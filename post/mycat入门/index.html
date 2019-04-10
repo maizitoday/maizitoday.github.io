@@ -1,0 +1,727 @@
+<!DOCTYPE html>
+<html lang="en-us">
+<head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+
+    
+    <meta property="og:site_name" content="">
+    <meta property="og:type" content="article">
+
+    
+    <meta property="og:image" content="http://maizitoday.github.io//img/home-bg-jeep.jpg">
+    <meta property="twitter:image" content="http://maizitoday.github.io//img/home-bg-jeep.jpg" />
+    
+
+    
+    <meta name="title" content="mycat入门" />
+    <meta property="og:title" content="mycat入门" />
+    <meta property="twitter:title" content="mycat入门" />
+    
+
+    
+    <meta name="description" content="麦子，程序员, 开源爱好者，生活探险家 | 这里是 麦子 的博客，与你一起发现更大的世界。">
+    <meta property="og:description" content="麦子，程序员, 开源爱好者，生活探险家 | 这里是 麦子 的博客，与你一起发现更大的世界。" />
+    <meta property="twitter:description" content="麦子，程序员, 开源爱好者，生活探险家 | 这里是 麦子 的博客，与你一起发现更大的世界。" />
+    
+
+    
+    <meta property="twitter:card" content="summary" />
+    
+    
+
+    <meta name="keyword"  content="麦子, maizi, maizi, , 麦子的网络日志, 麦子的博客, maizi Blog, 博客, 个人网站, 互联网, Web, 云原生, PaaS, Istio, Kubernetes, 微服务, Microservice">
+    <link rel="shortcut icon" href="/img/favicon.ico">
+
+    <title>mycat入门-麦子的博客 | 麦子 Blog</title>
+
+    <link rel="canonical" href="/post/mycat%E5%85%A5%E9%97%A8/">
+
+    <link rel="stylesheet" href="/css/iDisqus.min.css"/>
+	
+    
+    <link rel="stylesheet" href="/css/bootstrap.min.css">
+
+    
+    <link rel="stylesheet" href="/css/hux-blog.min.css">
+
+    
+    <link rel="stylesheet" href="/css/syntax.css">
+
+    
+    <link rel="stylesheet" href="/css/zanshang.css">
+
+    
+    <link href="//cdnjs.cloudflare.com/ajax/libs/font-awesome/4.6.3/css/font-awesome.min.css" rel="stylesheet" type="text/css">
+    
+    
+    <script src="/js/jquery.min.js"></script>
+    
+    
+    <script src="/js/bootstrap.min.js"></script>
+    
+    
+    <script src="/js/hux-blog.min.js"></script>
+	
+    
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.13.1/styles/docco.min.css">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.13.1/highlight.min.js"></script>
+    <script>hljs.initHighlightingOnLoad();</script>
+</head>
+
+
+<nav class="navbar navbar-default navbar-custom navbar-fixed-top">
+    <div class="container-fluid">
+        
+        <div class="navbar-header page-scroll">
+            <button type="button" class="navbar-toggle">
+                <span class="sr-only">Toggle navigation</span>
+                <span class="icon-bar"></span>
+                <span class="icon-bar"></span>
+                <span class="icon-bar"></span>
+            </button>
+            <a class="navbar-brand" href="/"></a>
+        </div>
+
+        
+        
+        <div id="huxblog_navbar">
+            <div class="navbar-collapse">
+                <ul class="nav navbar-nav navbar-right">
+                    <li>
+                        <a href="/">Home</a>
+                    </li>
+                    
+                    <li>
+                        <a href="/categories/life">Life</a>
+                    </li>
+                    
+                    <li>
+                        <a href="/categories/tech">Tech</a>
+                    </li>
+                    
+                    
+		    
+                        <li><a href="/top/about/">ABOUT</a></li>
+                    
+
+                    
+		    <li>
+                        <a href="/search">SEARCH <img src="/img/search.png" height="15" style="cursor: pointer;" alt="Search"></a>
+		    </li>
+                    
+                </ul>
+            </div>
+        </div>
+        
+    </div>
+    
+</nav>
+<script>
+    
+    
+    
+    var $body   = document.body;
+    var $toggle = document.querySelector('.navbar-toggle');
+    var $navbar = document.querySelector('#huxblog_navbar');
+    var $collapse = document.querySelector('.navbar-collapse');
+
+    $toggle.addEventListener('click', handleMagic)
+    function handleMagic(e){
+        if ($navbar.className.indexOf('in') > 0) {
+        
+            $navbar.className = " ";
+            
+            setTimeout(function(){
+                
+                if($navbar.className.indexOf('in') < 0) {
+                    $collapse.style.height = "0px"
+                }
+            },400)
+        }else{
+        
+            $collapse.style.height = "auto"
+            $navbar.className += " in";
+        }
+    }
+</script>
+
+
+
+
+<style type="text/css">
+    header.intro-header {
+        background-image: url('https://img.zhaohuabing.com/in-post/2018-05-23-external_system_auth/background.jpg')
+    }
+</style>
+<header class="intro-header">
+    <div class="container">
+        <div class="row">
+            <div class="col-lg-8 col-lg-offset-2 col-md-10 col-md-offset-1">
+                <div class="post-heading">
+                    <div class="tags">
+                        
+                        <a class="tag" href="/tags/mycat" title="mycat">
+                            mycat
+                        </a>
+                        
+                        <a class="tag" href="/tags/%E4%B8%AD%E9%97%B4%E4%BB%B6" title="中间件">
+                            中间件
+                        </a>
+                        
+                        <a class="tag" href="/tags/mysql" title="mysql">
+                            mysql
+                        </a>
+                        
+                        <a class="tag" href="/tags/%E6%95%B0%E6%8D%AE%E5%BA%93" title="数据库">
+                            数据库
+                        </a>
+                        
+                        <a class="tag" href="/tags/%E4%B8%BB%E4%BB%8E%E5%A4%8D%E5%88%B6" title="主从复制">
+                            主从复制
+                        </a>
+                        
+                        <a class="tag" href="/tags/%E8%AF%BB%E5%86%99%E5%88%86%E7%A6%BB" title="读写分离">
+                            读写分离
+                        </a>
+                        
+                    </div>
+                    <h1>mycat入门</h1>
+                    <h2 class="subheading"></h2>
+                    <span class="meta">
+			Posted by 
+			
+			         &#34;麦子&#34;
+			 
+			on 
+			Wednesday, March 27, 2019
+                        
+                    </span>
+                </div>
+            </div>
+        </div>
+    </div>
+</header>
+
+
+
+
+<article>
+    <div class="container">
+        <div class="row">
+
+            
+            <div class="
+                col-lg-8 col-lg-offset-2
+                col-md-10 col-md-offset-1
+                post-container">
+
+                
+                <header>
+                    <h2>TOC</h2>
+                </header>
+                <nav id="TableOfContents">
+<ul>
+<li>
+<ul>
+<li>
+<ul>
+<li><a href="#数据切分">数据切分</a></li>
+<li><a href="#逻辑表和物理表">逻辑表和物理表</a></li>
+<li><a href="#为什么要用mycat">为什么要用MyCat</a></li>
+<li><a href="#mysql主从复制-docker">mysql主从复制(docker)</a></li>
+<li><a href="#mycat实现读写分离">mycat实现读写分离</a>
+<ul>
+<li><a href="#schema-xml">schema.xml</a></li>
+<li><a href="#server-xml">server.xml</a></li>
+<li><a href="#测试是否读写分离">测试是否读写分离</a></li>
+</ul></li>
+</ul></li>
+</ul></li>
+</ul>
+</nav>
+                
+                
+
+<p>[TOC]</p>
+
+<h3 id="数据切分">数据切分</h3>
+
+<p>数据的切分（Sharding）根据其切分规则的类型，可以分为两种切分模式。一种是按照不同的表（或者 Schema）来切分到不同的数据库（主机）之上，这种切可以称之为数据的垂直（纵向）切分；另外一种则是根据 表中的数据的逻辑关系，将同一个表中的数据按照某种条件拆分到多台数据库（主机）上面，这种切分称之为数 据的水平（横向）切分。</p>
+
+<h3 id="逻辑表和物理表">逻辑表和物理表</h3>
+
+<p>逻辑表：逻辑表可以理解为数据库中的视图，是一张虚拟表。可以映射到一张物理表，也可以由多张物理表组成，这些物理表可以来自于不同的数据源。</p>
+
+<p>物理表：物理表是具体某个数据源中的一张表。</p>
+
+<h3 id="为什么要用mycat">为什么要用MyCat</h3>
+
+<p>转自： <a href="https://blog.csdn.net/nxw_tsp/article/details/56277430">https://blog.csdn.net/nxw_tsp/article/details/56277430</a></p>
+
+<p>***一、什么是MyCat：
+MyCat是一个开源的分布式数据库系统，是一个实现了MySQL协议的服务器，前端用户可以把它看作是一个数据库代理，用MySQL客户端工具和命令行访问，而其后端可以用MySQL原生协议与多个MySQL服务器通信，也可以用JDBC协议与大多数主流数据库服务器通信，其核心功能是分表分库，即将一个大表水平分割为N个小表，存储在后端MySQL服务器里或者其他数据库里。</p>
+
+<p>MyCat发展到目前的版本，已经不是一个单纯的MySQL代理了，它的后端可以支持MySQL、SQL Server、Oracle、DB2、PostgreSQL等主流数据库，也支持MongoDB这种新型NoSQL方式的存储，未来还会支持更多类型的存储。而在最终用户看来，无论是那种存储方式，在MyCat里，都是一个传统的数据库表，支持标准的SQL语句进行数据的操作，这样一来，对前端业务系统来说，可以大幅降低开发难度，提升开发速度</p>
+
+<p>所以可以这样理解：数据库是对底层存储文件的抽象，而Mycat是对数据库的抽象。他是所有背后数据库的一个管理者。 也是代码和数据库的一个接口。</p>
+
+<h3 id="mysql主从复制-docker">mysql主从复制(docker)</h3>
+
+<ol>
+<li>mysql配置文件修改</li>
+</ol>
+
+<pre><code class="language-yaml">
+#拉取mysql镜像，进入容器，修改/etc/mysql/my.cnf
+
+#在master中这个文件加入
+[mysqld]
+log-bin=mysql-bin #开启二进制日志
+server-id=1 # 唯一服务器ID，非0整数，不能和其他服务器的server-id重复
+
+#在slave中这个文件加入
+[mysqld]
+log-bin=mysql-bin
+server-id=2
+
+#这里面还有很多配置， 有需要在查询配置。
+
+配置好后， 重新启动容器
+</code></pre>
+
+<ol>
+<li>客户端配置主从关系</li>
+</ol>
+
+<pre><code class="language-yaml">#master
+    #用数据库客户端工具连接master数据，执行一下数据，
+    #主要作用： 创建同步账号，允许访问的IP地址为%，%表示通配符
+    GRANT REPLICATION SLAVE ON *.* to 'root'@'%' identified by '123456';  
+    
+    #查看状态，记住File、Position的值，在Slaver中将用到
+    show master status;
+    
+#slave    
+   #用数据库客户端工具连接slave数据，执行一下数据，
+   #主要作用： 设置主库链接
+   #主机ip， 不能是127.0.0.1, 如果是的话slave_i_state会是null
+   #MASTER_LOG_FILE 和 MASTER_LOG_POS 这个值，在master上面语句中有
+   #port是容器端口
+   CHANGE MASTER TO MASTER_HOST ='192.168.70.102', MASTER_USER ='root', MASTER_PASSWORD ='123456', MASTER_LOG_FILE ='mysql-bin.000001', MASTER_LOG_POS =429, MASTER_PORT =3306;
+    
+    #启动从库同步
+    start slave;
+    
+    #查看状态
+    show slave status;
+    
+ #成功的标志，
+    根据上面的查看状态语句，出现了 
+    slave_io_state:Waiting for master to send event
+    slave_sql_running:Yes
+    slave_io_running:Yes
+    表示已经成功了，现在主从复制已经完成
+</code></pre>
+
+<h3 id="mycat实现读写分离">mycat实现读写分离</h3>
+
+<p>主要是两个文件的修改， 一个是server.xml和schema.xml文件。</p>
+
+<h4 id="schema-xml">schema.xml</h4>
+
+<pre><code class="language-xml">&lt;mycat:schema xmlns:mycat=&quot;http://io.mycat/&quot;&gt;
+   1. 这里定义了一个逻辑库，这个workdb是数据库集群对外的一个入口， 这个逻辑库对应的数据分片就是dn1
+   &lt;schema name=&quot;workdb&quot; checkSQLschema=&quot;false&quot; sqlMaxLimit=&quot;100&quot; dataNode=&quot;dn1&quot;&gt;&lt;/schema&gt;
+   2. 这个数据节点dn1,表示了一个数据库代理，同时他代表的真实的数据库名称是work，如果你在客户端创建新的schemar的时候，可以创建，但是这个schema不可以使用，这里只能对work进行处理。
+  &lt;dataNode name=&quot;dn1&quot; dataHost=&quot;vm3306&quot; database=&quot;work&quot; &gt;&lt;/dataNode&gt;
+        &lt;dataHost name=&quot;vm3306&quot; maxCon=&quot;1000&quot; minCon=&quot;10&quot; balance=&quot;3&quot; writeType=&quot;0&quot; dbType=&quot;mysql&quot; dbDriver=&quot;native&quot;&gt;
+          3.这个是用于监控服务是正常的
+			    &lt;heartbeat&gt;select user()&lt;/heartbeat&gt;
+			    &lt;writeHost host=&quot;hostM1&quot; url=&quot;192.168.70.102:3306&quot; user=&quot;root&quot; password=&quot;123456&quot;&gt;
+			        &lt;readHost host=&quot;hostS1&quot; url=&quot;192.168.70.102:3307&quot; user=&quot;root&quot; password=&quot;123456&quot;/&gt;
+			    &lt;/writeHost&gt;
+      &lt;/dataHost&gt;
+&lt;/mycat:schema&gt;
+
+负载均衡类型：
+
+（1）balance=&quot;0&quot;, 不开启读写分离机制，所有读操作都发送到当前可用的writeHost 上。
+
+（2）balance=&quot;1&quot;，全部的 readHost 与 stand by writeHost 参与 select 语句的负载均衡，简单的说，当双主双从模式(M1-&gt;S1，M2-&gt;S2，并且 M1 与 M2 互为主备)，正常情况下，M2,S1,S2 都参与 select 语句的负载均衡。
+
+（3）balance=&quot;2&quot;，所有读操作都随机的在 writeHost、 readhost 上分发。
+
+（4）balance=&quot;3&quot;，所有读请求随机的分发到 wiriterHost 对应的 readhost 执行，writerHost 不负担读压力，注意 balance=3 只在 1.4 及其以后版本有，1.3 没有。
+
+
+writeType=&quot;0&quot;, 所有写操作发送到配置的第一个 writeHost，第一个挂了切到还生存的第二个writeHost，重新启动后已切换后的为准，切换记录在配置文件中:dnindex.properties
+
+</code></pre>
+
+<h4 id="server-xml">server.xml</h4>
+
+<pre><code class="language-xml">配置可以处理的用户，同时这个schemas这个地方就是schema中的逻辑库
+
+&lt;user name=&quot;root&quot;&gt;
+		&lt;property name=&quot;password&quot;&gt;123456&lt;/property&gt;
+		&lt;property name=&quot;schemas&quot;&gt;workdb&lt;/property&gt;
+		
+		&lt;!-- 表级 DML 权限设置 --&gt;
+		&lt;!-- 		
+		&lt;privileges check=&quot;false&quot;&gt;
+			&lt;schema name=&quot;TESTDB&quot; dml=&quot;0110&quot; &gt;
+				&lt;table name=&quot;tb01&quot; dml=&quot;0000&quot;&gt;&lt;/table&gt;
+				&lt;table name=&quot;tb02&quot; dml=&quot;1111&quot;&gt;&lt;/table&gt;
+			&lt;/schema&gt;
+		&lt;/privileges&gt;		
+		 --&gt;
+	&lt;/user&gt;
+
+	&lt;user name=&quot;root_work&quot;&gt;
+		&lt;property name=&quot;password&quot;&gt;123456&lt;/property&gt;
+		&lt;property name=&quot;schemas&quot;&gt;workdb&lt;/property&gt;
+		&lt;property name=&quot;readOnly&quot;&gt;true&lt;/property&gt;
+	&lt;/user&gt;
+</code></pre>
+
+<p>如此就可以实现了mysql的读写分离，如图：</p>
+
+<p><img src="/img/mycat.png" alt="" /></p>
+
+<h4 id="测试是否读写分离">测试是否读写分离</h4>
+
+<p>​        用客户端连接mycat服务器， 这个地方需要注意，我们连接的数据库的名称是work，同时，他的端口应该是8066/tcp这个端口， 我这边用的是docker映射出来的端口。</p>
+
+<ol>
+<li><p>连接成功mycat的， 然后直接在里面创建表， 写入数据，如果看到master和slave都有数据，证明写是ok的。</p></li>
+
+<li><p>然后在slave客户端手动添加一条数据， 然后在mycat的客户端直接查询这个表，查看出来的数据是否比master的数据要多一条，如果是多一条了，那么证明在查询的时候，是走的slave端。</p></li>
+
+<li><p>需要主要，手动插入slave后，在添加数据，发现master和slave数据无法同步了， 这个时候，请查看在slave中执行 show slave status;  查看</p></li>
+</ol>
+
+<p>slave_io_state:Waiting for master to send event
+   slave_sql_running:Yes
+   slave_io_running:Yes</p>
+
+<p>这些状态是否正常，如果不正常， 就百度处理，把他们修改正常。 因为slave是不可以写入数据的。</p>
+
+
+                
+                
+<div class="entry-shang text-center">
+    
+	    <p>「真诚赞赏，手留余香」</p>
+	
+	<button class="zs show-zs btn btn-bred">赞赏支持</button>
+</div>
+<div class="zs-modal-bg"></div>
+<div class="zs-modal-box">
+	<div class="zs-modal-head">
+		<button type="button" class="close">×</button>
+		<span class="author"><a href="http://maizitoday.github.io/"><img src="/img/favicon.png" /></a></span>
+        
+	        <p class="tip"><i></i><span>真诚赞赏，手留余香</span></p>
+		
+ 
+	</div>
+	<div class="zs-modal-body">
+		<div class="zs-modal-btns">
+			<button class="btn btn-blink" data-num="2">2元</button>
+			<button class="btn btn-blink" data-num="5">5元</button>
+			<button class="btn btn-blink" data-num="10">10元</button>
+			<button class="btn btn-blink" data-num="50">50元</button>
+			<button class="btn btn-blink" data-num="100">100元</button>
+			<button class="btn btn-blink" data-num="1">任意金额</button>
+		</div>
+		<div class="zs-modal-pay">
+			<button class="btn btn-bred" id="pay-text">2元</button>
+			<p>使用<span id="pay-type">微信</span>扫描二维码完成支付</p>
+			<img src="/img/reward/wechat-2.png"  id="pay-image"/>
+		</div>
+	</div>
+	<div class="zs-modal-footer">
+		<label><input type="radio" name="zs-type" value="wechat" class="zs-type" checked="checked"><span ><span class="zs-wechat"><img src="/img/reward/wechat-btn.png"/></span></label>
+		<label><input type="radio" name="zs-type" value="alipay" class="zs-type" class="zs-alipay"><img src="/img/reward/alipay-btn.png"/></span></label>
+	</div>
+</div>
+<script type="text/javascript" src="/js/reward.js"></script>
+
+                
+
+                <hr>
+                <ul class="pager">
+                    
+                    <li class="previous">
+                        <a href="/post/kubernetes%E5%85%A5%E9%97%A8/" data-toggle="tooltip" data-placement="top" title="Kubernetes入门">&larr;
+                            Previous Post</a>
+                    </li>
+                    
+                    
+                    <li class="next">
+                        <a href="/post/docker%E7%B3%BB%E5%88%97-dockerfile/" data-toggle="tooltip" data-placement="top" title="dockerfile常用命令">Next
+                            Post &rarr;</a>
+                    </li>
+                    
+                </ul>
+
+                
+<div id="disqus-comment"></div>
+
+
+
+            </div>
+            
+            <div class="
+                col-lg-8 col-lg-offset-2
+                col-md-10 col-md-offset-1
+                sidebar-container">
+
+                
+                
+                <section>
+                    <hr class="hidden-sm hidden-xs">
+                    <h5><a href="/tags/">FEATURED TAGS</a></h5>
+                    <div class="tags">
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        <a href="/tags/docker" title="docker">
+                            docker
+                        </a>
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        <a href="/tags/linux" title="linux">
+                            linux
+                        </a>
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        <a href="/tags/%E4%B8%AD%E9%97%B4%E4%BB%B6" title="中间件">
+                            中间件
+                        </a>
+                        
+                        
+                        
+                        <a href="/tags/%E4%B8%BB%E4%BB%8E%E5%A4%8D%E5%88%B6" title="主从复制">
+                            主从复制
+                        </a>
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                    </div>
+                </section>
+                
+
+                
+                
+                <section>
+                    <hr>
+                    <h5>FRIENDS</h5>
+                    <ul class="list-inline">
+                        
+                        <li><a target="_blank" href="https://zhaohuabing.com">赵化冰的博客</a></li>
+                        
+                        <li><a target="_blank" href="http://www.tianshouzhi.com">田守枝的博客</a></li>
+                        
+                    </ul>
+                </section>
+                
+            </div>
+        </div>
+    </div>
+</article>
+
+
+
+
+<footer>
+    <div class="container">
+        <div class="row">
+            <div class="col-lg-8 col-lg-offset-2 col-md-10 col-md-offset-1">
+                <ul class="list-inline text-center">
+                   
+                   <li>
+                       <a href="" rel="alternate" type="application/rss+xml" title="" >
+                           <span class="fa-stack fa-lg">
+                               <i class="fa fa-circle fa-stack-2x"></i>
+                               <i class="fa fa-rss fa-stack-1x fa-inverse"></i>
+                           </span>
+                       </a>
+                   </li>
+                   
+                    
+                    <li>
+                        <a href="mailto:maiziybtoday@gmail.com">
+                            <span class="fa-stack fa-lg">
+                                <i class="fa fa-circle fa-stack-2x"></i>
+                                <i class="fa fa-envelope fa-stack-1x fa-inverse"></i>
+                            </span>
+                        </a>
+                    </li>
+		    
+                    
+                    
+                    
+                    
+
+                    
+
+		    
+                    
+                    <li>
+                        <a target="_blank" href="/your%20wechat%20qr%20code%20image">
+                            <span class="fa-stack fa-lg">
+                                <i class="fa fa-circle fa-stack-2x"></i>
+                                <i class="fa fa-wechat fa-stack-1x fa-inverse"></i>
+                            </span>
+                        </a>
+                    </li>
+		    
+                    
+                    
+                    <li>
+                        <a target="_blank" href="https://www.linkedin.com/in/yourlinkedinid">
+                            <span class="fa-stack fa-lg">
+                                <i class="fa fa-circle fa-stack-2x"></i>
+                                <i class="fa fa-linkedin fa-stack-1x fa-inverse"></i>
+                            </span>
+                        </a>
+                    </li>
+		    
+                    
+                </ul>
+		<p class="copyright text-muted">
+                    Copyright &copy;  2019
+                    <br>
+                    <a href="https://themes.gohugo.io/hugo-theme-cleanwhite">CleanWhite Hugo Theme</a> by <a href="https://zhaohuabing.com">Huabing</a> |
+                    <iframe
+                        style="margin-left: 2px; margin-bottom:-5px;"
+                        frameborder="0" scrolling="0" width="100px" height="20px"
+                        src="https://ghbtns.com/github-btn.html?user=zhaohuabing&repo=hugo-theme-cleanwhite&type=star&count=true" >
+                    </iframe>
+                </p>
+            </div>
+        </div>
+    </div>
+</footer>
+
+
+
+
+<script>
+    function async(u, c) {
+      var d = document, t = 'script',
+          o = d.createElement(t),
+          s = d.getElementsByTagName(t)[0];
+      o.src = u;
+      if (c) { o.addEventListener('load', function (e) { c(null, e); }, false); }
+      s.parentNode.insertBefore(o, s);
+    }
+</script>
+
+
+
+
+
+
+<script>
+    
+    if($('#tag_cloud').length !== 0){
+        async("/js/jquery.tagcloud.js",function(){
+            $.fn.tagcloud.defaults = {
+                
+                color: {start: '#bbbbee', end: '#0085a1'},
+            };
+            $('#tag_cloud a').tagcloud();
+        })
+    }
+</script>
+
+
+<script>
+    async("https://cdnjs.cloudflare.com/ajax/libs/fastclick/1.0.6/fastclick.js", function(){
+        var $nav = document.querySelector("nav");
+        if($nav) FastClick.attach($nav);
+    })
+</script>
+
+
+
+
+
+
+</body>
+</html>

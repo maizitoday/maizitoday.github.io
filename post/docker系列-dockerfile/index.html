@@ -1,0 +1,746 @@
+<!DOCTYPE html>
+<html lang="en-us">
+<head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+
+    
+    <meta property="og:site_name" content="">
+    <meta property="og:type" content="article">
+
+    
+    <meta property="og:image" content="http://maizitoday.github.io//img/home-bg-jeep.jpg">
+    <meta property="twitter:image" content="http://maizitoday.github.io//img/home-bg-jeep.jpg" />
+    
+
+    
+    <meta name="title" content="dockerfile常用命令" />
+    <meta property="og:title" content="dockerfile常用命令" />
+    <meta property="twitter:title" content="dockerfile常用命令" />
+    
+
+    
+    <meta name="description" content="麦子，程序员, 开源爱好者，生活探险家 | 这里是 麦子 的博客，与你一起发现更大的世界。">
+    <meta property="og:description" content="麦子，程序员, 开源爱好者，生活探险家 | 这里是 麦子 的博客，与你一起发现更大的世界。" />
+    <meta property="twitter:description" content="麦子，程序员, 开源爱好者，生活探险家 | 这里是 麦子 的博客，与你一起发现更大的世界。" />
+    
+
+    
+    <meta property="twitter:card" content="summary" />
+    
+    
+
+    <meta name="keyword"  content="麦子, maizi, maizi, , 麦子的网络日志, 麦子的博客, maizi Blog, 博客, 个人网站, 互联网, Web, 云原生, PaaS, Istio, Kubernetes, 微服务, Microservice">
+    <link rel="shortcut icon" href="/img/favicon.ico">
+
+    <title>dockerfile常用命令-麦子的博客 | 麦子 Blog</title>
+
+    <link rel="canonical" href="/post/docker%E7%B3%BB%E5%88%97-dockerfile/">
+
+    <link rel="stylesheet" href="/css/iDisqus.min.css"/>
+	
+    
+    <link rel="stylesheet" href="/css/bootstrap.min.css">
+
+    
+    <link rel="stylesheet" href="/css/hux-blog.min.css">
+
+    
+    <link rel="stylesheet" href="/css/syntax.css">
+
+    
+    <link rel="stylesheet" href="/css/zanshang.css">
+
+    
+    <link href="//cdnjs.cloudflare.com/ajax/libs/font-awesome/4.6.3/css/font-awesome.min.css" rel="stylesheet" type="text/css">
+    
+    
+    <script src="/js/jquery.min.js"></script>
+    
+    
+    <script src="/js/bootstrap.min.js"></script>
+    
+    
+    <script src="/js/hux-blog.min.js"></script>
+	
+    
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.13.1/styles/docco.min.css">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.13.1/highlight.min.js"></script>
+    <script>hljs.initHighlightingOnLoad();</script>
+</head>
+
+
+<nav class="navbar navbar-default navbar-custom navbar-fixed-top">
+    <div class="container-fluid">
+        
+        <div class="navbar-header page-scroll">
+            <button type="button" class="navbar-toggle">
+                <span class="sr-only">Toggle navigation</span>
+                <span class="icon-bar"></span>
+                <span class="icon-bar"></span>
+                <span class="icon-bar"></span>
+            </button>
+            <a class="navbar-brand" href="/"></a>
+        </div>
+
+        
+        
+        <div id="huxblog_navbar">
+            <div class="navbar-collapse">
+                <ul class="nav navbar-nav navbar-right">
+                    <li>
+                        <a href="/">Home</a>
+                    </li>
+                    
+                    <li>
+                        <a href="/categories/life">Life</a>
+                    </li>
+                    
+                    <li>
+                        <a href="/categories/tech">Tech</a>
+                    </li>
+                    
+                    
+		    
+                        <li><a href="/top/about/">ABOUT</a></li>
+                    
+
+                    
+		    <li>
+                        <a href="/search">SEARCH <img src="/img/search.png" height="15" style="cursor: pointer;" alt="Search"></a>
+		    </li>
+                    
+                </ul>
+            </div>
+        </div>
+        
+    </div>
+    
+</nav>
+<script>
+    
+    
+    
+    var $body   = document.body;
+    var $toggle = document.querySelector('.navbar-toggle');
+    var $navbar = document.querySelector('#huxblog_navbar');
+    var $collapse = document.querySelector('.navbar-collapse');
+
+    $toggle.addEventListener('click', handleMagic)
+    function handleMagic(e){
+        if ($navbar.className.indexOf('in') > 0) {
+        
+            $navbar.className = " ";
+            
+            setTimeout(function(){
+                
+                if($navbar.className.indexOf('in') < 0) {
+                    $collapse.style.height = "0px"
+                }
+            },400)
+        }else{
+        
+            $collapse.style.height = "auto"
+            $navbar.className += " in";
+        }
+    }
+</script>
+
+
+
+
+<style type="text/css">
+    header.intro-header {
+        background-image: url('https://img.zhaohuabing.com/in-post/2018-05-23-service_2_service_auth/background.jpg')
+    }
+</style>
+<header class="intro-header">
+    <div class="container">
+        <div class="row">
+            <div class="col-lg-8 col-lg-offset-2 col-md-10 col-md-offset-1">
+                <div class="post-heading">
+                    <div class="tags">
+                        
+                        <a class="tag" href="/tags/docker%E7%B3%BB%E5%88%97" title="docker系列">
+                            docker系列
+                        </a>
+                        
+                        <a class="tag" href="/tags/dockerfile" title="dockerfile">
+                            dockerfile
+                        </a>
+                        
+                    </div>
+                    <h1>dockerfile常用命令</h1>
+                    <h2 class="subheading"></h2>
+                    <span class="meta">
+			Posted by 
+			
+			         &#34;麦子&#34;
+			 
+			on 
+			Wednesday, March 27, 2019
+                        
+                    </span>
+                </div>
+            </div>
+        </div>
+    </div>
+</header>
+
+
+
+
+<article>
+    <div class="container">
+        <div class="row">
+
+            
+            <div class="
+                col-lg-8 col-lg-offset-2
+                col-md-10 col-md-offset-1
+                post-container">
+
+                
+                <header>
+                    <h2>TOC</h2>
+                </header>
+                <nav id="TableOfContents">
+<ul>
+<li>
+<ul>
+<li>
+<ul>
+<li><a href="#dockerfile作用">DockerFile作用</a></li>
+<li><a href="#dockerfile-语法">Dockerfile 语法</a>
+<ul>
+<li><a href="#add">ADD</a></li>
+<li><a href="#cmd">CMD</a></li>
+<li><a href="#entrypoint">ENTRYPOINT</a></li>
+<li><a href="#copy">COPY</a></li>
+<li><a href="#env">ENV</a></li>
+<li><a href="#expose">EXPOSE</a></li>
+<li><a href="#from">FROM</a></li>
+<li><a href="#maintainer">MAINTAINER</a></li>
+<li><a href="#run">RUN</a></li>
+<li><a href="#user">USER</a></li>
+<li><a href="#volume">VOLUME</a></li>
+<li><a href="#workdir">WORKDIR</a></li>
+</ul></li>
+<li><a href="#如何使用dockerfiles">如何使用Dockerfiles</a>
+<ul>
+<li><a href="#dockerfile-run-cmd-entrypoint命令区别">Dockerfile RUN，CMD，ENTRYPOINT命令区别</a></li>
+</ul></li>
+<li><a href="#dockerfile构建mycat">DockerFile构建mycat</a></li>
+</ul></li>
+</ul></li>
+</ul>
+</nav>
+                
+                
+
+<p>[TOC]</p>
+
+<h3 id="dockerfile作用">DockerFile作用</h3>
+
+<p>Dockerfile是由一系列命令和参数构成的脚本，这些命令应用于基础镜像并最终创建一个新的镜像。比用命令更加的灵活。</p>
+
+<h3 id="dockerfile-语法">Dockerfile 语法</h3>
+
+<p>转载地址： <a href="https://www.cnblogs.com/boshen-hzb/p/6400272.html">https://www.cnblogs.com/boshen-hzb/p/6400272.html</a></p>
+
+<h4 id="add">ADD</h4>
+
+<p>ADD命令有两个参数，源和目标。它的基本作用是从源系统的文件系统上复制文件到目标容器的文件系统。如果源是一个URL，那该URL的内容将被下载并复制到容器中。</p>
+
+<pre><code class="language-yaml">#Usage: ADD [source directory or URL] [destination directory]
+#ADD /my_app_folder /my_app_folder` 
+</code></pre>
+
+<h4 id="cmd">CMD</h4>
+
+<p>和RUN命令相似，CMD可以用于执行特定的命令。和RUN不同的是，这些命令不是在镜像构建的过程中执行的，而是在用镜像构建容器后被调用。</p>
+
+<p>CMD的作用是作为执行container时候的默认行为（容器默认的启动命令）,当运行container的时候声明了command，则不再用image中的CMD默认所定义的命令, 一个Dockerfile中只能有一个有效的CMD，当定义多个CMD的时候，只有最后一个才会起作用.</p>
+
+<pre><code class="language-yaml">支持三种格式
+CMD [&quot;executable&quot;,&quot;param1&quot;,&quot;param2&quot;] 使用 exec 执行，推荐方式；
+CMD command param1 param2 在 /bin/sh 中执行，提供给需要交互的应用；
+CMD [&quot;param1&quot;,&quot;param2&quot;] 提供给 ENTRYPOINT 的默认参数；
+指定启动容器时执行的命令，每个 Dockerfile 只能有一条 CMD 命令。如果指定了多条命令，只有最后一条会被执行。
+如果用户启动容器时候指定了运行的命令，则会覆盖掉 CMD 指定的命令。
+</code></pre>
+
+<h4 id="entrypoint">ENTRYPOINT</h4>
+
+<p>配置容器启动后执行的命令，并且不可被 docker run 提供的参数覆盖。每个 Dockerfile 中只能有一个 ENTRYPOINT，当指定多个时，只有最后一个起效。</p>
+
+<pre><code class="language-yaml">两种格式：
+ENTRYPOINT [&quot;executable&quot;, &quot;param1&quot;, &quot;param2&quot;]
+ENTRYPOINT command param1 param2（shell中执行）。
+</code></pre>
+
+<h4 id="copy">COPY</h4>
+
+<p>格式为 COPY <src> <dest>,复制本地主机的 <src>（为 Dockerfile 所在目录的相对路径）到容器中的 <dest>。当使用本地目录为源目录时，推荐使用 COPY。</p>
+
+<h4 id="env">ENV</h4>
+
+<p>ENV命令用于设置环境变量。这些变量以”key=value”的形式存在，并可以在容器内被脚本或者程序调用。这个机制给在容器中运行应用带来了极大的便利。</p>
+
+<pre><code class="language-yaml"># Usage: ENV key value
+ENV JAVA_HOME /usr/local/jdk1.7.0_80
+ENV CLASSPATH ${JAVA_HOME}/lib/dt.jar:$JAVA_HOME/lib/tools.jar
+ENV PATH $PATH:${JAVA_HOME}/bin
+</code></pre>
+
+<h4 id="expose">EXPOSE</h4>
+
+<p>EXPOSE用来指定端口，使容器内的应用可以通过端口和外界交互。</p>
+
+<pre><code class="language-yaml"># Usage: EXPOSE [port]
+EXPOSE 8080
+# EXPOSE命令只是声明了容器应该打开的端口并没有实际上将它打开!
+# docker run -P 只有运行的时候，才会打开这个端口映射 
+
+</code></pre>
+
+<h4 id="from">FROM</h4>
+
+<p>FROM命令可能是最重要的Dockerfile命令。改命令定义了使用哪个基础镜像启动构建流程。基础镜像可以为任意镜 像。如果基础镜像没有被发现，Docker将试图从Docker image index来查找该镜像。FROM命令必须是Dockerfile的首个命令。</p>
+
+<pre><code class="language-yaml"># Usage: FROM [image name]
+FROM ubuntu 
+</code></pre>
+
+<h4 id="maintainer">MAINTAINER</h4>
+
+<p>我建议这个命令放在Dockerfile的起始部分，虽然理论上它可以放置于Dockerfile的任意位置。这个命令用于声明作者，并应该放在FROM的后面。</p>
+
+<pre><code class="language-yaml"># Usage: MAINTAINER [name]
+MAINTAINER authors_name 
+</code></pre>
+
+<h4 id="run">RUN</h4>
+
+<p>每一个RUN指令都会是在一个新的container里面运行,并提交为一个image作为下一个RUN的base</p>
+
+<pre><code class="language-yaml">RUN命令有两种格式
+
+1. RUN &lt;command&gt;
+2. RUN [&quot;executable&quot;, &quot;param1&quot;, &quot;param2&quot;]
+第一种后边直接跟shell命令
+
+# 如果-c 选项存在，命令就从字符串中读取。如果字符串后有参数，他们将会被分配到参数的位置上，从$0开始。
+在linux操作系统上默认 /bin/sh -c 
+
+在windows操作系统上默认 cmd /S /C
+
+第二种是类似于函数调用。
+
+可将executable理解成为可执行文件，后面就是两个参数。
+</code></pre>
+
+<h4 id="user">USER</h4>
+
+<p>USER命令用于设置运行容器的UID。</p>
+
+<pre><code class="language-yaml"># Usage: USER [UID]
+USER 751
+</code></pre>
+
+<h4 id="volume">VOLUME</h4>
+
+<p>通过dockerfile的 VOLUME 指令可以在镜像中创建挂载点，这样只要通过该镜像创建的容器都有了挂载点。还有一个区别是，通过 VOLUME 指令创建的挂载点，无法指定主机上对应的目录，是自动生成的。</p>
+
+<pre><code class="language-yaml">#多种写法
+VOLUME [&quot;/data&quot;]
+VOLUME /var/log
+VOLUME /var/log /var/db
+
+我们通过docker inspect 查看通过该dockerfile创建的镜像生成的容器，可以看到映射到本地的一个地址
+</code></pre>
+
+<h4 id="workdir">WORKDIR</h4>
+
+<p>设置工作目录,为后续的RUN、CMD、ENTRYPOINT指令配置工作目录。可以使用多个WORKDIR指令，后续命令如果参数时相对路径，则会基于之前命令指定的路径.</p>
+
+<h3 id="如何使用dockerfiles">如何使用Dockerfiles</h3>
+
+<p>使用Dockerfiles和手工使用Docker Daemon运行命令一样简单。脚本运行后输出为新的镜像ID。</p>
+
+<pre><code class="language-yaml"># Build an image using the Dockerfile at current location
+# Example: sudo docker build -t [name] .
+sudo docker build -t my_mongodb . 
+</code></pre>
+
+<h4 id="dockerfile-run-cmd-entrypoint命令区别">Dockerfile RUN，CMD，ENTRYPOINT命令区别</h4>
+
+<p>转载地址：<a href="https://www.jianshu.com/p/f0a0f6a43907">https://www.jianshu.com/p/f0a0f6a43907</a></p>
+
+<p>Dockerfile中RUN，CMD和ENTRYPOINT都能够用于执行命令，下面是三者的主要用途：</p>
+
+<ul>
+<li>RUN命令执行命令并创建新的镜像层，通常用于安装软件包</li>
+<li>CMD命令设置容器启动后默认执行的命令及其参数，但CMD设置的命令能够被<code>docker run</code>命令后面的命令行参数替换</li>
+<li>ENTRYPOINT配置容器启动时的执行命令（不会被忽略，一定会被执行，即使运行 <code>docker run</code>时指定了其他命令）</li>
+</ul>
+
+<h3 id="dockerfile构建mycat">DockerFile构建mycat</h3>
+
+<p>转载地址： <a href="https://hub.docker.com/r/longhronshens/mycat-docker/dockerfile">https://hub.docker.com/r/longhronshens/mycat-docker/dockerfile</a></p>
+
+<p>创建Dockerfile文件(文件名称要大写)</p>
+
+<pre><code class="language-yaml">FROM centos
+RUN echo &quot;root:root&quot; | chpasswd
+RUN yum -y install net-tools
+
+# install java
+ADD http://mirrors.linuxeye.com/jdk/jdk-7u80-linux-x64.tar.gz /usr/local/
+RUN cd /usr/local &amp;&amp; tar -zxvf jdk-7u80-linux-x64.tar.gz &amp;&amp; ls -lna
+
+ENV JAVA_HOME /usr/local/jdk1.7.0_80
+ENV CLASSPATH ${JAVA_HOME}/lib/dt.jar:$JAVA_HOME/lib/tools.jar
+ENV PATH $PATH:${JAVA_HOME}/bin
+
+#install mycat
+ADD http://dl.mycat.io/1.6-RELEASE/Mycat-server-1.6-RELEASE-20161028204710-linux.tar.gz /usr/local
+RUN cd /usr/local &amp;&amp; tar -zxvf Mycat-server-1.6-RELEASE-20161028204710-linux.tar.gz &amp;&amp; ls -lna
+
+VOLUME /usr/local/mycat/conf
+
+EXPOSE 8066 9066
+#EXPOSE 7066
+
+CMD /usr/local/mycat/bin/mycat console
+</code></pre>
+
+<p>切换到这个文件的目录执行</p>
+
+<pre><code class="language-yaml">#编译
+docker build -t mycat .
+
+#运行
+docker run -P     #-p 大写， 会默认有一个为容器的对应端口出来
+
+
+</code></pre>
+
+
+                
+                
+<div class="entry-shang text-center">
+    
+	    <p>「真诚赞赏，手留余香」</p>
+	
+	<button class="zs show-zs btn btn-bred">赞赏支持</button>
+</div>
+<div class="zs-modal-bg"></div>
+<div class="zs-modal-box">
+	<div class="zs-modal-head">
+		<button type="button" class="close">×</button>
+		<span class="author"><a href="http://maizitoday.github.io/"><img src="/img/favicon.png" /></a></span>
+        
+	        <p class="tip"><i></i><span>真诚赞赏，手留余香</span></p>
+		
+ 
+	</div>
+	<div class="zs-modal-body">
+		<div class="zs-modal-btns">
+			<button class="btn btn-blink" data-num="2">2元</button>
+			<button class="btn btn-blink" data-num="5">5元</button>
+			<button class="btn btn-blink" data-num="10">10元</button>
+			<button class="btn btn-blink" data-num="50">50元</button>
+			<button class="btn btn-blink" data-num="100">100元</button>
+			<button class="btn btn-blink" data-num="1">任意金额</button>
+		</div>
+		<div class="zs-modal-pay">
+			<button class="btn btn-bred" id="pay-text">2元</button>
+			<p>使用<span id="pay-type">微信</span>扫描二维码完成支付</p>
+			<img src="/img/reward/wechat-2.png"  id="pay-image"/>
+		</div>
+	</div>
+	<div class="zs-modal-footer">
+		<label><input type="radio" name="zs-type" value="wechat" class="zs-type" checked="checked"><span ><span class="zs-wechat"><img src="/img/reward/wechat-btn.png"/></span></label>
+		<label><input type="radio" name="zs-type" value="alipay" class="zs-type" class="zs-alipay"><img src="/img/reward/alipay-btn.png"/></span></label>
+	</div>
+</div>
+<script type="text/javascript" src="/js/reward.js"></script>
+
+                
+
+                <hr>
+                <ul class="pager">
+                    
+                    <li class="previous">
+                        <a href="/post/mycat%E5%85%A5%E9%97%A8/" data-toggle="tooltip" data-placement="top" title="mycat入门">&larr;
+                            Previous Post</a>
+                    </li>
+                    
+                    
+                    <li class="next">
+                        <a href="/post/webservice%E5%AD%A6%E4%B9%A0/" data-toggle="tooltip" data-placement="top" title="webservice-wsdl理解">Next
+                            Post &rarr;</a>
+                    </li>
+                    
+                </ul>
+
+                
+<div id="disqus-comment"></div>
+
+
+
+            </div>
+            
+            <div class="
+                col-lg-8 col-lg-offset-2
+                col-md-10 col-md-offset-1
+                sidebar-container">
+
+                
+                
+                <section>
+                    <hr class="hidden-sm hidden-xs">
+                    <h5><a href="/tags/">FEATURED TAGS</a></h5>
+                    <div class="tags">
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        <a href="/tags/docker" title="docker">
+                            docker
+                        </a>
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        <a href="/tags/linux" title="linux">
+                            linux
+                        </a>
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        <a href="/tags/%E4%B8%AD%E9%97%B4%E4%BB%B6" title="中间件">
+                            中间件
+                        </a>
+                        
+                        
+                        
+                        <a href="/tags/%E4%B8%BB%E4%BB%8E%E5%A4%8D%E5%88%B6" title="主从复制">
+                            主从复制
+                        </a>
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                    </div>
+                </section>
+                
+
+                
+                
+                <section>
+                    <hr>
+                    <h5>FRIENDS</h5>
+                    <ul class="list-inline">
+                        
+                        <li><a target="_blank" href="https://zhaohuabing.com">赵化冰的博客</a></li>
+                        
+                        <li><a target="_blank" href="http://www.tianshouzhi.com">田守枝的博客</a></li>
+                        
+                    </ul>
+                </section>
+                
+            </div>
+        </div>
+    </div>
+</article>
+
+
+
+
+<footer>
+    <div class="container">
+        <div class="row">
+            <div class="col-lg-8 col-lg-offset-2 col-md-10 col-md-offset-1">
+                <ul class="list-inline text-center">
+                   
+                   <li>
+                       <a href="" rel="alternate" type="application/rss+xml" title="" >
+                           <span class="fa-stack fa-lg">
+                               <i class="fa fa-circle fa-stack-2x"></i>
+                               <i class="fa fa-rss fa-stack-1x fa-inverse"></i>
+                           </span>
+                       </a>
+                   </li>
+                   
+                    
+                    <li>
+                        <a href="mailto:maiziybtoday@gmail.com">
+                            <span class="fa-stack fa-lg">
+                                <i class="fa fa-circle fa-stack-2x"></i>
+                                <i class="fa fa-envelope fa-stack-1x fa-inverse"></i>
+                            </span>
+                        </a>
+                    </li>
+		    
+                    
+                    
+                    
+                    
+
+                    
+
+		    
+                    
+                    <li>
+                        <a target="_blank" href="/your%20wechat%20qr%20code%20image">
+                            <span class="fa-stack fa-lg">
+                                <i class="fa fa-circle fa-stack-2x"></i>
+                                <i class="fa fa-wechat fa-stack-1x fa-inverse"></i>
+                            </span>
+                        </a>
+                    </li>
+		    
+                    
+                    
+                    <li>
+                        <a target="_blank" href="https://www.linkedin.com/in/yourlinkedinid">
+                            <span class="fa-stack fa-lg">
+                                <i class="fa fa-circle fa-stack-2x"></i>
+                                <i class="fa fa-linkedin fa-stack-1x fa-inverse"></i>
+                            </span>
+                        </a>
+                    </li>
+		    
+                    
+                </ul>
+		<p class="copyright text-muted">
+                    Copyright &copy;  2019
+                    <br>
+                    <a href="https://themes.gohugo.io/hugo-theme-cleanwhite">CleanWhite Hugo Theme</a> by <a href="https://zhaohuabing.com">Huabing</a> |
+                    <iframe
+                        style="margin-left: 2px; margin-bottom:-5px;"
+                        frameborder="0" scrolling="0" width="100px" height="20px"
+                        src="https://ghbtns.com/github-btn.html?user=zhaohuabing&repo=hugo-theme-cleanwhite&type=star&count=true" >
+                    </iframe>
+                </p>
+            </div>
+        </div>
+    </div>
+</footer>
+
+
+
+
+<script>
+    function async(u, c) {
+      var d = document, t = 'script',
+          o = d.createElement(t),
+          s = d.getElementsByTagName(t)[0];
+      o.src = u;
+      if (c) { o.addEventListener('load', function (e) { c(null, e); }, false); }
+      s.parentNode.insertBefore(o, s);
+    }
+</script>
+
+
+
+
+
+
+<script>
+    
+    if($('#tag_cloud').length !== 0){
+        async("/js/jquery.tagcloud.js",function(){
+            $.fn.tagcloud.defaults = {
+                
+                color: {start: '#bbbbee', end: '#0085a1'},
+            };
+            $('#tag_cloud a').tagcloud();
+        })
+    }
+</script>
+
+
+<script>
+    async("https://cdnjs.cloudflare.com/ajax/libs/fastclick/1.0.6/fastclick.js", function(){
+        var $nav = document.querySelector("nav");
+        if($nav) FastClick.attach($nav);
+    })
+</script>
+
+
+
+
+
+
+</body>
+</html>

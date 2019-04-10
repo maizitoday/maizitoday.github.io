@@ -1,0 +1,855 @@
+<!DOCTYPE html>
+<html lang="en-us">
+<head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+
+    
+    <meta property="og:site_name" content="">
+    <meta property="og:type" content="article">
+
+    
+    <meta property="og:image" content="http://maizitoday.github.io//img/home-bg-jeep.jpg">
+    <meta property="twitter:image" content="http://maizitoday.github.io//img/home-bg-jeep.jpg" />
+    
+
+    
+    <meta name="title" content="SpringMVC封装常用的CRUD操作" />
+    <meta property="og:title" content="SpringMVC封装常用的CRUD操作" />
+    <meta property="twitter:title" content="SpringMVC封装常用的CRUD操作" />
+    
+
+    
+    <meta name="description" content="麦子，程序员, 开源爱好者，生活探险家 | 这里是 麦子 的博客，与你一起发现更大的世界。">
+    <meta property="og:description" content="麦子，程序员, 开源爱好者，生活探险家 | 这里是 麦子 的博客，与你一起发现更大的世界。" />
+    <meta property="twitter:description" content="麦子，程序员, 开源爱好者，生活探险家 | 这里是 麦子 的博客，与你一起发现更大的世界。" />
+    
+
+    
+    <meta property="twitter:card" content="summary" />
+    
+    
+
+    <meta name="keyword"  content="麦子, maizi, maizi, , 麦子的网络日志, 麦子的博客, maizi Blog, 博客, 个人网站, 互联网, Web, 云原生, PaaS, Istio, Kubernetes, 微服务, Microservice">
+    <link rel="shortcut icon" href="/img/favicon.ico">
+
+    <title>SpringMVC封装常用的CRUD操作-麦子的博客 | 麦子 Blog</title>
+
+    <link rel="canonical" href="/post/springmvc%E5%B0%81%E8%A3%85%E5%B8%B8%E7%94%A8%E7%9A%84crud/">
+
+    <link rel="stylesheet" href="/css/iDisqus.min.css"/>
+	
+    
+    <link rel="stylesheet" href="/css/bootstrap.min.css">
+
+    
+    <link rel="stylesheet" href="/css/hux-blog.min.css">
+
+    
+    <link rel="stylesheet" href="/css/syntax.css">
+
+    
+    <link rel="stylesheet" href="/css/zanshang.css">
+
+    
+    <link href="//cdnjs.cloudflare.com/ajax/libs/font-awesome/4.6.3/css/font-awesome.min.css" rel="stylesheet" type="text/css">
+    
+    
+    <script src="/js/jquery.min.js"></script>
+    
+    
+    <script src="/js/bootstrap.min.js"></script>
+    
+    
+    <script src="/js/hux-blog.min.js"></script>
+	
+    
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.13.1/styles/docco.min.css">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.13.1/highlight.min.js"></script>
+    <script>hljs.initHighlightingOnLoad();</script>
+</head>
+
+
+<nav class="navbar navbar-default navbar-custom navbar-fixed-top">
+    <div class="container-fluid">
+        
+        <div class="navbar-header page-scroll">
+            <button type="button" class="navbar-toggle">
+                <span class="sr-only">Toggle navigation</span>
+                <span class="icon-bar"></span>
+                <span class="icon-bar"></span>
+                <span class="icon-bar"></span>
+            </button>
+            <a class="navbar-brand" href="/"></a>
+        </div>
+
+        
+        
+        <div id="huxblog_navbar">
+            <div class="navbar-collapse">
+                <ul class="nav navbar-nav navbar-right">
+                    <li>
+                        <a href="/">Home</a>
+                    </li>
+                    
+                    <li>
+                        <a href="/categories/life">Life</a>
+                    </li>
+                    
+                    <li>
+                        <a href="/categories/tech">Tech</a>
+                    </li>
+                    
+                    
+		    
+                        <li><a href="/top/about/">ABOUT</a></li>
+                    
+
+                    
+		    <li>
+                        <a href="/search">SEARCH <img src="/img/search.png" height="15" style="cursor: pointer;" alt="Search"></a>
+		    </li>
+                    
+                </ul>
+            </div>
+        </div>
+        
+    </div>
+    
+</nav>
+<script>
+    
+    
+    
+    var $body   = document.body;
+    var $toggle = document.querySelector('.navbar-toggle');
+    var $navbar = document.querySelector('#huxblog_navbar');
+    var $collapse = document.querySelector('.navbar-collapse');
+
+    $toggle.addEventListener('click', handleMagic)
+    function handleMagic(e){
+        if ($navbar.className.indexOf('in') > 0) {
+        
+            $navbar.className = " ";
+            
+            setTimeout(function(){
+                
+                if($navbar.className.indexOf('in') < 0) {
+                    $collapse.style.height = "0px"
+                }
+            },400)
+        }else{
+        
+            $collapse.style.height = "auto"
+            $navbar.className += " in";
+        }
+    }
+</script>
+
+
+
+
+<style type="text/css">
+    header.intro-header {
+        background-image: url('https://img.zhaohuabing.com/in-post/2018-06-04-introducing-the-istio-v1alpha3-routing-api/background.jpg')
+    }
+</style>
+<header class="intro-header">
+    <div class="container">
+        <div class="row">
+            <div class="col-lg-8 col-lg-offset-2 col-md-10 col-md-offset-1">
+                <div class="post-heading">
+                    <div class="tags">
+                        
+                        <a class="tag" href="/tags/crud" title="CRUD">
+                            CRUD
+                        </a>
+                        
+                        <a class="tag" href="/tags/%E5%9F%BA%E7%A1%80%E6%A1%86%E6%9E%B6" title="基础框架">
+                            基础框架
+                        </a>
+                        
+                    </div>
+                    <h1>SpringMVC封装常用的CRUD操作</h1>
+                    <h2 class="subheading"></h2>
+                    <span class="meta">
+			Posted by 
+			
+			         &#34;麦子&#34;
+			 
+			on 
+			Tuesday, April 9, 2019
+                        
+                    </span>
+                </div>
+            </div>
+        </div>
+    </div>
+</header>
+
+
+
+
+<article>
+    <div class="container">
+        <div class="row">
+
+            
+            <div class="
+                col-lg-8 col-lg-offset-2
+                col-md-10 col-md-offset-1
+                post-container">
+
+                
+                <header>
+                    <h2>TOC</h2>
+                </header>
+                <nav id="TableOfContents">
+<ul>
+<li><a href="#dao">Dao</a></li>
+<li><a href="#service">Service</a></li>
+<li><a href="#controller">Controller</a></li>
+<li><a href="#tools">Tools</a></li>
+</ul>
+</nav>
+                
+                
+
+<p>[TOC]</p>
+
+<p>目标：  主要处理单表的进行列表展示， 和 增加，删除，修改，查询等这样的操作的封装处理。对于我们用的myBiatis来处理数据库， 都是通过插件， 数据库和实体以及DAO都是自动生成的，这样的话， 我们可以发现， DAO层都是相同的方法。 同时再编写service层和controller的时候，很多的功能点都是重复的。  所以进行了封装。</p>
+
+<p>主要思路： 通过泛型来控制DAO层的对应的实体类。  然后对于Service和Controller层的时候， 写成抽象类，因为通过@Autowired注册的时候， 是根据顺序来处理的，如果， 如果直接再基类中注册的话， sprng不知道你要注册的是哪一个DAO。 所以这两个类需要进行抽象话。  然后再子类中进行具体的注册处理。 当然封装的一些方法， 需要进行变动的时候，通过重写就好。   具体代码如下：</p>
+
+<h1 id="dao">Dao</h1>
+
+<pre><code class="language-java">public interface SimplenessDao&lt;K&gt; {
+	
+	  int deleteByPrimaryKey(BigDecimal medId);
+ 
+    int insert(K k);
+ 
+    int insertSelective(K k);
+ 
+    K selectByPrimaryKey(BigDecimal medId);
+ 
+    int updateByPrimaryKeySelective(K k);
+ 
+    int updateByPrimaryKey(K k);
+    
+    // 列表数据
+    List&lt;K&gt; findList(Map&lt;String,Object&gt; map);
+    
+    // 列表记录 
+    Integer findListCount(Map&lt;String,Object&gt; map);
+}
+</code></pre>
+
+<h1 id="service">Service</h1>
+
+<p>我这边加入了ISimplenessService， 主要是用来规范和习惯， 注入到controller的我直接用了 SimplenessServiceImpl</p>
+
+<pre><code class="language-java">public interface ISimplenessService&lt;K&gt; {
+	
+	// 查询列表
+	List&lt;K&gt; findList(Map&lt;String,Object&gt; paramsMap);
+	
+	// 查询记录
+	Integer findListCount(Map&lt;String,Object&gt; paramsMap);
+	
+	// 添加和修改--这个用于ajax处理
+	HttpAjaxResult  saveOrUpdate(K k,Integer id);
+	
+	// 查询id对应对象 
+	K  findEntityByParams(Map&lt;String,Integer&gt; paramsMap,Class&lt;K&gt; clazz);
+	
+	// 根据id删除对象 
+	HttpAjaxResult delByPrimKey(int id);
+}
+</code></pre>
+
+<pre><code class="language-java">
+@SuppressWarnings(&quot;rawtypes&quot;)
+public abstract class SimplenessServiceImpl&lt;K&gt; implements ISimplenessService&lt;K&gt; {
+ 
+      public abstract SimplenessDao DaoHandler();
+
+      @SuppressWarnings(&quot;unchecked&quot;)
+      public K selectByPrimaryKey(BigDecimal medId) {
+
+        return (K) DaoHandler().selectByPrimaryKey(medId);
+      }
+ 
+      @SuppressWarnings(&quot;unchecked&quot;)
+      @Override
+      public List findList(Map paramsMap) {
+
+        return DaoHandler().findList(paramsMap);
+      }
+
+      @SuppressWarnings(&quot;unchecked&quot;)
+      @Override
+      public Integer findListCount(Map paramsMap) {
+
+        return DaoHandler().findListCount(paramsMap);
+      }
+ 
+      @SuppressWarnings(&quot;unchecked&quot;)
+      @Override
+      public HttpAjaxResult saveOrUpdate(K k, Integer id) {
+        int count = 0;
+        k = this.dataSupplementHandler(k,id);
+        if (id == null || id == 0) {
+          count = DaoHandler().insertSelective(k);
+        } else {
+          count = DaoHandler().updateByPrimaryKeySelective(k);
+        }
+        return this.ajaxBusiness(count);
+      }
+
+      /***
+       * 
+      * @Title: dataSupplement 
+      * @Description: TODO(这里用一句话描述这个方法的作用)  数据补充处理 
+      * @param @param k    设定文件 
+      * @return void    返回类型 
+      * @throws
+       */
+      public K  dataSupplementHandler(K k,Integer id){
+
+        return k;
+      }
+	
+ 
+      @Override
+      public HttpAjaxResult delByPrimKey(int id) {
+        BigDecimal ids = new BigDecimal(id);
+        int count = DaoHandler().deleteByPrimaryKey(ids);
+        return this.ajaxBusiness(count);
+      }
+
+      /**
+       * 
+       * @Title: ajaxBusiness
+       * @Description: TODO(这里用一句话描述这个方法的作用) ajax统一回复处理
+       * @param @param count
+       * @param @return 设定文件
+       * @return HttpAjaxResult 返回类型
+       * @throws
+       */
+      public HttpAjaxResult ajaxBusiness(int count) {
+        HttpAjaxResult result = new HttpAjaxResult();
+        if (count &gt; 0) {
+          result.setResultCode(200);
+          result.setResultMsg(&quot;success&quot;);
+        } else {
+          result.setResultCode(400);
+          result.setResultMsg(&quot;fail&quot;);
+        }
+        return result;
+      }
+
+      @SuppressWarnings(&quot;unchecked&quot;)
+      public K findEntityByParams(Map paramsMap, Class clazz) {
+        try {
+          K k = null;
+          if (paramsMap != null) {
+            boolean flag = paramsMap.containsKey(&quot;id&quot;);
+            if (flag) {
+              int id = (int) paramsMap.get(&quot;id&quot;);
+              if (id == 0) {
+                // 创建对象。
+                k = (K) clazz.newInstance();
+              } else {
+                BigDecimal decId = new BigDecimal(id);
+                k = (K) DaoHandler().selectByPrimaryKey(decId);
+              }
+              return k;
+            }
+          }
+          return k;
+        } catch (Exception e) {
+          e.printStackTrace();
+        }
+        return null;
+      }
+}
+</code></pre>
+
+<h1 id="controller">Controller</h1>
+
+<pre><code class="language-java">@SuppressWarnings(&quot;rawtypes&quot;)
+public abstract class SimplenessController&lt;K&gt; extends BaseController{
+	  
+      // 外面填充
+      public abstract SimplenessServiceImpl  serviceImplHandler();
+      /***
+       * 
+      * @Title: setUpUrlPrefix 
+      * @Description: TODO(这里用一句话描述这个方法的作用)  统一访问请求URL
+      * @param @return    设定文件 
+      * @return String    返回类型 
+      * @throws
+       */
+      public abstract String  setUpUrlPrefix();
+
+	
+      /***
+       * 
+      * @Title: listView 
+      * @Description: TODO(这里用一句话描述这个方法的作用)  列表展示页面 
+      * @param @return    设定文件 
+      * @return ModelAndView    返回类型 
+      * @throws
+       */
+      @RequestMapping(value = &quot;/listView&quot;)
+      public  ModelAndView listView(){
+        ModelAndView  modelView = this.pageForward(this.setUpUrlPrefix()+&quot;/list&quot;); 
+        return  modelView;
+      };
+
+
+      /***
+       * 
+      * @Title: listData 
+      * @Description: TODO(这里用一句话描述这个方法的作用)  ajax  list数据返回 
+      * @param @param pageBean
+      * @param @throws Exception    设定文件 
+      * @return void    返回类型 
+      * @throws
+       */
+      @RequestMapping(value = &quot;/listData&quot;)
+      @ResponseBody
+      public void listData(PageBean pageBean,K k) throws Exception{
+        Map&lt;String, Object&gt; map = new HashMap&lt;String, Object&gt;();
+        map = this.addParamsBusiness(k,map);
+        List dataList = serviceImplHandler().findList(map);
+          int  pageCount = serviceImplHandler().findListCount(map);
+          listDataResorce(map,pageBean,dataList,pageCount);
+      };
+
+
+      @SuppressWarnings(&quot;unchecked&quot;)
+      public void  listDataResorce(Map&lt;String, Object&gt; map,PageBean pageBean,List dataList,int pageCount) throws Exception{
+        map.put(&quot;pageBean&quot;, pageBean);
+          ResPageBean resPageBean = new ResPageBean(pageBean.getsEcho(), pageCount,pageCount);
+        resPageBean.setAaData(dataList);
+        this.outputStr(&quot;yyyy-MM-dd HH:mm:ss&quot;, resPageBean);
+      }
+
+
+      /**
+       * 
+      * @Title: addParamsBusiness 
+      * @Description: TODO(这里用一句话描述这个方法的作用)  添加查询条件处理。  
+      * @param @param map
+      * @param @return    设定文件 
+      * @return Map&lt;String,Object&gt;    返回类型 
+      * @throws
+       */
+        public Map&lt;String, Object&gt; addParamsBusiness(K k,Map&lt;String, Object&gt; map){
+
+
+        return map;
+      }
+
+
+         // 设置这个Class类型， 用来实现增加操作问题。 (添加的时候需要创建对象用)
+         public abstract Class&lt;K&gt; setUpClass();
+
+        /***
+         * 
+        * @Title: addView 
+        * @Description: TODO(这里用一句话描述这个方法的作用)      编辑和新增页面返回
+        * @param @param id
+        * @param @return    设定文件 
+        * @return ModelAndView    返回类型 
+        * @throws
+         */
+        @RequestMapping(value=&quot;/addOrUpdate/{id}&quot;)
+      public ModelAndView addOrUpdate(@PathVariable(&quot;id&quot;) Integer id){
+          Map&lt;String, Object&gt; map = new HashMap&lt;String, Object&gt;();
+          map.put(&quot;id&quot;, id);
+          K k = (K) serviceImplHandler().findEntityByParams(map,this.setUpClass());
+        ModelAndView  modelView = this.pageForward(this.setUpUrlPrefix()+&quot;/addOrUpdate&quot;,&quot;baseObject&quot;,k); 
+        return  modelView;
+        }
+      /**
+       * 
+      * @Title: saveOrUpdate 
+      * @Description: TODO(这里用一句话描述这个方法的作用)   ajax 新增和更新 
+      * @param @param k
+      * @param @return    设定文件 
+      * @return HttpAjaxResult    返回类型 
+      * @throws
+       */
+      @RequestMapping(value=&quot;/saveOrUpdateAjax/{id}&quot;)
+      @ResponseBody
+      public HttpAjaxResult saveOrUpdateAjax(K k,@PathVariable(&quot;id&quot;) Integer id){
+          HttpAjaxResult ajaxResult = serviceImplHandler().saveOrUpdate(k,id);
+        return  ajaxResult;
+        }
+
+        /***
+         * 
+        * @Title: del 
+        * @Description: TODO(这里用一句话描述这个方法的作用)   ajax 删除处理 
+        * @param @param id
+        * @param @return    设定文件 
+        * @return HttpAjaxResult    返回类型 
+        * @throws
+         */
+
+        @RequestMapping(value=&quot;/del/{id}&quot;)
+        @ResponseBody
+      public  HttpAjaxResult del(@PathVariable(&quot;id&quot;) Integer id){
+          HttpAjaxResult ajaxResult = serviceImplHandler().delByPrimKey(id);
+        return  ajaxResult;
+        };
+}
+</code></pre>
+
+<h1 id="tools">Tools</h1>
+
+<p>HttpAjaxResult这个类主要用来控制AJax的返回类的处理</p>
+
+<pre><code class="language-java">public class HttpAjaxResult {
+      private int resultCode;
+      private String resultMsg;
+      public int getResultCode() {
+        return resultCode;
+      }
+      public void setResultCode(int resultCode) {
+        this.resultCode = resultCode;
+      }
+      public String getResultMsg() {
+        return resultMsg;
+      }
+      public void setResultMsg(String resultMsg) {
+        this.resultMsg = resultMsg;
+      }
+}
+</code></pre>
+
+<p>同时，我们再定义处理泛型的类的时候， 有时候如果为了控制对象的范围处理， 我们可以直接通过  T  extends  BaseObject  这样来进行更好的代码规范处理。</p>
+
+<p>基础代码就如上进行处理。</p>
+
+
+                
+                
+<div class="entry-shang text-center">
+    
+	    <p>「真诚赞赏，手留余香」</p>
+	
+	<button class="zs show-zs btn btn-bred">赞赏支持</button>
+</div>
+<div class="zs-modal-bg"></div>
+<div class="zs-modal-box">
+	<div class="zs-modal-head">
+		<button type="button" class="close">×</button>
+		<span class="author"><a href="http://maizitoday.github.io/"><img src="/img/favicon.png" /></a></span>
+        
+	        <p class="tip"><i></i><span>真诚赞赏，手留余香</span></p>
+		
+ 
+	</div>
+	<div class="zs-modal-body">
+		<div class="zs-modal-btns">
+			<button class="btn btn-blink" data-num="2">2元</button>
+			<button class="btn btn-blink" data-num="5">5元</button>
+			<button class="btn btn-blink" data-num="10">10元</button>
+			<button class="btn btn-blink" data-num="50">50元</button>
+			<button class="btn btn-blink" data-num="100">100元</button>
+			<button class="btn btn-blink" data-num="1">任意金额</button>
+		</div>
+		<div class="zs-modal-pay">
+			<button class="btn btn-bred" id="pay-text">2元</button>
+			<p>使用<span id="pay-type">微信</span>扫描二维码完成支付</p>
+			<img src="/img/reward/wechat-2.png"  id="pay-image"/>
+		</div>
+	</div>
+	<div class="zs-modal-footer">
+		<label><input type="radio" name="zs-type" value="wechat" class="zs-type" checked="checked"><span ><span class="zs-wechat"><img src="/img/reward/wechat-btn.png"/></span></label>
+		<label><input type="radio" name="zs-type" value="alipay" class="zs-type" class="zs-alipay"><img src="/img/reward/alipay-btn.png"/></span></label>
+	</div>
+</div>
+<script type="text/javascript" src="/js/reward.js"></script>
+
+                
+
+                <hr>
+                <ul class="pager">
+                    
+                    <li class="previous">
+                        <a href="/post/docker%E5%9F%BA%E7%A1%80/" data-toggle="tooltip" data-placement="top" title="docker">&larr;
+                            Previous Post</a>
+                    </li>
+                    
+                    
+                    <li class="next">
+                        <a href="/post/linux%E5%B8%B8%E7%94%A8%E5%91%BD%E4%BB%A4/" data-toggle="tooltip" data-placement="top" title="Linux常用命令">Next
+                            Post &rarr;</a>
+                    </li>
+                    
+                </ul>
+
+                
+<div id="disqus-comment"></div>
+
+
+
+            </div>
+            
+            <div class="
+                col-lg-8 col-lg-offset-2
+                col-md-10 col-md-offset-1
+                sidebar-container">
+
+                
+                
+                <section>
+                    <hr class="hidden-sm hidden-xs">
+                    <h5><a href="/tags/">FEATURED TAGS</a></h5>
+                    <div class="tags">
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        <a href="/tags/docker" title="docker">
+                            docker
+                        </a>
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        <a href="/tags/linux" title="linux">
+                            linux
+                        </a>
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        <a href="/tags/%E4%B8%AD%E9%97%B4%E4%BB%B6" title="中间件">
+                            中间件
+                        </a>
+                        
+                        
+                        
+                        <a href="/tags/%E4%B8%BB%E4%BB%8E%E5%A4%8D%E5%88%B6" title="主从复制">
+                            主从复制
+                        </a>
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                    </div>
+                </section>
+                
+
+                
+                
+                <section>
+                    <hr>
+                    <h5>FRIENDS</h5>
+                    <ul class="list-inline">
+                        
+                        <li><a target="_blank" href="https://zhaohuabing.com">赵化冰的博客</a></li>
+                        
+                        <li><a target="_blank" href="http://www.tianshouzhi.com">田守枝的博客</a></li>
+                        
+                    </ul>
+                </section>
+                
+            </div>
+        </div>
+    </div>
+</article>
+
+
+
+
+<footer>
+    <div class="container">
+        <div class="row">
+            <div class="col-lg-8 col-lg-offset-2 col-md-10 col-md-offset-1">
+                <ul class="list-inline text-center">
+                   
+                   <li>
+                       <a href="" rel="alternate" type="application/rss+xml" title="" >
+                           <span class="fa-stack fa-lg">
+                               <i class="fa fa-circle fa-stack-2x"></i>
+                               <i class="fa fa-rss fa-stack-1x fa-inverse"></i>
+                           </span>
+                       </a>
+                   </li>
+                   
+                    
+                    <li>
+                        <a href="mailto:maiziybtoday@gmail.com">
+                            <span class="fa-stack fa-lg">
+                                <i class="fa fa-circle fa-stack-2x"></i>
+                                <i class="fa fa-envelope fa-stack-1x fa-inverse"></i>
+                            </span>
+                        </a>
+                    </li>
+		    
+                    
+                    
+                    
+                    
+
+                    
+
+		    
+                    
+                    <li>
+                        <a target="_blank" href="/your%20wechat%20qr%20code%20image">
+                            <span class="fa-stack fa-lg">
+                                <i class="fa fa-circle fa-stack-2x"></i>
+                                <i class="fa fa-wechat fa-stack-1x fa-inverse"></i>
+                            </span>
+                        </a>
+                    </li>
+		    
+                    
+                    
+                    <li>
+                        <a target="_blank" href="https://www.linkedin.com/in/yourlinkedinid">
+                            <span class="fa-stack fa-lg">
+                                <i class="fa fa-circle fa-stack-2x"></i>
+                                <i class="fa fa-linkedin fa-stack-1x fa-inverse"></i>
+                            </span>
+                        </a>
+                    </li>
+		    
+                    
+                </ul>
+		<p class="copyright text-muted">
+                    Copyright &copy;  2019
+                    <br>
+                    <a href="https://themes.gohugo.io/hugo-theme-cleanwhite">CleanWhite Hugo Theme</a> by <a href="https://zhaohuabing.com">Huabing</a> |
+                    <iframe
+                        style="margin-left: 2px; margin-bottom:-5px;"
+                        frameborder="0" scrolling="0" width="100px" height="20px"
+                        src="https://ghbtns.com/github-btn.html?user=zhaohuabing&repo=hugo-theme-cleanwhite&type=star&count=true" >
+                    </iframe>
+                </p>
+            </div>
+        </div>
+    </div>
+</footer>
+
+
+
+
+<script>
+    function async(u, c) {
+      var d = document, t = 'script',
+          o = d.createElement(t),
+          s = d.getElementsByTagName(t)[0];
+      o.src = u;
+      if (c) { o.addEventListener('load', function (e) { c(null, e); }, false); }
+      s.parentNode.insertBefore(o, s);
+    }
+</script>
+
+
+
+
+
+
+<script>
+    
+    if($('#tag_cloud').length !== 0){
+        async("/js/jquery.tagcloud.js",function(){
+            $.fn.tagcloud.defaults = {
+                
+                color: {start: '#bbbbee', end: '#0085a1'},
+            };
+            $('#tag_cloud a').tagcloud();
+        })
+    }
+</script>
+
+
+<script>
+    async("https://cdnjs.cloudflare.com/ajax/libs/fastclick/1.0.6/fastclick.js", function(){
+        var $nav = document.querySelector("nav");
+        if($nav) FastClick.attach($nav);
+    })
+</script>
+
+
+
+
+
+
+</body>
+</html>
