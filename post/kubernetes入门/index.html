@@ -1,0 +1,1443 @@
+<!DOCTYPE html>
+<html lang="en-us">
+<head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+
+    
+    <meta property="og:site_name" content="">
+    <meta property="og:type" content="article">
+
+    
+    <meta property="og:image" content="http://maizitoday.github.io//img/home-bg-jeep.jpg">
+    <meta property="twitter:image" content="http://maizitoday.github.io//img/home-bg-jeep.jpg" />
+    
+
+    
+    <meta name="title" content="Kubernetes入门" />
+    <meta property="og:title" content="Kubernetes入门" />
+    <meta property="twitter:title" content="Kubernetes入门" />
+    
+
+    
+    <meta name="description" content="麦子，程序员, 开源爱好者，生活探险家 | 这里是 麦子 的博客，与你一起发现更大的世界。">
+    <meta property="og:description" content="麦子，程序员, 开源爱好者，生活探险家 | 这里是 麦子 的博客，与你一起发现更大的世界。" />
+    <meta property="twitter:description" content="麦子，程序员, 开源爱好者，生活探险家 | 这里是 麦子 的博客，与你一起发现更大的世界。" />
+    
+
+    
+    <meta property="twitter:card" content="summary" />
+    
+    
+
+    <meta name="keyword"  content="麦子, maizi, maizi, , 麦子的网络日志, 麦子的博客, maizi Blog, 博客, 个人网站, 互联网, Web, 云原生, PaaS, Istio, Kubernetes, 微服务, Microservice">
+    <link rel="shortcut icon" href="/img/favicon.ico">
+
+    <title>Kubernetes入门-麦子的博客 | 麦子 Blog</title>
+
+    <link rel="canonical" href="/post/kubernetes%E5%85%A5%E9%97%A8/">
+
+    <link rel="stylesheet" href="/css/iDisqus.min.css"/>
+	
+    
+    <link rel="stylesheet" href="/css/bootstrap.min.css">
+
+    
+    <link rel="stylesheet" href="/css/hux-blog.min.css">
+
+    
+    <link rel="stylesheet" href="/css/syntax.css">
+
+    
+    <link rel="stylesheet" href="/css/zanshang.css">
+
+    
+    <link href="//cdnjs.cloudflare.com/ajax/libs/font-awesome/4.6.3/css/font-awesome.min.css" rel="stylesheet" type="text/css">
+    
+    
+    <script src="/js/jquery.min.js"></script>
+    
+    
+    <script src="/js/bootstrap.min.js"></script>
+    
+    
+    <script src="/js/hux-blog.min.js"></script>
+	
+    
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.13.1/styles/docco.min.css">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.13.1/highlight.min.js"></script>
+    <script>hljs.initHighlightingOnLoad();</script>
+</head>
+
+
+<nav class="navbar navbar-default navbar-custom navbar-fixed-top">
+    <div class="container-fluid">
+        
+        <div class="navbar-header page-scroll">
+            <button type="button" class="navbar-toggle">
+                <span class="sr-only">Toggle navigation</span>
+                <span class="icon-bar"></span>
+                <span class="icon-bar"></span>
+                <span class="icon-bar"></span>
+            </button>
+            <a class="navbar-brand" href="/"></a>
+        </div>
+
+        
+        
+        <div id="huxblog_navbar">
+            <div class="navbar-collapse">
+                <ul class="nav navbar-nav navbar-right">
+                    <li>
+                        <a href="/">Home</a>
+                    </li>
+                    
+                    <li>
+                        <a href="/categories/tech">Tech</a>
+                    </li>
+                    
+                    
+		    
+                        <li><a href="/top/books/">BOOKS</a></li>
+                    
+                        <li><a href="/top/about/">ABOUT</a></li>
+                    
+
+                    
+		    <li>
+                        <a href="/search">SEARCH <img src="/img/search.png" height="15" style="cursor: pointer;" alt="Search"></a>
+		    </li>
+                    
+                </ul>
+            </div>
+        </div>
+        
+    </div>
+    
+</nav>
+<script>
+    
+    
+    
+    var $body   = document.body;
+    var $toggle = document.querySelector('.navbar-toggle');
+    var $navbar = document.querySelector('#huxblog_navbar');
+    var $collapse = document.querySelector('.navbar-collapse');
+
+    $toggle.addEventListener('click', handleMagic)
+    function handleMagic(e){
+        if ($navbar.className.indexOf('in') > 0) {
+        
+            $navbar.className = " ";
+            
+            setTimeout(function(){
+                
+                if($navbar.className.indexOf('in') < 0) {
+                    $collapse.style.height = "0px"
+                }
+            },400)
+        }else{
+        
+            $collapse.style.height = "auto"
+            $navbar.className += " in";
+        }
+    }
+</script>
+
+
+
+
+<style type="text/css">
+    header.intro-header {
+        background-image: url('/img/home-bg-jeep.jpg')
+    }
+</style>
+<header class="intro-header">
+    <div class="container">
+        <div class="row">
+            <div class="col-lg-8 col-lg-offset-2 col-md-10 col-md-offset-1">
+                <div class="post-heading">
+                    <div class="tags">
+                        
+                        <a class="tag" href="/tags/k8s%E6%A0%B8%E5%BF%83%E4%B8%BB%E4%BB%B6" title="k8s核心主件">
+                            k8s核心主件
+                        </a>
+                        
+                        <a class="tag" href="/tags/%E5%B8%B8%E7%94%A8%E5%91%BD%E4%BB%A4" title="常用命令">
+                            常用命令
+                        </a>
+                        
+                        <a class="tag" href="/tags/yaml%E9%85%8D%E7%BD%AE" title="yaml配置">
+                            yaml配置
+                        </a>
+                        
+                        <a class="tag" href="/tags/poddeploymentservice" title="pod,deployment,service">
+                            pod,deployment,service
+                        </a>
+                        
+                        <a class="tag" href="/tags/ingressvolume" title="ingress,volume">
+                            ingress,volume
+                        </a>
+                        
+                        <a class="tag" href="/tags/docker" title="docker">
+                            docker
+                        </a>
+                        
+                    </div>
+                    <h1>Kubernetes入门</h1>
+                    <h2 class="subheading"></h2>
+                    <span class="meta">
+			Posted by 
+			
+			         &#34;麦子&#34;
+			 
+			on 
+			Monday, March 4, 2019
+                        
+                    </span>
+                </div>
+            </div>
+        </div>
+    </div>
+</header>
+
+
+
+
+<article>
+    <div class="container">
+        <div class="row">
+
+            
+            <div class="
+                col-lg-8 col-lg-offset-2
+                col-md-10 col-md-offset-1
+                post-container">
+
+                
+                <header>
+                    <h2>TOC</h2>
+                </header>
+                <nav id="TableOfContents">
+<ul>
+<li>
+<ul>
+<li>
+<ul>
+<li><a href="#路由">路由</a></li>
+<li><a href="#dns">DNS</a></li>
+<li><a href="#mac安装kubernetes">mac安装kubernetes</a></li>
+<li><a href="#搭建kubernetes-dashboard">搭建kubernetes-dashboard</a></li>
+<li><a href="#什么是kubernetes">什么是kubernetes</a></li>
+<li><a href="#核心主件">核心主件</a>
+<ul>
+<li><a href="#pod">Pod</a></li>
+<li><a href="#部署-deployment">部署(Deployment)</a></li>
+<li><a href="#服务-service">服务（Service）</a></li>
+<li><a href="#任务-job">任务（Job）</a></li>
+<li><a href="#后台支撑服务集-daemonset">后台支撑服务集（DaemonSet）</a></li>
+<li><a href="#有状态服务集-petset">有状态服务集（PetSet）</a></li>
+<li><a href="#存储卷-volume">存储卷（Volume）</a></li>
+<li><a href="#密钥对象-secret">密钥对象（Secret）</a></li>
+<li><a href="#用户帐户-user-account-和服务帐户-service-account">用户帐户（User Account）和服务帐户（Service Account）</a></li>
+<li><a href="#名称空间-namespace">名称空间（Namespace）</a></li>
+<li><a href="#rbac访问授权">RBAC访问授权</a></li>
+<li><a href="#基本联系流程">基本联系流程</a></li>
+</ul></li>
+<li><a href="#k8s架构图">K8S架构图</a></li>
+<li><a href="#常用k8的常用命令">常用k8的常用命令</a>
+<ul>
+<li><a href="#查看集群信息">查看集群信息</a></li>
+<li><a href="#运行一个nginx的pod">运行一个nginx的pod</a></li>
+<li><a href="#查看pod-service-deployment信息">查看pod,service,deployment信息</a></li>
+<li><a href="#删除">删除</a></li>
+<li><a href="#资源暴露为service">资源暴露为service</a></li>
+<li><a href="#scale动态扩容-缩容">scale动态扩容/缩容</a></li>
+<li><a href="#set动态升级版本-配置应用资源">set动态升级版本，配置应用资源</a></li>
+<li><a href="#rollout-undo-回滚版本-暂停-恢复">rollout undo 回滚版本，暂停，恢复</a></li>
+<li><a href="#edit编辑修改">edit编辑修改</a></li>
+<li><a href="#label标签">label标签</a></li>
+<li><a href="#标签选择器">标签选择器</a></li>
+</ul></li>
+<li><a href="#kubernetes资源配置">kubernetes资源配置</a>
+<ul>
+<li><a href="#主流资源的配置清单">主流资源的配置清单</a></li>
+<li><a href="#pod资源">pod资源</a>
+<ul>
+<li><a href="#pod格式和常用命令">pod格式和常用命令</a></li>
+<li><a href="#pod健康检测">pod健康检测</a></li>
+<li><a href="#pod启动前-后钩子">pod启动前/后钩子</a></li>
+</ul></li>
+</ul></li>
+<li><a href="#pod控制器详解">pod控制器详解</a>
+<ul>
+<li><a href="#pod控制器有多种类型">pod控制器有多种类型</a></li>
+<li><a href="#deployment">Deployment</a>
+<ul>
+<li><a href="#deployment定义资源清单">Deployment定义资源清单</a></li>
+<li><a href="#deployment扩容-缩容-升级-回滚">deployment扩容/缩容/升级/回滚</a></li>
+</ul></li>
+<li><a href="#daemonset">DaemonSet</a></li>
+<li><a href="#statefulset">StatefulSet</a></li>
+</ul></li>
+<li><a href="#service">service</a></li>
+<li><a href="#ingress">Ingress</a>
+<ul>
+<li><a href="#https协议访问服务">https协议访问服务</a></li>
+</ul></li>
+<li><a href="#存储劵详解">存储劵详解</a>
+<ul>
+<li><a href="#存储卷常用类型">存储卷常用类型</a></li>
+</ul></li>
+</ul></li>
+</ul></li>
+</ul>
+</nav>
+                
+                
+
+<p>[TOC]</p>
+
+<p>注明：资源多来源于网上资源，此文章只是记录笔记整理，点击标题链接查看细节原文。</p>
+
+<h3 id="路由">路由</h3>
+
+<p>转载地址：<a href="https://www.zhihu.com/question/46767015/answer/103018297">https://www.zhihu.com/question/46767015/answer/103018297</a></p>
+
+<p>路由——url的分层解析。</p>
+
+<p>第一层  解析到服务器目标机器。这个通常是域名或ip。</p>
+
+<p>第二层  解析到服务器的特定资源文件。这个通常是pathinfo。</p>
+
+<p>第三层  解析特定资源的特定状态。包含在pathinfo参数中。</p>
+
+<p>主要是服务器，资源文件，特定状态定位。</p>
+
+<p>就是在找到目的地。
+ 路由器里根据目标IP，找到中间需要经过的路由器路径。
+ Web里根据网址找到能处理这个URL的程序或模块。</p>
+
+<h3 id="dns">DNS</h3>
+
+<p>是一种组织成域层次结构的计算机和网络服务命名系统。DNS命名用于TCP/IP网络，主要使用在Internet上。当网络上的一台客户机需要访问某服务器上的资源时，客户机的用户只需要在浏览器中的地址文本框中输入该服务器的网址、就可以与该服务器进行连接，计算机的硬件只能识别IP地址，而不能识别其他类型的地址。这样在用户容易记忆的地址和计算机能够识别的地址之间就需要进行转换，DNS服务器便充当了这个地址解析的角色。现在找本机上面host里面的对应，如果没有就到网上寻找。</p>
+
+<h3 id="mac安装kubernetes">mac安装kubernetes</h3>
+
+<p>转载地址：<a href="https://yq.aliyun.com/articles/508460">https://yq.aliyun.com/articles/508460</a></p>
+
+<pre><code class="language-shell">git clone https://github.com/AliyunContainerService/k8s-for-docker-desktop(下载master分支)
+cd k8s-for-docker-desktop
+./load_images.sh
+然后直接启动docker就可以直接加载了。
+
+
+kubectl config use-context docker-for-desktop
+验证 Kubernetes 安装
+kubectl cluster-info
+kubectl get nodes
+
+kubectl create -f kubernetes-dashboard.yaml(这个需要在那个master分支的文件夹中执行)
+kubectl proxy
+http://localhost:8001/api/v1/namespaces/kube-system/services/https:kubernetes-dashboard:/proxy/#!/overview?namespace=default
+</code></pre>
+
+<h3 id="搭建kubernetes-dashboard">搭建kubernetes-dashboard</h3>
+
+<p>转载地址：<a href="https://my.oschina.net/wubiaowpBlogShare/blog/2222564">https://my.oschina.net/wubiaowpBlogShare/blog/2222564</a></p>
+
+<p>在kubernetes-dashboard.yaml父级文件夹下创建account.yaml文件用于访问kubernetes-dashboard，添加如下配置</p>
+
+<pre><code class="language-shell"># Create Service AccountapiVersion: v1 
+kind: ServiceAccount 
+metadata:   
+  name: admin-user   
+  namespace: kube-system 
+---# Create ClusterRoleBindingapiVersion: rbac.authorization.k8s.io/v1beta1 
+kind: ClusterRoleBinding 
+metadata:   
+  name: admin-user 
+roleRef:   
+  apiGroup: rbac.authorization.k8s.io   
+  kind: ClusterRole   
+  name: cluster-admin 
+subjects: 
+  - kind: ServiceAccount   
+  name: admin-user   
+  namespace: kube-system
+</code></pre>
+
+<p>获取登陆令牌kubectl -n kube-system describe secret $(kubectl -n kube-system get secret | grep admin-user | awk &lsquo;{print $1}&rsquo;)， 获取输出的token粘贴复制到kubernetes-dashboard登陆页面获取授权。</p>
+
+<h3 id="什么是kubernetes">什么是kubernetes</h3>
+
+<p>转载地址：<a href="http://www.dockone.io/article/932">http://www.dockone.io/article/932</a></p>
+
+<p>Kubernetes（k8s）是自动化容器操作的开源平台，这些操作包括部署，调度和节点集群间扩展。如果你曾经用过Docker容器技术部署容器，那么可以将Docker看成Kubernetes内部使用的低级别组件。Kubernetes不仅仅支持Docker，还支持Rocket，这是另一种容器技术。</p>
+
+<p>使用Kubernetes可以：</p>
+
+<ul>
+<li><p>自动化容器的部署和复制</p></li>
+
+<li><p>随时扩展或收缩容器规模</p></li>
+
+<li><p>将容器组织成组，并且提供容器间的负载均衡</p></li>
+
+<li><p>很容易地升级应用程序容器的新版本</p></li>
+
+<li><p>提供容器弹性，如果容器失效就替换它，等等&hellip;</p></li>
+</ul>
+
+<h3 id="核心主件">核心主件</h3>
+
+<p>原文地址：<a href="https://www.cnblogs.com/along21/p/10297756.html">https://www.cnblogs.com/along21/p/10297756.html</a></p>
+
+<h4 id="pod">Pod</h4>
+
+<p>​     Pod的设计理念是支持多个容器在一个Pod中共享网络地址和文件系统，可以通过进程间通信和文件共享这种简单高效的方式组合完成服务。</p>
+
+<p>​     Pod是K8s集群中所有业务类型的基础，可以看作运行在K8s集群中的小机器人，不同类型的业务就需要不同类型的小机器人去执行。目前K8s中的业务主要可以分为长期伺服型（long-running）、批处理型（batch）、节点后台支撑型（node-daemon）和有状态应用型（stateful application）；分别对应的小机器人控制器为Deployment、Job、DaemonSet和PetSe</p>
+
+<h4 id="部署-deployment">部署(Deployment)</h4>
+
+<p>​      部署表示用户对K8s集群的一次更新操作。<strong>部署是一个比RS应用模式更广的API对象，可以是创建一个新的服务，更新一个新的服务，也可以是滚动升级一个服务</strong>。滚动升级一个服务，实际是创建一个新的RS，然后逐渐将新RS中副本数增加到理想状态，将旧RS中的副本数减小到0的复合操作。感觉就是管理pod的工具。</p>
+
+<h4 id="服务-service">服务（Service）</h4>
+
+<p>​      一个Pod只是一个运行服务的实例，随时可能在一个节点上停止，在另一个节点以一个新的IP启动一个新的Pod，因此不能以确定的IP和端口号提供服务。要稳定地提供服务需要服务发现和负载均衡能力。服务发现完成的工作，是针对客户端访问的服务，找到对应的的后端服务实例。在K8s集群中，客户端需要访问的服务就是Service对象。<strong>每个Service会对应一个集群内部有效的虚拟IP，集群内部通过虚拟IP访问一个服务。在K8s集群中微服务的负载均衡是由Kube-proxy实现的</strong>。Kube-proxy是K8s集群内部的负载均衡器。它是一个分布式代理服务器，在K8s的每个节点上都有一个；这一设计体现了它的伸缩性优势，需要访问服务的节点越多，提供负载均衡能力的Kube-proxy就越多，高可用节点也随之增多。</p>
+
+<p>​      相比我们理解的nginx中的负载均衡的时候， 对外配置的一个入口。 这个简单理解也是可以这样。</p>
+
+<p>​      service： *如果Pods是短暂的，那么重启时IP地址可能会改变，怎么才能从前端容器正确可靠地指向后台容器呢？</p>
+
+<p>​      会为Service创建一个本地集群的DNS入口，因此前端Pod只需要DNS查找主机名为 ‘backend-service’，就能够解析出前端应用程序可用的IP地址。</p>
+
+<p>​     现在前端已经得到了后台服务的IP地址，但是它应该访问2个后台Pod的哪一个呢？Service在这2个后台Pod之间提供透明的负载均衡，会将请求分发给其中的任意一个，通过每个Node上运行的代理（kube-proxy）完成。</p>
+
+<p>​      RC、RS和Deployment只是保证了支撑服务的微服务Pod的数量，但是没有解决如何访问这些服务的问题。一个Pod只是一个运行服务的实例，随时可能在一个节点上停止，在另一个节点以一个新的IP启动一个新的Pod，因此不能以确定的IP和端口号提供服务。要稳定地提供服务需要服务发现和负载均衡能力。服务发现完成的工作，是针对客户端访问的服务，找到对应的的后端服务实例。在K8s集群中，客户端需要访问的服务就是Service对象。每个Service会对应一个集群内部有效的虚拟IP，集群内部通过虚拟IP访问一个服务。在K8s集群中微服务的负载均衡是由Kube-proxy实现的。Kube-proxy是K8s集群内部的负载均衡器。它是一个分布式代理服务器，在K8s的每个节点上都有一个；</p>
+
+<h4 id="任务-job">任务（Job）</h4>
+
+<p>　　<strong>Job是K8s用来控制批处理型任务的API对象</strong>。批处理业务与长期伺服业务的主要区别是批处理业务的运行有头有尾，而长期伺服业务在用户不停止的情况下永远运行。Job管理的Pod根据用户的设置把任务成功完成就自动退出了。成功完成的标志根据不同的spec.completions策略而不同：单Pod型任务有一个Pod成功就标志完成；定数成功型任务保证有N个任务全部成功；工作队列型任务根据应用确认的全局成功而标志成功。</p>
+
+<h4 id="后台支撑服务集-daemonset">后台支撑服务集（DaemonSet）</h4>
+
+<p>　　长期伺服型和批处理型服务的核心在业务应用，可能有些节点运行多个同类业务的Pod，有些节点上又没有这类Pod运行；而后台支撑型服务的核心关注点在K8s集群中的节点（物理机或虚拟机），要保证每个节点上都有一个此类Pod运行。节点可能是所有集群节点也可能是通过nodeSelector选定的一些特定节点。<strong>典型的后台支撑型服务包括，存储，日志和监控等在每个节点上支持K8s集群运行的服务</strong>。</p>
+
+<h4 id="有状态服务集-petset">有状态服务集（PetSet）</h4>
+
+<p>​        RC和RS-&gt;Replication Controller,保证pod的高可用，保证pod的数量。</p>
+
+<p>​        RC和RS主要是控制提供无状态服务的，其所控制的Pod的名字是随机设置的，一个Pod出故障了就被丢弃掉，在另一个地方重启一个新的Pod，名字变了、名字和启动在哪儿都不重要，重要的只是Pod总数；而PetSet是用来控制有状态服务，PetSet中的每个Pod的名字都是事先确定的，不能更改。</p>
+
+<p>​       对于RC和RS中的Pod，一般不挂载存储或者挂载共享存储，保存的是所有Pod共享的状态，适合于PetSet的业务包括数据库服务MySQL和PostgreSQL，集群化管理服务Zookeeper、etcd等有状态服务。运维人员需要不断地维护它。</p>
+
+<h4 id="存储卷-volume">存储卷（Volume）</h4>
+
+<p>​         K8s集群中的存储卷跟Docker的存储卷有些类似，<strong>只不过Docker的存储卷作用范围为一个容器，而K8s的存储卷的生命周期和作用范围是一个Pod</strong>。每个Pod中声明的存储卷由Pod中的所有容器共享。持久存储卷（Persistent Volume，PV）和持久存储卷声明（Persistent Volume Claim，PVC）  <strong>PV和PVC使得K8s集群具备了存储的逻辑抽象能力</strong>，使得在配置Pod的逻辑里可以忽略对实际后台存储技术的配置，而把这项配置的工作交给PV的配置者，即集群的管理者。相当于提出了一个接口，和JDBC的接口一样，后面不管是mysql还是oracle</p>
+
+<h4 id="密钥对象-secret">密钥对象（Secret）</h4>
+
+<p>​        <strong>Secret是用来保存和传递密码、密钥、认证凭证这些敏感信息的对象</strong>。使用Secret的好处是可以避免把敏感信息明文写在配置文件里。</p>
+
+<h4 id="用户帐户-user-account-和服务帐户-service-account">用户帐户（User Account）和服务帐户（Service Account）</h4>
+
+<p>​       顾名思义，用户帐户为人提供账户标识，而服务账户为计算机进程和K8s集群中运行的Pod提供账户标识。用户帐户和服务帐户的一个区别是作用范围；用户帐户对应的是人的身份，人的身份与服务的namespace无关，所以用户账户是跨namespace的；而服务帐户对应的是一个运行中程序的身份，与特定namespace是相关的。</p>
+
+<h4 id="名称空间-namespace">名称空间（Namespace）</h4>
+
+<p>​      <strong>名称空间为K8s集群提供虚拟的隔离作用</strong>，K8s集群初始有两个名字空间，分别是<strong>默认名称空间default和系统名称空间kube-system</strong>，除此以外，管理员可以可以创建新的名字空间满足需要。</p>
+
+<h4 id="rbac访问授权">RBAC访问授权</h4>
+
+<p>​       RBAC主要是引入了角色（Role）和角色绑定（RoleBinding）的抽象概念</p>
+
+<h4 id="基本联系流程">基本联系流程</h4>
+
+<ol>
+<li>创建Deployment文件， 里面配置好需要下载的镜像，运行后，生成pod。这个Deployment里面就包含了对应pods</li>
+<li>创建Deployment时候，有对应的tag</li>
+</ol>
+
+<p>​         创建nginx.ymal</p>
+
+<pre><code class="language-yaml">apiVersion: extensions/v1beta1                  # K8S对应的API版本
+kind: Deployment                # 对应的类型
+metadata:
+  name: nginx-dev
+  labels:
+    name: nginx-dev
+spec:
+  replicas: 2                    # 镜像副本数量
+  template:
+    metadata:
+      labels:                    # 容器的标签 可和service关联
+        app: nginx
+    spec:
+      containers:
+        - name: nginx            # 容器名和镜像
+          image: nginx
+          imagePullPolicy: Always
+          securityContext:
+               privileged: true   # 特权进入 
+</code></pre>
+
+<p>​         通过命令  kubectl create -f nginx.yaml   创建pods，查看效果</p>
+
+<pre><code class="language-yaml">kubectl get pods
+
+NAME                         READY   STATUS    RESTARTS   AGE
+nginx-dev-57b967f787-dr58z   1/1     Running   0          4h43m
+nginx-dev-57b967f787-vdc54   1/1     Running   0          4h43m
+
+kubectl get deployment
+
+NAME        READY   UP-TO-DATE   AVAILABLE   AGE
+nginx-dev   2/2     2            2           4h43m
+
+上面分别看到了pods 和 deployment，  可以查看2个nginx容器分别分配的虚拟ip
+
+kubectl get pods -o wide 
+
+NAME                         READY   STATUS    RESTARTS   AGE     IP          NODE              
+nginx-dev-57b967f787-dr58z   1/1     Running   0          4h44m   10.1.0.70   docker-desktop    
+nginx-dev-57b967f787-vdc54   1/1     Running   0          4h44m   10.1.0.69   docker-desktop
+
+</code></pre>
+
+<ol>
+<li>​    启动service，用上面的Deployment中的tag，关联起来，创建服务。</li>
+</ol>
+
+<p>​</p>
+
+<pre><code class="language-yaml">创建：kubectl expose deployment nginx-dev --name=nginx-service --port=80
+
+查看
+kubectl get svc nginx-service
+
+NAME            TYPE       CLUSTER-IP     EXTERNAL-IP   PORT(S)        AGE
+nginx-service   NodePort   10.108.53.71   &lt;none&gt;        80:32632/TCP   4h45m
+
+</code></pre>
+
+<ol>
+<li><p>这个时候，node里面的容器，可以通过service创建出来的CLUSTER-IP来进行互相通信。</p></li>
+
+<li><p>外网直接访问容器里面的容器，需要修改这个服务的 type: NodePort 为这个就可以了。</p></li>
+</ol>
+
+<pre><code>kubectl edit svc nginx-service
+
+执行后，修改这个文件的  type: NodePort 为这个。
+
+注意：  在 kubectl edit svc nginx-service 这个命令的时候， 如果用sublime软件打开，发现，还没有修改就关闭了，无法修改的问题， 执行这个命令的时候，我们可以指定用哪一个软件打开，如下：
+
+ KUBE_EDITOR=&quot;vi&quot;  kubectl edit svc nginx-service
+ 
+同时， 如果是mac系统做了修改， 还是无法直接用容器ip:32632这个来访问， 但是可以通过mac的主机:32632来进行访问， 感觉这个是mac系统问题， 在docker里面的容器也是一样，直接用本机ip访问就OK。 如：
+
+http://localhost:32632  网上Linux就是可以  10.1.0.70:32632 直接访问到容器里面了。
+同时容器里面的也可以直接curl &lt;mac主机ip&gt;:32632可以访问外面。
+</code></pre>
+
+<h3 id="k8s架构图">K8S架构图</h3>
+
+<p>(转载地址：<a href="http://www.dockone.io/article/932">http://www.dockone.io/article/932</a>)</p>
+
+<p><img src="http://dockone.io/uploads/article/20151230/d56441427680948fb56a00af57bda690.png" alt="" /></p>
+
+<p><img src="http://dockone.io/uploads/article/20151230/5e2bad1a25e33e2d155da81da1d3a54b.gif" alt="" /></p>
+
+<h3 id="常用k8的常用命令">常用k8的常用命令</h3>
+
+<p>(转载地址：<a href="https://www.cnblogs.com/along21/p/10304362.html">https://www.cnblogs.com/along21/p/10304362.html</a>)</p>
+
+<h4 id="查看集群信息">查看集群信息</h4>
+
+<p>​      kubectl cluster-info</p>
+
+<h4 id="运行一个nginx的pod">运行一个nginx的pod</h4>
+
+<p>​      kubectl run nginx-deploy &ndash;image=nginx:1.14-alpine &ndash;port=80 &ndash;replicas=1</p>
+
+<h4 id="查看pod-service-deployment信息">查看pod,service,deployment信息</h4>
+
+<p>​      kubectl get pods/svc/deployment</p>
+
+<h4 id="删除">删除</h4>
+
+<p>​      kubectl delete ([-f FILENAME] | TYPE [(NAME | -l label | &ndash;all)])</p>
+
+<p>​      常用如：kubectl delete pods nginx-deploy-5b595999-6kw54</p>
+
+<h4 id="资源暴露为service">资源暴露为service</h4>
+
+<p>​      kubectl expose (-f FILENAME | TYPE NAME) [&ndash;port=port] [&ndash;protocol=TCP|UDP] [&ndash;target-port=number-or-name] [&ndash;name=name] [&ndash;external-ip=external-ip-of-service] [&ndash;type=type]</p>
+
+<p>​     常用如：kubectl expose deployment nginx-deploy &ndash;name=nginx &ndash;port=80 &ndash;target-port=80 &ndash;protocol=TCP</p>
+
+<p>​                &ndash;port：暴露在service上的端口
+​                &ndash;target-port：容器中的端口</p>
+
+<h4 id="scale动态扩容-缩容">scale动态扩容/缩容</h4>
+
+<p>​     扩容或缩容 Deployment、ReplicaSet、Replication Controller或 Job 中Pod数量</p>
+
+<p>​    kubectl scale [&ndash;resource-version=version] [&ndash;current-replicas=count] &ndash;replicas=COUNT (-f FILENAME | TYPE NAME)</p>
+
+<p>​    常用如：kubectl scale &ndash;replicas=5 deployment myapp</p>
+
+<h4 id="set动态升级版本-配置应用资源">set动态升级版本，配置应用资源</h4>
+
+<p>​     配置应用资源。</p>
+
+<p>​     set：使用这些命令能帮你更改现有应用资源一些信息。子命令：image、resources、selector、subject）set image</p>
+
+<p>​     set image：更新现有的资源对象的容器镜像。可使用资源对象包括（不区分大小写）：pod (po)、replicationcontroller (rc)、deployment (deploy)、  daemonset (ds)、job、replicaset (rs)</p>
+
+<p>​     $ kubectl set image (-f FILENAME | TYPE NAME) CONTAINER_NAME_1=CONTAINER_IMAGE_1 &hellip; CONTAINER_NAME_N=CONTAINER_IMAGE_N</p>
+
+<p>​     版本升级：kubectl set image deployment myapp myapp=ikubernetes/myapp:v2</p>
+
+<h4 id="rollout-undo-回滚版本-暂停-恢复">rollout undo 回滚版本，暂停，恢复</h4>
+
+<p>​    （1）rollout</p>
+
+<p>​            对资源进行管理：可用资源包括：deployments、daemonsets，子命令：history（查看历史版本）、pause（暂停资源）、resume（恢复暂停资源）、status（查看资源状态）、undo（回滚版本）</p>
+
+<p>（2）rollout undo</p>
+
+<p>​           回滚pod到之前的版本。</p>
+
+<p>​       kubectl rollout undo (TYPE NAME | TYPE/NAME) [flags]</p>
+
+<p>​       回滚    kubectl rollout undo deployment myapp</p>
+
+<h4 id="edit编辑修改">edit编辑修改</h4>
+
+<p>​     使用默认编辑器，编辑服务器上定义的资源， KUBE_EDITOR指定编辑器打开</p>
+
+<p>​     $ kubectl edit (RESOURCE`<code>/NAME</code> `| -f FILENAME)，</p>
+
+<p>​     常用：  kubectl edit svc myapp</p>
+
+<h4 id="label标签">label标签</h4>
+
+<p>更新（增加、修改或删除）资源上的 label（标签）。</p>
+
+<p>kubectl label <a href="-f FILENAME | TYPE NAME">&ndash;overwrite</a> KEY_1=VAL_1 &hellip; KEY_N=VAL_N [&ndash;resource-version=version]</p>
+
+<p>运行一个标签为app=nginx的pod</p>
+
+<p>kubectl run nginx &ndash;image=nginx:1.14-alpine &ndash;replicas=1 &ndash;labels=&ldquo;app=nginx&rdquo;</p>
+
+<h4 id="标签选择器">标签选择器</h4>
+
+<p>等值关系：=，==，!=</p>
+
+<p>​    kubectl get pods -l release=stable &ndash;show-labels</p>
+
+<p>集合关系</p>
+
+<ul>
+<li>KEY in (VALUE1,VALUE2,&hellip;)：集合中存在此健</li>
+<li>KEY notin (VALUE1,VALUE2,&hellip;)：集合中不存在此健</li>
+<li>KEY：存在此健</li>
+<li>!KEY：不存在此健</li>
+</ul>
+
+<p>kubectl get pods -l &ldquo;release in (stable,beta,alpha)&rdquo;</p>
+
+<h3 id="kubernetes资源配置">kubernetes资源配置</h3>
+
+<p>(转载地址：<a href="https://www.cnblogs.com/along21/p/10313341.html">https://www.cnblogs.com/along21/p/10313341.html</a>)</p>
+
+<h4 id="主流资源的配置清单">主流资源的配置清单</h4>
+
+<pre><code class="language-yml">api server: group/version        #查询当前支持哪些api server: kubectil api-version
+kind: #资源类别
+metadata: #元数据
+      name: #名字
+      namespace: #命名空间
+      labels: #标签
+      annotation: #资源注解
+      selfLink: #每个资源的引用
+ spec: #期望的状态 ，期望资源应该用于什么特性
+ status: #当前状态，本字段由k8s集群维护，用户不需要自己处理
+ 
+ #使用  kubectil explain,可以查看每个资源如何配置
+ #如：  kubectil explain pod 
+ #还可以层级递进  kubectil explain pod.spec 
+</code></pre>
+
+<p>​</p>
+
+<h4 id="pod资源">pod资源</h4>
+
+<h5 id="pod格式和常用命令">pod格式和常用命令</h5>
+
+<pre><code class="language-yaml">apiVersion: v1
+kind: Pod
+metadata:
+  name: pod-demo
+  namespace: default
+  #labels: {app:myapp, tier:frontend} #映射可以写为{}形式;
+  labels: #也可以在下边分级写
+    app: myapp
+    tier: frontend
+  annotations: #资源注解
+    along.com/created-by: &quot;cluster admin&quot;
+spec:
+  containers:
+  - name: myapp #容器名称 
+    image: ikubernetes/myapp:v1 #镜像
+    ports: #从容器中公开的端口列表
+    - name: http #暴露这个端口的名称
+      containerPort: 80 #Pod中服务的端口号
+      #hostIP：暴露绑定在主机哪个IP上
+      #hostPort：暴露在主机的端口号
+    - name: https
+      containerPort: 443
+  - name: busybox ##容器名称
+    image: busybox:latest #镜像
+    imagePullPolicy: IfNotPresent #下载镜像规则，镜像时latest标签，默认是Always；否则默认IfNotPresen
+    #Always总是镜像，Never不下载镜像，IfNotPresent本地有则不下载，k8s就会从本地拉取镜像了
+    
+    #command:  执行命令， [&quot;/bin/sh&quot;,&quot;-c&quot;,&quot;sleep 3600&quot;]  #列表可以写为[]形式;   
+    command: #也可以在下边分级写,要加-
+    - &quot;/bin/sh&quot;
+    - &quot;-c&quot;
+    - &quot;sleep 3600&quot;
+  nodeSelector: #节点标签选择器
+    disktype: ssd
+ 
+ #查看现在pod的yaml格式   kubectl get pod nginx-dev-57b967f787-vdc54 -o yaml
+ #创建     kubectl create -f pod-demo.yaml
+ #查看pod信息  kubectl get pods -o wide
+ #查看详细信息  kubectl describe pods pod-demo
+ #删除基于yaml文件pod  kubectl delete -f pod-demo.yaml
+</code></pre>
+
+<h5 id="pod健康检测">pod健康检测</h5>
+
+<pre><code>1. pod健康检测分为存活性探测、 就绪型探测；这在生产环境几乎是必须配置的；
+</code></pre>
+
+<ol>
+<li>如果没有就绪型探测；pod一启动就会被分配用户流量；若pod中的服务像tomcat等，需要时间启动；就会导致有一定时间，用户访问不到服务；</li>
+<li>如果没有存活性探测：pod中服务一旦失败，没有检测，不会将容器重启关闭；也会导致用户访问服务失败</li>
+</ol>
+
+<ul>
+<li><strong>livenessProbe 存活性探测</strong>
+
+<ul>
+<li>exec：指定检测的命令</li>
+<li>failureThreshold：连续失败次数被认为失败，默认为3，最小值为1</li>
+<li>httpGet：指定要执行的http请求</li>
+<li>initialDelaySeconds：在容器启动多少秒后再检测</li>
+<li>periodSeconds：每隔多少秒探测一次；默认为10秒。最低限度值是1</li>
+<li>successThreshold：连续成功次数认为服务正常</li>
+<li>tcpSocket：定涉及TCP端口的操作</li>
+<li>timeoutSeconds:探测超时的秒数，默认为1秒</li>
+</ul></li>
+<li><strong>readinessProbe 就绪型探测</strong>（和livenessProbe 存活性探测选项一样）</li>
+</ul>
+
+<pre><code class="language-yaml">#pod健康检测选项
+# 在spec字段下、containers字段配置，可使用explain查看详细用法 一般配置有三个
+
+# kubectl explain pod.spec.containers.
+  # Always：总是重启（默认）
+  # OnFailure：只有容器状态为错误时，才重启
+  # Never：绝不重启
+
+</code></pre>
+
+<p>下面列子：</p>
+
+<p>当探测到/tmp/healthy文件不存在时，认为服务故障；容器在30秒后执行删除/tmp/healthy文件</p>
+
+<pre><code class="language-yaml">apiVersion: v1
+kind: Pod
+metadata:
+  name: liveness-exec-pod
+  namespace: default
+spec:
+  containers:
+  - name: liveness-exec-container
+    image: busybox:latest
+    imagePullPolicy: IfNotPresent
+    command: [&quot;/bin/sh&quot;,&quot;-c&quot;,&quot;touch /tmp/healthy; sleep 30; rm -f /tmp/healthy; sleep 3600&quot;]
+    livenessProbe:
+      exec:
+        command: [&quot;test&quot;,&quot;-e&quot;,&quot;/tmp/healthy&quot;]
+      initialDelaySeconds: 1  #在容器启动后1秒开始检测
+      periodSeconds: 3  #每隔3秒探测一次
+  restartPolicy: Always  #总是重启pod
+  
+  #个人理解    bash -c &quot;./atest hello world&quot;实际上和./atest hello world等价
+  #直接进入容器   kubectl exec -it nginx-dev-57b967f787-dr58z -- /bin/sh 
+  #通过  kubectl describe pods liveness-httpget-pod 命令可以查看详细信息，是否重启过。
+  
+  
+</code></pre>
+
+<h5 id="pod启动前-后钩子">pod启动前/后钩子</h5>
+
+<ul>
+<li>pod在启动前后都可以设置钩子hook；在spec.containers.lifecycle字段下设置；</li>
+<li>postStart：创建容器后立即调用PostStart操作；如果失败，根据重启策略终止；</li>
+<li>preStop：在容器终止之前立即调用PreStop操作，该容器在处理程序完成后终止</li>
+</ul>
+
+<p>语法</p>
+
+<p>​    $ kubectl explain pod.spec.containers.lifecycle</p>
+
+<ul>
+<li>postStart
+
+<ul>
+<li>exec：指定了要采取的命令；</li>
+<li>httpGet：指定要执行的http请求;</li>
+<li>tcpSocket：指定涉及TCP端口的操作</li>
+</ul></li>
+<li>preStop （和postStart命令一样）
+
+<br /></li>
+</ul>
+
+<pre><code class="language-yaml"># 启动容器前，先创建准备一个httpd服务的主页面文件/tmp/index.html
+apiVersion: v1
+kind: Pod
+metadata:
+  name: poststart-pod
+  namespace: default
+spec:
+  containers:
+  - name:  poststart-container
+    image: busybox:latest
+    imagePullPolicy: IfNotPresent
+    lifecycle:
+      postStart:
+        exec:
+          command: ['/bin/sh','-c','echo hello &gt; /tmp/index.html']
+    command: ['/bin/sh','-c','/bin/httpd -f -h /tmp']
+</code></pre>
+
+<h3 id="pod控制器详解">pod控制器详解</h3>
+
+<p>(转载地址：<a href="https://www.cnblogs.com/along21/p/10318478.html">https://www.cnblogs.com/along21/p/10318478.html</a>)</p>
+
+<h4 id="pod控制器有多种类型">pod控制器有多种类型</h4>
+
+<ul>
+<li>ReplicationController（RC）：RC保证了在所有时间内，都有特定数量的Pod副本正在运行，如果太多了，RC就杀死几个，如果太少了，RC会新建几个</li>
+<li><strong>ReplicaSet（RS）</strong>：代用户创建指定数量的pod副本数量，确保pod副本数量符合预期状态，并且支持滚动式自动扩容和缩容功能。</li>
+<li><strong>Deployment</strong>（重要）：工作在ReplicaSet之上，用于管理无状态应用，目前来说最好的控制器。支持滚动更新和回滚功能，还提供声明式配置。</li>
+<li><strong>DaemonSet</strong>：用于确保集群中的每一个节点只运行特定的pod副本，通常用于实现系统级后台任务。比如ELK服务</li>
+<li>Job：只要完成就立即退出，不需要重启或重建。</li>
+<li>CronJob：周期性任务控制，不需要持续后台运行</li>
+<li>StatefulSet：管理有状态应用</li>
+</ul>
+
+<p>我们一般用Deployment来管理ReplicaSet。</p>
+
+<h4 id="deployment">Deployment</h4>
+
+<h5 id="deployment定义资源清单">Deployment定义资源清单</h5>
+
+<pre><code class="language-yaml"> apiVersion： app/v1  #版本
+ kind： Deployment  #类型
+ metadata  #元数据
+ spec  #期望状态
+       #--------------replicaset 也有的选项---------------
+       minReadySeconds：应为新创建的pod准备好的最小秒数
+       replicas：副本数； 默认为1
+       selector：标签选择器
+       template：模板（必须的）
+           metadata：模板中的元数据
+           spec：模板中的期望状态
+       #--------------deployment 独有的选项---------------
+       strategy：更新策略；用于将现有pod替换为新pod的部署策略
+           Recreate：重新创建
+           RollingUpdate：滚动更新
+               maxSurge：可以在所需数量的pod之上安排的最大pod数；例如：5、10%
+               maxUnavailable：更新期间可用的最大pod数；
+       revisionHistoryLimit：要保留以允许回滚的旧ReplicaSet的数量，默认10
+       paused：表示部署已暂停，部署控制器不处理部署
+       progressDeadlineSeconds：在执行此操作之前部署的最长时间被认为是失败的
+ status  当前状态
+</code></pre>
+
+<pre><code class="language-yaml">apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: myapp-deploy
+  namespace: default
+spec:
+  replicas: 2 #副本数
+  selector:
+    matchLabels:
+      app: myapp
+      release: canary
+  template:
+    metadata:
+      labels:
+        app: myapp
+        release: canary
+    spec:
+      containers:
+      - name: myapp
+        image: ikubernetes/myapp:v1 #镜像
+        ports:
+        - name: http
+          containerPort: 80    
+   strategy:
+     rollingUpdate:
+        maxSurge: 1  #每次更新一个pod
+        maxUnavailable: 0  #最大不可用pod为0       
+</code></pre>
+
+<h5 id="deployment扩容-缩容-升级-回滚">deployment扩容/缩容/升级/回滚</h5>
+
+<pre><code class="language-yaml">-----扩容/缩容 
+#修改配置文件  
+vim deploy-damo.yaml
+#命令修改  
+kubectl apply -f deploy-damo.yaml 
+#可以查看pod扩容的一个数量过程 
+kubectl get pods -w  相当于tail -f 时刻监控 
+
+-----升级策略，可以在yaml文件中，设置每次升级一个pod
+#先更新一个pod，然后立即暂停，等版本运行没问题了，再继续发布
+kubectl set image deployment myapp-deploy myapp=ikubernetes/myapp:v3 &amp;&amp; kubectl rollout pause deployment myapp-deploy
+
+#中间可以一直监控过程
+kubectl rollout status deployment myapp-deploy
+
+#等版本运行没问题了，解除暂停，继续发布更新
+kubectl rollout resume deployment myapp-deploy
+
+------版本回滚
+
+#查询版本变更历史
+kubectl rollout history deployment myapp-deploy
+
+#undo回滚版本；--to-revision=  回滚到第几版本
+kubectl rollout undo deployment myapp-deploy --to-revision=1
+</code></pre>
+
+<h4 id="daemonset">DaemonSet</h4>
+
+<p>DaemonSet保证在每个Node上都运行一个容器副本，常用来部署一些集群的日志、监控或者其他系统管理应用。</p>
+
+<p>DaemonSet确保集群中每个（部分）node运行一份pod副本，当node加入集群时创建pod，当node离开集群时回收pod。如果删除DaemonSet，其创建的所有pod也被删除，DaemonSet中的pod覆盖整个集群。</p>
+
+<pre><code class="language-yaml"> apiVersion： app/v1  版本
+ kind： DaemonSet  类型
+ metadata  元数据
+ spec  期望状态
+       --------------replicaset 也有的选项---------------
+       minReadySeconds：应为新创建的pod准备好的最小秒数
+       selector：标签选择器
+       template：模板（必须的）
+             metadata：模板中的元数据
+             spec：模板中的期望状态
+       --------------daemonset 独有的选项---------------
+       revisionHistoryLimit：要保留以允许回滚的旧ReplicaSet的数量，默认10
+       updateStrategy：用新pod替换现有DaemonSet pod的更新策略
+ status  当前状态
+</code></pre>
+
+<p>创建并创建一个简单的DaemonSet，启动pod，只后台运行filebeat手机日志服务</p>
+
+<pre><code class="language-yaml">apiVersion: apps/v1
+kind: DaemonSet
+metadata:
+  name: filebeat-ds
+  namespace: default
+spec:
+  selector:
+    matchLabels:
+      app: filebeat
+      release: stable
+  template:
+    metadata:
+      labels:
+        app: filebeat
+        release: stable
+    spec:
+      containers:
+      - name: filebeat
+        image: ikubernetes/filebeat:5.6.5-alpine
+        env: # 通过配置文件的env或者envFrom 字段来设置环境变量，进入容器可以获取这个值
+        - name: REDIS_HOST
+          value: redis.default.svc.cluster.local
+        - name: REDIS_LOG_LEVEL
+          value: info
+</code></pre>
+
+<p>scheduler调度来使用这种pod，然后一些数据放到数据卷中处理，有这样的场景。</p>
+
+<h4 id="statefulset">StatefulSet</h4>
+
+<p>StatefulSet是为了解决有状态的问题（对应Deployments和ReplicaSets是为无状态服务而设计），其应用场景包括</p>
+
+<ul>
+<li>稳定的持久化存储，即Pod重新调度后还是能访问到相同的持久化数据，基于PVC来实现</li>
+<li>稳定的网络标志，即Pod重新调度后其PodName和HostName不变，基于Headless Service（即没有Cluster IP的Service）来实现</li>
+<li>有序部署，有序扩展，即Pod是有顺序的，在部署或者扩展的时候要依据定义的顺序依次依次进行（即从0到N-1，在下一个Pod运行之前所有之前的Pod必须都是Running和Ready状态），基于init containers来实现</li>
+<li>有序收缩，有序删除（即从N-1到0）</li>
+</ul>
+
+<p>三个必要组件</p>
+
+<p>从上面的应用场景可以发现，StatefulSet由以下几个部分组成：</p>
+
+<ul>
+<li>用于定义网络标志（DNS domain）的 <strong>Headless Service</strong>（无头服务）</li>
+<li>定义具体应用的<strong>StatefulSet控制器</strong></li>
+<li>用于创建PersistentVolumes 的 <strong>volumeClaimTemplates存储卷模板</strong></li>
+</ul>
+
+<h3 id="service">service</h3>
+
+<p>(转载地址：<a href="https://www.cnblogs.com/along21/p/10333086.html">https://www.cnblogs.com/along21/p/10333086.html</a>)</p>
+
+<pre><code class="language-yaml"> apiVersion： v1  版本
+ kind： Service  类型
+ metadata  元数据
+ spec  期望状态
+     ports：服务公开的端口列表；把哪个端口和后端建立联系
+         port：此服务将公开的端口
+         targetPort：要在服务所针对的pod上访问的端口的编号或名称
+         nodePort：K8S 集群节点上的端口
+     #selector：标签选择器；关联到哪些pod资源上
+     #clusterIP：服务的IP地址，通常由主服务器随机分配，如果设置None，就是无头service
+     type：确定服务的公开方式。 默认为ClusterIP
+          #ClusterIP（默认） 仅用于集群内通信，集群内部可达，可以被各pod访问，节点本身可访问
+          #NodePort  构建在ClusterIP上，并在路由到clusterIP的每个节点上分配一个端口；
+          client ---&gt; NodeIP:NodePort ---&gt; ClusterIP:ServicePort ---&gt; PodIP:containePort 
+          #LoadBalancer 
+          构建在NodePort上，并创建一个外部负载均衡器（如果在当前云中受支持），它将路由到clusterIP；
+          #ExternelName
+          通过CNAME将service与externalName的值(比如：foo.bar.example.com)映射起来. 
+          要求kube-dns的版本为1.7或以上.
+     sessionAffinity：service 负载均衡，默认值是None，根据iptables规则随机调度；
+                      可使用sessionAffinity保持会话连线；
+                      (如果设置为ClientIP，请求就只发往一个pod中，而不是随机)
+  status  当前状态
+  
+  
+  
+  # 开发人员不使用默认的负载均衡策略，自定义负载均衡;或者希望知道同组服务的其他实例。 
+  # 方法：创建无头服务，不为service设置clusterIP，
+  
+  
+  
+</code></pre>
+
+<h3 id="ingress">Ingress</h3>
+
+<p>(转载地址<a href="https://www.cnblogs.com/along21/p/10333086.html">https://www.cnblogs.com/along21/p/10333086.html</a>)</p>
+
+<p>Ingress是授权入站连接到达集群服务的规则集合。</p>
+
+<pre><code class="language-yaml">  internet
+      |
+------------
+[ Services ]
+
+
+ apiVersion： v1  版本
+ kind： Ingress  类型
+ metadata  元数据
+ spec  期望状态
+       backend： 默认后端，能够处理与任何规则不匹配的请求
+       rules：用于配置Ingress的主机规则列表
+       tls：目前Ingress仅支持单个TLS端口443
+ status  当前状态
+</code></pre>
+
+<p>创建ingress，绑定后端nginx服务</p>
+
+<pre><code class="language-yaml">apiVersion: extensions/v1beta1
+kind: Ingress
+metadata:
+  name: ingress-myapp
+  namespace: default
+spec:
+  rules:
+  - host: myapp.along.com
+    secretName: tomcat-ingress-secret #https 访问业务
+    http:
+      paths:
+      - path:
+        backend:
+          serviceName: myapp #nginx镜像的service 
+          servicePort: 80
+</code></pre>
+
+<h4 id="https协议访问服务">https协议访问服务</h4>
+
+<pre><code class="language-yaml">#创建私钥  
+openssl genrsa -out tls.key 2048
+#创建证书  
+ openssl req -new -x509 -key tls.key -out tls.crt -subj /C=CN/ST=Beijing/L=Beijing/O=DevOps/CN=tomcat.along.com
+#创建secret
+ kubectl create secret tls tomcat-ingress-secret --cert=tls.crt --key=tls.key
+ 
+
+</code></pre>
+
+<h3 id="存储劵详解">存储劵详解</h3>
+
+<p>(转载地址：<a href="https://www.cnblogs.com/along21/p/10338242.html">https://www.cnblogs.com/along21/p/10338242.html</a>)</p>
+
+<p>从另外一个方面讲，<strong>Kubernetes volume，拥有明确的生命周期</strong>，与所在的Pod的生命周期相同。因此，Kubernetes volume独立与任何容器，与Pod相关，所以数据在重启的过程中还会保留，当然，如果这个Pod被删除了，那么这些数据也会被删除。更重要的是，<strong>Kubernetes volume 支持多种类型，任何容器都可以使用多个Kubernetes volume</strong>。</p>
+
+<p>它的核心，<strong>一个 volume 就是一个目录，可能包含一些数据，这些数据对pod中的所有容器都是可用的，这个目录怎么使用，什么类型，由什么组成都是由特殊的volume 类型决定的。</strong></p>
+
+<p>要使用Volume，pod需要指定Volume的类型和内容（<strong>spec.volumes字段</strong>），和映射到容器的位置（<strong>spec.containers.volumeMounts字段</strong>）。</p>
+
+<h4 id="存储卷常用类型">存储卷常用类型</h4>
+
+<pre><code class="language-yaml">#非持久性存储#
+
+#emptyDir
+使用emptyDir，当Pod分配到Node上时，将会创建emptyDir，并且只要Node上的Pod一直运行，Volume就会一直存。当Pod（不管任何原因）从Node上被删除时，emptyDir也同时会删除，存储的数据也将永久删除。常用于作为临时目录、或缓存使用。
+#hostPath
+hostPath允许挂载Node（宿主机）上的文件系统到Pod里面去。如果Pod需要使用Node上的文件，可以使用hostPath。
+
+#网络连接性存储#
+
+#NFS存储卷
+NFS 是Network File System的缩写，即网络文件系统。Kubernetes中通过简单地配置就可以挂载NFS到Pod中，而NFS中的数据是可以永久保存的，同时NFS支持同时写操作。Pod被删除时，Volume被卸载，内容被保留。这就意味着NFS能够允许我们提前对数据进行处理，而且这些数据可以在Pod之间相互传递.
+　　
+</code></pre>
+
+
+                
+                
+<div class="entry-shang text-center">
+    
+	    <p>「真诚赞赏，手留余香」</p>
+	
+	<button class="zs show-zs btn btn-bred">赞赏支持</button>
+</div>
+<div class="zs-modal-bg"></div>
+<div class="zs-modal-box">
+	<div class="zs-modal-head">
+		<button type="button" class="close">×</button>
+		<span class="author"><a href="http://maizitoday.github.io/"><img src="/img/favicon.png" /></a></span>
+        
+	        <p class="tip"><i></i><span>真诚赞赏，手留余香</span></p>
+		
+ 
+	</div>
+	<div class="zs-modal-body">
+		<div class="zs-modal-btns">
+			<button class="btn btn-blink" data-num="2">2元</button>
+			<button class="btn btn-blink" data-num="5">5元</button>
+			<button class="btn btn-blink" data-num="10">10元</button>
+			<button class="btn btn-blink" data-num="50">50元</button>
+			<button class="btn btn-blink" data-num="100">100元</button>
+			<button class="btn btn-blink" data-num="1">任意金额</button>
+		</div>
+		<div class="zs-modal-pay">
+			<button class="btn btn-bred" id="pay-text">2元</button>
+			<p>使用<span id="pay-type">微信</span>扫描二维码完成支付</p>
+			<img src="/img/reward/wechat-2.png"  id="pay-image"/>
+		</div>
+	</div>
+	<div class="zs-modal-footer">
+		<label><input type="radio" name="zs-type" value="wechat" class="zs-type" checked="checked"><span ><span class="zs-wechat"><img src="/img/reward/wechat-btn.png"/></span></label>
+		<label><input type="radio" name="zs-type" value="alipay" class="zs-type" class="zs-alipay"><img src="/img/reward/alipay-btn.png"/></span></label>
+	</div>
+</div>
+<script type="text/javascript" src="/js/reward.js"></script>
+
+                
+
+                <hr>
+                <ul class="pager">
+                    
+                    <li class="previous">
+                        <a href="/post/nginx/" data-toggle="tooltip" data-placement="top" title="nginx系列一基础认识">&larr;
+                            Previous Post</a>
+                    </li>
+                    
+                    
+                    <li class="next">
+                        <a href="/post/mycat%E5%85%A5%E9%97%A8/" data-toggle="tooltip" data-placement="top" title="mycat入门">Next
+                            Post &rarr;</a>
+                    </li>
+                    
+                </ul>
+
+                
+<div id="disqus-comment"></div>
+
+
+
+            </div>
+            
+            <div class="
+                col-lg-8 col-lg-offset-2
+                col-md-10 col-md-offset-1
+                sidebar-container">
+
+                
+                
+                <section>
+                    <hr class="hidden-sm hidden-xs">
+                    <h5><a href="/tags/">FEATURED TAGS</a></h5>
+                    <div class="tags">
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        <a href="/tags/docker" title="docker">
+                            docker
+                        </a>
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        <a href="/tags/linux" title="linux">
+                            linux
+                        </a>
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        <a href="/tags/%E4%B8%AD%E9%97%B4%E4%BB%B6" title="中间件">
+                            中间件
+                        </a>
+                        
+                        
+                        
+                        <a href="/tags/%E4%B8%BB%E4%BB%8E%E5%A4%8D%E5%88%B6" title="主从复制">
+                            主从复制
+                        </a>
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                    </div>
+                </section>
+                
+
+                
+                
+                <section>
+                    <hr>
+                    <h5>FRIENDS</h5>
+                    <ul class="list-inline">
+                        
+                        <li><a target="_blank" href="https://maizitoday.github.io">麦子的博客</a></li>
+                        
+                    </ul>
+                </section>
+                
+            </div>
+        </div>
+    </div>
+</article>
+
+
+
+
+<footer>
+    <div class="container">
+        <div class="row">
+            <div class="col-lg-8 col-lg-offset-2 col-md-10 col-md-offset-1">
+                <ul class="list-inline text-center">
+                   
+                   <li>
+                       <a href="" rel="alternate" type="application/rss+xml" title="" >
+                           <span class="fa-stack fa-lg">
+                               <i class="fa fa-circle fa-stack-2x"></i>
+                               <i class="fa fa-rss fa-stack-1x fa-inverse"></i>
+                           </span>
+                       </a>
+                   </li>
+                   
+                    
+                    <li>
+                        <a href="mailto:maiziybtoday@gmail.com">
+                            <span class="fa-stack fa-lg">
+                                <i class="fa fa-circle fa-stack-2x"></i>
+                                <i class="fa fa-envelope fa-stack-1x fa-inverse"></i>
+                            </span>
+                        </a>
+                    </li>
+		    
+                    
+                    
+                    
+                    
+
+                    
+
+		    
+                    
+                    <li>
+                        <a target="_blank" href="/your%20wechat%20qr%20code%20image">
+                            <span class="fa-stack fa-lg">
+                                <i class="fa fa-circle fa-stack-2x"></i>
+                                <i class="fa fa-wechat fa-stack-1x fa-inverse"></i>
+                            </span>
+                        </a>
+                    </li>
+		    
+                    
+                    <li>
+                        <a target="_blank" href="https://github.com/yourgithub">
+                            <span class="fa-stack fa-lg">
+                                <i class="fa fa-circle fa-stack-2x"></i>
+                                <i class="fa fa-github fa-stack-1x fa-inverse"></i>
+                            </span>
+                        </a>
+                    </li>
+		    
+                    
+                    <li>
+                        <a target="_blank" href="https://www.linkedin.com/in/yourlinkedinid">
+                            <span class="fa-stack fa-lg">
+                                <i class="fa fa-circle fa-stack-2x"></i>
+                                <i class="fa fa-linkedin fa-stack-1x fa-inverse"></i>
+                            </span>
+                        </a>
+                    </li>
+		    
+                    
+                </ul>
+		<p class="copyright text-muted">
+                    Copyright &copy;  2019
+                    <br>
+                    <a href="https://themes.gohugo.io/hugo-theme-cleanwhite">CleanWhite Hugo Theme</a> by <a href="https://zhaohuabing.com">Huabing</a> |
+                    <iframe
+                        style="margin-left: 2px; margin-bottom:-5px;"
+                        frameborder="0" scrolling="0" width="100px" height="20px"
+                        src="https://ghbtns.com/github-btn.html?user=zhaohuabing&repo=hugo-theme-cleanwhite&type=star&count=true" >
+                    </iframe>
+                </p>
+            </div>
+        </div>
+    </div>
+</footer>
+
+
+
+
+<script>
+    function async(u, c) {
+      var d = document, t = 'script',
+          o = d.createElement(t),
+          s = d.getElementsByTagName(t)[0];
+      o.src = u;
+      if (c) { o.addEventListener('load', function (e) { c(null, e); }, false); }
+      s.parentNode.insertBefore(o, s);
+    }
+</script>
+
+
+
+
+
+
+<script>
+    
+    if($('#tag_cloud').length !== 0){
+        async("/js/jquery.tagcloud.js",function(){
+            $.fn.tagcloud.defaults = {
+                
+                color: {start: '#bbbbee', end: '#0085a1'},
+            };
+            $('#tag_cloud a').tagcloud();
+        })
+    }
+</script>
+
+
+<script>
+    async("https://cdnjs.cloudflare.com/ajax/libs/fastclick/1.0.6/fastclick.js", function(){
+        var $nav = document.querySelector("nav");
+        if($nav) FastClick.attach($nav);
+    })
+</script>
+
+
+
+
+
+
+</body>
+</html>

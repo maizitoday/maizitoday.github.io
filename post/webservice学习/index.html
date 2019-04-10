@@ -1,0 +1,741 @@
+<!DOCTYPE html>
+<html lang="en-us">
+<head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+
+    
+    <meta property="og:site_name" content="">
+    <meta property="og:type" content="article">
+
+    
+    <meta property="og:image" content="http://maizitoday.github.io//img/home-bg-jeep.jpg">
+    <meta property="twitter:image" content="http://maizitoday.github.io//img/home-bg-jeep.jpg" />
+    
+
+    
+    <meta name="title" content="webservice-wsdl理解" />
+    <meta property="og:title" content="webservice-wsdl理解" />
+    <meta property="twitter:title" content="webservice-wsdl理解" />
+    
+
+    
+    <meta name="description" content="麦子，程序员, 开源爱好者，生活探险家 | 这里是 麦子 的博客，与你一起发现更大的世界。">
+    <meta property="og:description" content="麦子，程序员, 开源爱好者，生活探险家 | 这里是 麦子 的博客，与你一起发现更大的世界。" />
+    <meta property="twitter:description" content="麦子，程序员, 开源爱好者，生活探险家 | 这里是 麦子 的博客，与你一起发现更大的世界。" />
+    
+
+    
+    <meta property="twitter:card" content="summary" />
+    
+    
+
+    <meta name="keyword"  content="麦子, maizi, maizi, , 麦子的网络日志, 麦子的博客, maizi Blog, 博客, 个人网站, 互联网, Web, 云原生, PaaS, Istio, Kubernetes, 微服务, Microservice">
+    <link rel="shortcut icon" href="/img/favicon.ico">
+
+    <title>webservice-wsdl理解-麦子的博客 | 麦子 Blog</title>
+
+    <link rel="canonical" href="/post/webservice%E5%AD%A6%E4%B9%A0/">
+
+    <link rel="stylesheet" href="/css/iDisqus.min.css"/>
+	
+    
+    <link rel="stylesheet" href="/css/bootstrap.min.css">
+
+    
+    <link rel="stylesheet" href="/css/hux-blog.min.css">
+
+    
+    <link rel="stylesheet" href="/css/syntax.css">
+
+    
+    <link rel="stylesheet" href="/css/zanshang.css">
+
+    
+    <link href="//cdnjs.cloudflare.com/ajax/libs/font-awesome/4.6.3/css/font-awesome.min.css" rel="stylesheet" type="text/css">
+    
+    
+    <script src="/js/jquery.min.js"></script>
+    
+    
+    <script src="/js/bootstrap.min.js"></script>
+    
+    
+    <script src="/js/hux-blog.min.js"></script>
+	
+    
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.13.1/styles/docco.min.css">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.13.1/highlight.min.js"></script>
+    <script>hljs.initHighlightingOnLoad();</script>
+</head>
+
+
+<nav class="navbar navbar-default navbar-custom navbar-fixed-top">
+    <div class="container-fluid">
+        
+        <div class="navbar-header page-scroll">
+            <button type="button" class="navbar-toggle">
+                <span class="sr-only">Toggle navigation</span>
+                <span class="icon-bar"></span>
+                <span class="icon-bar"></span>
+                <span class="icon-bar"></span>
+            </button>
+            <a class="navbar-brand" href="/"></a>
+        </div>
+
+        
+        
+        <div id="huxblog_navbar">
+            <div class="navbar-collapse">
+                <ul class="nav navbar-nav navbar-right">
+                    <li>
+                        <a href="/">Home</a>
+                    </li>
+                    
+                    <li>
+                        <a href="/categories/tech">Tech</a>
+                    </li>
+                    
+                    
+		    
+                        <li><a href="/top/books/">BOOKS</a></li>
+                    
+                        <li><a href="/top/about/">ABOUT</a></li>
+                    
+
+                    
+		    <li>
+                        <a href="/search">SEARCH <img src="/img/search.png" height="15" style="cursor: pointer;" alt="Search"></a>
+		    </li>
+                    
+                </ul>
+            </div>
+        </div>
+        
+    </div>
+    
+</nav>
+<script>
+    
+    
+    
+    var $body   = document.body;
+    var $toggle = document.querySelector('.navbar-toggle');
+    var $navbar = document.querySelector('#huxblog_navbar');
+    var $collapse = document.querySelector('.navbar-collapse');
+
+    $toggle.addEventListener('click', handleMagic)
+    function handleMagic(e){
+        if ($navbar.className.indexOf('in') > 0) {
+        
+            $navbar.className = " ";
+            
+            setTimeout(function(){
+                
+                if($navbar.className.indexOf('in') < 0) {
+                    $collapse.style.height = "0px"
+                }
+            },400)
+        }else{
+        
+            $collapse.style.height = "auto"
+            $navbar.className += " in";
+        }
+    }
+</script>
+
+
+
+
+<style type="text/css">
+    header.intro-header {
+        background-image: url('/img/home-bg-jeep.jpg')
+    }
+</style>
+<header class="intro-header">
+    <div class="container">
+        <div class="row">
+            <div class="col-lg-8 col-lg-offset-2 col-md-10 col-md-offset-1">
+                <div class="post-heading">
+                    <div class="tags">
+                        
+                        <a class="tag" href="/tags/rpc" title="RPC">
+                            RPC
+                        </a>
+                        
+                        <a class="tag" href="/tags/wsdl" title="wsdl">
+                            wsdl
+                        </a>
+                        
+                    </div>
+                    <h1>webservice-wsdl理解</h1>
+                    <h2 class="subheading"></h2>
+                    <span class="meta">
+			Posted by 
+			
+			         &#34;麦子&#34;
+			 
+			on 
+			Tuesday, April 2, 2019
+                        
+                    </span>
+                </div>
+            </div>
+        </div>
+    </div>
+</header>
+
+
+
+
+<article>
+    <div class="container">
+        <div class="row">
+
+            
+            <div class="
+                col-lg-8 col-lg-offset-2
+                col-md-10 col-md-offset-1
+                post-container">
+
+                
+                <header>
+                    <h2>TOC</h2>
+                </header>
+                <nav id="TableOfContents">
+<ul>
+<li>
+<ul>
+<li>
+<ul>
+<li>
+<ul>
+<li><a href="#wsdl是什么">wsdl是什么</a></li>
+<li><a href="#wsdl的结构图文档理解">wsdl的结构图文档理解</a></li>
+<li><a href="#一个webservice的请求流程">一个webService的请求流程</a></li>
+</ul></li>
+</ul></li>
+</ul></li>
+</ul>
+</nav>
+                
+                
+
+<h4 id="wsdl是什么">wsdl是什么</h4>
+
+<p>webservice定义语言， 对应.wsdl文档，一个webService会对应一个唯一的wsdl文档，定义了客户端与服务端发送请求和响应的数据格式和过程。</p>
+
+<h4 id="wsdl的结构图文档理解">wsdl的结构图文档理解</h4>
+
+<p>转载地址：  <a href="https://lixh1986.iteye.com/blog/2426291">https://lixh1986.iteye.com/blog/2426291</a></p>
+
+<p>元素binding显示出，暴露的访问接口方法。</p>
+
+<pre><code class="language-xml">&lt;?xml version=&quot;1.0&quot; encoding=&quot;UTF8&quot; ?&gt;  
+  
+&lt;wsdl:definitions targetNamespace=&quot;http://www.57market.com.cn/HelloService&quot;   
+    xmlns:soapenc12=&quot;http://www.w3.org/2003/05/soapencoding&quot;   
+    xmlns:tns=&quot;http://www.57market.com.cn/HelloService&quot;   
+    xmlns:wsdl=&quot;http://schemas.xmlsoap.org/wsdl/&quot;   
+    xmlns:xsd=&quot;http://www.w3.org/2001/XMLSchema&quot;   
+    xmlns:soap11=&quot;http://schemas.xmlsoap.org/soap/envelope/&quot;   
+    xmlns:wsdlsoap=&quot;http://schemas.xmlsoap.org/wsdl/soap/&quot;   
+    xmlns:soapenc11=&quot;http://schemas.xmlsoap.org/soap/encoding/&quot;   
+    xmlns:soap12=&quot;http://www.w3.org/2003/05/soapenvelope&quot;&gt;  
+  
+  
+/**  
+ * types元素,定义了交换信息的数据格式。  
+ * 为了实现最大的互操作性（interoperability）和平台中立性（neutrality），  
+ * WSDL选用XML Schema DataTypes简称XSD作为标准类型系统，并将它作为固有类型系统。  
+ *  
+ * 下面是数据定义部分，该部分定义了两个元素，一个是sayHello，一个是sayHelloResponse：  
+ * sayHello：定义了一个复杂类型，仅仅包含一个简单的字符串，将来用来描述操作的参入传入部分；  
+ * sayHelloResponse：定义了一个复杂类型，仅仅包含一个简单的字符串，将来用来描述操作的返回值；  
+ */  
+  
+  
+&lt;wsdl:types&gt;  
+  
+    &lt;xsd:schema xmlns:xsd=&quot;http://www.w3.org/2001/XMLSchema&quot;   
+                attributeFormDefault=&quot;qualified&quot;   
+                elementFormDefault=&quot;qualified&quot;   
+                targetNamespace=&quot;http://www.57market.com.cn/HelloService&quot;&gt;  
+                  
+  
+        &lt;xsd:element name=&quot;sayHello&quot;&gt;  
+            &lt;xsd:complexType&gt;  
+                &lt;xsd:sequence&gt;  
+                    &lt;xsd:element maxOccurs=&quot;1&quot; minOccurs=&quot;1&quot; name=&quot;in0&quot; nillable=&quot;true&quot; type=&quot;xsd:string&quot; /&gt;  
+                &lt;/xsd:sequence&gt;  
+            &lt;/xsd:complexType&gt;  
+        &lt;/xsd:element&gt;  
+  
+  
+        &lt;xsd:element name=&quot;sayHelloResponse&quot;&gt;  
+            &lt;xsd:complexType&gt;  
+                &lt;xsd:sequence&gt;  
+                    &lt;xsd:element maxOccurs=&quot;1&quot; minOccurs=&quot;1&quot; name=&quot;out&quot; nillable=&quot;true&quot; type=&quot;xsd:string&quot; /&gt;  
+                &lt;/xsd:sequence&gt;  
+            &lt;/xsd:complexType&gt;  
+        &lt;/xsd:element&gt;  
+  
+   
+    &lt;/xsd:schema&gt;  
+  &lt;/wsdl:types&gt;  
+  
+   
+  
+/**  
+ * message元素是交换信息的抽象定义。  
+ * 需要分别定义用于作为输入参数的消息和输出参数的消息。  
+ *  
+ * 定义了两个消息 sayHelloRequest 和 sayHelloResponse：  
+ * sayHelloRequest：sayHello操作的请求消息格式。由一个消息片断（part）组成。  
+ * 片段的名字为 parameters, 片段的元素是我们前面定义的types中的元素；  
+ * sayHelloResponse：sayHello操作的响应消息格式。由一个消息片断（part）组成。  
+ * 片段的名字为 parameters, 片段的元素是我们前面定义的types中的元素；  
+ *  
+ * 如果采用RPC样式的消息传递，只需要将文档中的element元素应以修改为type即可。  
+ *  
+ * - message：用來定義消息的結構  
+ * - part：指定引用types中定義的標籤片斷  
+ *  
+ */  
+  
+&lt;wsdl:message name=&quot;sayHelloRequest&quot;&gt;  
+     &lt;wsdl:part name=&quot;parameters&quot; element=&quot;tns:sayHello&quot; /&gt;  
+&lt;/wsdl:message&gt;  
+  
+&lt;wsdl:message name=&quot;sayHelloResponse&quot;&gt;  
+     &lt;wsdl:part name=&quot;parameters&quot; element=&quot;tns:sayHelloResponse&quot; /&gt;  
+&lt;/wsdl:message&gt;  
+  
+   
+  
+/**  
+  
+ * portType元素中定义了Web服务的操作。一些抽象操作的集合。  
+ * 操作定义了输入和输出数据流中可以出现的XML消息。  
+ * 每个操作关联一个输入消息和一个输出消息。  
+  
+ * 这里包含一个操作（operation）：sayHello方法，  
+ * 同时包含input和output表明该操作是一个 请求／响应模式，  
+ *   
+ * input请求的消息体是前面定义的 sayHelloRequest。  
+ * output响应的消息体是前面定义的 sayHelloResponse。  
+  
+ *  - portType：用來定義服務端的SEI  
+ *  - operation：用來指定SEI中的處理請求的方法  
+ *  - input：指定客戶端應用傳過來的數據，會引用上面的而定義的message  
+ *  - output:指定服務端返回給客戶端的數據，會引用上面的而定義的message  
+ */  
+  
+&lt;wsdl:portType name=&quot;HelloServicePortType&quot;&gt;  
+  
+    &lt;wsdl:operation name=&quot;sayHello&quot;&gt;  
+        &lt;wsdl:input name=&quot;sayHelloRequest&quot; message=&quot;tns:sayHelloRequest&quot; /&gt;  
+        &lt;wsdl:output name=&quot;sayHelloResponse&quot; message=&quot;tns:sayHelloResponse&quot; /&gt;  
+    &lt;/wsdl:operation&gt;  
+  
+&lt;/wsdl:portType&gt;  
+  
+   
+  
+/**  
+ * binding 元素描述特定服务接口的协议、数据格式、安全性和其它属性。  
+ * 针对operation和portType中使用的message指定实际的协议和数据格式规范。  
+ *  
+ * binding:用于定义SEI的实现类  
+ *  - type：引用上面的 portType  
+ *  - style：document 绑定的数据是一个document（XML）  
+ *  - operation：用来定义实现的方法  
+ *  - input: 指定客户端应传过来的数据  
+ *  - output：指定服务器端返回客户端的数据  
+ *  - literal：文本数据  
+ */  
+  
+&lt;wsdl:binding name=&quot;HelloServiceHttpBinding&quot; type=&quot;tns:HelloServicePortType&quot;&gt;  
+  
+        &lt;wsdlsoap:binding style=&quot;document&quot; transport=&quot;http://schemas.xmlsoap.org/soap/http&quot;/&gt;  
+  
+        &lt;wsdl:operation name=&quot;sayHello&quot;&gt;  
+            &lt;wsdlsoap:operation soapAction=&quot;&quot; /&gt;  
+            &lt;wsdl:input name=&quot;sayHelloRequest&quot;&gt;  
+                &lt;wsdlsoap:body use=&quot;literal&quot; /&gt;  
+            &lt;/wsdl:input&gt;  
+            &lt;wsdl:output name=&quot;sayHelloResponse&quot;&gt;  
+                &lt;wsdlsoap:body use=&quot;literal&quot; /&gt;  
+            &lt;/wsdl:output&gt;  
+        &lt;/wsdl:operation&gt;  
+  
+&lt;/wsdl:binding&gt;  
+  
+   
+ 
+/**  
+ * service元素包含一组port元素。  
+ *  
+ * port将端点与来自服务接口定义的 binding 元素关联起来。  
+ * port指定一个绑定的地址，这样定义一个通信的终端。  
+ *  
+ * - service：一個webservice的容器  
+ * - name：它用以指定一個服務器端處理請求的入口（就是SEI的實現）  
+ * - binding：引用上面定义的 binding  
+ * - address:当前 webservice 的请求地址  
+ *  
+ */  
+  
+&lt;wsdl:service name=&quot;HelloService&quot;&gt;  
+  
+    &lt;wsdl:port name=&quot;HelloServiceHttpPort&quot; binding=&quot;tns:HelloServiceHttpBinding&quot;&gt;  
+        &lt;soap:address location=&quot;http://localhost:8080/xfire/services/HelloService&quot; /&gt;  
+    &lt;/wsdl:port&gt;  
+  
+&lt;/wsdl:service&gt;  
+  
+   
+  
+  
+&lt;/wsdl:definitions&gt;  
+
+</code></pre>
+
+<h4 id="一个webservice的请求流程">一个webService的请求流程</h4>
+
+<p>如何发布一个webService:</p>
+
+<ol>
+<li>定义SEI    @webservice  @webMethod</li>
+<li>定义SEI实现</li>
+<li>发布： Endpoint.publish(url,SELimplObject)</li>
+</ol>
+
+<p>如何请求一个webService:</p>
+
+<ol>
+<li>根据wsdl文档生成客户端代码.  jdk/cxf</li>
+<li>根据生成的代码调用webService</li>
+</ol>
+
+
+                
+                
+<div class="entry-shang text-center">
+    
+	    <p>「真诚赞赏，手留余香」</p>
+	
+	<button class="zs show-zs btn btn-bred">赞赏支持</button>
+</div>
+<div class="zs-modal-bg"></div>
+<div class="zs-modal-box">
+	<div class="zs-modal-head">
+		<button type="button" class="close">×</button>
+		<span class="author"><a href="http://maizitoday.github.io/"><img src="/img/favicon.png" /></a></span>
+        
+	        <p class="tip"><i></i><span>真诚赞赏，手留余香</span></p>
+		
+ 
+	</div>
+	<div class="zs-modal-body">
+		<div class="zs-modal-btns">
+			<button class="btn btn-blink" data-num="2">2元</button>
+			<button class="btn btn-blink" data-num="5">5元</button>
+			<button class="btn btn-blink" data-num="10">10元</button>
+			<button class="btn btn-blink" data-num="50">50元</button>
+			<button class="btn btn-blink" data-num="100">100元</button>
+			<button class="btn btn-blink" data-num="1">任意金额</button>
+		</div>
+		<div class="zs-modal-pay">
+			<button class="btn btn-bred" id="pay-text">2元</button>
+			<p>使用<span id="pay-type">微信</span>扫描二维码完成支付</p>
+			<img src="/img/reward/wechat-2.png"  id="pay-image"/>
+		</div>
+	</div>
+	<div class="zs-modal-footer">
+		<label><input type="radio" name="zs-type" value="wechat" class="zs-type" checked="checked"><span ><span class="zs-wechat"><img src="/img/reward/wechat-btn.png"/></span></label>
+		<label><input type="radio" name="zs-type" value="alipay" class="zs-type" class="zs-alipay"><img src="/img/reward/alipay-btn.png"/></span></label>
+	</div>
+</div>
+<script type="text/javascript" src="/js/reward.js"></script>
+
+                
+
+                <hr>
+                <ul class="pager">
+                    
+                    <li class="previous">
+                        <a href="/post/docker%E7%B3%BB%E5%88%97-dockerfile/" data-toggle="tooltip" data-placement="top" title="dockerfile常用命令">&larr;
+                            Previous Post</a>
+                    </li>
+                    
+                    
+                    <li class="next">
+                        <a href="/post/redis/" data-toggle="tooltip" data-placement="top" title="redis">Next
+                            Post &rarr;</a>
+                    </li>
+                    
+                </ul>
+
+                
+<div id="disqus-comment"></div>
+
+
+
+            </div>
+            
+            <div class="
+                col-lg-8 col-lg-offset-2
+                col-md-10 col-md-offset-1
+                sidebar-container">
+
+                
+                
+                <section>
+                    <hr class="hidden-sm hidden-xs">
+                    <h5><a href="/tags/">FEATURED TAGS</a></h5>
+                    <div class="tags">
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        <a href="/tags/docker" title="docker">
+                            docker
+                        </a>
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        <a href="/tags/linux" title="linux">
+                            linux
+                        </a>
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        <a href="/tags/%E4%B8%AD%E9%97%B4%E4%BB%B6" title="中间件">
+                            中间件
+                        </a>
+                        
+                        
+                        
+                        <a href="/tags/%E4%B8%BB%E4%BB%8E%E5%A4%8D%E5%88%B6" title="主从复制">
+                            主从复制
+                        </a>
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                    </div>
+                </section>
+                
+
+                
+                
+                <section>
+                    <hr>
+                    <h5>FRIENDS</h5>
+                    <ul class="list-inline">
+                        
+                        <li><a target="_blank" href="https://maizitoday.github.io">麦子的博客</a></li>
+                        
+                    </ul>
+                </section>
+                
+            </div>
+        </div>
+    </div>
+</article>
+
+
+
+
+<footer>
+    <div class="container">
+        <div class="row">
+            <div class="col-lg-8 col-lg-offset-2 col-md-10 col-md-offset-1">
+                <ul class="list-inline text-center">
+                   
+                   <li>
+                       <a href="" rel="alternate" type="application/rss+xml" title="" >
+                           <span class="fa-stack fa-lg">
+                               <i class="fa fa-circle fa-stack-2x"></i>
+                               <i class="fa fa-rss fa-stack-1x fa-inverse"></i>
+                           </span>
+                       </a>
+                   </li>
+                   
+                    
+                    <li>
+                        <a href="mailto:maiziybtoday@gmail.com">
+                            <span class="fa-stack fa-lg">
+                                <i class="fa fa-circle fa-stack-2x"></i>
+                                <i class="fa fa-envelope fa-stack-1x fa-inverse"></i>
+                            </span>
+                        </a>
+                    </li>
+		    
+                    
+                    
+                    
+                    
+
+                    
+
+		    
+                    
+                    <li>
+                        <a target="_blank" href="/your%20wechat%20qr%20code%20image">
+                            <span class="fa-stack fa-lg">
+                                <i class="fa fa-circle fa-stack-2x"></i>
+                                <i class="fa fa-wechat fa-stack-1x fa-inverse"></i>
+                            </span>
+                        </a>
+                    </li>
+		    
+                    
+                    <li>
+                        <a target="_blank" href="https://github.com/yourgithub">
+                            <span class="fa-stack fa-lg">
+                                <i class="fa fa-circle fa-stack-2x"></i>
+                                <i class="fa fa-github fa-stack-1x fa-inverse"></i>
+                            </span>
+                        </a>
+                    </li>
+		    
+                    
+                    <li>
+                        <a target="_blank" href="https://www.linkedin.com/in/yourlinkedinid">
+                            <span class="fa-stack fa-lg">
+                                <i class="fa fa-circle fa-stack-2x"></i>
+                                <i class="fa fa-linkedin fa-stack-1x fa-inverse"></i>
+                            </span>
+                        </a>
+                    </li>
+		    
+                    
+                </ul>
+		<p class="copyright text-muted">
+                    Copyright &copy;  2019
+                    <br>
+                    <a href="https://themes.gohugo.io/hugo-theme-cleanwhite">CleanWhite Hugo Theme</a> by <a href="https://zhaohuabing.com">Huabing</a> |
+                    <iframe
+                        style="margin-left: 2px; margin-bottom:-5px;"
+                        frameborder="0" scrolling="0" width="100px" height="20px"
+                        src="https://ghbtns.com/github-btn.html?user=zhaohuabing&repo=hugo-theme-cleanwhite&type=star&count=true" >
+                    </iframe>
+                </p>
+            </div>
+        </div>
+    </div>
+</footer>
+
+
+
+
+<script>
+    function async(u, c) {
+      var d = document, t = 'script',
+          o = d.createElement(t),
+          s = d.getElementsByTagName(t)[0];
+      o.src = u;
+      if (c) { o.addEventListener('load', function (e) { c(null, e); }, false); }
+      s.parentNode.insertBefore(o, s);
+    }
+</script>
+
+
+
+
+
+
+<script>
+    
+    if($('#tag_cloud').length !== 0){
+        async("/js/jquery.tagcloud.js",function(){
+            $.fn.tagcloud.defaults = {
+                
+                color: {start: '#bbbbee', end: '#0085a1'},
+            };
+            $('#tag_cloud a').tagcloud();
+        })
+    }
+</script>
+
+
+<script>
+    async("https://cdnjs.cloudflare.com/ajax/libs/fastclick/1.0.6/fastclick.js", function(){
+        var $nav = document.querySelector("nav");
+        if($nav) FastClick.attach($nav);
+    })
+</script>
+
+
+
+
+
+
+</body>
+</html>

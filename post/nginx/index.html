@@ -1,0 +1,861 @@
+<!DOCTYPE html>
+<html lang="en-us">
+<head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+
+    
+    <meta property="og:site_name" content="">
+    <meta property="og:type" content="article">
+
+    
+    <meta property="og:image" content="http://maizitoday.github.io//img/home-bg-jeep.jpg">
+    <meta property="twitter:image" content="http://maizitoday.github.io//img/home-bg-jeep.jpg" />
+    
+
+    
+    <meta name="title" content="nginx系列一基础认识" />
+    <meta property="og:title" content="nginx系列一基础认识" />
+    <meta property="twitter:title" content="nginx系列一基础认识" />
+    
+
+    
+    <meta name="description" content="麦子，程序员, 开源爱好者，生活探险家 | 这里是 麦子 的博客，与你一起发现更大的世界。">
+    <meta property="og:description" content="麦子，程序员, 开源爱好者，生活探险家 | 这里是 麦子 的博客，与你一起发现更大的世界。" />
+    <meta property="twitter:description" content="麦子，程序员, 开源爱好者，生活探险家 | 这里是 麦子 的博客，与你一起发现更大的世界。" />
+    
+
+    
+    <meta property="twitter:card" content="summary" />
+    
+    
+
+    <meta name="keyword"  content="麦子, maizi, maizi, , 麦子的网络日志, 麦子的博客, maizi Blog, 博客, 个人网站, 互联网, Web, 云原生, PaaS, Istio, Kubernetes, 微服务, Microservice">
+    <link rel="shortcut icon" href="/img/favicon.ico">
+
+    <title>nginx系列一基础认识-麦子的博客 | 麦子 Blog</title>
+
+    <link rel="canonical" href="/post/nginx/">
+
+    <link rel="stylesheet" href="/css/iDisqus.min.css"/>
+	
+    
+    <link rel="stylesheet" href="/css/bootstrap.min.css">
+
+    
+    <link rel="stylesheet" href="/css/hux-blog.min.css">
+
+    
+    <link rel="stylesheet" href="/css/syntax.css">
+
+    
+    <link rel="stylesheet" href="/css/zanshang.css">
+
+    
+    <link href="//cdnjs.cloudflare.com/ajax/libs/font-awesome/4.6.3/css/font-awesome.min.css" rel="stylesheet" type="text/css">
+    
+    
+    <script src="/js/jquery.min.js"></script>
+    
+    
+    <script src="/js/bootstrap.min.js"></script>
+    
+    
+    <script src="/js/hux-blog.min.js"></script>
+	
+    
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.13.1/styles/docco.min.css">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.13.1/highlight.min.js"></script>
+    <script>hljs.initHighlightingOnLoad();</script>
+</head>
+
+
+<nav class="navbar navbar-default navbar-custom navbar-fixed-top">
+    <div class="container-fluid">
+        
+        <div class="navbar-header page-scroll">
+            <button type="button" class="navbar-toggle">
+                <span class="sr-only">Toggle navigation</span>
+                <span class="icon-bar"></span>
+                <span class="icon-bar"></span>
+                <span class="icon-bar"></span>
+            </button>
+            <a class="navbar-brand" href="/"></a>
+        </div>
+
+        
+        
+        <div id="huxblog_navbar">
+            <div class="navbar-collapse">
+                <ul class="nav navbar-nav navbar-right">
+                    <li>
+                        <a href="/">Home</a>
+                    </li>
+                    
+                    <li>
+                        <a href="/categories/tech">Tech</a>
+                    </li>
+                    
+                    
+		    
+                        <li><a href="/top/books/">BOOKS</a></li>
+                    
+                        <li><a href="/top/about/">ABOUT</a></li>
+                    
+
+                    
+		    <li>
+                        <a href="/search">SEARCH <img src="/img/search.png" height="15" style="cursor: pointer;" alt="Search"></a>
+		    </li>
+                    
+                </ul>
+            </div>
+        </div>
+        
+    </div>
+    
+</nav>
+<script>
+    
+    
+    
+    var $body   = document.body;
+    var $toggle = document.querySelector('.navbar-toggle');
+    var $navbar = document.querySelector('#huxblog_navbar');
+    var $collapse = document.querySelector('.navbar-collapse');
+
+    $toggle.addEventListener('click', handleMagic)
+    function handleMagic(e){
+        if ($navbar.className.indexOf('in') > 0) {
+        
+            $navbar.className = " ";
+            
+            setTimeout(function(){
+                
+                if($navbar.className.indexOf('in') < 0) {
+                    $collapse.style.height = "0px"
+                }
+            },400)
+        }else{
+        
+            $collapse.style.height = "auto"
+            $navbar.className += " in";
+        }
+    }
+</script>
+
+
+
+
+<style type="text/css">
+    header.intro-header {
+        background-image: url('/img/home-bg-jeep.jpg')
+    }
+</style>
+<header class="intro-header">
+    <div class="container">
+        <div class="row">
+            <div class="col-lg-8 col-lg-offset-2 col-md-10 col-md-offset-1">
+                <div class="post-heading">
+                    <div class="tags">
+                        
+                        <a class="tag" href="/tags/nginx" title="nginx">
+                            nginx
+                        </a>
+                        
+                        <a class="tag" href="/tags/%E8%B4%9F%E8%BD%BD%E5%9D%87%E8%A1%A1" title="负载均衡">
+                            负载均衡
+                        </a>
+                        
+                        <a class="tag" href="/tags/%E5%BA%94%E7%94%A8%E6%9C%8D%E5%8A%A1%E5%99%A8" title="应用服务器">
+                            应用服务器
+                        </a>
+                        
+                    </div>
+                    <h1>nginx系列一基础认识</h1>
+                    <h2 class="subheading"></h2>
+                    <span class="meta">
+			Posted by 
+			
+			         &#34;麦子&#34;
+			 
+			on 
+			Monday, March 4, 2019
+                        
+                    </span>
+                </div>
+            </div>
+        </div>
+    </div>
+</header>
+
+
+
+
+<article>
+    <div class="container">
+        <div class="row">
+
+            
+            <div class="
+                col-lg-8 col-lg-offset-2
+                col-md-10 col-md-offset-1
+                post-container">
+
+                
+                <header>
+                    <h2>TOC</h2>
+                </header>
+                <nav id="TableOfContents">
+<ul>
+<li>
+<ul>
+<li>
+<ul>
+<li>
+<ul>
+<li><a href="#tomcat-与-nginx-apache-的区别是什么"><strong>tomcat</strong> 与 <strong>nginx</strong>，<strong>apache</strong>的区别是什么？</a></li>
+<li><a href="#什么是host文件">什么是HOST文件</a></li>
+<li><a href="#nginx多进程工作模式">nginx多进程工作模式￼</a></li>
+<li><a href="#nginx配置文件分析-nginx-conf">Nginx配置文件分析   nginx.conf</a></li>
+<li><a href="#什么是虚拟主机">什么是虚拟主机</a></li>
+<li><a href="#default-conf-具体虚拟主机配置">default.conf   具体虚拟主机配置</a></li>
+<li><a href="#location-中root地址分析-如下">location 中root地址分析， 如下：</a></li>
+<li><a href="#nginx命令参数">nginx命令参数</a></li>
+<li><a href="#反向代理和正向代理">反向代理和正向代理</a></li>
+<li><a href="#负载均衡">负载均衡</a></li>
+<li><a href="#动静分离">动静分离</a></li>
+<li><a href="#高并发策略">高并发策略</a></li>
+<li><a href="#安装ftp">安装ftp</a></li>
+<li><a href="#ssh服务安装">SSH服务安装</a></li>
+<li><a href="#开机自启动sshd服务">开机自启动sshd服务</a></li>
+<li><a href="#集群中的session">集群中的session</a></li>
+<li><a href="#springboot运行后-查看解压后的文件-负载均衡中-我这边直接使用springboot服务">springboot运行后，查看解压后的文件（负载均衡中，我这边直接使用springboot服务）</a></li>
+</ul></li>
+</ul></li>
+</ul></li>
+</ul>
+</nav>
+                
+                
+
+<h4 id="tomcat-与-nginx-apache-的区别是什么"><strong>tomcat</strong> 与 <strong>nginx</strong>，<strong>apache</strong>的区别是什么？</h4>
+
+<p>虽然Tomcat也可以认为是HTTP服务器，但通常它仍然会和Nginx配合在一起使用：</p>
+
+<ul>
+<li>动静态资源分离——运用Nginx的反向代理功能分发请求：所有动态资源的请求交给Tomcat，而静态资源的请求（例如图片、视频、CSS、JavaScript文件等）则直接由Nginx返回到浏览器，这样能大大减轻Tomcat的压力。</li>
+<li>负载均衡，当业务压力增大时，可能一个Tomcat的实例不足以处理，那么这时可以启动多个Tomcat实例进行水平扩展，而Nginx的负载均衡功能可以把请求通过算法分发到各个不同的实例进行处理</li>
+</ul>
+
+<p>apache用的越来越少了，大体上和nginx功能重合的更多。</p>
+
+<p>严格的来说，<strong>Apache/Nginx</strong> 应该叫做「<strong>HTTP Server</strong>」；而 <strong>Tomcat</strong> 则是一个「<strong>Application Server</strong>」，或者更准确的来说，是一个「<strong>Servlet/JSP</strong>」应用的容器（<strong>Ruby/Python</strong> 等其他语言开发的应用也无法直接运行在 <strong>Tomcat</strong> 上）。</p>
+
+<p>一个 HTTP Server 关心的是 HTTP 协议层面的传输和访问控制，所以在 Apache/Nginx 上你可以看到代理、负载均衡等功能。客户端通过 HTTP Server 访问服务器上存储的资源（HTML 文件、图片文件等等）。通过 CGI 技术，也可以将处理过的内容通过 HTTP Server 分发，但是一个 HTTP Server 始终只是把服务器上的文件如实的通过 HTTP 协议传输给客户端。</p>
+
+<p>而应用服务器，则是一个应用执行的容器。它首先需要支持开发语言的 Runtime（对于 Tomcat 来说，就是 Java），保证应用能够在应用服务器上正常运行。其次，需要支持应用相关的规范，例如类库、安全方面的特性。对于 Tomcat 来说，就是需要提供 JSP/Sevlet 运行需要的标准类库、Interface 等。为了方便，应用服务器往往也会集成 HTTP Server 的功能，但是不如专业的 HTTP Server 那么强大，所以应用服务器往往是运行在 HTTP Server 的背后，执行应用，将动态的内容转化为静态的内容之后，通过 HTTP Server 分发到客户端。</p>
+
+<h4 id="什么是host文件">什么是HOST文件</h4>
+
+<p>Hosts是一个没有扩展名的系统文件，其基本作用就是将一些常用的网址域名与其对应的IP地址建立一个关联“数据库”，当用户在浏览器中输入一个需要登录的网址时，系统会首先自动从Hosts文件中寻找对应的IP地址，一旦找到，系统会立即打开对应网页，如果没有找到，
+则系统再会将网址提交DNS
+域名解析服务器进行IP地址的解析，如果发现是被屏蔽的IP或域名，就会禁止打开此网页！
+在我们开发中，我们可以设置一个好记住的名字， 有力于开发。</p>
+
+<h4 id="nginx多进程工作模式">nginx多进程工作模式￼</h4>
+
+<p>master主进程控制多个work进程。work进程处理业务逻辑。</p>
+
+<p>Nginx的高效得益于它的事件驱动机制，当完成后就告诉socker，这个时候socker就进行处理。 其中在等待的时候， sokcer可以接收其他的请求。</p>
+
+<h4 id="nginx配置文件分析-nginx-conf">Nginx配置文件分析   nginx.conf</h4>
+
+<hr />
+
+<pre><code class="language-nginx">user  nginx;    # 当前用户  
+
+worker_processes  1;   #  CPU数，或者是2倍CPU数量
+
+error_log  /var/log/nginx/error.log warn;   #错误日志 
+
+pid        /var/run/nginx.pid;  # 当前nginx的进程id 
+
+events {
+    worker_connections  1024;  # 每一台进程数就是  work_processes*work_connections 
+}
+
+http {
+    include       /etc/nginx/mime.types;  # 互联网媒体类型的标准
+    default_type  application/octet-stream; # 默认的接受数据类型任意的二进制数据格式 
+    log_format  main   '$remote_addr - $remote_user [$time_local] &quot;$request&quot; '  #日志格式类型 
+                       '$status $body_bytes_sent &quot;$http_referer&quot; '
+                       '&quot;$http_user_agent&quot; &quot;$http_x_forwarded_for&quot;';
+    access_log  /var/log/nginx/access.log  main;  #访问日志 
+    sendfile    on;  # 指定是否调用sendfile来输出文件，对于普通应用，必须设为on，如果用来进行下载等应用磁盘IO负载应用，可设置为off，以平衡磁盘与网络IO处理速度，降低系统uptime
+                       
+   #tcp_nopush  on;  # 在nginx中，tcp_nopush配置与tcp_nodelay“互斥”。它可以配置一次发送数据包的大小。也就是说，数据包累积到一定大小后就发送。在nginx中tcp_nopush必须和sendfile配合使用
+    
+   keepalive_timeout  65;  # 连接超时时间为75s 
+   #gzip  on;   #经过gzip压缩后页面大小可以变为原来的30%甚至更小，这样，用户浏览页面的时候速度会块得多。
+   include /etc/nginx/conf.d/*.conf; #这个地方用来写入虚拟主机文件，对应的某一个域名访问的日志都在这个里面的。
+</code></pre>
+
+<h4 id="什么是虚拟主机">什么是虚拟主机</h4>
+
+<p>虚拟主机，就是把一台物理服务器划分为多个“虚拟”服务器， 每一个虚拟主机都可以有独立的域名和独立的目录。
+阿里云就是做的虚拟主机。 nginx中一个server就是一个虚拟主机。</p>
+
+<h4 id="default-conf-具体虚拟主机配置">default.conf   具体虚拟主机配置</h4>
+
+<pre><code class="language-nginx">server {
+    listen       80;  #监听端口 
+    server_name  localhost;  #服务地址 
+    #charset koi8-r;
+    access_log  /var/log/nginx/host.access.log  main;  #这个虚拟主机的访问日志 
+</code></pre>
+
+<pre><code class="language-nginx">#-------location-------------#
+
+  语法规则： location[=|~|~*|^~]/uri/{...}
+
+ = 开头表示精确匹配 
+
+ ^~ 开头表示uri以某个常规字符串开头，理解为匹配url路径即可。
+
+ ~ 开头表示区分大小写的正则匹配 
+
+ ~* 开头表示不区分大小写的正则匹配
+
+ / 通用匹配，任何请求都会匹配到。
+
+#-------location-------------#
+location / {
+    root   /usr/share/nginx/html;
+    index  index.html index.htm;
+}
+
+#http://localhost:9090/index.html，表示, 到/usr/share/nginx/html 这个下面去找
+
+error_page   500 502 503 504  /50x.html;
+
+location = /50x.html {
+    root   /usr/share/nginx/html;
+}
+</code></pre>
+
+<h4 id="location-中root地址分析-如下">location 中root地址分析， 如下：</h4>
+
+<pre><code class="language-nginx">   location ^~  /images/  {
+           root   /tmp/;
+      }
+</code></pre>
+
+<p><a href="http://localhost:9090/images/3.jpg">http://localhost:9090/images/3.jpg</a>  这个会到这里， 然后在去找 /tmp/ 然后是这个下面的images目录下面的3.jpg这个文件。</p>
+
+<h4 id="nginx命令参数">nginx命令参数</h4>
+
+<pre><code class="language-nginx"># nginx -t 测试配置是否正确 
+
+# nginx -s reload 作用加载最新配置 
+
+# nginx -s stop 立刻停止
+
+# nginx -s quit 优雅停止 
+
+# nginx -s reopen 重新打开日志
+
+# nginx -c xxx.conf  指定配置文件打开
+</code></pre>
+
+<h4 id="反向代理和正向代理">反向代理和正向代理</h4>
+
+<p>正向代理简单地打个租房的比方<strong>:</strong></p>
+
+<p>A<strong>(客户端)想租</strong>C<strong>(服务端)的房子,但是</strong>A<strong>(客户端)并不认识</strong>C**(服务端)租不到。</p>
+
+<p><strong>B</strong>(代理)认识<strong>C</strong>(服务端)能租这个房子所以你找了<strong>B</strong>(代理)帮忙租到了这个房子。</p>
+
+<p>这个过程中<strong>C</strong>(服务端)不认识<strong>A</strong>(客户端)只认识<strong>B</strong>(代理)</p>
+
+<p><strong>C</strong>(服务端)并不知道<strong>A</strong>(客户端)租了房子，只知道房子租给了<strong>B</strong>(代理)。</p>
+
+<p>作用：</p>
+
+<ol>
+<li>访问原来无法访问的资源，翻墙。</li>
+<li>可以做缓存，加速资源的访问。</li>
+<li>对客户端上网进行认证授权。</li>
+<li>上网行为管理，记录用户访问记录。</li>
+</ol>
+
+<p>反向代理<strong>:</strong>客户端 一<strong>&gt;</strong>代理 <strong>&lt;</strong>一<strong>&gt;</strong> 服务端</p>
+
+<p>反向代理也用一个租房的例子<strong>:</strong></p>
+
+<p>A<strong>(客户端)想租一个房子,</strong>B**(代理)就把这个房子租给了他。</p>
+
+<p>这时候实际上<strong>C</strong>(服务端)才是房东。</p>
+
+<p><strong>B</strong>(代理)是中介把这个房子租给了<strong>A</strong>(客户端)。</p>
+
+<p>这个过程中<strong>A</strong>(客户端)并不知道这个房子到底谁才是房东</p>
+
+<p>他都有可能认为这个房子就是<strong>B</strong>(代理)的</p>
+
+<p>作用：</p>
+
+<ol>
+<li>负载均衡，提高处理和响应速度。</li>
+<li>保证内网安全，隐藏服务器信息，防止web攻击。</li>
+</ol>
+
+<h4 id="负载均衡">负载均衡</h4>
+
+<pre><code class="language-nginx">nginx.conf  在这个地方设置
+
+upstream tomcat { #集群名称 
+        server 127.0.0.1:9092 weight=5;  // weight 这个是权重，谁大几率就访问大一些
+        server 127.0.0.1:9093 weight=5;
+     }
+
+同时在 具体的虚拟主机中设置如下
+
+server {
+      listen       80;
+      server_name  localhost; # 这边对外的访问都是 localhost:80
+      location / {
+          root   /usr/share/nginx/html;
+          index  index.html index.htm;
+          proxy_pass http://tomcat; #直接转发到这个集群里面去了，这里对应了2个服务器
+          proxy_redirect default;
+     }
+
+这样就实现了一个简单的负载均衡了。
+</code></pre>
+
+<p>负载均衡几种策略方式</p>
+
+<ol>
+<li>weight                     权重方式</li>
+<li>ip_hash                   依据ip分配方式</li>
+<li>least_conn               最少连接方式</li>
+<li>fair（第三方）           响应时间方式</li>
+<li>url_hash（第三方）  依据URL分配方式<br /></li>
+</ol>
+
+<h4 id="动静分离">动静分离</h4>
+
+<pre><code class="language-nginx">location ~* \.(gif|jpg|jpeg|png|css|js|ico)$ { //包含这些后缀，请求被转发到静态池，否则转发到动态池
+        root /tmp/images/;
+   }
+
+或者
+
+upstream static_pools {
+    server 192.168.1.106:8080;
+}
+
+location ~ .*.(gif|jpg|jpeg|png|bmp|swf|css|js)$ { 
+            proxy_pass http://static_pools;
+        }
+
+
+</code></pre>
+
+<h4 id="高并发策略">高并发策略</h4>
+
+<ol>
+<li>负载均衡： 集群</li>
+<li>动静分离：使用Nginx，CDN（用第三方的一些js，不放到自己的服务器上）</li>
+<li>缓存：以空间换时间，提高系统效率</li>
+<li>限流：流量控制</li>
+<li>降级：服务降载，就是把不是核心的业务关掉。 比如不需要的日志业务给关掉。</li>
+</ol>
+
+<h4 id="安装ftp">安装ftp</h4>
+
+<p>yum  install  vsftpd</p>
+
+<p>配置文件：/etc/vsftpd.conf</p>
+
+<p>service  vsftpd restart   (注意他的端口也还是SSH的默认端口)</p>
+
+<h4 id="ssh服务安装">SSH服务安装</h4>
+
+<p>yum install openssh-server</p>
+
+<p>vi /etc/ssh/sshd_config</p>
+
+<p>Port 22</p>
+
+<p>Protocol 2</p>
+
+<p>PermitRootLogin yes    最后一个重要！因为它是允许root用户直接使用sshd服务登录服务器的！</p>
+
+<p>service sshd restart</p>
+
+<h4 id="开机自启动sshd服务">开机自启动sshd服务</h4>
+
+<pre><code class="language-shell">$ systemctl enable sshd.service     
+# 开机自启sshd$ systemctl disable sshd.service    
+# 开机关闭自启sshd$ systemctl start sshd.service     
+# 启动sshd$ systemctl restart sshd.service    
+# 重启$ systemctl stop sshd.service       
+# 停止$ systemctl reload sshd.service    
+# 重新加载$ systemctl status sshd.service    
+# 查看启动状态`
+</code></pre>
+
+<h4 id="集群中的session">集群中的session</h4>
+
+<ol>
+<li>Session 保持</li>
+</ol>
+
+<p>​      对于Nginx可以选用Session保持的方法实行负载均衡，nginx的upstream目前支持5种方式的分配方式，其中有两种比    较通用的Session解决方法，ip_hash和url_hash。注意：后者不是官方模块，需要额外安装。</p>
+
+<p>​       ip_hash</p>
+
+<p>​      每个请求按访问ip的hash结果分配，这样每个访客固定访问一个后端服务器，达到了Session保持的方法。</p>
+
+<ol>
+<li>Session 复制</li>
+</ol>
+
+<p>​      既然，我们的目标是所有服务器上都要保持用户的Session，那么将每个应用服务器中的Session信息复制到其它服务 器节点上是不是就可以呢？这就是Session的第二中处理办法：会话复制。</p>
+
+<ol>
+<li>Session 共享</li>
+</ol>
+
+<p>既然会话保持和会话复制都不完美，那么我们为什么不把Session放在一个统一的地方呢，这样集群中的所有节点都  在一个地方进行Session的存取就可以解决问题。对于Session来说，肯定是频繁使用的，虽然你可以把它存放在数据库中，但是真正生产环境中我更推荐存放在性能更快的分布式KV数据中，例如：Memcached和Redis。</p>
+
+<h4 id="springboot运行后-查看解压后的文件-负载均衡中-我这边直接使用springboot服务">springboot运行后，查看解压后的文件（负载均衡中，我这边直接使用springboot服务）</h4>
+
+<pre><code class="language-java">jar uvf test.jar com\lovedata\bigdata\jar\NeedReplace.class
+</code></pre>
+
+<p>通过上面的命令，直接替换class文件。 如果是持续集成的话，就不要管了， 同时还可以在IDEA已经通过SSH替换了class后，我们在写一个shell命令， 进行再次打包。</p>
+
+
+                
+                
+<div class="entry-shang text-center">
+    
+	    <p>「真诚赞赏，手留余香」</p>
+	
+	<button class="zs show-zs btn btn-bred">赞赏支持</button>
+</div>
+<div class="zs-modal-bg"></div>
+<div class="zs-modal-box">
+	<div class="zs-modal-head">
+		<button type="button" class="close">×</button>
+		<span class="author"><a href="http://maizitoday.github.io/"><img src="/img/favicon.png" /></a></span>
+        
+	        <p class="tip"><i></i><span>真诚赞赏，手留余香</span></p>
+		
+ 
+	</div>
+	<div class="zs-modal-body">
+		<div class="zs-modal-btns">
+			<button class="btn btn-blink" data-num="2">2元</button>
+			<button class="btn btn-blink" data-num="5">5元</button>
+			<button class="btn btn-blink" data-num="10">10元</button>
+			<button class="btn btn-blink" data-num="50">50元</button>
+			<button class="btn btn-blink" data-num="100">100元</button>
+			<button class="btn btn-blink" data-num="1">任意金额</button>
+		</div>
+		<div class="zs-modal-pay">
+			<button class="btn btn-bred" id="pay-text">2元</button>
+			<p>使用<span id="pay-type">微信</span>扫描二维码完成支付</p>
+			<img src="/img/reward/wechat-2.png"  id="pay-image"/>
+		</div>
+	</div>
+	<div class="zs-modal-footer">
+		<label><input type="radio" name="zs-type" value="wechat" class="zs-type" checked="checked"><span ><span class="zs-wechat"><img src="/img/reward/wechat-btn.png"/></span></label>
+		<label><input type="radio" name="zs-type" value="alipay" class="zs-type" class="zs-alipay"><img src="/img/reward/alipay-btn.png"/></span></label>
+	</div>
+</div>
+<script type="text/javascript" src="/js/reward.js"></script>
+
+                
+
+                <hr>
+                <ul class="pager">
+                    
+                    <li class="previous">
+                        <a href="/post/rocketmq/" data-toggle="tooltip" data-placement="top" title="rocketmq系列一基础认识">&larr;
+                            Previous Post</a>
+                    </li>
+                    
+                    
+                    <li class="next">
+                        <a href="/post/kubernetes%E5%85%A5%E9%97%A8/" data-toggle="tooltip" data-placement="top" title="Kubernetes入门">Next
+                            Post &rarr;</a>
+                    </li>
+                    
+                </ul>
+
+                
+<div id="disqus-comment"></div>
+
+
+
+            </div>
+            
+            <div class="
+                col-lg-8 col-lg-offset-2
+                col-md-10 col-md-offset-1
+                sidebar-container">
+
+                
+                
+                <section>
+                    <hr class="hidden-sm hidden-xs">
+                    <h5><a href="/tags/">FEATURED TAGS</a></h5>
+                    <div class="tags">
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        <a href="/tags/docker" title="docker">
+                            docker
+                        </a>
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        <a href="/tags/linux" title="linux">
+                            linux
+                        </a>
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        <a href="/tags/%E4%B8%AD%E9%97%B4%E4%BB%B6" title="中间件">
+                            中间件
+                        </a>
+                        
+                        
+                        
+                        <a href="/tags/%E4%B8%BB%E4%BB%8E%E5%A4%8D%E5%88%B6" title="主从复制">
+                            主从复制
+                        </a>
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                    </div>
+                </section>
+                
+
+                
+                
+                <section>
+                    <hr>
+                    <h5>FRIENDS</h5>
+                    <ul class="list-inline">
+                        
+                        <li><a target="_blank" href="https://maizitoday.github.io">麦子的博客</a></li>
+                        
+                    </ul>
+                </section>
+                
+            </div>
+        </div>
+    </div>
+</article>
+
+
+
+
+<footer>
+    <div class="container">
+        <div class="row">
+            <div class="col-lg-8 col-lg-offset-2 col-md-10 col-md-offset-1">
+                <ul class="list-inline text-center">
+                   
+                   <li>
+                       <a href="" rel="alternate" type="application/rss+xml" title="" >
+                           <span class="fa-stack fa-lg">
+                               <i class="fa fa-circle fa-stack-2x"></i>
+                               <i class="fa fa-rss fa-stack-1x fa-inverse"></i>
+                           </span>
+                       </a>
+                   </li>
+                   
+                    
+                    <li>
+                        <a href="mailto:maiziybtoday@gmail.com">
+                            <span class="fa-stack fa-lg">
+                                <i class="fa fa-circle fa-stack-2x"></i>
+                                <i class="fa fa-envelope fa-stack-1x fa-inverse"></i>
+                            </span>
+                        </a>
+                    </li>
+		    
+                    
+                    
+                    
+                    
+
+                    
+
+		    
+                    
+                    <li>
+                        <a target="_blank" href="/your%20wechat%20qr%20code%20image">
+                            <span class="fa-stack fa-lg">
+                                <i class="fa fa-circle fa-stack-2x"></i>
+                                <i class="fa fa-wechat fa-stack-1x fa-inverse"></i>
+                            </span>
+                        </a>
+                    </li>
+		    
+                    
+                    <li>
+                        <a target="_blank" href="https://github.com/yourgithub">
+                            <span class="fa-stack fa-lg">
+                                <i class="fa fa-circle fa-stack-2x"></i>
+                                <i class="fa fa-github fa-stack-1x fa-inverse"></i>
+                            </span>
+                        </a>
+                    </li>
+		    
+                    
+                    <li>
+                        <a target="_blank" href="https://www.linkedin.com/in/yourlinkedinid">
+                            <span class="fa-stack fa-lg">
+                                <i class="fa fa-circle fa-stack-2x"></i>
+                                <i class="fa fa-linkedin fa-stack-1x fa-inverse"></i>
+                            </span>
+                        </a>
+                    </li>
+		    
+                    
+                </ul>
+		<p class="copyright text-muted">
+                    Copyright &copy;  2019
+                    <br>
+                    <a href="https://themes.gohugo.io/hugo-theme-cleanwhite">CleanWhite Hugo Theme</a> by <a href="https://zhaohuabing.com">Huabing</a> |
+                    <iframe
+                        style="margin-left: 2px; margin-bottom:-5px;"
+                        frameborder="0" scrolling="0" width="100px" height="20px"
+                        src="https://ghbtns.com/github-btn.html?user=zhaohuabing&repo=hugo-theme-cleanwhite&type=star&count=true" >
+                    </iframe>
+                </p>
+            </div>
+        </div>
+    </div>
+</footer>
+
+
+
+
+<script>
+    function async(u, c) {
+      var d = document, t = 'script',
+          o = d.createElement(t),
+          s = d.getElementsByTagName(t)[0];
+      o.src = u;
+      if (c) { o.addEventListener('load', function (e) { c(null, e); }, false); }
+      s.parentNode.insertBefore(o, s);
+    }
+</script>
+
+
+
+
+
+
+<script>
+    
+    if($('#tag_cloud').length !== 0){
+        async("/js/jquery.tagcloud.js",function(){
+            $.fn.tagcloud.defaults = {
+                
+                color: {start: '#bbbbee', end: '#0085a1'},
+            };
+            $('#tag_cloud a').tagcloud();
+        })
+    }
+</script>
+
+
+<script>
+    async("https://cdnjs.cloudflare.com/ajax/libs/fastclick/1.0.6/fastclick.js", function(){
+        var $nav = document.querySelector("nav");
+        if($nav) FastClick.attach($nav);
+    })
+</script>
+
+
+
+
+
+
+</body>
+</html>
