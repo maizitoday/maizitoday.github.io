@@ -1,0 +1,784 @@
+<!DOCTYPE html>
+<html lang="en-us">
+<head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+
+    
+    <meta property="og:site_name" content="">
+    <meta property="og:type" content="article">
+
+    
+    <meta property="og:image" content="http://maizitoday.github.io//img/home-bg-jeep.jpg">
+    <meta property="twitter:image" content="http://maizitoday.github.io//img/home-bg-jeep.jpg" />
+    
+
+    
+    <meta name="title" content="java基础-jvm" />
+    <meta property="og:title" content="java基础-jvm" />
+    <meta property="twitter:title" content="java基础-jvm" />
+    
+
+    
+    <meta name="description" content="麦子，程序员, 开源爱好者，生活探险家 | 这里是 麦子 的博客，与你一起发现更大的世界。">
+    <meta property="og:description" content="麦子，程序员, 开源爱好者，生活探险家 | 这里是 麦子 的博客，与你一起发现更大的世界。" />
+    <meta property="twitter:description" content="麦子，程序员, 开源爱好者，生活探险家 | 这里是 麦子 的博客，与你一起发现更大的世界。" />
+    
+
+    
+    <meta property="twitter:card" content="summary" />
+    
+    
+
+    <meta name="keyword"  content="麦子, maizi, maizi, , 麦子的网络日志, 麦子的博客, maizi Blog, 博客, 个人网站, 互联网, Web, 云原生, PaaS, Istio, Kubernetes, 微服务, Microservice">
+    <link rel="shortcut icon" href="/img/favicon.ico">
+
+    <title>java基础-jvm-麦子的博客 | 麦子 Blog</title>
+
+    <link rel="canonical" href="/post/java%E5%9F%BA%E7%A1%80-jvm/">
+
+    <link rel="stylesheet" href="/css/iDisqus.min.css"/>
+	
+    
+    <link rel="stylesheet" href="/css/bootstrap.min.css">
+
+    
+    <link rel="stylesheet" href="/css/hux-blog.min.css">
+
+    
+    <link rel="stylesheet" href="/css/syntax.css">
+
+    
+    <link rel="stylesheet" href="/css/zanshang.css">
+
+    
+    <link href="//cdnjs.cloudflare.com/ajax/libs/font-awesome/4.6.3/css/font-awesome.min.css" rel="stylesheet" type="text/css">
+    
+    
+    <script src="/js/jquery.min.js"></script>
+    
+    
+    <script src="/js/bootstrap.min.js"></script>
+    
+    
+    <script src="/js/hux-blog.min.js"></script>
+	
+    
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.13.1/styles/docco.min.css">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.13.1/highlight.min.js"></script>
+    <script>hljs.initHighlightingOnLoad();</script>
+</head>
+
+
+<nav class="navbar navbar-default navbar-custom navbar-fixed-top">
+    <div class="container-fluid">
+        
+        <div class="navbar-header page-scroll">
+            <button type="button" class="navbar-toggle">
+                <span class="sr-only">Toggle navigation</span>
+                <span class="icon-bar"></span>
+                <span class="icon-bar"></span>
+                <span class="icon-bar"></span>
+            </button>
+            <a class="navbar-brand" href="/"></a>
+        </div>
+
+        
+        
+        <div id="huxblog_navbar">
+            <div class="navbar-collapse">
+                <ul class="nav navbar-nav navbar-right">
+                    <li>
+                        <a href="/">Home</a>
+                    </li>
+                    
+                    <li>
+                        <a href="/categories/life">Life</a>
+                    </li>
+                    
+                    <li>
+                        <a href="/categories/tech">Tech</a>
+                    </li>
+                    
+                    
+		    
+                        <li><a href="/top/about/">ABOUT</a></li>
+                    
+
+                    
+		    <li>
+                        <a href="/search">SEARCH <img src="/img/search.png" height="15" style="cursor: pointer;" alt="Search"></a>
+		    </li>
+                    
+                </ul>
+            </div>
+        </div>
+        
+    </div>
+    
+</nav>
+<script>
+    
+    
+    
+    var $body   = document.body;
+    var $toggle = document.querySelector('.navbar-toggle');
+    var $navbar = document.querySelector('#huxblog_navbar');
+    var $collapse = document.querySelector('.navbar-collapse');
+
+    $toggle.addEventListener('click', handleMagic)
+    function handleMagic(e){
+        if ($navbar.className.indexOf('in') > 0) {
+        
+            $navbar.className = " ";
+            
+            setTimeout(function(){
+                
+                if($navbar.className.indexOf('in') < 0) {
+                    $collapse.style.height = "0px"
+                }
+            },400)
+        }else{
+        
+            $collapse.style.height = "auto"
+            $navbar.className += " in";
+        }
+    }
+</script>
+
+
+
+
+<style type="text/css">
+    header.intro-header {
+        background-image: url('/img/home-bg-jeep.jpg')
+    }
+</style>
+<header class="intro-header">
+    <div class="container">
+        <div class="row">
+            <div class="col-lg-8 col-lg-offset-2 col-md-10 col-md-offset-1">
+                <div class="post-heading">
+                    <div class="tags">
+                        
+                        <a class="tag" href="/tags/java%E5%9F%BA%E7%A1%80" title="java基础">
+                            java基础
+                        </a>
+                        
+                        <a class="tag" href="/tags/jvm" title="jvm">
+                            jvm
+                        </a>
+                        
+                        <a class="tag" href="/tags/%E8%99%9A%E6%8B%9F%E6%9C%BA" title="虚拟机">
+                            虚拟机
+                        </a>
+                        
+                    </div>
+                    <h1>java基础-jvm</h1>
+                    <h2 class="subheading"></h2>
+                    <span class="meta">
+			Posted by 
+			
+			         &#34;麦子&#34;
+			 
+			on 
+			Monday, April 22, 2019
+                        
+                    </span>
+                </div>
+            </div>
+        </div>
+    </div>
+</header>
+
+
+
+
+<article>
+    <div class="container">
+        <div class="row">
+
+            
+            <div class="
+                col-lg-8 col-lg-offset-2
+                col-md-10 col-md-offset-1
+                post-container">
+
+                
+                <header>
+                    <h2>TOC</h2>
+                </header>
+                <nav id="TableOfContents">
+<ul>
+<li><a href="#jvm体系结构概览">JVM体系结构概览</a>
+<ul>
+<li><a href="#类转载器">类转载器</a>
+<ul>
+<li><a href="#双亲委派机制">双亲委派机制</a></li>
+<li><a href="#沙箱安全机制">沙箱安全机制</a></li>
+</ul></li>
+<li><a href="#native">native</a></li>
+<li><a href="#程序计数器-pc">程序计数器(PC)</a></li>
+<li><a href="#方法区-method-area">方法区(Method Area)</a></li>
+<li><a href="#栈区">栈区</a>
+<ul>
+<li><a href="#stack-栈是什么"><strong><em>Stack</em></strong> 栈是什么</a></li>
+<li><a href="#栈存储什么">栈存储什么</a></li>
+<li><a href="#栈运行原理">栈运行原理</a></li>
+<li><a href="#运行流程图">运行流程图</a></li>
+<li><a href="#栈-堆-方法区交互关系">栈，堆，方法区交互关系</a></li>
+</ul></li>
+<li><a href="#堆区">堆区</a>
+<ul>
+<li><a href="#永久区-1-7还有这个-1-8之后就是元空间">永久区：(1.7还有这个，1.8之后就是元空间)</a></li>
+<li><a href="#第三方包直接放入永久区">第三方包直接放入永久区</a></li>
+<li><a href="#方法区和永久代区别">方法区和永久代区别</a></li>
+</ul></li>
+<li><a href="#堆参数调优">堆参数调优</a></li>
+<li><a href="#gc">GC</a>
+<ul>
+<li><a href="#gc算法">GC算法</a></li>
+<li><a href="#gc什么时候调用">GC什么时候调用</a></li>
+</ul></li>
+<li><a href="#throwable和exception的区别">throwable和Exception的区别</a>
+<ul>
+<li><a href="#exception效果">Exception效果</a></li>
+<li><a href="#throwable效果">throwable效果</a></li>
+</ul></li>
+</ul></li>
+</ul>
+</nav>
+                
+                
+
+<p>[TOC]</p>
+
+<p><strong>说明： 本学习主要对尚硅谷周阳大神《jvm视频》记录，一下文字来源这个视频PPT</strong></p>
+
+<h1 id="jvm体系结构概览">JVM体系结构概览</h1>
+
+<p><img src="/img/4-23-1.png" alt="4-23-1" /></p>
+
+<p>JVM是运行在操作系统之上的，它和硬件没有直接的交互。</p>
+
+<p>负责加载class文件，class文件在文件开头有特定的文件标示，并且ClassLoader只负责class文件的加载，至于它是否可以运行，则由ExecutionEngine决定。<strong>Execution Engine</strong>* 执行引擎负责解释命令，提交操作系统执行。</p>
+
+<h2 id="类转载器">类转载器</h2>
+
+<p><img src="/img/4-23-2.png" alt="4-23-2" /></p>
+
+<p>当我们在IDEA工具创建一个Test.java类时候， main运行的时候， 为什么可以运行？</p>
+
+<p>因为我们在搭建java环境的时候，我们配置环境的时候，可以看到 $JAVAHOME/jre/lib/rt.jar 和   $JAVAHOME/jre/lib/ext/*.jar,需要相关的类，java虚拟机已经帮你写好了，也就是说他的父类和相关类都已经帮你写好了，这些加载器，已经把这些类已经加载到了JVM中了。</p>
+
+<p>$CLASSPATH,我们在配置环境的时候CLASSPATH=.;%JAVA_HOME%\lib;%JAVA_HOME%\lib\tools.jar， 可以看到前面的分好，他回去搜索当前的目录，查找出所有的class文件，加载进去到JVM机。</p>
+
+<p>自定义加载器一般很少重写。</p>
+
+<p><strong>这样，我们创建的java文件，就被这个快递员送到了虚拟机中了。</strong></p>
+
+<h3 id="双亲委派机制">双亲委派机制</h3>
+
+<p>原文：<a href="https://blog.csdn.net/start_lie/article/details/79016312">https://blog.csdn.net/start_lie/article/details/79016312</a></p>
+
+<p>双亲委派模型的式作过程是：如果一个类加载器收到了类加载的请求，它首先不会自己去尝试加载这个类，而是把这个请求委派给父类加载器去完成，每一个层次的类加载器都是如此，因此所有的加载请求最终都应该传送到顶层的启动类加载器中，只有当父加载器反馈自己无法完全这个加载请求时，子加载器才会尝试自己去加载。</p>
+
+<h3 id="沙箱安全机制">沙箱安全机制</h3>
+
+<p>原文：<a href="https://blog.csdn.net/start_lie/article/details/79016312">https://blog.csdn.net/start_lie/article/details/79016312</a></p>
+
+<p>沙箱机制是由基于双亲委派机制上 采取的一种JVM的自我保护机制,假设你要写一个java.lang.String 的类,由于双亲委派机制的原理,此请求会先交给Bootstrap试图进行加载,但是Bootstrap在加载类时首先通过包和类名查找rt.jar中有没有该类,有则优先加载rt.jar包中的类,因此就保证了java的运行机制不会被破坏.</p>
+
+<p>有了双亲委派机制的前提，在沙箱安全机制下，黑客自定义的<code>java.lang.String</code>类永远都不会被加载进内存。因为首先是最顶端的类加载器加载系统的<code>java.lang.String</code>类，最终自定义的类加载器无法加载<code>java.lang.String</code>类，防止java源码被恶心修改。</p>
+
+<h2 id="native">native</h2>
+
+<p>用于，Java平台和本地C代码进行互操作的关键字，他主要和C对接，但是我们现在有更好的对接方式， 比如webService。这个是由于前期java用C/C++来写的，这个历史背景下面有了这个native关键字。</p>
+
+<h2 id="程序计数器-pc">程序计数器(PC)</h2>
+
+<p>计数和调度用：每个线程都有一个程序计数器，是线程私有的,就是一个指针，指向方法区中的方法字节码（用来存储指向下一条指令的地址,也即将要执行的指令代码），由执行引擎读取下一条指令，是一个非常小的内存空间，几乎可以忽略不记。</p>
+
+<p>比如： 我们controller调用Server，在调用Dao，他就是一条这样的指引，按照顺序，一个钩子一个钩子的挂住，有顺序的执行。他就是严格执行这个顺序的调度器。</p>
+
+<h2 id="方法区-method-area">方法区(Method Area)</h2>
+
+<p>简单说，所有定义的方法的信息都保存在该区域，此区属于共享区间。 静态变量+常量+类信息(构造方法/接口定义)+运行时常量池存在方法区中。实例变量存在堆内存中,和方法区无关。<strong>也就是一个类的模板，相当于一个设计图，一个抽象类。</strong></p>
+
+<p>实际而言，方法区（Method Area）和堆一样，是各个线程共享的内存区域，它用于存储虚拟机加载的：类信息+普通常量+静态常量+编译器编译后的代码等等，虽然JVM规范将方法区描述为堆的一个逻辑部分，但它却还有一个别名叫做Non-Heap(非堆)，目的就是要和堆分开。</p>
+
+<h2 id="栈区">栈区</h2>
+
+<p>首先栈区就是一个子弹夹，后进先出。</p>
+
+<pre><code class="language-java">public class Main {
+
+    public void test01()
+    {
+        System.out.println(&quot;  test01  栈顶 &quot;);
+    }
+
+    public void test02()
+    {
+        System.out.println(&quot;  test02   &quot;);
+    }
+
+    public static void main(String[] args){
+        Main  main = new Main();
+        main.test01();
+        main.test02();
+        System.out.println(&quot;  main 栈区就是栈低 &quot;);
+    }
+}
+/**
+  从这里可以看出， 执行的时候，最新执行的，test01执行后，出栈，然后test02出栈，然后main主线程出栈，
+  程序结束。
+**/
+</code></pre>
+
+<h3 id="stack-栈是什么"><strong><em>Stack</em></strong> 栈是什么</h3>
+
+<p>栈也叫栈内存，主管Java程序的运行，是在线程创建时创建，它的生命期是跟随线程的生命期，线程结束栈内存也就释放，<strong>对于栈来说不存在垃圾回收问题</strong>，只要线程一结束该栈就Over，生命周期和线程一致，是线程私有的。8种基本类型的变量+对象的引用变量+实例方法都是在函数的栈内存中分配，<strong>需要注意这个栈也就是子弹夹内存是有限的。</strong></p>
+
+<h3 id="栈存储什么">栈存储什么</h3>
+
+<p>栈帧中主要保存3 类数据：</p>
+
+<p>本地变量（Local Variables）:输入参数和输出参数以及方法内的变量；</p>
+
+<p>栈操作（Operand Stack）:记录出栈、入栈的操作；</p>
+
+<p>栈帧数据（Frame Data）:包括类文件、方法等等。</p>
+
+<h3 id="栈运行原理">栈运行原理</h3>
+
+<p>栈中的数据都是以栈帧（Stack Frame）的格式存在，栈帧是一个内存区块，是一个数据集，是一个有关方法(Method)和运行期数据的数据集，当一个方法A被调用时就产生了一个栈帧 F1，并被压入到栈中，</p>
+
+<p>A方法又调用了 B方法，于是产生栈帧 F2 也被压入栈，</p>
+
+<p>B方法又调用了 C方法，于是产生栈帧 F3 也被压入栈，</p>
+
+<p>……</p>
+
+<p>执行完毕后，先弹出F3栈帧，再弹出F2栈帧，再弹出F1栈帧……</p>
+
+<p>遵循“先进后出”/“后进先出”原则。</p>
+
+<p><strong>注意这个地方只是一种声明的：调用</strong></p>
+
+<h3 id="运行流程图">运行流程图</h3>
+
+<p><img src="/img/4-23-3.png" alt="4-23-3" /></p>
+
+<h3 id="栈-堆-方法区交互关系">栈，堆，方法区交互关系</h3>
+
+<p><img src="/img/4-23-4.png" alt="4-23-4" /></p>
+
+<h2 id="堆区">堆区</h2>
+
+<p>存放所有new出来的对象；对象的引用放入到栈区。</p>
+
+<p><img src="/img/4-23-5.png" alt="4-23-5" /></p>
+
+<h3 id="永久区-1-7还有这个-1-8之后就是元空间">永久区：(1.7还有这个，1.8之后就是元空间)</h3>
+
+<p><img src="/img/4-23-6.png" alt="4-23-6" /></p>
+
+<h3 id="第三方包直接放入永久区">第三方包直接放入永久区</h3>
+
+<p><img src="/img/4-23-7.png" alt="4-23-7" /></p>
+
+<h3 id="方法区和永久代区别">方法区和永久代区别</h3>
+
+<p><img src="/img/4-23-8.png" alt="4-23-8" /></p>
+
+<h2 id="堆参数调优">堆参数调优</h2>
+
+<p><img src="/img/4-23-9.png" alt="4-23-9" /></p>
+
+<p>-Xms1024m  -Xmx1024m : 这个地方是设置新生区和养老区      -XX:+PrintGCDetails:输出dump文件，用来分析内存。</p>
+
+<p>-XX:+HeapDumpOnOutOfMemoryError
+-XX:HeapDumpPath=/img/</p>
+
+<p>设置如果出现OOM，把对应的hprof文件给输出，打开这个堆内存进行分析。</p>
+
+<p><strong>如下可以查看到，在 Full GC后，就报OOM错误了，同时查看jdk1.8是Metaspace元空间。</strong></p>
+
+<p><img src="/img/4-23-10.png" alt="4-23-10" /></p>
+
+<h2 id="gc">GC</h2>
+
+<h3 id="gc算法">GC算法</h3>
+
+<p><img src="/img/4-23-11.png" alt="4-23-11" /></p>
+
+<h3 id="gc什么时候调用">GC什么时候调用</h3>
+
+<p>也就是GC的触发条件，eden 满了minor gc，升到老年代的对象大于老年代剩余空间full gc，或者小于时被HandlePromotionFailure参数强制full gc；gc与非gc时间耗时超过了GCTimeRatio的限制引发OOM，调优诸如通过NewRatio控制新生代老年代比例，通过 MaxTenuringThreshold控制进入老年前生存次数等。</p>
+
+<h2 id="throwable和exception的区别">throwable和Exception的区别</h2>
+
+<p>如果是堆内存溢出了， 只有throwable能捕捉到，因为Exception内存不够用了，他是Exception的父类。</p>
+
+<h3 id="exception效果">Exception效果</h3>
+
+<p><img src="/img/4-23-12.png" alt="4-23-12" /></p>
+
+<h3 id="throwable效果">throwable效果</h3>
+
+<p><img src="/img/4-23-13.png" alt="4-23-13" /></p>
+
+
+                
+                
+<div class="entry-shang text-center">
+    
+	    <p>「真诚赞赏，手留余香」</p>
+	
+	<button class="zs show-zs btn btn-bred">赞赏支持</button>
+</div>
+<div class="zs-modal-bg"></div>
+<div class="zs-modal-box">
+	<div class="zs-modal-head">
+		<button type="button" class="close">×</button>
+		<span class="author"><a href="http://maizitoday.github.io/"><img src="/img/favicon.png" /></a></span>
+        
+	        <p class="tip"><i></i><span>真诚赞赏，手留余香</span></p>
+		
+ 
+	</div>
+	<div class="zs-modal-body">
+		<div class="zs-modal-btns">
+			<button class="btn btn-blink" data-num="2">2元</button>
+			<button class="btn btn-blink" data-num="5">5元</button>
+			<button class="btn btn-blink" data-num="10">10元</button>
+			<button class="btn btn-blink" data-num="50">50元</button>
+			<button class="btn btn-blink" data-num="100">100元</button>
+			<button class="btn btn-blink" data-num="1">任意金额</button>
+		</div>
+		<div class="zs-modal-pay">
+			<button class="btn btn-bred" id="pay-text">2元</button>
+			<p>使用<span id="pay-type">微信</span>扫描二维码完成支付</p>
+			<img src="/img/reward/wechat-2.png"  id="pay-image"/>
+		</div>
+	</div>
+	<div class="zs-modal-footer">
+		<label><input type="radio" name="zs-type" value="wechat" class="zs-type" checked="checked"><span ><span class="zs-wechat"><img src="/img/reward/wechat-btn.png"/></span></label>
+		<label><input type="radio" name="zs-type" value="alipay" class="zs-type" class="zs-alipay"><img src="/img/reward/alipay-btn.png"/></span></label>
+	</div>
+</div>
+<script type="text/javascript" src="/js/reward.js"></script>
+
+                
+
+                <hr>
+                <ul class="pager">
+                    
+                    <li class="previous">
+                        <a href="/post/springcloud%E7%B3%BB%E5%88%97-fegin/" data-toggle="tooltip" data-placement="top" title="springCloud系列-Fegin">&larr;
+                            Previous Post</a>
+                    </li>
+                    
+                    
+                </ul>
+
+                
+<div id="disqus-comment"></div>
+
+
+
+            </div>
+            
+            <div class="
+                col-lg-8 col-lg-offset-2
+                col-md-10 col-md-offset-1
+                sidebar-container">
+
+                
+                
+                <section>
+                    <hr class="hidden-sm hidden-xs">
+                    <h5><a href="/tags/">FEATURED TAGS</a></h5>
+                    <div class="tags">
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        <a href="/tags/docker" title="docker">
+                            docker
+                        </a>
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        <a href="/tags/linux" title="linux">
+                            linux
+                        </a>
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        <a href="/tags/springcloud%E7%B3%BB%E5%88%97" title="springCloud系列">
+                            springCloud系列
+                        </a>
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        <a href="/tags/%E4%B8%AD%E9%97%B4%E4%BB%B6" title="中间件">
+                            中间件
+                        </a>
+                        
+                        
+                        
+                        <a href="/tags/%E4%B8%BB%E4%BB%8E%E5%A4%8D%E5%88%B6" title="主从复制">
+                            主从复制
+                        </a>
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        <a href="/tags/%E8%B4%9F%E8%BD%BD%E5%9D%87%E8%A1%A1" title="负载均衡">
+                            负载均衡
+                        </a>
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                    </div>
+                </section>
+                
+
+                
+                
+                <section>
+                    <hr>
+                    <h5>FRIENDS</h5>
+                    <ul class="list-inline">
+                        
+                        <li><a target="_blank" href="https://zhaohuabing.com">赵化冰的博客</a></li>
+                        
+                        <li><a target="_blank" href="http://www.tianshouzhi.com">田守枝的博客</a></li>
+                        
+                    </ul>
+                </section>
+                
+            </div>
+        </div>
+    </div>
+</article>
+
+
+
+
+<footer>
+    <div class="container">
+        <div class="row">
+            <div class="col-lg-8 col-lg-offset-2 col-md-10 col-md-offset-1">
+                <ul class="list-inline text-center">
+                   
+                   <li>
+                       <a href="" rel="alternate" type="application/rss+xml" title="" >
+                           <span class="fa-stack fa-lg">
+                               <i class="fa fa-circle fa-stack-2x"></i>
+                               <i class="fa fa-rss fa-stack-1x fa-inverse"></i>
+                           </span>
+                       </a>
+                   </li>
+                   
+                    
+                    <li>
+                        <a href="mailto:maiziybtoday@gmail.com">
+                            <span class="fa-stack fa-lg">
+                                <i class="fa fa-circle fa-stack-2x"></i>
+                                <i class="fa fa-envelope fa-stack-1x fa-inverse"></i>
+                            </span>
+                        </a>
+                    </li>
+		    
+                    
+                    
+                    
+                    
+
+                    
+
+		    
+                    
+                    <li>
+                        <a target="_blank" href="/your%20wechat%20qr%20code%20image">
+                            <span class="fa-stack fa-lg">
+                                <i class="fa fa-circle fa-stack-2x"></i>
+                                <i class="fa fa-wechat fa-stack-1x fa-inverse"></i>
+                            </span>
+                        </a>
+                    </li>
+		    
+                    
+                    
+                    <li>
+                        <a target="_blank" href="https://www.linkedin.com/in/yourlinkedinid">
+                            <span class="fa-stack fa-lg">
+                                <i class="fa fa-circle fa-stack-2x"></i>
+                                <i class="fa fa-linkedin fa-stack-1x fa-inverse"></i>
+                            </span>
+                        </a>
+                    </li>
+		    
+                    
+                </ul>
+		<p class="copyright text-muted">
+                    Copyright &copy;  2019
+                    <br>
+                    <a href="https://themes.gohugo.io/hugo-theme-cleanwhite">CleanWhite Hugo Theme</a> by <a href="https://zhaohuabing.com">Huabing</a> |
+                    <iframe
+                        style="margin-left: 2px; margin-bottom:-5px;"
+                        frameborder="0" scrolling="0" width="100px" height="20px"
+                        src="https://ghbtns.com/github-btn.html?user=zhaohuabing&repo=hugo-theme-cleanwhite&type=star&count=true" >
+                    </iframe>
+                </p>
+            </div>
+        </div>
+    </div>
+</footer>
+
+
+
+
+<script>
+    function async(u, c) {
+      var d = document, t = 'script',
+          o = d.createElement(t),
+          s = d.getElementsByTagName(t)[0];
+      o.src = u;
+      if (c) { o.addEventListener('load', function (e) { c(null, e); }, false); }
+      s.parentNode.insertBefore(o, s);
+    }
+</script>
+
+
+
+
+
+
+<script>
+    
+    if($('#tag_cloud').length !== 0){
+        async("/js/jquery.tagcloud.js",function(){
+            $.fn.tagcloud.defaults = {
+                
+                color: {start: '#bbbbee', end: '#0085a1'},
+            };
+            $('#tag_cloud a').tagcloud();
+        })
+    }
+</script>
+
+
+<script>
+    async("https://cdnjs.cloudflare.com/ajax/libs/fastclick/1.0.6/fastclick.js", function(){
+        var $nav = document.querySelector("nav");
+        if($nav) FastClick.attach($nav);
+    })
+</script>
+
+
+
+
+
+
+</body>
+</html>
