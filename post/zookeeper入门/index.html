@@ -1,0 +1,914 @@
+<!DOCTYPE html>
+<html lang="en-us">
+<head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+
+    
+    <meta property="og:site_name" content="">
+    <meta property="og:type" content="article">
+
+    
+    <meta property="og:image" content="http://maizitoday.github.io//img/home-bg-jeep.jpg">
+    <meta property="twitter:image" content="http://maizitoday.github.io//img/home-bg-jeep.jpg" />
+    
+
+    
+    <meta name="title" content="Zookeeper-入门" />
+    <meta property="og:title" content="Zookeeper-入门" />
+    <meta property="twitter:title" content="Zookeeper-入门" />
+    
+
+    
+    <meta name="description" content="麦子，程序员, 开源爱好者，生活探险家 | 这里是 麦子 的博客，与你一起发现更大的世界。">
+    <meta property="og:description" content="麦子，程序员, 开源爱好者，生活探险家 | 这里是 麦子 的博客，与你一起发现更大的世界。" />
+    <meta property="twitter:description" content="麦子，程序员, 开源爱好者，生活探险家 | 这里是 麦子 的博客，与你一起发现更大的世界。" />
+    
+
+    
+    <meta property="twitter:card" content="summary" />
+    
+    
+
+    <meta name="keyword"  content="麦子, maizi, maizi, , 麦子的网络日志, 麦子的博客, maizi Blog, 博客, 个人网站, 互联网, Web, 云原生, PaaS, Istio, Kubernetes, 微服务, Microservice">
+    <link rel="shortcut icon" href="/img/favicon.ico">
+
+    <title>Zookeeper-入门-麦子的博客 | 麦子 Blog</title>
+
+    <link rel="canonical" href="/post/zookeeper%E5%85%A5%E9%97%A8/">
+
+    <link rel="stylesheet" href="/css/iDisqus.min.css"/>
+	
+    
+    <link rel="stylesheet" href="/css/bootstrap.min.css">
+
+    
+    <link rel="stylesheet" href="/css/hux-blog.min.css">
+
+    
+    <link rel="stylesheet" href="/css/syntax.css">
+
+    
+    <link rel="stylesheet" href="/css/zanshang.css">
+
+    
+    <link href="//cdnjs.cloudflare.com/ajax/libs/font-awesome/4.6.3/css/font-awesome.min.css" rel="stylesheet" type="text/css">
+    
+    
+    <script src="/js/jquery.min.js"></script>
+    
+    
+    <script src="/js/bootstrap.min.js"></script>
+    
+    
+    <script src="/js/hux-blog.min.js"></script>
+	
+    
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.13.1/styles/docco.min.css">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.13.1/highlight.min.js"></script>
+    <script>hljs.initHighlightingOnLoad();</script>
+</head>
+
+
+<nav class="navbar navbar-default navbar-custom navbar-fixed-top">
+    <div class="container-fluid">
+        
+        <div class="navbar-header page-scroll">
+            <button type="button" class="navbar-toggle">
+                <span class="sr-only">Toggle navigation</span>
+                <span class="icon-bar"></span>
+                <span class="icon-bar"></span>
+                <span class="icon-bar"></span>
+            </button>
+            <a class="navbar-brand" href="/"></a>
+        </div>
+
+        
+        
+        <div id="huxblog_navbar">
+            <div class="navbar-collapse">
+                <ul class="nav navbar-nav navbar-right">
+                    <li>
+                        <a href="/">Home</a>
+                    </li>
+                    
+                    <li>
+                        <a href="/categories/life">Life</a>
+                    </li>
+                    
+                    <li>
+                        <a href="/categories/tech">Tech</a>
+                    </li>
+                    
+                    
+		    
+                        <li><a href="/top/about/">ABOUT</a></li>
+                    
+
+                    
+		    <li>
+                        <a href="/search">SEARCH <img src="/img/search.png" height="15" style="cursor: pointer;" alt="Search"></a>
+		    </li>
+                    
+                </ul>
+            </div>
+        </div>
+        
+    </div>
+    
+</nav>
+<script>
+    
+    
+    
+    var $body   = document.body;
+    var $toggle = document.querySelector('.navbar-toggle');
+    var $navbar = document.querySelector('#huxblog_navbar');
+    var $collapse = document.querySelector('.navbar-collapse');
+
+    $toggle.addEventListener('click', handleMagic)
+    function handleMagic(e){
+        if ($navbar.className.indexOf('in') > 0) {
+        
+            $navbar.className = " ";
+            
+            setTimeout(function(){
+                
+                if($navbar.className.indexOf('in') < 0) {
+                    $collapse.style.height = "0px"
+                }
+            },400)
+        }else{
+        
+            $collapse.style.height = "auto"
+            $navbar.className += " in";
+        }
+    }
+</script>
+
+
+
+
+<style type="text/css">
+    header.intro-header {
+        background-image: url('https://img.zhaohuabing.com/in-post/2018-4-25-istio-auto-injection-with-webhook/lion.jpg')
+    }
+</style>
+<header class="intro-header">
+    <div class="container">
+        <div class="row">
+            <div class="col-lg-8 col-lg-offset-2 col-md-10 col-md-offset-1">
+                <div class="post-heading">
+                    <div class="tags">
+                        
+                        <a class="tag" href="/tags/zookeeper" title="zookeeper">
+                            zookeeper
+                        </a>
+                        
+                        <a class="tag" href="/tags/%E5%88%86%E5%B8%83%E5%BC%8F" title="分布式">
+                            分布式
+                        </a>
+                        
+                        <a class="tag" href="/tags/%E5%88%86%E5%B8%83%E5%BC%8F%E9%94%81" title="分布式锁">
+                            分布式锁
+                        </a>
+                        
+                        <a class="tag" href="/tags/%E6%9C%8D%E5%8A%A1%E6%B3%A8%E5%86%8C" title="服务注册">
+                            服务注册
+                        </a>
+                        
+                    </div>
+                    <h1>Zookeeper-入门</h1>
+                    <h2 class="subheading"></h2>
+                    <span class="meta">
+			Posted by 
+			
+			         &#34;麦子&#34;
+			 
+			on 
+			Tuesday, April 23, 2019
+                        
+                    </span>
+                </div>
+            </div>
+        </div>
+    </div>
+</header>
+
+
+
+
+<article>
+    <div class="container">
+        <div class="row">
+
+            
+            <div class="
+                col-lg-8 col-lg-offset-2
+                col-md-10 col-md-offset-1
+                post-container">
+
+                
+                <header>
+                    <h2>TOC</h2>
+                </header>
+                <nav id="TableOfContents">
+<ul>
+<li><a href="#zookeeper入门">Zookeeper入门</a>
+<ul>
+<li><a href="#工作机制">工作机制</a></li>
+<li><a href="#特点">特点</a></li>
+<li><a href="#数据结构">数据结构</a></li>
+<li><a href="#应用场景">应用场景</a>
+<ul>
+<li><a href="#统一命名服务">统一命名服务</a></li>
+<li><a href="#统一配置管理">统一配置管理</a></li>
+<li><a href="#统一集群管理">统一集群管理</a></li>
+<li><a href="#服务器动态上下线">服务器动态上下线</a></li>
+<li><a href="#软负载均衡">软负载均衡</a></li>
+</ul></li>
+</ul></li>
+<li><a href="#zookeeper集群安装">Zookeeper集群安装</a>
+<ul>
+<li><a href="#创建docker-compose-yml">创建docker-compose.yml</a></li>
+<li><a href="#运行查看服务">运行查看服务</a></li>
+<li><a href="#集群搭建修改">集群搭建修改</a></li>
+<li><a href="#查看服务启动状态">查看服务启动状态</a></li>
+<li><a href="#工具连接zookeeper">工具连接Zookeeper</a></li>
+<li><a href="#zoo-cfg配置文件">zoo.cfg配置文件</a>
+<ul>
+<li><a href="#clientport">clientPort</a></li>
+<li><a href="#datadir">dataDir</a></li>
+<li><a href="#datalogdir">dataLogDir</a></li>
+<li><a href="#ticktime">tickTime</a></li>
+<li><a href="#initlimit">initLimit</a></li>
+<li><a href="#synclimit">syncLimit</a></li>
+<li><a href="#autopurge-purgeinterval">autopurge.purgeInterval</a></li>
+<li><a href="#autopurge-snapretaincount">autopurge.snapRetainCount</a></li>
+<li><a href="#maxclientcnxns">maxClientCnxns</a></li>
+<li><a href="#server-a-b-c-d">server.A=B：C：D：</a></li>
+</ul></li>
+</ul></li>
+<li><a href="#zookeeper内部原理">Zookeeper内部原理</a>
+<ul>
+<li><a href="#选举机制">选举机制</a>
+<ul>
+<li><a href="#全新集群选举">全新集群选举</a></li>
+<li><a href="#非全新集群选举">非全新集群选举</a></li>
+</ul></li>
+<li><a href="#节点类型">节点类型</a></li>
+<li><a href="#监听器的原理">监听器的原理</a></li>
+<li><a href="#写数据流程">写数据流程</a></li>
+</ul></li>
+</ul>
+</nav>
+                
+                
+
+<p>[TOC]</p>
+
+<p><strong>说明： 本学习主要对尚硅谷大数据研发部《zookeeper视频》记录，一下文字来源这个视频PPT</strong></p>
+
+<p><strong>注意：</strong> <strong>Zookeeper 版本 3.4</strong></p>
+
+<h1 id="zookeeper入门">Zookeeper入门</h1>
+
+<p>zookeeper是一个开源的分布式的，为分布式应用<strong>提供协调服务</strong>的项目。</p>
+
+<h2 id="工作机制">工作机制</h2>
+
+<p><img src="/img/4-26-1.png" alt="4-26-1" /></p>
+
+<h2 id="特点">特点</h2>
+
+<p><img src="/img/4-26-2.png" alt="4-26-2" /></p>
+
+<h2 id="数据结构">数据结构</h2>
+
+<p><img src="/img/4-26-3.png" alt="4-26-3" /></p>
+
+<h2 id="应用场景">应用场景</h2>
+
+<h3 id="统一命名服务">统一命名服务</h3>
+
+<p><img src="/img/4-26-4.png" alt="4-26-4" /></p>
+
+<h3 id="统一配置管理">统一配置管理</h3>
+
+<p><img src="/img/4-26-5.png" alt="4-26-5" /></p>
+
+<h3 id="统一集群管理">统一集群管理</h3>
+
+<p><img src="/img/4-26-6.png" alt="4-26-6" /></p>
+
+<h3 id="服务器动态上下线">服务器动态上下线</h3>
+
+<p><img src="/img/4-26-7.png" alt="4-26-7" /></p>
+
+<h3 id="软负载均衡">软负载均衡</h3>
+
+<p><img src="/img/4-26-8.png" alt="4-26-8" /></p>
+
+<h1 id="zookeeper集群安装">Zookeeper集群安装</h1>
+
+<h2 id="创建docker-compose-yml">创建docker-compose.yml</h2>
+
+<pre><code class="language-yaml">version: '3.4'
+
+services:
+  zoo1:
+    image: zookeeper
+    restart: always
+    hostname: zoo1
+    ports:
+      - 2181:2181
+    environment:
+      ZOO_MY_ID: 1
+      ZOO_SERVERS: server.1=0.0.0.0:2888:3888 server.2=zoo2:2888:3888 server.3=zoo3:2888:3888
+
+  zoo2:
+    image: zookeeper
+    restart: always
+    hostname: zoo2
+    ports:
+      - 2182:2181
+    environment:
+      ZOO_MY_ID: 2
+      ZOO_SERVERS: server.1=zoo1:2888:3888 server.2=0.0.0.0:2888:3888 server.3=zoo3:2888:3888
+
+  zoo3:
+    image: zookeeper
+    restart: always
+    hostname: zoo3
+    ports:
+      - 2183:2181
+    environment:
+      ZOO_MY_ID: 3
+      ZOO_SERVERS: server.1=zoo1:2888:3888 server.2=zoo2:2888:3888 server.3=0.0.0.0:2888:3888
+</code></pre>
+
+<h2 id="运行查看服务">运行查看服务</h2>
+
+<pre><code class="language-yaml">#运行
+docker-compose up -d
+
+#查看运行服务 
+docker-compose ps 
+
+#如下：
+➜  zookeeper docker-compose ps
+      Name                    Command               State                     Ports
+------------------------------------------------------------------------------------------------------
+zookeeper_zoo1_1   /docker-entrypoint.sh zkSe ...   Up      0.0.0.0:2181-&gt;2181/tcp, 2888/tcp, 3888/tcp
+zookeeper_zoo2_1   /docker-entrypoint.sh zkSe ...   Up      0.0.0.0:2182-&gt;2181/tcp, 2888/tcp, 3888/tcp
+zookeeper_zoo3_1   /docker-entrypoint.sh zkSe ...   Up      0.0.0.0:2183-&gt;2181/tcp, 2888/tcp, 3888/tcp
+
+#进入其中一个容器
+➜  zookeeper docker-compose exec zoo1 /bin/bash
+</code></pre>
+
+<h2 id="集群搭建修改">集群搭建修改</h2>
+
+<p>用docker-compose进行集群搭建可以看出， 主要是下面这个地方的修改，</p>
+
+<pre><code class="language-yaml"> environment:
+      ZOO_MY_ID: 2
+      ZOO_SERVERS: server.1=zoo1:2888:3888 server.2=0.0.0.0:2888:3888 server.3=zoo3:2888:3888
+</code></pre>
+
+<p>进入容器中查看：</p>
+
+<pre><code class="language-yaml">#myid 位置和值 
+bash-4.4# pwd
+/data
+bash-4.4# ls
+myid       version-2
+bash-4.4# cat myid
+2
+bash-4.4#
+
+#zoo.cfg中配置了server服务组
+bash-4.4# cat zoo.cfg
+clientPort=2181
+dataDir=/data
+dataLogDir=/datalog
+tickTime=2000
+initLimit=5
+syncLimit=2
+autopurge.snapRetainCount=3
+autopurge.purgeInterval=0
+maxClientCnxns=60
+server.1=zoo1:2888:3888
+server.2=0.0.0.0:2888:3888
+server.3=zoo3:2888:3888
+bash-4.4#
+</code></pre>
+
+<p>如果是Linux中配置，也只需要修改这两个地方。</p>
+
+<p>其中zoo.cfg的修改就在下载的Zookeeper包，解压里面的conf里面的<strong>zoo.cfg</strong>直接修改。<strong>myid</strong>创建在zoo.cfg配置文件中  dataDir=/data ， 这个路径下。</p>
+
+<h2 id="查看服务启动状态">查看服务启动状态</h2>
+
+<pre><code class="language-shell">#查看服务状态 
+bash-4.4# pwd
+/zookeeper-3.4.14/bin
+bash-4.4# ./zkServer.sh status
+ZooKeeper JMX enabled by default
+Using config: /conf/zoo.cfg
+Mode: follower  #这里是follower角色
+
+#启动客户端
+bash-4.4# ./zkCli.sh
+</code></pre>
+
+<h2 id="工具连接zookeeper">工具连接Zookeeper</h2>
+
+<p>zookeeper-visualizer这个工具很好用，下载地址：<a href="https://github.com/xin497668869/zookeeper-visualizer，效果图如下：">https://github.com/xin497668869/zookeeper-visualizer，效果图如下：</a></p>
+
+<p><img src="/img/4-26-9.png" alt="4-26-9" /></p>
+
+<h2 id="zoo-cfg配置文件">zoo.cfg配置文件</h2>
+
+<p>转载地址：<a href="https://blog.csdn.net/lan12334321234/article/details/70049945">https://blog.csdn.net/lan12334321234/article/details/70049945</a></p>
+
+<pre><code class="language-properties">clientPort=2181
+dataDir=/data
+dataLogDir=/datalog
+tickTime=2000
+initLimit=5
+syncLimit=2
+autopurge.snapRetainCount=3
+autopurge.purgeInterval=0
+maxClientCnxns=60
+server.1=zoo1:2888:3888
+server.2=0.0.0.0:2888:3888
+server.3=zoo3:2888:3888
+
+ #2181：对cline端提供服务
+ #2888：集群内机器通讯使用（Leader监听此端口），副本数据同步端口。
+ #3888：选举leader使用
+</code></pre>
+
+<h3 id="clientport">clientPort</h3>
+
+<p>客户端连接的接口，客户端连接zookeeper服务器的端口，zookeeper会监听这个端口，接收客户端的请求访问！这个端口默认是2181。</p>
+
+<h3 id="datadir">dataDir</h3>
+
+<p>该属性对应的目录是用来存放myid信息跟一些版本，日志，跟服务器唯一的ID信息等。</p>
+
+<h3 id="datalogdir">dataLogDir</h3>
+
+<p>是事务日志目录</p>
+
+<h3 id="ticktime">tickTime</h3>
+
+<p>客户端与服务器或者服务器与服务器之间维持心跳，也就是每个tickTime时间就会发送一次心跳。通过心跳不仅能够用来监听机器的工作状态，还可以通过心跳来控制Flower跟Leader的通信时间，默认情况下FL的会话时常是心跳间隔的两倍。</p>
+
+<h3 id="initlimit">initLimit</h3>
+
+<p>集群中的follower服务器(F)与leader服务器(L)之间<strong>初始连接</strong>时能容忍的最多心跳数（tickTime的数量）</p>
+
+<h3 id="synclimit">syncLimit</h3>
+
+<p>集群中flower服务器（F）跟leader（L）服务器之间的请求和答应最多能容忍的心跳数。</p>
+
+<h3 id="autopurge-purgeinterval">autopurge.purgeInterval</h3>
+
+<p>在上文中已经提到，3.4.0及之后版本，ZK提供了自动清理事务日志和快照文件的功能，这个参数指定了清理频率，单位是小时，需要配置一个1或更大的整数，默认是0，表示不开启自动清理功能。</p>
+
+<h3 id="autopurge-snapretaincount">autopurge.snapRetainCount</h3>
+
+<p>这个参数和上面的参数搭配使用，这个参数指定了需要保留的文件数目。默认是保留3个。</p>
+
+<h3 id="maxclientcnxns">maxClientCnxns</h3>
+
+<p>单个客户端与单台服务器之间的连接数的限制，是ip级别的，默认是60，如果设置为0，那么表明不作任何限制。请注意这个限制的使用范围，<strong>仅仅是单台客户端机器与单台ZK服务器之间的连接数限制</strong>，不是针对指定客户端IP，也不是ZK集群的连接数限制，也不是单台ZK对所有客户端的连接数限制。</p>
+
+<h3 id="server-a-b-c-d">server.A=B：C：D：</h3>
+
+<p>server.A=B：C：D：其中 A 是一个数字，表示这个是第几号服务器；<strong>B 是这个服务器的 ip 地址</strong>；C 表示的是这个服务器与集群中的 Leader 服务器交换信息的端口；D 表示的是万一集群中的 Leader 服务器挂了，需要一个端口来重新进行选举，选出一个新的 Leader，而这个端口就是用来执行选举时服务器相互通信的端口。如果是伪集群的配置方式，由于 B 都是一样，所以不同的 Zookeeper 实例通信端口号不能一样，所以要给它们分配不同的端口号。<strong>Zookeeper 启动时会读取dataDir里面的myid文件，拿到里面的数据与 zoo.cfg 里面的配置信息比较从而判断到底是那个 server。</strong></p>
+
+<h1 id="zookeeper内部原理">Zookeeper内部原理</h1>
+
+<h2 id="选举机制">选举机制</h2>
+
+<p><img src="/img/4-26-10.png" alt="4-26-10" /></p>
+
+<h3 id="全新集群选举">全新集群选举</h3>
+
+<p>也就是服务依次启动的时候，刚开始启动。</p>
+
+<p><img src="/img/4-26-11.png" alt="4-26-11" /></p>
+
+<p>其中需要注意， 当1号机器，收到3号机器发送过来的信息后，他会把投2号的一票，去投3号，2号的也会把自己的一票投3号机器， 相当于一个投票池子里面， 每一台机器只能投一票，当发现比自己myid大的时候，就把投给自己唯一个票投给比他大的myid。</p>
+
+<p><strong>注意：在初始启动时候， myid的值越大，机会就大，其他机器认为你比他要牛。</strong></p>
+
+<h3 id="非全新集群选举">非全新集群选举</h3>
+
+<p><img src="/img/4-26-12.png" alt="4-26-12" /></p>
+
+<h2 id="节点类型">节点类型</h2>
+
+<p><img src="/img/4-26-13.png" alt="4-26-13" /></p>
+
+<h2 id="监听器的原理">监听器的原理</h2>
+
+<p><img src="/img/4-26-16.png" alt="4-26-16" /></p>
+
+<h2 id="写数据流程">写数据流程</h2>
+
+<p><img src="/img/4-26-17.png" alt="4-26-17" /></p>
+
+
+                
+                
+<div class="entry-shang text-center">
+    
+	    <p>「真诚赞赏，手留余香」</p>
+	
+	<button class="zs show-zs btn btn-bred">赞赏支持</button>
+</div>
+<div class="zs-modal-bg"></div>
+<div class="zs-modal-box">
+	<div class="zs-modal-head">
+		<button type="button" class="close">×</button>
+		<span class="author"><a href="http://maizitoday.github.io/"><img src="/img/favicon.png" /></a></span>
+        
+	        <p class="tip"><i></i><span>真诚赞赏，手留余香</span></p>
+		
+ 
+	</div>
+	<div class="zs-modal-body">
+		<div class="zs-modal-btns">
+			<button class="btn btn-blink" data-num="2">2元</button>
+			<button class="btn btn-blink" data-num="5">5元</button>
+			<button class="btn btn-blink" data-num="10">10元</button>
+			<button class="btn btn-blink" data-num="50">50元</button>
+			<button class="btn btn-blink" data-num="100">100元</button>
+			<button class="btn btn-blink" data-num="1">任意金额</button>
+		</div>
+		<div class="zs-modal-pay">
+			<button class="btn btn-bred" id="pay-text">2元</button>
+			<p>使用<span id="pay-type">微信</span>扫描二维码完成支付</p>
+			<img src="/img/reward/wechat-2.png"  id="pay-image"/>
+		</div>
+	</div>
+	<div class="zs-modal-footer">
+		<label><input type="radio" name="zs-type" value="wechat" class="zs-type" checked="checked"><span ><span class="zs-wechat"><img src="/img/reward/wechat-btn.png"/></span></label>
+		<label><input type="radio" name="zs-type" value="alipay" class="zs-type" class="zs-alipay"><img src="/img/reward/alipay-btn.png"/></span></label>
+	</div>
+</div>
+<script type="text/javascript" src="/js/reward.js"></script>
+
+                
+
+                <hr>
+                <ul class="pager">
+                    
+                    <li class="previous">
+                        <a href="/post/java%E5%9F%BA%E7%A1%80-jvm/" data-toggle="tooltip" data-placement="top" title="java基础-jvm">&larr;
+                            Previous Post</a>
+                    </li>
+                    
+                    
+                    <li class="next">
+                        <a href="/post/docker%E7%B3%BB%E5%88%97-compose/" data-toggle="tooltip" data-placement="top" title="docker-compose终端常用命令">Next
+                            Post &rarr;</a>
+                    </li>
+                    
+                </ul>
+
+                
+<div id="disqus-comment"></div>
+
+
+
+            </div>
+            
+            <div class="
+                col-lg-8 col-lg-offset-2
+                col-md-10 col-md-offset-1
+                sidebar-container">
+
+                
+                
+                <section>
+                    <hr class="hidden-sm hidden-xs">
+                    <h5><a href="/tags/">FEATURED TAGS</a></h5>
+                    <div class="tags">
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        <a href="/tags/compose" title="compose">
+                            compose
+                        </a>
+                        
+                        
+                        
+                        <a href="/tags/docker" title="docker">
+                            docker
+                        </a>
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        <a href="/tags/linux" title="linux">
+                            linux
+                        </a>
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        <a href="/tags/springcloud%E7%B3%BB%E5%88%97" title="springCloud系列">
+                            springCloud系列
+                        </a>
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        <a href="/tags/zookeeper" title="zookeeper">
+                            zookeeper
+                        </a>
+                        
+                        
+                        
+                        <a href="/tags/%E4%B8%AD%E9%97%B4%E4%BB%B6" title="中间件">
+                            中间件
+                        </a>
+                        
+                        
+                        
+                        <a href="/tags/%E4%B8%BB%E4%BB%8E%E5%A4%8D%E5%88%B6" title="主从复制">
+                            主从复制
+                        </a>
+                        
+                        
+                        
+                        
+                        
+                        <a href="/tags/%E5%88%86%E5%B8%83%E5%BC%8F%E9%94%81" title="分布式锁">
+                            分布式锁
+                        </a>
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        <a href="/tags/%E5%B8%B8%E7%94%A8%E5%91%BD%E4%BB%A4" title="常用命令">
+                            常用命令
+                        </a>
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        <a href="/tags/%E8%B4%9F%E8%BD%BD%E5%9D%87%E8%A1%A1" title="负载均衡">
+                            负载均衡
+                        </a>
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                    </div>
+                </section>
+                
+
+                
+                
+                <section>
+                    <hr>
+                    <h5>FRIENDS</h5>
+                    <ul class="list-inline">
+                        
+                        <li><a target="_blank" href="https://zhaohuabing.com">赵化冰的博客</a></li>
+                        
+                        <li><a target="_blank" href="http://www.tianshouzhi.com">田守枝的博客</a></li>
+                        
+                    </ul>
+                </section>
+                
+            </div>
+        </div>
+    </div>
+</article>
+
+
+
+
+<footer>
+    <div class="container">
+        <div class="row">
+            <div class="col-lg-8 col-lg-offset-2 col-md-10 col-md-offset-1">
+                <ul class="list-inline text-center">
+                   
+                   <li>
+                       <a href="" rel="alternate" type="application/rss+xml" title="" >
+                           <span class="fa-stack fa-lg">
+                               <i class="fa fa-circle fa-stack-2x"></i>
+                               <i class="fa fa-rss fa-stack-1x fa-inverse"></i>
+                           </span>
+                       </a>
+                   </li>
+                   
+                    
+                    <li>
+                        <a href="mailto:maiziybtoday@gmail.com">
+                            <span class="fa-stack fa-lg">
+                                <i class="fa fa-circle fa-stack-2x"></i>
+                                <i class="fa fa-envelope fa-stack-1x fa-inverse"></i>
+                            </span>
+                        </a>
+                    </li>
+		    
+                    
+                    
+                    
+                    
+
+                    
+
+		    
+                    
+                    <li>
+                        <a target="_blank" href="/your%20wechat%20qr%20code%20image">
+                            <span class="fa-stack fa-lg">
+                                <i class="fa fa-circle fa-stack-2x"></i>
+                                <i class="fa fa-wechat fa-stack-1x fa-inverse"></i>
+                            </span>
+                        </a>
+                    </li>
+		    
+                    
+                    
+                    <li>
+                        <a target="_blank" href="https://www.linkedin.com/in/yourlinkedinid">
+                            <span class="fa-stack fa-lg">
+                                <i class="fa fa-circle fa-stack-2x"></i>
+                                <i class="fa fa-linkedin fa-stack-1x fa-inverse"></i>
+                            </span>
+                        </a>
+                    </li>
+		    
+                    
+                </ul>
+		<p class="copyright text-muted">
+                    Copyright &copy;  2019
+                    <br>
+                    <a href="https://themes.gohugo.io/hugo-theme-cleanwhite">CleanWhite Hugo Theme</a> by <a href="https://zhaohuabing.com">Huabing</a> |
+                    <iframe
+                        style="margin-left: 2px; margin-bottom:-5px;"
+                        frameborder="0" scrolling="0" width="100px" height="20px"
+                        src="https://ghbtns.com/github-btn.html?user=zhaohuabing&repo=hugo-theme-cleanwhite&type=star&count=true" >
+                    </iframe>
+                </p>
+            </div>
+        </div>
+    </div>
+</footer>
+
+
+
+
+<script>
+    function async(u, c) {
+      var d = document, t = 'script',
+          o = d.createElement(t),
+          s = d.getElementsByTagName(t)[0];
+      o.src = u;
+      if (c) { o.addEventListener('load', function (e) { c(null, e); }, false); }
+      s.parentNode.insertBefore(o, s);
+    }
+</script>
+
+
+
+
+
+
+<script>
+    
+    if($('#tag_cloud').length !== 0){
+        async("/js/jquery.tagcloud.js",function(){
+            $.fn.tagcloud.defaults = {
+                
+                color: {start: '#bbbbee', end: '#0085a1'},
+            };
+            $('#tag_cloud a').tagcloud();
+        })
+    }
+</script>
+
+
+<script>
+    async("https://cdnjs.cloudflare.com/ajax/libs/fastclick/1.0.6/fastclick.js", function(){
+        var $nav = document.querySelector("nav");
+        if($nav) FastClick.attach($nav);
+    })
+</script>
+
+
+
+
+
+
+</body>
+</html>
