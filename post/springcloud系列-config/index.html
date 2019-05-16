@@ -179,7 +179,7 @@
 			         &#34;麦子&#34;
 			 
 			on 
-			Monday, April 22, 2019
+			Thursday, May 16, 2019
                         
                     </span>
                 </div>
@@ -205,13 +205,120 @@
                 <header>
                     <h2>TOC</h2>
                 </header>
+                <nav id="TableOfContents">
+<ul>
+<li><a href="#config作用">config作用</a></li>
+<li><a href="#config流程">config流程</a>
+<ul>
+<li><a href="#config-server-和-git-通信">config-server 和 git 通信</a>
+<ul>
+<li><a href="#pom-xml">pom.xml</a></li>
+<li><a href="#application-yml">application.yml</a></li>
+<li><a href="#测试访问效果">测试访问效果</a></li>
+<li><a href="#配置的读取规则">配置的读取规则</a></li>
+</ul></li>
+<li><a href="#config-client-和-config-server通信">config-client 和 config-server通信</a>
+<ul>
+<li><a href="#pom-xml-1">pom.xml</a></li>
+<li><a href="#bootstrap-yml">bootstrap.yml</a></li>
+<li><a href="#github上面资源文件路径和application-yml文件">github上面资源文件路径和application.yml文件</a></li>
+<li><a href="#运行效果">运行效果</a></li>
+</ul></li>
+</ul></li>
+<li><a href="#自动刷新">自动刷新</a></li>
+</ul>
+</nav>
                 
                 
-                <p>[TOC]</p>
+
+<p>[TOC]</p>
 
 <p><strong>说明： 本学习主要对尚硅谷周阳大神《SpringCloud视频》记录，一下文字来源这个视频PPT</strong></p>
 
 <p><strong>说明： 版本springboot2.14</strong>   <strong><spring-cloud.version>Greenwich.SR1</spring-cloud.version></strong></p>
+
+<h1 id="config作用">config作用</h1>
+
+<p>SpringCloud Config为微服务架构中的微服务提供集中化的外部配置支持，配置服务器为<strong>各个不同微服务</strong>应用的所有环境提供了一个中心化的<strong>外部</strong>配置。 我们现在可以直接在clone在本地的git配置环境中，进行直接修改相关配置，然后不需要重启对应的服务。更加的方便。</p>
+
+<ol>
+<li>集中管理配置文件</li>
+<li>不同环境不同配置，动态化配置更新，分环境部署比如dev/test/prod</li>
+<li>运行期间动态调整配置，不再需要在每个服务部署的机器上编写配置文件,服务会向配置中心统一拉取配置自己的配置</li>
+<li>当配置发生变动时，服务不需要重启即可感知到配置的变化并应用新的配置。</li>
+</ol>
+
+<h1 id="config流程">config流程</h1>
+
+<p><img src="/img/5-16-11.png" alt="5-16-11" /></p>
+
+<h2 id="config-server-和-git-通信">config-server 和 git 通信</h2>
+
+<h3 id="pom-xml">pom.xml</h3>
+
+<pre><code class="language-xml">&lt;dependency&gt;
+			&lt;groupId&gt;org.springframework.cloud&lt;/groupId&gt;
+			&lt;artifactId&gt;spring-cloud-config-server&lt;/artifactId&gt;
+&lt;/dependency&gt;
+</code></pre>
+
+<h3 id="application-yml">application.yml</h3>
+
+<pre><code class="language-yaml">spring:
+  application:
+    name: service-config
+  cloud:
+    config:
+      server:
+        git:
+          uri: https://github.com/maizitoday/springcloud-config.git  #git 地址 
+          search-paths: 
+             -projectA #会在github下面的这个文件夹下面去找相关文件。
+          default-label： #分支
+</code></pre>
+
+<h3 id="测试访问效果">测试访问效果</h3>
+
+<p><img src="/img/5-16-12.png" alt="5-16-12" /></p>
+
+<h3 id="配置的读取规则">配置的读取规则</h3>
+
+<p><img src="/img/5-16-13.png" alt="5-16-13" /></p>
+
+<p>上面图，显示访问github上面的application.yml的方式。label是分支的名称。可以根据这种方式来读取git上面的数据</p>
+
+<h2 id="config-client-和-config-server通信">config-client 和 config-server通信</h2>
+
+<h3 id="pom-xml-1">pom.xml</h3>
+
+<pre><code class="language-xml">&lt;dependency&gt;
+			&lt;groupId&gt;org.springframework.cloud&lt;/groupId&gt;
+			&lt;artifactId&gt;spring-cloud-starter-config&lt;/artifactId&gt;
+&lt;/dependency&gt;
+</code></pre>
+
+<h3 id="bootstrap-yml">bootstrap.yml</h3>
+
+<pre><code class="language-yaml">spring:
+  cloud:
+    config:
+      name: application-client  #指定github上面的确定的资源文件名称，没有后缀yml
+      profile: dev  #本次访问的资源项目
+      label: master  #当前分支 
+      uri: http://localhost:8080  #config 服务， 指定从哪一个服务来获取github上面的资源
+</code></pre>
+
+<h3 id="github上面资源文件路径和application-yml文件">github上面资源文件路径和application.yml文件</h3>
+
+<p><img src="/img/5-16-14.png" alt="5-16-14" /></p>
+
+<h3 id="运行效果">运行效果</h3>
+
+<p><img src="/img/5-16-15.png" alt="5-16-15" /></p>
+
+<h1 id="自动刷新">自动刷新</h1>
+
+<p>当我们修改github本地文件的时候，需要在浏览器端，马上可以看到最新的数据，需要Spring Cloud Bus 加上 MQ 来实现，然后在github上面需要设置一个钩子， 加入相关指令代码， 然后就可以了 。 后期在加上这一块的知识实现。</p>
 
 
                 
@@ -260,15 +367,10 @@
                 <ul class="pager">
                     
                     <li class="previous">
-                        <a href="/post/springcloud%E7%B3%BB%E5%88%97-fegin/" data-toggle="tooltip" data-placement="top" title="springCloud系列-Fegin">&larr;
+                        <a href="/post/springcloud%E7%B3%BB%E5%88%97-gateway%E7%BD%91%E5%85%B3/" data-toggle="tooltip" data-placement="top" title="springCloud系列-gateway网关">&larr;
                             Previous Post</a>
                     </li>
                     
-                    
-                    <li class="next">
-                        <a href="/post/java%E5%9F%BA%E7%A1%80-jvm/" data-toggle="tooltip" data-placement="top" title="java基础-jvm">Next
-                            Post &rarr;</a>
-                    </li>
                     
                 </ul>
 
