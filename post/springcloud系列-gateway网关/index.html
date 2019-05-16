@@ -1,0 +1,1025 @@
+<!DOCTYPE html>
+<html lang="en-us">
+<head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+
+    
+    <meta property="og:site_name" content="">
+    <meta property="og:type" content="article">
+
+    
+    <meta property="og:image" content="http://maizitoday.github.io//img/home-bg-jeep.jpg">
+    <meta property="twitter:image" content="http://maizitoday.github.io//img/home-bg-jeep.jpg" />
+    
+
+    
+    <meta name="title" content="springCloud系列-gateway网关" />
+    <meta property="og:title" content="springCloud系列-gateway网关" />
+    <meta property="twitter:title" content="springCloud系列-gateway网关" />
+    
+
+    
+    <meta name="description" content="麦子，程序员, 开源爱好者，生活探险家 | 这里是 麦子 的博客，与你一起发现更大的世界。">
+    <meta property="og:description" content="麦子，程序员, 开源爱好者，生活探险家 | 这里是 麦子 的博客，与你一起发现更大的世界。" />
+    <meta property="twitter:description" content="麦子，程序员, 开源爱好者，生活探险家 | 这里是 麦子 的博客，与你一起发现更大的世界。" />
+    
+
+    
+    <meta property="twitter:card" content="summary" />
+    
+    
+
+    <meta name="keyword"  content="麦子, maizi, maizi, , 麦子的网络日志, 麦子的博客, maizi Blog, 博客, 个人网站, 互联网, Web, 云原生, PaaS, Istio, Kubernetes, 微服务, Microservice">
+    <link rel="shortcut icon" href="/img/favicon.ico">
+
+    <title>springCloud系列-gateway网关-麦子的博客 | 麦子 Blog</title>
+
+    <link rel="canonical" href="/post/springcloud%E7%B3%BB%E5%88%97-gateway%E7%BD%91%E5%85%B3/">
+
+    <link rel="stylesheet" href="/css/iDisqus.min.css"/>
+	
+    
+    <link rel="stylesheet" href="/css/bootstrap.min.css">
+
+    
+    <link rel="stylesheet" href="/css/hux-blog.min.css">
+
+    
+    <link rel="stylesheet" href="/css/syntax.css">
+
+    
+    <link rel="stylesheet" href="/css/zanshang.css">
+
+    
+    <link href="//cdnjs.cloudflare.com/ajax/libs/font-awesome/4.6.3/css/font-awesome.min.css" rel="stylesheet" type="text/css">
+    
+    
+    <script src="/js/jquery.min.js"></script>
+    
+    
+    <script src="/js/bootstrap.min.js"></script>
+    
+    
+    <script src="/js/hux-blog.min.js"></script>
+	
+    
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.13.1/styles/docco.min.css">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.13.1/highlight.min.js"></script>
+    <script>hljs.initHighlightingOnLoad();</script>
+</head>
+
+
+<nav class="navbar navbar-default navbar-custom navbar-fixed-top">
+    <div class="container-fluid">
+        
+        <div class="navbar-header page-scroll">
+            <button type="button" class="navbar-toggle">
+                <span class="sr-only">Toggle navigation</span>
+                <span class="icon-bar"></span>
+                <span class="icon-bar"></span>
+                <span class="icon-bar"></span>
+            </button>
+            <a class="navbar-brand" href="/"></a>
+        </div>
+
+        
+        
+        <div id="huxblog_navbar">
+            <div class="navbar-collapse">
+                <ul class="nav navbar-nav navbar-right">
+                    <li>
+                        <a href="/">Home</a>
+                    </li>
+                    
+                    <li>
+                        <a href="/categories/life">Life</a>
+                    </li>
+                    
+                    <li>
+                        <a href="/categories/tech">Tech</a>
+                    </li>
+                    
+                    
+		    
+                        <li><a href="/top/about/">ABOUT</a></li>
+                    
+
+                    
+		    <li>
+                        <a href="/search">SEARCH <img src="/img/search.png" height="15" style="cursor: pointer;" alt="Search"></a>
+		    </li>
+                    
+                </ul>
+            </div>
+        </div>
+        
+    </div>
+    
+</nav>
+<script>
+    
+    
+    
+    var $body   = document.body;
+    var $toggle = document.querySelector('.navbar-toggle');
+    var $navbar = document.querySelector('#huxblog_navbar');
+    var $collapse = document.querySelector('.navbar-collapse');
+
+    $toggle.addEventListener('click', handleMagic)
+    function handleMagic(e){
+        if ($navbar.className.indexOf('in') > 0) {
+        
+            $navbar.className = " ";
+            
+            setTimeout(function(){
+                
+                if($navbar.className.indexOf('in') < 0) {
+                    $collapse.style.height = "0px"
+                }
+            },400)
+        }else{
+        
+            $collapse.style.height = "auto"
+            $navbar.className += " in";
+        }
+    }
+</script>
+
+
+
+
+<style type="text/css">
+    header.intro-header {
+        background-image: url('https://zhaohuabing.com/img/2018-12-27-the-obstacles-to-put-istio-into-production/background.jpg')
+    }
+</style>
+<header class="intro-header">
+    <div class="container">
+        <div class="row">
+            <div class="col-lg-8 col-lg-offset-2 col-md-10 col-md-offset-1">
+                <div class="post-heading">
+                    <div class="tags">
+                        
+                        <a class="tag" href="/tags/springcloud" title="springCloud">
+                            springCloud
+                        </a>
+                        
+                        <a class="tag" href="/tags/gateway" title="gateway">
+                            gateway
+                        </a>
+                        
+                        <a class="tag" href="/tags/%E7%BD%91%E5%85%B3" title="网关">
+                            网关
+                        </a>
+                        
+                    </div>
+                    <h1>springCloud系列-gateway网关</h1>
+                    <h2 class="subheading"></h2>
+                    <span class="meta">
+			Posted by 
+			
+			         &#34;麦子&#34;
+			 
+			on 
+			Monday, May 13, 2019
+                        
+                    </span>
+                </div>
+            </div>
+        </div>
+    </div>
+</header>
+
+
+
+
+<article>
+    <div class="container">
+        <div class="row">
+
+            
+            <div class="
+                col-lg-8 col-lg-offset-2
+                col-md-10 col-md-offset-1
+                post-container">
+
+                
+                <header>
+                    <h2>TOC</h2>
+                </header>
+                <nav id="TableOfContents">
+<ul>
+<li><a href="#路由器和猫区别">路由器和猫区别</a></li>
+<li><a href="#gateway网关作用">gateway网关作用</a>
+<ul>
+<li><a href="#为什么用网关">为什么用网关</a></li>
+<li><a href="#api-网关后的优点">API 网关后的优点</a></li>
+<li><a href="#网关和nginx的区别">网关和Nginx的区别</a></li>
+</ul></li>
+<li><a href="#路由规则">路由规则</a>
+<ul>
+<li><a href="#说明">说明</a></li>
+<li><a href="#基础配置">基础配置</a></li>
+<li><a href="#通过时间来匹配">通过时间来匹配</a></li>
+<li><a href="#通过-cookie-匹配">通过 Cookie 匹配</a></li>
+<li><a href="#通过-host-匹配">通过 Host 匹配</a></li>
+<li><a href="#通过请求方式匹配">通过请求方式匹配</a></li>
+<li><a href="#通过请求路径匹配">通过请求路径匹配</a></li>
+<li><a href="#通过请求-ip">通过请求 ip</a></li>
+<li><a href="#组合使用">组合使用</a></li>
+</ul></li>
+<li><a href="#注册中心">注册中心</a>
+<ul>
+<li><a href="#pom-xml">pom.xml</a></li>
+<li><a href="#application-yml">application.yml</a></li>
+<li><a href="#eureka服务查看">eureka服务查看</a></li>
+<li><a href="#代理服务运行结果">代理服务运行结果</a></li>
+</ul></li>
+<li><a href="#基于-filter-过滤器-实现的高级功能">基于 Filter(过滤器) 实现的高级功能</a>
+<ul>
+<li><a href="#快速上手">快速上手</a></li>
+<li><a href="#效果图">效果图</a></li>
+<li><a href="#filter-的一些常用功能">Filter 的一些常用功能</a>
+<ul>
+<li><a href="#stripprefix-filter">StripPrefix Filter</a></li>
+<li><a href="#prefixpath-filter">PrefixPath Filter</a></li>
+<li><a href="#限速路由器">限速路由器</a></li>
+<li><a href="#熔断路由器">熔断路由器</a></li>
+<li><a href="#重试路由器">重试路由器</a></li>
+</ul></li>
+</ul></li>
+</ul>
+</nav>
+                
+                
+
+<p>[TOC]</p>
+
+<p><strong>说明：文章转载 博客地址： <a href="http://www.ityouknow.com，作者：纯洁的微笑">http://www.ityouknow.com，作者：纯洁的微笑</a></strong></p>
+
+<h1 id="路由器和猫区别">路由器和猫区别</h1>
+
+<p>猫是什么？</p>
+
+<p>猫叫正名叫【调制解调器】, 电脑通过它才能拨号上网</p>
+
+<p>路由器是什么？</p>
+
+<p>路由器作用是可以一个网线使几台电脑可以同时上网,起到一个分配的作用。上面连接猫,下面连接电脑。</p>
+
+<h1 id="gateway网关作用">gateway网关作用</h1>
+
+<p>API网关是一个服务器，是系统的唯一入口。从面向对象设计的角度看，它与外观模式类似。API网关封装了系统内部架构，为每个客户端提供一个定制的API。<strong>它可能还具有其它职责，如身份验证、监控、负载均衡、缓存、请求分片与管理、静态响应处理。</strong>
+API网关方式的核心要点是，所有的客户端和消费端都通过统一的网关接入微服务，在网关层处理所有的非业务功能。通常，网关也是提供REST/HTTP的访问API。服务端通过API-GW注册和管理服务。</p>
+
+<p><img src="/img/5-16-1.png" alt="250417-20171207092518113-1200547245" /></p>
+
+<h2 id="为什么用网关">为什么用网关</h2>
+
+<p>原文地址：<a href="https://www.infoq.cn/article/comparing-api-gateway-performances">https://www.infoq.cn/article/comparing-api-gateway-performances</a></p>
+
+<p>API 网关出现的原因是微服务架构的出现，不同的微服务一般会有不同的网络地址，而外部客户端可能需要调用多个服务的接口才能完成一个业务需求，如果让客户端直接与各个微服务通信，会有以下的问题：</p>
+
+<ol>
+<li>客户端会多次请求不同的微服务，增加了客户端的复杂性。</li>
+<li>存在跨域请求，在一定场景下处理相对复杂。</li>
+<li>认证复杂，每个服务都需要独立认证。</li>
+<li>难以重构，随着项目的迭代，可能需要重新划分微服务。例如，可能将多个服务合并成一个或者将一个服务拆分成多个。如果客户端直接与微服务通信，那么重构将会很难实施。</li>
+<li>某些微服务可能使用了防火墙 / 浏览器不友好的协议，直接访问会有一定的困难。</li>
+</ol>
+
+<h2 id="api-网关后的优点">API 网关后的优点</h2>
+
+<p><strong>原文地址：<a href="https://www.infoq.cn/article/comparing-api-gateway-performances">https://www.infoq.cn/article/comparing-api-gateway-performances</a></strong></p>
+
+<ul>
+<li>易于监控。可以在网关收集监控数据并将其推送到外部系统进行分析。</li>
+<li>易于认证。可以在网关上进行认证，然后再将请求转发到后端的微服务，而无须在每个微服务中进行认证。</li>
+<li>减少了客户端与各个微服务之间的交互次数。</li>
+</ul>
+
+<p><img src="/img/5-16-2.png" alt="b7cb5f47a80e0910dc1c33d62080ea00" /></p>
+
+<h2 id="网关和nginx的区别">网关和Nginx的区别</h2>
+
+<p>现在感觉，如果在这里在用上Nginx的话， 首先，网关这个服务应该不需要负载均衡了，所以Nginx不会放在网关服务前面，那就只有放入到后面，我们一般用它来做静态动态分离， 如果放到后面，那么Nginx就相当于一个静态服务器了，在springCloud中，Nginx放到后端，不会在来做负载均衡了，因为我可以把其他服务注册到注册中心就好了， 所以如果springCloud中还需要加入Nginx的话， 还没想明白， 后期在对这一块进行修改处理。</p>
+
+<h1 id="路由规则">路由规则</h1>
+
+<p><img src="/img/5-16-3.png" alt="spring-cloud-gateway3" /></p>
+
+<h2 id="说明">说明</h2>
+
+<p>id：我们自定义的路由 ID，保持唯一
+uri：目标服务地址
+predicates：路由条件，Predicate 接受一个输入参数，返回一个布尔值结果。该接口包含多种默认方法来将 Predicate 组合成其他复杂的逻辑（比如：与，或，非）。
+filters：过滤规则，本示例暂时没用。</p>
+
+<h2 id="基础配置">基础配置</h2>
+
+<pre><code class="language-yaml">spring:
+  cloud:
+    gateway:
+      routes:
+      - id: remoteaddr_route         
+        uri: http://www.ityouknow.com  
+        predicates:
+          - Path=/*
+</code></pre>
+
+<h2 id="通过时间来匹配">通过时间来匹配</h2>
+
+<pre><code class="language-yaml">spring:
+  cloud:
+    gateway:
+      routes:
+      #通过时间来匹配
+      - id: time_route
+        uri: http://ityouknow.com
+        predicates:
+          #请求时间在 2018年1月20日6点6分6秒之后的所有请求都转发到地址http://ityouknow.com
+          - After=2018-01-20T06:06:06+08:00[Asia/Shanghai]    
+      - id: after_route
+        uri: http://ityouknow.com
+        predicates:
+         #表示在这个时间之前可以进行路由，在这时间之后停止路由，修改完之后重启项目再次访问地
+          - Before=2018-01-20T06:06:06+08:00[Asia/Shanghai]   
+</code></pre>
+
+<h2 id="通过-cookie-匹配">通过 Cookie 匹配</h2>
+
+<pre><code class="language-yaml">spring:
+  cloud:
+    gateway:
+      routes:
+      - id: cookie_route
+        uri: http://ityouknow.com
+        predicates:
+           - Cookie=ityouknow, kee.e
+</code></pre>
+
+<h2 id="通过-host-匹配">通过 Host 匹配</h2>
+
+<p>Host Route Predicate 接收一组参数，一组匹配的域名列表，这个模板是一个 ant 分隔的模板，用.号作为分隔符。它通过参数中的主机地址作为匹配规则。</p>
+
+<pre><code class="language-yaml">spring:
+  cloud:
+    gateway:
+      routes:
+      - id: host_route
+        uri: http://ityouknow.com
+        predicates:
+        - Host=**.ityouknow.com
+</code></pre>
+
+<h2 id="通过请求方式匹配">通过请求方式匹配</h2>
+
+<p>通过请求方式匹配   可以通过是 POST、GET、PUT、DELETE 等不同的请求方式来进行路由。</p>
+
+<pre><code class="language-yaml">spring:
+  cloud:
+    gateway:
+      routes:
+      - id: method_route
+        uri: http://ityouknow.com
+        predicates:
+        - Method=GET
+</code></pre>
+
+<h2 id="通过请求路径匹配">通过请求路径匹配</h2>
+
+<p>如果请求路径符合要求，则此路由将匹配，例如：/foo/1 或者 /foo/bar。</p>
+
+<pre><code class="language-yaml">spring:
+  cloud:
+    gateway:
+      routes:
+      - id: host_route
+        uri: http://ityouknow.com
+        predicates:
+        - Path=/foo/{segment}
+</code></pre>
+
+<h2 id="通过请求-ip">通过请求 ip</h2>
+
+<p>通过请求 ip 地址进行匹配</p>
+
+<pre><code class="language-yaml">spring:
+  cloud:
+    gateway:
+      routes:
+      - id: remoteaddr_route
+        uri: http://ityouknow.com
+        predicates:
+        - RemoteAddr=192.168.1.1/24
+</code></pre>
+
+<h2 id="组合使用">组合使用</h2>
+
+<p>各种 Predicates 同时存在于同一个路由时，请求必须同时满足所有的条件才被这个路由匹配。</p>
+
+<pre><code class="language-yaml">spring:
+  cloud:
+    gateway:
+      routes:
+      - id: host_foo_path_headers_to_httpbin
+        uri: http://ityouknow.com
+        predicates:
+        - Host=**.foo.org
+        - Path=/headers
+        - Method=GET
+        - Header=X-Request-Id, \d+
+        - Query=foo, ba.
+        - Query=baz
+        - Cookie=chocolate, ch.p
+        - After=2018-01-20T06:06:06+08:00[Asia/Shanghai]
+</code></pre>
+
+<h1 id="注册中心">注册中心</h1>
+
+<p><strong>只要将 Spring Cloud Gateway 注册到服务中心，Spring Cloud Gateway 默认就会代理服务中心的所有服务</strong></p>
+
+<h2 id="pom-xml">pom.xml</h2>
+
+<pre><code class="language-yaml">&lt;dependency&gt;
+			&lt;groupId&gt;org.springframework.cloud&lt;/groupId&gt;
+			&lt;artifactId&gt;spring-cloud-starter-gateway&lt;/artifactId&gt;
+&lt;/dependency&gt;
+&lt;dependency&gt;
+			&lt;groupId&gt;org.springframework.cloud&lt;/groupId&gt;
+			&lt;artifactId&gt;spring-cloud-starter-netflix-eureka-client&lt;/artifactId&gt;
+			&lt;version&gt;2.1.1.RELEASE&lt;/version&gt;
+&lt;/dependency&gt;
+</code></pre>
+
+<h2 id="application-yml">application.yml</h2>
+
+<pre><code class="language-yaml">server:
+  port: 6677
+  
+eureka:
+  client:
+    service-url:
+      defaultZone: http://eureka5001.com:5001/eureka,http://eureka5002.com:5002/eureka,http://eureka5003.com:5003/eureka
+
+logging:
+  level:
+    org.springframework.cloud.gateway: debug
+
+spring:
+  application:
+    name: cloud-gateway-eureka
+  cloud:
+    gateway:
+      discovery:
+        locator:
+          enabled: true
+</code></pre>
+
+<h2 id="eureka服务查看">eureka服务查看</h2>
+
+<p><img src="/img/5-16-4.png" alt="屏幕快照 2019-05-15 下午9.37.53" /></p>
+
+<p>可以看到我们已经把两个provide服务和gateway服务，注册到了eureka中，这个时候，cloud-gateway-eureka会代理服务中心的所有服务。</p>
+
+<h2 id="代理服务运行结果">代理服务运行结果</h2>
+
+<p><img src="/img/5-16-5.png" alt="屏幕快照 2019-05-15 下午9.54.44" /></p>
+
+<p><img src="/img/5-16-6.png" alt="屏幕快照 2019-05-15 下午9.55.00" /></p>
+
+<p>provide服务这个方法，我返回不同的结果，可以看到，他是一种轮休负载均衡的访问两个服务。</p>
+
+<p><strong>注意： 我这里在application.yml配置的时候，没有写明uri所以，我在访问的链接是<a href="http://localhost:6677/PROVIDE-DATA/provide是这个，如果我们配置了*uri*:">http://localhost:6677/PROVIDE-DATA/provide是这个，如果我们配置了*uri*:</a> lb://PROVIDE-DATA 这样的话，我们的访问地址就是<a href="http://localhost:6677/provide">http://localhost:6677/provide</a></strong></p>
+
+<h1 id="基于-filter-过滤器-实现的高级功能">基于 Filter(过滤器) 实现的高级功能</h1>
+
+<p>Spring Cloud Gateway 的 Filter 的生命周期不像 Zuul 的那么丰富，它只有两个：“pre” 和 “post”。</p>
+
+<ul>
+<li><strong>PRE</strong>： 这种过滤器在请求被路由之前调用。我们可利用这种过滤器实现身份验证、在集群中选择请求的微服务、记录调试信息等。</li>
+<li><strong>POST</strong>：这种过滤器在路由到微服务以后执行。这种过滤器可用来为响应添加标准的 HTTP Header、收集统计信息和指标、将响应从微服务发送给客户端等。</li>
+</ul>
+
+<p>Spring Cloud Gateway 的 Filter 分为两种：GatewayFilter 与 GlobalFilter。GlobalFilter 会应用到所有的路由上，而 GatewayFilter 将应用到单个路由或者一个分组的路由上。</p>
+
+<p>Spring Cloud Gateway 内置了9种 GlobalFilter，比如 Netty Routing Filter、LoadBalancerClient Filter、Websocket Routing Filter 等，根据名字即可猜测出这些 Filter 的作者，具体大家可以参考官网内容：<a href="http://cloud.spring.io/spring-cloud-gateway/single/spring-cloud-gateway.html#_global_filters">Global Filters</a></p>
+
+<h2 id="快速上手">快速上手</h2>
+
+<p>修改application.yml,添加规则,AddRequestParameter GatewayFilter 可以在请求中添加指定参数。</p>
+
+<pre><code class="language-yaml">spring:
+  application:
+    name: cloud-gateway-eureka
+  cloud:
+    gateway:
+      discovery:
+        locator:
+          enabled: true
+      routes:
+        - id: add_request_parameter_route
+          uri: lb://PROVIDE-DATA
+          filters:
+            - AddRequestParameter=foo, bar
+          predicates:
+            - Method=GET  
+</code></pre>
+
+<p>实现的效果是，在这个规则的请求下面，将会默认有一个参数foo=bar传入provide服务中。</p>
+
+<h2 id="效果图">效果图</h2>
+
+<p>下面是一个消费端调用Feign访问原始的服务效果：</p>
+
+<p><img src="/img/5-16-7.png" alt="屏幕快照 2019-05-15 下午10.21.40" /></p>
+
+<p>下面是通过gateway服务来访问的服务效果：</p>
+
+<p><img src="/img/5-16-8.png" alt="屏幕快照 2019-05-15 下午10.22.36" /></p>
+
+<p>可以看比原来的服务多了传入过来的参数了。</p>
+
+<h2 id="filter-的一些常用功能">Filter 的一些常用功能</h2>
+
+<h3 id="stripprefix-filter">StripPrefix Filter</h3>
+
+<p>StripPrefix Filter 是一个请求路径截取的功能，我们可以利用这个功能来做特殊业务的转发。如下面， 我们在浏览器端输入<a href="http://localhost:6677/name/maizi/provide">http://localhost:6677/name/maizi/provide</a> 实际上他访问的还是<a href="http://localhost:6677/provide，StripPrefix这个表示截取路径的个数。">http://localhost:6677/provide，StripPrefix这个表示截取路径的个数。</a></p>
+
+<pre><code class="language-yaml">spring:
+  application:
+    name: cloud-gateway-eureka
+  cloud:
+    gateway:
+      discovery:
+        locator:
+          enabled: true
+      routes:
+        - id: add_request_parameter_route
+          uri: lb://PROVIDE-DATA
+          filters:
+            - StripPrefix=2
+          predicates:
+            - Path=/name/**   
+</code></pre>
+
+<h3 id="prefixpath-filter">PrefixPath Filter</h3>
+
+<p>比如：请求/hello，最后转发到目标服务的路径变为/mypath/hello</p>
+
+<pre><code class="language-yaml">spring:
+  application:
+    name: cloud-gateway-eureka
+  cloud:
+    gateway:
+      discovery:
+        locator:
+          enabled: true
+      routes:
+        - id: add_request_parameter_route
+          uri: lb://PROVIDE-DATA
+          predicates:
+            - Path=/**
+          filters:
+            - PrefixPath=/mypath
+</code></pre>
+
+<h3 id="限速路由器">限速路由器</h3>
+
+<p>限速在高并发场景中比较常用的手段之一，可以有效的保障服务的整体稳定性，Spring Cloud Gateway 提供了基于 Redis 的限流方案。所以我们首先需要添加对应的依赖包<code>spring-boot-starter-data-redis-reactive</code></p>
+
+<p>具体查看转载地址学习。</p>
+
+<h3 id="熔断路由器">熔断路由器</h3>
+
+<p>虽然他可以处理熔断，但是感觉在Consumer端融合hystrix，代码更加的清晰，同时业务分成也更好，网关这一块就只是处理官网东西，hystrix这个更加偏向业务，需要在Consumer这里写更加的清晰。</p>
+
+<h3 id="重试路由器">重试路由器</h3>
+
+<pre><code class="language-yaml">spring:
+  cloud:
+    gateway:
+      routes:
+      - id: retry_test
+        uri: lb://spring-cloud-producer
+        predicates:
+        - Path=/retry
+        filters:
+        - name: Retry
+          args:
+            retries: 3
+            statuses: BAD_GATEWAY
+</code></pre>
+
+<p>Retry GatewayFilter 通过这四个参数来控制重试机制： retries, statuses, methods, 和 series。</p>
+
+<ul>
+<li>retries：重试次数，默认值是 3 次</li>
+<li>statuses：HTTP 的状态返回码，取值请参考：<code>org.springframework.http.HttpStatus</code></li>
+<li>methods：指定哪些方法的请求需要进行重试逻辑，默认值是 GET 方法，取值参考：<code>org.springframework.http.HttpMethod</code></li>
+<li>series：一些列的状态码配置，取值参考：<code>org.springframework.http.HttpStatus.Series</code>。符合的某段状态码才会进行重试逻辑，默认值是 SERVER_ERROR，值是 5，也就是 5XX(5 开头的状态码)，共有5 个值。</li>
+</ul>
+
+
+                
+                
+<div class="entry-shang text-center">
+    
+	    <p>「真诚赞赏，手留余香」</p>
+	
+	<button class="zs show-zs btn btn-bred">赞赏支持</button>
+</div>
+<div class="zs-modal-bg"></div>
+<div class="zs-modal-box">
+	<div class="zs-modal-head">
+		<button type="button" class="close">×</button>
+		<span class="author"><a href="http://maizitoday.github.io/"><img src="/img/favicon.png" /></a></span>
+        
+	        <p class="tip"><i></i><span>真诚赞赏，手留余香</span></p>
+		
+ 
+	</div>
+	<div class="zs-modal-body">
+		<div class="zs-modal-btns">
+			<button class="btn btn-blink" data-num="2">2元</button>
+			<button class="btn btn-blink" data-num="5">5元</button>
+			<button class="btn btn-blink" data-num="10">10元</button>
+			<button class="btn btn-blink" data-num="50">50元</button>
+			<button class="btn btn-blink" data-num="100">100元</button>
+			<button class="btn btn-blink" data-num="1">任意金额</button>
+		</div>
+		<div class="zs-modal-pay">
+			<button class="btn btn-bred" id="pay-text">2元</button>
+			<p>使用<span id="pay-type">微信</span>扫描二维码完成支付</p>
+			<img src="/img/reward/wechat-2.png"  id="pay-image"/>
+		</div>
+	</div>
+	<div class="zs-modal-footer">
+		<label><input type="radio" name="zs-type" value="wechat" class="zs-type" checked="checked"><span ><span class="zs-wechat"><img src="/img/reward/wechat-btn.png"/></span></label>
+		<label><input type="radio" name="zs-type" value="alipay" class="zs-type" class="zs-alipay"><img src="/img/reward/alipay-btn.png"/></span></label>
+	</div>
+</div>
+<script type="text/javascript" src="/js/reward.js"></script>
+
+                
+
+                <hr>
+                <ul class="pager">
+                    
+                    <li class="previous">
+                        <a href="/post/zookeeper-%E7%9B%91%E5%90%AC%E6%9C%8D%E5%8A%A1%E5%99%A8%E5%8A%A8%E6%80%81%E4%B8%8A%E4%B8%8B%E7%BA%BF/" data-toggle="tooltip" data-placement="top" title="Zookeeper-监听服务动态上下线">&larr;
+                            Previous Post</a>
+                    </li>
+                    
+                    
+                    <li class="next">
+                        <a href="/post/zookeeper-%E5%88%86%E5%B8%83%E5%BC%8F%E9%94%81/" data-toggle="tooltip" data-placement="top" title="Zookeeper-分布式锁">Next
+                            Post &rarr;</a>
+                    </li>
+                    
+                </ul>
+
+                
+<div id="disqus-comment"></div>
+
+
+
+            </div>
+            
+            <div class="
+                col-lg-8 col-lg-offset-2
+                col-md-10 col-md-offset-1
+                sidebar-container">
+
+                
+                
+                <section>
+                    <hr class="hidden-sm hidden-xs">
+                    <h5><a href="/tags/">FEATURED TAGS</a></h5>
+                    <div class="tags">
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        <a href="/tags/zookeeper" title="Zookeeper">
+                            Zookeeper
+                        </a>
+                        
+                        
+                        
+                        <a href="/tags/docker" title="docker">
+                            docker
+                        </a>
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        <a href="/tags/dockerfile" title="dockerfile">
+                            dockerfile
+                        </a>
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        <a href="/tags/java%E5%9F%BA%E7%A1%80" title="java基础">
+                            java基础
+                        </a>
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        <a href="/tags/springcloud" title="springCloud">
+                            springCloud
+                        </a>
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        <a href="/tags/%E4%B8%AD%E9%97%B4%E4%BB%B6" title="中间件">
+                            中间件
+                        </a>
+                        
+                        
+                        
+                        <a href="/tags/%E4%B8%BB%E4%BB%8E%E5%A4%8D%E5%88%B6" title="主从复制">
+                            主从复制
+                        </a>
+                        
+                        
+                        
+                        
+                        
+                        <a href="/tags/%E5%88%86%E5%B8%83%E5%BC%8F%E9%94%81" title="分布式锁">
+                            分布式锁
+                        </a>
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        <a href="/tags/%E5%BC%80%E5%8F%91%E5%B7%A5%E5%85%B7" title="开发工具">
+                            开发工具
+                        </a>
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        <a href="/tags/%E6%9C%8D%E5%8A%A1%E8%84%9A%E6%9C%AC" title="服务脚本">
+                            服务脚本
+                        </a>
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        <a href="/tags/%E8%B4%9F%E8%BD%BD%E5%9D%87%E8%A1%A1" title="负载均衡">
+                            负载均衡
+                        </a>
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                    </div>
+                </section>
+                
+
+                
+                
+                <section>
+                    <hr>
+                    <h5>FRIENDS</h5>
+                    <ul class="list-inline">
+                        
+                        <li><a target="_blank" href="https://zhaohuabing.com">赵化冰的博客</a></li>
+                        
+                        <li><a target="_blank" href="http://www.tianshouzhi.com">田守枝的博客</a></li>
+                        
+                        <li><a target="_blank" href="http://www.ityouknow.com">纯洁的微笑的博客</a></li>
+                        
+                    </ul>
+                </section>
+                
+            </div>
+        </div>
+    </div>
+</article>
+
+
+
+
+<footer>
+    <div class="container">
+        <div class="row">
+            <div class="col-lg-8 col-lg-offset-2 col-md-10 col-md-offset-1">
+                <ul class="list-inline text-center">
+                   
+                   <li>
+                       <a href="" rel="alternate" type="application/rss+xml" title="" >
+                           <span class="fa-stack fa-lg">
+                               <i class="fa fa-circle fa-stack-2x"></i>
+                               <i class="fa fa-rss fa-stack-1x fa-inverse"></i>
+                           </span>
+                       </a>
+                   </li>
+                   
+                    
+                    <li>
+                        <a href="mailto:maiziybtoday@gmail.com">
+                            <span class="fa-stack fa-lg">
+                                <i class="fa fa-circle fa-stack-2x"></i>
+                                <i class="fa fa-envelope fa-stack-1x fa-inverse"></i>
+                            </span>
+                        </a>
+                    </li>
+		    
+                    
+                    
+                    
+                    
+
+                    
+
+		    
+                    
+                    <li>
+                        <a target="_blank" href="/your%20wechat%20qr%20code%20image">
+                            <span class="fa-stack fa-lg">
+                                <i class="fa fa-circle fa-stack-2x"></i>
+                                <i class="fa fa-wechat fa-stack-1x fa-inverse"></i>
+                            </span>
+                        </a>
+                    </li>
+		    
+                    
+                    
+                    <li>
+                        <a target="_blank" href="https://www.linkedin.com/in/yourlinkedinid">
+                            <span class="fa-stack fa-lg">
+                                <i class="fa fa-circle fa-stack-2x"></i>
+                                <i class="fa fa-linkedin fa-stack-1x fa-inverse"></i>
+                            </span>
+                        </a>
+                    </li>
+		    
+                    
+                </ul>
+		<p class="copyright text-muted">
+                    Copyright &copy;  2019
+                    <br>
+                    <a href="https://themes.gohugo.io/hugo-theme-cleanwhite">CleanWhite Hugo Theme</a> by <a href="https://zhaohuabing.com">Huabing</a> |
+                    <iframe
+                        style="margin-left: 2px; margin-bottom:-5px;"
+                        frameborder="0" scrolling="0" width="100px" height="20px"
+                        src="https://ghbtns.com/github-btn.html?user=zhaohuabing&repo=hugo-theme-cleanwhite&type=star&count=true" >
+                    </iframe>
+                </p>
+            </div>
+        </div>
+    </div>
+</footer>
+
+
+
+
+<script>
+    function async(u, c) {
+      var d = document, t = 'script',
+          o = d.createElement(t),
+          s = d.getElementsByTagName(t)[0];
+      o.src = u;
+      if (c) { o.addEventListener('load', function (e) { c(null, e); }, false); }
+      s.parentNode.insertBefore(o, s);
+    }
+</script>
+
+
+
+
+
+
+<script>
+    
+    if($('#tag_cloud').length !== 0){
+        async("/js/jquery.tagcloud.js",function(){
+            $.fn.tagcloud.defaults = {
+                
+                color: {start: '#bbbbee', end: '#0085a1'},
+            };
+            $('#tag_cloud a').tagcloud();
+        })
+    }
+</script>
+
+
+<script>
+    async("https://cdnjs.cloudflare.com/ajax/libs/fastclick/1.0.6/fastclick.js", function(){
+        var $nav = document.querySelector("nav");
+        if($nav) FastClick.attach($nav);
+    })
+</script>
+
+
+
+
+
+
+</body>
+</html>
