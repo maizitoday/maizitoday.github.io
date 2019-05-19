@@ -1,0 +1,1213 @@
+<!DOCTYPE html>
+<html lang="en-us">
+<head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+
+    
+    <meta property="og:site_name" content="">
+    <meta property="og:type" content="article">
+
+    
+    <meta property="og:image" content="http://maizitoday.github.io//img/home-bg-jeep.jpg">
+    <meta property="twitter:image" content="http://maizitoday.github.io//img/home-bg-jeep.jpg" />
+    
+
+    
+    <meta name="title" content="MySQL数据库" />
+    <meta property="og:title" content="MySQL数据库" />
+    <meta property="twitter:title" content="MySQL数据库" />
+    
+
+    
+    <meta name="description" content="麦子，程序员, 开源爱好者，生活探险家 | 这里是 麦子 的博客，与你一起发现更大的世界。">
+    <meta property="og:description" content="麦子，程序员, 开源爱好者，生活探险家 | 这里是 麦子 的博客，与你一起发现更大的世界。" />
+    <meta property="twitter:description" content="麦子，程序员, 开源爱好者，生活探险家 | 这里是 麦子 的博客，与你一起发现更大的世界。" />
+    
+
+    
+    <meta property="twitter:card" content="summary" />
+    
+    
+
+    <meta name="keyword"  content="麦子, maizi, maizi, , 麦子的网络日志, 麦子的博客, maizi Blog, 博客, 个人网站, 互联网, Web, 云原生, PaaS, Istio, Kubernetes, 微服务, Microservice">
+    <link rel="shortcut icon" href="/img/favicon.ico">
+
+    <title>MySQL数据库-麦子的博客</title>
+
+    <link rel="canonical" href="/post/%E6%95%B0%E6%8D%AE%E5%BA%93-mysql%E6%80%A7%E8%83%BD%E4%BC%98%E5%8C%96/">
+
+    <link rel="stylesheet" href="/css/iDisqus.min.css"/>
+	
+    
+    <link rel="stylesheet" href="/css/bootstrap.min.css">
+
+    
+    <link rel="stylesheet" href="/css/hux-blog.min.css">
+
+    
+    <link rel="stylesheet" href="/css/syntax.css">
+
+    
+    <link rel="stylesheet" href="/css/zanshang.css">
+
+    
+    <link href="//cdnjs.cloudflare.com/ajax/libs/font-awesome/4.6.3/css/font-awesome.min.css" rel="stylesheet" type="text/css">
+    
+    
+    <script src="/js/jquery.min.js"></script>
+    
+    
+    <script src="/js/bootstrap.min.js"></script>
+    
+    
+    <script src="/js/hux-blog.min.js"></script>
+	
+    
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.13.1/styles/docco.min.css">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.13.1/highlight.min.js"></script>
+    <script>hljs.initHighlightingOnLoad();</script>
+</head>
+
+
+<nav class="navbar navbar-default navbar-custom navbar-fixed-top">
+    <div class="container-fluid">
+        
+        <div class="navbar-header page-scroll">
+            <button type="button" class="navbar-toggle">
+                <span class="sr-only">Toggle navigation</span>
+                <span class="icon-bar"></span>
+                <span class="icon-bar"></span>
+                <span class="icon-bar"></span>
+            </button>
+            <a class="navbar-brand" href="/"></a>
+        </div>
+
+        
+        
+        <div id="huxblog_navbar">
+            <div class="navbar-collapse">
+                <ul class="nav navbar-nav navbar-right">
+                    <li>
+                        <a href="/">Home</a>
+                    </li>
+                    
+                    <li>
+                        <a href="/categories/life">Life</a>
+                    </li>
+                    
+                    <li>
+                        <a href="/categories/tech">Tech</a>
+                    </li>
+                    
+                    
+		    
+                        <li><a href="/top/about/">ABOUT</a></li>
+                    
+
+                    
+		    <li>
+                        <a href="/search">SEARCH <img src="/img/search.png" height="15" style="cursor: pointer;" alt="Search"></a>
+		    </li>
+                    
+                </ul>
+            </div>
+        </div>
+        
+    </div>
+    
+</nav>
+<script>
+    
+    
+    
+    var $body   = document.body;
+    var $toggle = document.querySelector('.navbar-toggle');
+    var $navbar = document.querySelector('#huxblog_navbar');
+    var $collapse = document.querySelector('.navbar-collapse');
+
+    $toggle.addEventListener('click', handleMagic)
+    function handleMagic(e){
+        if ($navbar.className.indexOf('in') > 0) {
+        
+            $navbar.className = " ";
+            
+            setTimeout(function(){
+                
+                if($navbar.className.indexOf('in') < 0) {
+                    $collapse.style.height = "0px"
+                }
+            },400)
+        }else{
+        
+            $collapse.style.height = "auto"
+            $navbar.className += " in";
+        }
+    }
+</script>
+
+
+
+
+<style type="text/css">
+    header.intro-header {
+        background-image: url('/img/home-bg-jeep.jpg')
+    }
+</style>
+<header class="intro-header">
+    <div class="container">
+        <div class="row">
+            <div class="col-lg-8 col-lg-offset-2 col-md-10 col-md-offset-1">
+                <div class="post-heading">
+                    <div class="tags">
+                        
+                        <a class="tag" href="/tags/%E6%95%B0%E6%8D%AE%E5%BA%93" title="数据库">
+                            数据库
+                        </a>
+                        
+                        <a class="tag" href="/tags/mysql" title="mysql">
+                            mysql
+                        </a>
+                        
+                        <a class="tag" href="/tags/%E6%80%A7%E8%83%BD%E4%BC%98%E5%8C%96" title="性能优化">
+                            性能优化
+                        </a>
+                        
+                    </div>
+                    <h1>MySQL数据库</h1>
+                    <h2 class="subheading"></h2>
+                    <span class="meta">
+			Posted by 
+			
+			         &#34;麦子&#34;
+			 
+			on 
+			Sunday, May 19, 2019
+                        
+                    </span>
+                </div>
+            </div>
+        </div>
+    </div>
+</header>
+
+
+
+
+<article>
+    <div class="container">
+        <div class="row">
+
+            
+            <div class="
+                col-lg-8 col-lg-offset-2
+                col-md-10 col-md-offset-1
+                post-container">
+
+                
+                <header>
+                    <h2>TOC</h2>
+                </header>
+                <nav id="TableOfContents">
+<ul>
+<li><a href="#schema是什么">schema是什么</a></li>
+<li><a href="#数据库事物">数据库事物</a>
+<ul>
+<li><a href="#事务的基本要素-acid">事务的基本要素（ACID）</a>
+<ul>
+<li><a href="#原子性-atomicity">原子性（Atomicity）</a></li>
+<li><a href="#一致性-consistency">一致性（Consistency）</a></li>
+<li><a href="#隔离性-isolation">隔离性（Isolation）</a></li>
+<li><a href="#持久性-durability">持久性（Durability）</a></li>
+</ul></li>
+<li><a href="#事务的并发问题">事务的并发问题</a>
+<ul>
+<li><a href="#脏读">脏读</a></li>
+<li><a href="#不可重复读">不可重复读</a></li>
+<li><a href="#幻读">幻读</a></li>
+</ul></li>
+<li><a href="#mysql事务隔离级别">MySQL事务隔离级别</a>
+<ul>
+<li><a href="#事物级别查看和修改">事物级别查看和修改</a></li>
+<li><a href="#隔离级别的理解">隔离级别的理解</a>
+<ul>
+<li><a href="#读未提交-read-uncommitted">读未提交（read-uncommitted）</a></li>
+<li><a href="#不可重复读-read-committed">不可重复读（read-committed）</a></li>
+<li><a href="#repeatable-read-mysql默认隔离级别">repeatable read(MySQL默认隔离级别)</a></li>
+<li><a href="#serializable">serializable</a></li>
+</ul></li>
+</ul></li>
+</ul></li>
+<li><a href="#数据库锁">数据库锁</a>
+<ul>
+<li><a href="#乐观锁">乐观锁</a>
+<ul>
+<li><a href="#优点与不足">优点与不足</a></li>
+</ul></li>
+<li><a href="#悲观锁">悲观锁</a>
+<ul>
+<li><a href="#优点与不足-1">优点与不足</a></li>
+</ul></li>
+</ul></li>
+<li><a href="#表空间">表空间</a>
+<ul>
+<li><a href="#共享表空间">共享表空间</a>
+<ul>
+<li><a href="#查看当前共享表空间">查看当前共享表空间</a></li>
+<li><a href="#增加共享表空间">增加共享表空间</a></li>
+</ul></li>
+<li><a href="#独立表空间">独立表空间</a></li>
+</ul></li>
+<li><a href="#索引">索引</a>
+<ul>
+<li><a href="#什么是索引">什么是索引？</a></li>
+<li><a href="#为什么要有索引呢">为什么要有索引呢？</a></li>
+<li><a href="#索引类型">索引类型</a>
+<ul>
+<li><a href="#常规索引">常规索引</a></li>
+<li><a href="#主键索引">主键索引</a></li>
+<li><a href="#唯一索引">唯一索引</a></li>
+<li><a href="#全文索引">全文索引</a></li>
+<li><a href="#外键索引">外键索引</a></li>
+</ul></li>
+<li><a href="#创建-删除索引">创建/删除索引</a>
+<ul>
+<li><a href="#语法">语法</a></li>
+<li><a href="#demo实例">demo实例</a></li>
+<li><a href="#索引的优化">索引的优化</a></li>
+</ul></li>
+</ul></li>
+<li><a href="#mysql三种虚拟表">mysql三种虚拟表</a>
+<ul>
+<li><a href="#临时表">临时表</a>
+<ul>
+<li><a href="#什么是临时表">什么是临时表</a></li>
+<li><a href="#临时表的应用场景">临时表的应用场景</a></li>
+<li><a href="#创建临时表">创建临时表</a></li>
+<li><a href="#直接将查询结果导入临时表">直接将查询结果导入临时表</a></li>
+</ul></li>
+<li><a href="#视图">视图</a>
+<ul>
+<li><a href="#作用">作用</a>
+<ul>
+<li><a href="#提高了重用性">提高了重用性</a></li>
+<li><a href="#对数据库重构-却不影响程序的运行">对数据库重构，却不影响程序的运行</a></li>
+<li><a href="#提高了安全性能-可以对不同的用户">提高了安全性能。可以对不同的用户</a></li>
+<li><a href="#让数据更加清晰">让数据更加清晰</a></li>
+</ul></li>
+</ul></li>
+</ul></li>
+<li><a href="#开启慢查询日志">开启慢查询日志</a>
+<ul>
+<li><a href="#查询日志格式">查询日志格式</a></li>
+</ul></li>
+<li><a href="#explain分析">EXPLAIN分析</a></li>
+<li><a href="#分库分表">分库分表</a></li>
+<li><a href="#数据库设计">数据库设计</a>
+<ul>
+<li><a href="#范式化和反范式化">范式化和反范式化</a></li>
+</ul></li>
+<li><a href="#数据库系统配置">数据库系统配置</a></li>
+<li><a href="#sql-left-right-inner-使用">sql left right inner 使用</a>
+<ul>
+<li><a href="#左链接-left-join-on">左链接 left join on</a></li>
+<li><a href="#右链接-right-join-on">右链接 right join on</a></li>
+<li><a href="#内链接-inner-join">内链接  inner join</a></li>
+<li><a href="#全链接-full-join">全链接 full join</a></li>
+</ul></li>
+</ul>
+</nav>
+                
+                
+
+<p>[TOC]</p>
+
+<p><strong>说明： 文章里面的图片来源地址:<a href="https://www.imooc.com/learn/194,教学视频">https://www.imooc.com/learn/194,教学视频</a></strong></p>
+
+<h1 id="schema是什么">schema是什么</h1>
+
+<p><strong>原文：<a href="https://blog.csdn.net/hpulfc/article/details/79564790">https://blog.csdn.net/hpulfc/article/details/79564790</a></strong></p>
+
+<p>在SQL环境下，schema就是数据库对象的集合，所谓的数据库对象也就是常说的表，索引，视图，存储过程等。在schema之上的，就是数据库的实例，也就是通常create databases获得的东西。也就是说一个schema 实例 可以有多个schema, 可以给不同的用户创建不同的schema,并且他们都是在同一数据库实例下面。</p>
+
+<p>在MySQL中基本认为schema和数据库相同，也就是说schema的名称和数据库的实例的名称相同，一个数据库有一个schema。</p>
+
+<p>而在PostgreSQL中，可以创建一个数据库，然后在数据库中，创建不同的schema,每个schema又有着一些各自的表，索引等。</p>
+
+<h1 id="数据库事物">数据库事物</h1>
+
+<p><strong>转载地址： <a href="https://www.cnblogs.com/huanongying/p/7021555.html">https://www.cnblogs.com/huanongying/p/7021555.html</a></strong></p>
+
+<h2 id="事务的基本要素-acid">事务的基本要素（ACID）</h2>
+
+<h3 id="原子性-atomicity">原子性（Atomicity）</h3>
+
+<p>事务开始后所有操作，要么全部做完，要么全部不做，不可能停滞在中间环节。事务执行过程中出错，会回滚到事务开始前的状态，所有的操作就像没有发生一样。也就是说事务是一个不可分割的整体，就像化学中学过的原子，是物质构成的基本单位。</p>
+
+<h3 id="一致性-consistency">一致性（Consistency）</h3>
+
+<p>事务开始前和结束后，数据库的完整性约束没有被破坏 。比如A向B转账，不可能A扣了钱，B却没收到。</p>
+
+<h3 id="隔离性-isolation">隔离性（Isolation）</h3>
+
+<p>同一时间，只允许一个事务请求同一数据，不同的事务之间彼此没有任何干扰。比如A正在从一张银行卡中取钱，在A取钱的过程结束前，B不能向这张卡转账。</p>
+
+<h3 id="持久性-durability">持久性（Durability）</h3>
+
+<p>事务完成后，事务对数据库的所有更新将被保存到数据库，不能回滚。</p>
+
+<h2 id="事务的并发问题">事务的并发问题</h2>
+
+<h3 id="脏读">脏读</h3>
+
+<p>事务A读取了事务B更新的数据，然后B回滚操作，那么A读取到的数据是脏数据。</p>
+
+<h3 id="不可重复读">不可重复读</h3>
+
+<p>事务 A 多次读取同一数据，事务 B 在事务A多次读取的过程中，对数据作了更新并提交，导致事务A多次读取同一数据时，结果 不一致。</p>
+
+<h3 id="幻读">幻读</h3>
+
+<p>系统管理员A将数据库中所有学生的成绩从具体分数改为ABCDE等级，但是系统管理员B就在这个时候插入了一条具体分数的记录，当系统管理员A改结束后发现还有一条记录没有改过来，就好像发生了幻觉一样，这就叫幻读。</p>
+
+<h2 id="mysql事务隔离级别">MySQL事务隔离级别</h2>
+
+<p>转载地址：<a href="https://blog.csdn.net/xuheng8600/article/details/79869669">https://blog.csdn.net/xuheng8600/article/details/79869669</a></p>
+
+<table>
+<thead>
+<tr>
+<th>事务隔离级别</th>
+<th>脏读</th>
+<th>不可重复读</th>
+<th>幻读</th>
+</tr>
+</thead>
+
+<tbody>
+<tr>
+<td>读未提交（read-uncommitted）</td>
+<td>是</td>
+<td>是</td>
+<td>是</td>
+</tr>
+
+<tr>
+<td>不可重复读（read-committed）</td>
+<td>否</td>
+<td>是</td>
+<td>是</td>
+</tr>
+
+<tr>
+<td>可重复读（repeatable-read）</td>
+<td>否</td>
+<td>否</td>
+<td>是</td>
+</tr>
+
+<tr>
+<td>串行化（serializable）</td>
+<td>否</td>
+<td>否</td>
+<td>否</td>
+</tr>
+</tbody>
+</table>
+
+<h3 id="事物级别查看和修改">事物级别查看和修改</h3>
+
+<pre><code class="language-sql"> #查看当前会话隔离级别
+ SELECT @@tx_isolation
+ 
+ #设置当前会话隔离级别
+ set session transaction isolation level repeatable read;
+ 
+ #查看系统当前隔离级别
+ select @@global.tx_isolation;
+ 
+ #查看系统当前隔离级别
+ set global transaction isolation level repeatable read;
+</code></pre>
+
+<h3 id="隔离级别的理解">隔离级别的理解</h3>
+
+<h4 id="读未提交-read-uncommitted">读未提交（read-uncommitted）</h4>
+
+<p>可以看到未提交的数据（脏读），举个例子：别人说的话你都相信了，但是可能他只是说说，并不实际做。</p>
+
+<h4 id="不可重复读-read-committed">不可重复读（read-committed）</h4>
+
+<p>读取提交的数据。但是，可能多次读取的数据结果不一致（不可重复读，幻读）。用读写的观点就是：读取的行数据，可以写。</p>
+
+<h4 id="repeatable-read-mysql默认隔离级别">repeatable read(MySQL默认隔离级别)</h4>
+
+<p>可以重复读取，但有幻读。读写观点：读取的数据行不可写，但是可以往表中新增数据。在MySQL中，其他事务新增的数据，看不到，不会产生幻读。采用多版本并发控制（MVCC）机制解决幻读问题。</p>
+
+<h4 id="serializable">serializable</h4>
+
+<p>可读，不可写。像java中的锁，写数据必须等待另一个事务结束。</p>
+
+<h1 id="数据库锁">数据库锁</h1>
+
+<p><strong>转载地址：<a href="https://www.jianshu.com/p/2633fc36b57a">https://www.jianshu.com/p/2633fc36b57a</a></strong></p>
+
+<h2 id="乐观锁">乐观锁</h2>
+
+<p>乐观锁（Optimistic Lock），顾名思义，就是很乐观，每次去拿数据的时候都认为别人不会修改，所以不会上锁，但是在提交更新的时候会判断一下在此期间别人有没有去更新这个数据。乐观锁适用于读多写少的应用场景，这样可以提高吞吐量。</p>
+
+<p>乐观锁：假设不会发生并发冲突，只在提交操作时检查是否违反数据完整性。</p>
+
+<p>乐观锁一般来说有以下2种方式：</p>
+
+<ul>
+<li>使用数据版本（Version）记录机制实现，这是乐观锁最常用的一种实现方式。何谓数据版本？即为数据增加一个版本标识，一般是通过为数据库表增加一个数字类型的 “version” 字段来实现。当读取数据时，将version字段的值一同读出，数据每更新一次，对此version值加一。当我们提交更新的时候，判断数据库表对应记录的当前版本信息与第一次取出来的version值进行比对，如果数据库表当前版本号与第一次取出来的version值相等，则予以更新，否则认为是过期数据。</li>
+<li>使用时间戳（timestamp）。乐观锁定的第二种实现方式和第一种差不多，同样是在需要乐观锁控制的table中增加一个字段，名称无所谓，字段类型使用时间戳（timestamp）, 和上面的version类似，也是在更新提交的时候检查当前数据库中数据的时间戳和自己更新前取到的时间戳进行对比，如果一致则OK，否则就是版本冲突。
+Java JUC中的atomic包就是乐观锁的一种实现，AtomicInteger 通过CAS（Compare And Set）操作实现线程安全的自增。</li>
+</ul>
+
+<h3 id="优点与不足">优点与不足</h3>
+
+<p>乐观并发控制相信事务之间的数据竞争(data race)的概率是比较小的，因此尽可能直接做下去，直到提交的时候才去锁定，所以<strong>不会产生任何锁和死锁</strong>。但如果直接简单这么做，还是有可能会遇到不可预期的结果，例如两个事务都读取了数据库的某一行，经过修改以后写回数据库，这时就遇到了问题。</p>
+
+<h2 id="悲观锁">悲观锁</h2>
+
+<p>悲观锁（Pessimistic Lock），顾名思义，就是很悲观，每次去拿数据的时候都认为别人会修改，所以每次在拿数据的时候都会上锁，这样别人想拿这个数据就会block直到它拿到锁。</p>
+
+<p>悲观锁：假定会发生并发冲突，屏蔽一切可能违反数据完整性的操作。</p>
+
+<p>Java synchronized 就属于悲观锁的一种实现，每次线程要修改数据时都先获得锁，保证同一时刻只有一个线程能操作数据，其他线程则会被block。</p>
+
+<h3 id="优点与不足-1">优点与不足</h3>
+
+<p>悲观并发控制实际上是“先取锁再访问”的保守策略，<strong>为数据处理的安全提供了保证</strong>。但是在效率方面，处理加锁的机制<strong>会让数据库产生额外的开销，还有增加产生死锁的机会</strong>；另外，在只读型事务处理中由于不会产生冲突，也没必要使用锁，这样做只能增加系统负载；还有会<strong>降低了并行性</strong>，一个事务如果锁定了某行数据，其他事务就必须等待该事务处理完才可以处理那行数。</p>
+
+<h1 id="表空间">表空间</h1>
+
+<p><strong>转载地址：<a href="https://blog.csdn.net/daohengshangqian/article/details/50116493">https://blog.csdn.net/daohengshangqian/article/details/50116493</a></strong></p>
+
+<p>mysql 表空间管理与共享维护，INNODB 对于表的存储有两种形式，一种是<strong>共享表空间</strong>，及多张表放在一个文件中，还有一种是<strong>独立表空间</strong>，每个表都有独立的数据文件。</p>
+
+<h2 id="共享表空间">共享表空间</h2>
+
+<h3 id="查看当前共享表空间">查看当前共享表空间</h3>
+
+<pre><code class="language-sql">show variables like '%innodb_data_file_path%' ;
+</code></pre>
+
+<h3 id="增加共享表空间">增加共享表空间</h3>
+
+<pre><code class="language-shell">[root@localhost mysql]# cat /etc/my.cnf 
+[mysqld]
+datadir=/var/lib/mysql
+socket=/var/lib/mysql/mysql.sock
+user=mysql
+# Disabling symbolic-links is recommended to prevent assorted security risks
+symbolic-links=0
+innodb_data_file_path=ibdata1:12M;ibdata2:24M:autoextend
+</code></pre>
+
+<p>更改后，可以再来查来执行 <strong>show variables like &lsquo;%innodb_data_file_path%&rsquo; ;</strong></p>
+
+<h2 id="独立表空间">独立表空间</h2>
+
+<pre><code class="language-yaml">show variables like '%innodb_file_per_table%' ;
+</code></pre>
+
+<h1 id="索引">索引</h1>
+
+<p><strong>原文地址： <a href="https://www.cnblogs.com/bypp/p/7755307.html">https://www.cnblogs.com/bypp/p/7755307.html</a></strong></p>
+
+<h2 id="什么是索引">什么是索引？</h2>
+
+<p>一般的应用系统，读写比例在10:1左右，而且插入操作和一般的更新操作很少出现性能问题，在生产环境中，我们遇到最多的，也是最容易出问题的，还是一些复杂的查询操作，因此对查询语句的优化显然是重中之重。说起加速查询，就不得不提到索引了。</p>
+
+<h2 id="为什么要有索引呢">为什么要有索引呢？</h2>
+
+<p>索引在MySQL中也叫做“键”，是存储引擎用于快速找到记录的一种数据结构。索引对于良好的性能，非常关键，尤其是当表中的数据量越来越大时，索引对于性能的影响愈发重要。索引优化应该是对查询性能优化最有效的手段了。索引能够轻易将查询性能提高好几个数量级。索引相当于字典的音序表，如果要查某个字，如果不使用音序表，则需要从几百页中逐页去查。</p>
+
+<h2 id="索引类型">索引类型</h2>
+
+<h3 id="常规索引">常规索引</h3>
+
+<p>常规索引，也叫普通索引（index或key），它可以常规地提高查询效率。一张数据表中可以有多个常规索引。常规索引是使用最普遍的索引类型，如果没有明确指明索引的类型，我们所说的索引都是指常规索引。</p>
+
+<h3 id="主键索引">主键索引</h3>
+
+<p>主键索引（Primary Key），也简称主键。它可以提高查询效率，并提供唯一性约束。一张表中只能有一个主键。被标志为自动增长的字段一定是主键，但主键不一定是自动增长。一般把主键定义在无意义的字段上（如：编号），主键的数据类型最好是数值。</p>
+
+<h3 id="唯一索引">唯一索引</h3>
+
+<p>唯一索引（Unique Key），可以提高查询效率，并提供唯一性约束。一张表中可以有多个唯一索引。</p>
+
+<h3 id="全文索引">全文索引</h3>
+
+<p>全文索引（Full Text），可以提高全文搜索的查询效率，一般使用Sphinx替代。但Sphinx不支持中文检索，Coreseek是支持中文的全文检索引擎，也称作具有中文分词功能的Sphinx。实际项目中，我们用到的是Coreseek。</p>
+
+<h3 id="外键索引">外键索引</h3>
+
+<p>外键索引（Foreign Key），简称外键，它可以提高查询效率，外键会自动和对应的其他表的主键关联。外键的主要作用是保证记录的一致性和完整性。</p>
+
+<h2 id="创建-删除索引">创建/删除索引</h2>
+
+<h3 id="语法">语法</h3>
+
+<pre><code class="language-sql">#方法一：创建表时
+    　　CREATE TABLE 表名 (
+                字段名1  数据类型 [完整性约束条件…],
+                字段名2  数据类型 [完整性约束条件…],
+                [UNIQUE | FULLTEXT | SPATIAL ]   INDEX | KEY
+                [索引名]  (字段名[(长度)]  [ASC |DESC]) 
+                );
+
+
+#方法二：CREATE在已存在的表上创建索引
+        CREATE  [UNIQUE | FULLTEXT | SPATIAL ]  INDEX  索引名 
+                     ON 表名 (字段名[(长度)]  [ASC |DESC]) ;
+
+
+#方法三：ALTER TABLE在已存在的表上创建索引
+        ALTER TABLE 表名 ADD  [UNIQUE | FULLTEXT | SPATIAL ] INDEX
+                             索引名 (字段名[(长度)]  [ASC |DESC]) ;
+                             
+#删除索引：DROP INDEX 索引名 ON 表名字;
+</code></pre>
+
+<h3 id="demo实例">demo实例</h3>
+
+<pre><code class="language-sql">创建索引
+    -在创建表时就创建（需要注意的几点）
+    create table s1(
+    id int ,#可以在这加primary key
+    #id int index #不可以这样加索引，因为index只是索引，没有约束一说，
+    #不能像主键，还有唯一约束一样，在定义字段的时候加索引
+    name char(20),
+    age int,
+    email varchar(30)
+    #primary key(id) #也可以在这加
+    index(id) #可以这样加
+    );
+    -在创建表后在创建
+    create index name on s1(name); #添加普通索引
+    create unique age on s1(age);添加唯一索引
+    alter table s1 add primary key(id); #添加住建索引，也就是给id字段增加一个主键约束
+    create index name on s1(id,name); #添加普通联合索引
+删除索引
+    drop index id on s1;
+    drop index name on s1; #删除普通索引
+    drop index age on s1; #删除唯一索引，就和普通索引一样，不用在index前加unique来删，直接就可以删了
+    alter table s1 drop primary key; #删除主键(因为它添加的时候是按照alter来增加的，那么我们也用alter来删)
+</code></pre>
+
+<h3 id="索引的优化">索引的优化</h3>
+
+<p><img src="/img/5-19-1.png" alt="5-19-1" /></p>
+
+<p><img src="/img/5-19-2.png" alt="5-19-2" /></p>
+
+<h1 id="mysql三种虚拟表">mysql三种虚拟表</h1>
+
+<ul>
+<li><p>临时表</p></li>
+
+<li><p>内存表</p></li>
+
+<li><p>视图</p></li>
+</ul>
+
+<h2 id="临时表">临时表</h2>
+
+<p><strong>原文：<a href="https://blog.csdn.net/qq_41376740/article/details/79393943">https://blog.csdn.net/qq_41376740/article/details/79393943</a></strong></p>
+
+<h3 id="什么是临时表">什么是临时表</h3>
+
+<p>MySQL用于存储一些中间结果集的表，临时表只在当前连接可见，当关闭连接时，Mysql会自动删除表并释放所有空间。为什么会产生临时表：一般是由于复杂的SQL导致临时表被大量创建。临时表是建立在系统临时文件夹中的表。临时表的数据和表结构都存储在内存之中，<strong>退出的时候所占的空间会被释放</strong></p>
+
+<h3 id="临时表的应用场景">临时表的应用场景</h3>
+
+<p>当工作在十分大的表上运行时，运行相关查询，来获的一个大量数据的小的子集。较好的办法，不是对整个表运行这些查询，而是让MySQL每次找出所需的少数记录，将记录选择到一个临时表，然后对这些表运行查询。</p>
+
+<h3 id="创建临时表">创建临时表</h3>
+
+<pre><code class="language-sql">关键字为temporary
+
+create temporary table tmp_table(
+       name varchar(10) not null,
+       value int not null
+);
+注意:
+show tables;
+show table status
+这两个命令无法查看临时表。 但是可以查内存表
+</code></pre>
+
+<h3 id="直接将查询结果导入临时表">直接将查询结果导入临时表</h3>
+
+<pre><code class="language-sql">CREATE TEMPORARY TABLE tmp_table SELECT * FROM table_name
+</code></pre>
+
+<h2 id="视图">视图</h2>
+
+<p><strong>原文：<a href="https://www.cnblogs.com/sustudy/p/4166714.html">https://www.cnblogs.com/sustudy/p/4166714.html</a></strong></p>
+
+<h3 id="作用">作用</h3>
+
+<h4 id="提高了重用性">提高了重用性</h4>
+
+<p>提高了重用性，就像一个函数。如果要频繁获取user的name和goods的name。就应该使用以下sql语言。示例：</p>
+
+<pre><code class="language-sql">select a.name as username, b.name as goodsname from user as a, goods as b, ug as c where a.id=c.userid and c.goodsid=b.id;
+
+但有了视图就不一样了，创建视图other。示例
+        create view other as select a.name as username, b.name as goodsname from user as a, goods as b, ug as c where a.id=c.userid and c.goodsid=b.id;
+
+创建好视图后，就可以这样获取user的name和goods的name。示例：
+        select * from other;
+以上sql语句，就能获取user的name和goods的name了。
+</code></pre>
+
+<h4 id="对数据库重构-却不影响程序的运行">对数据库重构，却不影响程序的运行</h4>
+
+<p>对数据库重构，却不影响程序的运行。假如因为某种需求，需要将user拆房表usera和表userb，该两张表的结构如下：</p>
+
+<pre><code class="language-sql">测试表:usera有id，name，age字段
+测试表:userb有id，name，sex字段
+这时如果php端使用sql语句：select * from user;那就会提示该表不存在，这时该如何解决呢。
+解决方案：创建视图。以下sql语句创建视图：
+        create view user as select a.name,a.age,b.sex from usera as a, userb as b where a.name=b.name;
+以上假设name都是唯一的。此时php端使用sql语句：select * from user;就不会报错什么的。这就实现了更改数据库结构，不更改脚本程序的功能了。
+</code></pre>
+
+<h4 id="提高了安全性能-可以对不同的用户">提高了安全性能。可以对不同的用户</h4>
+
+<p>提高了安全性能。可以对不同的用户，设定不同的视图。例如：某用户只能获取user表的name和age数据，不能获取sex数据。则可以这样创建视图。示例如下：</p>
+
+<pre><code class="language-sql">create view other as select a.name, a.age from user as a;
+这样的话，使用sql语句：select * from other; 最多就只能获取name和age的数据，其他的数据就获取不了了。
+</code></pre>
+
+<h4 id="让数据更加清晰">让数据更加清晰</h4>
+
+<p>让数据更加清晰。想要什么样的数据，就创建什么样的视图。经过以上三条作用的解析，这条作用应该很容易理解了吧</p>
+
+<h1 id="开启慢查询日志">开启慢查询日志</h1>
+
+<p>可以记录超时的所有的SQL语句</p>
+
+<pre><code class="language-sql">#开启终端，连接客户端
+mysql -u root -p
+
+# 查看慢查日志是否开启
+SHOW VARIABLES  LIKE 'slow_query_log';
+SET GLOBAL slow_query_log=on;
+
+# 查看是否没有使用索引的查询记录
+SHOW VARIABLES LIKE 'log%';
+# 开启所有查询都记录下来
+SET GLOBAL log_queries_not_using_indexes=on;
+
+#查看执行多长时间的语句记录下来。
+SHOW VARIABLES LIKE 'long_query_time';
+#这个地方设置后，需要重新开启一个终端才可以看到效果
+set global long_query_time=0;
+
+#查看慢日志的具体文件
+SHOW  VARIABLES LIKE 'slow%'
+</code></pre>
+
+<h2 id="查询日志格式">查询日志格式</h2>
+
+<pre><code class="language-sql">#查看慢日志的具体文件
+SHOW  VARIABLES LIKE 'slow%'
+
+SET timestamp=1558163795;
+/* ApplicationName=DataGrip 2017.2.2 */ SET SQL_SELECT_LIMIT=12;
+# User@Host: root[root] @  [172.17.0.1]  Id:    78
+# Query_time: 0.000247  Lock_time: 0.000102 Rows_sent: 1  Rows_examined: 2
+SET timestamp=1558163795;
+/* ApplicationName=DataGrip 2017.2.2 */ SELECT * FROM work.PDMAN_DB_VERSION WHERE DB_VERSION = 'v1.0.4';
+</code></pre>
+
+<h1 id="explain分析">EXPLAIN分析</h1>
+
+<p><img src="/img/5-19-3.png" alt="5-19-3" /></p>
+
+<p><img src="/img/5-19-4.png" alt="5-19-4" /></p>
+
+<p><img src="/img/5-19-5.png" alt="5-19-5" /></p>
+
+<h1 id="分库分表">分库分表</h1>
+
+<p><img src="/img/5-19-6.jpg" alt="5-19-6" /></p>
+
+<p><img src="/img/5-19-7.jpg" alt="5-19-7" /></p>
+
+<h1 id="数据库设计">数据库设计</h1>
+
+<h2 id="范式化和反范式化">范式化和反范式化</h2>
+
+<p><img src="/img/5-19-8.png" alt="5-19-8" /></p>
+
+<p><img src="/img/5-19-9.png" alt="5-19-9" /></p>
+
+<p><img src="/img/5-19-10.png" alt="5-19-10" /></p>
+
+<h1 id="数据库系统配置">数据库系统配置</h1>
+
+<p><img src="/img/5-19-11.jpg" alt="5-19-11" /></p>
+
+<h1 id="sql-left-right-inner-使用">sql left right inner 使用</h1>
+
+<p><strong>原文：<a href="https://blog.csdn.net/weixin_41926488/article/details/80327541">https://blog.csdn.net/weixin_41926488/article/details/80327541</a></strong></p>
+
+<h2 id="左链接-left-join-on">左链接 left join on</h2>
+
+<p>left join,在两张表进行连接查询时，会返回左表所有的行，即使在右表中没有匹配的记录。</p>
+
+<pre><code class="language-sql">SELECT Persons.LastName, Persons.FirstName, Orders.OrderNo
+FROM Persons
+LEFT JOIN Orders
+ON Persons.Id_P=Orders.Id_P
+ORDER BY Persons.LastName
+</code></pre>
+
+<h2 id="右链接-right-join-on">右链接 right join on</h2>
+
+<p>right join,在两张表进行连接查询时，会返回右表所有的行，即使在左表中没有匹配的记录。</p>
+
+<pre><code class="language-sql">SELECT Persons.LastName, Persons.FirstName, Orders.OrderNo
+FROM Persons
+RIGHT JOIN Orders
+ON Persons.Id_P=Orders.Id_P
+ORDER BY Persons.LastName
+</code></pre>
+
+<h2 id="内链接-inner-join">内链接  inner join</h2>
+
+<p>inner join，在两张表进行连接查询时，只保留两张表中完全匹配的结果集。</p>
+
+<pre><code class="language-sql">SELECT Persons.LastName, Persons.FirstName, Orders.OrderNo
+FROM Persons
+INNER JOIN Orders
+ON Persons.Id_P=Orders.Id_P
+ORDER BY Persons.LastName
+</code></pre>
+
+<h2 id="全链接-full-join">全链接 full join</h2>
+
+<p>full join,在两张表进行连接查询时，返回左表和右表中所有没有匹配的行。</p>
+
+<pre><code class="language-sql">SELECT Persons.LastName, Persons.FirstName, Orders.OrderNo
+FROM Persons
+FULL JOIN Orders
+ON Persons.Id_P=Orders.Id_P
+ORDER BY Persons.LastName
+</code></pre>
+
+
+                
+                
+<div class="entry-shang text-center">
+    
+	    <p>「真诚赞赏，手留余香」</p>
+	
+	<button class="zs show-zs btn btn-bred">赞赏支持</button>
+</div>
+<div class="zs-modal-bg"></div>
+<div class="zs-modal-box">
+	<div class="zs-modal-head">
+		<button type="button" class="close">×</button>
+		<span class="author"><a href="http://maizitoday.github.io/"><img src="/img/favicon.png" /></a></span>
+        
+	        <p class="tip"><i></i><span>真诚赞赏，手留余香</span></p>
+		
+ 
+	</div>
+	<div class="zs-modal-body">
+		<div class="zs-modal-btns">
+			<button class="btn btn-blink" data-num="2">2元</button>
+			<button class="btn btn-blink" data-num="5">5元</button>
+			<button class="btn btn-blink" data-num="10">10元</button>
+			<button class="btn btn-blink" data-num="50">50元</button>
+			<button class="btn btn-blink" data-num="100">100元</button>
+			<button class="btn btn-blink" data-num="1">任意金额</button>
+		</div>
+		<div class="zs-modal-pay">
+			<button class="btn btn-bred" id="pay-text">2元</button>
+			<p>使用<span id="pay-type">微信</span>扫描二维码完成支付</p>
+			<img src="/img/reward/wechat-2.png"  id="pay-image"/>
+		</div>
+	</div>
+	<div class="zs-modal-footer">
+		<label><input type="radio" name="zs-type" value="wechat" class="zs-type" checked="checked"><span ><span class="zs-wechat"><img src="/img/reward/wechat-btn.png"/></span></label>
+		<label><input type="radio" name="zs-type" value="alipay" class="zs-type" class="zs-alipay"><img src="/img/reward/alipay-btn.png"/></span></label>
+	</div>
+</div>
+<script type="text/javascript" src="/js/reward.js"></script>
+
+                
+
+                <hr>
+                <ul class="pager">
+                    
+                    <li class="previous">
+                        <a href="/post/springcloud%E7%B3%BB%E5%88%97-config/" data-toggle="tooltip" data-placement="top" title="springCloud系列-config">&larr;
+                            Previous Post</a>
+                    </li>
+                    
+                    
+                </ul>
+
+                
+<div id="disqus-comment"></div>
+
+
+
+            </div>
+            
+            <div class="
+                col-lg-8 col-lg-offset-2
+                col-md-10 col-md-offset-1
+                sidebar-container">
+
+                
+                
+                <section>
+                    <hr class="hidden-sm hidden-xs">
+                    <h5><a href="/tags/">FEATURED TAGS</a></h5>
+                    <div class="tags">
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        <a href="/tags/zookeeper" title="Zookeeper">
+                            Zookeeper
+                        </a>
+                        
+                        
+                        
+                        <a href="/tags/docker" title="docker">
+                            docker
+                        </a>
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        <a href="/tags/dockerfile" title="dockerfile">
+                            dockerfile
+                        </a>
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        <a href="/tags/java%E5%9F%BA%E7%A1%80" title="java基础">
+                            java基础
+                        </a>
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        <a href="/tags/mysql" title="mysql">
+                            mysql
+                        </a>
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        <a href="/tags/springcloud" title="springCloud">
+                            springCloud
+                        </a>
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        <a href="/tags/%E4%B8%AD%E9%97%B4%E4%BB%B6" title="中间件">
+                            中间件
+                        </a>
+                        
+                        
+                        
+                        <a href="/tags/%E4%B8%BB%E4%BB%8E%E5%A4%8D%E5%88%B6" title="主从复制">
+                            主从复制
+                        </a>
+                        
+                        
+                        
+                        
+                        
+                        <a href="/tags/%E5%88%86%E5%B8%83%E5%BC%8F%E9%94%81" title="分布式锁">
+                            分布式锁
+                        </a>
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        <a href="/tags/%E5%BC%80%E5%8F%91%E5%B7%A5%E5%85%B7" title="开发工具">
+                            开发工具
+                        </a>
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        <a href="/tags/%E6%95%B0%E6%8D%AE%E5%BA%93" title="数据库">
+                            数据库
+                        </a>
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        <a href="/tags/%E6%9C%8D%E5%8A%A1%E8%84%9A%E6%9C%AC" title="服务脚本">
+                            服务脚本
+                        </a>
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        <a href="/tags/%E8%B4%9F%E8%BD%BD%E5%9D%87%E8%A1%A1" title="负载均衡">
+                            负载均衡
+                        </a>
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                    </div>
+                </section>
+                
+
+                
+                
+                <section>
+                    <hr>
+                    <h5>FRIENDS</h5>
+                    <ul class="list-inline">
+                        
+                        <li><a target="_blank" href="https://zhaohuabing.com">赵化冰博客</a></li>
+                        
+                        <li><a target="_blank" href="http://www.tianshouzhi.com">田守枝博客</a></li>
+                        
+                        <li><a target="_blank" href="http://www.ityouknow.com">纯洁的微笑博客</a></li>
+                        
+                    </ul>
+                </section>
+                
+            </div>
+        </div>
+    </div>
+</article>
+
+
+
+
+<footer>
+    <div class="container">
+        <div class="row">
+            <div class="col-lg-8 col-lg-offset-2 col-md-10 col-md-offset-1">
+                <ul class="list-inline text-center">
+                   
+                   <li>
+                       <a href="" rel="alternate" type="application/rss+xml" title="" >
+                           <span class="fa-stack fa-lg">
+                               <i class="fa fa-circle fa-stack-2x"></i>
+                               <i class="fa fa-rss fa-stack-1x fa-inverse"></i>
+                           </span>
+                       </a>
+                   </li>
+                   
+                    
+                    <li>
+                        <a href="mailto:maiziybtoday@gmail.com">
+                            <span class="fa-stack fa-lg">
+                                <i class="fa fa-circle fa-stack-2x"></i>
+                                <i class="fa fa-envelope fa-stack-1x fa-inverse"></i>
+                            </span>
+                        </a>
+                    </li>
+		    
+                    
+                    
+                    
+                    
+
+                    
+
+		    
+                    
+                    <li>
+                        <a target="_blank" href="/your%20wechat%20qr%20code%20image">
+                            <span class="fa-stack fa-lg">
+                                <i class="fa fa-circle fa-stack-2x"></i>
+                                <i class="fa fa-wechat fa-stack-1x fa-inverse"></i>
+                            </span>
+                        </a>
+                    </li>
+		    
+                    
+                    
+                    <li>
+                        <a target="_blank" href="https://www.linkedin.com/in/yourlinkedinid">
+                            <span class="fa-stack fa-lg">
+                                <i class="fa fa-circle fa-stack-2x"></i>
+                                <i class="fa fa-linkedin fa-stack-1x fa-inverse"></i>
+                            </span>
+                        </a>
+                    </li>
+		    
+                    
+                </ul>
+		<p class="copyright text-muted">
+                    Copyright &copy;  2019
+                    <br>
+                    <a href="https://themes.gohugo.io/hugo-theme-cleanwhite">CleanWhite Hugo Theme</a> by <a href="https://zhaohuabing.com">Huabing</a> |
+                    <iframe
+                        style="margin-left: 2px; margin-bottom:-5px;"
+                        frameborder="0" scrolling="0" width="100px" height="20px"
+                        src="https://ghbtns.com/github-btn.html?user=zhaohuabing&repo=hugo-theme-cleanwhite&type=star&count=true" >
+                    </iframe>
+                </p>
+            </div>
+        </div>
+    </div>
+</footer>
+
+
+
+
+<script>
+    function async(u, c) {
+      var d = document, t = 'script',
+          o = d.createElement(t),
+          s = d.getElementsByTagName(t)[0];
+      o.src = u;
+      if (c) { o.addEventListener('load', function (e) { c(null, e); }, false); }
+      s.parentNode.insertBefore(o, s);
+    }
+</script>
+
+
+
+
+
+
+<script>
+    
+    if($('#tag_cloud').length !== 0){
+        async("/js/jquery.tagcloud.js",function(){
+            $.fn.tagcloud.defaults = {
+                
+                color: {start: '#bbbbee', end: '#0085a1'},
+            };
+            $('#tag_cloud a').tagcloud();
+        })
+    }
+</script>
+
+
+<script>
+    async("https://cdnjs.cloudflare.com/ajax/libs/fastclick/1.0.6/fastclick.js", function(){
+        var $nav = document.querySelector("nav");
+        if($nav) FastClick.attach($nav);
+    })
+</script>
+
+
+
+
+
+
+</body>
+</html>
