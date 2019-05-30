@@ -15,9 +15,9 @@
     
 
     
-    <meta name="title" content="springboot系列-简单理解启动原理" />
-    <meta property="og:title" content="springboot系列-简单理解启动原理" />
-    <meta property="twitter:title" content="springboot系列-简单理解启动原理" />
+    <meta name="title" content="springboot系列-数据库" />
+    <meta property="og:title" content="springboot系列-数据库" />
+    <meta property="twitter:title" content="springboot系列-数据库" />
     
 
     
@@ -34,9 +34,9 @@
     <meta name="keyword"  content="麦子, maizi, maizi, , 麦子的网络日志, 麦子的博客, maizi Blog, 博客, 个人网站, 互联网, Web, 云原生, PaaS, Istio, Kubernetes, 微服务, Microservice">
     <link rel="shortcut icon" href="/img/favicon.ico">
 
-    <title>springboot系列-简单理解启动原理-麦子的博客</title>
+    <title>springboot系列-数据库-麦子的博客</title>
 
-    <link rel="canonical" href="/post/springboot%E7%B3%BB%E5%88%97-%E7%AE%80%E5%8D%95%E7%90%86%E8%A7%A3%E5%90%AF%E5%8A%A8%E5%8E%9F%E7%90%86/">
+    <link rel="canonical" href="/post/springboot%E7%B3%BB%E5%88%97-%E6%95%B0%E6%8D%AE%E5%BA%93/">
 
     <link rel="stylesheet" href="/css/iDisqus.min.css"/>
 	
@@ -166,16 +166,12 @@
                             springboot系列
                         </a>
                         
-                        <a class="tag" href="/tags/%E7%AE%80%E5%8D%95%E7%90%86%E8%A7%A3%E5%90%AF%E5%8A%A8%E5%8E%9F%E7%90%86" title="简单理解启动原理">
-                            简单理解启动原理
-                        </a>
-                        
-                        <a class="tag" href="/tags/0%E9%85%8D%E7%BD%AE%E5%90%AF%E5%8A%A8%E5%8E%9F%E7%90%86" title="0配置启动原理">
-                            0配置启动原理
+                        <a class="tag" href="/tags/%E6%95%B0%E6%8D%AE%E5%BA%93" title="数据库">
+                            数据库
                         </a>
                         
                     </div>
-                    <h1>springboot系列-简单理解启动原理</h1>
+                    <h1>springboot系列-数据库</h1>
                     <h2 class="subheading"></h2>
                     <span class="meta">
 			Posted by 
@@ -183,7 +179,7 @@
 			         &#34;麦子&#34;
 			 
 			on 
-			Friday, May 24, 2019
+			Wednesday, May 29, 2019
                         
                     </span>
                 </div>
@@ -211,13 +207,52 @@
                 </header>
                 <nav id="TableOfContents">
 <ul>
-<li><a href="#处理包导入问题">处理包导入问题</a>
+<li><a href="#jdbc">JDBC</a>
 <ul>
 <li><a href="#pom-xml">pom.xml</a></li>
-<li><a href="#spring-boot-starter">spring-boot-starter</a></li>
+<li><a href="#数据源配置">数据源配置</a></li>
+<li><a href="#初始化sql脚本">初始化sql脚本</a></li>
+<li><a href="#jdbctemplate模板">JdbcTemplate模板</a></li>
 </ul></li>
-<li><a href="#扫描所有包导入所有类">扫描所有包导入所有类</a></li>
-<li><a href="#加载默认配置文件">加载默认配置文件</a></li>
+<li><a href="#连接mycat">连接mycat</a>
+<ul>
+<li><a href="#application-yml">application.yml</a></li>
+</ul></li>
+<li><a href="#配置druid数据源">配置druid数据源</a>
+<ul>
+<li><a href="#pom-xml-1">pom.xml</a></li>
+<li><a href="#application-yml-1">application.yml</a></li>
+<li><a href="#druid管理页面配置">Druid管理页面配置</a></li>
+<li><a href="#效果如下">效果如下</a></li>
+</ul></li>
+<li><a href="#mybatis">MyBatis</a>
+<ul>
+<li><a href="#pom-xml-2">pom.xml</a></li>
+<li><a href="#注解版">注解版</a>
+<ul>
+<li><a href="#添加扫描mapper">添加扫描Mapper</a></li>
+<li><a href="#mapper-crud">mapper-crud</a></li>
+<li><a href="#controller-restful风格">controller-RestFul风格</a></li>
+</ul></li>
+<li><a href="#配置文件版">配置文件版</a>
+<ul>
+<li><a href="#配置文件xml">配置文件xml</a></li>
+</ul></li>
+</ul></li>
+<li><a href="#springdata">springData</a>
+<ul>
+<li><a href="#springdata相关概念">SpringData相关概念</a></li>
+<li><a href="#什么是jpa呢">什么是JPA呢</a></li>
+<li><a href="#springdata提供的编程接口">SpringData提供的编程接口</a></li>
+<li><a href="#具体实现jpa">具体实现JPA</a>
+<ul>
+<li><a href="#pom-xml-3">pom.xml</a></li>
+<li><a href="#创建表">创建表</a></li>
+<li><a href="#mapper层">mapper层</a></li>
+<li><a href="#controller">Controller</a></li>
+<li><a href="#application-yml-2">application.yml</a></li>
+</ul></li>
+</ul></li>
 </ul>
 </nav>
                 
@@ -231,105 +266,428 @@
 
 <p><strong>spingboot版本<version>2.1.5.RELEASE</version></strong></p>
 
-<h1 id="处理包导入问题">处理包导入问题</h1>
+<h1 id="jdbc">JDBC</h1>
 
 <h2 id="pom-xml">pom.xml</h2>
 
-<pre><code class="language-xml">&lt;parent&gt;
-  &lt;groupId&gt;org.springframework.boot&lt;/groupId&gt;
-  &lt;artifactId&gt;spring-boot-starter-parent&lt;/artifactId&gt;
-  &lt;version&gt;2.1.5.RELEASE&lt;/version&gt;
-  &lt;relativePath/&gt; 
-&lt;/parent&gt;
+<pre><code class="language-xml">&lt;dependency&gt;
+      &lt;groupId&gt;org.springframework.boot&lt;/groupId&gt;
+      &lt;artifactId&gt;spring-boot-starter-jdbc&lt;/artifactId&gt;
+      &lt;scope&gt;compile&lt;/scope&gt;
+ &lt;/dependency&gt;
+ &lt;dependency&gt;
+      &lt;groupId&gt;mysql&lt;/groupId&gt;
+      &lt;artifactId&gt;mysql-connector-java&lt;/artifactId&gt;
+      &lt;scope&gt;runtime&lt;/scope&gt;
+&lt;/dependency&gt;
 </code></pre>
 
-<p>用vscode中，显示所有依赖，所有需要的包和对应的版本都已经处理好的了。如下：</p>
+<h2 id="数据源配置">数据源配置</h2>
 
-<p><img src="/img/5-24-02.png" alt="5-24-02" /></p>
-
-<p><img src="/img/5-24-01.png" alt="5-24-01" /></p>
-
-<h2 id="spring-boot-starter">spring-boot-starter</h2>
-
-<p>spring-boot-starter：spring-boot场景启动器；帮我们导入了web模块正常运行所依赖的组件；</p>
-
-<p>Spring Boot将所有的功能场景都抽取出来，做成一个个的starters（启动器），只需要在项目里面引入这些starter相关场景的所有依赖都会导入进来。要用什么功能就导入什么场景的启动器</p>
-
-<p><img src="/img/5-24-03.png" alt="5-24-03" /></p>
-
-<h1 id="扫描所有包导入所有类">扫描所有包导入所有类</h1>
-
-<pre><code class="language-java">@Target(ElementType.TYPE)
-@Retention(RetentionPolicy.RUNTIME)
-@Documented
-@Inherited
-@SpringBootConfiguration
-@EnableAutoConfiguration
-@ComponentScan(excludeFilters = {
-		@Filter(type = FilterType.CUSTOM, classes = TypeExcludeFilter.class),
-		@Filter(type = FilterType.CUSTOM,
-				classes = AutoConfigurationExcludeFilter.class) })
-public @interface SpringBootApplication {
+<pre><code class="language-yaml">spring:
+  datasource:
+    username: root
+    password: 123456
+    url: jdbc:mysql://localhost:3306/work?useUnicode=true&amp;characterEncoding=utf-8 #中文乱码问题
+    driver-class-name: com.mysql.cj.jdbc.Driver
+    sql-script-encoding: utf-8
+    schema:
+    - classpath*:sql/school.sql #
+    # - classpath*:sql/school2.sql
+    initialization-mode: always # 保证去自动执行上面对应的sql语句
 </code></pre>
 
-<p>点击@EnableAutoConfiguration</p>
+<h2 id="初始化sql脚本">初始化sql脚本</h2>
 
-<pre><code class="language-java">@Target(ElementType.TYPE)
-@Retention(RetentionPolicy.RUNTIME)
-@Documented
-@Inherited
-@AutoConfigurationPackage
-@Import(AutoConfigurationImportSelector.class)
-public @interface EnableAutoConfiguration {
+<pre><code class="language-sql">DROP TABLE IF EXISTS  work.school;
+-- Create the table in the specified schema
+CREATE TABLE work.school
+(
+  id INT NOT NULL PRIMARY KEY,
+  -- primary key column
+  name NVARCHAR(50) NOT NULL,
+  address NVARCHAR(50) NOT NULL
+  -- specify more columns here
+);
 
-	String ENABLED_OVERRIDE_PROPERTY = &quot;spring.boot.enableautoconfiguration&quot;;
+
+INSERT INTO work.school
+  ( -- columns to insert data into
+  id, name, address
+  )
+VALUES
+  (
+    1, &quot;中文1号&quot;, &quot;湖南&quot;
+),
+  (  
+    2, &quot;中文2号&quot;, &quot;深圳&quot;
+);
 </code></pre>
 
-<p>点击@AutoConfigurationPackage</p>
+<h2 id="jdbctemplate模板">JdbcTemplate模板</h2>
 
-<pre><code class="language-java">@Target(ElementType.TYPE)
-@Retention(RetentionPolicy.RUNTIME)
-@Documented
-@Inherited
-@Import(AutoConfigurationPackages.Registrar.class)
-public @interface AutoConfigurationPackage {
+<pre><code class="language-java">@Autowired
+private JdbcTemplate jdbcTemplate;
+
+@GetMapping(value = { &quot;/school&quot;, &quot;/&quot; })
+public List&lt;Map&lt;String, Object&gt;&gt; getMethodName() throws SQLException {
+    List&lt;Map&lt;String, Object&gt;&gt; result = jdbcTemplate.queryForList(&quot;select * from school&quot;);
+    return result;
+}
+</code></pre>
+
+<h1 id="连接mycat">连接mycat</h1>
+
+<p>需要把版本改成5.xx</p>
+
+<pre><code class="language-xml">&lt;dependency&gt;
+      &lt;groupId&gt;mysql&lt;/groupId&gt;
+      &lt;artifactId&gt;mysql-connector-java&lt;/artifactId&gt;
+      &lt;scope&gt;runtime&lt;/scope&gt;
+      &lt;version&gt;5.1.34&lt;/version&gt;
+ &lt;/dependency&gt;
+</code></pre>
+
+<p><strong>不然会出现 SQLNonTransientConnectionException: CLIENT_PLUGIN_AUTH is required 这个错误。</strong></p>
+
+<h2 id="application-yml">application.yml</h2>
+
+<p>同时连接mycat也就相当于连接另一个单机数据库一样就ok了。如下：</p>
+
+<pre><code class="language-yaml">spring:
+  datasource:
+    username: root
+    password: 123456
+    url: jdbc:mysql://localhost:32769/workdb?useUnicode=true&amp;characterEncoding=utf-8
+    driver-class-name: com.mysql.jdbc.Driver
+    sql-script-encoding: utf-8
+    schema:
+    - classpath*:sql/school.sql
+    initialization-mode: always
+</code></pre>
+
+<h1 id="配置druid数据源">配置druid数据源</h1>
+
+<p>好处，用于监控sql执行速度，url的访问等数据。</p>
+
+<h2 id="pom-xml-1">pom.xml</h2>
+
+<pre><code class="language-xml">&lt;dependency&gt;
+			&lt;groupId&gt;com.alibaba&lt;/groupId&gt;
+			&lt;artifactId&gt;druid-spring-boot-starter&lt;/artifactId&gt;
+			&lt;version&gt;1.1.17&lt;/version&gt;
+&lt;/dependency&gt;
+</code></pre>
+
+<h2 id="application-yml-1">application.yml</h2>
+
+<pre><code class="language-yaml">spring:
+  datasource:
+    username: root
+    password: 123456
+    url: jdbc:mysql://localhost:32769/workdb?useUnicode=true&amp;characterEncoding=utf-8
+    driver-class-name: com.mysql.jdbc.Driver
+    sql-script-encoding: utf-8
+    schema:
+    - classpath*:sql/school.sql
+    initialization-mode: always
+    type: com.alibaba.druid.pool.DruidDataSource
+    druid:
+      initialSize: 5
+      minIdle: 5
+      maxActive: 20
+      # 配置获取连接等待超时的时间
+      maxWait: 60000
+      # 配置间隔多久才进行一次检测，检测需要关闭的空闲连接，单位是毫秒
+      timeBetweenEvictionRunsMillis: 60000
+      # 配置一个连接在池中最小生存的时间，单位是毫秒
+      minEvictableIdleTimeMillis: 300000
+      validationQuery: SELECT 1 FROM DUAL
+      testWhileIdle: true
+      testOnBorrow: false
+      testOnReturn: false
+      # 打开PSCache，并且指定每个连接上PSCache的大小
+      poolPreparedStatements: true
+      maxPoolPreparedStatementPerConnectionSize: 20
+      # 通过connectProperties属性来打开mergeSql功能；慢SQL记录
+      connectionProperties: druid.stat.mergeSql=true;druid.stat.slowSqlMillis=5000
+      # 合并多个DruidDataSource的监控数据
+      useGlobalDataSourceStat: true
+      # 配置监控统计拦截的filters，去掉后监控界面sql无法统计，'wall'用于防火墙  filters: stat:统计,wall 防火墙，
+      filter:
+        stat:
+          enabled: true  #和以前版本有区别
+        wall:
+          enabled: true  #和以前版本有区别
+</code></pre>
+
+<h2 id="druid管理页面配置">Druid管理页面配置</h2>
+
+<pre><code class="language-java">@Configuration
+public class DruidConfig {
+    /***
+     * 
+     * @return  配置Druid的监控,配置一个管理后台的Servlet
+     */
+    @Bean
+    public ServletRegistrationBean statViewServlet() {
+        ServletRegistrationBean bean = new ServletRegistrationBean(new StatViewServlet(), &quot;/druid/*&quot;);
+        Map&lt;String, String&gt; initParams = new HashMap&lt;&gt;();
+
+        initParams.put(&quot;loginUsername&quot;, &quot;admin&quot;);
+        initParams.put(&quot;loginPassword&quot;, &quot;admin&quot;);
+        initParams.put(&quot;allow&quot;, &quot;&quot;);// IP白名单 (没有配置或者为空，则允许所有访问)
+        initParams.put(&quot;deny&quot;, &quot;192.168.15.21&quot;); //IP黑名单 (存在共同时，deny优先于allow)
+
+        bean.setInitParameters(initParams);
+        return bean;
+    }
+
+    /***
+     *  
+     *   配置一个web监控的filter, 过滤对应的格式 
+     * */
+    @Bean
+    public FilterRegistrationBean webStatFilter() {
+        FilterRegistrationBean bean = new FilterRegistrationBean();
+        bean.setFilter(new WebStatFilter());
+        Map&lt;String, String&gt; initParams = new HashMap&lt;&gt;();
+        initParams.put(&quot;exclusions&quot;, &quot;*.js,*.gif,*.jpg,*.bmp,*.png,*.css,*.ico,/druid/*&quot;);
+        bean.setInitParameters(initParams);
+        bean.setUrlPatterns(Arrays.asList(&quot;/*&quot;));
+        return bean;
+    }
+ }   
+</code></pre>
+
+<h2 id="效果如下">效果如下</h2>
+
+<p><img src="/img/Xnip2019-05-29_18-44-21.png" alt="Xnip2019-05-29_18-44-21" /></p>
+
+<p><strong>注意：他可以查看你系统中所有的数据操作，然后可以看到你执行比较慢的sql语句等。</strong></p>
+
+<h1 id="mybatis">MyBatis</h1>
+
+<h2 id="pom-xml-2">pom.xml</h2>
+
+<pre><code class="language-xml">&lt;dependency&gt;
+      &lt;groupId&gt;org.mybatis.spring.boot&lt;/groupId&gt;
+      &lt;artifactId&gt;mybatis-spring-boot-starter&lt;/artifactId&gt;
+      &lt;version&gt;2.0.1&lt;/version&gt;
+      &lt;scope&gt;compile&lt;/scope&gt;
+ &lt;/dependency&gt;
+</code></pre>
+
+<h2 id="注解版">注解版</h2>
+
+<h3 id="添加扫描mapper">添加扫描Mapper</h3>
+
+<pre><code class="language-java">@MapperScan(value = &quot;com.example.databasedemo.mybatis&quot;) // 扫描你mapper所在的文件夹
+@SpringBootApplication
+public class DemoApplication {
+
+	public static void main(String[] args) {
+		SpringApplication.run(DemoApplication.class, args);
+	}
+}
+</code></pre>
+
+<h3 id="mapper-crud">mapper-crud</h3>
+
+<p>这里的注解都是<strong>org.apache.ibatis</strong>这个包里面的，感觉就关联了<strong>myBatis</strong>了.</p>
+
+<pre><code class="language-java">public interface SchoolMapper {
+    
+    @Select(&quot;select * from school where id=#{id}&quot;)
+    public School getSchoolById(Integer id);
+
+    @Delete(&quot;delete from school where id=#{id}&quot;)
+    public int deleteSchoolById(Integer id);
+
+    @Options(useGeneratedKeys = true,keyProperty = &quot;id&quot;)
+    @Insert(&quot;insert into school(name,address) values(#{name},#{address})&quot;)
+    public int insertSchool(School school);
+
+    @Update(&quot;update school set name=#{name} where id=#{id}&quot;)
+    public int updateSchool(School school);
+}
+</code></pre>
+
+<p>更多的注解可以操作复杂的处理</p>
+
+<h3 id="controller-restful风格">controller-RestFul风格</h3>
+
+<pre><code class="language-java">@RestController
+public class MyBatisController {
+
+    @Autowired
+    private SchoolMapper schoolMapper;
+
+    @GetMapping(&quot;/school/{id}&quot;)
+    public School getSchool(@PathVariable(&quot;id&quot;) Integer id) {
+        School school = schoolMapper.getSchoolById(id);
+        return school;
+    }
+
+    @DeleteMapping(&quot;/school/{id}&quot;)
+    public int delSchool(@PathVariable(&quot;id&quot;) int id) {
+        int count = schoolMapper.deleteSchoolById(id);
+        return count;
+    }
+
+    @PostMapping(value = &quot;school&quot;)
+    public int addSchool(@RequestBody School school) {
+        int count = schoolMapper.insertSchool(school);
+        return count;
+    }
+
+    @PutMapping(value = &quot;school&quot;)
+    public int putMethodName(@RequestBody School school) {
+        int count = schoolMapper.updateSchool(school);
+        return count;
+    }
 
 }
 </code></pre>
 
-<p>查看<strong>Registrar</strong>类，debug如下：</p>
+<p><strong>注意</strong></p>
 
-<p><img src="/img/5-24-04.png" alt="5-24-04" /></p>
+<p><strong>前端请求传Json对象则后端使用@RequestParam；</strong></p>
 
-<p>查看项目目录结构，注意其中的<strong>主配置类（@SpringBootApplication标注的类）目录</strong></p>
+<p><strong>前端请求传Json对象的字符串则后端使用@RequestBody。</strong></p>
 
-<p><img src="/img/Xnip2019-05-24_17-33-47.png" alt="Xnip2019-05-24_17-33-47" /></p>
+<p><strong>总结: 可以看到，用注解版，操作非常简单。</strong></p>
 
-<p>由上面可以看到，他加载了所有<strong>&ldquo;com.maizi.helloworld.helloword&rdquo;</strong>目录下的所有类。</p>
+<h2 id="配置文件版">配置文件版</h2>
 
-<p>这样，将主配置类（@SpringBootApplication标注的类）的所在包及下面所有子包里面的所有组件扫描到Spring容器；</p>
+<pre><code class="language-yaml">mybatis:
+  config-location: classpath:mybatis/mybatis-config.xml  #指定全局配置文件的位置
+  mapper-locations: classpath:mybatis/mapper/*.xml   #指定sql映射文件的位置
+</code></pre>
 
-<h1 id="加载默认配置文件">加载默认配置文件</h1>
+<p><strong>注意mapper文件也是需要@mapper或者提供@MapperScan的。</strong></p>
 
-<p>分别点击：</p>
+<h3 id="配置文件xml">配置文件xml</h3>
 
-<ol>
-<li><p>@<em>EnableAutoConfiguration</em></p></li>
+<pre><code class="language-xml">&lt;?xml version=&quot;1.0&quot; encoding=&quot;UTF-8&quot;?&gt;
+&lt;!DOCTYPE mapper PUBLIC &quot;-//mybatis.org//DTD Mapper 3.0//EN&quot; &quot;http://mybatis.org/dtd/mybatis-3-mapper.dtd&quot;&gt;
+&lt;mapper namespace=&quot;com.example.databasedemo.mybatis.SchoolXmlMapper&quot;&gt;
+    &lt;select id=&quot;getSchoolById&quot; resultType=&quot;com.example.databasedemo.mybatis.School&quot;&gt;
+         select * from school where id=#{id}
+    &lt;/select&gt;
+&lt;/mapper&gt;
+</code></pre>
 
-<li><p>@<em>Import</em>(AutoConfigurationImportSelector.class)</p></li>
-</ol>
+<h1 id="springdata">springData</h1>
 
-<p>进去AutoConfigurationImportSelector类， debug查看结果如下：</p>
+<p><strong>转载地址： <a href="https://blog.csdn.net/sinat_28050007/article/details/53290217">https://blog.csdn.net/sinat_28050007/article/details/53290217</a></strong></p>
 
-<p><img src="/img/Xnip2019-05-24_17-43-30.png" alt="Xnip2019-05-24_17-43-30" /></p>
+<h2 id="springdata相关概念">SpringData相关概念</h2>
 
-<p>会给容器中导入非常多的自动配置类（xxxAutoConfiguration）；就是给容器中导入这个场景需要的所有组件，并配置好这些组件；这些配置类就提供了我们在写yml文件的时候，默认的一些属性值， 如下：</p>
+<p>SpringData是Spring基于ORM框架、JPA规范封装的一套JPA应用框架，它提供了包括增删改查在内的常用功能，且易于扩展，可使开发者用极简的代码实现对数据库的访问和操作。</p>
 
-<p><img src="/img/Xnip2019-05-24_16-56-51.png" alt="Xnip2019-05-24_16-56-51" /></p>
+<p><strong>我们就在Application层进行操作</strong></p>
 
-<p><strong>对应的就是   <em>server.port</em>=8081</strong></p>
+<p><img src="/img/2019-05-30 下午1.48.41.png" alt="2019-05-30 下午1.48.41" /></p>
 
-<p><strong>J2EE的整体整合解决方案和自动配置都在spring-boot-autoconfigure-1.5.9.RELEASE.jar；</strong></p>
+<h2 id="什么是jpa呢">什么是JPA呢</h2>
+
+<p>JPA全称Java Persistence API，是sun提出的一个对象持久化规范，各JavaEE应用服务器自主选择具体实现。JPA仅仅只是一个规范，而不是产品；使用JPA本身是不能做到持久化的。所以，JPA只是一系列定义好的持久化操作的接口，在系统中使用时，需要真正的实现者。</p>
+
+<p>JPA的底层实现是一些流行的开源ORM(对象关系映射)框架，因此JPA其实也就是java实体对象和关系型数据库建立起映射关系，通过面向对象编程的思想操作关系型数据库的规范。</p>
+
+<h2 id="springdata提供的编程接口">SpringData提供的编程接口</h2>
+
+<p>Repository：最顶层接口，是一个空接口，目的是为了统一所有的Repository的类型，且能让组件扫描的时候自动识别；</p>
+
+<p>CrudRepository：提供基础的增删改查操作；</p>
+
+<p>PagingAndSortingRepository：提供分页和排序的操作；</p>
+
+<p>JpaRepository：增加了批量操作的功能；</p>
+
+<p>JpaSpecificationExecutor ：组合查询条件，提供原生SQL查询。</p>
+
+<p><img src="/img/2019-05-30 下午1.48.08.png" alt="2019-05-30 下午1.48.08" /></p>
+
+<h2 id="具体实现jpa">具体实现JPA</h2>
+
+<h3 id="pom-xml-3">pom.xml</h3>
+
+<pre><code class="language-xml"> &lt;dependency&gt;
+      &lt;groupId&gt;org.springframework.boot&lt;/groupId&gt;
+      &lt;artifactId&gt;spring-boot-starter-data-jpa&lt;/artifactId&gt;
+      &lt;scope&gt;compile&lt;/scope&gt;
+  &lt;/dependency&gt;
+</code></pre>
+
+<h3 id="创建表">创建表</h3>
+
+<pre><code class="language-java">//使用JPA注解配置映射关系
+@Entity //告诉JPA这是一个实体类（和数据表映射的类）
+@Table(name = &quot;tbl_user&quot;) //@Table来指定和哪个数据表对应;如果省略默认表名就是user；
+@Data
+public class User implements Serializable {
+
+    @Id //这是一个主键
+    @GeneratedValue(strategy = GenerationType.IDENTITY)//自增主键
+    private Integer id;
+
+    @Column(name = &quot;last_name&quot;,length = 50) //这是和数据表对应的一个列
+    private String lastName;
+    @Column //省略默认列名就是属性名
+    private String email;
+}
+</code></pre>
+
+<h3 id="mapper层">mapper层</h3>
+
+<pre><code class="language-java">public interface UserRepository extends JpaRepository&lt;User, Integer&gt; {
+    
+}
+</code></pre>
+
+<h3 id="controller">Controller</h3>
+
+<pre><code class="language-java">
+@RestController
+public class JpaController {
+    
+    @Autowired
+    private UserRepository  userRepository;
+
+    @GetMapping(value=&quot;/jpa/{id}&quot;)
+    public User getUser(@PathVariable(&quot;id&quot;) Integer id) {
+        Optional&lt;User&gt; optional = userRepository.findById(id);
+        return optional.get();
+    }
+    
+    @PostMapping(value=&quot;/jpa&quot;)
+    public User addUser(@RequestBody User user) {
+        User resultUser = userRepository.save(user);
+        return resultUser;
+    }
+
+}
+</code></pre>
+
+<h3 id="application-yml-2">application.yml</h3>
+
+<pre><code class="language-yaml">spring:
+  jpa:
+    show-sql: true  #  控制台显示SQL
+    hibernate:
+      ddl-auto: update #更新或者创建数据表结构
+  datasource:
+    username: root
+    password: 123456
+    url: jdbc:mysql://localhost:32769/workdb?useUnicode=true&amp;characterEncoding=utf-8
+    driver-class-name: com.mysql.jdbc.Driver
+    sql-script-encoding: utf-8
+    type: com.alibaba.druid.pool.DruidDataSource
+</code></pre>
+
+<p><strong>注意：这里集成了Druid，druid只是和数据源的配置，和其他的调用接口没关系，这里一样还是可以监控数据源，不需要做什么改动。</strong></p>
 
 
                 
@@ -378,15 +736,10 @@ public @interface AutoConfigurationPackage {
                 <ul class="pager">
                     
                     <li class="previous">
-                        <a href="/post/springboot%E7%B3%BB%E5%88%97-%E9%85%8D%E7%BD%AE%E6%96%87%E4%BB%B6/" data-toggle="tooltip" data-placement="top" title="springboot系列-配置文件">&larr;
+                        <a href="/post/springboot%E7%B3%BB%E5%88%97-web/" data-toggle="tooltip" data-placement="top" title="springboot系列-web">&larr;
                             Previous Post</a>
                     </li>
                     
-                    
-                    <li class="next">
-                        <a href="/post/springboot%E7%B3%BB%E5%88%97-%E5%B8%B8%E7%94%A8%E6%B3%A8%E8%A7%A3%E7%90%86%E8%A7%A3/" data-toggle="tooltip" data-placement="top" title="springboot系列-常用注解理解">Next
-                            Post &rarr;</a>
-                    </li>
                     
                 </ul>
 
