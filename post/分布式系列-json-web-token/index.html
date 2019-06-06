@@ -1,0 +1,906 @@
+<!DOCTYPE html>
+<html lang="en-us">
+<head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+
+    
+    <meta property="og:site_name" content="">
+    <meta property="og:type" content="article">
+
+    
+    <meta property="og:image" content="http://maizitoday.github.io//img/home-bg-jeep.jpg">
+    <meta property="twitter:image" content="http://maizitoday.github.io//img/home-bg-jeep.jpg" />
+    
+
+    
+    <meta name="title" content="json-web-token" />
+    <meta property="og:title" content="json-web-token" />
+    <meta property="twitter:title" content="json-web-token" />
+    
+
+    
+    <meta name="description" content="麦子，程序员, 开源爱好者，生活探险家 | 这里是 麦子 的博客，与你一起发现更大的世界。">
+    <meta property="og:description" content="麦子，程序员, 开源爱好者，生活探险家 | 这里是 麦子 的博客，与你一起发现更大的世界。" />
+    <meta property="twitter:description" content="麦子，程序员, 开源爱好者，生活探险家 | 这里是 麦子 的博客，与你一起发现更大的世界。" />
+    
+
+    
+    <meta property="twitter:card" content="summary" />
+    
+    
+
+    <meta name="keyword"  content="麦子, maizi, maizi, , 麦子的网络日志, 麦子的博客, maizi Blog, 博客, 个人网站, 互联网, Web, 云原生, PaaS, Istio, Kubernetes, 微服务, Microservice">
+    <link rel="shortcut icon" href="/img/favicon.ico">
+
+    <title>json-web-token-麦子的博客</title>
+
+    <link rel="canonical" href="/post/%E5%88%86%E5%B8%83%E5%BC%8F%E7%B3%BB%E5%88%97-json-web-token/">
+
+    <link rel="stylesheet" href="/css/iDisqus.min.css"/>
+	
+    
+    <link rel="stylesheet" href="/css/bootstrap.min.css">
+
+    
+    <link rel="stylesheet" href="/css/hux-blog.min.css">
+
+    
+    <link rel="stylesheet" href="/css/syntax.css">
+
+    
+    <link rel="stylesheet" href="/css/zanshang.css">
+
+    
+    <link href="//cdnjs.cloudflare.com/ajax/libs/font-awesome/4.6.3/css/font-awesome.min.css" rel="stylesheet" type="text/css">
+    
+    
+    <script src="/js/jquery.min.js"></script>
+    
+    
+    <script src="/js/bootstrap.min.js"></script>
+    
+    
+    <script src="/js/hux-blog.min.js"></script>
+	
+    
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.13.1/styles/docco.min.css">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.13.1/highlight.min.js"></script>
+    <script>hljs.initHighlightingOnLoad();</script>
+</head>
+
+
+<nav class="navbar navbar-default navbar-custom navbar-fixed-top">
+    <div class="container-fluid">
+        
+        <div class="navbar-header page-scroll">
+            <button type="button" class="navbar-toggle">
+                <span class="sr-only">Toggle navigation</span>
+                <span class="icon-bar"></span>
+                <span class="icon-bar"></span>
+                <span class="icon-bar"></span>
+            </button>
+            <a class="navbar-brand" href="/"></a>
+        </div>
+
+        
+        
+        <div id="huxblog_navbar">
+            <div class="navbar-collapse">
+                <ul class="nav navbar-nav navbar-right">
+                    <li>
+                        <a href="/">Home</a>
+                    </li>
+                    
+                    <li>
+                        <a href="/categories/life">Life</a>
+                    </li>
+                    
+                    <li>
+                        <a href="/categories/tech">Tech</a>
+                    </li>
+                    
+                    
+		    
+                        <li><a href="/top/about/">ABOUT</a></li>
+                    
+
+                    
+		    <li>
+                        <a href="/search">SEARCH <img src="/img/search.png" height="15" style="cursor: pointer;" alt="Search"></a>
+		    </li>
+                    
+                </ul>
+            </div>
+        </div>
+        
+    </div>
+    
+</nav>
+<script>
+    
+    
+    
+    var $body   = document.body;
+    var $toggle = document.querySelector('.navbar-toggle');
+    var $navbar = document.querySelector('#huxblog_navbar');
+    var $collapse = document.querySelector('.navbar-collapse');
+
+    $toggle.addEventListener('click', handleMagic)
+    function handleMagic(e){
+        if ($navbar.className.indexOf('in') > 0) {
+        
+            $navbar.className = " ";
+            
+            setTimeout(function(){
+                
+                if($navbar.className.indexOf('in') < 0) {
+                    $collapse.style.height = "0px"
+                }
+            },400)
+        }else{
+        
+            $collapse.style.height = "auto"
+            $navbar.className += " in";
+        }
+    }
+</script>
+
+
+
+
+<style type="text/css">
+    header.intro-header {
+        background-image: url('https://zhaohuabing.com//img/post-bg-unix-linux.jpg')
+    }
+</style>
+<header class="intro-header">
+    <div class="container">
+        <div class="row">
+            <div class="col-lg-8 col-lg-offset-2 col-md-10 col-md-offset-1">
+                <div class="post-heading">
+                    <div class="tags">
+                        
+                        <a class="tag" href="/tags/%E5%88%86%E5%B8%83%E5%BC%8F%E7%B3%BB%E5%88%97" title="分布式系列">
+                            分布式系列
+                        </a>
+                        
+                        <a class="tag" href="/tags/%E6%9D%83%E9%99%90%E5%AE%89%E5%85%A8" title="权限安全">
+                            权限安全
+                        </a>
+                        
+                        <a class="tag" href="/tags/%E5%89%8D%E5%90%8E%E7%AB%AF%E5%88%86%E7%A6%BB" title="前后端分离">
+                            前后端分离
+                        </a>
+                        
+                        <a class="tag" href="/tags/%E5%8D%95%E7%82%B9%E7%99%BB%E5%BD%95" title="单点登录">
+                            单点登录
+                        </a>
+                        
+                        <a class="tag" href="/tags/jwt" title="jwt">
+                            jwt
+                        </a>
+                        
+                    </div>
+                    <h1>json-web-token</h1>
+                    <h2 class="subheading"></h2>
+                    <span class="meta">
+			Posted by 
+			
+			         &#34;麦子&#34;
+			 
+			on 
+			Thursday, May 30, 2019
+                        
+                    </span>
+                </div>
+            </div>
+        </div>
+    </div>
+</header>
+
+
+
+
+<article>
+    <div class="container">
+        <div class="row">
+
+            
+            <div class="
+                col-lg-8 col-lg-offset-2
+                col-md-10 col-md-offset-1
+                post-container">
+
+                
+                <header>
+                    <h2>TOC</h2>
+                </header>
+                <nav id="TableOfContents">
+<ul>
+<li><a href="#json-web-token是什么">JSON WEB Token是什么</a></li>
+<li><a href="#jwt与session的差异">JWT与Session的差异</a></li>
+<li><a href="#jwt的好处">JWT的好处</a>
+<ul>
+<li><a href="#无状态和可扩展性">无状态和可扩展性</a></li>
+<li><a href="#安全">安全</a></li>
+<li><a href="#单点服务">单点服务</a></li>
+<li><a href="#前后端分离">前后端分离</a></li>
+</ul></li>
+<li><a href="#认证和授权">认证和授权</a></li>
+<li><a href="#jtw结构">JTW结构</a>
+<ul>
+<li><a href="#header-头部">Header 头部</a></li>
+<li><a href="#payload-负载">Payload 负载</a></li>
+<li><a href="#signature-签名">Signature 签名</a></li>
+<li><a href="#完整的一个jwt">完整的一个JWT</a></li>
+</ul></li>
+<li><a href="#session-token-jwt工作原理">session,token,JWT工作原理</a>
+<ul>
+<li><a href="#session认证流程">session认证流程</a></li>
+<li><a href="#直接token认证流程">直接token认证流程</a></li>
+<li><a href="#jwt认证流程">JWT认证流程</a></li>
+</ul></li>
+<li><a href="#springboot-jwt">Springboot+JWT</a>
+<ul>
+<li><a href="#pom-xml">pom.xml</a></li>
+<li><a href="#加密解密">加密解密</a></li>
+<li><a href="#运行结果">运行结果</a></li>
+</ul></li>
+</ul>
+</nav>
+                
+                
+
+<p>[TOC]</p>
+
+<p><strong>转载地址： <a href="https://blog.csdn.net/yangdiao127/article/details/70336467">https://blog.csdn.net/yangdiao127/article/details/70336467</a>  数字签名解释</strong></p>
+
+<p><strong>转载地址： <a href="https://www.cnblogs.com/cjsblog/p/9277677.html">https://www.cnblogs.com/cjsblog/p/9277677.html</a></strong></p>
+
+<h1 id="json-web-token是什么">JSON WEB Token是什么</h1>
+
+<p>JSON Web Token (JWT)是一个<strong>开放标准</strong>(RFC 7519)，它定义了一种紧凑的、自包含的方式，用于作为JSON对象在各方之间安全地传输信息。该信息可以被验证和信任，<strong>因为它是数字签名的。</strong></p>
+
+<p>所谓的数字签名就是，用公钥和私钥的一种对称。</p>
+
+<h1 id="jwt与session的差异">JWT与Session的差异</h1>
+
+<p>相同点是，它们都是存储用户信息；然而，Session是在服务器端的，而JWT是在客户端的。Session方式存储用户信息的最大问题在于要占用大量服务器内存，增加服务器的开销。而JWT方式将用户状态分散到了客户端中，可以明显减轻服务端的内存压力。Session的状态是存储在服务器端，客户端只有session id；而Token的状态是存储在客户端。</p>
+
+<h1 id="jwt的好处">JWT的好处</h1>
+
+<p>身份认证在这种场景下，一旦用户完成了登陆，在接下来的每个请求中包含JWT，可以用来验证用户身份以及对路由，服务和资源的访问权限进行验证。由于它的开销非常小，可以轻松的在不同域名的系统中传递，所有目前在单点登录（SSO）中比较广泛的使用了该技术。 信息交换在通信的双方之间使用JWT对数据进行编码是一种非常安全的方式，由于它的信息是经过签名的，可以确保发送者发送的信息是没有经过伪造的。</p>
+
+<h2 id="无状态和可扩展性">无状态和可扩展性</h2>
+
+<p>Tokens存储在客户端。完全无状态，可扩展。我们的负载均衡器可以将用户传递到任意服务器，因为在任何地方都没有状态或会话信息。</p>
+
+<h2 id="安全">安全</h2>
+
+<p>Token不是Cookie。（The token, not a cookie.）每次请求的时候Token都会被发送。而且，由于没有Cookie被发送，还有助于防止CSRF攻击。即使在你的实现中将token存储到客户端的Cookie中，<strong>这个Cookie也只是一种存储机制，而非身份认证机制。</strong>没有基于会话的信息可以操作，因为我们没有会话!  <strong>应为我们还需要用私钥来进行解密才是认证。</strong></p>
+
+<h2 id="单点服务">单点服务</h2>
+
+<p>单点登录是现在广泛使用的JWT的一个特性，因为它的开销很小，并且可以轻松地跨域使用。</p>
+
+<h2 id="前后端分离">前后端分离</h2>
+
+<p>前后端分离，在分布式系统中，我们处理跨域的问题。</p>
+
+<h1 id="认证和授权">认证和授权</h1>
+
+<p>认证意味着证实某个用户是他所声明的那个人；授权意味决定一个身份确定的用户能够访问那些资源。</p>
+
+<h1 id="jtw结构">JTW结构</h1>
+
+<p>JWT包含了使用.分隔的三部分</p>
+
+<h2 id="header-头部">Header 头部</h2>
+
+<p>header典型的由两部分组成：token的类型（“JWT”）和算法名称（比如：HMAC SHA256或者RSA等等）。</p>
+
+<p>例如：</p>
+
+<pre><code class="language-json">{
+  &quot;alg&quot;:&quot;HS256&quot;,
+  &quot;type&quot;:&quot;JWT&quot;
+ }
+</code></pre>
+
+<p>然后，用Base64对这个JSON编码就得到了JWT的第一部分</p>
+
+<h2 id="payload-负载">Payload 负载</h2>
+
+<p>JWT的第二部分是payload，它包含声明（要求）。声明是关于实体(通常是用户)和其他数据的声明。声明有三种类型: registered, public 和 private。</p>
+
+<ul>
+<li>Registered claims : 这里有一组预定义的声明，它们不是强制的，但是推荐。比如：iss (issuer), exp (expiration time), sub (subject), aud (audience)等。</li>
+<li>Public claims : 可以随意定义。</li>
+<li>Private claims : 用于在同意使用它们的各方之间共享信息，并且不是注册的或公开的声明。</li>
+</ul>
+
+<p>下面是一个列子</p>
+
+<pre><code class="language-json">{
+  &quot;sub&quot;:&quot;1234567890&quot;,
+  &quot;name&quot;:&quot;John Doe&quot;,
+  &quot;admin&quot;:true
+ }
+</code></pre>
+
+<p>对payload进行Base64编码就得到JWT的第二部分</p>
+
+<p><strong>注意：不要在JWT的playload或者header中放置敏感信息，除非它们是加密的。</strong></p>
+
+<h2 id="signature-签名">Signature 签名</h2>
+
+<p>为了得到签名部分，你必须有编码过的header、编码过的payload、一个秘钥，签名算法是header中指定的那个，然对它们签名即可。</p>
+
+<p>如下：</p>
+
+<pre><code class="language-java">HMACSHA256(base64UrlEncode(header) + &quot;.&quot; + base64UrlEncode(payload), secret)
+</code></pre>
+
+<p>hash方法用到了一个secret，这个东西需要application server和authentication server双方都知道，相当于约好了同一把验证的钥匙，最终才好做认证。</p>
+
+<p><strong>签名是用于验证消息在传递过程中有没有被更改，并且，对于使用私钥签名的token，它还可以验证JWT的发送方是否为它所称的发送方。保证了数据安全性，可以说就是一种认证处理。</strong></p>
+
+<h2 id="完整的一个jwt">完整的一个JWT</h2>
+
+<p>查看官网：<a href="https://jwt.io/#debugger-io">https://jwt.io/#debugger-io</a></p>
+
+<p><img src="/img/Xnip2019-06-06_13-47-10.png" alt="Xnip2019-06-06_13-47-10" /></p>
+
+<p><strong>注意： 发送JWT要用https，JWT本身不保证数据安全，需要认证机构CA发送秘钥这样的话才是安全的。</strong></p>
+
+<h1 id="session-token-jwt工作原理">session,token,JWT工作原理</h1>
+
+<p><strong>转载地址：<a href="https://blog.csdn.net/qq_40707682/article/details/88560565">https://blog.csdn.net/qq_40707682/article/details/88560565</a></strong></p>
+
+<h2 id="session认证流程">session认证流程</h2>
+
+<p><img src="/img/6-6-1.png" alt="6-6-1" /></p>
+
+<h2 id="直接token认证流程">直接token认证流程</h2>
+
+<p><img src="/img/6-6-2.png" alt="6-6-2" /></p>
+
+<h2 id="jwt认证流程">JWT认证流程</h2>
+
+<p><img src="/img/6-6-3.png" alt="6-6-3" /></p>
+
+<h1 id="springboot-jwt">Springboot+JWT</h1>
+
+<h2 id="pom-xml">pom.xml</h2>
+
+<pre><code class="language-xml">&lt;dependency&gt;
+			&lt;groupId&gt;io.jsonwebtoken&lt;/groupId&gt;
+			&lt;artifactId&gt;jjwt&lt;/artifactId&gt;
+			&lt;version&gt;0.7.0&lt;/version&gt;
+&lt;/dependency&gt;
+</code></pre>
+
+<h2 id="加密解密">加密解密</h2>
+
+<pre><code class="language-java">@Data
+@ToString
+public class Employee {
+    private String id;
+    private String username;
+    private String password;
+
+    public Employee() {
+        this.setId(&quot;testId&quot;);
+        this.setUsername(&quot;testUsername&quot;);
+        this.setPassword(&quot;testPassword&quot;);
+    }
+}
+
+public static void main(String[] args) {
+        System.out.println(&quot;开始测试jwt加密&quot;);
+
+        String token = Jwts.builder()
+                .setSubject(new Employee().toString())
+                .setExpiration(new Date(System.currentTimeMillis() + 30 * 60 * 1000))
+                .signWith(SignatureAlgorithm.HS512, &quot;PrivateSecret&quot;) 
+                .compact();
+        System.out.println(token);
+
+        System.out.println(&quot;开始测试jwt Subject 解密&quot;);
+        String user = Jwts.parser()
+                    .setSigningKey(&quot;PrivateSecret&quot;)
+                    .parseClaimsJws(token)
+                    .getBody()
+                    .getSubject();
+        System.out.println(user);
+
+  
+        System.out.println(&quot;显示所有的信息&quot;);
+        Object object = Jwts.parser()
+                    .setSigningKey(&quot;PrivateSecret&quot;)
+                    .parseClaimsJws(token)
+                    .getBody();
+        System.out.println(object);  
+    }
+</code></pre>
+
+<h2 id="运行结果">运行结果</h2>
+
+<pre><code>开始测试jwt加密
+eyJhbGciOiJIUzUxMiJ9.eyJzdWIiOiJFbXBsb3llZShpZD10ZXN0SWQsIHVzZXJuYW1lPXRlc3RVc2VybmFtZSwgcGFzc3dvcmQ9dGVzdFBhc3N3b3JkKSIsImV4cCI6MTU1OTgwNjk0OX0.6g2n2upcRNiecmjhw5V9HiUs0fHeg7-YBCTtFIpNhvpAhTLZQ79n5qOc2SNpd4rNx15gozy0krDo-zKBSumrlQ
+开始测试jwt Subject 解密
+Employee(id=testId, username=testUsername, password=testPassword)
+显示所有的信息
+{sub=Employee(id=testId, username=testUsername, password=testPassword), exp=1559806949}
+</code></pre>
+
+
+                
+                
+<div class="entry-shang text-center">
+    
+	    <p>「真诚赞赏，手留余香」</p>
+	
+	<button class="zs show-zs btn btn-bred">赞赏支持</button>
+</div>
+<div class="zs-modal-bg"></div>
+<div class="zs-modal-box">
+	<div class="zs-modal-head">
+		<button type="button" class="close">×</button>
+		<span class="author"><a href="http://maizitoday.github.io/"><img src="/img/favicon.png" /></a></span>
+        
+	        <p class="tip"><i></i><span>真诚赞赏，手留余香</span></p>
+		
+ 
+	</div>
+	<div class="zs-modal-body">
+		<div class="zs-modal-btns">
+			<button class="btn btn-blink" data-num="2">2元</button>
+			<button class="btn btn-blink" data-num="5">5元</button>
+			<button class="btn btn-blink" data-num="10">10元</button>
+			<button class="btn btn-blink" data-num="50">50元</button>
+			<button class="btn btn-blink" data-num="100">100元</button>
+			<button class="btn btn-blink" data-num="1">任意金额</button>
+		</div>
+		<div class="zs-modal-pay">
+			<button class="btn btn-bred" id="pay-text">2元</button>
+			<p>使用<span id="pay-type">微信</span>扫描二维码完成支付</p>
+			<img src="/img/reward/wechat-2.png"  id="pay-image"/>
+		</div>
+	</div>
+	<div class="zs-modal-footer">
+		<label><input type="radio" name="zs-type" value="wechat" class="zs-type" checked="checked"><span ><span class="zs-wechat"><img src="/img/reward/wechat-btn.png"/></span></label>
+		<label><input type="radio" name="zs-type" value="alipay" class="zs-type" class="zs-alipay"><img src="/img/reward/alipay-btn.png"/></span></label>
+	</div>
+</div>
+<script type="text/javascript" src="/js/reward.js"></script>
+
+                
+
+                <hr>
+                <ul class="pager">
+                    
+                    <li class="previous">
+                        <a href="/post/springboot%E7%B3%BB%E5%88%97-security/" data-toggle="tooltip" data-placement="top" title="springboot系列-security">&larr;
+                            Previous Post</a>
+                    </li>
+                    
+                    
+                </ul>
+
+                
+<div id="disqus-comment"></div>
+
+
+
+            </div>
+            
+            <div class="
+                col-lg-8 col-lg-offset-2
+                col-md-10 col-md-offset-1
+                sidebar-container">
+
+                
+                
+                <section>
+                    <hr class="hidden-sm hidden-xs">
+                    <h5><a href="/tags/">FEATURED TAGS</a></h5>
+                    <div class="tags">
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        <a href="/tags/zookeeper" title="Zookeeper">
+                            Zookeeper
+                        </a>
+                        
+                        
+                        
+                        
+                        
+                        <a href="/tags/docker" title="docker">
+                            docker
+                        </a>
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        <a href="/tags/dockerfile" title="dockerfile">
+                            dockerfile
+                        </a>
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        <a href="/tags/java%E5%9F%BA%E7%A1%80" title="java基础">
+                            java基础
+                        </a>
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        <a href="/tags/jwt" title="jwt">
+                            jwt
+                        </a>
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        <a href="/tags/springcloud" title="springCloud">
+                            springCloud
+                        </a>
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        <a href="/tags/springboot%E7%B3%BB%E5%88%97" title="springboot系列">
+                            springboot系列
+                        </a>
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        <a href="/tags/%E4%B8%AD%E9%97%B4%E4%BB%B6" title="中间件">
+                            中间件
+                        </a>
+                        
+                        
+                        
+                        <a href="/tags/%E4%B8%BB%E4%BB%8E%E5%A4%8D%E5%88%B6" title="主从复制">
+                            主从复制
+                        </a>
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        <a href="/tags/%E5%88%86%E5%B8%83%E5%BC%8F%E7%B3%BB%E5%88%97" title="分布式系列">
+                            分布式系列
+                        </a>
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        <a href="/tags/%E5%BC%80%E5%8F%91%E5%B7%A5%E5%85%B7" title="开发工具">
+                            开发工具
+                        </a>
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        <a href="/tags/%E6%95%B0%E6%8D%AE%E5%BA%93" title="数据库">
+                            数据库
+                        </a>
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        <a href="/tags/%E6%9C%8D%E5%8A%A1%E8%84%9A%E6%9C%AC" title="服务脚本">
+                            服务脚本
+                        </a>
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        <a href="/tags/%E8%B4%9F%E8%BD%BD%E5%9D%87%E8%A1%A1" title="负载均衡">
+                            负载均衡
+                        </a>
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                    </div>
+                </section>
+                
+
+                
+                
+                <section>
+                    <hr>
+                    <h5>FRIENDS</h5>
+                    <ul class="list-inline">
+                        
+                        <li><a target="_blank" href="https://zhaohuabing.com">赵化冰博客</a></li>
+                        
+                        <li><a target="_blank" href="http://www.tianshouzhi.com">田守枝博客</a></li>
+                        
+                        <li><a target="_blank" href="http://www.ityouknow.com">纯洁的微笑博客</a></li>
+                        
+                    </ul>
+                </section>
+                
+            </div>
+        </div>
+    </div>
+</article>
+
+
+
+
+<footer>
+    <div class="container">
+        <div class="row">
+            <div class="col-lg-8 col-lg-offset-2 col-md-10 col-md-offset-1">
+                <ul class="list-inline text-center">
+                   
+                   <li>
+                       <a href="" rel="alternate" type="application/rss+xml" title="" >
+                           <span class="fa-stack fa-lg">
+                               <i class="fa fa-circle fa-stack-2x"></i>
+                               <i class="fa fa-rss fa-stack-1x fa-inverse"></i>
+                           </span>
+                       </a>
+                   </li>
+                   
+                    
+                    <li>
+                        <a href="mailto:maiziybtoday@gmail.com">
+                            <span class="fa-stack fa-lg">
+                                <i class="fa fa-circle fa-stack-2x"></i>
+                                <i class="fa fa-envelope fa-stack-1x fa-inverse"></i>
+                            </span>
+                        </a>
+                    </li>
+		    
+                    
+                    
+                    
+                    
+
+                    
+
+		    
+                    
+                    <li>
+                        <a target="_blank" href="/your%20wechat%20qr%20code%20image">
+                            <span class="fa-stack fa-lg">
+                                <i class="fa fa-circle fa-stack-2x"></i>
+                                <i class="fa fa-wechat fa-stack-1x fa-inverse"></i>
+                            </span>
+                        </a>
+                    </li>
+		    
+                    
+                    
+                    <li>
+                        <a target="_blank" href="https://www.linkedin.com/in/yourlinkedinid">
+                            <span class="fa-stack fa-lg">
+                                <i class="fa fa-circle fa-stack-2x"></i>
+                                <i class="fa fa-linkedin fa-stack-1x fa-inverse"></i>
+                            </span>
+                        </a>
+                    </li>
+		    
+                    
+                </ul>
+		<p class="copyright text-muted">
+                    Copyright &copy;  2019
+                    <br>
+                    <a href="https://themes.gohugo.io/hugo-theme-cleanwhite">CleanWhite Hugo Theme</a> by <a href="https://zhaohuabing.com">Huabing</a> |
+                    <iframe
+                        style="margin-left: 2px; margin-bottom:-5px;"
+                        frameborder="0" scrolling="0" width="100px" height="20px"
+                        src="https://ghbtns.com/github-btn.html?user=zhaohuabing&repo=hugo-theme-cleanwhite&type=star&count=true" >
+                    </iframe>
+                </p>
+            </div>
+        </div>
+    </div>
+</footer>
+
+
+
+
+<script>
+    function async(u, c) {
+      var d = document, t = 'script',
+          o = d.createElement(t),
+          s = d.getElementsByTagName(t)[0];
+      o.src = u;
+      if (c) { o.addEventListener('load', function (e) { c(null, e); }, false); }
+      s.parentNode.insertBefore(o, s);
+    }
+</script>
+
+
+
+
+
+
+<script>
+    
+    if($('#tag_cloud').length !== 0){
+        async("/js/jquery.tagcloud.js",function(){
+            $.fn.tagcloud.defaults = {
+                
+                color: {start: '#bbbbee', end: '#0085a1'},
+            };
+            $('#tag_cloud a').tagcloud();
+        })
+    }
+</script>
+
+
+<script>
+    async("https://cdnjs.cloudflare.com/ajax/libs/fastclick/1.0.6/fastclick.js", function(){
+        var $nav = document.querySelector("nav");
+        if($nav) FastClick.attach($nav);
+    })
+</script>
+
+
+
+
+
+
+</body>
+</html>
