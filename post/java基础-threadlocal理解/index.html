@@ -1,0 +1,1068 @@
+<!DOCTYPE html>
+<html lang="en-us">
+<head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+
+    
+    <meta property="og:site_name" content="">
+    <meta property="og:type" content="article">
+
+    
+    <meta property="og:image" content="http://maizitoday.github.io//img/home-bg-jeep.jpg">
+    <meta property="twitter:image" content="http://maizitoday.github.io//img/home-bg-jeep.jpg" />
+    
+
+    
+    <meta name="title" content="ThreadLocal理解" />
+    <meta property="og:title" content="ThreadLocal理解" />
+    <meta property="twitter:title" content="ThreadLocal理解" />
+    
+
+    
+    <meta name="description" content="麦子，程序员, 开源爱好者，生活探险家 | 这里是 麦子 的博客，与你一起发现更大的世界。">
+    <meta property="og:description" content="麦子，程序员, 开源爱好者，生活探险家 | 这里是 麦子 的博客，与你一起发现更大的世界。" />
+    <meta property="twitter:description" content="麦子，程序员, 开源爱好者，生活探险家 | 这里是 麦子 的博客，与你一起发现更大的世界。" />
+    
+
+    
+    <meta property="twitter:card" content="summary" />
+    
+    
+
+    <meta name="keyword"  content="麦子, maizi, maizi, , 麦子的网络日志, 麦子的博客, maizi Blog, 博客, 个人网站, 互联网, Web, 云原生, PaaS, Istio, Kubernetes, 微服务, Microservice">
+    <link rel="shortcut icon" href="/img/favicon.ico">
+
+    <title>ThreadLocal理解-麦子的博客</title>
+
+    <link rel="canonical" href="/post/java%E5%9F%BA%E7%A1%80-threadlocal%E7%90%86%E8%A7%A3/">
+
+    <link rel="stylesheet" href="/css/iDisqus.min.css"/>
+	
+    
+    <link rel="stylesheet" href="/css/bootstrap.min.css">
+
+    
+    <link rel="stylesheet" href="/css/hux-blog.min.css">
+
+    
+    <link rel="stylesheet" href="/css/syntax.css">
+
+    
+    <link rel="stylesheet" href="/css/zanshang.css">
+
+    
+    <link href="//cdnjs.cloudflare.com/ajax/libs/font-awesome/4.6.3/css/font-awesome.min.css" rel="stylesheet" type="text/css">
+    
+    
+    <script src="/js/jquery.min.js"></script>
+    
+    
+    <script src="/js/bootstrap.min.js"></script>
+    
+    
+    <script src="/js/hux-blog.min.js"></script>
+	
+    
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.13.1/styles/docco.min.css">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.13.1/highlight.min.js"></script>
+    <script>hljs.initHighlightingOnLoad();</script>
+</head>
+
+
+<nav class="navbar navbar-default navbar-custom navbar-fixed-top">
+    <div class="container-fluid">
+        
+        <div class="navbar-header page-scroll">
+            <button type="button" class="navbar-toggle">
+                <span class="sr-only">Toggle navigation</span>
+                <span class="icon-bar"></span>
+                <span class="icon-bar"></span>
+                <span class="icon-bar"></span>
+            </button>
+            <a class="navbar-brand" href="/"></a>
+        </div>
+
+        
+        
+        <div id="huxblog_navbar">
+            <div class="navbar-collapse">
+                <ul class="nav navbar-nav navbar-right">
+                    <li>
+                        <a href="/">Home</a>
+                    </li>
+                    
+                    <li>
+                        <a href="/categories/life">Life</a>
+                    </li>
+                    
+                    <li>
+                        <a href="/categories/tech">Tech</a>
+                    </li>
+                    
+                    
+		    
+                        <li><a href="/top/about/">ABOUT</a></li>
+                    
+
+                    
+		    <li>
+                        <a href="/search">SEARCH <img src="/img/search.png" height="15" style="cursor: pointer;" alt="Search"></a>
+		    </li>
+                    
+                </ul>
+            </div>
+        </div>
+        
+    </div>
+    
+</nav>
+<script>
+    
+    
+    
+    var $body   = document.body;
+    var $toggle = document.querySelector('.navbar-toggle');
+    var $navbar = document.querySelector('#huxblog_navbar');
+    var $collapse = document.querySelector('.navbar-collapse');
+
+    $toggle.addEventListener('click', handleMagic)
+    function handleMagic(e){
+        if ($navbar.className.indexOf('in') > 0) {
+        
+            $navbar.className = " ";
+            
+            setTimeout(function(){
+                
+                if($navbar.className.indexOf('in') < 0) {
+                    $collapse.style.height = "0px"
+                }
+            },400)
+        }else{
+        
+            $collapse.style.height = "auto"
+            $navbar.className += " in";
+        }
+    }
+</script>
+
+
+
+
+<style type="text/css">
+    header.intro-header {
+        background-image: url('https://img.zhaohuabing.com/in-post/2018-04-16-using-helm-to-deploy-to-kubernetes/buffalo.jpg')
+    }
+</style>
+<header class="intro-header">
+    <div class="container">
+        <div class="row">
+            <div class="col-lg-8 col-lg-offset-2 col-md-10 col-md-offset-1">
+                <div class="post-heading">
+                    <div class="tags">
+                        
+                        <a class="tag" href="/tags/java%E5%9F%BA%E7%A1%80" title="java基础">
+                            java基础
+                        </a>
+                        
+                        <a class="tag" href="/tags/threadlocal" title="ThreadLocal">
+                            ThreadLocal
+                        </a>
+                        
+                        <a class="tag" href="/tags/%E5%B9%B6%E5%8F%91%E7%BC%96%E7%A8%8B" title="并发编程">
+                            并发编程
+                        </a>
+                        
+                    </div>
+                    <h1>ThreadLocal理解</h1>
+                    <h2 class="subheading"></h2>
+                    <span class="meta">
+			Posted by 
+			
+			         &#34;麦子&#34;
+			 
+			on 
+			Tuesday, July 9, 2019
+                        
+                    </span>
+                </div>
+            </div>
+        </div>
+    </div>
+</header>
+
+
+
+
+<article>
+    <div class="container">
+        <div class="row">
+
+            
+            <div class="
+                col-lg-8 col-lg-offset-2
+                col-md-10 col-md-offset-1
+                post-container">
+
+                
+                <header>
+                    <h2>TOC</h2>
+                </header>
+                <nav id="TableOfContents">
+<ul>
+<li><a href="#threadlocal-是什么">ThreadLocal 是什么</a></li>
+<li><a href="#java-threadlocal的使用">Java ThreadLocal的使用</a></li>
+<li><a href="#如何创建threadlocal变量">如何创建ThreadLocal变量</a></li>
+<li><a href="#如何访问threadlocal变量">如何访问ThreadLocal变量</a></li>
+<li><a href="#代码证实">代码证实</a></li>
+<li><a href="#典型用途">典型用途</a>
+<ul>
+<li><a href="#管理数据库的connection">管理数据库的Connection</a></li>
+<li><a href="#spring-是如何解决并发访问的线程安全性问题的">Spring 是如何解决并发访问的线程安全性问题的</a></li>
+</ul></li>
+<li><a href="#threadlocal原理">ThreadLocal原理</a></li>
+</ul>
+</nav>
+                
+                
+
+<p>[TOC]</p>
+
+<p><strong>转载地址：<a href="https://www.imooc.com/article/25536">https://www.imooc.com/article/25536</a></strong></p>
+
+<p><strong>转载地址：<a href="http://ifeve.com/java-threadlocal的使用/">http://ifeve.com/java-threadlocal的使用/</a></strong></p>
+
+<h1 id="threadlocal-是什么">ThreadLocal 是什么</h1>
+
+<p>结合我的总结可以这样理解：ThreadLocal提供了线程的局部变量，每个线程都可以通过<code>set()</code>和<code>get()</code>来对这个局部变量进行操作，但不会和其他线程的局部变量进行冲突，<strong>实现了线程的数据隔离</strong>～。</p>
+
+<p>简要言之：往ThreadLocal中填充的变量属于<strong>当前</strong>线程，该变量对其他线程而言是隔离的。可以把他理解为一个容器。</p>
+
+<h1 id="java-threadlocal的使用">Java ThreadLocal的使用</h1>
+
+<p>Java中的ThreadLocal类允许我们创建只能被同一个线程读写的变量。因此，如果一段代码含有一个ThreadLocal变量的引用，即使两个线程同时执行这段代码，它们也无法访问到对方的ThreadLocal变量。</p>
+
+<h1 id="如何创建threadlocal变量">如何创建ThreadLocal变量</h1>
+
+<p>以下代码展示了如何创建一个ThreadLocal变量：</p>
+
+<pre><code class="language-java">private static ThreadLocal&lt;String&gt; myThreadLocal = new ThreadLocal&lt;String&gt;();
+</code></pre>
+
+<p>我们可以看到，通过这段代码实例化了一个ThreadLocal对象。我们只需要实例化对象一次，并且也不需要知道它是被哪个线程实例化。虽然所有的线程都能访问到这个ThreadLocal实例，但是每个线程却只能访问到自己通过调用ThreadLocal的set()方法设置的值。即使是两个不同的线程在同一个ThreadLocal对象上设置了不同的值，他们仍然无法访问到对方的值。</p>
+
+<h1 id="如何访问threadlocal变量">如何访问ThreadLocal变量</h1>
+
+<p>一旦创建了一个ThreadLocal变量，你可以通过如下代码设置某个需要保存的值：</p>
+
+<pre><code class="language-java">myThreadLocal.set(&quot;A thread local value”);
+</code></pre>
+
+<p>可以通过下面方法读取保存在ThreadLocal变量中的值：</p>
+
+<pre><code class="language-java">String threadLocalValue = myThreadLocal.get();
+</code></pre>
+
+<h1 id="代码证实">代码证实</h1>
+
+<pre><code class="language-java"> public interface Sequence {
+    
+    int getNumber();
+
+    void setNumber(int index);
+}
+</code></pre>
+
+<pre><code class="language-java">public class ClientThread extends Thread {
+
+    private Sequence sequence;
+
+    public ClientThread(Sequence sequence) {
+        this.sequence = sequence;
+    }
+
+    @Override
+    public void run() {
+        for (int i = 0; i &lt; 3; i++) {
+            sequence.setNumber(i);
+            System.out.println(Thread.currentThread().getName() + &quot; =&gt;&quot; + sequence.getNumber());
+        }
+    }
+
+}
+</code></pre>
+
+<pre><code class="language-java">public class SequenceA implements Sequence {
+
+    private static int number = 0;
+
+    private static ThreadLocal&lt;Integer&gt; numberThreadLocal = new ThreadLocal&lt;&gt;();
+
+    @Override
+    public int getNumber() {
+
+        // return number;         1号 
+        return numberThreadLocal.get();
+    }
+
+    @Override
+    public void setNumber(int index) {
+        // number = number + 1;         1号 
+        numberThreadLocal.set(index+1);
+    }
+
+    public static void main(String[] args) {
+        Sequence sequence = new SequenceA();
+
+        ClientThread thread1 = new ClientThread(sequence);
+        ClientThread thread2 = new ClientThread(sequence);
+        ClientThread thread3 = new ClientThread(sequence);
+
+        thread1.start();
+        thread2.start();
+        thread3.start();
+
+    }
+}
+</code></pre>
+
+<p>运行效果如下：</p>
+
+<pre><code class="language-java">Thread-0 =&gt;1
+Thread-2 =&gt;1
+Thread-1 =&gt;1
+Thread-2 =&gt;2
+Thread-2 =&gt;3
+Thread-0 =&gt;2
+Thread-0 =&gt;3
+Thread-1 =&gt;2
+Thread-1 =&gt;3
+</code></pre>
+
+<p>如果打开注释的代码  1号 ， 运行效果如下：</p>
+
+<pre><code class="language-java">Thread-1 =&gt;2
+Thread-2 =&gt;3
+Thread-0 =&gt;2
+Thread-2 =&gt;5
+Thread-1 =&gt;4
+Thread-2 =&gt;7
+Thread-0 =&gt;6
+Thread-0 =&gt;9
+Thread-1 =&gt;8
+</code></pre>
+
+<p>这里就可以看到， number这个变量已经被三个线程在使用了， 使用ThreadLocal可以实现线程隔离操作。</p>
+
+<h1 id="典型用途">典型用途</h1>
+
+<h2 id="管理数据库的connection">管理数据库的Connection</h2>
+
+<p>当时在学JDBC的时候，为了方便操作写了一个简单数据库连接池，需要数据库连接池的理由也很简单，频繁创建和关闭Connection是一件非常耗费资源的操作，因此需要创建数据库连接池～</p>
+
+<p>那么，数据库连接池的连接怎么管理呢？？我们交由ThreadLocal来进行管理。为什么交给它来管理呢？？ThreadLocal能够实现<strong>当前线程的操作都是用同一个Connection，保证了事务！</strong></p>
+
+<pre><code class="language-java">public class DBUtil {
+    //数据库连接池
+    private static BasicDataSource source;
+
+    //为不同的线程管理连接
+    private static ThreadLocal&lt;Connection&gt; local;
+
+    static {
+        try {
+            //加载配置文件
+            Properties properties = new Properties();
+
+            //获取读取流
+            InputStream stream = DBUtil.class.getClassLoader().getResourceAsStream(&quot;连接池/config.properties&quot;);
+
+            //从配置文件中读取数据
+            properties.load(stream);
+
+            //关闭流
+            stream.close();
+
+            //初始化连接池
+            source = new BasicDataSource();
+
+            //设置驱动
+            source.setDriverClassName(properties.getProperty(&quot;driver&quot;));
+
+            //设置url
+            source.setUrl(properties.getProperty(&quot;url&quot;));
+
+            //设置用户名
+            source.setUsername(properties.getProperty(&quot;user&quot;));
+
+            //设置密码
+            source.setPassword(properties.getProperty(&quot;pwd&quot;));
+
+            //设置初始连接数量
+            source.setInitialSize(Integer.parseInt(properties.getProperty(&quot;initsize&quot;)));
+
+            //设置最大的连接数量
+            source.setMaxActive(Integer.parseInt(properties.getProperty(&quot;maxactive&quot;)));
+
+            //设置最长的等待时间
+            source.setMaxWait(Integer.parseInt(properties.getProperty(&quot;maxwait&quot;)));
+
+            //设置最小空闲数
+            source.setMinIdle(Integer.parseInt(properties.getProperty(&quot;minidle&quot;)));
+
+            //初始化线程本地
+            local = new ThreadLocal&lt;&gt;();
+
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
+
+    public static Connection getConnection() throws SQLException {
+        //获取Connection对象
+        Connection connection = source.getConnection();
+
+        //把Connection放进ThreadLocal里面
+        local.set(connection);
+
+        //返回Connection对象
+        return connection;
+    }
+
+    //关闭数据库连接
+    public static void closeConnection() {
+        //从线程中拿到Connection对象
+        Connection connection = local.get();
+
+        try {
+            if (connection != null) {
+                //恢复连接为自动提交
+                connection.setAutoCommit(true);
+
+                //这里不是真的把连接关了,只是将该连接归还给连接池
+                connection.close();
+
+                //既然连接已经归还给连接池了,ThreadLocal保存的Connction对象也已经没用了
+                local.remove();
+
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+    }
+
+}
+
+</code></pre>
+
+<h2 id="spring-是如何解决并发访问的线程安全性问题的">Spring 是如何解决并发访问的线程安全性问题的</h2>
+
+<p><strong>转载地址：<a href="https://www.cnblogs.com/tiancai/p/9627109.html">https://www.cnblogs.com/tiancai/p/9627109.html</a></strong></p>
+
+<p>springmvc的controller是singleton的（非线程安全的），所在在使用spring开发web 时要注意，默认Controller、Dao、Service都是单例的。由于只有一个Controller的instance，当多个线程调用它的时候，它里面的instance变量就不是线程安全的了，会发生窜数据的问题。当然大多数情况下，我们根本不需要考虑线程安全的问题，比如dao,service等，除非在bean中声明了实例变量。因此，我们在使用spring mvc 的contrller时，应避免在controller中定义实例变量。</p>
+
+<p>有几种解决方法：
+<strong>1、在Controller中使用ThreadLocal变量</strong>
+2、在spring配置文件Controller中声明 scope=&ldquo;prototype&rdquo;，每次都创建新的controller。</p>
+
+<h1 id="threadlocal原理">ThreadLocal原理</h1>
+
+<ol>
+<li><p>每个Thread维护着一个ThreadLocalMap的引用</p></li>
+
+<li><p>ThreadLocalMap是ThreadLocal的内部类，用Entry来进行存储</p></li>
+
+<li><p>调用ThreadLocal的set()方法时，实际上就是往ThreadLocalMap设置值，key是ThreadLocal对象，值是传递进来的对象</p></li>
+
+<li><p>调用ThreadLocal的get()方法时，实际上就是往ThreadLocalMap获取值，key是ThreadLocal对象</p></li>
+
+<li><p>ThreadLocal本身并不存储值<strong>，它只是</strong>作为一个key来让线程从ThreadLocalMap获取value。</p></li>
+</ol>
+
+<p>正因为这个原理，所以ThreadLocal能够实现“数据隔离”，获取当前线程的局部变量值，不受其他线程影响～</p>
+
+<p>具体原理查看：<a href="https://www.imooc.com/article/25536">https://www.imooc.com/article/25536</a></p>
+
+
+                
+                
+<div class="entry-shang text-center">
+    
+	    <p>「真诚赞赏，手留余香」</p>
+	
+	<button class="zs show-zs btn btn-bred">赞赏支持</button>
+</div>
+<div class="zs-modal-bg"></div>
+<div class="zs-modal-box">
+	<div class="zs-modal-head">
+		<button type="button" class="close">×</button>
+		<span class="author"><a href="http://maizitoday.github.io/"><img src="/img/favicon.png" /></a></span>
+        
+	        <p class="tip"><i></i><span>真诚赞赏，手留余香</span></p>
+		
+ 
+	</div>
+	<div class="zs-modal-body">
+		<div class="zs-modal-btns">
+			<button class="btn btn-blink" data-num="2">2元</button>
+			<button class="btn btn-blink" data-num="5">5元</button>
+			<button class="btn btn-blink" data-num="10">10元</button>
+			<button class="btn btn-blink" data-num="50">50元</button>
+			<button class="btn btn-blink" data-num="100">100元</button>
+			<button class="btn btn-blink" data-num="1">任意金额</button>
+		</div>
+		<div class="zs-modal-pay">
+			<button class="btn btn-bred" id="pay-text">2元</button>
+			<p>使用<span id="pay-type">微信</span>扫描二维码完成支付</p>
+			<img src="/img/reward/wechat-2.png"  id="pay-image"/>
+		</div>
+	</div>
+	<div class="zs-modal-footer">
+		<label><input type="radio" name="zs-type" value="wechat" class="zs-type" checked="checked"><span ><span class="zs-wechat"><img src="/img/reward/wechat-btn.png"/></span></label>
+		<label><input type="radio" name="zs-type" value="alipay" class="zs-type" class="zs-alipay"><img src="/img/reward/alipay-btn.png"/></span></label>
+	</div>
+</div>
+<script type="text/javascript" src="/js/reward.js"></script>
+
+                
+
+                <hr>
+                <ul class="pager">
+                    
+                    <li class="previous">
+                        <a href="/post/%E8%AE%BE%E8%AE%A1%E6%A8%A1%E5%BC%8F-%E5%8A%A8%E6%80%81%E4%BB%A3%E7%90%86/" data-toggle="tooltip" data-placement="top" title="动态代理">&larr;
+                            Previous Post</a>
+                    </li>
+                    
+                    
+                </ul>
+
+                
+<div id="disqus-comment"></div>
+
+
+
+            </div>
+            
+            <div class="
+                col-lg-8 col-lg-offset-2
+                col-md-10 col-md-offset-1
+                sidebar-container">
+
+                
+                
+                <section>
+                    <hr class="hidden-sm hidden-xs">
+                    <h5><a href="/tags/">FEATURED TAGS</a></h5>
+                    <div class="tags">
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        <a href="/tags/zookeeper" title="Zookeeper">
+                            Zookeeper
+                        </a>
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        <a href="/tags/docker" title="docker">
+                            docker
+                        </a>
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        <a href="/tags/dockerfile" title="dockerfile">
+                            dockerfile
+                        </a>
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        <a href="/tags/java%E5%9F%BA%E7%A1%80" title="java基础">
+                            java基础
+                        </a>
+                        
+                        
+                        
+                        <a href="/tags/java%E7%9B%B8%E5%85%B3%E6%A6%82%E5%BF%B5" title="java相关概念">
+                            java相关概念
+                        </a>
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        <a href="/tags/jvm" title="jvm">
+                            jvm
+                        </a>
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        <a href="/tags/springcloud" title="springCloud">
+                            springCloud
+                        </a>
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        <a href="/tags/springboot%E7%B3%BB%E5%88%97" title="springboot系列">
+                            springboot系列
+                        </a>
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        <a href="/tags/%E4%B8%AD%E9%97%B4%E4%BB%B6" title="中间件">
+                            中间件
+                        </a>
+                        
+                        
+                        
+                        <a href="/tags/%E4%B8%BB%E4%BB%8E%E5%A4%8D%E5%88%B6" title="主从复制">
+                            主从复制
+                        </a>
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        <a href="/tags/%E5%88%86%E5%B8%83%E5%BC%8F%E7%B3%BB%E5%88%97" title="分布式系列">
+                            分布式系列
+                        </a>
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        <a href="/tags/%E5%BC%80%E5%8F%91%E5%B7%A5%E5%85%B7" title="开发工具">
+                            开发工具
+                        </a>
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        <a href="/tags/%E6%95%B0%E6%8D%AE%E5%BA%93" title="数据库">
+                            数据库
+                        </a>
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        <a href="/tags/%E6%9C%8D%E5%8A%A1%E8%84%9A%E6%9C%AC" title="服务脚本">
+                            服务脚本
+                        </a>
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        <a href="/tags/%E8%AE%BE%E8%AE%A1%E6%A8%A1%E5%BC%8F" title="设计模式">
+                            设计模式
+                        </a>
+                        
+                        
+                        
+                        
+                        
+                        <a href="/tags/%E8%B4%9F%E8%BD%BD%E5%9D%87%E8%A1%A1" title="负载均衡">
+                            负载均衡
+                        </a>
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                    </div>
+                </section>
+                
+
+                
+                
+                <section>
+                    <hr>
+                    <h5>FRIENDS</h5>
+                    <ul class="list-inline">
+                        
+                        <li><a target="_blank" href="https://zhaohuabing.com">赵化冰博客</a></li>
+                        
+                        <li><a target="_blank" href="http://www.tianshouzhi.com">田守枝</a></li>
+                        
+                        <li><a target="_blank" href="http://www.ityouknow.com">纯洁的微笑</a></li>
+                        
+                        <li><a target="_blank" href="https://renchunxiao.com">任春晓</a></li>
+                        
+                        <li><a target="_blank" href="https://www.lihongkun.com">泛泛之辈</a></li>
+                        
+                        <li><a target="_blank" href="https://juejin.im/welcome/backend">后端服务论坛</a></li>
+                        
+                        <li><a target="_blank" href="https://www.javaboy.org">江南一点雨</a></li>
+                        
+                    </ul>
+                </section>
+                
+            </div>
+        </div>
+    </div>
+</article>
+
+
+
+
+<footer>
+    <div class="container">
+        <div class="row">
+            <div class="col-lg-8 col-lg-offset-2 col-md-10 col-md-offset-1">
+                <ul class="list-inline text-center">
+                   
+                   <li>
+                       <a href="" rel="alternate" type="application/rss+xml" title="" >
+                           <span class="fa-stack fa-lg">
+                               <i class="fa fa-circle fa-stack-2x"></i>
+                               <i class="fa fa-rss fa-stack-1x fa-inverse"></i>
+                           </span>
+                       </a>
+                   </li>
+                   
+                    
+                    <li>
+                        <a href="mailto:maiziybtoday@gmail.com">
+                            <span class="fa-stack fa-lg">
+                                <i class="fa fa-circle fa-stack-2x"></i>
+                                <i class="fa fa-envelope fa-stack-1x fa-inverse"></i>
+                            </span>
+                        </a>
+                    </li>
+		    
+                    
+                    
+                    
+                    
+
+                    
+
+		    
+                    
+                    <li>
+                        <a target="_blank" href="/your%20wechat%20qr%20code%20image">
+                            <span class="fa-stack fa-lg">
+                                <i class="fa fa-circle fa-stack-2x"></i>
+                                <i class="fa fa-wechat fa-stack-1x fa-inverse"></i>
+                            </span>
+                        </a>
+                    </li>
+		    
+                    
+                    
+                    <li>
+                        <a target="_blank" href="https://www.linkedin.com/in/yourlinkedinid">
+                            <span class="fa-stack fa-lg">
+                                <i class="fa fa-circle fa-stack-2x"></i>
+                                <i class="fa fa-linkedin fa-stack-1x fa-inverse"></i>
+                            </span>
+                        </a>
+                    </li>
+		    
+                    
+                </ul>
+		<p class="copyright text-muted">
+                    Copyright &copy;  2019
+                    <br>
+                    <a href="https://themes.gohugo.io/hugo-theme-cleanwhite">CleanWhite Hugo Theme</a> by <a href="https://zhaohuabing.com">Huabing</a> |
+                    <iframe
+                        style="margin-left: 2px; margin-bottom:-5px;"
+                        frameborder="0" scrolling="0" width="100px" height="20px"
+                        src="https://ghbtns.com/github-btn.html?user=zhaohuabing&repo=hugo-theme-cleanwhite&type=star&count=true" >
+                    </iframe>
+                </p>
+            </div>
+        </div>
+    </div>
+</footer>
+
+
+
+
+<script>
+    function async(u, c) {
+      var d = document, t = 'script',
+          o = d.createElement(t),
+          s = d.getElementsByTagName(t)[0];
+      o.src = u;
+      if (c) { o.addEventListener('load', function (e) { c(null, e); }, false); }
+      s.parentNode.insertBefore(o, s);
+    }
+</script>
+
+
+
+
+
+
+<script>
+    
+    if($('#tag_cloud').length !== 0){
+        async("/js/jquery.tagcloud.js",function(){
+            $.fn.tagcloud.defaults = {
+                
+                color: {start: '#bbbbee', end: '#0085a1'},
+            };
+            $('#tag_cloud a').tagcloud();
+        })
+    }
+</script>
+
+
+<script>
+    async("https://cdnjs.cloudflare.com/ajax/libs/fastclick/1.0.6/fastclick.js", function(){
+        var $nav = document.querySelector("nav");
+        if($nav) FastClick.attach($nav);
+    })
+</script>
+
+
+
+
+
+
+</body>
+</html>
