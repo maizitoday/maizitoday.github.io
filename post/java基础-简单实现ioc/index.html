@@ -1,0 +1,1049 @@
+<!DOCTYPE html>
+<html lang="en-us">
+<head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+
+    
+    <meta property="og:site_name" content="">
+    <meta property="og:type" content="article">
+
+    
+    <meta property="og:image" content="http://maizitoday.github.io//img/home-bg-jeep.jpg">
+    <meta property="twitter:image" content="http://maizitoday.github.io//img/home-bg-jeep.jpg" />
+    
+
+    
+    <meta name="title" content="简单实现IOC" />
+    <meta property="og:title" content="简单实现IOC" />
+    <meta property="twitter:title" content="简单实现IOC" />
+    
+
+    
+    <meta name="description" content="麦子，程序员, 开源爱好者，生活探险家 | 这里是 麦子 的博客，与你一起发现更大的世界。">
+    <meta property="og:description" content="麦子，程序员, 开源爱好者，生活探险家 | 这里是 麦子 的博客，与你一起发现更大的世界。" />
+    <meta property="twitter:description" content="麦子，程序员, 开源爱好者，生活探险家 | 这里是 麦子 的博客，与你一起发现更大的世界。" />
+    
+
+    
+    <meta property="twitter:card" content="summary" />
+    
+    
+
+    <meta name="keyword"  content="麦子, maizi, maizi, , 麦子的网络日志, 麦子的博客, maizi Blog, 博客, 个人网站, 互联网, Web, 云原生, PaaS, Istio, Kubernetes, 微服务, Microservice">
+    <link rel="shortcut icon" href="/img/favicon.ico">
+
+    <title>简单实现IOC-麦子的博客</title>
+
+    <link rel="canonical" href="/post/java%E5%9F%BA%E7%A1%80-%E7%AE%80%E5%8D%95%E5%AE%9E%E7%8E%B0ioc/">
+
+    <link rel="stylesheet" href="/css/iDisqus.min.css"/>
+	
+    
+    <link rel="stylesheet" href="/css/bootstrap.min.css">
+
+    
+    <link rel="stylesheet" href="/css/hux-blog.min.css">
+
+    
+    <link rel="stylesheet" href="/css/syntax.css">
+
+    
+    <link rel="stylesheet" href="/css/zanshang.css">
+
+    
+    <link href="//cdnjs.cloudflare.com/ajax/libs/font-awesome/4.6.3/css/font-awesome.min.css" rel="stylesheet" type="text/css">
+    
+    
+    <script src="/js/jquery.min.js"></script>
+    
+    
+    <script src="/js/bootstrap.min.js"></script>
+    
+    
+    <script src="/js/hux-blog.min.js"></script>
+	
+    
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.13.1/styles/docco.min.css">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.13.1/highlight.min.js"></script>
+    <script>hljs.initHighlightingOnLoad();</script>
+</head>
+
+
+<nav class="navbar navbar-default navbar-custom navbar-fixed-top">
+    <div class="container-fluid">
+        
+        <div class="navbar-header page-scroll">
+            <button type="button" class="navbar-toggle">
+                <span class="sr-only">Toggle navigation</span>
+                <span class="icon-bar"></span>
+                <span class="icon-bar"></span>
+                <span class="icon-bar"></span>
+            </button>
+            <a class="navbar-brand" href="/"></a>
+        </div>
+
+        
+        
+        <div id="huxblog_navbar">
+            <div class="navbar-collapse">
+                <ul class="nav navbar-nav navbar-right">
+                    <li>
+                        <a href="/">Home</a>
+                    </li>
+                    
+                    <li>
+                        <a href="/categories/life">Life</a>
+                    </li>
+                    
+                    <li>
+                        <a href="/categories/tech">Tech</a>
+                    </li>
+                    
+                    
+		    
+                        <li><a href="/top/about/">ABOUT</a></li>
+                    
+
+                    
+		    <li>
+                        <a href="/search">SEARCH <img src="/img/search.png" height="15" style="cursor: pointer;" alt="Search"></a>
+		    </li>
+                    
+                </ul>
+            </div>
+        </div>
+        
+    </div>
+    
+</nav>
+<script>
+    
+    
+    
+    var $body   = document.body;
+    var $toggle = document.querySelector('.navbar-toggle');
+    var $navbar = document.querySelector('#huxblog_navbar');
+    var $collapse = document.querySelector('.navbar-collapse');
+
+    $toggle.addEventListener('click', handleMagic)
+    function handleMagic(e){
+        if ($navbar.className.indexOf('in') > 0) {
+        
+            $navbar.className = " ";
+            
+            setTimeout(function(){
+                
+                if($navbar.className.indexOf('in') < 0) {
+                    $collapse.style.height = "0px"
+                }
+            },400)
+        }else{
+        
+            $collapse.style.height = "auto"
+            $navbar.className += " in";
+        }
+    }
+</script>
+
+
+
+
+<style type="text/css">
+    header.intro-header {
+        background-image: url('https://img.zhaohuabing.com/in-post/2018-04-16-using-helm-to-deploy-to-kubernetes/buffalo.jpg')
+    }
+</style>
+<header class="intro-header">
+    <div class="container">
+        <div class="row">
+            <div class="col-lg-8 col-lg-offset-2 col-md-10 col-md-offset-1">
+                <div class="post-heading">
+                    <div class="tags">
+                        
+                        <a class="tag" href="/tags/java%E5%9F%BA%E7%A1%80" title="java基础">
+                            java基础
+                        </a>
+                        
+                        <a class="tag" href="/tags/ioc" title="ioc">
+                            ioc
+                        </a>
+                        
+                    </div>
+                    <h1>简单实现IOC</h1>
+                    <h2 class="subheading"></h2>
+                    <span class="meta">
+			Posted by 
+			
+			         &#34;麦子&#34;
+			 
+			on 
+			Wednesday, July 10, 2019
+                        
+                    </span>
+                </div>
+            </div>
+        </div>
+    </div>
+</header>
+
+
+
+
+<article>
+    <div class="container">
+        <div class="row">
+
+            
+            <div class="
+                col-lg-8 col-lg-offset-2
+                col-md-10 col-md-offset-1
+                post-container">
+
+                
+                <header>
+                    <h2>TOC</h2>
+                </header>
+                <nav id="TableOfContents">
+<ul>
+<li><a href="#实现的功能">实现的功能</a></li>
+<li><a href="#自定义注解类">自定义注解类</a></li>
+<li><a href="#模拟service类">模拟service类</a></li>
+<li><a href="#模拟controller类">模拟Controller类</a></li>
+<li><a href="#反射实现包里面的class文件">反射实现包里面的class文件</a></li>
+<li><a href="#属性注入">属性注入</a></li>
+<li><a href="#方法注解和controller绑定">方法注解和Controller绑定</a></li>
+<li><a href="#模拟实现web请求进行方法调用">模拟实现web请求进行方法调用</a></li>
+<li><a href="#运行结果">运行结果</a></li>
+<li><a href="#总结">总结</a></li>
+</ul>
+</nav>
+                
+                
+
+<p>[TOC]</p>
+
+<h1 id="实现的功能">实现的功能</h1>
+
+<p>简单实现IOC功能，模拟web请求找到对应的Controller和Controller里面对应的方法，然后反射调用方法。</p>
+
+<p>步骤分为以下几步：</p>
+
+<ol>
+<li>自动加载某一个包里面的所有class类，进行反射实例化。</li>
+<li>定义自定义属性注解，进行自动注入到对应的Controller类。</li>
+<li>实现方法自定义注解和Controller，以及Controller里面的方法的绑定。</li>
+<li>最终实现模拟web一个请求，然后找到对应的Controller里面的方法，反射调用这个方法。</li>
+</ol>
+
+<h1 id="自定义注解类">自定义注解类</h1>
+
+<pre><code class="language-java">import java.lang.annotation.ElementType;
+import java.lang.annotation.Retention;
+import java.lang.annotation.RetentionPolicy;
+import java.lang.annotation.Target;
+
+@Target(ElementType.METHOD)
+@Retention(RetentionPolicy.RUNTIME)
+public @interface MyMethodAnnotation {
+    String requestAction();
+}
+</code></pre>
+
+<pre><code class="language-java">import java.lang.annotation.ElementType;
+import java.lang.annotation.Retention;
+import java.lang.annotation.RetentionPolicy;
+import java.lang.annotation.Target;
+
+@Target(ElementType.FIELD)
+@Retention(RetentionPolicy.RUNTIME)
+public @interface MyFieldAnnotation {
+    
+}
+</code></pre>
+
+<h1 id="模拟service类">模拟service类</h1>
+
+<pre><code class="language-java">public class MyService {
+
+    public void handlerData() {
+        System.out.println(&quot;service: 处理消息完成&quot;);
+    }
+
+}
+</code></pre>
+
+<h1 id="模拟controller类">模拟Controller类</h1>
+
+<pre><code class="language-java">public class MyController {
+
+    @MyFieldAnnotation
+    public MyService myService;
+
+    @MyMethodAnnotation(requestAction = &quot;login.action&quot;)
+    public void showMessage() {
+        myService.handlerData();
+        System.out.println(&quot;controller: 运行完成&quot;);
+    }
+
+}
+</code></pre>
+
+<h1 id="反射实现包里面的class文件">反射实现包里面的class文件</h1>
+
+<pre><code class="language-java">public static Map&lt;Class&lt;?&gt;, Object&gt; loadAllClass(String packageName) throws IOException {
+        Map&lt;Class&lt;?&gt;, Object&gt; resultMap = new HashMap&lt;&gt;();
+        String packageDirName = packageName.replace('.', '/');
+        Enumeration&lt;URL&gt; dirs = Thread.currentThread().getContextClassLoader().getResources(packageDirName);
+        while (dirs.hasMoreElements()) {
+            URL url = dirs.nextElement();
+            String protocol = url.getProtocol();
+            if (&quot;file&quot;.equals(protocol)) {
+                String filePath = URLDecoder.decode(url.getFile(), &quot;UTF-8&quot;);
+                log.info(&quot;文件路径: &quot; + filePath);
+
+                File dir = new File(filePath);
+                if (!dir.exists() || !dir.isDirectory()) {
+                    log.info(&quot;文件不存在&quot;);
+                    return null;
+                }
+                File[] dirfiles = dir.listFiles();
+                Stream&lt;File&gt; stream = Stream.of(dirfiles);
+                stream.forEach(file -&gt; {
+                    String className = file.getName().substring(0, file.getName().length() - 6);
+                    Class&lt;?&gt; clazz = null;
+                    try {
+                        clazz = Class.forName(packageName + &quot;.&quot; + className);
+                    } catch (ClassNotFoundException e) {
+                        log.info(packageName + &quot;.&quot; + className + &quot; -&gt; 反射失败&quot;);
+                        e.printStackTrace();
+                    }
+                    if (!clazz.isAnnotation()) {
+                        try {
+                            resultMap.put(clazz, clazz.newInstance());
+                        } catch (InstantiationException | IllegalAccessException e) {
+                            e.printStackTrace();
+                        }
+                    }
+
+                });
+            }
+        }
+
+        for (Class&lt;?&gt; var : resultMap.keySet()) {
+            log.info(var + &quot;  : &quot; + resultMap.get(var));
+        }
+        return resultMap;
+    }
+</code></pre>
+
+<h1 id="属性注入">属性注入</h1>
+
+<pre><code class="language-java"> /**
+     * 标有 MyFieldAnnotation的注解， 自动进行属性设置
+     */
+    public static List&lt;Object&gt; setField(Map&lt;Class&lt;?&gt;, Object&gt; resultMap) {
+        List&lt;Object&gt; resultList = new ArrayList&lt;&gt;();
+        for (Class&lt;?&gt; var : resultMap.keySet()) {
+            Object beanInstance = resultMap.get(var);
+            Field[] fields = var.getDeclaredFields(); // 获取所有的属性
+            if (fields != null) {
+                Stream.of(fields).forEach((field) -&gt; {
+                    if (field.isAnnotationPresent(MyFieldAnnotation.class)) {
+                        log.info(&quot;拥有 MyFieldAnnotation 注解的类： &quot; + beanInstance);
+
+                        field.setAccessible(true); // 对私有字段的访问取消检查
+                        Class&lt;?&gt; beanFidldClass = field.getType();
+                        try {
+                            field.set(beanInstance, resultMap.get(beanFidldClass));
+                            resultList.add(beanInstance);
+                        } catch (IllegalArgumentException | IllegalAccessException e) {
+                            e.printStackTrace();
+                        }
+                    }
+                });
+            }
+        }
+        return resultList;
+    }
+</code></pre>
+
+<h1 id="方法注解和controller绑定">方法注解和Controller绑定</h1>
+
+<pre><code class="language-java"> /***
+     * 设置 MyMethodAnnotation 和 Controller 的对应关系
+     * 
+     */
+    public static Map&lt;String, Map&lt;Method, Object&gt;&gt; functionToController(Map&lt;Class&lt;?&gt;, Object&gt; resultMap) {
+        Map&lt;String, Map&lt;Method, Object&gt;&gt; requestMapping = new HashMap&lt;&gt;();
+        for (Class&lt;?&gt; var : resultMap.keySet()) {
+            Object beanInstance = resultMap.get(var);
+            Method[] methods = var.getDeclaredMethods();
+            if (methods != null) {
+                Stream.of(methods).forEach((method) -&gt; {
+                    if (method.isAnnotationPresent(MyMethodAnnotation.class)) {
+                        log.info(&quot;拥有 MyMethodAnnotation 注解的类： &quot; + beanInstance);
+                        MyMethodAnnotation action = method.getAnnotation(MyMethodAnnotation.class);
+                        String requestAction = action.requestAction();
+                        Map&lt;Method, Object&gt; controllerToMethod = new HashMap&lt;Method, Object&gt;();
+                        controllerToMethod.put(method, beanInstance);
+                        requestMapping.put(requestAction, controllerToMethod);
+                    }
+                });
+            }
+        }
+        for (String var : requestMapping.keySet()) {
+            log.info(var + &quot;  : &quot; + requestMapping.get(var));
+        }
+        return requestMapping;
+    }
+</code></pre>
+
+<h1 id="模拟实现web请求进行方法调用">模拟实现web请求进行方法调用</h1>
+
+<pre><code class="language-java">  public static void main(String[] args)
+            throws IOException, IllegalAccessException, IllegalArgumentException, InvocationTargetException {
+        Map&lt;Class&lt;?&gt;, Object&gt; resultMap = IocHelper.loadAllClass(&quot;com.example.basedemo.reflectdemo.iocdemo&quot;);
+        System.out.println();
+
+        List&lt;Object&gt; resultList = setField(resultMap);
+        System.out.println();
+
+        Map&lt;String, Map&lt;Method, Object&gt;&gt; functionToController = functionToController(resultMap);
+        System.out.println();
+
+        // 模拟web请求，因为我们通过Tomcat，request.getMethod()方法可以知道你的具体的请求路径是什么
+       //  这里就是一个简单的 login.action的服务请求。
+        String loginAction = &quot;login.action&quot;;
+        Map&lt;Method, Object&gt; methodMap = (Map&lt;Method, Object&gt;) functionToController.get(loginAction);
+        if (methodMap.size() == 1) {
+            for (Method method : methodMap.keySet()) {
+                MyController myController = (MyController) methodMap.get(method);
+                method.invoke(myController, null);
+            }
+        }
+
+    }
+</code></pre>
+
+<h1 id="运行结果">运行结果</h1>
+
+<pre><code class="language-java">22:09:15.678 [main] INFO com.example.basedemo.reflectdemo.iocdemo.IocHelper - 文件路径: /vscode/javaBaseDemo/basedemo/target/classes/com/example/basedemo/reflectdemo/iocdemo
+22:09:15.760 [main] INFO com.example.basedemo.reflectdemo.iocdemo.IocHelper - class com.example.basedemo.reflectdemo.iocdemo.MyController  : com.example.basedemo.reflectdemo.iocdemo.MyController@27abe2cd
+22:09:15.760 [main] INFO com.example.basedemo.reflectdemo.iocdemo.IocHelper - class com.example.basedemo.reflectdemo.iocdemo.MyService  : com.example.basedemo.reflectdemo.iocdemo.MyService@5f5a92bb
+22:09:15.760 [main] INFO com.example.basedemo.reflectdemo.iocdemo.IocHelper - class com.example.basedemo.reflectdemo.iocdemo.IocHelper  : com.example.basedemo.reflectdemo.iocdemo.IocHelper@6fdb1f78
+
+22:09:15.772 [main] INFO com.example.basedemo.reflectdemo.iocdemo.IocHelper - 拥有 MyFieldAnnotation 注解的类： com.example.basedemo.reflectdemo.iocdemo.MyController@27abe2cd
+
+22:09:15.776 [main] INFO com.example.basedemo.reflectdemo.iocdemo.IocHelper - 拥有 MyMethodAnnotation 注解的类： com.example.basedemo.reflectdemo.iocdemo.MyController@27abe2cd
+22:09:15.776 [main] INFO com.example.basedemo.reflectdemo.iocdemo.IocHelper - login.action  : {public void com.example.basedemo.reflectdemo.iocdemo.MyController.showMessage()=com.example.basedemo.reflectdemo.iocdemo.MyController@27abe2cd}
+
+service: 处理消息完成
+controller: 运行完成
+
+</code></pre>
+
+<p>可以看到我们就是通过一个login.action的方法， 就找到了对应的这个Controller的里面的方法， 然后进行执行。</p>
+
+<h1 id="总结">总结</h1>
+
+<p>上面我们实现了一个简单的IOC， 实现了，MyController类里面通过反射去设置MyController类里面的MyService属性，然后通过模拟web， 通过一个URL的请求去找到对应的Controller和对应的方法。最后调用的时候，进行反射来实现，方法的调用。 简单实现了一个IOC的注入功能。</p>
+
+
+                
+                
+<div class="entry-shang text-center">
+    
+	    <p>「真诚赞赏，手留余香」</p>
+	
+	<button class="zs show-zs btn btn-bred">赞赏支持</button>
+</div>
+<div class="zs-modal-bg"></div>
+<div class="zs-modal-box">
+	<div class="zs-modal-head">
+		<button type="button" class="close">×</button>
+		<span class="author"><a href="http://maizitoday.github.io/"><img src="/img/favicon.png" /></a></span>
+        
+	        <p class="tip"><i></i><span>真诚赞赏，手留余香</span></p>
+		
+ 
+	</div>
+	<div class="zs-modal-body">
+		<div class="zs-modal-btns">
+			<button class="btn btn-blink" data-num="2">2元</button>
+			<button class="btn btn-blink" data-num="5">5元</button>
+			<button class="btn btn-blink" data-num="10">10元</button>
+			<button class="btn btn-blink" data-num="50">50元</button>
+			<button class="btn btn-blink" data-num="100">100元</button>
+			<button class="btn btn-blink" data-num="1">任意金额</button>
+		</div>
+		<div class="zs-modal-pay">
+			<button class="btn btn-bred" id="pay-text">2元</button>
+			<p>使用<span id="pay-type">微信</span>扫描二维码完成支付</p>
+			<img src="/img/reward/wechat-2.png"  id="pay-image"/>
+		</div>
+	</div>
+	<div class="zs-modal-footer">
+		<label><input type="radio" name="zs-type" value="wechat" class="zs-type" checked="checked"><span ><span class="zs-wechat"><img src="/img/reward/wechat-btn.png"/></span></label>
+		<label><input type="radio" name="zs-type" value="alipay" class="zs-type" class="zs-alipay"><img src="/img/reward/alipay-btn.png"/></span></label>
+	</div>
+</div>
+<script type="text/javascript" src="/js/reward.js"></script>
+
+                
+
+                <hr>
+                <ul class="pager">
+                    
+                    <li class="previous">
+                        <a href="/post/java%E5%9F%BA%E7%A1%80-threadlocal%E7%90%86%E8%A7%A3/" data-toggle="tooltip" data-placement="top" title="ThreadLocal理解">&larr;
+                            Previous Post</a>
+                    </li>
+                    
+                    
+                    <li class="next">
+                        <a href="/post/java%E5%9F%BA%E7%A1%80-%E5%8F%8D%E5%B0%84/" data-toggle="tooltip" data-placement="top" title="反射">Next
+                            Post &rarr;</a>
+                    </li>
+                    
+                </ul>
+
+                
+<div id="disqus-comment"></div>
+
+
+
+            </div>
+            
+            <div class="
+                col-lg-8 col-lg-offset-2
+                col-md-10 col-md-offset-1
+                sidebar-container">
+
+                
+                
+                <section>
+                    <hr class="hidden-sm hidden-xs">
+                    <h5><a href="/tags/">FEATURED TAGS</a></h5>
+                    <div class="tags">
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        <a href="/tags/zookeeper" title="Zookeeper">
+                            Zookeeper
+                        </a>
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        <a href="/tags/docker" title="docker">
+                            docker
+                        </a>
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        <a href="/tags/dockerfile" title="dockerfile">
+                            dockerfile
+                        </a>
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        <a href="/tags/java%E5%9F%BA%E7%A1%80" title="java基础">
+                            java基础
+                        </a>
+                        
+                        
+                        
+                        <a href="/tags/java%E7%9B%B8%E5%85%B3%E6%A6%82%E5%BF%B5" title="java相关概念">
+                            java相关概念
+                        </a>
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        <a href="/tags/jvm" title="jvm">
+                            jvm
+                        </a>
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        <a href="/tags/springcloud" title="springCloud">
+                            springCloud
+                        </a>
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        <a href="/tags/springboot%E7%B3%BB%E5%88%97" title="springboot系列">
+                            springboot系列
+                        </a>
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        <a href="/tags/%E4%B8%AD%E9%97%B4%E4%BB%B6" title="中间件">
+                            中间件
+                        </a>
+                        
+                        
+                        
+                        <a href="/tags/%E4%B8%BB%E4%BB%8E%E5%A4%8D%E5%88%B6" title="主从复制">
+                            主从复制
+                        </a>
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        <a href="/tags/%E5%88%86%E5%B8%83%E5%BC%8F%E7%B3%BB%E5%88%97" title="分布式系列">
+                            分布式系列
+                        </a>
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        <a href="/tags/%E5%BC%80%E5%8F%91%E5%B7%A5%E5%85%B7" title="开发工具">
+                            开发工具
+                        </a>
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        <a href="/tags/%E6%95%B0%E6%8D%AE%E5%BA%93" title="数据库">
+                            数据库
+                        </a>
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        <a href="/tags/%E6%9C%8D%E5%8A%A1%E8%84%9A%E6%9C%AC" title="服务脚本">
+                            服务脚本
+                        </a>
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        <a href="/tags/%E8%AE%BE%E8%AE%A1%E6%A8%A1%E5%BC%8F" title="设计模式">
+                            设计模式
+                        </a>
+                        
+                        
+                        
+                        
+                        
+                        <a href="/tags/%E8%B4%9F%E8%BD%BD%E5%9D%87%E8%A1%A1" title="负载均衡">
+                            负载均衡
+                        </a>
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                    </div>
+                </section>
+                
+
+                
+                
+                <section>
+                    <hr>
+                    <h5>FRIENDS</h5>
+                    <ul class="list-inline">
+                        
+                        <li><a target="_blank" href="https://zhaohuabing.com">赵化冰博客</a></li>
+                        
+                        <li><a target="_blank" href="http://www.tianshouzhi.com">田守枝</a></li>
+                        
+                        <li><a target="_blank" href="http://www.ityouknow.com">纯洁的微笑</a></li>
+                        
+                        <li><a target="_blank" href="https://renchunxiao.com">任春晓</a></li>
+                        
+                        <li><a target="_blank" href="https://www.lihongkun.com">泛泛之辈</a></li>
+                        
+                        <li><a target="_blank" href="https://juejin.im/welcome/backend">后端服务论坛</a></li>
+                        
+                        <li><a target="_blank" href="https://www.javaboy.org">江南一点雨</a></li>
+                        
+                    </ul>
+                </section>
+                
+            </div>
+        </div>
+    </div>
+</article>
+
+
+
+
+<footer>
+    <div class="container">
+        <div class="row">
+            <div class="col-lg-8 col-lg-offset-2 col-md-10 col-md-offset-1">
+                <ul class="list-inline text-center">
+                   
+                   <li>
+                       <a href="" rel="alternate" type="application/rss+xml" title="" >
+                           <span class="fa-stack fa-lg">
+                               <i class="fa fa-circle fa-stack-2x"></i>
+                               <i class="fa fa-rss fa-stack-1x fa-inverse"></i>
+                           </span>
+                       </a>
+                   </li>
+                   
+                    
+                    <li>
+                        <a href="mailto:maiziybtoday@gmail.com">
+                            <span class="fa-stack fa-lg">
+                                <i class="fa fa-circle fa-stack-2x"></i>
+                                <i class="fa fa-envelope fa-stack-1x fa-inverse"></i>
+                            </span>
+                        </a>
+                    </li>
+		    
+                    
+                    
+                    
+                    
+
+                    
+
+		    
+                    
+                    <li>
+                        <a target="_blank" href="/your%20wechat%20qr%20code%20image">
+                            <span class="fa-stack fa-lg">
+                                <i class="fa fa-circle fa-stack-2x"></i>
+                                <i class="fa fa-wechat fa-stack-1x fa-inverse"></i>
+                            </span>
+                        </a>
+                    </li>
+		    
+                    
+                    
+                    <li>
+                        <a target="_blank" href="https://www.linkedin.com/in/yourlinkedinid">
+                            <span class="fa-stack fa-lg">
+                                <i class="fa fa-circle fa-stack-2x"></i>
+                                <i class="fa fa-linkedin fa-stack-1x fa-inverse"></i>
+                            </span>
+                        </a>
+                    </li>
+		    
+                    
+                </ul>
+		<p class="copyright text-muted">
+                    Copyright &copy;  2019
+                    <br>
+                    <a href="https://themes.gohugo.io/hugo-theme-cleanwhite">CleanWhite Hugo Theme</a> by <a href="https://zhaohuabing.com">Huabing</a> |
+                    <iframe
+                        style="margin-left: 2px; margin-bottom:-5px;"
+                        frameborder="0" scrolling="0" width="100px" height="20px"
+                        src="https://ghbtns.com/github-btn.html?user=zhaohuabing&repo=hugo-theme-cleanwhite&type=star&count=true" >
+                    </iframe>
+                </p>
+            </div>
+        </div>
+    </div>
+</footer>
+
+
+
+
+<script>
+    function async(u, c) {
+      var d = document, t = 'script',
+          o = d.createElement(t),
+          s = d.getElementsByTagName(t)[0];
+      o.src = u;
+      if (c) { o.addEventListener('load', function (e) { c(null, e); }, false); }
+      s.parentNode.insertBefore(o, s);
+    }
+</script>
+
+
+
+
+
+
+<script>
+    
+    if($('#tag_cloud').length !== 0){
+        async("/js/jquery.tagcloud.js",function(){
+            $.fn.tagcloud.defaults = {
+                
+                color: {start: '#bbbbee', end: '#0085a1'},
+            };
+            $('#tag_cloud a').tagcloud();
+        })
+    }
+</script>
+
+
+<script>
+    async("https://cdnjs.cloudflare.com/ajax/libs/fastclick/1.0.6/fastclick.js", function(){
+        var $nav = document.querySelector("nav");
+        if($nav) FastClick.attach($nav);
+    })
+</script>
+
+
+
+
+
+
+</body>
+</html>
