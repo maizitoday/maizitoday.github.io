@@ -221,6 +221,12 @@
 <ul>
 <li><a href="#双亲委派机制">双亲委派机制</a></li>
 <li><a href="#沙箱安全机制">沙箱安全机制</a></li>
+<li><a href="#classloader">ClassLoader</a>
+<ul>
+<li><a href="#自定义classloader">自定义ClassLoader</a></li>
+<li><a href="#自定义classloader还能做什么">自定义ClassLoader还能做什么</a></li>
+</ul></li>
+<li><a href="#java类加载流程">JAVA类加载流程</a></li>
 </ul></li>
 <li><a href="#native">native</a></li>
 <li><a href="#程序计数器-pc">程序计数器(PC)</a></li>
@@ -295,6 +301,48 @@
 <p>沙箱机制是由基于双亲委派机制上 采取的一种JVM的自我保护机制,假设你要写一个java.lang.String 的类,由于双亲委派机制的原理,此请求会先交给Bootstrap试图进行加载,但是Bootstrap在加载类时首先通过包和类名查找rt.jar中有没有该类,有则优先加载rt.jar包中的类,因此就保证了java的运行机制不会被破坏.</p>
 
 <p>有了双亲委派机制的前提，在沙箱安全机制下，黑客自定义的<code>java.lang.String</code>类永远都不会被加载进内存。因为首先是最顶端的类加载器加载系统的<code>java.lang.String</code>类，最终自定义的类加载器无法加载<code>java.lang.String</code>类，防止java源码被恶心修改。</p>
+
+<h3 id="classloader">ClassLoader</h3>
+
+<p>原文：<a href="https://blog.csdn.net/briblue/article/details/54973413">https://blog.csdn.net/briblue/article/details/54973413</a></p>
+
+<p>ClassLoader翻译过来就是类加载器，普通的java开发者其实用到的不多，但对于某些框架开发者来说却非常常见。理解ClassLoader的加载机制，也有利于我们编写出更高效的代码。ClassLoader的具体作用就是将class文件加载到jvm虚拟机中去，程序就可以正确运行了。但是，jvm启动的时候，并不会一次性加载所有的class文件，而是根据需要去动态加载。想想也是的，一次性加载那么多jar包那么多class，那内存不崩溃。</p>
+
+<h4 id="自定义classloader">自定义ClassLoader</h4>
+
+<p>不知道大家有没有发现，不管是Bootstrap ClassLoader还是ExtClassLoader等，这些类加载器都只是加载指定的目录下的jar包或者资源。如果在某种情况下，我们需要动态加载一些东西呢？比如从D盘某个文件夹加载一个class文件，或者从网络上下载class主内容然后再进行加载，这样可以吗？</p>
+
+<p>如果要这样做的话，需要我们自定义一个classloader。</p>
+
+<h4 id="自定义classloader还能做什么">自定义ClassLoader还能做什么</h4>
+
+<p>突破了JDK系统内置加载路径的限制之后，我们就可以编写自定义ClassLoader，然后剩下的就叫给开发者你自己了。你可以按照自己的意愿进行业务的定制，将ClassLoader玩出花样来。</p>
+
+<p>常见的用法是将Class文件按照某种加密手段进行加密，然后按照规则编写自定义的ClassLoader进行解密，这样我们就可以在程序中加载特定了类，并且这个类只能被我们自定义的加载器进行加载，提高了程序的安全性。</p>
+
+<h3 id="java类加载流程">JAVA类加载流程</h3>
+
+<p>原文：<a href="https://blog.csdn.net/briblue/article/details/54973413">https://blog.csdn.net/briblue/article/details/54973413</a></p>
+
+<p>Java语言系统自带有三个类加载器:</p>
+
+<ol>
+<li><p>Bootstrap ClassLoader 最顶层的加载类，主要加载核心类库，%JRE_HOME%\lib下的rt.jar、resources.jar、charsets.jar和class等。另外需要注意的是可以通过启动jvm时指定-Xbootclasspath和路径来改变Bootstrap ClassLoader的加载目录。比如java -Xbootclasspath/a:path被指定的文件追加到默认的bootstrap路径中。我们可以打开我的电脑，在上面的目录下查看，看看这些jar包是不是存在于这个目录。</p></li>
+
+<li><p><strong>Extention ClassLoader</strong> 扩展的类加载器，加载目录%JRE_HOME%\lib\ext目录下的jar包和class文件。还可以加载<code>-D java.ext.dirs</code>选项指定的目录。</p></li>
+
+<li><p><strong>Appclass Loader也称为SystemAppClass</strong> 加载当前应用的classpath的所有类。</p></li>
+</ol>
+
+<p>我们看到了系统的3个类加载器，但我们可能不知道具体哪个先行呢？我可以先告诉你答案</p>
+
+<ol>
+<li>Bootstrap CLassloder</li>
+<li>Extention ClassLoader</li>
+<li>AppClassLoader</li>
+</ol>
+
+<p>说明了它们加载的路径。并且还提到了<code>-Xbootclasspath</code>和<code>-D java.ext.dirs</code>这两个虚拟机参数选项。</p>
 
 <h2 id="native">native</h2>
 
@@ -564,6 +612,8 @@
                         
                         
                         
+                        
+                        
                         <a href="/tags/zookeeper" title="Zookeeper">
                             Zookeeper
                         </a>
@@ -772,6 +822,12 @@
                         
                         
                         
+                        
+                        
+                        
+                        
+                        
+                        
                         <a href="/tags/%E5%BC%80%E5%8F%91%E5%B7%A5%E5%85%B7" title="开发工具">
                             开发工具
                         </a>
@@ -809,6 +865,8 @@
                         <a href="/tags/%E6%9C%8D%E5%8A%A1%E8%84%9A%E6%9C%AC" title="服务脚本">
                             服务脚本
                         </a>
+                        
+                        
                         
                         
                         
