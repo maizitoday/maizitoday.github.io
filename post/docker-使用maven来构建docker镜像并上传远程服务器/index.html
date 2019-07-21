@@ -1,0 +1,1068 @@
+<!DOCTYPE html>
+<html lang="en-us">
+<head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+
+    
+    <meta property="og:site_name" content="">
+    <meta property="og:type" content="article">
+
+    
+    <meta property="og:image" content="http://maizitoday.github.io//img/home-bg-jeep.jpg">
+    <meta property="twitter:image" content="http://maizitoday.github.io//img/home-bg-jeep.jpg" />
+    
+
+    
+    <meta name="title" content="使用Maven来构建Docker镜像并上传远程服务器" />
+    <meta property="og:title" content="使用Maven来构建Docker镜像并上传远程服务器" />
+    <meta property="twitter:title" content="使用Maven来构建Docker镜像并上传远程服务器" />
+    
+
+    
+    <meta name="description" content="麦子，程序员, 开源爱好者，生活探险家 | 这里是 麦子 的博客，与你一起发现更大的世界。">
+    <meta property="og:description" content="麦子，程序员, 开源爱好者，生活探险家 | 这里是 麦子 的博客，与你一起发现更大的世界。" />
+    <meta property="twitter:description" content="麦子，程序员, 开源爱好者，生活探险家 | 这里是 麦子 的博客，与你一起发现更大的世界。" />
+    
+
+    
+    <meta property="twitter:card" content="summary" />
+    
+    
+
+    <meta name="keyword"  content="麦子, maizi, maizi, , 麦子的网络日志, 麦子的博客, maizi Blog, 博客, 个人网站, 互联网, Web, 云原生, PaaS, Istio, Kubernetes, 微服务, Microservice">
+    <link rel="shortcut icon" href="/img/favicon.ico">
+
+    <title>使用Maven来构建Docker镜像并上传远程服务器-麦子的博客</title>
+
+    <link rel="canonical" href="/post/docker-%E4%BD%BF%E7%94%A8maven%E6%9D%A5%E6%9E%84%E5%BB%BAdocker%E9%95%9C%E5%83%8F%E5%B9%B6%E4%B8%8A%E4%BC%A0%E8%BF%9C%E7%A8%8B%E6%9C%8D%E5%8A%A1%E5%99%A8/">
+
+    <link rel="stylesheet" href="/css/iDisqus.min.css"/>
+	
+    
+    <link rel="stylesheet" href="/css/bootstrap.min.css">
+
+    
+    <link rel="stylesheet" href="/css/hux-blog.min.css">
+
+    
+    <link rel="stylesheet" href="/css/syntax.css">
+
+    
+    <link rel="stylesheet" href="/css/zanshang.css">
+
+    
+    <link href="//cdnjs.cloudflare.com/ajax/libs/font-awesome/4.6.3/css/font-awesome.min.css" rel="stylesheet" type="text/css">
+    
+    
+    <script src="/js/jquery.min.js"></script>
+    
+    
+    <script src="/js/bootstrap.min.js"></script>
+    
+    
+    <script src="/js/hux-blog.min.js"></script>
+	
+    
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.13.1/styles/docco.min.css">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.13.1/highlight.min.js"></script>
+    <script>hljs.initHighlightingOnLoad();</script>
+</head>
+
+
+<nav class="navbar navbar-default navbar-custom navbar-fixed-top">
+    <div class="container-fluid">
+        
+        <div class="navbar-header page-scroll">
+            <button type="button" class="navbar-toggle">
+                <span class="sr-only">Toggle navigation</span>
+                <span class="icon-bar"></span>
+                <span class="icon-bar"></span>
+                <span class="icon-bar"></span>
+            </button>
+            <a class="navbar-brand" href="/"></a>
+        </div>
+
+        
+        
+        <div id="huxblog_navbar">
+            <div class="navbar-collapse">
+                <ul class="nav navbar-nav navbar-right">
+                    <li>
+                        <a href="/">Home</a>
+                    </li>
+                    
+                    <li>
+                        <a href="/categories/life">Life</a>
+                    </li>
+                    
+                    <li>
+                        <a href="/categories/tech">Tech</a>
+                    </li>
+                    
+                    
+		    
+                        <li><a href="/top/about/">ABOUT</a></li>
+                    
+
+                    
+		    <li>
+                        <a href="/search">SEARCH <img src="/img/search.png" height="15" style="cursor: pointer;" alt="Search"></a>
+		    </li>
+                    
+                </ul>
+            </div>
+        </div>
+        
+    </div>
+    
+</nav>
+<script>
+    
+    
+    
+    var $body   = document.body;
+    var $toggle = document.querySelector('.navbar-toggle');
+    var $navbar = document.querySelector('#huxblog_navbar');
+    var $collapse = document.querySelector('.navbar-collapse');
+
+    $toggle.addEventListener('click', handleMagic)
+    function handleMagic(e){
+        if ($navbar.className.indexOf('in') > 0) {
+        
+            $navbar.className = " ";
+            
+            setTimeout(function(){
+                
+                if($navbar.className.indexOf('in') < 0) {
+                    $collapse.style.height = "0px"
+                }
+            },400)
+        }else{
+        
+            $collapse.style.height = "auto"
+            $navbar.className += " in";
+        }
+    }
+</script>
+
+
+
+
+<style type="text/css">
+    header.intro-header {
+        background-image: url('https://zhaohuabing.com//img/post-bg-unix-linux.jpg')
+    }
+</style>
+<header class="intro-header">
+    <div class="container">
+        <div class="row">
+            <div class="col-lg-8 col-lg-offset-2 col-md-10 col-md-offset-1">
+                <div class="post-heading">
+                    <div class="tags">
+                        
+                        <a class="tag" href="/tags/docker" title="docker">
+                            docker
+                        </a>
+                        
+                        <a class="tag" href="/tags/%E5%BC%80%E5%8F%91%E5%B7%A5%E5%85%B7" title="开发工具">
+                            开发工具
+                        </a>
+                        
+                        <a class="tag" href="/tags/maven" title="maven">
+                            maven
+                        </a>
+                        
+                        <a class="tag" href="/tags/maven%E6%9D%A5%E6%9E%84%E5%BB%BAdocker%E9%95%9C%E5%83%8F" title="Maven来构建Docker镜像">
+                            Maven来构建Docker镜像
+                        </a>
+                        
+                        <a class="tag" href="/tags/docker%E5%BC%80%E5%90%AF%E8%BF%9C%E7%A8%8B%E6%9C%8D%E5%8A%A1" title="docker开启远程服务">
+                            docker开启远程服务
+                        </a>
+                        
+                        <a class="tag" href="/tags/vscode%E8%BF%9C%E7%A8%8B%E8%BF%9E%E6%8E%A5docker" title="vscode远程连接docker">
+                            vscode远程连接docker
+                        </a>
+                        
+                    </div>
+                    <h1>使用Maven来构建Docker镜像并上传远程服务器</h1>
+                    <h2 class="subheading"></h2>
+                    <span class="meta">
+			Posted by 
+			
+			         &#34;麦子&#34;
+			 
+			on 
+			Sunday, July 21, 2019
+                        
+                    </span>
+                </div>
+            </div>
+        </div>
+    </div>
+</header>
+
+
+
+
+<article>
+    <div class="container">
+        <div class="row">
+
+            
+            <div class="
+                col-lg-8 col-lg-offset-2
+                col-md-10 col-md-offset-1
+                post-container">
+
+                
+                <header>
+                    <h2>TOC</h2>
+                </header>
+                <nav id="TableOfContents">
+<ul>
+<li><a href="#目的">目的</a></li>
+<li><a href="#pom-xml">pom.xml</a>
+<ul>
+<li><a href="#将插件绑定在某个phase执行">将插件绑定在某个phase执行</a></li>
+</ul></li>
+<li><a href="#dockerfile-sh-文件">Dockerfile，sh 文件</a></li>
+<li><a href="#配置远端docker开启远程访问">配置远端docker开启远程访问</a>
+<ul>
+<li><a href="#配置远程访问">配置远程访问</a></li>
+<li><a href="#docker重新读取配置文件-重新启动docker服务">docker重新读取配置文件，重新启动docker服务</a></li>
+<li><a href="#验证docker进程和远程端口">验证docker进程和远程端口</a></li>
+<li><a href="#测试访问centos7的docker服务">测试访问centos7的docker服务</a></li>
+</ul></li>
+<li><a href="#maven-打包上传">maven 打包上传</a></li>
+<li><a href="#docker报错-warning-ipv4">Docker报错 WARNING: IPv4</a>
+<ul>
+<li><a href="#解决办法">解决办法</a></li>
+<li><a href="#注意">注意</a></li>
+</ul></li>
+<li><a href="#vscode工具连接远程docker服务">vscode工具连接远程docker服务</a></li>
+</ul>
+</nav>
+                
+                
+
+<h1 id="目的">目的</h1>
+
+<p>本地通过maven命令， 进行打包， 把项目打包成镜像，然后上传到Linux上的docker上面，作为镜像。</p>
+
+<h1 id="pom-xml">pom.xml</h1>
+
+<p>加载docker-maven-plugin插件</p>
+
+<pre><code class="language-xml">&lt;plugin&gt;
+				&lt;groupId&gt;com.spotify&lt;/groupId&gt;
+				&lt;artifactId&gt;docker-maven-plugin&lt;/artifactId&gt;
+				&lt;version&gt;0.4.13&lt;/version&gt;
+				&lt;executions&gt;
+					&lt;execution&gt;
+						&lt;id&gt;build-image&lt;/id&gt;
+						&lt;phase&gt;package&lt;/phase&gt;
+						&lt;goals&gt;
+							&lt;goal&gt;build&lt;/goal&gt;
+						&lt;/goals&gt;
+					&lt;/execution&gt;
+				&lt;/executions&gt;
+				&lt;configuration&gt;
+					&lt;!-- 远程docker服务地址 --&gt;
+					&lt;dockerHost&gt;http://10.211.55.8:2375&lt;/dockerHost&gt;
+					&lt;imageName&gt;${docker.hub.domain}/${docker.image.prefix}/${project.artifactId}:${docker.image.tag}&lt;/imageName&gt;
+					&lt;forceTags&gt;true&lt;/forceTags&gt;
+          &lt;!-- Dockerfile 文件位置--&gt;
+					&lt;dockerDirectory&gt;${project.basedir}/src/main/docker&lt;/dockerDirectory&gt;
+					&lt;resources&gt;
+						&lt;resource&gt;
+							&lt;targetPath&gt;/&lt;/targetPath&gt;
+                &lt;!-- maven 编译后，会在target下面生成 Dockerfile 和 jar文件--&gt;
+							&lt;directory&gt;${project.build.directory}&lt;/directory&gt;
+							&lt;include&gt;${project.build.finalName}.jar&lt;/include&gt;
+						&lt;/resource&gt;
+					&lt;/resources&gt;	
+				&lt;/configuration&gt;
+			&lt;/plugin&gt;
+</code></pre>
+
+<h2 id="将插件绑定在某个phase执行">将插件绑定在某个phase执行</h2>
+
+<p>很多场景下，我们有这样的需求，执行例如<code>mvn clean package</code> 时，插件就自动为我们构建Docker镜像。要想实现这点，我们只需将插件的goal绑定在某个phase即可。</p>
+
+<p>phase和goal可以这样理解：maven命令格式是：<code>mvn phase:goal</code> ，例如<code>mvn package docker:build</code> 。那么，package和docker都是phase，build则是goal 。</p>
+
+<pre><code class="language-xml">&lt;executions&gt;
+  &lt;execution&gt;
+    &lt;id&gt;build-image&lt;/id&gt;
+    &lt;phase&gt;package&lt;/phase&gt;
+    &lt;goals&gt;
+      &lt;goal&gt;build&lt;/goal&gt;
+    &lt;/goals&gt;
+  &lt;/execution&gt;
+&lt;/executions&gt;
+</code></pre>
+
+<p>就可将插件绑定在package这个phase上。也就是说，用户只需执行<code>mvn package</code> ，就会自动执行<code>mvn docker:build</code> 。当然，读者也可按照需求，将插件绑定到其他的phase。</p>
+
+<p><strong>相关属性标签的解释：<a href="https://yq.aliyun.com/articles/622330">https://yq.aliyun.com/articles/622330</a></strong></p>
+
+<h1 id="dockerfile-sh-文件">Dockerfile，sh 文件</h1>
+
+<pre><code class="language-dockerfile">FROM openjdk:8-jre
+RUN  mkdir maizi
+COPY *.jar /maizi/app.jar
+COPY start.sh /maizi/
+RUN  cd /maizi/ &amp;&amp; chmod a+x start.sh 
+CMD [ &quot;sh&quot;,&quot;/maizi/start.sh&quot; ]
+EXPOSE 8888
+</code></pre>
+
+<pre><code class="language-shell">#!/bin/sh
+apt-get update &amp;&amp; apt-get install -y procps
+cd /maizi/ &amp;&amp; touch springboot.log
+nohup java -Djava.security.egd=file:/dev/./urandom -jar  app.jar &gt;&gt;springboot.log 2&gt;&amp;1
+cat springboot.log
+</code></pre>
+
+<h1 id="配置远端docker开启远程访问">配置远端docker开启远程访问</h1>
+
+<p><strong>原文地址</strong>：<strong><a href="https://blog.csdn.net/qq_19674905/article/details/80267821">https://blog.csdn.net/qq_19674905/article/details/80267821</a></strong></p>
+
+<h2 id="配置远程访问">配置远程访问</h2>
+
+<p>打开/usr/lib/systemd/system/docker.service如下：</p>
+
+<pre><code class="language-properties">Service]
+Type=notify
+NotifyAccess=main
+EnvironmentFile=-/run/containers/registries.conf
+EnvironmentFile=-/etc/sysconfig/docker
+EnvironmentFile=-/etc/sysconfig/docker-storage
+EnvironmentFile=-/etc/sysconfig/docker-network
+Environment=GOTRACEBACK=crash
+Environment=DOCKER_HTTP_HOST_COMPAT=1
+Environment=PATH=/usr/libexec/docker:/usr/bin:/usr/sbin
+ExecStart=/usr/bin/dockerd-current -H tcp://0.0.0.0:2375 -H unix:///var/run/docker.sock \
+          --add-runtime docker-runc=/usr/libexec/docker/docker-runc-current \
+          --default-runtime=docker-runc \
+          --exec-opt native.cgroupdriver=systemd \
+          --userland-proxy-path=/usr/libexec/docker/docker-proxy-current \
+          --init-path=/usr/libexec/docker/docker-init-current \
+          --seccomp-profile=/etc/docker/seccomp.json \
+          $OPTIONS \
+          $DOCKER_STORAGE_OPTIONS \
+          $DOCKER_NETWORK_OPTIONS \
+          $ADD_REGISTRY \
+          $BLOCK_REGISTRY \
+          $INSECURE_REGISTRY \
+	  $REGISTRIES 
+ExecReload=/bin/kill -s HUP $MAINPID
+LimitNOFILE=1048576
+LimitNPROC=1048576
+LimitCORE=infinity
+TimeoutStartSec=0
+Restart=on-abnormal
+KillMode=process
+
+[Install]
+WantedBy=multi-user.target
+
+</code></pre>
+
+<p><strong>-H tcp://0.0.0.0:2375 -H unix:///var/run/docker.sock</strong> , 这个地方就是配置开启远程访问的端口和服务。</p>
+
+<h2 id="docker重新读取配置文件-重新启动docker服务">docker重新读取配置文件，重新启动docker服务</h2>
+
+<pre><code class="language-linux">systemctl daemon-reload
+systemctl restart docker
+</code></pre>
+
+<h2 id="验证docker进程和远程端口">验证docker进程和远程端口</h2>
+
+<pre><code class="language-linux">ps -elf | grep docker
+
+[root@localhost docker]# netstat -tulp  | grep  2375
+tcp6       0      0 [::]:2375               [::]:*                  LISTEN      5741/dockerd-curren 
+
+</code></pre>
+
+<h2 id="测试访问centos7的docker服务">测试访问centos7的docker服务</h2>
+
+<p>在本地用docker 命令查看远程的docker服务镜像，用于测试远程是否OK。</p>
+
+<pre><code class="language-linux">➜  blog docker -H 10.211.55.8  images
+REPOSITORY                            TAG                 IMAGE ID            CREATED             SIZE
+maizi1989/maizi-today/maventodocker   20190718            6d4e4c41bc92        2 days ago          283MB
+openjdk                               8-jre               f44b742ffc37        3 days ago          246MB
+</code></pre>
+
+<p>从这里可以看到， 本地已经可以查看到了远程docker的所有镜像了，证明远程服务已经开启。</p>
+
+<h1 id="maven-打包上传">maven 打包上传</h1>
+
+<p>vscode手动进行clean ，package打包或者在项目目录下进行如下命令进行打包：</p>
+
+<pre><code class="language-maven">  mvn clean package 
+</code></pre>
+
+<p>操作时候查看远端docker， 进行docker imgaes就可以查看到刚上传过来的镜像。</p>
+
+<h1 id="docker报错-warning-ipv4">Docker报错 WARNING: IPv4</h1>
+
+<p><strong>原文：<a href="https://blog.csdn.net/yjk13703623757/article/details/68939183">https://blog.csdn.net/yjk13703623757/article/details/68939183</a></strong></p>
+
+<p>启动容器</p>
+
+<pre><code class="language-dockerfile">docker run --rm -it -p 8888:8888/tcp maizi1989/maizi-today/maventodocker:20190718
+</code></pre>
+
+<p>如果直接进行启动，创建容器的时候， 报如下错误：</p>
+
+<pre><code class="language-linux">WARNING: IPv4 forwarding is disabled. Networking will not work.
+</code></pre>
+
+<h2 id="解决办法">解决办法</h2>
+
+<pre><code>vim  /usr/lib/sysctl.d/00-system.conf
+net.ipv4.ip_forward=1
+systemctl restart network #重启network服务
+</code></pre>
+
+<p>完成以后，删除错误的容器，再次创建新容器，就不再报错了。</p>
+
+<h2 id="注意">注意</h2>
+
+<p>这个问题一定要解决， 不然你在本地无法访问远端的docker启动的服务。还有导致你无法通过客户端去连接远端docker服务。</p>
+
+<h1 id="vscode工具连接远程docker服务">vscode工具连接远程docker服务</h1>
+
+<p>可以看到我们把镜像发布到远端docker的时候， 操作docker服务的时候，不方便， 所以找一个客户端直接远程连接docker服务， 方便操作。</p>
+
+<p>点击vscode的 [设置],然后搜索 docker:host ， 然后配置如下：</p>
+
+<pre><code class="language-linux">tcp://10.211.55.8:2375
+
+注意：这个地方不要写http, 如果是写http的话，我用vscode工具，进行run的时候， 他的dockerfile里面的端口无法映射到机器端口。
+</code></pre>
+
+<p>这样， 就可以远程操作docker服务了，这个插件有很多docker的操作， 很方便。效果如下：</p>
+
+<p><img src="/img/Xnip2019-07-21_15-13-53.png" alt="Xnip2019-07-21_15-13-53" /></p>
+
+<p>可以看到这里可以配置选择工作区， 如果默认不配置的话，就显示你本机的docker服务。</p>
+
+
+                
+                
+<div class="entry-shang text-center">
+    
+	    <p>「真诚赞赏，手留余香」</p>
+	
+	<button class="zs show-zs btn btn-bred">赞赏支持</button>
+</div>
+<div class="zs-modal-bg"></div>
+<div class="zs-modal-box">
+	<div class="zs-modal-head">
+		<button type="button" class="close">×</button>
+		<span class="author"><a href="http://maizitoday.github.io/"><img src="/img/favicon.png" /></a></span>
+        
+	        <p class="tip"><i></i><span>真诚赞赏，手留余香</span></p>
+		
+ 
+	</div>
+	<div class="zs-modal-body">
+		<div class="zs-modal-btns">
+			<button class="btn btn-blink" data-num="2">2元</button>
+			<button class="btn btn-blink" data-num="5">5元</button>
+			<button class="btn btn-blink" data-num="10">10元</button>
+			<button class="btn btn-blink" data-num="50">50元</button>
+			<button class="btn btn-blink" data-num="100">100元</button>
+			<button class="btn btn-blink" data-num="1">任意金额</button>
+		</div>
+		<div class="zs-modal-pay">
+			<button class="btn btn-bred" id="pay-text">2元</button>
+			<p>使用<span id="pay-type">微信</span>扫描二维码完成支付</p>
+			<img src="/img/reward/wechat-2.png"  id="pay-image"/>
+		</div>
+	</div>
+	<div class="zs-modal-footer">
+		<label><input type="radio" name="zs-type" value="wechat" class="zs-type" checked="checked"><span ><span class="zs-wechat"><img src="/img/reward/wechat-btn.png"/></span></label>
+		<label><input type="radio" name="zs-type" value="alipay" class="zs-type" class="zs-alipay"><img src="/img/reward/alipay-btn.png"/></span></label>
+	</div>
+</div>
+<script type="text/javascript" src="/js/reward.js"></script>
+
+                
+
+                <hr>
+                <ul class="pager">
+                    
+                    <li class="previous">
+                        <a href="/post/java%E5%9F%BA%E7%A1%80-java%E5%91%BD%E4%BB%A4%E8%A1%8C%E5%B7%A5%E5%85%B7/" data-toggle="tooltip" data-placement="top" title="JAVA命令行工具">&larr;
+                            Previous Post</a>
+                    </li>
+                    
+                    
+                </ul>
+
+                
+<div id="disqus-comment"></div>
+
+
+
+            </div>
+            
+            <div class="
+                col-lg-8 col-lg-offset-2
+                col-md-10 col-md-offset-1
+                sidebar-container">
+
+                
+                
+                <section>
+                    <hr class="hidden-sm hidden-xs">
+                    <h5><a href="/tags/">FEATURED TAGS</a></h5>
+                    <div class="tags">
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        <a href="/tags/zookeeper" title="Zookeeper">
+                            Zookeeper
+                        </a>
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        <a href="/tags/docker" title="docker">
+                            docker
+                        </a>
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        <a href="/tags/dockerfile" title="dockerfile">
+                            dockerfile
+                        </a>
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        <a href="/tags/java%E5%9F%BA%E7%A1%80" title="java基础">
+                            java基础
+                        </a>
+                        
+                        
+                        
+                        <a href="/tags/java%E7%9B%B8%E5%85%B3%E6%A6%82%E5%BF%B5" title="java相关概念">
+                            java相关概念
+                        </a>
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        <a href="/tags/jvm" title="jvm">
+                            jvm
+                        </a>
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        <a href="/tags/maven" title="maven">
+                            maven
+                        </a>
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        <a href="/tags/springcloud" title="springCloud">
+                            springCloud
+                        </a>
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        <a href="/tags/springboot%E7%B3%BB%E5%88%97" title="springboot系列">
+                            springboot系列
+                        </a>
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        <a href="/tags/%E4%B8%AD%E9%97%B4%E4%BB%B6" title="中间件">
+                            中间件
+                        </a>
+                        
+                        
+                        
+                        <a href="/tags/%E4%B8%BB%E4%BB%8E%E5%A4%8D%E5%88%B6" title="主从复制">
+                            主从复制
+                        </a>
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        <a href="/tags/%E5%88%86%E5%B8%83%E5%BC%8F%E7%B3%BB%E5%88%97" title="分布式系列">
+                            分布式系列
+                        </a>
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        <a href="/tags/%E5%BC%80%E5%8F%91%E5%B7%A5%E5%85%B7" title="开发工具">
+                            开发工具
+                        </a>
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        <a href="/tags/%E6%95%B0%E6%8D%AE%E5%BA%93" title="数据库">
+                            数据库
+                        </a>
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        <a href="/tags/%E6%9C%8D%E5%8A%A1%E8%84%9A%E6%9C%AC" title="服务脚本">
+                            服务脚本
+                        </a>
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        <a href="/tags/%E8%AE%BE%E8%AE%A1%E6%A8%A1%E5%BC%8F" title="设计模式">
+                            设计模式
+                        </a>
+                        
+                        
+                        
+                        
+                        
+                        <a href="/tags/%E8%B4%9F%E8%BD%BD%E5%9D%87%E8%A1%A1" title="负载均衡">
+                            负载均衡
+                        </a>
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                    </div>
+                </section>
+                
+
+                
+                
+                <section>
+                    <hr>
+                    <h5>FRIENDS</h5>
+                    <ul class="list-inline">
+                        
+                        <li><a target="_blank" href="https://zhaohuabing.com">赵化冰博客</a></li>
+                        
+                        <li><a target="_blank" href="http://www.tianshouzhi.com">田守枝</a></li>
+                        
+                        <li><a target="_blank" href="http://www.ityouknow.com">纯洁的微笑</a></li>
+                        
+                        <li><a target="_blank" href="https://renchunxiao.com">任春晓</a></li>
+                        
+                        <li><a target="_blank" href="https://www.lihongkun.com">泛泛之辈</a></li>
+                        
+                        <li><a target="_blank" href="https://juejin.im/welcome/backend">后端服务论坛</a></li>
+                        
+                        <li><a target="_blank" href="https://www.javaboy.org">江南一点雨</a></li>
+                        
+                    </ul>
+                </section>
+                
+            </div>
+        </div>
+    </div>
+</article>
+
+
+
+
+<footer>
+    <div class="container">
+        <div class="row">
+            <div class="col-lg-8 col-lg-offset-2 col-md-10 col-md-offset-1">
+                <ul class="list-inline text-center">
+                   
+                   <li>
+                       <a href="" rel="alternate" type="application/rss+xml" title="" >
+                           <span class="fa-stack fa-lg">
+                               <i class="fa fa-circle fa-stack-2x"></i>
+                               <i class="fa fa-rss fa-stack-1x fa-inverse"></i>
+                           </span>
+                       </a>
+                   </li>
+                   
+                    
+                    <li>
+                        <a href="mailto:maiziybtoday@gmail.com">
+                            <span class="fa-stack fa-lg">
+                                <i class="fa fa-circle fa-stack-2x"></i>
+                                <i class="fa fa-envelope fa-stack-1x fa-inverse"></i>
+                            </span>
+                        </a>
+                    </li>
+		    
+                    
+                    
+                    
+                    
+
+                    
+
+		    
+                    
+                    <li>
+                        <a target="_blank" href="/your%20wechat%20qr%20code%20image">
+                            <span class="fa-stack fa-lg">
+                                <i class="fa fa-circle fa-stack-2x"></i>
+                                <i class="fa fa-wechat fa-stack-1x fa-inverse"></i>
+                            </span>
+                        </a>
+                    </li>
+		    
+                    
+                    
+                    <li>
+                        <a target="_blank" href="https://www.linkedin.com/in/yourlinkedinid">
+                            <span class="fa-stack fa-lg">
+                                <i class="fa fa-circle fa-stack-2x"></i>
+                                <i class="fa fa-linkedin fa-stack-1x fa-inverse"></i>
+                            </span>
+                        </a>
+                    </li>
+		    
+                    
+                </ul>
+		<p class="copyright text-muted">
+                    Copyright &copy;  2019
+                    <br>
+                    <a href="https://themes.gohugo.io/hugo-theme-cleanwhite">CleanWhite Hugo Theme</a> by <a href="https://zhaohuabing.com">Huabing</a> |
+                    <iframe
+                        style="margin-left: 2px; margin-bottom:-5px;"
+                        frameborder="0" scrolling="0" width="100px" height="20px"
+                        src="https://ghbtns.com/github-btn.html?user=zhaohuabing&repo=hugo-theme-cleanwhite&type=star&count=true" >
+                    </iframe>
+                </p>
+            </div>
+        </div>
+    </div>
+</footer>
+
+
+
+
+<script>
+    function async(u, c) {
+      var d = document, t = 'script',
+          o = d.createElement(t),
+          s = d.getElementsByTagName(t)[0];
+      o.src = u;
+      if (c) { o.addEventListener('load', function (e) { c(null, e); }, false); }
+      s.parentNode.insertBefore(o, s);
+    }
+</script>
+
+
+
+
+
+
+<script>
+    
+    if($('#tag_cloud').length !== 0){
+        async("/js/jquery.tagcloud.js",function(){
+            $.fn.tagcloud.defaults = {
+                
+                color: {start: '#bbbbee', end: '#0085a1'},
+            };
+            $('#tag_cloud a').tagcloud();
+        })
+    }
+</script>
+
+
+<script>
+    async("https://cdnjs.cloudflare.com/ajax/libs/fastclick/1.0.6/fastclick.js", function(){
+        var $nav = document.querySelector("nav");
+        if($nav) FastClick.attach($nav);
+    })
+</script>
+
+
+
+
+
+
+</body>
+</html>
