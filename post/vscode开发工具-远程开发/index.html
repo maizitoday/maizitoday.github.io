@@ -209,7 +209,18 @@
 <ul>
 <li><a href="#remote-ssh">remote-ssh</a></li>
 <li><a href="#sftp">SFTP</a></li>
-<li><a href="#远程调试代码">远程调试代码</a></li>
+<li><a href="#远程调试代码">远程调试代码</a>
+<ul>
+<li><a href="#launch配置">launch配置</a></li>
+<li><a href="#springboot启动">springboot启动</a></li>
+<li><a href="#命令分析">命令分析</a>
+<ul>
+<li><a href="#transport">transport</a></li>
+<li><a href="#server">server</a></li>
+<li><a href="#address">address</a></li>
+<li><a href="#suspend">suspend</a></li>
+</ul></li>
+</ul></li>
 </ul>
 </nav>
                 
@@ -261,6 +272,49 @@
 </code></pre>
 
 <h1 id="远程调试代码">远程调试代码</h1>
+
+<h2 id="launch配置">launch配置</h2>
+
+<pre><code class="language-json">{
+    &quot;configurations&quot;: [
+        {
+            &quot;type&quot;: &quot;java&quot;,
+            &quot;name&quot;: &quot;Debug (Attach)&quot;,
+            &quot;request&quot;: &quot;attach&quot;,
+            &quot;hostName&quot;: &quot;10.211.55.10&quot;,
+            &quot;port&quot;: 5006
+        }
+    ]
+}
+</code></pre>
+
+<h2 id="springboot启动">springboot启动</h2>
+
+<pre><code class="language-shell">
+java  -Xnoagent -Djava.compiler=NONE -Xdebug -Xrunjdwp:transport=dt_socket,server=y,suspend=n,address=10.211.55.10:5006 -jar remotedemo-0.0.1-SNAPSHOT.jar 
+</code></pre>
+
+<p>注意：这里的address一定需要是ip+端口形式启动，否则无法开启远程调试。</p>
+
+<h2 id="命令分析">命令分析</h2>
+
+<p><strong>转载地址：<a href="https://blog.51cto.com/a4boy/1889940">https://blog.51cto.com/a4boy/1889940</a></strong></p>
+
+<h3 id="transport">transport</h3>
+
+<p>这里通常使用套接字传输。但是在 Windows 平台上也可以使用共享内存传输。</p>
+
+<h3 id="server">server</h3>
+
+<p>如果值为 y，目标应用程序监听将要连接的调试器应用程序。否则，它将连接到特定地址上的调试器应用程序。</p>
+
+<h3 id="address">address</h3>
+
+<p>这是连接的传输地址。如果服务器为 n，将尝试连接到该地址上的调试器应用程序。否则，将在这个端口监听连接。</p>
+
+<h3 id="suspend">suspend</h3>
+
+<p>如果值为 y，目标 VM 将暂停，直到调试器应用程序进行连接。</p>
 
 
                 
@@ -512,6 +566,8 @@
                         
                         
                         
+                        
+                        
                         <a href="/tags/springcloud" title="springCloud">
                             springCloud
                         </a>
@@ -719,6 +775,8 @@
                         <a href="/tags/%E8%B4%9F%E8%BD%BD%E5%9D%87%E8%A1%A1" title="负载均衡">
                             负载均衡
                         </a>
+                        
+                        
                         
                         
                         
