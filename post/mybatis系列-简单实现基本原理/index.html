@@ -1,0 +1,1168 @@
+<!DOCTYPE html>
+<html lang="en-us">
+<head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+
+    
+    <meta property="og:site_name" content="">
+    <meta property="og:type" content="article">
+
+    
+    <meta property="og:image" content="http://maizitoday.github.io//img/home-bg-jeep.jpg">
+    <meta property="twitter:image" content="http://maizitoday.github.io//img/home-bg-jeep.jpg" />
+    
+
+    
+    <meta name="title" content="MyBatis框架简单自己实现" />
+    <meta property="og:title" content="MyBatis框架简单自己实现" />
+    <meta property="twitter:title" content="MyBatis框架简单自己实现" />
+    
+
+    
+    <meta name="description" content="麦子，程序员, 开源爱好者，生活探险家 | 这里是 麦子 的博客，与你一起发现更大的世界。">
+    <meta property="og:description" content="麦子，程序员, 开源爱好者，生活探险家 | 这里是 麦子 的博客，与你一起发现更大的世界。" />
+    <meta property="twitter:description" content="麦子，程序员, 开源爱好者，生活探险家 | 这里是 麦子 的博客，与你一起发现更大的世界。" />
+    
+
+    
+    <meta property="twitter:card" content="summary" />
+    
+    
+
+    <meta name="keyword"  content="麦子, maizi, maizi, , 麦子的网络日志, 麦子的博客, maizi Blog, 博客, 个人网站, 互联网, Web, 云原生, PaaS, Istio, Kubernetes, 微服务, Microservice">
+    <link rel="shortcut icon" href="/img/favicon.ico">
+
+    <title>MyBatis框架简单自己实现-麦子的博客</title>
+
+    <link rel="canonical" href="/post/mybatis%E7%B3%BB%E5%88%97-%E7%AE%80%E5%8D%95%E5%AE%9E%E7%8E%B0%E5%9F%BA%E6%9C%AC%E5%8E%9F%E7%90%86/">
+
+    <link rel="stylesheet" href="/css/iDisqus.min.css"/>
+	
+    
+    <link rel="stylesheet" href="/css/bootstrap.min.css">
+
+    
+    <link rel="stylesheet" href="/css/hux-blog.min.css">
+
+    
+    <link rel="stylesheet" href="/css/syntax.css">
+
+    
+    <link rel="stylesheet" href="/css/zanshang.css">
+
+    
+    <link href="//cdnjs.cloudflare.com/ajax/libs/font-awesome/4.6.3/css/font-awesome.min.css" rel="stylesheet" type="text/css">
+    
+    
+    <script src="/js/jquery.min.js"></script>
+    
+    
+    <script src="/js/bootstrap.min.js"></script>
+    
+    
+    <script src="/js/hux-blog.min.js"></script>
+	
+    
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.13.1/styles/docco.min.css">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.13.1/highlight.min.js"></script>
+    <script>hljs.initHighlightingOnLoad();</script>
+</head>
+
+
+<nav class="navbar navbar-default navbar-custom navbar-fixed-top">
+    <div class="container-fluid">
+        
+        <div class="navbar-header page-scroll">
+            <button type="button" class="navbar-toggle">
+                <span class="sr-only">Toggle navigation</span>
+                <span class="icon-bar"></span>
+                <span class="icon-bar"></span>
+                <span class="icon-bar"></span>
+            </button>
+            <a class="navbar-brand" href="/"></a>
+        </div>
+
+        
+        
+        <div id="huxblog_navbar">
+            <div class="navbar-collapse">
+                <ul class="nav navbar-nav navbar-right">
+                    <li>
+                        <a href="/">Home</a>
+                    </li>
+                    
+                    <li>
+                        <a href="/categories/life">Life</a>
+                    </li>
+                    
+                    <li>
+                        <a href="/categories/tech">Tech</a>
+                    </li>
+                    
+                    
+		    
+                        <li><a href="/top/about/">ABOUT</a></li>
+                    
+
+                    
+		    <li>
+                        <a href="/search">SEARCH <img src="/img/search.png" height="15" style="cursor: pointer;" alt="Search"></a>
+		    </li>
+                    
+                </ul>
+            </div>
+        </div>
+        
+    </div>
+    
+</nav>
+<script>
+    
+    
+    
+    var $body   = document.body;
+    var $toggle = document.querySelector('.navbar-toggle');
+    var $navbar = document.querySelector('#huxblog_navbar');
+    var $collapse = document.querySelector('.navbar-collapse');
+
+    $toggle.addEventListener('click', handleMagic)
+    function handleMagic(e){
+        if ($navbar.className.indexOf('in') > 0) {
+        
+            $navbar.className = " ";
+            
+            setTimeout(function(){
+                
+                if($navbar.className.indexOf('in') < 0) {
+                    $collapse.style.height = "0px"
+                }
+            },400)
+        }else{
+        
+            $collapse.style.height = "auto"
+            $navbar.className += " in";
+        }
+    }
+</script>
+
+
+
+
+<style type="text/css">
+    header.intro-header {
+        background-image: url('https://c.pxhere.com/images/1f/8d/7a12ae7fcd86cdc43f624556db3b-1451061.jpg!d')
+    }
+</style>
+<header class="intro-header">
+    <div class="container">
+        <div class="row">
+            <div class="col-lg-8 col-lg-offset-2 col-md-10 col-md-offset-1">
+                <div class="post-heading">
+                    <div class="tags">
+                        
+                        <a class="tag" href="/tags/%E6%95%B0%E6%8D%AE%E5%BA%93" title="数据库">
+                            数据库
+                        </a>
+                        
+                        <a class="tag" href="/tags/mybatis%E6%A1%86%E6%9E%B6%E5%AE%9E%E7%8E%B0" title="MyBatis框架实现">
+                            MyBatis框架实现
+                        </a>
+                        
+                    </div>
+                    <h1>MyBatis框架简单自己实现</h1>
+                    <h2 class="subheading"></h2>
+                    <span class="meta">
+			Posted by 
+			
+			         &#34;麦子&#34;
+			 
+			on 
+			Wednesday, August 21, 2019
+                        
+                    </span>
+                </div>
+            </div>
+        </div>
+    </div>
+</header>
+
+
+
+
+<article>
+    <div class="container">
+        <div class="row">
+
+            
+            <div class="
+                col-lg-8 col-lg-offset-2
+                col-md-10 col-md-offset-1
+                post-container">
+
+                
+                <header>
+                    <h2>TOC</h2>
+                </header>
+                <nav id="TableOfContents">
+<ul>
+<li><a href="#入口类">入口类</a></li>
+<li><a href="#jdk代理">jdk代理</a>
+<ul>
+<li><a href="#mysqlsession-java">MySqlSession.java</a></li>
+<li><a href="#mymapperproxy-java">MyMapperProxy.java</a></li>
+</ul></li>
+<li><a href="#数据库连接">数据库连接</a>
+<ul>
+<li><a href="#myconfiguration-java">MyConfiguration.java</a></li>
+</ul></li>
+<li><a href="#配置文件处理">配置文件处理</a>
+<ul>
+<li><a href="#usermapper-xml">UserMapper.xml</a></li>
+<li><a href="#mapperbean-java">MapperBean.java</a></li>
+<li><a href="#function-java">Function.java</a></li>
+<li><a href="#user-java">User.java</a></li>
+</ul></li>
+<li><a href="#接口类">接口类</a>
+<ul>
+<li><a href="#usermapper-java">UserMapper.java</a></li>
+</ul></li>
+<li><a href="#实际执行sql语句类">实际执行sql语句类</a>
+<ul>
+<li><a href="#myexcutor-java">MyExcutor.java</a></li>
+</ul></li>
+<li><a href="#总结">总结</a></li>
+</ul>
+</nav>
+                
+                
+
+<p>[TOC]</p>
+
+<p><strong>特别说明：以下代码来源网上，来源地址已经丢失。</strong></p>
+
+<h1 id="入口类">入口类</h1>
+
+<pre><code class="language-java">public class APP {
+
+    public static void main(String[] args){
+        MySqlSession  sqlSession = new MySqlSession();
+        // jdk代理
+        UserMapper mapper = sqlSession.getMapper(UserMapper.class);
+        User user = mapper.getUserById(&quot;1&quot;);
+        System.out.println(&quot;  user:   &quot;+user);
+    }
+
+}
+
+</code></pre>
+
+<h1 id="jdk代理">jdk代理</h1>
+
+<h2 id="mysqlsession-java">MySqlSession.java</h2>
+
+<pre><code class="language-java">public class MySqlSession {
+
+    private Excutor  excutor = new MyExcutor();
+
+    private MyConfiguration myConfiguration = new MyConfiguration();
+
+    public &lt;T&gt; T selectOne(String sql, Object parameter)
+    {
+        return  excutor.query(sql,parameter);
+    }
+
+
+    public &lt;T&gt; T getMapper(Class&lt;T&gt; clas){
+
+        return (T)Proxy.
+              newProxyInstance(clas.getClassLoader(),
+                               new Class[]{clas},
+                               new MyMapperProxy(this,myConfiguration));
+    }
+}
+</code></pre>
+
+<h2 id="mymapperproxy-java">MyMapperProxy.java</h2>
+
+<pre><code class="language-java">public class MyMapperProxy implements InvocationHandler{
+
+
+    private MySqlSession  mySqlSession;
+    private MyConfiguration myConfiguration;
+
+    public MyMapperProxy(MySqlSession mySqlSession, MyConfiguration myConfiguration) {
+        this.mySqlSession = mySqlSession;
+        this.myConfiguration = myConfiguration;
+    }
+
+    
+    @Override
+    public Object invoke(Object proxy, Method method, Object[] args) throws Throwable {
+        // 解析xml文档，封装到MapperBean对象中
+        MapperBean mapperBean = myConfiguration.readMapper();
+        // 判断这个接口类的路径和xml的nameSpace是否一致
+        if (!method.getDeclaringClass().getName().equals(mapperBean.getInterfaceName()))
+        {
+            return null;
+        }
+        List&lt;Function&gt; list = mapperBean.getList();
+        if (list != null &amp;&amp; list.size() &gt; 0)
+        {
+            for (Function function : list)
+            {
+                 // 这里就进行判断接口类里面的方法的名称和xml配置文件里面的id是否一致
+                if (method.getName().equals(function.getFuncName()))
+                {  
+                    // 实际执行的sql语句
+                    return mySqlSession.selectOne(function.getSql(),String.valueOf(args[0]));
+                }
+            }
+        }
+        return null;
+    }
+}
+</code></pre>
+
+<h1 id="数据库连接">数据库连接</h1>
+
+<h2 id="myconfiguration-java">MyConfiguration.java</h2>
+
+<p>处理数据库连接和xml配置文件的对象化封装。</p>
+
+<pre><code class="language-java">public class MyConfiguration {
+
+    private static  String driver = &quot;com.mysql.jdbc.Driver&quot;;
+    private static String url = &quot;jdbc:mysql://127.0.0.1:3306/sys?useUnicode=true&amp;characterEncoding=utf-8&amp;useSSL=false&quot;;
+    private static String username = &quot;root&quot;;
+    private static String password = &quot;123456&quot;;
+    // 用于管理数据库连接池，ThreadLocal能够实现当前线程的操作都是用同一个Connection，保证了事务！
+    private static ThreadLocal&lt;Connection&gt; connContainer = new ThreadLocal&lt;Connection&gt;();
+
+    /**
+     * 获取数据库连接
+     * @return
+     */
+    public Connection getConnection() throws Exception{
+        Connection conn = connContainer.get();
+        Class.forName(driver);
+        conn = DriverManager.getConnection(url,username,password);
+        conn.setAutoCommit(false);
+        return conn;
+    }
+
+    /***
+     *  关闭链接
+     */
+    public void closeConnection() throws Exception
+    {
+        Connection conn = connContainer.get();
+        if (conn != null)
+        {
+            conn.close();
+        }
+        connContainer.remove();
+    }
+
+    /***
+     * 读取写入SQL的配置文件，获取他的SQL语句，返回值，传入的参数
+     * @param path
+     * @return
+     */
+    public MapperBean readMapper()
+    {
+        ClassLoader  loader = ClassLoader.getSystemClassLoader();
+        MapperBean  mapperBean = new MapperBean();
+        try {
+            InputStream stream =  MyConfiguration.class.getResourceAsStream(&quot;/maizi/UserMapper.xml&quot;);
+            SAXReader reader = new SAXReader();
+            Document document = reader.read(stream);
+            Element root = document.getRootElement();
+            // 把nameSpace值为接口名
+            mapperBean.setInterfaceName(root.attributeValue(&quot;nameSpace&quot;).trim());
+            // 存储方法
+            List&lt;Function&gt; list = new ArrayList&lt;Function&gt;();
+            // 遍历根节点下面所有节点
+            for(Iterator rootIter = root.elementIterator();rootIter.hasNext();)
+            {
+              Function fun = new Function();
+              Element e = (Element) rootIter.next();
+              String sqltype = e.getName().trim();
+              String funcName = e.attributeValue(&quot;id&quot;).trim();
+              String sql = e.getText().trim();
+              String  resultType = e.attributeValue(&quot;resultType&quot;).trim();
+              // sql 类型是 查询还是修改等
+              fun.setSqlType(sqltype);
+              fun.setFuncName(funcName);
+              Object newInstance = null;
+              // 在这里直接实例化返回的对象
+              newInstance = Class.forName(resultType).newInstance();
+              fun.setResultType(newInstance);
+              fun.setSql(sql);
+              System.out.println(&quot;   fun:  &quot;+fun.toString());
+              list.add(fun);
+            }
+            mapperBean.setList(list);
+        }catch (Exception e){
+           e.printStackTrace();
+        }
+        return mapperBean;
+    }
+}
+
+</code></pre>
+
+<h1 id="配置文件处理">配置文件处理</h1>
+
+<h2 id="usermapper-xml">UserMapper.xml</h2>
+
+<pre><code class="language-xml">&lt;?xml version=&quot;1.0&quot; encoding=&quot;UTF-8&quot;?&gt;
+&lt;mapper nameSpace=&quot;mapper.UserMapper&quot;&gt;
+    &lt;select id=&quot;getUserById&quot; resultType =&quot;mapper.User&quot;&gt;
+        select * from user where id = ?
+    &lt;/select&gt;
+&lt;/mapper&gt;
+</code></pre>
+
+<h2 id="mapperbean-java">MapperBean.java</h2>
+
+<pre><code class="language-java">@Data
+public class MapperBean {
+    private String interfaceName; // 接口名
+    private List&lt;Function&gt; list; // 接口下所有方法
+}
+</code></pre>
+
+<h2 id="function-java">Function.java</h2>
+
+<pre><code class="language-java">@Data
+@ToString
+public class Function {
+    private String sqlType;
+    private String funcName;
+    private String sql;
+    private Object resultType;
+    private String parameterType;
+}
+</code></pre>
+
+<h2 id="user-java">User.java</h2>
+
+<pre><code class="language-java">@Data
+@ToString
+public class User {
+  private String id;
+  private String userName;
+  private String passWord;
+}
+</code></pre>
+
+<h1 id="接口类">接口类</h1>
+
+<h2 id="usermapper-java">UserMapper.java</h2>
+
+<pre><code class="language-java">public interface UserMapper {
+
+    public User getUserById(String id);
+
+}
+</code></pre>
+
+<h1 id="实际执行sql语句类">实际执行sql语句类</h1>
+
+<h2 id="myexcutor-java">MyExcutor.java</h2>
+
+<pre><code class="language-java">public class MyExcutor  implements Excutor{
+
+    private MyConfiguration  myConfiguration = new MyConfiguration();
+
+    @Override
+    public &lt;T&gt; T query(String sql, Object parameter) {
+        try {
+            Connection connection = myConfiguration.getConnection();
+            ResultSet set = null;
+            PreparedStatement pre = null;
+            pre = connection.prepareStatement(sql);
+            pre.setString(1,parameter.toString());
+            set = pre.executeQuery();
+            User u = new User();
+            while (set.next())
+            {
+                u.setId(set.getString(1));
+                u.setUserName(set.getString(2));
+                u.setPassWord(set.getString(3));
+            }
+            return (T)u;
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        return null;
+    }
+}
+</code></pre>
+
+<h1 id="总结">总结</h1>
+
+<p>解析xml配置文件</p>
+
+<pre><code class="language-xml">&lt;?xml version=&quot;1.0&quot; encoding=&quot;UTF-8&quot;?&gt;
+&lt;mapper nameSpace=&quot;mapper.UserMapper&quot;&gt;
+    &lt;select id=&quot;getUserById&quot; resultType =&quot;mapper.User&quot;&gt;
+        select * from user where id = ?
+    &lt;/select&gt;
+&lt;/mapper&gt;
+</code></pre>
+
+<p>获取里面的nameSpace，然后根据前面的jdk代理传入的</p>
+
+<pre><code class="language-java">UserMapper mapper = sqlSession.getMapper(UserMapper.class);
+</code></pre>
+
+<p>为了就是找到xml配置文件的<strong>id和接口的方法对应</strong>，</p>
+
+<pre><code class="language-java">User user = mapper.getUserById(&quot;1&quot;);
+</code></pre>
+
+<p>然后在代理类里面进行实际的sql的操作和返回数据和对象的填充。</p>
+
+
+                
+                
+<div class="entry-shang text-center">
+    
+	    <p>「真诚赞赏，手留余香」</p>
+	
+	<button class="zs show-zs btn btn-bred">赞赏支持</button>
+</div>
+<div class="zs-modal-bg"></div>
+<div class="zs-modal-box">
+	<div class="zs-modal-head">
+		<button type="button" class="close">×</button>
+		<span class="author"><a href="http://maizitoday.github.io/"><img src="/img/favicon.png" /></a></span>
+        
+	        <p class="tip"><i></i><span>真诚赞赏，手留余香</span></p>
+		
+ 
+	</div>
+	<div class="zs-modal-body">
+		<div class="zs-modal-btns">
+			<button class="btn btn-blink" data-num="2">2元</button>
+			<button class="btn btn-blink" data-num="5">5元</button>
+			<button class="btn btn-blink" data-num="10">10元</button>
+			<button class="btn btn-blink" data-num="50">50元</button>
+			<button class="btn btn-blink" data-num="100">100元</button>
+			<button class="btn btn-blink" data-num="1">任意金额</button>
+		</div>
+		<div class="zs-modal-pay">
+			<button class="btn btn-bred" id="pay-text">2元</button>
+			<p>使用<span id="pay-type">微信</span>扫描二维码完成支付</p>
+			<img src="/img/reward/wechat-2.png"  id="pay-image"/>
+		</div>
+	</div>
+	<div class="zs-modal-footer">
+		<label><input type="radio" name="zs-type" value="wechat" class="zs-type" checked="checked"><span ><span class="zs-wechat"><img src="/img/reward/wechat-btn.png"/></span></label>
+		<label><input type="radio" name="zs-type" value="alipay" class="zs-type" class="zs-alipay"><img src="/img/reward/alipay-btn.png"/></span></label>
+	</div>
+</div>
+<script type="text/javascript" src="/js/reward.js"></script>
+
+                
+
+                <hr>
+                <ul class="pager">
+                    
+                    <li class="previous">
+                        <a href="/post/vscode%E5%BC%80%E5%8F%91%E5%B7%A5%E5%85%B7-sourcetrail%E6%BA%90%E7%A0%81%E6%9F%A5%E7%9C%8B%E5%B7%A5%E5%85%B7/" data-toggle="tooltip" data-placement="top" title="sourcetrail源码查看工具">&larr;
+                            Previous Post</a>
+                    </li>
+                    
+                    
+                </ul>
+
+                
+<div id="disqus-comment"></div>
+
+
+
+            </div>
+            
+            <div class="
+                col-lg-8 col-lg-offset-2
+                col-md-10 col-md-offset-1
+                sidebar-container">
+
+                
+                
+                <section>
+                    <hr class="hidden-sm hidden-xs">
+                    <h5><a href="/tags/">FEATURED TAGS</a></h5>
+                    <div class="tags">
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        <a href="/tags/zookeeper" title="Zookeeper">
+                            Zookeeper
+                        </a>
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        <a href="/tags/docker" title="docker">
+                            docker
+                        </a>
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        <a href="/tags/dockerfile" title="dockerfile">
+                            dockerfile
+                        </a>
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        <a href="/tags/java%E5%9F%BA%E7%A1%80" title="java基础">
+                            java基础
+                        </a>
+                        
+                        
+                        
+                        <a href="/tags/java%E7%9B%B8%E5%85%B3%E6%A6%82%E5%BF%B5" title="java相关概念">
+                            java相关概念
+                        </a>
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        <a href="/tags/jvm" title="jvm">
+                            jvm
+                        </a>
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        <a href="/tags/maven" title="maven">
+                            maven
+                        </a>
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        <a href="/tags/springcloud" title="springCloud">
+                            springCloud
+                        </a>
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        <a href="/tags/springboot%E7%B3%BB%E5%88%97" title="springboot系列">
+                            springboot系列
+                        </a>
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        <a href="/tags/%E4%B8%AD%E9%97%B4%E4%BB%B6" title="中间件">
+                            中间件
+                        </a>
+                        
+                        
+                        
+                        <a href="/tags/%E4%B8%BB%E4%BB%8E%E5%A4%8D%E5%88%B6" title="主从复制">
+                            主从复制
+                        </a>
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        <a href="/tags/%E5%88%86%E5%B8%83%E5%BC%8F%E7%B3%BB%E5%88%97" title="分布式系列">
+                            分布式系列
+                        </a>
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        <a href="/tags/%E5%BC%80%E5%8F%91%E5%B7%A5%E5%85%B7" title="开发工具">
+                            开发工具
+                        </a>
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        <a href="/tags/%E6%95%B0%E6%8D%AE%E5%BA%93" title="数据库">
+                            数据库
+                        </a>
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        <a href="/tags/%E6%9C%8D%E5%8A%A1%E8%84%9A%E6%9C%AC" title="服务脚本">
+                            服务脚本
+                        </a>
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        <a href="/tags/%E8%AE%BE%E8%AE%A1%E6%A8%A1%E5%BC%8F" title="设计模式">
+                            设计模式
+                        </a>
+                        
+                        
+                        
+                        
+                        
+                        <a href="/tags/%E8%B4%9F%E8%BD%BD%E5%9D%87%E8%A1%A1" title="负载均衡">
+                            负载均衡
+                        </a>
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                    </div>
+                </section>
+                
+
+                
+                
+                <section>
+                    <hr>
+                    <h5>FRIENDS</h5>
+                    <ul class="list-inline">
+                        
+                        <li><a target="_blank" href="https://zhaohuabing.com">赵化冰博客</a></li>
+                        
+                        <li><a target="_blank" href="http://www.tianshouzhi.com">田守枝</a></li>
+                        
+                        <li><a target="_blank" href="http://www.ityouknow.com">纯洁的微笑</a></li>
+                        
+                        <li><a target="_blank" href="https://renchunxiao.com">任春晓</a></li>
+                        
+                        <li><a target="_blank" href="https://www.lihongkun.com">泛泛之辈</a></li>
+                        
+                        <li><a target="_blank" href="https://juejin.im/welcome/backend">后端服务论坛</a></li>
+                        
+                        <li><a target="_blank" href="https://www.javaboy.org">江南一点雨</a></li>
+                        
+                    </ul>
+                </section>
+                
+            </div>
+        </div>
+    </div>
+</article>
+
+
+
+
+<footer>
+    <div class="container">
+        <div class="row">
+            <div class="col-lg-8 col-lg-offset-2 col-md-10 col-md-offset-1">
+                <ul class="list-inline text-center">
+                   
+                   <li>
+                       <a href="" rel="alternate" type="application/rss+xml" title="" >
+                           <span class="fa-stack fa-lg">
+                               <i class="fa fa-circle fa-stack-2x"></i>
+                               <i class="fa fa-rss fa-stack-1x fa-inverse"></i>
+                           </span>
+                       </a>
+                   </li>
+                   
+                    
+                    <li>
+                        <a href="mailto:maiziybtoday@gmail.com">
+                            <span class="fa-stack fa-lg">
+                                <i class="fa fa-circle fa-stack-2x"></i>
+                                <i class="fa fa-envelope fa-stack-1x fa-inverse"></i>
+                            </span>
+                        </a>
+                    </li>
+		    
+                    
+                    
+                    
+                    
+
+                    
+
+		    
+                    
+                    <li>
+                        <a target="_blank" href="/your%20wechat%20qr%20code%20image">
+                            <span class="fa-stack fa-lg">
+                                <i class="fa fa-circle fa-stack-2x"></i>
+                                <i class="fa fa-wechat fa-stack-1x fa-inverse"></i>
+                            </span>
+                        </a>
+                    </li>
+		    
+                    
+                    
+                    <li>
+                        <a target="_blank" href="https://www.linkedin.com/in/yourlinkedinid">
+                            <span class="fa-stack fa-lg">
+                                <i class="fa fa-circle fa-stack-2x"></i>
+                                <i class="fa fa-linkedin fa-stack-1x fa-inverse"></i>
+                            </span>
+                        </a>
+                    </li>
+		    
+                    
+                </ul>
+		<p class="copyright text-muted">
+                    Copyright &copy;  2019
+                    <br>
+                    <a href="https://themes.gohugo.io/hugo-theme-cleanwhite">CleanWhite Hugo Theme</a> by <a href="https://zhaohuabing.com">Huabing</a> |
+                    <iframe
+                        style="margin-left: 2px; margin-bottom:-5px;"
+                        frameborder="0" scrolling="0" width="100px" height="20px"
+                        src="https://ghbtns.com/github-btn.html?user=zhaohuabing&repo=hugo-theme-cleanwhite&type=star&count=true" >
+                    </iframe>
+                </p>
+            </div>
+        </div>
+    </div>
+</footer>
+
+
+
+
+<script>
+    function async(u, c) {
+      var d = document, t = 'script',
+          o = d.createElement(t),
+          s = d.getElementsByTagName(t)[0];
+      o.src = u;
+      if (c) { o.addEventListener('load', function (e) { c(null, e); }, false); }
+      s.parentNode.insertBefore(o, s);
+    }
+</script>
+
+
+
+
+
+
+<script>
+    
+    if($('#tag_cloud').length !== 0){
+        async("/js/jquery.tagcloud.js",function(){
+            $.fn.tagcloud.defaults = {
+                
+                color: {start: '#bbbbee', end: '#0085a1'},
+            };
+            $('#tag_cloud a').tagcloud();
+        })
+    }
+</script>
+
+
+<script>
+    async("https://cdnjs.cloudflare.com/ajax/libs/fastclick/1.0.6/fastclick.js", function(){
+        var $nav = document.querySelector("nav");
+        if($nav) FastClick.attach($nav);
+    })
+</script>
+
+
+
+
+
+
+</body>
+</html>
