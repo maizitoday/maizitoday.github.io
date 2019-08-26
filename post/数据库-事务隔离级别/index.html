@@ -1,0 +1,1249 @@
+<!DOCTYPE html>
+<html lang="en-us">
+<head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+
+    
+    <meta property="og:site_name" content="">
+    <meta property="og:type" content="article">
+
+    
+    <meta property="og:image" content="http://maizitoday.github.io//img/home-bg-jeep.jpg">
+    <meta property="twitter:image" content="http://maizitoday.github.io//img/home-bg-jeep.jpg" />
+    
+
+    
+    <meta name="title" content="事务隔离级别" />
+    <meta property="og:title" content="事务隔离级别" />
+    <meta property="twitter:title" content="事务隔离级别" />
+    
+
+    
+    <meta name="description" content="麦子，程序员, 开源爱好者，生活探险家 | 这里是 麦子 的博客，与你一起发现更大的世界。">
+    <meta property="og:description" content="麦子，程序员, 开源爱好者，生活探险家 | 这里是 麦子 的博客，与你一起发现更大的世界。" />
+    <meta property="twitter:description" content="麦子，程序员, 开源爱好者，生活探险家 | 这里是 麦子 的博客，与你一起发现更大的世界。" />
+    
+
+    
+    <meta property="twitter:card" content="summary" />
+    
+    
+
+    <meta name="keyword"  content="麦子, maizi, maizi, , 麦子的网络日志, 麦子的博客, maizi Blog, 博客, 个人网站, 互联网, Web, 云原生, PaaS, Istio, Kubernetes, 微服务, Microservice">
+    <link rel="shortcut icon" href="/img/favicon.ico">
+
+    <title>事务隔离级别-麦子的博客</title>
+
+    <link rel="canonical" href="/post/%E6%95%B0%E6%8D%AE%E5%BA%93-%E4%BA%8B%E5%8A%A1%E9%9A%94%E7%A6%BB%E7%BA%A7%E5%88%AB/">
+
+    <link rel="stylesheet" href="/css/iDisqus.min.css"/>
+	
+    
+    <link rel="stylesheet" href="/css/bootstrap.min.css">
+
+    
+    <link rel="stylesheet" href="/css/hux-blog.min.css">
+
+    
+    <link rel="stylesheet" href="/css/syntax.css">
+
+    
+    <link rel="stylesheet" href="/css/zanshang.css">
+
+    
+    <link href="//cdnjs.cloudflare.com/ajax/libs/font-awesome/4.6.3/css/font-awesome.min.css" rel="stylesheet" type="text/css">
+    
+    
+    <script src="/js/jquery.min.js"></script>
+    
+    
+    <script src="/js/bootstrap.min.js"></script>
+    
+    
+    <script src="/js/hux-blog.min.js"></script>
+	
+    
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.13.1/styles/docco.min.css">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.13.1/highlight.min.js"></script>
+    <script>hljs.initHighlightingOnLoad();</script>
+</head>
+
+
+<nav class="navbar navbar-default navbar-custom navbar-fixed-top">
+    <div class="container-fluid">
+        
+        <div class="navbar-header page-scroll">
+            <button type="button" class="navbar-toggle">
+                <span class="sr-only">Toggle navigation</span>
+                <span class="icon-bar"></span>
+                <span class="icon-bar"></span>
+                <span class="icon-bar"></span>
+            </button>
+            <a class="navbar-brand" href="/"></a>
+        </div>
+
+        
+        
+        <div id="huxblog_navbar">
+            <div class="navbar-collapse">
+                <ul class="nav navbar-nav navbar-right">
+                    <li>
+                        <a href="/">Home</a>
+                    </li>
+                    
+                    <li>
+                        <a href="/categories/life">Life</a>
+                    </li>
+                    
+                    <li>
+                        <a href="/categories/tech">Tech</a>
+                    </li>
+                    
+                    
+		    
+                        <li><a href="/top/about/">ABOUT</a></li>
+                    
+
+                    
+		    <li>
+                        <a href="/search">SEARCH <img src="/img/search.png" height="15" style="cursor: pointer;" alt="Search"></a>
+		    </li>
+                    
+                </ul>
+            </div>
+        </div>
+        
+    </div>
+    
+</nav>
+<script>
+    
+    
+    
+    var $body   = document.body;
+    var $toggle = document.querySelector('.navbar-toggle');
+    var $navbar = document.querySelector('#huxblog_navbar');
+    var $collapse = document.querySelector('.navbar-collapse');
+
+    $toggle.addEventListener('click', handleMagic)
+    function handleMagic(e){
+        if ($navbar.className.indexOf('in') > 0) {
+        
+            $navbar.className = " ";
+            
+            setTimeout(function(){
+                
+                if($navbar.className.indexOf('in') < 0) {
+                    $collapse.style.height = "0px"
+                }
+            },400)
+        }else{
+        
+            $collapse.style.height = "auto"
+            $navbar.className += " in";
+        }
+    }
+</script>
+
+
+
+
+<style type="text/css">
+    header.intro-header {
+        background-image: url('https://c.pxhere.com/images/30/ba/c619ed3589daec3e288ba83c45d6-1427539.jpg!d')
+    }
+</style>
+<header class="intro-header">
+    <div class="container">
+        <div class="row">
+            <div class="col-lg-8 col-lg-offset-2 col-md-10 col-md-offset-1">
+                <div class="post-heading">
+                    <div class="tags">
+                        
+                        <a class="tag" href="/tags/%E6%95%B0%E6%8D%AE%E5%BA%93" title="数据库">
+                            数据库
+                        </a>
+                        
+                        <a class="tag" href="/tags/%E4%BA%8B%E5%8A%A1%E9%9A%94%E7%A6%BB%E7%BA%A7%E5%88%AB" title="事务隔离级别">
+                            事务隔离级别
+                        </a>
+                        
+                    </div>
+                    <h1>事务隔离级别</h1>
+                    <h2 class="subheading"></h2>
+                    <span class="meta">
+			Posted by 
+			
+			         &#34;麦子&#34;
+			 
+			on 
+			Monday, August 26, 2019
+                        
+                    </span>
+                </div>
+            </div>
+        </div>
+    </div>
+</header>
+
+
+
+
+<article>
+    <div class="container">
+        <div class="row">
+
+            
+            <div class="
+                col-lg-8 col-lg-offset-2
+                col-md-10 col-md-offset-1
+                post-container">
+
+                
+                <header>
+                    <h2>TOC</h2>
+                </header>
+                <nav id="TableOfContents">
+<ul>
+<li><a href="#事务的基本要素-acid">事务的基本要素（ACID）</a>
+<ul>
+<li>
+<ul>
+<li><a href="#原子性-atomicity">原子性（Atomicity）</a></li>
+<li><a href="#一致性-consistency">一致性（Consistency）</a></li>
+<li><a href="#隔离性-isolation">隔离性（Isolation）</a></li>
+<li><a href="#持久性-durability">持久性（Durability）</a></li>
+</ul></li>
+</ul></li>
+<li><a href="#事务并发和隔离性导致问题">事务并发和隔离性导致问题</a>
+<ul>
+<li><a href="#脏读">脏读</a></li>
+<li><a href="#不可重复读">不可重复读</a></li>
+<li><a href="#幻读">幻读</a></li>
+</ul></li>
+<li><a href="#事物隔离">事物隔离</a>
+<ul>
+<li><a href="#第一类数据丢失更新">第一类数据丢失更新</a>
+<ul>
+<li><a href="#脏读-1">脏读</a></li>
+<li><a href="#不可重复读-1">不可重复读</a></li>
+<li><a href="#幻读-1">幻读</a></li>
+</ul></li>
+<li><a href="#第二类数据丢失更新">第二类数据丢失更新</a></li>
+<li><a href="#隔离级别">隔离级别</a>
+<ul>
+<li><a href="#read-uncommitted-读取未提交内容">Read Uncommitted（读取未提交内容）</a></li>
+<li><a href="#read-committed-读取提交内容">Read Committed（读取提交内容）</a></li>
+<li><a href="#repeatable-read-可重读">Repeatable Read（可重读）</a></li>
+<li><a href="#serializable-可串行化">Serializable（可串行化）</a></li>
+</ul></li>
+</ul></li>
+<li><a href="#数据库锁">数据库锁</a>
+<ul>
+<li><a href="#乐观锁">乐观锁</a>
+<ul>
+<li><a href="#优点与不足">优点与不足</a></li>
+</ul></li>
+<li><a href="#悲观锁">悲观锁</a>
+<ul>
+<li><a href="#优点与不足-1">优点与不足</a></li>
+</ul></li>
+</ul></li>
+</ul>
+</nav>
+                
+                
+
+<p>[TOC]</p>
+
+<p><strong>转载地址：&lt;<a href="https://blog.csdn.net/husj_506808/article/details/78889112">https://blog.csdn.net/husj_506808/article/details/78889112</a></strong>&gt;</p>
+
+<p><strong>转载地址： <a href="https://www.cnblogs.com/huanongying/p/7021555.html">https://www.cnblogs.com/huanongying/p/7021555.html</a></strong></p>
+
+<h1 id="事务的基本要素-acid">事务的基本要素（ACID）</h1>
+
+<h3 id="原子性-atomicity">原子性（Atomicity）</h3>
+
+<p>事务开始后所有操作，要么全部做完，要么全部不做，不可能停滞在中间环节。事务执行过程中出错，会回滚到事务开始前的状态，所有的操作就像没有发生一样。也就是说事务是一个不可分割的整体，就像化学中学过的原子，是物质构成的基本单位。</p>
+
+<h3 id="一致性-consistency">一致性（Consistency）</h3>
+
+<p>事务开始前和结束后，数据库的完整性约束没有被破坏 。比如A向B转账，不可能A扣了钱，B却没收到。</p>
+
+<h3 id="隔离性-isolation">隔离性（Isolation）</h3>
+
+<p>同一时间，只允许一个事务请求同一数据，不同的事务之间彼此没有任何干扰。比如A正在从一张银行卡中取钱，在A取钱的过程结束前，B不能向这张卡转账。</p>
+
+<h3 id="持久性-durability">持久性（Durability）</h3>
+
+<p>事务完成后，事务对数据库的所有更新将被保存到数据库，不能回滚。</p>
+
+<h1 id="事务并发和隔离性导致问题">事务并发和隔离性导致问题</h1>
+
+<h2 id="脏读">脏读</h2>
+
+<p>事务A读取了事务B更新的数据，然后B回滚操作，那么A读取到的数据是脏数据。</p>
+
+<h2 id="不可重复读">不可重复读</h2>
+
+<p>事务 A 多次读取同一数据，事务 B 在事务A多次读取的过程中，对数据作了更新并提交，导致事务A多次读取同一数据时，结果 不一致。</p>
+
+<h2 id="幻读">幻读</h2>
+
+<p>系统管理员A将数据库中所有学生的成绩从具体分数改为ABCDE等级，但是系统管理员B就在这个时候插入了一条具体分数的记录，当系统管理员A改结束后发现还有一条记录没有改过来，就好像发生了幻觉一样，这就叫幻读。</p>
+
+<h1 id="事物隔离">事物隔离</h1>
+
+<h2 id="第一类数据丢失更新">第一类数据丢失更新</h2>
+
+<p>撤销一个事务时, 把其他事务已经提交的更新数据覆盖(<strong>此情况在事务中不可能出现, 因为一个事务中修改时此记录已加锁, 必须等待此事务完成后另一个事务才可以继续UPDATE</strong>)</p>
+
+<h3 id="脏读-1">脏读</h3>
+
+<p><strong>一个事务读到另一个事务，尚未提交的修改，就是脏读。</strong>这里所谓的修改，除了Update操作,不要忘了,还包括Insert和Delete操作。脏读的后果：如果后一个事务回滚，那么它所做的修改，统统都会被撤销。前一个事务读到的数据，就是垃圾数据。</p>
+
+<p>例如：</p>
+
+<table>
+<thead>
+<tr>
+<th>时间</th>
+<th>取款事务</th>
+<th>支票转账事务</th>
+</tr>
+</thead>
+
+<tbody>
+<tr>
+<td>T1</td>
+<td>开始事务</td>
+<td></td>
+</tr>
+
+<tr>
+<td>T2</td>
+<td></td>
+<td>开始事务</td>
+</tr>
+
+<tr>
+<td>T3</td>
+<td>查询账户余额为1000元</td>
+<td></td>
+</tr>
+
+<tr>
+<td>T4</td>
+<td></td>
+<td></td>
+</tr>
+
+<tr>
+<td>T5</td>
+<td>取出100，把存款余额改为900元</td>
+<td></td>
+</tr>
+
+<tr>
+<td>T6</td>
+<td></td>
+<td>查询账户的存款余额为900元（脏读）</td>
+</tr>
+
+<tr>
+<td>T7</td>
+<td>撤销该事务，把存款余额恢复为1000元</td>
+<td></td>
+</tr>
+
+<tr>
+<td>T8</td>
+<td></td>
+<td>汇入100元，把存款余额改为1000元</td>
+</tr>
+
+<tr>
+<td>T9</td>
+<td></td>
+<td>提交事务</td>
+</tr>
+</tbody>
+</table>
+
+<p><strong>注：脏读的后果很严重。</strong></p>
+
+<h3 id="不可重复读-1">不可重复读</h3>
+
+<p>在同一个事务中，再次读取数据时【就是你的select操作】，所读取的数据，和第1次读取的数据，不一样了。就是不可重复读。</p>
+
+<p>举个例子：</p>
+
+<p>事务1：查询有双人床房间。99号房间，有双人床。</p>
+
+<p>事务2：将99号房间，改成单人床房间。</p>
+
+<p>事务1：再次执行查询，请求所有双人床房间列表，99号房间不再列表中了。也就是说，事务1，可以看到其他事务所做的修改。</p>
+
+<p>在不可重复读，里面，可以看到其他事务所做的修改，而导致2次的查询结果不再一样了。这里的修改，是提交过的。也可以是没有提交的，这种情况同时也是脏读。</p>
+
+<p>如果，数据库系统的隔离级别。允许，不可重复读。那么你启动一个事务，并做一个select查询操作。查询到的数据，就有可能，和你第2次，3次&hellip;n次，查询到的数据不一样。一般情况下，你只会做一次，select
+查询，并以这一次的查询数据，作为后续计算的基础。因为允许出现，不可重复读。那么任何时候，查询到的数据，都有可能被其他事务更新，查询的结果将是不确定的。</p>
+
+<p><strong>注：如果允许，不可重复读，你的查询结果，将是不确定的。一个不确定的结果，你能容忍吗？</strong></p>
+
+<h3 id="幻读-1">幻读</h3>
+
+<p>事务1读取指定的where子句所返回的一些行。然后，事务2插入一个新行，这个新行也满足事务1使用的查询where子句。然后事务1再次使用相同的查询读取行，但是现在它看到了事务2刚插入的行。这个行被称为幻象，因为对事务1来说，这一行的出现是不可思议的。</p>
+
+<p>举个例子：</p>
+
+<p>事务1：请求没有预定的，双人床房间列表。</p>
+
+<p>事务2：向Reservation表中插入一个新纪录，以预订99号房间，并提交。</p>
+
+<p>事务1：再次请求有双人床的未预定的房间列表，99号房间，不再位于列表中。</p>
+
+<p><strong>注：幻读，针对的是，Insert操作。如果事务2，插入的记录，没有提交。那么同时也是脏读。</strong></p>
+
+<h2 id="第二类数据丢失更新">第二类数据丢失更新</h2>
+
+<p>这是不可重复读中的特例, 一个事务覆盖另一个事务已提交的更新数据(以下会出现此情况)</p>
+
+<table>
+<thead>
+<tr>
+<th>时间</th>
+<th>取款事务</th>
+<th>支票转账事务</th>
+</tr>
+</thead>
+
+<tbody>
+<tr>
+<td>T1</td>
+<td>开始事务</td>
+<td></td>
+</tr>
+
+<tr>
+<td>T2</td>
+<td></td>
+<td>开始事务</td>
+</tr>
+
+<tr>
+<td>T3</td>
+<td>查询账户余额为1000元</td>
+<td></td>
+</tr>
+
+<tr>
+<td>T4</td>
+<td></td>
+<td>查询账户余额为1000元</td>
+</tr>
+
+<tr>
+<td>T5</td>
+<td>取出100，把存款余额改为900元</td>
+<td></td>
+</tr>
+
+<tr>
+<td>T6</td>
+<td>提交事务</td>
+<td></td>
+</tr>
+
+<tr>
+<td>T7</td>
+<td></td>
+<td>汇入100元，把存款余额改为1100元</td>
+</tr>
+
+<tr>
+<td>T8</td>
+<td></td>
+<td>提交事务</td>
+</tr>
+</tbody>
+</table>
+
+<h2 id="隔离级别">隔离级别</h2>
+
+<p>InnoDB中 只要此行在别的事务中产生了锁 本事务中就不允许进行修改 只能阻塞 等待别的事务提交。<strong>一般设置为Read Committed, 并且利用悲观锁(SELECT &hellip; FOR UPDATE)或乐观锁(SET NUM=NUM+1, 而不是计算后再插入, 避免并发)来处理特殊</strong>情况。</p>
+
+<p><strong>SQL标准定义了4类隔离级别</strong>，包括了一些具体规则，用来限定事务内外的哪些改变是可见的，哪些是不可见的。低级别的隔离级一般支持更高的并发处理，并拥有更低的系统开销。</p>
+
+<h3 id="read-uncommitted-读取未提交内容">Read Uncommitted（读取未提交内容）</h3>
+
+<p>​       在该隔离级别，所有事务都可以看到其他未提交事务的执行结果。本隔离级别很少用于实际应用，因为它的性能也不比其他级别好多少。读取未提交的数据，也被称之为脏读（Dirty Read）。</p>
+
+<h3 id="read-committed-读取提交内容">Read Committed（读取提交内容）</h3>
+
+<p>这是大多数数据库系统的默认隔离级别（但不是MySQL默认的）。它满足了隔离的简单定义：一个事务只能看见已经提交事务所做的改变。这种隔离级别 也支持所谓的不可重复读（Nonrepeatable Read），因为同一事务的其他实例在该实例处理其间可能会有新的commit，所以同一select可能返回不同结果。</p>
+
+<p>READ COMMITTED 在该隔离级别下，一个事务从开始到提交之前对数据所做的改变对其它事务是不可见的，这样就解决在READ-UNCOMMITTED级别下的脏读问题。但如果一个事务在执行过程中，其它事务的提交对该事物中的数据发生改变，那么该事务中的一个查询语句在两次执行过程中会返回不一样的结果。</p>
+
+<h3 id="repeatable-read-可重读">Repeatable Read（可重读）</h3>
+
+<p>这是MySQL的默认事务隔离级别，它确保同一事务的多个实例在并发读取数据时，会看到同样的数据行。不过理论上，这会导致另一个棘手的问题：幻读 （Phantom Read）。简单的说，幻读指当用户读取某一范围的数据行时，另一个事务又在该范围内插入了新行，当用户再读取该范围的数据行时，会发现有新的“幻影” 行。InnoDB和Falcon存储引擎通过多版本并发控制（MVCC，Multiversion Concurrency Control）机制解决了该问题。</p>
+
+<p>REPEATABLE READ 这是MySQL的默认事务隔离级别，能确保事务在并发读取数据时会看到同样的数据行，解决了READ-COMMITTED隔离级别下的不可重复读问题。mysql的InnoDB存储引擎通过多版本并发控制（Multi_Version Concurrency Control, MVCC）机制来解决该问题。在该机制下，事务每开启一个实例，都会分配一个版本号给它，如果读取的数据行正在被其它事务执行DELETE或UPDATE操作（即该行上有排他锁），这时该事物的读取操作不会等待行上的锁释放，而是根据版本号去读取行的快照数据（记录在undo log中），这样，事务中的查询操作返回的都是同一版本下的数据，解决了不可重复读问题。</p>
+
+<p><strong>缺陷</strong>：虽然该隔离级别下解决了不可重复读问题，但理论上会导致另一个问题：幻读（Phantom Read）。正如上面所讲，一个事务在执行过程中，另一个事物对已有数据行的更改，MVCC机制可保障该事物读取到的原有数据行的内容相同，但并不能阻止另一个事务插入新的数据行，这就会导致该事物中凭空多出数据行，像出现了幻读一样，这便是幻读问题。</p>
+
+<h3 id="serializable-可串行化">Serializable（可串行化）</h3>
+
+<p>这是<strong>最高的隔离级别</strong>，它通过强制事务排序，使之不可能相互冲突，从而解决幻读问题。简言之，它是在每个读的数据行上加上共享锁。在这个级别，可能导致大量的超时现象和锁竞争。<strong>只要操作产生了锁，就不允许其他事务读取和修改！</strong></p>
+
+<p>SERIALIZABLE 这是事务的最高隔离级别，通过强制事务排序，使之不可能相互冲突，就是在每个读的数据行加上共享锁来实现。在该隔离级别下，可以解决前面出现的脏读、不可重复读和幻读问题，但也会导致大量的超时和锁竞争现象，一般不推荐使用。</p>
+
+<h1 id="数据库锁">数据库锁</h1>
+
+<p><strong>转载地址：<a href="https://www.jianshu.com/p/2633fc36b57a">https://www.jianshu.com/p/2633fc36b57a</a></strong></p>
+
+<h2 id="乐观锁">乐观锁</h2>
+
+<p>乐观锁（Optimistic Lock），顾名思义，就是很乐观，每次去拿数据的时候都认为别人不会修改，所以不会上锁，但是在提交更新的时候会判断一下在此期间别人有没有去更新这个数据。乐观锁适用于读多写少的应用场景，这样可以提高吞吐量。</p>
+
+<p>乐观锁：假设不会发生并发冲突，只在提交操作时检查是否违反数据完整性。</p>
+
+<p>乐观锁一般来说有以下2种方式：</p>
+
+<ul>
+<li>使用数据版本（Version）记录机制实现，这是乐观锁最常用的一种实现方式。何谓数据版本？即为数据增加一个版本标识，一般是通过为数据库表增加一个数字类型的 “version” 字段来实现。当读取数据时，将version字段的值一同读出，数据每更新一次，对此version值加一。当我们提交更新的时候，判断数据库表对应记录的当前版本信息与第一次取出来的version值进行比对，如果数据库表当前版本号与第一次取出来的version值相等，则予以更新，否则认为是过期数据。</li>
+<li>使用时间戳（timestamp）。乐观锁定的第二种实现方式和第一种差不多，同样是在需要乐观锁控制的table中增加一个字段，名称无所谓，字段类型使用时间戳（timestamp）, 和上面的version类似，也是在更新提交的时候检查当前数据库中数据的时间戳和自己更新前取到的时间戳进行对比，如果一致则OK，否则就是版本冲突。
+Java JUC中的atomic包就是乐观锁的一种实现，AtomicInteger 通过CAS（Compare And Set）操作实现线程安全的自增。</li>
+</ul>
+
+<h3 id="优点与不足">优点与不足</h3>
+
+<p>乐观并发控制相信事务之间的数据竞争(data race)的概率是比较小的，因此尽可能直接做下去，直到提交的时候才去锁定，所以<strong>不会产生任何锁和死锁</strong>。但如果直接简单这么做，还是有可能会遇到不可预期的结果，例如两个事务都读取了数据库的某一行，经过修改以后写回数据库，这时就遇到了问题。</p>
+
+<h2 id="悲观锁">悲观锁</h2>
+
+<p>悲观锁（Pessimistic Lock），顾名思义，就是很悲观，每次去拿数据的时候都认为别人会修改，所以每次在拿数据的时候都会上锁，这样别人想拿这个数据就会block直到它拿到锁。</p>
+
+<table>
+<thead>
+<tr>
+<th>时间</th>
+<th>取款事务</th>
+<th>支票转账事务</th>
+</tr>
+</thead>
+
+<tbody>
+<tr>
+<td>T1</td>
+<td>开始事务</td>
+<td></td>
+</tr>
+
+<tr>
+<td>T2</td>
+<td></td>
+<td>开始事务</td>
+</tr>
+
+<tr>
+<td>T3</td>
+<td>select * from ACCOUNTS where ID = 1 for update； 查询账户余额为1000元；这条记录被锁定。</td>
+<td></td>
+</tr>
+
+<tr>
+<td>T4</td>
+<td></td>
+<td>select * from ACCOUNTS where ID = 1 for update； 执行该语句时，事务停下来等待取款事务解除对这条记录的锁定。</td>
+</tr>
+
+<tr>
+<td>T5</td>
+<td>取出100，把存款余额改为900元</td>
+<td></td>
+</tr>
+
+<tr>
+<td>T6</td>
+<td>提交事务</td>
+<td></td>
+</tr>
+
+<tr>
+<td>T7</td>
+<td></td>
+<td>事务恢复运行，查询结果显示存款余额为900.这条记录被锁定。</td>
+</tr>
+
+<tr>
+<td>T8</td>
+<td></td>
+<td>汇入100元，把存款余额改为1000元。</td>
+</tr>
+
+<tr>
+<td>T9</td>
+<td></td>
+<td>提交事务</td>
+</tr>
+</tbody>
+</table>
+
+<p>悲观锁：假定会发生并发冲突，屏蔽一切可能违反数据完整性的操作。</p>
+
+<p>Java synchronized 就属于悲观锁的一种实现，每次线程要修改数据时都先获得锁，保证同一时刻只有一个线程能操作数据，其他线程则会被block。</p>
+
+<h3 id="优点与不足-1">优点与不足</h3>
+
+<p>悲观并发控制实际上是“先取锁再访问”的保守策略，<strong>为数据处理的安全提供了保证</strong>。但是在效率方面，处理加锁的机制<strong>会让数据库产生额外的开销，还有增加产生死锁的机会</strong>；另外，在只读型事务处理中由于不会产生冲突，也没必要使用锁，这样做只能增加系统负载；还有会<strong>降低了并行性</strong>，一个事务如果锁定了某行数据，其他事务就必须等待该事务处理完才可以处理那行数。</p>
+
+
+                
+                
+<div class="entry-shang text-center">
+    
+	    <p>「真诚赞赏，手留余香」</p>
+	
+	<button class="zs show-zs btn btn-bred">赞赏支持</button>
+</div>
+<div class="zs-modal-bg"></div>
+<div class="zs-modal-box">
+	<div class="zs-modal-head">
+		<button type="button" class="close">×</button>
+		<span class="author"><a href="http://maizitoday.github.io/"><img src="/img/favicon.png" /></a></span>
+        
+	        <p class="tip"><i></i><span>真诚赞赏，手留余香</span></p>
+		
+ 
+	</div>
+	<div class="zs-modal-body">
+		<div class="zs-modal-btns">
+			<button class="btn btn-blink" data-num="2">2元</button>
+			<button class="btn btn-blink" data-num="5">5元</button>
+			<button class="btn btn-blink" data-num="10">10元</button>
+			<button class="btn btn-blink" data-num="50">50元</button>
+			<button class="btn btn-blink" data-num="100">100元</button>
+			<button class="btn btn-blink" data-num="1">任意金额</button>
+		</div>
+		<div class="zs-modal-pay">
+			<button class="btn btn-bred" id="pay-text">2元</button>
+			<p>使用<span id="pay-type">微信</span>扫描二维码完成支付</p>
+			<img src="/img/reward/wechat-2.png"  id="pay-image"/>
+		</div>
+	</div>
+	<div class="zs-modal-footer">
+		<label><input type="radio" name="zs-type" value="wechat" class="zs-type" checked="checked"><span ><span class="zs-wechat"><img src="/img/reward/wechat-btn.png"/></span></label>
+		<label><input type="radio" name="zs-type" value="alipay" class="zs-type" class="zs-alipay"><img src="/img/reward/alipay-btn.png"/></span></label>
+	</div>
+</div>
+<script type="text/javascript" src="/js/reward.js"></script>
+
+                
+
+                <hr>
+                <ul class="pager">
+                    
+                    <li class="previous">
+                        <a href="/post/java%E7%9B%B8%E5%85%B3%E6%A6%82%E5%BF%B5-%E6%AD%A3%E5%90%91%E4%BB%A3%E7%90%86&#43;%E5%8F%8D%E5%90%91%E4%BB%A3%E7%90%86/" data-toggle="tooltip" data-placement="top" title="反向代理&#43;正向代理">&larr;
+                            Previous Post</a>
+                    </li>
+                    
+                    
+                </ul>
+
+                
+<div id="disqus-comment"></div>
+
+
+
+            </div>
+            
+            <div class="
+                col-lg-8 col-lg-offset-2
+                col-md-10 col-md-offset-1
+                sidebar-container">
+
+                
+                
+                <section>
+                    <hr class="hidden-sm hidden-xs">
+                    <h5><a href="/tags/">FEATURED TAGS</a></h5>
+                    <div class="tags">
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        <a href="/tags/zookeeper" title="Zookeeper">
+                            Zookeeper
+                        </a>
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        <a href="/tags/docker" title="docker">
+                            docker
+                        </a>
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        <a href="/tags/dockerfile" title="dockerfile">
+                            dockerfile
+                        </a>
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        <a href="/tags/java%E5%9F%BA%E7%A1%80" title="java基础">
+                            java基础
+                        </a>
+                        
+                        
+                        
+                        <a href="/tags/java%E7%9B%B8%E5%85%B3%E6%A6%82%E5%BF%B5" title="java相关概念">
+                            java相关概念
+                        </a>
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        <a href="/tags/jvm" title="jvm">
+                            jvm
+                        </a>
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        <a href="/tags/maven" title="maven">
+                            maven
+                        </a>
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        <a href="/tags/springcloud" title="springCloud">
+                            springCloud
+                        </a>
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        <a href="/tags/springboot%E7%B3%BB%E5%88%97" title="springboot系列">
+                            springboot系列
+                        </a>
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        <a href="/tags/%E4%B8%AD%E9%97%B4%E4%BB%B6" title="中间件">
+                            中间件
+                        </a>
+                        
+                        
+                        
+                        <a href="/tags/%E4%B8%BB%E4%BB%8E%E5%A4%8D%E5%88%B6" title="主从复制">
+                            主从复制
+                        </a>
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        <a href="/tags/%E5%88%86%E5%B8%83%E5%BC%8F%E7%B3%BB%E5%88%97" title="分布式系列">
+                            分布式系列
+                        </a>
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        <a href="/tags/%E5%BC%80%E5%8F%91%E5%B7%A5%E5%85%B7" title="开发工具">
+                            开发工具
+                        </a>
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        <a href="/tags/%E6%95%B0%E6%8D%AE%E5%BA%93" title="数据库">
+                            数据库
+                        </a>
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        <a href="/tags/%E6%9C%8D%E5%8A%A1%E8%84%9A%E6%9C%AC" title="服务脚本">
+                            服务脚本
+                        </a>
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        <a href="/tags/%E8%AE%BE%E8%AE%A1%E6%A8%A1%E5%BC%8F" title="设计模式">
+                            设计模式
+                        </a>
+                        
+                        
+                        
+                        
+                        
+                        <a href="/tags/%E8%B4%9F%E8%BD%BD%E5%9D%87%E8%A1%A1" title="负载均衡">
+                            负载均衡
+                        </a>
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                    </div>
+                </section>
+                
+
+                
+                
+                <section>
+                    <hr>
+                    <h5>FRIENDS</h5>
+                    <ul class="list-inline">
+                        
+                        <li><a target="_blank" href="https://zhaohuabing.com">赵化冰博客</a></li>
+                        
+                        <li><a target="_blank" href="http://www.tianshouzhi.com">田守枝</a></li>
+                        
+                        <li><a target="_blank" href="http://www.ityouknow.com">纯洁的微笑</a></li>
+                        
+                        <li><a target="_blank" href="https://renchunxiao.com">任春晓</a></li>
+                        
+                        <li><a target="_blank" href="https://www.lihongkun.com">泛泛之辈</a></li>
+                        
+                        <li><a target="_blank" href="https://juejin.im/welcome/backend">后端服务论坛</a></li>
+                        
+                        <li><a target="_blank" href="https://www.javaboy.org">江南一点雨</a></li>
+                        
+                    </ul>
+                </section>
+                
+            </div>
+        </div>
+    </div>
+</article>
+
+
+
+
+<footer>
+    <div class="container">
+        <div class="row">
+            <div class="col-lg-8 col-lg-offset-2 col-md-10 col-md-offset-1">
+                <ul class="list-inline text-center">
+                   
+                   <li>
+                       <a href="" rel="alternate" type="application/rss+xml" title="" >
+                           <span class="fa-stack fa-lg">
+                               <i class="fa fa-circle fa-stack-2x"></i>
+                               <i class="fa fa-rss fa-stack-1x fa-inverse"></i>
+                           </span>
+                       </a>
+                   </li>
+                   
+                    
+                    <li>
+                        <a href="mailto:maiziybtoday@gmail.com">
+                            <span class="fa-stack fa-lg">
+                                <i class="fa fa-circle fa-stack-2x"></i>
+                                <i class="fa fa-envelope fa-stack-1x fa-inverse"></i>
+                            </span>
+                        </a>
+                    </li>
+		    
+                    
+                    
+                    
+                    
+
+                    
+
+		    
+                    
+                    <li>
+                        <a target="_blank" href="/your%20wechat%20qr%20code%20image">
+                            <span class="fa-stack fa-lg">
+                                <i class="fa fa-circle fa-stack-2x"></i>
+                                <i class="fa fa-wechat fa-stack-1x fa-inverse"></i>
+                            </span>
+                        </a>
+                    </li>
+		    
+                    
+                    
+                    <li>
+                        <a target="_blank" href="https://www.linkedin.com/in/yourlinkedinid">
+                            <span class="fa-stack fa-lg">
+                                <i class="fa fa-circle fa-stack-2x"></i>
+                                <i class="fa fa-linkedin fa-stack-1x fa-inverse"></i>
+                            </span>
+                        </a>
+                    </li>
+		    
+                    
+                </ul>
+		<p class="copyright text-muted">
+                    Copyright &copy;  2019
+                    <br>
+                    <a href="https://themes.gohugo.io/hugo-theme-cleanwhite">CleanWhite Hugo Theme</a> by <a href="https://zhaohuabing.com">Huabing</a> |
+                    <iframe
+                        style="margin-left: 2px; margin-bottom:-5px;"
+                        frameborder="0" scrolling="0" width="100px" height="20px"
+                        src="https://ghbtns.com/github-btn.html?user=zhaohuabing&repo=hugo-theme-cleanwhite&type=star&count=true" >
+                    </iframe>
+                </p>
+            </div>
+        </div>
+    </div>
+</footer>
+
+
+
+
+<script>
+    function async(u, c) {
+      var d = document, t = 'script',
+          o = d.createElement(t),
+          s = d.getElementsByTagName(t)[0];
+      o.src = u;
+      if (c) { o.addEventListener('load', function (e) { c(null, e); }, false); }
+      s.parentNode.insertBefore(o, s);
+    }
+</script>
+
+
+
+
+
+
+<script>
+    
+    if($('#tag_cloud').length !== 0){
+        async("/js/jquery.tagcloud.js",function(){
+            $.fn.tagcloud.defaults = {
+                
+                color: {start: '#bbbbee', end: '#0085a1'},
+            };
+            $('#tag_cloud a').tagcloud();
+        })
+    }
+</script>
+
+
+<script>
+    async("https://cdnjs.cloudflare.com/ajax/libs/fastclick/1.0.6/fastclick.js", function(){
+        var $nav = document.querySelector("nav");
+        if($nav) FastClick.attach($nav);
+    })
+</script>
+
+
+
+
+
+
+</body>
+</html>
