@@ -263,24 +263,12 @@
 </ul></li>
 </ul></li>
 </ul></li>
-<li><a href="#开启慢查询日志">开启慢查询日志</a>
-<ul>
-<li><a href="#查询日志格式">查询日志格式</a></li>
-</ul></li>
-<li><a href="#explain分析">EXPLAIN分析</a></li>
 <li><a href="#分库分表">分库分表</a></li>
 <li><a href="#数据库设计">数据库设计</a>
 <ul>
 <li><a href="#范式化和反范式化">范式化和反范式化</a></li>
 </ul></li>
 <li><a href="#数据库系统配置">数据库系统配置</a></li>
-<li><a href="#sql-left-right-inner-使用">sql left right inner 使用</a>
-<ul>
-<li><a href="#左链接-left-join-on">左链接 left join on</a></li>
-<li><a href="#右链接-right-join-on">右链接 right join on</a></li>
-<li><a href="#内链接-inner-join">内链接  inner join</a></li>
-<li><a href="#全链接-full-join">全链接 full join</a></li>
-</ul></li>
 </ul>
 </nav>
                 
@@ -572,52 +560,6 @@ show table status
 
 <p>让数据更加清晰。想要什么样的数据，就创建什么样的视图。经过以上三条作用的解析，这条作用应该很容易理解了吧</p>
 
-<h1 id="开启慢查询日志">开启慢查询日志</h1>
-
-<p>可以记录超时的所有的SQL语句</p>
-
-<pre><code class="language-sql">#开启终端，连接客户端
-mysql -u root -p
-
-# 查看慢查日志是否开启
-SHOW VARIABLES  LIKE 'slow_query_log';
-SET GLOBAL slow_query_log=on;
-
-# 查看是否没有使用索引的查询记录
-SHOW VARIABLES LIKE 'log%';
-# 开启所有查询都记录下来
-SET GLOBAL log_queries_not_using_indexes=on;
-
-#查看执行多长时间的语句记录下来。
-SHOW VARIABLES LIKE 'long_query_time';
-#这个地方设置后，需要重新开启一个终端才可以看到效果
-set global long_query_time=0;
-
-#查看慢日志的具体文件
-SHOW  VARIABLES LIKE 'slow%'
-</code></pre>
-
-<h2 id="查询日志格式">查询日志格式</h2>
-
-<pre><code class="language-sql">#查看慢日志的具体文件
-SHOW  VARIABLES LIKE 'slow%'
-
-SET timestamp=1558163795;
-/* ApplicationName=DataGrip 2017.2.2 */ SET SQL_SELECT_LIMIT=12;
-# User@Host: root[root] @  [172.17.0.1]  Id:    78
-# Query_time: 0.000247  Lock_time: 0.000102 Rows_sent: 1  Rows_examined: 2
-SET timestamp=1558163795;
-/* ApplicationName=DataGrip 2017.2.2 */ SELECT * FROM work.PDMAN_DB_VERSION WHERE DB_VERSION = 'v1.0.4';
-</code></pre>
-
-<h1 id="explain分析">EXPLAIN分析</h1>
-
-<p><img src="/img/5-19-3.png" alt="5-19-3" /></p>
-
-<p><img src="/img/5-19-4.png" alt="5-19-4" /></p>
-
-<p><img src="/img/5-19-5.png" alt="5-19-5" /></p>
-
 <h1 id="分库分表">分库分表</h1>
 
 <p><img src="/img/5-19-6.jpg" alt="5-19-6" /></p>
@@ -637,54 +579,6 @@ SET timestamp=1558163795;
 <h1 id="数据库系统配置">数据库系统配置</h1>
 
 <p><img src="/img/5-19-11.jpg" alt="5-19-11" /></p>
-
-<h1 id="sql-left-right-inner-使用">sql left right inner 使用</h1>
-
-<p><strong>原文：<a href="https://blog.csdn.net/weixin_41926488/article/details/80327541">https://blog.csdn.net/weixin_41926488/article/details/80327541</a></strong></p>
-
-<h2 id="左链接-left-join-on">左链接 left join on</h2>
-
-<p>left join,在两张表进行连接查询时，会返回左表所有的行，即使在右表中没有匹配的记录。</p>
-
-<pre><code class="language-sql">SELECT Persons.LastName, Persons.FirstName, Orders.OrderNo
-FROM Persons
-LEFT JOIN Orders
-ON Persons.Id_P=Orders.Id_P
-ORDER BY Persons.LastName
-</code></pre>
-
-<h2 id="右链接-right-join-on">右链接 right join on</h2>
-
-<p>right join,在两张表进行连接查询时，会返回右表所有的行，即使在左表中没有匹配的记录。</p>
-
-<pre><code class="language-sql">SELECT Persons.LastName, Persons.FirstName, Orders.OrderNo
-FROM Persons
-RIGHT JOIN Orders
-ON Persons.Id_P=Orders.Id_P
-ORDER BY Persons.LastName
-</code></pre>
-
-<h2 id="内链接-inner-join">内链接  inner join</h2>
-
-<p>inner join，在两张表进行连接查询时，只保留两张表中完全匹配的结果集。</p>
-
-<pre><code class="language-sql">SELECT Persons.LastName, Persons.FirstName, Orders.OrderNo
-FROM Persons
-INNER JOIN Orders
-ON Persons.Id_P=Orders.Id_P
-ORDER BY Persons.LastName
-</code></pre>
-
-<h2 id="全链接-full-join">全链接 full join</h2>
-
-<p>full join,在两张表进行连接查询时，返回左表和右表中所有没有匹配的行。</p>
-
-<pre><code class="language-sql">SELECT Persons.LastName, Persons.FirstName, Orders.OrderNo
-FROM Persons
-FULL JOIN Orders
-ON Persons.Id_P=Orders.Id_P
-ORDER BY Persons.LastName
-</code></pre>
 
 
                 
@@ -824,12 +718,6 @@ ORDER BY Persons.LastName
                         
                         
                         
-                        <a href="/tags/zookeeper" title="Zookeeper">
-                            Zookeeper
-                        </a>
-                        
-                        
-                        
                         
                         
                         
@@ -924,9 +812,19 @@ ORDER BY Persons.LastName
                         
                         
                         
+                        <a href="/tags/mysql%E7%B3%BB%E5%88%97" title="mysql系列">
+                            mysql系列
+                        </a>
                         
                         
                         
+                        
+                        
+                        
+                        
+                        <a href="/tags/nosql" title="nosql">
+                            nosql
+                        </a>
                         
                         
                         
@@ -1064,9 +962,15 @@ ORDER BY Persons.LastName
                         
                         
                         
+                        
+                        
+                        
+                        
                         <a href="/tags/%E5%BC%80%E5%8F%91%E5%B7%A5%E5%85%B7" title="开发工具">
                             开发工具
                         </a>
+                        
+                        
                         
                         
                         
@@ -1101,6 +1005,16 @@ ORDER BY Persons.LastName
                         <a href="/tags/%E6%9C%8D%E5%8A%A1%E8%84%9A%E6%9C%AC" title="服务脚本">
                             服务脚本
                         </a>
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
                         
                         
                         
