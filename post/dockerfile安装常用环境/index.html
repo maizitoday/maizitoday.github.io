@@ -208,6 +208,12 @@
                 <nav id="TableOfContents">
 <ul>
 <li><a href="#mysql">mysql</a></li>
+<li><a href="#oracle">oracle</a></li>
+<li><a href="#redis">redis</a>
+<ul>
+<li><a href="#redis-conf">redis.conf</a></li>
+<li><a href="#服务启动和停止">服务启动和停止</a></li>
+</ul></li>
 </ul>
 </nav>
                 
@@ -226,6 +232,77 @@
  # 启动
  # docker run -p 3306:3306  --name mysql-master -e MYSQL_ROOT_PASSWORD=root -itd mysql-master
  
+</code></pre>
+
+<h1 id="oracle">oracle</h1>
+
+<pre><code class="language-dockerfile"> FROM absolutapps/oracle-12c-ee
+ EXPOSE 1521 
+
+
+ # 编译 
+ # docker build -t oracle12 .
+
+ 
+ # 启动
+ # docker run -itd --name oracle12  --privileged  -p 8081:8080 -p 1521:1521 absolutapps/oracle-12c-ee
+
+ # 账号: SYSTEM   密码: oracle  SERVICE_NAME:ORCL 
+</code></pre>
+
+<h1 id="redis">redis</h1>
+
+<p><a href="https://hub.docker.com/_/redis">https://hub.docker.com/_/redis</a></p>
+
+<pre><code class="language-shell"># 安装客户端
+brew cask install another-redis-desktop-manager
+</code></pre>
+
+<pre><code class="language-yml"> FROM redis
+ EXPOSE  6379
+ 
+
+ # 编译 
+ # docker build -f /vscode/docker-software-dockerfile/redis/Dockerfile .
+
+ 
+ # 启动
+ docker run -p 6379:6379 \
+          -v /vscode/docker-software-dockerfile/redis/6379/data:/data \
+          -v /vscode/docker-software-dockerfile/redis/6379/redis.conf:/etc/redis/redis.conf \
+            --privileged=true \
+            --name redis \
+            -itd redis  redis-server /etc/redis/redis.conf --appendonly yes
+</code></pre>
+
+<h2 id="redis-conf">redis.conf</h2>
+
+<pre><code class="language-shell">#获取原始的redis.conf
+wget http://download.redis.io/releases/redis-5.0.5.tar.gz
+
+#新版本可能需要修改为 
+bind 0.0.0.0
+
+#不想给redis配置密码，需要修改配置文件：
+protected-mode no
+
+</code></pre>
+
+<p>上面处理完成，本地客户端和docker容器可以进行连接了。</p>
+
+<h2 id="服务启动和停止">服务启动和停止</h2>
+
+<pre><code class="language-yml">apt-get update &amp;&amp; apt-get install procps 
+
+ps aux | grep redis
+
+#关闭 
+cd  /usr/local/bin 
+root@369a39fe77bf:/usr/local/bin# redis-cli -h 127.0.0.1 -p 6379 shutdown
+
+#启动
+cd  /usr/local/bin 
+root@369a39fe77bf:/usr/local/bin# redis-server /etc/redis/redis.conf
 </code></pre>
 
 
@@ -386,6 +463,12 @@
                         
                         
                         
+                        
+                        
+                        
+                        
+                        
+                        
                         <a href="/tags/docker" title="docker">
                             docker
                         </a>
@@ -399,6 +482,8 @@
                         <a href="/tags/dockerfile" title="dockerfile">
                             dockerfile
                         </a>
+                        
+                        
                         
                         
                         
@@ -468,6 +553,14 @@
                         
                         
                         
+                        <a href="/tags/mybatis%E7%B3%BB%E5%88%97" title="mybatis系列">
+                            mybatis系列
+                        </a>
+                        
+                        
+                        
+                        
+                        
                         <a href="/tags/mysql%E7%B3%BB%E5%88%97" title="mysql系列">
                             mysql系列
                         </a>
@@ -485,6 +578,12 @@
                         
                         
                         
+                        
+                        
+                        
+                        <a href="/tags/redis" title="redis">
+                            redis
+                        </a>
                         
                         
                         
@@ -506,9 +605,19 @@
                         
                         
                         
+                        
+                        
+                        
+                        
                         <a href="/tags/springboot%E7%B3%BB%E5%88%97" title="springboot系列">
                             springboot系列
                         </a>
+                        
+                        
+                        
+                        
+                        
+                        
                         
                         
                         
@@ -584,9 +693,13 @@
                         
                         
                         
+                        
+                        
                         <a href="/tags/%E5%88%86%E5%B8%83%E5%BC%8F%E7%B3%BB%E5%88%97" title="分布式系列">
                             分布式系列
                         </a>
+                        
+                        
                         
                         
                         
@@ -741,6 +854,8 @@
                         <a href="/tags/%E8%B4%9F%E8%BD%BD%E5%9D%87%E8%A1%A1" title="负载均衡">
                             负载均衡
                         </a>
+                        
+                        
                         
                         
                         

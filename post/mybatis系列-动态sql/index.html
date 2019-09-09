@@ -1,0 +1,1313 @@
+<!DOCTYPE html>
+<html lang="en-us">
+<head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+
+    
+    <meta property="og:site_name" content="">
+    <meta property="og:type" content="article">
+
+    
+    <meta property="og:image" content="http://maizitoday.github.io//img/home-bg-jeep.jpg">
+    <meta property="twitter:image" content="http://maizitoday.github.io//img/home-bg-jeep.jpg" />
+    
+
+    
+    <meta name="title" content="mybatis系列-动态sql" />
+    <meta property="og:title" content="mybatis系列-动态sql" />
+    <meta property="twitter:title" content="mybatis系列-动态sql" />
+    
+
+    
+    <meta name="description" content="麦子，程序员, 开源爱好者，生活探险家 | 这里是 麦子 的博客，与你一起发现更大的世界。">
+    <meta property="og:description" content="麦子，程序员, 开源爱好者，生活探险家 | 这里是 麦子 的博客，与你一起发现更大的世界。" />
+    <meta property="twitter:description" content="麦子，程序员, 开源爱好者，生活探险家 | 这里是 麦子 的博客，与你一起发现更大的世界。" />
+    
+
+    
+    <meta property="twitter:card" content="summary" />
+    
+    
+
+    <meta name="keyword"  content="麦子, maizi, maizi, , 麦子的网络日志, 麦子的博客, maizi Blog, 博客, 个人网站, 互联网, Web, 云原生, PaaS, Istio, Kubernetes, 微服务, Microservice">
+    <link rel="shortcut icon" href="/img/favicon.ico">
+
+    <title>mybatis系列-动态sql-麦子的博客</title>
+
+    <link rel="canonical" href="/post/mybatis%E7%B3%BB%E5%88%97-%E5%8A%A8%E6%80%81sql/">
+
+    <link rel="stylesheet" href="/css/iDisqus.min.css"/>
+	
+    
+    <link rel="stylesheet" href="/css/bootstrap.min.css">
+
+    
+    <link rel="stylesheet" href="/css/hux-blog.min.css">
+
+    
+    <link rel="stylesheet" href="/css/syntax.css">
+
+    
+    <link rel="stylesheet" href="/css/zanshang.css">
+
+    
+    <link href="//cdnjs.cloudflare.com/ajax/libs/font-awesome/4.6.3/css/font-awesome.min.css" rel="stylesheet" type="text/css">
+    
+    
+    <script src="/js/jquery.min.js"></script>
+    
+    
+    <script src="/js/bootstrap.min.js"></script>
+    
+    
+    <script src="/js/hux-blog.min.js"></script>
+	
+    
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.13.1/styles/docco.min.css">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.13.1/highlight.min.js"></script>
+    <script>hljs.initHighlightingOnLoad();</script>
+</head>
+
+
+<nav class="navbar navbar-default navbar-custom navbar-fixed-top">
+    <div class="container-fluid">
+        
+        <div class="navbar-header page-scroll">
+            <button type="button" class="navbar-toggle">
+                <span class="sr-only">Toggle navigation</span>
+                <span class="icon-bar"></span>
+                <span class="icon-bar"></span>
+                <span class="icon-bar"></span>
+            </button>
+            <a class="navbar-brand" href="/"></a>
+        </div>
+
+        
+        
+        <div id="huxblog_navbar">
+            <div class="navbar-collapse">
+                <ul class="nav navbar-nav navbar-right">
+                    <li>
+                        <a href="/">Home</a>
+                    </li>
+                    
+                    <li>
+                        <a href="/categories/life">Life</a>
+                    </li>
+                    
+                    <li>
+                        <a href="/categories/tech">Tech</a>
+                    </li>
+                    
+                    
+		    
+                        <li><a href="/top/about/">ABOUT</a></li>
+                    
+
+                    
+		    <li>
+                        <a href="/search">SEARCH <img src="/img/search.png" height="15" style="cursor: pointer;" alt="Search"></a>
+		    </li>
+                    
+                </ul>
+            </div>
+        </div>
+        
+    </div>
+    
+</nav>
+<script>
+    
+    
+    
+    var $body   = document.body;
+    var $toggle = document.querySelector('.navbar-toggle');
+    var $navbar = document.querySelector('#huxblog_navbar');
+    var $collapse = document.querySelector('.navbar-collapse');
+
+    $toggle.addEventListener('click', handleMagic)
+    function handleMagic(e){
+        if ($navbar.className.indexOf('in') > 0) {
+        
+            $navbar.className = " ";
+            
+            setTimeout(function(){
+                
+                if($navbar.className.indexOf('in') < 0) {
+                    $collapse.style.height = "0px"
+                }
+            },400)
+        }else{
+        
+            $collapse.style.height = "auto"
+            $navbar.className += " in";
+        }
+    }
+</script>
+
+
+
+
+<style type="text/css">
+    header.intro-header {
+        background-image: url('https://c.pxhere.com/images/52/54/18c63f88716ecc0dd8dd729f47a3-1420031.jpg!d')
+    }
+</style>
+<header class="intro-header">
+    <div class="container">
+        <div class="row">
+            <div class="col-lg-8 col-lg-offset-2 col-md-10 col-md-offset-1">
+                <div class="post-heading">
+                    <div class="tags">
+                        
+                        <a class="tag" href="/tags/mybatis%E7%B3%BB%E5%88%97" title="mybatis系列">
+                            mybatis系列
+                        </a>
+                        
+                        <a class="tag" href="/tags/%E5%8A%A8%E6%80%81sql" title="动态sql">
+                            动态sql
+                        </a>
+                        
+                        <a class="tag" href="/tags/ognl%E8%A1%A8%E8%BE%BE%E5%BC%8F" title="OGNL表达式">
+                            OGNL表达式
+                        </a>
+                        
+                    </div>
+                    <h1>mybatis系列-动态sql</h1>
+                    <h2 class="subheading"></h2>
+                    <span class="meta">
+			Posted by 
+			
+			    麦子
+			 
+			on 
+			Tuesday, September 3, 2019
+                        
+                    </span>
+                </div>
+            </div>
+        </div>
+    </div>
+</header>
+
+
+
+
+<article>
+    <div class="container">
+        <div class="row">
+
+            
+            <div class="
+                col-lg-8 col-lg-offset-2
+                col-md-10 col-md-offset-1
+                post-container">
+
+                
+                <header>
+                    <h2>TOC</h2>
+                </header>
+                <nav id="TableOfContents">
+<ul>
+<li><a href="#if-标签">if-标签</a>
+<ul>
+<li><a href="#讨论-null-和-是否有区别">讨论 null  和 &ldquo; 是否有区别</a></li>
+</ul></li>
+<li><a href="#where-标签">where-标签</a>
+<ul>
+<li><a href="#问题">问题</a></li>
+<li><a href="#第一种解决方法">第一种解决方法</a></li>
+<li><a href="#第二种解决办法">第二种解决办法</a></li>
+<li><a href="#注意">注意</a></li>
+</ul></li>
+<li><a href="#trim-标签">trim-标签</a>
+<ul>
+<li><a href="#问题-1">问题</a></li>
+<li><a href="#解决办法">解决办法</a></li>
+</ul></li>
+<li><a href="#choose-标签">choose-标签</a></li>
+<li><a href="#set-标签">set-标签</a>
+<ul>
+<li><a href="#问题-2">问题</a></li>
+<li><a href="#解决办法-1">解决办法</a></li>
+</ul></li>
+<li><a href="#foreach-标签">foreach-标签</a>
+<ul>
+<li><a href="#批量保存">批量保存</a>
+<ul>
+<li><a href="#mysql">mysql</a></li>
+<li><a href="#oracle">Oracle</a>
+<ul>
+<li><a href="#注意-1">注意</a></li>
+</ul></li>
+</ul></li>
+</ul></li>
+<li><a href="#两个内置参数">两个内置参数</a>
+<ul>
+<li><a href="#parameter">_parameter</a></li>
+<li><a href="#databaseid">_databaseId</a></li>
+<li><a href="#实际用途演示">实际用途演示</a></li>
+</ul></li>
+<li><a href="#bind-标签">bind-标签</a></li>
+<li><a href="#sql-include-标签">sql，include 标签</a></li>
+</ul>
+</nav>
+                
+                
+
+<p>[TOC]</p>
+
+<p><strong>说明：以下文字总结来源尚硅谷视频《MyBatis》<a href="https://www.bilibili.com/video/av34875242/?p=9">https://www.bilibili.com/video/av34875242/?p=9</a></strong></p>
+
+<p><strong>官网文档：<a href="http://www.mybatis.org/mybatis-3/zh/configuration.html#typeAliases">http://www.mybatis.org/mybatis-3/zh/configuration.html#typeAliases</a></strong></p>
+
+<p><strong>OGNL文档：<a href="https://commons.apache.org/proper/commons-ognl/language-guide.html">https://commons.apache.org/proper/commons-ognl/language-guide.html</a></strong></p>
+
+<h1 id="if-标签">if-标签</h1>
+
+<h2 id="讨论-null-和-是否有区别">讨论 null  和 &ldquo; 是否有区别</h2>
+
+<pre><code class="language-xml">&lt;select id=&quot;findStudentInfoByID&quot; resultMap=&quot;student&quot;&gt;
+      select * from student  
+      &lt;if test=&quot;id != '' &quot;&gt;
+             where student.id = #{id} 
+      &lt;/if&gt;          
+ &lt;/select&gt;
+: ==&gt;  Preparing: select * from student where student.id = ? 
+: ==&gt; Parameters: null
+: &lt;==      Total: 0
+</code></pre>
+
+<pre><code class="language-xml">&lt;select id=&quot;findStudentInfoByID&quot; resultMap=&quot;student&quot;&gt;
+    select * from student  
+    &lt;if test=&quot;id != null &quot;&gt;
+           where student.id = #{id} 
+    &lt;/if&gt;
+&lt;/select&gt;
+: ==&gt;  Preparing: select * from student 
+: ==&gt; Parameters: 
+: &lt;==      Total: 9
+</code></pre>
+
+<p>对比发现在这个里面  null  和 &ldquo; 是有区别的。 但是他也提供了去除空格的方法。</p>
+
+<pre><code>&lt;select id=&quot;findStudentInfoByID&quot; resultMap=&quot;student&quot;&gt;
+    select * from student  
+        &lt;if test=&quot;name.trim() != '' &quot;&gt;
+                 where student.id = #{id} 
+        &lt;/if&gt;
+&lt;/select&gt;
+</code></pre>
+
+<p><strong>注意：这里也要保证name值不能为null，不然也就是Cause: java.lang.NullPointerException: target is null for method trim</strong></p>
+
+<h1 id="where-标签">where-标签</h1>
+
+<h2 id="问题">问题</h2>
+
+<pre><code class="language-xml">&lt;!-- 多出的and问题  --&gt;
+&lt;select id=&quot;findStudentInfoByID&quot; resultMap=&quot;student&quot;&gt;
+  select * from student  
+                where 
+                &lt;if test=&quot;id != null &quot;&gt;
+                  student.id = #{id} 
+                &lt;/if&gt;
+                &lt;if test=&quot;name != null &quot;&gt;
+                  and student.name = #{name} 
+                &lt;/if&gt;
+&lt;/select&gt;
+</code></pre>
+
+<h2 id="第一种解决方法">第一种解决方法</h2>
+
+<pre><code class="language-xml">&lt;select id=&quot;findStudentInfoByID&quot; resultMap=&quot;student&quot;&gt;
+  select * from student  
+                where  1=1
+                &lt;if test=&quot;id != null &quot;&gt;
+                   and student.id = #{id} 
+                &lt;/if&gt;
+                &lt;if test=&quot;name != null &quot;&gt;
+                   and student.name = #{name} 
+                &lt;/if&gt;
+&lt;/select&gt;
+</code></pre>
+
+<h2 id="第二种解决办法">第二种解决办法</h2>
+
+<pre><code class="language-xml">&lt;select id=&quot;findStudentInfoByID&quot; resultMap=&quot;student&quot;&gt;
+    select * from student  
+                  &lt;where&gt;
+                        &lt;if test=&quot;id != null &quot;&gt;
+                            and student.id = #{id} 
+                        &lt;/if&gt;
+                        &lt;if test=&quot;name != null &quot;&gt;
+                            and student.name = #{name} 
+                        &lt;/if&gt;
+                  &lt;/where&gt; 
+&lt;/select&gt;
+</code></pre>
+
+<p>当我们的id是null，name不为null的时候打印sql如下：</p>
+
+<pre><code class="language-sql">select * from student WHERE student.name = ? 
+</code></pre>
+
+<h2 id="注意">注意</h2>
+
+<p>他只会去掉掉<strong>前面</strong>的and 和 or</p>
+
+<h1 id="trim-标签">trim-标签</h1>
+
+<h2 id="问题-1">问题</h2>
+
+<pre><code class="language-xml">&lt;!-- 多出的and问题  --&gt;
+&lt;select id=&quot;findStudentInfoByID&quot; resultMap=&quot;student&quot;&gt;
+        select * from student  
+            &lt;where&gt;
+                &lt;if test=&quot;id != null &quot;&gt;
+                      student.id = #{id} and
+                &lt;/if&gt;
+                &lt;if test=&quot;name != null &quot;&gt;
+                      student.name = #{name} 
+                &lt;/if&gt;
+            &lt;/where&gt; 
+&lt;/select&gt;
+</code></pre>
+
+<h2 id="解决办法">解决办法</h2>
+
+<pre><code class="language-xml">&lt;!-- 
+        prefix : 给字符串加一个前缀
+        prefixOverrides : 前缀覆盖，干掉前面多余的字符串
+        suffix：  给字符串后缀加一个字符串
+        suffixOverrides：后缀覆盖，干掉后缀多余的字符串
+ --&gt;
+&lt;select id=&quot;findStudentInfoByID&quot; resultMap=&quot;student&quot;&gt;
+    select * from student  
+    &lt;trim prefix=&quot;where&quot; suffixOverrides=&quot;and&quot;&gt;
+        &lt;if test=&quot;id != null &quot;&gt;
+              student.id = #{id} and
+        &lt;/if&gt;
+        &lt;if test=&quot;name != null &quot;&gt;
+              student.name = #{name} 
+        &lt;/if&gt;
+    &lt;/trim&gt;
+&lt;/select&gt;
+</code></pre>
+
+<h1 id="choose-标签">choose-标签</h1>
+
+<pre><code class="language-xml">&lt;select id=&quot;findStudentInfoByID&quot; resultMap=&quot;student&quot;&gt;
+      select * from student  
+            &lt;where&gt;
+                &lt;choose&gt;
+                    &lt;when test=&quot;id != null&quot;&gt;
+                          student.id = #{id} 
+                    &lt;/when&gt;
+                    &lt;when test=&quot;name != null&quot;&gt;
+                          student.name = #{name} 
+                    &lt;/when&gt;
+                    &lt;otherwise&gt;
+                           1 = 1
+                    &lt;/otherwise&gt;
+                &lt;/choose&gt;
+            &lt;/where&gt;
+&lt;/select&gt;
+</code></pre>
+
+<h1 id="set-标签">set-标签</h1>
+
+<h2 id="问题-2">问题</h2>
+
+<pre><code class="language-xml">&lt;!-- 多出的, 问题  --&gt;
+&lt;update id=&quot;updateStudent&quot;&gt;
+      update student set 
+          &lt;if test=&quot;name != null&quot;&gt;
+               name = #{name},
+          &lt;/if&gt;
+          &lt;if test=&quot;age != 0&quot;&gt;
+              age = #{age},
+          &lt;/if&gt;
+          &lt;if test=&quot;sex != null&quot;&gt;
+              sex = #{sex}
+          &lt;/if&gt;
+      where id = #{id}        
+&lt;/update&gt;
+</code></pre>
+
+<h2 id="解决办法-1">解决办法</h2>
+
+<pre><code class="language-xml">&lt;update id=&quot;updateStudent&quot;&gt;
+      update student 
+        &lt;set&gt; 
+            &lt;if test=&quot;name != null&quot;&gt;
+                  name = #{name},
+            &lt;/if&gt;
+            &lt;if test=&quot;age != 0&quot;&gt;
+                  age = #{age},
+            &lt;/if&gt;
+            &lt;if test=&quot;sex != null&quot;&gt;
+                  sex = #{sex}
+            &lt;/if&gt;
+        &lt;/set&gt;        
+      where id = #{id}   
+&lt;/update&gt;
+</code></pre>
+
+<h1 id="foreach-标签">foreach-标签</h1>
+
+<pre><code class="language-xml">&lt;select id=&quot;findStudentInfoByID&quot; resultMap=&quot;student&quot;&gt;
+    select * from student  where id in (1,2,3)
+&lt;/select&gt;
+
+&lt;!-- 
+  collection:指定要遍历的集合
+  item：将当前变量出来集合的元素赋值给指定的变量
+  separator：买个元素之间的分隔符
+  open：遍历出所有结果的第一个字符
+  close：变量出所有结果最后的一个字符
+  index: 遍历的是list的时候这个是索引。
+  遍历map的时候，index表示map的key， item表示map的val。
+--&gt;
+&lt;select id=&quot;findStudentInfoByID&quot; resultMap=&quot;student&quot;&gt;
+  select * from student  where id in 
+                                  &lt;foreach collection=&quot;selectparamMap&quot; 
+                                           item=&quot;paramMapVal&quot; separator=&quot;,&quot; 
+                                           open=&quot;(&quot; close=&quot;)&quot; index=&quot;i&quot;&gt;
+                                           
+                                     #{paramMapVal}
+                                     
+                                  &lt;/foreach&gt;
+&lt;/select&gt;
+</code></pre>
+
+<h2 id="批量保存">批量保存</h2>
+
+<h3 id="mysql">mysql</h3>
+
+<pre><code class="language-xml">&lt;insert id=&quot;insertStudentList&quot;&gt;
+  insert into student (name,sex,age,address_bus)  values 
+      &lt;foreach collection=&quot;studentlist&quot; item=&quot;student&quot; separator=&quot;,&quot; index=&quot;i&quot;&gt;
+          (#{student.name}, #{student.sex}, #{student.age}, #{student.addressBus})
+      &lt;/foreach&gt;
+&lt;/insert&gt;
+</code></pre>
+
+<h3 id="oracle">Oracle</h3>
+
+<pre><code class="language-xml">&lt;insert id=&quot;insertStudentList&quot;&gt;
+  begin
+      &lt;foreach collection=&quot;studentlist&quot; item=&quot;student&quot;&gt;
+      INSERT INTO SYSTEM.STUDENT (ID, NAME, SEX, AGE, ADDRESSBUS) 
+                                VALUES 
+                                 (SEQ_NEWSID.nextval, #{student.name}, 
+                                 #{student.sex}, #{student.age}, 
+                                 #{student.addressBus});
+      &lt;/foreach&gt;
+  end;
+&lt;/insert&gt;
+</code></pre>
+
+<h4 id="注意-1">注意</h4>
+
+<p>Oracle中后面的end的分号不能丢失，不然执行不成功。</p>
+
+<h1 id="两个内置参数">两个内置参数</h1>
+
+<h2 id="parameter">_parameter</h2>
+
+<p>代表整个参数。</p>
+
+<p>单个参数： _parameter就是这个参数</p>
+
+<p>多个参数： 参数会被封装为一个map，他就代表这个map</p>
+
+<h2 id="databaseid">_databaseId</h2>
+
+<p>如果配置了databaseIdProvider标签，他就代表当前的数据库的别名。</p>
+
+<h2 id="实际用途演示">实际用途演示</h2>
+
+<p>可以处理不同数据库的语句放到一起。</p>
+
+<pre><code class="language-xml">&lt;select id=&quot;XXXX&quot; resultMap=&quot;XXXX&quot;&gt;
+    &lt;if test=&quot;_databaseId == 'mysql'&quot; &gt;
+        select * from a
+          &lt;if test=&quot;_parameter != null&quot;&gt;
+             where name = #{name}
+    			&lt;/if&gt;
+    &lt;/if&gt;    
+    &lt;if test=&quot;_databaseId == 'oracle'&quot; &gt;
+        select * from b
+    &lt;/if&gt;    
+&lt;/select&gt;
+</code></pre>
+
+<h1 id="bind-标签">bind-标签</h1>
+
+<p>可以将OGNL表达式的值绑定到一个变量中，方便后来引用这个变量的值。 可以看到他可以数据进行处理加工，同时，OGNL表达式是可以调用java方法的，这样的话对数据的处理也可以有这个方法。</p>
+
+<pre><code class="language-xml">&lt;insert id=&quot;insertStudent&quot; 
+        parameterType=&quot;com.example.mybatisconfig.mysql.bean.Student&quot; 
+        useGeneratedKeys=&quot;true&quot; keyProperty=&quot;id&quot;&gt;
+        &lt;bind name=&quot;_buildName&quot; value=&quot; '110_' + name + '_119' &quot; /&gt;
+        insert into student (name,sex,age,address_bus)  
+                            values
+                            (#{_buildName}, #{sex}, #{age}, #{addressBus})
+&lt;/insert&gt;
+</code></pre>
+
+<h1 id="sql-include-标签">sql，include 标签</h1>
+
+<p>sql用于抽取可重用的sql标签。 include引用外部定义的sql片段。</p>
+
+<pre><code class="language-xml">&lt;insert id=&quot;insertStudent&quot; 
+        parameterType=&quot;com.example.mybatisconfig.mysql.bean.Student&quot;&gt;
+        &lt;bind name=&quot;_buildName&quot; value=&quot; '110_' + name + '_119' &quot; /&gt;
+        insert into student (&lt;include refid=&quot;student_sql&quot;&gt;&lt;/include&gt;)  
+                     values (#{_buildName}, #{sex}, #{age}, #{addressBus})
+&lt;/insert&gt;
+
+&lt;sql id=&quot;student_sql&quot;&gt;
+      name,sex,age,address_bus
+&lt;/sql&gt;
+
+</code></pre>
+
+<p>注意：在sql片段中可以也可以加入<if>等标签。</p>
+
+
+                
+                
+<div class="entry-shang text-center">
+    
+	    <p>「真诚赞赏，手留余香」</p>
+	
+	<button class="zs show-zs btn btn-bred">赞赏支持</button>
+</div>
+<div class="zs-modal-bg"></div>
+<div class="zs-modal-box">
+	<div class="zs-modal-head">
+		<button type="button" class="close">×</button>
+		<span class="author"><a href="http://maizitoday.github.io/"><img src="/img/favicon.png" /></a></span>
+        
+	        <p class="tip"><i></i><span>真诚赞赏，手留余香</span></p>
+		
+ 
+	</div>
+	<div class="zs-modal-body">
+		<div class="zs-modal-btns">
+			<button class="btn btn-blink" data-num="2">2元</button>
+			<button class="btn btn-blink" data-num="5">5元</button>
+			<button class="btn btn-blink" data-num="10">10元</button>
+			<button class="btn btn-blink" data-num="50">50元</button>
+			<button class="btn btn-blink" data-num="100">100元</button>
+			<button class="btn btn-blink" data-num="1">任意金额</button>
+		</div>
+		<div class="zs-modal-pay">
+			<button class="btn btn-bred" id="pay-text">2元</button>
+			<p>使用<span id="pay-type">微信</span>扫描二维码完成支付</p>
+			<img src="/img/reward/wechat-2.png"  id="pay-image"/>
+		</div>
+	</div>
+	<div class="zs-modal-footer">
+		<label><input type="radio" name="zs-type" value="wechat" class="zs-type" checked="checked"><span ><span class="zs-wechat"><img src="/img/reward/wechat-btn.png"/></span></label>
+		<label><input type="radio" name="zs-type" value="alipay" class="zs-type" class="zs-alipay"><img src="/img/reward/alipay-btn.png"/></span></label>
+	</div>
+</div>
+<script type="text/javascript" src="/js/reward.js"></script>
+
+                
+
+                <hr>
+                <ul class="pager">
+                    
+                    <li class="previous">
+                        <a href="/post/mybatis%E7%B3%BB%E5%88%97-%E7%BC%93%E5%AD%98/" data-toggle="tooltip" data-placement="top" title="mybatis系列-缓存">&larr;
+                            Previous Post</a>
+                    </li>
+                    
+                    
+                    <li class="next">
+                        <a href="/post/mybatis%E7%B3%BB%E5%88%97-mybatisplus%E6%8F%92%E4%BB%B6/" data-toggle="tooltip" data-placement="top" title="mybatis系列-MyBatisPlus插件学习">Next
+                            Post &rarr;</a>
+                    </li>
+                    
+                </ul>
+
+                
+<div id="disqus-comment"></div>
+
+
+
+            </div>
+            
+            <div class="
+                col-lg-8 col-lg-offset-2
+                col-md-10 col-md-offset-1
+                sidebar-container">
+
+                
+                
+                <section>
+                    <hr class="hidden-sm hidden-xs">
+                    <h5><a href="/tags/">FEATURED TAGS</a></h5>
+                    <div class="tags">
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        <a href="/tags/docker" title="docker">
+                            docker
+                        </a>
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        <a href="/tags/dockerfile" title="dockerfile">
+                            dockerfile
+                        </a>
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        <a href="/tags/java%E5%9F%BA%E7%A1%80" title="java基础">
+                            java基础
+                        </a>
+                        
+                        
+                        
+                        <a href="/tags/java%E7%9B%B8%E5%85%B3%E6%A6%82%E5%BF%B5" title="java相关概念">
+                            java相关概念
+                        </a>
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        <a href="/tags/jvm" title="jvm">
+                            jvm
+                        </a>
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        <a href="/tags/maven" title="maven">
+                            maven
+                        </a>
+                        
+                        
+                        
+                        
+                        
+                        <a href="/tags/mybatis%E7%B3%BB%E5%88%97" title="mybatis系列">
+                            mybatis系列
+                        </a>
+                        
+                        
+                        
+                        
+                        
+                        <a href="/tags/mysql%E7%B3%BB%E5%88%97" title="mysql系列">
+                            mysql系列
+                        </a>
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        <a href="/tags/nosql" title="nosql">
+                            nosql
+                        </a>
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        <a href="/tags/redis" title="redis">
+                            redis
+                        </a>
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        <a href="/tags/springcloud" title="springCloud">
+                            springCloud
+                        </a>
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        <a href="/tags/springboot%E7%B3%BB%E5%88%97" title="springboot系列">
+                            springboot系列
+                        </a>
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        <a href="/tags/%E4%B8%AD%E9%97%B4%E4%BB%B6" title="中间件">
+                            中间件
+                        </a>
+                        
+                        
+                        
+                        <a href="/tags/%E4%B8%BB%E4%BB%8E%E5%A4%8D%E5%88%B6" title="主从复制">
+                            主从复制
+                        </a>
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        <a href="/tags/%E5%88%86%E5%B8%83%E5%BC%8F%E7%B3%BB%E5%88%97" title="分布式系列">
+                            分布式系列
+                        </a>
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        <a href="/tags/%E5%BC%80%E5%8F%91%E5%B7%A5%E5%85%B7" title="开发工具">
+                            开发工具
+                        </a>
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        <a href="/tags/%E6%95%B0%E6%8D%AE%E5%BA%93" title="数据库">
+                            数据库
+                        </a>
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        <a href="/tags/%E6%9C%8D%E5%8A%A1%E8%84%9A%E6%9C%AC" title="服务脚本">
+                            服务脚本
+                        </a>
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        <a href="/tags/%E8%AE%BE%E8%AE%A1%E6%A8%A1%E5%BC%8F" title="设计模式">
+                            设计模式
+                        </a>
+                        
+                        
+                        
+                        
+                        
+                        <a href="/tags/%E8%B4%9F%E8%BD%BD%E5%9D%87%E8%A1%A1" title="负载均衡">
+                            负载均衡
+                        </a>
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                    </div>
+                </section>
+                
+
+                
+                
+                <section>
+                    <hr>
+                    <h5>FRIENDS</h5>
+                    <ul class="list-inline">
+                        
+                        <li><a target="_blank" href="https://zhaohuabing.com">赵化冰博客</a></li>
+                        
+                        <li><a target="_blank" href="http://www.tianshouzhi.com">田守枝</a></li>
+                        
+                        <li><a target="_blank" href="http://www.ityouknow.com">纯洁的微笑</a></li>
+                        
+                        <li><a target="_blank" href="https://renchunxiao.com">任春晓</a></li>
+                        
+                        <li><a target="_blank" href="https://www.lihongkun.com">泛泛之辈</a></li>
+                        
+                        <li><a target="_blank" href="https://juejin.im/welcome/backend">后端服务论坛</a></li>
+                        
+                        <li><a target="_blank" href="https://www.javaboy.org">江南一点雨</a></li>
+                        
+                    </ul>
+                </section>
+                
+            </div>
+        </div>
+    </div>
+</article>
+
+
+
+
+<footer>
+    <div class="container">
+        <div class="row">
+            <div class="col-lg-8 col-lg-offset-2 col-md-10 col-md-offset-1">
+                <ul class="list-inline text-center">
+                   
+                   <li>
+                       <a href="" rel="alternate" type="application/rss+xml" title="" >
+                           <span class="fa-stack fa-lg">
+                               <i class="fa fa-circle fa-stack-2x"></i>
+                               <i class="fa fa-rss fa-stack-1x fa-inverse"></i>
+                           </span>
+                       </a>
+                   </li>
+                   
+                    
+                    <li>
+                        <a href="mailto:maiziybtoday@gmail.com">
+                            <span class="fa-stack fa-lg">
+                                <i class="fa fa-circle fa-stack-2x"></i>
+                                <i class="fa fa-envelope fa-stack-1x fa-inverse"></i>
+                            </span>
+                        </a>
+                    </li>
+		    
+                    
+                    
+                    
+                    
+
+                    
+
+		    
+                    
+                    <li>
+                        <a target="_blank" href="/your%20wechat%20qr%20code%20image">
+                            <span class="fa-stack fa-lg">
+                                <i class="fa fa-circle fa-stack-2x"></i>
+                                <i class="fa fa-wechat fa-stack-1x fa-inverse"></i>
+                            </span>
+                        </a>
+                    </li>
+		    
+                    
+                    
+                    <li>
+                        <a target="_blank" href="https://www.linkedin.com/in/yourlinkedinid">
+                            <span class="fa-stack fa-lg">
+                                <i class="fa fa-circle fa-stack-2x"></i>
+                                <i class="fa fa-linkedin fa-stack-1x fa-inverse"></i>
+                            </span>
+                        </a>
+                    </li>
+		    
+                    
+                </ul>
+		<p class="copyright text-muted">
+                    Copyright &copy;  2019
+                    <br>
+                    <a href="https://themes.gohugo.io/hugo-theme-cleanwhite">CleanWhite Hugo Theme</a> by <a href="https://zhaohuabing.com">Huabing</a> |
+                    <iframe
+                        style="margin-left: 2px; margin-bottom:-5px;"
+                        frameborder="0" scrolling="0" width="100px" height="20px"
+                        src="https://ghbtns.com/github-btn.html?user=zhaohuabing&repo=hugo-theme-cleanwhite&type=star&count=true" >
+                    </iframe>
+                </p>
+            </div>
+        </div>
+    </div>
+</footer>
+
+
+
+
+<script>
+    function async(u, c) {
+      var d = document, t = 'script',
+          o = d.createElement(t),
+          s = d.getElementsByTagName(t)[0];
+      o.src = u;
+      if (c) { o.addEventListener('load', function (e) { c(null, e); }, false); }
+      s.parentNode.insertBefore(o, s);
+    }
+</script>
+
+
+
+
+
+
+<script>
+    
+    if($('#tag_cloud').length !== 0){
+        async("/js/jquery.tagcloud.js",function(){
+            $.fn.tagcloud.defaults = {
+                
+                color: {start: '#bbbbee', end: '#0085a1'},
+            };
+            $('#tag_cloud a').tagcloud();
+        })
+    }
+</script>
+
+
+<script>
+    async("https://cdnjs.cloudflare.com/ajax/libs/fastclick/1.0.6/fastclick.js", function(){
+        var $nav = document.querySelector("nav");
+        if($nav) FastClick.attach($nav);
+    })
+</script>
+
+
+
+
+
+
+</body>
+</html>
