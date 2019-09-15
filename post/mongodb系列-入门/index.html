@@ -1,0 +1,1365 @@
+<!DOCTYPE html>
+<html lang="en-us">
+<head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+
+    
+    <meta property="og:site_name" content="">
+    <meta property="og:type" content="article">
+
+    
+    <meta property="og:image" content="http://maizitoday.github.io//img/home-bg-jeep.jpg">
+    <meta property="twitter:image" content="http://maizitoday.github.io//img/home-bg-jeep.jpg" />
+    
+
+    
+    <meta name="title" content="mongodb系列-入门" />
+    <meta property="og:title" content="mongodb系列-入门" />
+    <meta property="twitter:title" content="mongodb系列-入门" />
+    
+
+    
+    <meta name="description" content="麦子，程序员, 开源爱好者，生活探险家 | 这里是 麦子 的博客，与你一起发现更大的世界。">
+    <meta property="og:description" content="麦子，程序员, 开源爱好者，生活探险家 | 这里是 麦子 的博客，与你一起发现更大的世界。" />
+    <meta property="twitter:description" content="麦子，程序员, 开源爱好者，生活探险家 | 这里是 麦子 的博客，与你一起发现更大的世界。" />
+    
+
+    
+    <meta property="twitter:card" content="summary" />
+    
+    
+
+    <meta name="keyword"  content="麦子, maizi, maizi, , 麦子的网络日志, 麦子的博客, maizi Blog, 博客, 个人网站, 互联网, Web, 云原生, PaaS, Istio, Kubernetes, 微服务, Microservice">
+    <link rel="shortcut icon" href="/img/favicon.ico">
+
+    <title>mongodb系列-入门-麦子的博客</title>
+
+    <link rel="canonical" href="/post/mongodb%E7%B3%BB%E5%88%97-%E5%85%A5%E9%97%A8/">
+
+    <link rel="stylesheet" href="/css/iDisqus.min.css"/>
+	
+    
+    <link rel="stylesheet" href="/css/bootstrap.min.css">
+
+    
+    <link rel="stylesheet" href="/css/hux-blog.min.css">
+
+    
+    <link rel="stylesheet" href="/css/syntax.css">
+
+    
+    <link rel="stylesheet" href="/css/zanshang.css">
+
+    
+    <link href="//cdnjs.cloudflare.com/ajax/libs/font-awesome/4.6.3/css/font-awesome.min.css" rel="stylesheet" type="text/css">
+    
+    
+    <script src="/js/jquery.min.js"></script>
+    
+    
+    <script src="/js/bootstrap.min.js"></script>
+    
+    
+    <script src="/js/hux-blog.min.js"></script>
+	
+    
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.13.1/styles/docco.min.css">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.13.1/highlight.min.js"></script>
+    <script>hljs.initHighlightingOnLoad();</script>
+</head>
+
+
+<nav class="navbar navbar-default navbar-custom navbar-fixed-top">
+    <div class="container-fluid">
+        
+        <div class="navbar-header page-scroll">
+            <button type="button" class="navbar-toggle">
+                <span class="sr-only">Toggle navigation</span>
+                <span class="icon-bar"></span>
+                <span class="icon-bar"></span>
+                <span class="icon-bar"></span>
+            </button>
+            <a class="navbar-brand" href="/"></a>
+        </div>
+
+        
+        
+        <div id="huxblog_navbar">
+            <div class="navbar-collapse">
+                <ul class="nav navbar-nav navbar-right">
+                    <li>
+                        <a href="/">Home</a>
+                    </li>
+                    
+                    <li>
+                        <a href="/categories/life">Life</a>
+                    </li>
+                    
+                    <li>
+                        <a href="/categories/tech">Tech</a>
+                    </li>
+                    
+                    
+		    
+                        <li><a href="/top/about/">ABOUT</a></li>
+                    
+
+                    
+		    <li>
+                        <a href="/search">SEARCH <img src="/img/search.png" height="15" style="cursor: pointer;" alt="Search"></a>
+		    </li>
+                    
+                </ul>
+            </div>
+        </div>
+        
+    </div>
+    
+</nav>
+<script>
+    
+    
+    
+    var $body   = document.body;
+    var $toggle = document.querySelector('.navbar-toggle');
+    var $navbar = document.querySelector('#huxblog_navbar');
+    var $collapse = document.querySelector('.navbar-collapse');
+
+    $toggle.addEventListener('click', handleMagic)
+    function handleMagic(e){
+        if ($navbar.className.indexOf('in') > 0) {
+        
+            $navbar.className = " ";
+            
+            setTimeout(function(){
+                
+                if($navbar.className.indexOf('in') < 0) {
+                    $collapse.style.height = "0px"
+                }
+            },400)
+        }else{
+        
+            $collapse.style.height = "auto"
+            $navbar.className += " in";
+        }
+    }
+</script>
+
+
+
+
+<style type="text/css">
+    header.intro-header {
+        background-image: url('https://c.pxhere.com/images/a1/23/147c2090573fcd3fbc38e7b7b5a7-1593571.jpg!d')
+    }
+</style>
+<header class="intro-header">
+    <div class="container">
+        <div class="row">
+            <div class="col-lg-8 col-lg-offset-2 col-md-10 col-md-offset-1">
+                <div class="post-heading">
+                    <div class="tags">
+                        
+                        <a class="tag" href="/tags/mongodb%E7%B3%BB%E5%88%97" title="mongodb系列">
+                            mongodb系列
+                        </a>
+                        
+                        <a class="tag" href="/tags/type%E8%BF%90%E7%94%A8" title="$type运用">
+                            $type运用
+                        </a>
+                        
+                        <a class="tag" href="/tags/capped-collection" title="capped collection">
+                            capped collection
+                        </a>
+                        
+                        <a class="tag" href="/tags/objectid%E5%88%86%E6%9E%90" title="objectid分析">
+                            objectid分析
+                        </a>
+                        
+                    </div>
+                    <h1>mongodb系列-入门</h1>
+                    <h2 class="subheading"></h2>
+                    <span class="meta">
+			Posted by 
+			
+			    麦子
+			 
+			on 
+			Sunday, September 15, 2019
+                        
+                    </span>
+                </div>
+            </div>
+        </div>
+    </div>
+</header>
+
+
+
+
+<article>
+    <div class="container">
+        <div class="row">
+
+            
+            <div class="
+                col-lg-8 col-lg-offset-2
+                col-md-10 col-md-offset-1
+                post-container">
+
+                
+                <header>
+                    <h2>TOC</h2>
+                </header>
+                <nav id="TableOfContents">
+<ul>
+<li><a href="#mogodb-vs-mysql">mogodb VS mysql</a>
+<ul>
+<li><a href="#区别">区别</a></li>
+</ul></li>
+<li><a href="#document">document</a>
+<ul>
+<li><a href="#长度大小限制">长度大小限制</a></li>
+</ul></li>
+<li><a href="#capped-collection-上线集合">capped collection(上线集合)</a>
+<ul>
+<li><a href="#简介">简介</a></li>
+<li><a href="#创建">创建</a></li>
+<li><a href="#列子">列子</a></li>
+<li><a href="#api命令操作">API命令操作</a></li>
+</ul></li>
+<li><a href="#bson">bson</a>
+<ul>
+<li><a href="#支持的数据类型">支持的数据类型</a></li>
+<li><a href="#type运用">$type运用</a></li>
+</ul></li>
+<li><a href="#objectid">ObjectId</a></li>
+<li><a href="#shell">shell</a>
+<ul>
+<li><a href="#js写法">js写法</a></li>
+</ul></li>
+</ul>
+</nav>
+                
+                
+
+<p>[TOC]</p>
+
+<p><strong>说明：本文来自于<a href="https://www.bilibili.com/video/av36394924/?p=2">https://www.bilibili.com/video/av36394924/?p=2</a>视频讲解</strong></p>
+
+<p><strong>官方文档：<a href="https://docs.mongodb.com/">https://docs.mongodb.com/</a>  4.2版本</strong></p>
+
+<h1 id="mogodb-vs-mysql">mogodb VS mysql</h1>
+
+<p>mogodb是无模式的文档数据库。</p>
+
+<table>
+<thead>
+<tr>
+<th>mysql</th>
+<th>mogodb</th>
+<th>说明</th>
+</tr>
+</thead>
+
+<tbody>
+<tr>
+<td>database</td>
+<td>database</td>
+<td>数据库/数据库</td>
+</tr>
+
+<tr>
+<td>table</td>
+<td>collection</td>
+<td>表/集合</td>
+</tr>
+
+<tr>
+<td>row</td>
+<td>document</td>
+<td>行/文档</td>
+</tr>
+</tbody>
+</table>
+
+<h2 id="区别">区别</h2>
+
+<p><strong>row</strong></p>
+
+<p>每一行都是一样的数据， 不可以添加不可以减少，也就是说fileds的个数在定义table的时候就一定申明好了。</p>
+
+<p><strong>document</strong></p>
+
+<p>他的每一个document都是独立的，同时也不是我们在create.collection的时候申明好的。</p>
+
+<h1 id="document">document</h1>
+
+<h2 id="长度大小限制">长度大小限制</h2>
+
+<p>mogodb天生就是分布式的，可扩展，高性能，遵循CAP。<strong>既然是分布式部署，存在两个问题，内存-&gt;粒度太多  网络带宽-&gt; 多而碎,  他的长度是16M。redis的value是512M(String)</strong></p>
+
+<h1 id="capped-collection-上线集合">capped collection(上线集合)</h1>
+
+<p><strong>转载地址：<a href="https://www.jianshu.com/p/86942c09094a">https://www.jianshu.com/p/86942c09094a</a></strong></p>
+
+<h2 id="简介">简介</h2>
+
+<ol>
+<li>Capped集合是一个固定大小，高性能的，文档按照插入顺序的一个集合。
+新的对象会把覆盖旧的对象，像环形缓存一样。</li>
+<li>find时默认就是插入的顺序,Capped集合会自动维护。</li>
+<li>Capped 集合用来解决top 多少的问题，最新的top条评论，最活跃的top用户&hellip;</li>
+<li>一些日志的话， 或者是发送一些短信消息数量太大过多，存放时间不会太长，使用这个老的替换新的。 自动维护</li>
+</ol>
+
+<p>指定这个collection的大小和document的数目。</p>
+
+<pre><code class="language-shell">Maximum size in bytes:  大小
+Maximum number of documents: 数据
+</code></pre>
+
+<p>他相当于一个环形的队列， 新的document进来的时候，会替换掉老的document文档。</p>
+
+<h2 id="创建">创建</h2>
+
+<pre><code class="language-sql">db.createCollection(&quot;集合名称&quot;, { capped : true, size : num, max : num } )
+db.createCollection(&quot;log&quot;, { capped : true, size : 1000, max : 5 } )
+</code></pre>
+
+<ol>
+<li>size用来指定集合大小，单位KB</li>
+<li>限制集合中对象的个数：可以在创建时设置max参数</li>
+<li>指定mac数量的时候必须同时指定size容量。淘汰机制只有在<strong>容量还没有满时才会依据文档数量工作</strong>。要是容量满了，淘汰机制会依据容量来工作。</li>
+</ol>
+
+<h2 id="列子">列子</h2>
+
+<p>设置最大是3个document：</p>
+
+<pre><code class="language-sql">db.getCollection(&quot;testcapped&quot;).insert({name:1})
+db.getCollection(&quot;testcapped&quot;).insert({name:2})
+db.getCollection(&quot;testcapped&quot;).insert({name:3})
+db.getCollection(&quot;testcapped&quot;).insert({name:4})
+</code></pre>
+
+<p>然后查看这个collection</p>
+
+<pre><code class="language-json">db.getCollection(&quot;testcapped&quot;).find();
+
+{ 
+    &quot;_id&quot; : ObjectId(&quot;5d7de039eae3e224578750ee&quot;), 
+    &quot;name&quot; : 2.0
+}
+// ----------------------------------------------
+{ 
+    &quot;_id&quot; : ObjectId(&quot;5d7de039eae3e224578750ef&quot;), 
+    &quot;name&quot; : 3.0
+}
+// ----------------------------------------------
+{ 
+    &quot;_id&quot; : ObjectId(&quot;5d7de039eae3e224578750f0&quot;), 
+    &quot;name&quot; : 4.0
+}
+</code></pre>
+
+<p>可以看到最早插入的document已经被覆盖了。</p>
+
+<h2 id="api命令操作">API命令操作</h2>
+
+<pre><code class="language-sql">#排序 
+db.cappedCollection.find().sort( { $natural: -1 } ) 
+
+#是否是上线集合
+db.collection.isCapped()
+
+#把普通集合转为上线集合
+db.runCommand({&quot;convertToCapped&quot;: &quot;mycoll&quot;, size: 100000, max: 100});
+
+</code></pre>
+
+<h1 id="bson">bson</h1>
+
+<p><a href="https://docs.mongodb.com/manual/reference/glossary/#term-bson">BSON</a>是一种二进制序列化格式，用于存储文档并在MongoDB中进行远程过程调用。</p>
+
+<h2 id="支持的数据类型">支持的数据类型</h2>
+
+<table>
+<thead>
+<tr>
+<th align="left">Type</th>
+<th align="left">Number</th>
+<th align="left">Alias</th>
+<th align="left">Notes</th>
+</tr>
+</thead>
+
+<tbody>
+<tr>
+<td align="left">Double</td>
+<td align="left">1</td>
+<td align="left">“double”</td>
+<td align="left"></td>
+</tr>
+
+<tr>
+<td align="left">String</td>
+<td align="left">2</td>
+<td align="left">“string”</td>
+<td align="left"></td>
+</tr>
+
+<tr>
+<td align="left">Object</td>
+<td align="left">3</td>
+<td align="left">“object”</td>
+<td align="left"></td>
+</tr>
+
+<tr>
+<td align="left">Array</td>
+<td align="left">4</td>
+<td align="left">“array”</td>
+<td align="left"></td>
+</tr>
+
+<tr>
+<td align="left">Binary data</td>
+<td align="left">5</td>
+<td align="left">“binData”</td>
+<td align="left"></td>
+</tr>
+
+<tr>
+<td align="left">Undefined</td>
+<td align="left">6</td>
+<td align="left">“undefined”</td>
+<td align="left">Deprecated.</td>
+</tr>
+
+<tr>
+<td align="left">ObjectId</td>
+<td align="left">7</td>
+<td align="left">“objectId”</td>
+<td align="left"></td>
+</tr>
+
+<tr>
+<td align="left">Boolean</td>
+<td align="left">8</td>
+<td align="left">“bool”</td>
+<td align="left"></td>
+</tr>
+
+<tr>
+<td align="left">Date</td>
+<td align="left">9</td>
+<td align="left">“date”</td>
+<td align="left"></td>
+</tr>
+
+<tr>
+<td align="left">Null</td>
+<td align="left">10</td>
+<td align="left">“null”</td>
+<td align="left"></td>
+</tr>
+
+<tr>
+<td align="left">Regular Expression</td>
+<td align="left">11</td>
+<td align="left">“regex”</td>
+<td align="left"></td>
+</tr>
+
+<tr>
+<td align="left">DBPointer</td>
+<td align="left">12</td>
+<td align="left">“dbPointer”</td>
+<td align="left">Deprecated.</td>
+</tr>
+
+<tr>
+<td align="left">JavaScript</td>
+<td align="left">13</td>
+<td align="left">“javascript”</td>
+<td align="left"></td>
+</tr>
+
+<tr>
+<td align="left">Symbol</td>
+<td align="left">14</td>
+<td align="left">“symbol”</td>
+<td align="left">Deprecated.</td>
+</tr>
+
+<tr>
+<td align="left">JavaScript (with scope)</td>
+<td align="left">15</td>
+<td align="left">“javascriptWithScope”</td>
+<td align="left"></td>
+</tr>
+
+<tr>
+<td align="left">32-bit integer</td>
+<td align="left">16</td>
+<td align="left">“int”</td>
+<td align="left"></td>
+</tr>
+
+<tr>
+<td align="left">Timestamp</td>
+<td align="left">17</td>
+<td align="left">“timestamp”</td>
+<td align="left"></td>
+</tr>
+
+<tr>
+<td align="left">64-bit integer</td>
+<td align="left">18</td>
+<td align="left">“long”</td>
+<td align="left"></td>
+</tr>
+
+<tr>
+<td align="left">Decimal128</td>
+<td align="left">19</td>
+<td align="left">“decimal”</td>
+<td align="left">New in version 3.4.</td>
+</tr>
+
+<tr>
+<td align="left">Min key</td>
+<td align="left">-1</td>
+<td align="left">“minKey”</td>
+<td align="left"></td>
+</tr>
+
+<tr>
+<td align="left">Max key</td>
+<td align="left">127</td>
+<td align="left">“maxKey”</td>
+<td align="left"></td>
+</tr>
+</tbody>
+</table>
+
+<h2 id="type运用">$type运用</h2>
+
+<pre><code class="language-sql">#查询password的类型是字符串的数据
+db.getCollection(&quot;teacher&quot;).find({&quot;password&quot;:{$type:2}})
+</code></pre>
+
+<p><strong>注意：还可以通过正则表达式来处理数据。</strong></p>
+
+<h1 id="objectid">ObjectId</h1>
+
+<p>默认是document的主键， 默认索引。</p>
+
+<p>12字节的<a href="https://docs.mongodb.com/manual/reference/bson-types/#objectid">ObjectId</a> 值包括：</p>
+
+<ul>
+<li>一个4字节的值，表示自Unix纪元以来的秒数，</li>
+<li>一个5字节的随机值，和</li>
+<li>一个3字节的计数器，以随机值开始。</li>
+</ul>
+
+<p>可以获取当前创建这个数据的时间</p>
+
+<pre><code class="language-javascript">var createTime  = ObjectId(&quot;5d7de7d74374945f03b8b592&quot;).getTimestamp();
+var year = createTime.getFullYear();  // 获取完整的年份(4位,1970)
+var month = createTime.getMonth() + 1;  // 获取月份(0-11,0代表1月,用的时候记得加上1)
+var date = createTime.getDate();  // 获取日(1-31)
+var time = createTime.getTime();  // 获取时间(从1970.1.1开始的毫秒数)
+var hours = createTime.getHours();  // 获取小时数(0-23)
+var minutes = createTime.getMinutes();  // 获取分钟数(0-59)
+var seconds = createTime.getSeconds();  // 获取秒数(0-59)
+print(year+&quot; &quot;+month+&quot; &quot;+date+&quot; &quot;+time+&quot; &quot;+hours+&quot; &quot;+minutes+&quot; &quot;+seconds);
+</code></pre>
+
+<h1 id="shell">shell</h1>
+
+<p>mongodb是封装了一个V8引擎，<strong>可以运行js代码的。</strong>可以通过load(&ldquo;js路径&rdquo;)执行里面的mongdb的命令操作。</p>
+
+<pre><code class="language-shell">#shell启动位置
+/bin/mongo
+</code></pre>
+
+<h2 id="js写法">js写法</h2>
+
+<pre><code class="language-javascript">var mongo = new Mongo(&quot;localhost:27017&quot;);
+var db = mongo.getDB(&quot;mydatabase&quot;); 
+var collection = db.getCollection(&quot;student&quot;);
+var list = collection.find({}).toArray();
+printjson(list);
+</code></pre>
+
+
+                
+                
+<div class="entry-shang text-center">
+    
+	    <p>「真诚赞赏，手留余香」</p>
+	
+	<button class="zs show-zs btn btn-bred">赞赏支持</button>
+</div>
+<div class="zs-modal-bg"></div>
+<div class="zs-modal-box">
+	<div class="zs-modal-head">
+		<button type="button" class="close">×</button>
+		<span class="author"><a href="http://maizitoday.github.io/"><img src="/img/favicon.png" /></a></span>
+        
+	        <p class="tip"><i></i><span>真诚赞赏，手留余香</span></p>
+		
+ 
+	</div>
+	<div class="zs-modal-body">
+		<div class="zs-modal-btns">
+			<button class="btn btn-blink" data-num="2">2元</button>
+			<button class="btn btn-blink" data-num="5">5元</button>
+			<button class="btn btn-blink" data-num="10">10元</button>
+			<button class="btn btn-blink" data-num="50">50元</button>
+			<button class="btn btn-blink" data-num="100">100元</button>
+			<button class="btn btn-blink" data-num="1">任意金额</button>
+		</div>
+		<div class="zs-modal-pay">
+			<button class="btn btn-bred" id="pay-text">2元</button>
+			<p>使用<span id="pay-type">微信</span>扫描二维码完成支付</p>
+			<img src="/img/reward/wechat-2.png"  id="pay-image"/>
+		</div>
+	</div>
+	<div class="zs-modal-footer">
+		<label><input type="radio" name="zs-type" value="wechat" class="zs-type" checked="checked"><span ><span class="zs-wechat"><img src="/img/reward/wechat-btn.png"/></span></label>
+		<label><input type="radio" name="zs-type" value="alipay" class="zs-type" class="zs-alipay"><img src="/img/reward/alipay-btn.png"/></span></label>
+	</div>
+</div>
+<script type="text/javascript" src="/js/reward.js"></script>
+
+                
+
+                <hr>
+                <ul class="pager">
+                    
+                    <li class="previous">
+                        <a href="/post/mongodb%E7%B3%BB%E5%88%97-%E6%A0%87%E5%87%86sql%E5%92%8Cmongodb%E5%AF%B9%E6%AF%94/" data-toggle="tooltip" data-placement="top" title="mongodb系列-标准sql和mongodb对比">&larr;
+                            Previous Post</a>
+                    </li>
+                    
+                    
+                    <li class="next">
+                        <a href="/post/mongodb%E7%B3%BB%E5%88%97-crud%E6%93%8D%E4%BD%9C/" data-toggle="tooltip" data-placement="top" title="mongodb系列-crud操作">Next
+                            Post &rarr;</a>
+                    </li>
+                    
+                </ul>
+
+                
+<div id="disqus-comment"></div>
+
+
+
+            </div>
+            
+            <div class="
+                col-lg-8 col-lg-offset-2
+                col-md-10 col-md-offset-1
+                sidebar-container">
+
+                
+                
+                <section>
+                    <hr class="hidden-sm hidden-xs">
+                    <h5><a href="/tags/">FEATURED TAGS</a></h5>
+                    <div class="tags">
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        <a href="/tags/docker" title="docker">
+                            docker
+                        </a>
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        <a href="/tags/dockerfile" title="dockerfile">
+                            dockerfile
+                        </a>
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        <a href="/tags/java%E5%9F%BA%E7%A1%80" title="java基础">
+                            java基础
+                        </a>
+                        
+                        
+                        
+                        <a href="/tags/java%E7%9B%B8%E5%85%B3%E6%A6%82%E5%BF%B5" title="java相关概念">
+                            java相关概念
+                        </a>
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        <a href="/tags/jvm" title="jvm">
+                            jvm
+                        </a>
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        <a href="/tags/maven" title="maven">
+                            maven
+                        </a>
+                        
+                        
+                        
+                        <a href="/tags/mongodb%E7%B3%BB%E5%88%97" title="mongodb系列">
+                            mongodb系列
+                        </a>
+                        
+                        
+                        
+                        
+                        
+                        <a href="/tags/mybatis%E7%B3%BB%E5%88%97" title="mybatis系列">
+                            mybatis系列
+                        </a>
+                        
+                        
+                        
+                        
+                        
+                        <a href="/tags/mysql%E7%B3%BB%E5%88%97" title="mysql系列">
+                            mysql系列
+                        </a>
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        <a href="/tags/nosql" title="nosql">
+                            nosql
+                        </a>
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        <a href="/tags/redis" title="redis">
+                            redis
+                        </a>
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        <a href="/tags/springcloud" title="springCloud">
+                            springCloud
+                        </a>
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        <a href="/tags/springboot%E7%B3%BB%E5%88%97" title="springboot系列">
+                            springboot系列
+                        </a>
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        <a href="/tags/%E4%B8%AD%E9%97%B4%E4%BB%B6" title="中间件">
+                            中间件
+                        </a>
+                        
+                        
+                        
+                        <a href="/tags/%E4%B8%BB%E4%BB%8E%E5%A4%8D%E5%88%B6" title="主从复制">
+                            主从复制
+                        </a>
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        <a href="/tags/%E5%88%86%E5%B8%83%E5%BC%8F%E7%B3%BB%E5%88%97" title="分布式系列">
+                            分布式系列
+                        </a>
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        <a href="/tags/%E5%BC%80%E5%8F%91%E5%B7%A5%E5%85%B7" title="开发工具">
+                            开发工具
+                        </a>
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        <a href="/tags/%E6%95%B0%E6%8D%AE%E5%BA%93" title="数据库">
+                            数据库
+                        </a>
+                        
+                        
+                        
+                        <a href="/tags/%E6%95%B0%E7%BB%84%E6%9B%B4%E6%96%B0%E8%BF%90%E7%AE%97%E7%AC%A6" title="数组更新运算符">
+                            数组更新运算符
+                        </a>
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        <a href="/tags/%E6%9C%8D%E5%8A%A1%E8%84%9A%E6%9C%AC" title="服务脚本">
+                            服务脚本
+                        </a>
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        <a href="/tags/%E8%AE%BE%E8%AE%A1%E6%A8%A1%E5%BC%8F" title="设计模式">
+                            设计模式
+                        </a>
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        <a href="/tags/%E8%B4%9F%E8%BD%BD%E5%9D%87%E8%A1%A1" title="负载均衡">
+                            负载均衡
+                        </a>
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                    </div>
+                </section>
+                
+
+                
+                
+                <section>
+                    <hr>
+                    <h5>FRIENDS</h5>
+                    <ul class="list-inline">
+                        
+                        <li><a target="_blank" href="https://zhaohuabing.com">赵化冰博客</a></li>
+                        
+                        <li><a target="_blank" href="http://www.tianshouzhi.com">田守枝</a></li>
+                        
+                        <li><a target="_blank" href="http://www.ityouknow.com">纯洁的微笑</a></li>
+                        
+                        <li><a target="_blank" href="https://renchunxiao.com">任春晓</a></li>
+                        
+                        <li><a target="_blank" href="https://www.lihongkun.com">泛泛之辈</a></li>
+                        
+                        <li><a target="_blank" href="https://juejin.im/welcome/backend">后端服务论坛</a></li>
+                        
+                        <li><a target="_blank" href="https://www.javaboy.org">江南一点雨</a></li>
+                        
+                    </ul>
+                </section>
+                
+            </div>
+        </div>
+    </div>
+</article>
+
+
+
+
+<footer>
+    <div class="container">
+        <div class="row">
+            <div class="col-lg-8 col-lg-offset-2 col-md-10 col-md-offset-1">
+                <ul class="list-inline text-center">
+                   
+                   <li>
+                       <a href="" rel="alternate" type="application/rss+xml" title="" >
+                           <span class="fa-stack fa-lg">
+                               <i class="fa fa-circle fa-stack-2x"></i>
+                               <i class="fa fa-rss fa-stack-1x fa-inverse"></i>
+                           </span>
+                       </a>
+                   </li>
+                   
+                    
+                    <li>
+                        <a href="mailto:maiziybtoday@gmail.com">
+                            <span class="fa-stack fa-lg">
+                                <i class="fa fa-circle fa-stack-2x"></i>
+                                <i class="fa fa-envelope fa-stack-1x fa-inverse"></i>
+                            </span>
+                        </a>
+                    </li>
+		    
+                    
+                    
+                    
+                    
+
+                    
+
+		    
+                    
+                    <li>
+                        <a target="_blank" href="/your%20wechat%20qr%20code%20image">
+                            <span class="fa-stack fa-lg">
+                                <i class="fa fa-circle fa-stack-2x"></i>
+                                <i class="fa fa-wechat fa-stack-1x fa-inverse"></i>
+                            </span>
+                        </a>
+                    </li>
+		    
+                    
+                    
+                    <li>
+                        <a target="_blank" href="https://www.linkedin.com/in/yourlinkedinid">
+                            <span class="fa-stack fa-lg">
+                                <i class="fa fa-circle fa-stack-2x"></i>
+                                <i class="fa fa-linkedin fa-stack-1x fa-inverse"></i>
+                            </span>
+                        </a>
+                    </li>
+		    
+                    
+                </ul>
+		<p class="copyright text-muted">
+                    Copyright &copy;  2019
+                    <br>
+                    <a href="https://themes.gohugo.io/hugo-theme-cleanwhite">CleanWhite Hugo Theme</a> by <a href="https://zhaohuabing.com">Huabing</a> |
+                    <iframe
+                        style="margin-left: 2px; margin-bottom:-5px;"
+                        frameborder="0" scrolling="0" width="100px" height="20px"
+                        src="https://ghbtns.com/github-btn.html?user=zhaohuabing&repo=hugo-theme-cleanwhite&type=star&count=true" >
+                    </iframe>
+                </p>
+            </div>
+        </div>
+    </div>
+</footer>
+
+
+
+
+<script>
+    function async(u, c) {
+      var d = document, t = 'script',
+          o = d.createElement(t),
+          s = d.getElementsByTagName(t)[0];
+      o.src = u;
+      if (c) { o.addEventListener('load', function (e) { c(null, e); }, false); }
+      s.parentNode.insertBefore(o, s);
+    }
+</script>
+
+
+
+
+
+
+<script>
+    
+    if($('#tag_cloud').length !== 0){
+        async("/js/jquery.tagcloud.js",function(){
+            $.fn.tagcloud.defaults = {
+                
+                color: {start: '#bbbbee', end: '#0085a1'},
+            };
+            $('#tag_cloud a').tagcloud();
+        })
+    }
+</script>
+
+
+<script>
+    async("https://cdnjs.cloudflare.com/ajax/libs/fastclick/1.0.6/fastclick.js", function(){
+        var $nav = document.querySelector("nav");
+        if($nav) FastClick.attach($nav);
+    })
+</script>
+
+
+
+
+
+
+</body>
+</html>
