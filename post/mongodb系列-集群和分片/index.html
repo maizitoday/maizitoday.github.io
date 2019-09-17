@@ -1,0 +1,1372 @@
+<!DOCTYPE html>
+<html lang="en-us">
+<head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+
+    
+    <meta property="og:site_name" content="">
+    <meta property="og:type" content="article">
+
+    
+    <meta property="og:image" content="http://maizitoday.github.io//img/home-bg-jeep.jpg">
+    <meta property="twitter:image" content="http://maizitoday.github.io//img/home-bg-jeep.jpg" />
+    
+
+    
+    <meta name="title" content="mongodb-集群和分片" />
+    <meta property="og:title" content="mongodb-集群和分片" />
+    <meta property="twitter:title" content="mongodb-集群和分片" />
+    
+
+    
+    <meta name="description" content="麦子，程序员, 开源爱好者，生活探险家 | 这里是 麦子 的博客，与你一起发现更大的世界。">
+    <meta property="og:description" content="麦子，程序员, 开源爱好者，生活探险家 | 这里是 麦子 的博客，与你一起发现更大的世界。" />
+    <meta property="twitter:description" content="麦子，程序员, 开源爱好者，生活探险家 | 这里是 麦子 的博客，与你一起发现更大的世界。" />
+    
+
+    
+    <meta property="twitter:card" content="summary" />
+    
+    
+
+    <meta name="keyword"  content="麦子, maizi, maizi, , 麦子的网络日志, 麦子的博客, maizi Blog, 博客, 个人网站, 互联网, Web, 云原生, PaaS, Istio, Kubernetes, 微服务, Microservice">
+    <link rel="shortcut icon" href="/img/favicon.ico">
+
+    <title>mongodb-集群和分片-麦子的博客</title>
+
+    <link rel="canonical" href="/post/mongodb%E7%B3%BB%E5%88%97-%E9%9B%86%E7%BE%A4%E5%92%8C%E5%88%86%E7%89%87/">
+
+    <link rel="stylesheet" href="/css/iDisqus.min.css"/>
+	
+    
+    <link rel="stylesheet" href="/css/bootstrap.min.css">
+
+    
+    <link rel="stylesheet" href="/css/hux-blog.min.css">
+
+    
+    <link rel="stylesheet" href="/css/syntax.css">
+
+    
+    <link rel="stylesheet" href="/css/zanshang.css">
+
+    
+    <link href="//cdnjs.cloudflare.com/ajax/libs/font-awesome/4.6.3/css/font-awesome.min.css" rel="stylesheet" type="text/css">
+    
+    
+    <script src="/js/jquery.min.js"></script>
+    
+    
+    <script src="/js/bootstrap.min.js"></script>
+    
+    
+    <script src="/js/hux-blog.min.js"></script>
+	
+    
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.13.1/styles/docco.min.css">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.13.1/highlight.min.js"></script>
+    <script>hljs.initHighlightingOnLoad();</script>
+</head>
+
+
+<nav class="navbar navbar-default navbar-custom navbar-fixed-top">
+    <div class="container-fluid">
+        
+        <div class="navbar-header page-scroll">
+            <button type="button" class="navbar-toggle">
+                <span class="sr-only">Toggle navigation</span>
+                <span class="icon-bar"></span>
+                <span class="icon-bar"></span>
+                <span class="icon-bar"></span>
+            </button>
+            <a class="navbar-brand" href="/"></a>
+        </div>
+
+        
+        
+        <div id="huxblog_navbar">
+            <div class="navbar-collapse">
+                <ul class="nav navbar-nav navbar-right">
+                    <li>
+                        <a href="/">Home</a>
+                    </li>
+                    
+                    <li>
+                        <a href="/categories/life">Life</a>
+                    </li>
+                    
+                    <li>
+                        <a href="/categories/tech">Tech</a>
+                    </li>
+                    
+                    
+		    
+                        <li><a href="/top/about/">ABOUT</a></li>
+                    
+
+                    
+		    <li>
+                        <a href="/search">SEARCH <img src="/img/search.png" height="15" style="cursor: pointer;" alt="Search"></a>
+		    </li>
+                    
+                </ul>
+            </div>
+        </div>
+        
+    </div>
+    
+</nav>
+<script>
+    
+    
+    
+    var $body   = document.body;
+    var $toggle = document.querySelector('.navbar-toggle');
+    var $navbar = document.querySelector('#huxblog_navbar');
+    var $collapse = document.querySelector('.navbar-collapse');
+
+    $toggle.addEventListener('click', handleMagic)
+    function handleMagic(e){
+        if ($navbar.className.indexOf('in') > 0) {
+        
+            $navbar.className = " ";
+            
+            setTimeout(function(){
+                
+                if($navbar.className.indexOf('in') < 0) {
+                    $collapse.style.height = "0px"
+                }
+            },400)
+        }else{
+        
+            $collapse.style.height = "auto"
+            $navbar.className += " in";
+        }
+    }
+</script>
+
+
+
+
+<style type="text/css">
+    header.intro-header {
+        background-image: url('https://c.pxhere.com/images/a1/23/147c2090573fcd3fbc38e7b7b5a7-1593571.jpg!d')
+    }
+</style>
+<header class="intro-header">
+    <div class="container">
+        <div class="row">
+            <div class="col-lg-8 col-lg-offset-2 col-md-10 col-md-offset-1">
+                <div class="post-heading">
+                    <div class="tags">
+                        
+                        <a class="tag" href="/tags/mongodb" title="mongodb">
+                            mongodb
+                        </a>
+                        
+                        <a class="tag" href="/tags/%E9%9B%86%E7%BE%A4" title="集群">
+                            集群
+                        </a>
+                        
+                        <a class="tag" href="/tags/%E5%88%86%E7%89%87" title="分片">
+                            分片
+                        </a>
+                        
+                        <a class="tag" href="/tags/%E5%88%86%E7%89%87%E7%AD%96%E7%95%A5" title="分片策略">
+                            分片策略
+                        </a>
+                        
+                    </div>
+                    <h1>mongodb-集群和分片</h1>
+                    <h2 class="subheading"></h2>
+                    <span class="meta">
+			Posted by 
+			
+			    麦子
+			 
+			on 
+			Monday, September 16, 2019
+                        
+                    </span>
+                </div>
+            </div>
+        </div>
+    </div>
+</header>
+
+
+
+
+<article>
+    <div class="container">
+        <div class="row">
+
+            
+            <div class="
+                col-lg-8 col-lg-offset-2
+                col-md-10 col-md-offset-1
+                post-container">
+
+                
+                <header>
+                    <h2>TOC</h2>
+                </header>
+                <nav id="TableOfContents">
+<ul>
+<li><a href="#配置文件参数">配置文件参数</a></li>
+<li><a href="#集群">集群</a>
+<ul>
+<li><a href="#docker-compose-yml">docker-compose.yml</a></li>
+<li><a href="#查看容器ip">查看容器IP</a></li>
+<li><a href="#验证同步">验证同步</a></li>
+<li><a href="#故障转移">故障转移</a></li>
+<li><a href="#问题">问题</a></li>
+<li><a href="#注意">注意</a></li>
+</ul></li>
+<li><a href="#分片">分片</a></li>
+<li><a href="#分片集群">分片集群</a>
+<ul>
+<li><a href="#1-配置服务器">1. 配置服务器</a></li>
+<li><a href="#2-mongos">2. mongos</a></li>
+<li><a href="#3-分片">3. 分片</a></li>
+</ul></li>
+<li><a href="#分片策略选择">分片策略选择</a>
+<ul>
+<li><a href="#hash-sharding">hash sharding</a></li>
+<li><a href="#ranged-sharding">ranged sharding</a></li>
+<li><a href="#tag-aware-sharding">Tag aware sharding</a></li>
+</ul></li>
+</ul>
+</nav>
+                
+                
+
+<p>[TOC]</p>
+
+<p><strong>说明：本文来自于<a href="https://www.bilibili.com/video/av36394924/?p=2">https://www.bilibili.com/video/av36394924/?p=2</a>视频讲解</strong></p>
+
+<p><strong>官方文档：<a href="https://docs.mongodb.com/manual/core/wiredtiger/">https://docs.mongodb.com/manual/core/wiredtiger/</a>  4.2版本</strong></p>
+
+<p><strong>转载地址：<a href="https://cloud.tencent.com/developer/article/1013044">https://cloud.tencent.com/developer/article/1013044</a></strong></p>
+
+<h1 id="配置文件参数">配置文件参数</h1>
+
+<p>官方地址：<a href="https://docs.mongodb.com/v2.4/reference/configuration-options/">https://docs.mongodb.com/v2.4/reference/configuration-options/</a></p>
+
+<pre><code class="language-properties">port=27002
+bind_ip=127.0.0.1   
+replSet=maizi  // 集群的名称
+</code></pre>
+
+<h1 id="集群">集群</h1>
+
+<h2 id="docker-compose-yml">docker-compose.yml</h2>
+
+<pre><code class="language-yml">version: '3'
+services:
+  rs1:
+    image: mongo4.2.0
+    container_name: &quot;rs1&quot;
+    ports:
+      - &quot;27000:27017&quot;
+    volumes:
+      - $PWD/mongodb/rs1:/data/db
+    command: mongod --dbpath /data/db --replSet mongoreplset
+  rs2:
+    image: mongo4.2.0
+    container_name: &quot;rs2&quot;
+    ports:
+      - &quot;27001:27017&quot;
+    volumes:
+      - $PWD/mongodb/rs2:/data/db
+    command: mongod --dbpath /data/db --replSet mongoreplset
+  rs3:
+    image: mongo4.2.0
+    container_name: &quot;rs3&quot;
+    ports:
+      - &quot;27002:27017&quot;
+    volumes:
+      - $PWD/mongodb/rs3:/data/db
+    command: mongod --dbpath /data/db --replSet mongoreplset
+</code></pre>
+
+<p>通过执行 docker-compose up -d 启动，</p>
+
+<h2 id="查看容器ip">查看容器IP</h2>
+
+<pre><code class="language-dockerfile">docker exec m1 cat /etc/hosts
+
+
+172.18.0.4   r3
+172.18.0.3   r2
+172.18.0.2   r1
+</code></pre>
+
+<p><img src="/img/Xnip2019-09-17_02-34-19.png" alt="Xnip2019-09-17_02-34-19" /></p>
+
+<pre><code class="language-js">// 初始化集群
+rs.initiate()
+// 查看集群配置
+rs.conf()
+// 向集群中添加成员
+rs.add(&quot;172.18.0.3:27017&quot;)
+rs.add(&quot;172.18.0.4:27017&quot;)
+
+// 查看状态
+rs.status()
+
+
+{ 
+    &quot;set&quot; : &quot;mongoreplset&quot;, 
+    &quot;date&quot; : ISODate(&quot;2019-09-16T18:52:03.222+0000&quot;), 
+    &quot;myState&quot; : 1.0, 
+    &quot;term&quot; : NumberLong(2), 
+    &quot;syncingTo&quot; : &quot;&quot;, 
+    &quot;syncSourceHost&quot; : &quot;&quot;, 
+    &quot;syncSourceId&quot; : -1.0, 
+    &quot;heartbeatIntervalMillis&quot; : NumberLong(2000), 
+    &quot;optimes&quot; : {
+        &quot;lastCommittedOpTime&quot; : {
+            &quot;ts&quot; : Timestamp(1568659918, 1), 
+            &quot;t&quot; : NumberLong(2)
+        }, 
+        &quot;lastCommittedWallTime&quot; : ISODate(&quot;2019-09-16T18:51:58.380+0000&quot;), 
+        &quot;readConcernMajorityOpTime&quot; : {
+            &quot;ts&quot; : Timestamp(1568659918, 1), 
+            &quot;t&quot; : NumberLong(2)
+        }, 
+        &quot;readConcernMajorityWallTime&quot; : ISODate(&quot;2019-09-16T18:51:58.380+0000&quot;), 
+        &quot;appliedOpTime&quot; : {
+            &quot;ts&quot; : Timestamp(1568659918, 1), 
+            &quot;t&quot; : NumberLong(2)
+        }, 
+        &quot;durableOpTime&quot; : {
+            &quot;ts&quot; : Timestamp(1568659918, 1), 
+            &quot;t&quot; : NumberLong(2)
+        }, 
+        &quot;lastAppliedWallTime&quot; : ISODate(&quot;2019-09-16T18:51:58.380+0000&quot;), 
+        &quot;lastDurableWallTime&quot; : ISODate(&quot;2019-09-16T18:51:58.380+0000&quot;)
+    }, 
+    &quot;lastStableRecoveryTimestamp&quot; : Timestamp(1568659868, 1), 
+    &quot;lastStableCheckpointTimestamp&quot; : Timestamp(1568659868, 1), 
+    &quot;members&quot; : [
+        {
+            &quot;_id&quot; : 0.0, 
+            &quot;name&quot; : &quot;e2f54aa4b983:27017&quot;, 
+            &quot;ip&quot; : &quot;172.18.0.2&quot;, 
+            &quot;health&quot; : 1.0, 
+            &quot;state&quot; : 1.0, 
+            &quot;stateStr&quot; : &quot;PRIMARY&quot;, 
+            &quot;uptime&quot; : 2042.0, 
+            &quot;optime&quot; : {
+                &quot;ts&quot; : Timestamp(1568659918, 1), 
+                &quot;t&quot; : NumberLong(2)
+            }, 
+            &quot;optimeDate&quot; : ISODate(&quot;2019-09-16T18:51:58.000+0000&quot;), 
+            &quot;syncingTo&quot; : &quot;&quot;, 
+            &quot;syncSourceHost&quot; : &quot;&quot;, 
+            &quot;syncSourceId&quot; : -1.0, 
+            &quot;infoMessage&quot; : &quot;&quot;, 
+            &quot;electionTime&quot; : Timestamp(1568657897, 1), 
+            &quot;electionDate&quot; : ISODate(&quot;2019-09-16T18:18:17.000+0000&quot;), 
+            &quot;configVersion&quot; : 3.0, 
+            &quot;self&quot; : true, 
+            &quot;lastHeartbeatMessage&quot; : &quot;&quot;
+        }, 
+        {
+            &quot;_id&quot; : 1.0, 
+            &quot;name&quot; : &quot;172.18.0.3:27017&quot;, 
+            &quot;ip&quot; : &quot;172.18.0.3&quot;, 
+            &quot;health&quot; : 1.0, 
+            &quot;state&quot; : 2.0, 
+            &quot;stateStr&quot; : &quot;SECONDARY&quot;, 
+            &quot;uptime&quot; : 1297.0, 
+            &quot;optime&quot; : {
+                &quot;ts&quot; : Timestamp(1568659918, 1), 
+                &quot;t&quot; : NumberLong(2)
+            }, 
+            &quot;optimeDurable&quot; : {
+                &quot;ts&quot; : Timestamp(1568659918, 1), 
+                &quot;t&quot; : NumberLong(2)
+            }, 
+            &quot;optimeDate&quot; : ISODate(&quot;2019-09-16T18:51:58.000+0000&quot;), 
+            &quot;optimeDurableDate&quot; : ISODate(&quot;2019-09-16T18:51:58.000+0000&quot;), 
+            &quot;lastHeartbeat&quot; : ISODate(&quot;2019-09-16T18:52:02.822+0000&quot;), 
+            &quot;lastHeartbeatRecv&quot; : ISODate(&quot;2019-09-16T18:52:02.091+0000&quot;), 
+            &quot;pingMs&quot; : NumberLong(0), 
+            &quot;lastHeartbeatMessage&quot; : &quot;&quot;, 
+            &quot;syncingTo&quot; : &quot;e2f54aa4b983:27017&quot;, 
+            &quot;syncSourceHost&quot; : &quot;e2f54aa4b983:27017&quot;, 
+            &quot;syncSourceId&quot; : 0.0, 
+            &quot;infoMessage&quot; : &quot;&quot;, 
+            &quot;configVersion&quot; : 3.0
+        }, 
+        {
+            &quot;_id&quot; : 2.0, 
+            &quot;name&quot; : &quot;172.18.0.4:27017&quot;, 
+            &quot;ip&quot; : &quot;172.18.0.4&quot;, 
+            &quot;health&quot; : 1.0, 
+            &quot;state&quot; : 2.0, 
+            &quot;stateStr&quot; : &quot;SECONDARY&quot;, 
+            &quot;uptime&quot; : 1293.0, 
+            &quot;optime&quot; : {
+                &quot;ts&quot; : Timestamp(1568659918, 1), 
+                &quot;t&quot; : NumberLong(2)
+            }, 
+            &quot;optimeDurable&quot; : {
+                &quot;ts&quot; : Timestamp(1568659918, 1), 
+                &quot;t&quot; : NumberLong(2)
+            }, 
+            &quot;optimeDate&quot; : ISODate(&quot;2019-09-16T18:51:58.000+0000&quot;), 
+            &quot;optimeDurableDate&quot; : ISODate(&quot;2019-09-16T18:51:58.000+0000&quot;), 
+            &quot;lastHeartbeat&quot; : ISODate(&quot;2019-09-16T18:52:02.822+0000&quot;), 
+            &quot;lastHeartbeatRecv&quot; : ISODate(&quot;2019-09-16T18:52:01.643+0000&quot;), 
+            &quot;pingMs&quot; : NumberLong(0), 
+            &quot;lastHeartbeatMessage&quot; : &quot;&quot;, 
+            &quot;syncingTo&quot; : &quot;e2f54aa4b983:27017&quot;, 
+            &quot;syncSourceHost&quot; : &quot;e2f54aa4b983:27017&quot;, 
+            &quot;syncSourceId&quot; : 0.0, 
+            &quot;infoMessage&quot; : &quot;&quot;, 
+            &quot;configVersion&quot; : 3.0
+        }
+    ], 
+    &quot;ok&quot; : 1.0, 
+    &quot;$clusterTime&quot; : {
+        &quot;clusterTime&quot; : Timestamp(1568659918, 1), 
+        &quot;signature&quot; : {
+            &quot;hash&quot; : BinData(0, &quot;AAAAAAAAAAAAAAAAAAAAAAAAAAA=&quot;), 
+            &quot;keyId&quot; : NumberLong(0)
+        }
+    }, 
+    &quot;operationTime&quot; : Timestamp(1568659918, 1)
+}
+
+</code></pre>
+
+<table>
+<thead>
+<tr>
+<th align="left">容器名</th>
+<th align="left">ip</th>
+<th align="left">备注</th>
+</tr>
+</thead>
+
+<tbody>
+<tr>
+<td align="left">m0</td>
+<td align="left">172.18.0.2</td>
+<td align="left">Primary</td>
+</tr>
+
+<tr>
+<td align="left">m1</td>
+<td align="left">172.18.0.3</td>
+<td align="left">Secondary1</td>
+</tr>
+
+<tr>
+<td align="left">m2</td>
+<td align="left">172.18.0.4</td>
+<td align="left">Secondary2</td>
+</tr>
+</tbody>
+</table>
+
+<h2 id="验证同步">验证同步</h2>
+
+<p><img src="/img/Xnip2019-09-17_03-02-13.png" alt="Xnip2019-09-17_03-02-13" /></p>
+
+<p>mongodb默认读写都是在Primary上进行的，副本节点不允许读写，可以使用如下命令来允许副本读：</p>
+
+<pre><code class="language-js">db.getMongo().setSlaveOk()
+</code></pre>
+
+<h2 id="故障转移">故障转移</h2>
+
+<p>副本集模式下，如果Primary不可用，整个集群将会选举出新的Primary来继续对外提供读写服务</p>
+
+<h2 id="问题">问题</h2>
+
+<p>对于调用mongodb服务的应用来说，应该怎么连接mongodb呢？一开始直连m0，等到出了问题再手工切换到m2么？</p>
+
+<h2 id="注意">注意</h2>
+
+<p><a href="https://cloud.tencent.com/developer/article/1013044">https://cloud.tencent.com/developer/article/1013044</a>  这篇文章写的很详细，需要的时候直接看此文章。</p>
+
+<h1 id="分片">分片</h1>
+
+<p>集群数据冗余性和高可用性， 分片是将大量的操作均摊到各自的服务器上面， 负载均衡，提高系统的吞吐量。</p>
+
+<p><img src="/img/Xnip2019-09-17_14-06-31.png" alt="Xnip2019-09-17_14-06-31" /></p>
+
+<p>原来我们用replica set 他是使用一台机器承载所有的流量，   现在用分片是我们用三台去承载。 分流了。</p>
+
+<h1 id="分片集群">分片集群</h1>
+
+<p>单一的分片在实际项目中， 无法保证高可用。 所以如果要分片分流的话， 直接使用分片集群处理。</p>
+
+<p>MongoDB分片<a href="https://docs.mongodb.com/manual/reference/glossary/#term-sharded-cluster">群集</a>包含以下组件：</p>
+
+<ul>
+<li><a href="https://docs.mongodb.com/manual/core/sharded-cluster-shards/">分片</a>：每个分片包含分片数据的子集。每个分片都可以部署为<a href="https://docs.mongodb.com/manual/reference/glossary/#term-replica-set">副本集</a>。</li>
+<li><a href="https://docs.mongodb.com/manual/core/sharded-cluster-query-router/">mongos</a>：<code>mongos</code>充当查询路由器，提供客户端应用程序和分片集群之间的接口。</li>
+<li><a href="https://docs.mongodb.com/manual/core/sharded-cluster-config-servers/">config servers</a>：配置服务器存储群集的元数据和配置设置。从MongoDB 3.4开始，必须将配置服务器部署为副本集</li>
+</ul>
+
+<p><img src="/img/Xnip2019-09-17_14-40-19.png" alt="Xnip2019-09-17_14-40-19" /></p>
+
+<h2 id="1-配置服务器">1. 配置服务器</h2>
+
+<p>config servers：配置服务器存储分片<a href="https://docs.mongodb.com/manual/reference/glossary/#term-sharded-cluster">集群</a>的元数据。元数据反映了分片集群中所有数据和组件的状态和组织。元数据包括每个分片上的块列表以及定义块的范围。</p>
+
+<p>该<a href="https://docs.mongodb.com/manual/reference/program/mongos/#bin.mongos"><code>mongos</code></a>实例缓存这些数据，并用它来路由读写操作，以正确的碎片。<a href="https://docs.mongodb.com/manual/reference/program/mongos/#bin.mongos"><code>mongos</code></a> 在群集有元数据更改时更新缓存，例如<a href="https://docs.mongodb.com/manual/core/sharding-data-partitioning/#sharding-chunk-splits">Chunk Splits</a>或<a href="https://docs.mongodb.com/manual/tutorial/add-shards-to-shard-cluster/">添加分片</a>。Shards还从配置服务器读取块元数据。</p>
+
+<p>配置服务器还存储<a href="https://docs.mongodb.com/manual/core/authentication/">身份验证</a>配置信息，例如<a href="https://docs.mongodb.com/manual/core/authorization/">基于角色的访问控制</a>或群集的<a href="https://docs.mongodb.com/manual/core/security-internal-authentication/">内部身份验证</a>设置。</p>
+
+<p>MongoDB还使用配置服务器来管理分布式锁。</p>
+
+<p>每个分片群集必须具有自己的配置服务器。不要将相同的配置服务器用于不同的分片群集。</p>
+
+<p>生产上建议config server的rs至少要有3个副本集成员。</p>
+
+<p><strong>MongoDB是在collection级别实现的水平分片。</strong></p>
+
+<h2 id="2-mongos">2. mongos</h2>
+
+<p>MongoDB <a href="https://docs.mongodb.com/manual/reference/program/mongos/#bin.mongos"><code>mongos</code></a>实例将查询和写入操作路由到分<a href="https://docs.mongodb.com/manual/reference/glossary/#term-shard">片</a>集群中的分片。<a href="https://docs.mongodb.com/manual/reference/program/mongos/#bin.mongos"><code>mongos</code></a>从应用程序的角度提供分片集群的唯一接口。<strong>应用程序永远不会与分片直接连接或通信</strong>。</p>
+
+<p>一个Sharding集群，可以有一个mongos，也可以如上图所示为每个App Server配置一个mongos以减轻路由压力。</p>
+
+<p>注意这里的mongos并不要配置为rs，因为只是个路由，并不存储数据，配置多个mongos的意思是配置多个单独的mongos实例。</p>
+
+<h2 id="3-分片">3. 分片</h2>
+
+<p>从MongoDB 3.6开始，必须将分片部署为<a href="https://docs.mongodb.com/manual/reference/glossary/#term-replica-set">副本集</a>以提供冗余和高可用性。</p>
+
+<p>分片群集中的每个数据库都有一个<a href="https://docs.mongodb.com/manual/reference/glossary/#term-primary-shard">主分片</a>，其中包含该数据库的所有非分片集合。每个数据库都有自己的主分片。<a href="https://docs.mongodb.com/manual/reference/glossary/#term-primary">主</a>分片与副本集中的<a href="https://docs.mongodb.com/manual/reference/glossary/#term-primary">主分片</a>无关。</p>
+
+<p>用来保存数据，保证数据的高可用性和一致性。可以是一个单独的mongod实例，也可以是一个副本集。在生产环境下Shard一般是一个Replica Set，以防止该数据片的单点故障。可以将所有shard的副本集放在一个服务器多个mongodb实例中。</p>
+
+<p>sharding的每个node的database中的集合可以是分片也可以不分片，每个db都有一个primary shard，未分片的集合就是存在其各自的primary shard中的。</p>
+
+<h1 id="分片策略选择">分片策略选择</h1>
+
+<p><strong>转载地址： <a href="https://www.cnblogs.com/leohahah/p/8652572.html">https://www.cnblogs.com/leohahah/p/8652572.html</a></strong></p>
+
+<h2 id="hash-sharding">hash sharding</h2>
+
+<p><a href="https://docs.mongodb.com/v3.2/core/hashed-sharding/">https://docs.mongodb.com/v3.2/core/hashed-sharding/</a></p>
+
+<p>当shard key总是单调递增时hash sharding并不是一个很好的选择，其查询分发基本和broadcast operation一样了，因为hash会把数据比较均匀的分布在各个shard上，但此时选择ranged sharding也有缺点，因为数据过度集中会导致数据集中于某个shard。</p>
+
+<h2 id="ranged-sharding">ranged sharding</h2>
+
+<p><a href="https://docs.mongodb.com/v3.2/core/ranged-sharding/">https://docs.mongodb.com/v3.2/core/ranged-sharding/</a></p>
+
+<p>在shard key选取不正确的情况下，范围分片会导致数据分布不均匀，也可能遭遇性能瓶颈，因此需要合理的选择ranged shard key。</p>
+
+<h2 id="tag-aware-sharding">Tag aware sharding</h2>
+
+<p><a href="https://docs.mongodb.com/v3.2/core/tag-aware-sharding/">https://docs.mongodb.com/v3.2/core/tag-aware-sharding/</a></p>
+
+<p>原理如下：</p>
+
+<ul>
+<li>sh.addShardTag() 给shard设置标签A</li>
+<li>sh.addTagRange() 给集合的某个chunk范围设置标签A，最终MongoDB会保证设置标签 A 的chunk范围（或该范围的超集）分布设置了标签 A 的 shard 上。</li>
+</ul>
+
+<p>Tag aware sharding可应用在如下场景：</p>
+
+<p>将部署在不同机房的shard设置机房标签，将不同chunk范围的数据分布到指定的机房</p>
+
+<p>将服务能力不通的shard设置服务等级标签，将更多的chunk分散到服务能力更强的shard上去。</p>
+
+<p>使用 Tag aware sharding 需要注意是,chunk分配到对应标签的shard上不是立即完成，而是在不断insert、update后触发split、moveChunk后逐步完成的，并且需要保证balancer是开启的。所以你可能会观察到，在设置了tag range后一段时间后，写入仍然没有分布到tag相同的shard上去。</p>
+
+
+                
+                
+<div class="entry-shang text-center">
+    
+	    <p>「真诚赞赏，手留余香」</p>
+	
+	<button class="zs show-zs btn btn-bred">赞赏支持</button>
+</div>
+<div class="zs-modal-bg"></div>
+<div class="zs-modal-box">
+	<div class="zs-modal-head">
+		<button type="button" class="close">×</button>
+		<span class="author"><a href="http://maizitoday.github.io/"><img src="/img/favicon.png" /></a></span>
+        
+	        <p class="tip"><i></i><span>真诚赞赏，手留余香</span></p>
+		
+ 
+	</div>
+	<div class="zs-modal-body">
+		<div class="zs-modal-btns">
+			<button class="btn btn-blink" data-num="2">2元</button>
+			<button class="btn btn-blink" data-num="5">5元</button>
+			<button class="btn btn-blink" data-num="10">10元</button>
+			<button class="btn btn-blink" data-num="50">50元</button>
+			<button class="btn btn-blink" data-num="100">100元</button>
+			<button class="btn btn-blink" data-num="1">任意金额</button>
+		</div>
+		<div class="zs-modal-pay">
+			<button class="btn btn-bred" id="pay-text">2元</button>
+			<p>使用<span id="pay-type">微信</span>扫描二维码完成支付</p>
+			<img src="/img/reward/wechat-2.png"  id="pay-image"/>
+		</div>
+	</div>
+	<div class="zs-modal-footer">
+		<label><input type="radio" name="zs-type" value="wechat" class="zs-type" checked="checked"><span ><span class="zs-wechat"><img src="/img/reward/wechat-btn.png"/></span></label>
+		<label><input type="radio" name="zs-type" value="alipay" class="zs-type" class="zs-alipay"><img src="/img/reward/alipay-btn.png"/></span></label>
+	</div>
+</div>
+<script type="text/javascript" src="/js/reward.js"></script>
+
+                
+
+                <hr>
+                <ul class="pager">
+                    
+                    <li class="previous">
+                        <a href="/post/mongodb%E7%B3%BB%E5%88%97-crud%E6%93%8D%E4%BD%9C/" data-toggle="tooltip" data-placement="top" title="mongodb-crud操作">&larr;
+                            Previous Post</a>
+                    </li>
+                    
+                    
+                    <li class="next">
+                        <a href="/post/mongodb%E7%B3%BB%E5%88%97-%E5%AD%98%E5%82%A8%E5%BC%95%E6%93%8E/" data-toggle="tooltip" data-placement="top" title="mongodb-存储引擎">Next
+                            Post &rarr;</a>
+                    </li>
+                    
+                </ul>
+
+                
+<div id="disqus-comment"></div>
+
+
+
+            </div>
+            
+            <div class="
+                col-lg-8 col-lg-offset-2
+                col-md-10 col-md-offset-1
+                sidebar-container">
+
+                
+                
+                <section>
+                    <hr class="hidden-sm hidden-xs">
+                    <h5><a href="/tags/">FEATURED TAGS</a></h5>
+                    <div class="tags">
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        <a href="/tags/docker" title="docker">
+                            docker
+                        </a>
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        <a href="/tags/dockerfile" title="dockerfile">
+                            dockerfile
+                        </a>
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        <a href="/tags/java%E5%9F%BA%E7%A1%80" title="java基础">
+                            java基础
+                        </a>
+                        
+                        
+                        
+                        <a href="/tags/java%E7%9B%B8%E5%85%B3%E6%A6%82%E5%BF%B5" title="java相关概念">
+                            java相关概念
+                        </a>
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        <a href="/tags/jvm" title="jvm">
+                            jvm
+                        </a>
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        <a href="/tags/maven" title="maven">
+                            maven
+                        </a>
+                        
+                        
+                        
+                        <a href="/tags/mongodb" title="mongodb">
+                            mongodb
+                        </a>
+                        
+                        
+                        
+                        
+                        
+                        <a href="/tags/mybatis%E7%B3%BB%E5%88%97" title="mybatis系列">
+                            mybatis系列
+                        </a>
+                        
+                        
+                        
+                        
+                        
+                        <a href="/tags/mysql%E7%B3%BB%E5%88%97" title="mysql系列">
+                            mysql系列
+                        </a>
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        <a href="/tags/nosql" title="nosql">
+                            nosql
+                        </a>
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        <a href="/tags/redis" title="redis">
+                            redis
+                        </a>
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        <a href="/tags/springcloud" title="springCloud">
+                            springCloud
+                        </a>
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        <a href="/tags/springboot%E7%B3%BB%E5%88%97" title="springboot系列">
+                            springboot系列
+                        </a>
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        <a href="/tags/%E4%B8%AD%E9%97%B4%E4%BB%B6" title="中间件">
+                            中间件
+                        </a>
+                        
+                        
+                        
+                        <a href="/tags/%E4%B8%BB%E4%BB%8E%E5%A4%8D%E5%88%B6" title="主从复制">
+                            主从复制
+                        </a>
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        <a href="/tags/%E5%88%86%E5%B8%83%E5%BC%8F%E7%B3%BB%E5%88%97" title="分布式系列">
+                            分布式系列
+                        </a>
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        <a href="/tags/%E5%BC%80%E5%8F%91%E5%B7%A5%E5%85%B7" title="开发工具">
+                            开发工具
+                        </a>
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        <a href="/tags/%E6%95%B0%E6%8D%AE%E5%BA%93" title="数据库">
+                            数据库
+                        </a>
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        <a href="/tags/%E6%9C%8D%E5%8A%A1%E8%84%9A%E6%9C%AC" title="服务脚本">
+                            服务脚本
+                        </a>
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        <a href="/tags/%E8%AE%BE%E8%AE%A1%E6%A8%A1%E5%BC%8F" title="设计模式">
+                            设计模式
+                        </a>
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        <a href="/tags/%E8%B4%9F%E8%BD%BD%E5%9D%87%E8%A1%A1" title="负载均衡">
+                            负载均衡
+                        </a>
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        <a href="/tags/%E9%9B%86%E7%BE%A4" title="集群">
+                            集群
+                        </a>
+                        
+                        
+                        
+                        
+                        
+                        
+                    </div>
+                </section>
+                
+
+                
+                
+                <section>
+                    <hr>
+                    <h5>FRIENDS</h5>
+                    <ul class="list-inline">
+                        
+                        <li><a target="_blank" href="https://zhaohuabing.com">赵化冰博客</a></li>
+                        
+                        <li><a target="_blank" href="http://www.tianshouzhi.com">田守枝</a></li>
+                        
+                        <li><a target="_blank" href="http://www.ityouknow.com">纯洁的微笑</a></li>
+                        
+                        <li><a target="_blank" href="https://renchunxiao.com">任春晓</a></li>
+                        
+                        <li><a target="_blank" href="https://www.lihongkun.com">泛泛之辈</a></li>
+                        
+                        <li><a target="_blank" href="https://juejin.im/welcome/backend">后端服务论坛</a></li>
+                        
+                        <li><a target="_blank" href="https://www.javaboy.org">江南一点雨</a></li>
+                        
+                    </ul>
+                </section>
+                
+            </div>
+        </div>
+    </div>
+</article>
+
+
+
+
+<footer>
+    <div class="container">
+        <div class="row">
+            <div class="col-lg-8 col-lg-offset-2 col-md-10 col-md-offset-1">
+                <ul class="list-inline text-center">
+                   
+                   <li>
+                       <a href="" rel="alternate" type="application/rss+xml" title="" >
+                           <span class="fa-stack fa-lg">
+                               <i class="fa fa-circle fa-stack-2x"></i>
+                               <i class="fa fa-rss fa-stack-1x fa-inverse"></i>
+                           </span>
+                       </a>
+                   </li>
+                   
+                    
+                    <li>
+                        <a href="mailto:maiziybtoday@gmail.com">
+                            <span class="fa-stack fa-lg">
+                                <i class="fa fa-circle fa-stack-2x"></i>
+                                <i class="fa fa-envelope fa-stack-1x fa-inverse"></i>
+                            </span>
+                        </a>
+                    </li>
+		    
+                    
+                    
+                    
+                    
+
+                    
+
+		    
+                    
+                    <li>
+                        <a target="_blank" href="/your%20wechat%20qr%20code%20image">
+                            <span class="fa-stack fa-lg">
+                                <i class="fa fa-circle fa-stack-2x"></i>
+                                <i class="fa fa-wechat fa-stack-1x fa-inverse"></i>
+                            </span>
+                        </a>
+                    </li>
+		    
+                    
+                    
+                    <li>
+                        <a target="_blank" href="https://www.linkedin.com/in/yourlinkedinid">
+                            <span class="fa-stack fa-lg">
+                                <i class="fa fa-circle fa-stack-2x"></i>
+                                <i class="fa fa-linkedin fa-stack-1x fa-inverse"></i>
+                            </span>
+                        </a>
+                    </li>
+		    
+                    
+                </ul>
+		<p class="copyright text-muted">
+                    Copyright &copy;  2019
+                    <br>
+                    <a href="https://themes.gohugo.io/hugo-theme-cleanwhite">CleanWhite Hugo Theme</a> by <a href="https://zhaohuabing.com">Huabing</a> |
+                    <iframe
+                        style="margin-left: 2px; margin-bottom:-5px;"
+                        frameborder="0" scrolling="0" width="100px" height="20px"
+                        src="https://ghbtns.com/github-btn.html?user=zhaohuabing&repo=hugo-theme-cleanwhite&type=star&count=true" >
+                    </iframe>
+                </p>
+            </div>
+        </div>
+    </div>
+</footer>
+
+
+
+
+<script>
+    function async(u, c) {
+      var d = document, t = 'script',
+          o = d.createElement(t),
+          s = d.getElementsByTagName(t)[0];
+      o.src = u;
+      if (c) { o.addEventListener('load', function (e) { c(null, e); }, false); }
+      s.parentNode.insertBefore(o, s);
+    }
+</script>
+
+
+
+
+
+
+<script>
+    
+    if($('#tag_cloud').length !== 0){
+        async("/js/jquery.tagcloud.js",function(){
+            $.fn.tagcloud.defaults = {
+                
+                color: {start: '#bbbbee', end: '#0085a1'},
+            };
+            $('#tag_cloud a').tagcloud();
+        })
+    }
+</script>
+
+
+<script>
+    async("https://cdnjs.cloudflare.com/ajax/libs/fastclick/1.0.6/fastclick.js", function(){
+        var $nav = document.querySelector("nav");
+        if($nav) FastClick.attach($nav);
+    })
+</script>
+
+
+
+
+
+
+</body>
+</html>

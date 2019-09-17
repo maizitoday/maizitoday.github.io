@@ -15,9 +15,9 @@
     
 
     
-    <meta name="title" content="mongodb系列-索引" />
-    <meta property="og:title" content="mongodb系列-索引" />
-    <meta property="twitter:title" content="mongodb系列-索引" />
+    <meta name="title" content="mongodb-索引" />
+    <meta property="og:title" content="mongodb-索引" />
+    <meta property="twitter:title" content="mongodb-索引" />
     
 
     
@@ -34,7 +34,7 @@
     <meta name="keyword"  content="麦子, maizi, maizi, , 麦子的网络日志, 麦子的博客, maizi Blog, 博客, 个人网站, 互联网, Web, 云原生, PaaS, Istio, Kubernetes, 微服务, Microservice">
     <link rel="shortcut icon" href="/img/favicon.ico">
 
-    <title>mongodb系列-索引-麦子的博客</title>
+    <title>mongodb-索引-麦子的博客</title>
 
     <link rel="canonical" href="/post/mongodb%E7%B3%BB%E5%88%97-%E7%B4%A2%E5%BC%95/">
 
@@ -162,16 +162,24 @@
                 <div class="post-heading">
                     <div class="tags">
                         
-                        <a class="tag" href="/tags/mongodb%E7%B3%BB%E5%88%97" title="mongodb系列">
-                            mongodb系列
+                        <a class="tag" href="/tags/mongodb" title="mongodb">
+                            mongodb
                         </a>
                         
-                        <a class="tag" href="/tags/%E6%95%B0%E7%BB%84%E6%9B%B4%E6%96%B0%E8%BF%90%E7%AE%97%E7%AC%A6" title="数组更新运算符">
-                            数组更新运算符
+                        <a class="tag" href="/tags/%E5%B8%B8%E7%94%A8%E7%B4%A2%E5%BC%95" title="常用索引">
+                            常用索引
+                        </a>
+                        
+                        <a class="tag" href="/tags/%E7%B4%A2%E5%BC%95%E4%BC%98%E5%8C%96" title="索引优化">
+                            索引优化
+                        </a>
+                        
+                        <a class="tag" href="/tags/query%E6%89%A7%E8%A1%8C%E8%AE%A1%E5%88%92" title="query执行计划">
+                            query执行计划
                         </a>
                         
                     </div>
-                    <h1>mongodb系列-索引</h1>
+                    <h1>mongodb-索引</h1>
                     <h2 class="subheading"></h2>
                     <span class="meta">
 			Posted by 
@@ -205,13 +213,259 @@
                 <header>
                     <h2>TOC</h2>
                 </header>
+                <nav id="TableOfContents">
+<ul>
+<li><a href="#常用索引">常用索引</a>
+<ul>
+<li><a href="#单键索引">单键索引</a></li>
+<li><a href="#复合索引">复合索引</a></li>
+<li><a href="#多键值索引">多键值索引</a></li>
+<li><a href="#hash索引">hash索引</a></li>
+<li><a href="#局部索引">局部索引</a></li>
+<li><a href="#稀疏索引">稀疏索引</a></li>
+<li><a href="#ttl索引">TTL索引</a></li>
+</ul></li>
+<li><a href="#索引管理">索引管理</a>
+<ul>
+<li><a href="#查看索引">查看索引</a></li>
+<li><a href="#移除索引">移除索引</a></li>
+<li><a href="#修改索引">修改索引</a></li>
+</ul></li>
+<li><a href="#索引的优化">索引的优化</a>
+<ul>
+<li><a href="#explain执行计划">explain执行计划</a></li>
+<li><a href="#和mysql的索引优化是一样的">和mysql的索引优化是一样的</a></li>
+</ul></li>
+</ul>
+</nav>
                 
                 
-                <p>[TOC]</p>
+
+<p>[TOC]</p>
 
 <p><strong>说明：本文来自于<a href="https://www.bilibili.com/video/av36394924/?p=2">https://www.bilibili.com/video/av36394924/?p=2</a>视频讲解</strong></p>
 
-<p><strong>官方文档：<a href="https://docs.mongodb.com/">https://docs.mongodb.com/</a>  4.2版本</strong></p>
+<p><strong>官方文档： <a href="https://docs.mongodb.com/manual/core/index-single/">https://docs.mongodb.com/manual/core/index-single/</a>  4.2版本</strong></p>
+
+<h1 id="常用索引">常用索引</h1>
+
+<h2 id="单键索引">单键索引</h2>
+
+<pre><code class="language-sql">实例：
+db.records.createIndex( { score: 1 } )
+db.getCollection(&quot;inventory&quot;).createIndex({&quot;item.name&quot; : 1})
+</code></pre>
+
+<h2 id="复合索引">复合索引</h2>
+
+<pre><code class="language-sql">规范：
+db.collection.createIndex( { &lt;field1&gt;: &lt;type&gt;, &lt;field2&gt;: &lt;type2&gt;, ... } )
+
+db.records.createIndex( { &quot;score&quot;: 1 } , {&quot;name&quot; : 1})
+</code></pre>
+
+<p><strong>注意索引位置：</strong></p>
+
+<h2 id="多键值索引">多键值索引</h2>
+
+<p>其实所谓的多键值索引就是在array上面建立一个索引，mongodb会将array的每一个数字进行排序索引。</p>
+
+<pre><code class="language-sql">规范：
+db.coll.createIndex( { &lt;field&gt;: &lt; 1 or -1 &gt; } )
+
+{ _id: 5, type: &quot;food&quot;, item: &quot;aaa&quot;, ratings: [ 5, 8, 9 ] }
+db.inventory.createIndex( { ratings: 1 } )
+</code></pre>
+
+<h2 id="hash索引">hash索引</h2>
+
+<p>将字段的值通过hash函数变成一个int类型的一个数字，然后放到数组中。 <strong>他是支持分片的。</strong>， 他就是为了定值查找。</p>
+
+<pre><code class="language-sql">规范：
+db.collection.createIndex( { &lt;field&gt;: &quot;hashed&quot; } )
+</code></pre>
+
+<h2 id="局部索引">局部索引</h2>
+
+<p>如果你建立的事一个basic indexs， 你解索的索引是针对所有的文档。 既然有所有， 那么你就有相对的词，局部。</p>
+
+<p>他主要是针对你匹配的复合条件的索引，是document的子集。 他有更低的开销，更少的存储空间。</p>
+
+<pre><code class="language-sql">规范：
+db.restaurants.createIndex(
+   { cuisine: 1 },
+   { partialFilterExpression: { rating: { $gt: 5 } } }
+)
+可以使用这几个： $exists $gt, $gte, $lt, $lte  $type  $and  
+
+
+db.restaurants.find( { cuisine: &quot;Italian&quot;, rating: { $lt: 8 } } )
+</code></pre>
+
+<h2 id="稀疏索引">稀疏索引</h2>
+
+<p>每一个文档的字段都不是一样的， 如果这个时候设置一个字段name是其他文档没有这个字段的时候，怎么来建立索引。</p>
+
+<p>稀疏索引，他的意思就是我建立的index字段必须在有这个字段的document才可以建立。</p>
+
+<pre><code class="language-sql">规范：
+db.addresses.createIndex( { &quot;xmpp_id&quot;: 1 }, { sparse: true } )
+
+db.scores.find( { score: { $lt: 90 } } )
+</code></pre>
+
+<h2 id="ttl索引">TTL索引</h2>
+
+<p>他是一个单键索引， 在制定的时间内，就回消除document数据， 可以用于缓存处理。</p>
+
+<pre><code class="language-sql">规范：
+db.eventlog.createIndex( { &quot;lastModifiedDate&quot;: 1 }, { expireAfterSeconds: 3600 } ) // 单位是秒
+
+
+</code></pre>
+
+<p><strong>注意：</strong> 有延迟， 本身有后台的进程去删除这些document，他是60秒执行一次。</p>
+
+<h1 id="索引管理">索引管理</h1>
+
+<h2 id="查看索引">查看索引</h2>
+
+<pre><code class="language-sql">db.collection.getIndexes()
+</code></pre>
+
+<h2 id="移除索引">移除索引</h2>
+
+<pre><code class="language-sql">db.pets.dropIndex( &quot;catIdx&quot; )  删除的是字段
+db.collection.dropIndexes()  // 会发现_id这个主键索引是删不掉的， 除非换了这个_id
+</code></pre>
+
+<h2 id="修改索引">修改索引</h2>
+
+<p>重建操作， 数据量大的时候，磁盘不够了， 碎片整理的，用这个， 但是不建议使用。，</p>
+
+<pre><code>db.collection.reIndex()  
+</code></pre>
+
+<p>这个操作， 只能影响一个mongdb，对主从和分片的其他的mongodb是不会有影响的。</p>
+
+<h1 id="索引的优化">索引的优化</h1>
+
+<p>他也是安装BTree的模式来的。</p>
+
+<h2 id="explain执行计划">explain执行计划</h2>
+
+<pre><code class="language-json">db.getCollection(&quot;inventory&quot;).find({ &quot;item.name&quot; : &quot;cd&quot;}).explain(&quot;executionStats&quot;)
+
+{ 
+    &quot;queryPlanner&quot; : {
+        &quot;plannerVersion&quot; : 1.0, 
+        &quot;namespace&quot; : &quot;mydatabse.inventory&quot;, 
+        &quot;indexFilterSet&quot; : false, 
+        &quot;parsedQuery&quot; : {
+            &quot;item.name&quot; : {
+                &quot;$eq&quot; : &quot;cd&quot;
+            }
+        }, 
+        &quot;queryHash&quot; : &quot;9CC5AAF7&quot;, 
+        &quot;planCacheKey&quot; : &quot;E5AE0C9D&quot;, 
+        &quot;winningPlan&quot; : {
+            &quot;stage&quot; : &quot;FETCH&quot;, 
+            &quot;inputStage&quot; : {
+                &quot;stage&quot; : &quot;IXSCAN&quot;, 
+                &quot;keyPattern&quot; : {
+                    &quot;item.name&quot; : 1.0
+                }, 
+                &quot;indexName&quot; : &quot;item.name_1&quot;, 
+                &quot;isMultiKey&quot; : false, 
+                &quot;multiKeyPaths&quot; : {
+                    &quot;item.name&quot; : [
+
+                    ]
+                }, 
+                &quot;isUnique&quot; : false, 
+                &quot;isSparse&quot; : false, 
+                &quot;isPartial&quot; : false, 
+                &quot;indexVersion&quot; : 2.0, 
+                &quot;direction&quot; : &quot;forward&quot;, 
+                &quot;indexBounds&quot; : {
+                    &quot;item.name&quot; : [
+                        &quot;[\&quot;cd\&quot;, \&quot;cd\&quot;]&quot;
+                    ]
+                }
+            }
+        }, 
+        &quot;rejectedPlans&quot; : [
+
+        ]
+    }, 
+    &quot;executionStats&quot; : {
+        &quot;executionSuccess&quot; : true, 
+        &quot;nReturned&quot; : 1.0, 
+        &quot;executionTimeMillis&quot; : 0.0, 
+        &quot;totalKeysExamined&quot; : 1.0, 
+        &quot;totalDocsExamined&quot; : 1.0, 
+        &quot;executionStages&quot; : {
+            &quot;stage&quot; : &quot;FETCH&quot;, 
+            &quot;nReturned&quot; : 1.0, // 返回的1条记录
+            &quot;executionTimeMillisEstimate&quot; : 0.0,  // 执行了时间 
+            &quot;works&quot; : 2.0, 
+            &quot;advanced&quot; : 1.0, 
+            &quot;needTime&quot; : 0.0, 
+            &quot;needYield&quot; : 0.0, 
+            &quot;saveState&quot; : 0.0, 
+            &quot;restoreState&quot; : 0.0, 
+            &quot;isEOF&quot; : 1.0, 
+            &quot;docsExamined&quot; : 1.0, // 查询了一条document文档
+            &quot;alreadyHasObj&quot; : 0.0, 
+            &quot;inputStage&quot; : {
+                &quot;stage&quot; : &quot;IXSCAN&quot;, 
+                &quot;nReturned&quot; : 1.0, 
+                &quot;executionTimeMillisEstimate&quot; : 0.0, 
+                &quot;works&quot; : 2.0, 
+                &quot;advanced&quot; : 1.0, 
+                &quot;needTime&quot; : 0.0, 
+                &quot;needYield&quot; : 0.0, 
+                &quot;saveState&quot; : 0.0, 
+                &quot;restoreState&quot; : 0.0, 
+                &quot;isEOF&quot; : 1.0, 
+                &quot;keyPattern&quot; : {
+                    &quot;item.name&quot; : 1.0
+                }, 
+                &quot;indexName&quot; : &quot;item.name_1&quot;, 
+                &quot;isMultiKey&quot; : false, 
+                &quot;multiKeyPaths&quot; : {
+                    &quot;item.name&quot; : [
+
+                    ]
+                }, 
+                &quot;isUnique&quot; : false, 
+                &quot;isSparse&quot; : false, 
+                &quot;isPartial&quot; : false, 
+                &quot;indexVersion&quot; : 2.0, 
+                &quot;direction&quot; : &quot;forward&quot;, 
+                &quot;indexBounds&quot; : {
+                    &quot;item.name&quot; : [
+                        &quot;[\&quot;cd\&quot;, \&quot;cd\&quot;]&quot;
+                    ]
+                }, 
+                &quot;keysExamined&quot; : 1.0, 
+                &quot;seeks&quot; : 1.0, 
+                &quot;dupsTested&quot; : 0.0, 
+                &quot;dupsDropped&quot; : 0.0
+            }
+        }
+    }, 
+    &quot;serverInfo&quot; : {
+        &quot;host&quot; : &quot;cdcbbd0f125a&quot;, 
+        &quot;port&quot; : 27017.0, 
+        &quot;version&quot; : &quot;4.2.0&quot;, 
+        &quot;gitVersion&quot; : &quot;a4b751dcf51dd249c5865812b390cfd1c0129c30&quot;
+    }, 
+    &quot;ok&quot; : 1.0
+}
+</code></pre>
+
+<h2 id="和mysql的索引优化是一样的">和mysql的索引优化是一样的</h2>
 
 
                 
@@ -260,13 +514,13 @@
                 <ul class="pager">
                     
                     <li class="previous">
-                        <a href="/post/mongodb%E7%B3%BB%E5%88%97-%E8%BF%90%E7%AE%97%E7%AC%A6/" data-toggle="tooltip" data-placement="top" title="mongodb系列-运算符">&larr;
+                        <a href="/post/mongodb%E7%B3%BB%E5%88%97-%E8%BF%90%E7%AE%97%E7%AC%A6/" data-toggle="tooltip" data-placement="top" title="mongodb-运算符">&larr;
                             Previous Post</a>
                     </li>
                     
                     
                     <li class="next">
-                        <a href="/post/mongodb%E7%B3%BB%E5%88%97-%E6%A0%87%E5%87%86sql%E5%92%8Cmongodb%E5%AF%B9%E6%AF%94/" data-toggle="tooltip" data-placement="top" title="mongodb系列-标准sql和mongodb对比">Next
+                        <a href="/post/mongodb%E7%B3%BB%E5%88%97-%E6%A0%87%E5%87%86sql%E5%92%8Cmongodb%E5%AF%B9%E6%AF%94/" data-toggle="tooltip" data-placement="top" title="mongodb-标准sql和mongodb对比">Next
                             Post &rarr;</a>
                     </li>
                     
@@ -467,8 +721,8 @@
                         
                         
                         
-                        <a href="/tags/mongodb%E7%B3%BB%E5%88%97" title="mongodb系列">
-                            mongodb系列
+                        <a href="/tags/mongodb" title="mongodb">
+                            mongodb
                         </a>
                         
                         
@@ -496,6 +750,8 @@
                         <a href="/tags/nosql" title="nosql">
                             nosql
                         </a>
+                        
+                        
                         
                         
                         
@@ -619,9 +875,17 @@
                         
                         
                         
+                        
+                        
                         <a href="/tags/%E5%88%86%E5%B8%83%E5%BC%8F%E7%B3%BB%E5%88%97" title="分布式系列">
                             分布式系列
                         </a>
+                        
+                        
+                        
+                        
+                        
+                        
                         
                         
                         
@@ -699,10 +963,6 @@
                         
                         
                         
-                        <a href="/tags/%E6%95%B0%E7%BB%84%E6%9B%B4%E6%96%B0%E8%BF%90%E7%AE%97%E7%AC%A6" title="数组更新运算符">
-                            数组更新运算符
-                        </a>
-                        
                         
                         
                         
@@ -720,6 +980,12 @@
                         <a href="/tags/%E6%9C%8D%E5%8A%A1%E8%84%9A%E6%9C%AC" title="服务脚本">
                             服务脚本
                         </a>
+                        
+                        
+                        
+                        
+                        
+                        
                         
                         
                         
@@ -820,6 +1086,10 @@
                         
                         
                         
+                        
+                        <a href="/tags/%E9%9B%86%E7%BE%A4" title="集群">
+                            集群
+                        </a>
                         
                         
                         
