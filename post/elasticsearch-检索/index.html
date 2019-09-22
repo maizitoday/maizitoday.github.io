@@ -1,0 +1,1641 @@
+<!DOCTYPE html>
+<html lang="en-us">
+<head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+
+    
+    <meta property="og:site_name" content="">
+    <meta property="og:type" content="article">
+
+    
+    <meta property="og:image" content="http://maizitoday.github.io//img/home-bg-jeep.jpg">
+    <meta property="twitter:image" content="http://maizitoday.github.io//img/home-bg-jeep.jpg" />
+    
+
+    
+    <meta name="title" content="ElasticSearch-检索原理" />
+    <meta property="og:title" content="ElasticSearch-检索原理" />
+    <meta property="twitter:title" content="ElasticSearch-检索原理" />
+    
+
+    
+    <meta name="description" content="麦子，程序员, 开源爱好者，生活探险家 | 这里是 麦子 的博客，与你一起发现更大的世界。">
+    <meta property="og:description" content="麦子，程序员, 开源爱好者，生活探险家 | 这里是 麦子 的博客，与你一起发现更大的世界。" />
+    <meta property="twitter:description" content="麦子，程序员, 开源爱好者，生活探险家 | 这里是 麦子 的博客，与你一起发现更大的世界。" />
+    
+
+    
+    <meta property="twitter:card" content="summary" />
+    
+    
+
+    <meta name="keyword"  content="麦子, maizi, maizi, , 麦子的网络日志, 麦子的博客, maizi Blog, 博客, 个人网站, 互联网, Web, 云原生, PaaS, Istio, Kubernetes, 微服务, Microservice">
+    <link rel="shortcut icon" href="/img/favicon.ico">
+
+    <title>ElasticSearch-检索原理-麦子的博客</title>
+
+    <link rel="canonical" href="/post/elasticsearch-%E6%A3%80%E7%B4%A2/">
+
+    <link rel="stylesheet" href="/css/iDisqus.min.css"/>
+	
+    
+    <link rel="stylesheet" href="/css/bootstrap.min.css">
+
+    
+    <link rel="stylesheet" href="/css/hux-blog.min.css">
+
+    
+    <link rel="stylesheet" href="/css/syntax.css">
+
+    
+    <link rel="stylesheet" href="/css/zanshang.css">
+
+    
+    <link href="//cdnjs.cloudflare.com/ajax/libs/font-awesome/4.6.3/css/font-awesome.min.css" rel="stylesheet" type="text/css">
+    
+    
+    <script src="/js/jquery.min.js"></script>
+    
+    
+    <script src="/js/bootstrap.min.js"></script>
+    
+    
+    <script src="/js/hux-blog.min.js"></script>
+	
+    
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.13.1/styles/docco.min.css">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.13.1/highlight.min.js"></script>
+    <script>hljs.initHighlightingOnLoad();</script>
+</head>
+
+
+<nav class="navbar navbar-default navbar-custom navbar-fixed-top">
+    <div class="container-fluid">
+        
+        <div class="navbar-header page-scroll">
+            <button type="button" class="navbar-toggle">
+                <span class="sr-only">Toggle navigation</span>
+                <span class="icon-bar"></span>
+                <span class="icon-bar"></span>
+                <span class="icon-bar"></span>
+            </button>
+            <a class="navbar-brand" href="/"></a>
+        </div>
+
+        
+        
+        <div id="huxblog_navbar">
+            <div class="navbar-collapse">
+                <ul class="nav navbar-nav navbar-right">
+                    <li>
+                        <a href="/">Home</a>
+                    </li>
+                    
+                    <li>
+                        <a href="/categories/life">Life</a>
+                    </li>
+                    
+                    <li>
+                        <a href="/categories/tech">Tech</a>
+                    </li>
+                    
+                    
+		    
+                        <li><a href="/top/about/">ABOUT</a></li>
+                    
+
+                    
+		    <li>
+                        <a href="/search">SEARCH <img src="/img/search.png" height="15" style="cursor: pointer;" alt="Search"></a>
+		    </li>
+                    
+                </ul>
+            </div>
+        </div>
+        
+    </div>
+    
+</nav>
+<script>
+    
+    
+    
+    var $body   = document.body;
+    var $toggle = document.querySelector('.navbar-toggle');
+    var $navbar = document.querySelector('#huxblog_navbar');
+    var $collapse = document.querySelector('.navbar-collapse');
+
+    $toggle.addEventListener('click', handleMagic)
+    function handleMagic(e){
+        if ($navbar.className.indexOf('in') > 0) {
+        
+            $navbar.className = " ";
+            
+            setTimeout(function(){
+                
+                if($navbar.className.indexOf('in') < 0) {
+                    $collapse.style.height = "0px"
+                }
+            },400)
+        }else{
+        
+            $collapse.style.height = "auto"
+            $navbar.className += " in";
+        }
+    }
+</script>
+
+
+
+
+<style type="text/css">
+    header.intro-header {
+        background-image: url('https://c.pxhere.com/images/e4/46/bd237f6583029424694a0d16589b-1435053.jpg!d')
+    }
+</style>
+<header class="intro-header">
+    <div class="container">
+        <div class="row">
+            <div class="col-lg-8 col-lg-offset-2 col-md-10 col-md-offset-1">
+                <div class="post-heading">
+                    <div class="tags">
+                        
+                        <a class="tag" href="/tags/elasticsearch" title="elasticSearch">
+                            elasticSearch
+                        </a>
+                        
+                        <a class="tag" href="/tags/%E6%A3%80%E7%B4%A2%E5%8E%9F%E7%90%86" title="检索原理">
+                            检索原理
+                        </a>
+                        
+                        <a class="tag" href="/tags/%E5%88%86%E8%AF%8D%E5%99%A8" title="分词器">
+                            分词器
+                        </a>
+                        
+                        <a class="tag" href="/tags/ik%E6%8F%92%E4%BB%B6" title="ik插件">
+                            ik插件
+                        </a>
+                        
+                        <a class="tag" href="/tags/%E8%87%AA%E5%AE%9A%E4%B9%89%E5%88%86%E8%AF%8D%E5%99%A8" title="自定义分词器">
+                            自定义分词器
+                        </a>
+                        
+                    </div>
+                    <h1>ElasticSearch-检索原理</h1>
+                    <h2 class="subheading"></h2>
+                    <span class="meta">
+			Posted by 
+			
+			    麦子
+			 
+			on 
+			Sunday, September 22, 2019
+                        
+                    </span>
+                </div>
+            </div>
+        </div>
+    </div>
+</header>
+
+
+
+
+<article>
+    <div class="container">
+        <div class="row">
+
+            
+            <div class="
+                col-lg-8 col-lg-offset-2
+                col-md-10 col-md-offset-1
+                post-container">
+
+                
+                <header>
+                    <h2>TOC</h2>
+                </header>
+                <nav id="TableOfContents">
+<ul>
+<li><a href="#检索">检索</a></li>
+<li><a href="#搜索原理">搜索原理</a>
+<ul>
+<li><a href="#b-tree数据算法">B+Tree数据算法</a></li>
+<li><a href="#posting-list">Posting List</a></li>
+<li><a href="#注意">注意</a></li>
+</ul></li>
+<li><a href="#分词器">分词器</a>
+<ul>
+<li><a href="#演示效果">演示效果</a></li>
+<li><a href="#针对索引字段进行分词">针对索引字段进行分词</a></li>
+<li><a href="#内置分词器">内置分词器</a>
+<ul>
+<li><a href="#面向字断词">面向字断词</a></li>
+<li><a href="#部分字断词">部分字断词</a></li>
+<li><a href="#结构化文本断词">结构化文本断词</a></li>
+</ul></li>
+</ul></li>
+<li><a href="#自定义分词器">自定义分词器</a>
+<ul>
+<li>
+<ul>
+<li><a href="#格式">格式</a></li>
+<li><a href="#示例">示例</a></li>
+</ul></li>
+</ul></li>
+<li><a href="#ik插件安装">ik插件安装</a></li>
+</ul>
+</nav>
+                
+                
+
+<p>[TOC]</p>
+
+<p><strong>说明：本文来自于<a href="https://www.bilibili.com/video/av64033816/?p=1&gt;视频讲解">https://www.bilibili.com/video/av64033816/?p=1&gt;视频讲解</a></strong></p>
+
+<p><strong>官方文档：<a href="https://www.elastic.co/guide/en/elasticsearch/reference/6.0/getting-started.html">https://www.elastic.co/guide/en/elasticsearch/reference/6.0/getting-started.html</a></strong></p>
+
+<h1 id="检索">检索</h1>
+
+<pre><code class="language-json">#查
+GET my_inde/doc/1
+
+#全部查询
+GET my_inde/doc/_search
+
+#全文检索 ， 只要某一个字段包含就可以查询出来
+GET my_inde/doc/_search?q=180
+
+#模糊检索 ， 只要某一个字段包含就可以查询出来
+GET my_inde/doc/_search?q=yb
+</code></pre>
+
+<h1 id="搜索原理">搜索原理</h1>
+
+<p><img src="/img/Xnip2019-09-22_16-24-24.png" alt="Xnip2019-09-22_16-24-24" /></p>
+
+<p>如上图演示的百度搜索引擎处理方式。</p>
+
+<ol>
+<li>通过爬虫进行填充内部的数据仓库</li>
+<li>通过对文档进行分词，根据title分出不同的词语出来。</li>
+<li>然后进行一个倒排索引处理，也就是根据你分出来的词语做一个统计，把一个词语对应的索引都总结出来。</li>
+<li>当你在搜索框输入词语的时候， 他会根据和倒排索引的对应，快速的找到对应的文档数据出来。</li>
+</ol>
+
+<p><strong>注意</strong>：如上图可以看出来， 其中倒排索引是最影响效率的。</p>
+
+<h2 id="b-tree数据算法">B+Tree数据算法</h2>
+
+<p>倒排索引</p>
+
+<p><img src="/img/Xnip2019-09-22_16-38-12.png" alt="Xnip2019-09-22_16-38-12" /></p>
+
+<p>具体演示地址：<a href="https://www.cs.usfca.edu/~galles/visualization/BPlusTree.html">https://www.cs.usfca.edu/~galles/visualization/BPlusTree.html</a></p>
+
+<p>其中每一个倒排索引中，都会有一个Posting List， 这里面包含了文档的id。 如图就是下面的红色框。</p>
+
+<p><img src="/img/Xnip2019-09-22_16-40-29.png" alt="Xnip2019-09-22_16-40-29" /></p>
+
+<h2 id="posting-list">Posting List</h2>
+
+<table>
+<thead>
+<tr>
+<th align="center">DocId</th>
+<th align="center">TF</th>
+<th align="center">Position</th>
+<th align="center">offset</th>
+</tr>
+</thead>
+
+<tbody>
+<tr>
+<td align="center">1</td>
+<td align="center">1</td>
+<td align="center">0</td>
+<td align="center"><0,2></td>
+</tr>
+
+<tr>
+<td align="center">3</td>
+<td align="center">1</td>
+<td align="center">0</td>
+<td align="center"><0,2></td>
+</tr>
+</tbody>
+</table>
+
+<p><strong>DocId</strong></p>
+
+<p>文档id，文档的原始信息</p>
+
+<p><strong>TF</strong></p>
+
+<p>单词频率，记录该词在文档中出现的次数，用于后续相关性算法</p>
+
+<p><strong>Position</strong></p>
+
+<p>位置，记录Fidld分词后，单词所在的位置，从0开始</p>
+
+<p><strong>offset</strong></p>
+
+<p>偏移量，记录单词在文档中开始和结束位置，用于高亮显示等。</p>
+
+<h2 id="注意">注意</h2>
+
+<p>每个文档字段都有自己的倒排索引。</p>
+
+<h1 id="分词器">分词器</h1>
+
+<table>
+<thead>
+<tr>
+<th align="center">步骤</th>
+<th align="center">处理</th>
+<th>应用场景</th>
+</tr>
+</thead>
+
+<tbody>
+<tr>
+<td align="center">Character  Filter</td>
+<td align="center">对<strong>原始文本</strong>进行处理</td>
+<td>去除html标签,特殊字符</td>
+</tr>
+
+<tr>
+<td align="center">Tokenizer</td>
+<td align="center">将<strong>原始文本</strong>进行分词</td>
+<td>如：培训机构-&gt;培训,机构</td>
+</tr>
+
+<tr>
+<td align="center">Token Filters</td>
+<td align="center">分词后的<strong>关键字</strong>进行加工</td>
+<td>如：转小写，删除语气词，近义词和同义词等</td>
+</tr>
+</tbody>
+</table>
+
+<p><img src="/img/Xnip2019-09-22_19-42-07.png" alt="Xnip2019-09-22_19-42-07" /></p>
+
+<h2 id="演示效果">演示效果</h2>
+
+<pre><code class="language-json">POST _analyze
+{
+  &quot;analyzer&quot;: &quot;standard&quot;,
+  &quot;text&quot;: &quot;hello world&quot;
+}
+
+
+结果
+{
+  &quot;tokens&quot; : [
+    {
+      &quot;token&quot; : &quot;hello&quot;,
+      &quot;start_offset&quot; : 0,
+      &quot;end_offset&quot; : 5,
+      &quot;type&quot; : &quot;&lt;ALPHANUM&gt;&quot;,
+      &quot;position&quot; : 0
+    },
+    {
+      &quot;token&quot; : &quot;world&quot;,
+      &quot;start_offset&quot; : 6,
+      &quot;end_offset&quot; : 11,
+      &quot;type&quot; : &quot;&lt;ALPHANUM&gt;&quot;,
+      &quot;position&quot; : 1
+    }
+  ]
+}
+
+</code></pre>
+
+<p>如上可以看到， 他对hello world 进行分词处理。</p>
+
+<h2 id="针对索引字段进行分词">针对索引字段进行分词</h2>
+
+<p>可以用下面的进行自己文档的分词效果。</p>
+
+<pre><code class="language-json">POST my_inde/_analyze
+{
+  &quot;field&quot;: &quot;name&quot;,
+  &quot;text&quot;: &quot;are you ok&quot;
+}
+
+
+</code></pre>
+
+<h2 id="内置分词器">内置分词器</h2>
+
+<p>Elasticsearch有许多内置的分词器，可用于构建 <a href="https://www.elastic.co/guide/en/elasticsearch/reference/7.3/analysis-custom-analyzer.html">自定义分词器</a>。</p>
+
+<h3 id="面向字断词">面向字断词</h3>
+
+<p>以下分词器通常用于将全文标记为单个单词</p>
+
+<table>
+<thead>
+<tr>
+<th align="center">名称</th>
+<th align="left">关键字</th>
+</tr>
+</thead>
+
+<tbody>
+<tr>
+<td align="center">标准分词器</td>
+<td align="left">standard</td>
+</tr>
+
+<tr>
+<td align="center">字母分词器</td>
+<td align="left">letter</td>
+</tr>
+
+<tr>
+<td align="center">小写分词器</td>
+<td align="left">lowercase</td>
+</tr>
+
+<tr>
+<td align="center">空格分词器</td>
+<td align="left">whitespace</td>
+</tr>
+
+<tr>
+<td align="center">UAX URL电子邮件令牌生成器</td>
+<td align="left">uax_url_email</td>
+</tr>
+
+<tr>
+<td align="center">经典分词器</td>
+<td align="left">classic</td>
+</tr>
+
+<tr>
+<td align="center">泰语分词器</td>
+<td align="left">thai</td>
+</tr>
+
+<tr>
+<td align="center">停止分词器</td>
+<td align="left">stop</td>
+</tr>
+</tbody>
+</table>
+
+<ol>
+<li><strong>标准分词器</strong></li>
+</ol>
+
+<p>该<code>standard</code>标记生成器将文本分为单词边界条件，由Unicode文本分割算法的定义。它删除大多数标点符号。这是大多数语言的最佳选择。</p>
+
+<ol>
+<li><strong>字母分词器</strong></li>
+</ol>
+
+<p>该<code>letter</code>标记生成器将文本分为方面每当遇到一个字符是不是字母</p>
+
+<ol>
+<li><strong>小写分词器</strong></li>
+</ol>
+
+<p>该<code>lowercase</code>标记生成器，如<code>letter</code>标记生成器，文本分为方面每当遇到一个特点，它已不是一个字母，但它也小写的所有条款。</p>
+
+<ol>
+<li><strong>空格分词器</strong></li>
+</ol>
+
+<p>该<code>whitespace</code>标记生成器将文本分为方面每当遇到任何空白字符。</p>
+
+<ol>
+<li><strong>UAX URL电子邮件令牌分词器</strong></li>
+</ol>
+
+<p>该<code>uax_url_email</code>分词器是一样的<code>standard</code>，除了它识别URL和电子邮件地址作为单个记号标记生成器。</p>
+
+<ol>
+<li><strong>经典分词器</strong></li>
+</ol>
+
+<p>该<code>classic</code>分词器是针对英语语法基础分词器。</p>
+
+<ol>
+<li><strong>泰语分词器</strong></li>
+</ol>
+
+<p>分<code>thai</code>词器将泰语文本分割为单词。</p>
+
+<h3 id="部分字断词">部分字断词</h3>
+
+<p>这些分词器将文本或单词分成小片段，以实现部分单词匹配：</p>
+
+<table>
+<thead>
+<tr>
+<th align="center">名称</th>
+<th align="left">关键字</th>
+</tr>
+</thead>
+
+<tbody>
+<tr>
+<td align="center">N-Gram令牌分词器</td>
+<td align="left">ngram</td>
+</tr>
+
+<tr>
+<td align="center">Edge N-Gram令牌分词器</td>
+<td align="left">edge_ngram</td>
+</tr>
+</tbody>
+</table>
+
+<ol>
+<li><strong>N-Gram令牌分词器</strong></li>
+</ol>
+
+<p>所述<code>ngram</code>标记生成器可以分解文本成单词，当它遇到任何指定的字符的列表（例如，空格或标点），则它返回的n-gram的每个单词的：连续字母的滑动窗口，例如<code>quick</code>→ <code>[qu, ui, ic, ck]</code>。</p>
+
+<ol>
+<li><strong>Edge N-Gram令牌分词器</strong></li>
+</ol>
+
+<p>所述<code>edge_ngram</code>标记生成器可以分解文本成单词，当它遇到任何指定的字符的列表（例如，空格或标点），则它返回的n-gram，其锚定到这个词，例如开始每个单词的<code>quick</code>→ <code>[q, qu, qui, quic, quick]</code>。</p>
+
+<h3 id="结构化文本断词">结构化文本断词</h3>
+
+<p>以下分词器通常与标识符，电子邮件地址，邮政编码和路径之类的结构化文本一起使用，而不是全文本：</p>
+
+<table>
+<thead>
+<tr>
+<th align="center">名称</th>
+<th align="left">关键字</th>
+</tr>
+</thead>
+
+<tbody>
+<tr>
+<td align="center">关键字分词器</td>
+<td align="left">keyword</td>
+</tr>
+
+<tr>
+<td align="center">模式分词器</td>
+<td align="left">pattern</td>
+</tr>
+
+<tr>
+<td align="center">简单模式分词器</td>
+<td align="left">simple_pattern</td>
+</tr>
+
+<tr>
+<td align="center">字符组分词器</td>
+<td align="left">char_group</td>
+</tr>
+
+<tr>
+<td align="center">简单模式分割分词器</td>
+<td align="left">simple_pattern_split</td>
+</tr>
+
+<tr>
+<td align="center">路径分词器</td>
+<td align="left">path_hierarchy</td>
+</tr>
+</tbody>
+</table>
+
+<ol>
+<li><strong>关键字分词器</strong></li>
+</ol>
+
+<p>该<code>keyword</code>分词器是一个“ 空操作 ”标记生成器接受任何文本它被赋予并输出完全相同的文本作为一个单项。可以将其与令牌过滤器结合使用，<a href="https://www.elastic.co/guide/en/elasticsearch/reference/7.3/analysis-lowercase-tokenfilter.html"><code>lowercase</code></a>以对分析的术语进行标准化。</p>
+
+<ol>
+<li><strong>模式分词器</strong></li>
+</ol>
+
+<p>所述<code>pattern</code>标记生成器使用正则表达式要么分裂文本术语每当一个字分离器相匹配，或者捕捉到的匹配的文本作为术语。</p>
+
+<ol>
+<li><strong>简单模式分词器</strong></li>
+</ol>
+
+<p>分<code>simple_pattern</code>词器使用正则表达式将匹配的文本捕获为术语。它使用正则表达式功能的受限子集，并且通常<code>pattern</code>比分词器更快。</p>
+
+<ol>
+<li><strong>字符组分词器</strong></li>
+</ol>
+
+<p>所述<code>char_group</code>标记生成器是可配置的通过字符集合分裂上，这通常是比运行正则表达式更便宜。</p>
+
+<ol>
+<li><strong>简单模式分割分词器</strong></li>
+</ol>
+
+<p>所述<code>simple_pattern_split</code>标记生成器使用相同的受限的正则表达式的子集作为<code>simple_pattern</code>标记生成器，但在分割匹配的输入，而不是返回的匹配，而术语。</p>
+
+<ol>
+<li><strong>路径分词器</strong></li>
+</ol>
+
+<p>所述<code>path_hierarchy</code>标记生成器需要像文件系统路径的分层值，分割的路径分隔，并发出一个术语，树中的每个部件，例如<code>/foo/bar/baz</code>→ <code>[/foo, /foo/bar, /foo/bar/baz ]</code>。</p>
+
+<h1 id="自定义分词器">自定义分词器</h1>
+
+<h3 id="格式">格式</h3>
+
+<p><code>custom</code>分析器接受以下参数：</p>
+
+<table>
+<thead>
+<tr>
+<th align="center">参数</th>
+<th align="left">说明</th>
+</tr>
+</thead>
+
+<tbody>
+<tr>
+<td align="center">tokenizer</td>
+<td align="left">内置或自定义的<a href="https://www.elastic.co/guide/en/elasticsearch/reference/7.3/analysis-tokenizers.html">分词器</a></td>
+</tr>
+
+<tr>
+<td align="center">char_filter</td>
+<td align="left">内置或自定义<a href="https://www.elastic.co/guide/en/elasticsearch/reference/7.3/analysis-charfilters.html">字符过滤器</a>的<strong>可选数组</strong></td>
+</tr>
+
+<tr>
+<td align="center">filter</td>
+<td align="left">内置或自定义<a href="https://www.elastic.co/guide/en/elasticsearch/reference/7.3/analysis-tokenfilters.html">令牌过滤器</a>的<strong>可选数组</strong></td>
+</tr>
+
+<tr>
+<td align="center">position_increment_gap</td>
+<td align="left">在为文本值数组建立索引时，Elasticsearch在一个值的最后一项和下一个值的第一项之间插入一个假的“空白”，以确保词组查询与来自不同数组元素的两项不匹配。默认为<code>100</code>。查看<a href="https://www.elastic.co/guide/en/elasticsearch/reference/7.3/position-increment-gap.html"><code>position_increment_gap</code></a>更多。</td>
+</tr>
+</tbody>
+</table>
+
+<h3 id="示例">示例</h3>
+
+<pre><code class="language-json">PUT my_index
+{
+  &quot;settings&quot;: {
+    &quot;analysis&quot;: {
+      &quot;analyzer&quot;: {
+        &quot;my_custom_analyzer&quot;: {   
+          &quot;type&quot;:      &quot;custom&quot;,  
+          &quot;tokenizer&quot;: &quot;standard&quot;,// 第二步：分词
+          &quot;char_filter&quot;: [ // 第一步： 字符过滤
+            &quot;html_strip&quot;
+          ],
+          &quot;filter&quot;: [ // 第三步：关键字加工处理
+            &quot;lowercase&quot;,
+            &quot;asciifolding&quot;
+          ]
+        }
+      }
+    }
+  }
+  
+#对照上面的分词流程图可以看到就是执行上面的三个步骤。 
+  
+POST my_index/_analyze
+{
+  &quot;analyzer&quot;: &quot;my_custom_analyzer&quot;,
+  &quot;text&quot;: &quot;Is this &lt;b&gt;déjà vu&lt;/b&gt;?&quot;
+}
+
+
+
+{
+  &quot;tokens&quot; : [
+    {
+      &quot;token&quot; : &quot;is&quot;,
+      &quot;start_offset&quot; : 0,
+      &quot;end_offset&quot; : 2,
+      &quot;type&quot; : &quot;&lt;ALPHANUM&gt;&quot;,
+      &quot;position&quot; : 0
+    },
+    {
+      &quot;token&quot; : &quot;this&quot;,
+      &quot;start_offset&quot; : 3,
+      &quot;end_offset&quot; : 7,
+      &quot;type&quot; : &quot;&lt;ALPHANUM&gt;&quot;,
+      &quot;position&quot; : 1
+    },
+    {
+      &quot;token&quot; : &quot;deja&quot;,
+      &quot;start_offset&quot; : 11,
+      &quot;end_offset&quot; : 15,
+      &quot;type&quot; : &quot;&lt;ALPHANUM&gt;&quot;,
+      &quot;position&quot; : 2
+    },
+    {
+      &quot;token&quot; : &quot;vu&quot;,
+      &quot;start_offset&quot; : 16,
+      &quot;end_offset&quot; : 22,
+      &quot;type&quot; : &quot;&lt;ALPHANUM&gt;&quot;,
+      &quot;position&quot; : 3
+    }
+  ]
+}
+</code></pre>
+
+<h1 id="ik插件安装">ik插件安装</h1>
+
+<p><a href="https://github.com/medcl/elasticsearch-analysis-ik/releases/">https://github.com/medcl/elasticsearch-analysis-ik/releases/</a> 找到对应的版本下载， 放入到容器对应的目录中。</p>
+
+<pre><code class="language-dockerfile">docker cp 
+/elasticsearch-analysis-ik-6.8.3.zip c350e8e2732c:/usr/share/elasticsearch/plugins/ik
+</code></pre>
+
+<p>ik 带有两个分词器
+<strong>ik_max_word ：</strong>会将文本做最细粒度的拆分；尽可能多的拆分出词语
+<strong>ik_smart：</strong>会做最粗粒度的拆分；已被分出的词语将不会再次被其它词语占有</p>
+
+<p>效果如下：</p>
+
+<pre><code class="language-json">POST _analyze
+{
+  &quot;tokenizer&quot;: &quot;ik_smart&quot;
+  , &quot;text&quot;: [&quot;php是世界上最好的语言&quot;]
+  
+}
+
+
+{
+  &quot;tokens&quot; : [
+    {
+      &quot;token&quot; : &quot;php&quot;,
+      &quot;start_offset&quot; : 0,
+      &quot;end_offset&quot; : 3,
+      &quot;type&quot; : &quot;ENGLISH&quot;,
+      &quot;position&quot; : 0
+    },
+    {
+      &quot;token&quot; : &quot;是&quot;,
+      &quot;start_offset&quot; : 3,
+      &quot;end_offset&quot; : 4,
+      &quot;type&quot; : &quot;CN_CHAR&quot;,
+      &quot;position&quot; : 1
+    },
+    {
+      &quot;token&quot; : &quot;世界上&quot;,
+      &quot;start_offset&quot; : 4,
+      &quot;end_offset&quot; : 7,
+      &quot;type&quot; : &quot;CN_WORD&quot;,
+      &quot;position&quot; : 2
+    },
+    {
+      &quot;token&quot; : &quot;最好&quot;,
+      &quot;start_offset&quot; : 7,
+      &quot;end_offset&quot; : 9,
+      &quot;type&quot; : &quot;CN_WORD&quot;,
+      &quot;position&quot; : 3
+    },
+    {
+      &quot;token&quot; : &quot;的&quot;,
+      &quot;start_offset&quot; : 9,
+      &quot;end_offset&quot; : 10,
+      &quot;type&quot; : &quot;CN_CHAR&quot;,
+      &quot;position&quot; : 4
+    },
+    {
+      &quot;token&quot; : &quot;语言&quot;,
+      &quot;start_offset&quot; : 10,
+      &quot;end_offset&quot; : 12,
+      &quot;type&quot; : &quot;CN_WORD&quot;,
+      &quot;position&quot; : 5
+    }
+  ]
+}
+</code></pre>
+
+
+                
+                
+<div class="entry-shang text-center">
+    
+	    <p>「真诚赞赏，手留余香」</p>
+	
+	<button class="zs show-zs btn btn-bred">赞赏支持</button>
+</div>
+<div class="zs-modal-bg"></div>
+<div class="zs-modal-box">
+	<div class="zs-modal-head">
+		<button type="button" class="close">×</button>
+		<span class="author"><a href="http://maizitoday.github.io/"><img src="/img/favicon.png" /></a></span>
+        
+	        <p class="tip"><i></i><span>真诚赞赏，手留余香</span></p>
+		
+ 
+	</div>
+	<div class="zs-modal-body">
+		<div class="zs-modal-btns">
+			<button class="btn btn-blink" data-num="2">2元</button>
+			<button class="btn btn-blink" data-num="5">5元</button>
+			<button class="btn btn-blink" data-num="10">10元</button>
+			<button class="btn btn-blink" data-num="50">50元</button>
+			<button class="btn btn-blink" data-num="100">100元</button>
+			<button class="btn btn-blink" data-num="1">任意金额</button>
+		</div>
+		<div class="zs-modal-pay">
+			<button class="btn btn-bred" id="pay-text">2元</button>
+			<p>使用<span id="pay-type">微信</span>扫描二维码完成支付</p>
+			<img src="/img/reward/wechat-2.png"  id="pay-image"/>
+		</div>
+	</div>
+	<div class="zs-modal-footer">
+		<label><input type="radio" name="zs-type" value="wechat" class="zs-type" checked="checked"><span ><span class="zs-wechat"><img src="/img/reward/wechat-btn.png"/></span></label>
+		<label><input type="radio" name="zs-type" value="alipay" class="zs-type" class="zs-alipay"><img src="/img/reward/alipay-btn.png"/></span></label>
+	</div>
+</div>
+<script type="text/javascript" src="/js/reward.js"></script>
+
+                
+
+                <hr>
+                <ul class="pager">
+                    
+                    <li class="previous">
+                        <a href="/post/elasticsearch-%E7%AE%80%E4%BB%8B%E5%92%8C%E5%AE%89%E8%A3%85/" data-toggle="tooltip" data-placement="top" title="ElasticSearch-入门">&larr;
+                            Previous Post</a>
+                    </li>
+                    
+                    
+                    <li class="next">
+                        <a href="/post/elasticsearch-%E5%AD%98%E5%82%A8%E5%92%8C%E6%95%B0%E6%8D%AE%E7%BB%93%E6%9E%84/" data-toggle="tooltip" data-placement="top" title="ElasticSearch-存储和数据结构">Next
+                            Post &rarr;</a>
+                    </li>
+                    
+                </ul>
+
+                
+<div id="disqus-comment"></div>
+
+
+
+            </div>
+            
+            <div class="
+                col-lg-8 col-lg-offset-2
+                col-md-10 col-md-offset-1
+                sidebar-container">
+
+                
+                
+                <section>
+                    <hr class="hidden-sm hidden-xs">
+                    <h5><a href="/tags/">FEATURED TAGS</a></h5>
+                    <div class="tags">
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        <a href="/tags/docker" title="docker">
+                            docker
+                        </a>
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        <a href="/tags/dockerfile" title="dockerfile">
+                            dockerfile
+                        </a>
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        <a href="/tags/elasticsearch" title="elasticSearch">
+                            elasticSearch
+                        </a>
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        <a href="/tags/java%E5%9F%BA%E7%A1%80" title="java基础">
+                            java基础
+                        </a>
+                        
+                        
+                        
+                        <a href="/tags/java%E7%9B%B8%E5%85%B3%E6%A6%82%E5%BF%B5" title="java相关概念">
+                            java相关概念
+                        </a>
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        <a href="/tags/jvm" title="jvm">
+                            jvm
+                        </a>
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        <a href="/tags/maven" title="maven">
+                            maven
+                        </a>
+                        
+                        
+                        
+                        <a href="/tags/mongodb" title="mongodb">
+                            mongodb
+                        </a>
+                        
+                        
+                        
+                        
+                        
+                        <a href="/tags/mybatis%E7%B3%BB%E5%88%97" title="mybatis系列">
+                            mybatis系列
+                        </a>
+                        
+                        
+                        
+                        
+                        
+                        <a href="/tags/mysql%E7%B3%BB%E5%88%97" title="mysql系列">
+                            mysql系列
+                        </a>
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        <a href="/tags/nosql" title="nosql">
+                            nosql
+                        </a>
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        <a href="/tags/redis" title="redis">
+                            redis
+                        </a>
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        <a href="/tags/springcloud" title="springCloud">
+                            springCloud
+                        </a>
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        <a href="/tags/springboot%E7%B3%BB%E5%88%97" title="springboot系列">
+                            springboot系列
+                        </a>
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        <a href="/tags/%E4%B8%AD%E9%97%B4%E4%BB%B6" title="中间件">
+                            中间件
+                        </a>
+                        
+                        
+                        
+                        <a href="/tags/%E4%B8%BB%E4%BB%8E%E5%A4%8D%E5%88%B6" title="主从复制">
+                            主从复制
+                        </a>
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        <a href="/tags/%E5%88%86%E5%B8%83%E5%BC%8F%E7%B3%BB%E5%88%97" title="分布式系列">
+                            分布式系列
+                        </a>
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        <a href="/tags/%E5%BC%80%E5%8F%91%E5%B7%A5%E5%85%B7" title="开发工具">
+                            开发工具
+                        </a>
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        <a href="/tags/%E6%95%B0%E6%8D%AE%E5%BA%93" title="数据库">
+                            数据库
+                        </a>
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        <a href="/tags/%E6%9C%8D%E5%8A%A1%E8%84%9A%E6%9C%AC" title="服务脚本">
+                            服务脚本
+                        </a>
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        <a href="/tags/%E7%AE%80%E4%BB%8B" title="简介">
+                            简介
+                        </a>
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        <a href="/tags/%E8%AE%BE%E8%AE%A1%E6%A8%A1%E5%BC%8F" title="设计模式">
+                            设计模式
+                        </a>
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        <a href="/tags/%E8%B4%9F%E8%BD%BD%E5%9D%87%E8%A1%A1" title="负载均衡">
+                            负载均衡
+                        </a>
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        <a href="/tags/%E9%9B%86%E7%BE%A4" title="集群">
+                            集群
+                        </a>
+                        
+                        
+                        
+                        
+                        
+                        
+                    </div>
+                </section>
+                
+
+                
+                
+                <section>
+                    <hr>
+                    <h5>FRIENDS</h5>
+                    <ul class="list-inline">
+                        
+                        <li><a target="_blank" href="https://zhaohuabing.com">赵化冰博客</a></li>
+                        
+                        <li><a target="_blank" href="http://www.tianshouzhi.com">田守枝</a></li>
+                        
+                        <li><a target="_blank" href="http://www.ityouknow.com">纯洁的微笑</a></li>
+                        
+                        <li><a target="_blank" href="https://renchunxiao.com">任春晓</a></li>
+                        
+                        <li><a target="_blank" href="https://www.lihongkun.com">泛泛之辈</a></li>
+                        
+                        <li><a target="_blank" href="https://juejin.im/welcome/backend">后端服务论坛</a></li>
+                        
+                        <li><a target="_blank" href="https://www.javaboy.org">江南一点雨</a></li>
+                        
+                    </ul>
+                </section>
+                
+            </div>
+        </div>
+    </div>
+</article>
+
+
+
+
+<footer>
+    <div class="container">
+        <div class="row">
+            <div class="col-lg-8 col-lg-offset-2 col-md-10 col-md-offset-1">
+                <ul class="list-inline text-center">
+                   
+                   <li>
+                       <a href="" rel="alternate" type="application/rss+xml" title="" >
+                           <span class="fa-stack fa-lg">
+                               <i class="fa fa-circle fa-stack-2x"></i>
+                               <i class="fa fa-rss fa-stack-1x fa-inverse"></i>
+                           </span>
+                       </a>
+                   </li>
+                   
+                    
+                    <li>
+                        <a href="mailto:maiziybtoday@gmail.com">
+                            <span class="fa-stack fa-lg">
+                                <i class="fa fa-circle fa-stack-2x"></i>
+                                <i class="fa fa-envelope fa-stack-1x fa-inverse"></i>
+                            </span>
+                        </a>
+                    </li>
+		    
+                    
+                    
+                    
+                    
+
+                    
+
+		    
+                    
+                    <li>
+                        <a target="_blank" href="/your%20wechat%20qr%20code%20image">
+                            <span class="fa-stack fa-lg">
+                                <i class="fa fa-circle fa-stack-2x"></i>
+                                <i class="fa fa-wechat fa-stack-1x fa-inverse"></i>
+                            </span>
+                        </a>
+                    </li>
+		    
+                    
+                    
+                    <li>
+                        <a target="_blank" href="https://www.linkedin.com/in/yourlinkedinid">
+                            <span class="fa-stack fa-lg">
+                                <i class="fa fa-circle fa-stack-2x"></i>
+                                <i class="fa fa-linkedin fa-stack-1x fa-inverse"></i>
+                            </span>
+                        </a>
+                    </li>
+		    
+                    
+                </ul>
+		<p class="copyright text-muted">
+                    Copyright &copy;  2019
+                    <br>
+                    <a href="https://themes.gohugo.io/hugo-theme-cleanwhite">CleanWhite Hugo Theme</a> by <a href="https://zhaohuabing.com">Huabing</a> |
+                    <iframe
+                        style="margin-left: 2px; margin-bottom:-5px;"
+                        frameborder="0" scrolling="0" width="100px" height="20px"
+                        src="https://ghbtns.com/github-btn.html?user=zhaohuabing&repo=hugo-theme-cleanwhite&type=star&count=true" >
+                    </iframe>
+                </p>
+            </div>
+        </div>
+    </div>
+</footer>
+
+
+
+
+<script>
+    function async(u, c) {
+      var d = document, t = 'script',
+          o = d.createElement(t),
+          s = d.getElementsByTagName(t)[0];
+      o.src = u;
+      if (c) { o.addEventListener('load', function (e) { c(null, e); }, false); }
+      s.parentNode.insertBefore(o, s);
+    }
+</script>
+
+
+
+
+
+
+<script>
+    
+    if($('#tag_cloud').length !== 0){
+        async("/js/jquery.tagcloud.js",function(){
+            $.fn.tagcloud.defaults = {
+                
+                color: {start: '#bbbbee', end: '#0085a1'},
+            };
+            $('#tag_cloud a').tagcloud();
+        })
+    }
+</script>
+
+
+<script>
+    async("https://cdnjs.cloudflare.com/ajax/libs/fastclick/1.0.6/fastclick.js", function(){
+        var $nav = document.querySelector("nav");
+        if($nav) FastClick.attach($nav);
+    })
+</script>
+
+
+
+
+
+
+</body>
+</html>

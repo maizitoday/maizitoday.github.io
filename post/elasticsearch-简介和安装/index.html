@@ -1,0 +1,1211 @@
+<!DOCTYPE html>
+<html lang="en-us">
+<head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+
+    
+    <meta property="og:site_name" content="">
+    <meta property="og:type" content="article">
+
+    
+    <meta property="og:image" content="http://maizitoday.github.io//img/home-bg-jeep.jpg">
+    <meta property="twitter:image" content="http://maizitoday.github.io//img/home-bg-jeep.jpg" />
+    
+
+    
+    <meta name="title" content="ElasticSearch-入门" />
+    <meta property="og:title" content="ElasticSearch-入门" />
+    <meta property="twitter:title" content="ElasticSearch-入门" />
+    
+
+    
+    <meta name="description" content="麦子，程序员, 开源爱好者，生活探险家 | 这里是 麦子 的博客，与你一起发现更大的世界。">
+    <meta property="og:description" content="麦子，程序员, 开源爱好者，生活探险家 | 这里是 麦子 的博客，与你一起发现更大的世界。" />
+    <meta property="twitter:description" content="麦子，程序员, 开源爱好者，生活探险家 | 这里是 麦子 的博客，与你一起发现更大的世界。" />
+    
+
+    
+    <meta property="twitter:card" content="summary" />
+    
+    
+
+    <meta name="keyword"  content="麦子, maizi, maizi, , 麦子的网络日志, 麦子的博客, maizi Blog, 博客, 个人网站, 互联网, Web, 云原生, PaaS, Istio, Kubernetes, 微服务, Microservice">
+    <link rel="shortcut icon" href="/img/favicon.ico">
+
+    <title>ElasticSearch-入门-麦子的博客</title>
+
+    <link rel="canonical" href="/post/elasticsearch-%E7%AE%80%E4%BB%8B%E5%92%8C%E5%AE%89%E8%A3%85/">
+
+    <link rel="stylesheet" href="/css/iDisqus.min.css"/>
+	
+    
+    <link rel="stylesheet" href="/css/bootstrap.min.css">
+
+    
+    <link rel="stylesheet" href="/css/hux-blog.min.css">
+
+    
+    <link rel="stylesheet" href="/css/syntax.css">
+
+    
+    <link rel="stylesheet" href="/css/zanshang.css">
+
+    
+    <link href="//cdnjs.cloudflare.com/ajax/libs/font-awesome/4.6.3/css/font-awesome.min.css" rel="stylesheet" type="text/css">
+    
+    
+    <script src="/js/jquery.min.js"></script>
+    
+    
+    <script src="/js/bootstrap.min.js"></script>
+    
+    
+    <script src="/js/hux-blog.min.js"></script>
+	
+    
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.13.1/styles/docco.min.css">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.13.1/highlight.min.js"></script>
+    <script>hljs.initHighlightingOnLoad();</script>
+</head>
+
+
+<nav class="navbar navbar-default navbar-custom navbar-fixed-top">
+    <div class="container-fluid">
+        
+        <div class="navbar-header page-scroll">
+            <button type="button" class="navbar-toggle">
+                <span class="sr-only">Toggle navigation</span>
+                <span class="icon-bar"></span>
+                <span class="icon-bar"></span>
+                <span class="icon-bar"></span>
+            </button>
+            <a class="navbar-brand" href="/"></a>
+        </div>
+
+        
+        
+        <div id="huxblog_navbar">
+            <div class="navbar-collapse">
+                <ul class="nav navbar-nav navbar-right">
+                    <li>
+                        <a href="/">Home</a>
+                    </li>
+                    
+                    <li>
+                        <a href="/categories/life">Life</a>
+                    </li>
+                    
+                    <li>
+                        <a href="/categories/tech">Tech</a>
+                    </li>
+                    
+                    
+		    
+                        <li><a href="/top/about/">ABOUT</a></li>
+                    
+
+                    
+		    <li>
+                        <a href="/search">SEARCH <img src="/img/search.png" height="15" style="cursor: pointer;" alt="Search"></a>
+		    </li>
+                    
+                </ul>
+            </div>
+        </div>
+        
+    </div>
+    
+</nav>
+<script>
+    
+    
+    
+    var $body   = document.body;
+    var $toggle = document.querySelector('.navbar-toggle');
+    var $navbar = document.querySelector('#huxblog_navbar');
+    var $collapse = document.querySelector('.navbar-collapse');
+
+    $toggle.addEventListener('click', handleMagic)
+    function handleMagic(e){
+        if ($navbar.className.indexOf('in') > 0) {
+        
+            $navbar.className = " ";
+            
+            setTimeout(function(){
+                
+                if($navbar.className.indexOf('in') < 0) {
+                    $collapse.style.height = "0px"
+                }
+            },400)
+        }else{
+        
+            $collapse.style.height = "auto"
+            $navbar.className += " in";
+        }
+    }
+</script>
+
+
+
+
+<style type="text/css">
+    header.intro-header {
+        background-image: url('https://c.pxhere.com/images/e4/46/bd237f6583029424694a0d16589b-1435053.jpg!d')
+    }
+</style>
+<header class="intro-header">
+    <div class="container">
+        <div class="row">
+            <div class="col-lg-8 col-lg-offset-2 col-md-10 col-md-offset-1">
+                <div class="post-heading">
+                    <div class="tags">
+                        
+                        <a class="tag" href="/tags/elasticsearch" title="elasticSearch">
+                            elasticSearch
+                        </a>
+                        
+                        <a class="tag" href="/tags/%E7%AE%80%E4%BB%8B" title="简介">
+                            简介
+                        </a>
+                        
+                        <a class="tag" href="/tags/%E5%AE%89%E8%A3%85" title="安装">
+                            安装
+                        </a>
+                        
+                        <a class="tag" href="/tags/kibana%E5%AE%89%E8%A3%85" title="kibana安装">
+                            kibana安装
+                        </a>
+                        
+                    </div>
+                    <h1>ElasticSearch-入门</h1>
+                    <h2 class="subheading"></h2>
+                    <span class="meta">
+			Posted by 
+			
+			    麦子
+			 
+			on 
+			Saturday, September 21, 2019
+                        
+                    </span>
+                </div>
+            </div>
+        </div>
+    </div>
+</header>
+
+
+
+
+<article>
+    <div class="container">
+        <div class="row">
+
+            
+            <div class="
+                col-lg-8 col-lg-offset-2
+                col-md-10 col-md-offset-1
+                post-container">
+
+                
+                <header>
+                    <h2>TOC</h2>
+                </header>
+                <nav id="TableOfContents">
+<ul>
+<li><a href="#简介">简介</a>
+<ul>
+<li><a href="#使用场景">使用场景</a>
+<ul>
+<li><a href="#全文检索">全文检索</a></li>
+<li><a href="#聚合">聚合</a></li>
+<li><a href="#地理空间api">地理空间API</a></li>
+</ul></li>
+<li><a href="#特点">特点</a></li>
+<li><a href="#es能做什么">ES能做什么</a></li>
+<li><a href="#es-的基本组件">ES 的基本组件</a>
+<ul>
+<li><a href="#索引-index">索引（index）</a></li>
+<li><a href="#类型-type">类型（type）</a></li>
+<li><a href="#文档-document">文档（document）</a></li>
+<li><a href="#映射-mapping">映射（mapping）</a></li>
+</ul></li>
+</ul></li>
+<li><a href="#elasticsearch安装成功">elasticSearch安装成功</a></li>
+<li><a href="#kibana-crud">kibana-CRUD</a></li>
+<li><a href="#注意">注意</a></li>
+</ul>
+</nav>
+                
+                
+
+<p>[TOC]</p>
+
+<p><strong>说明：本文来自于<a href="https://www.bilibili.com/video/av64033816/?p=1&gt;视频讲解">https://www.bilibili.com/video/av64033816/?p=1&gt;视频讲解</a></strong></p>
+
+<p><strong>官方文档：<a href="https://www.elastic.co/guide/en/elasticsearch/reference/6.0/getting-started.html">https://www.elastic.co/guide/en/elasticsearch/reference/6.0/getting-started.html</a></strong></p>
+
+<h1 id="简介">简介</h1>
+
+<p>ElasticSearch是一个基于Apache Luncene的开源的搜索引擎。无论在开源还是专有领域，Lucene可以被认为是迄今为止最先进，性能最好的，功能最齐全的搜索引擎库。</p>
+
+<p>Elasticsearch是一个分布式的文档(document)<strong>存储引擎</strong>。它可以实时存储并检索复杂数据结构——序列化的JSON文档。换言说，一旦文档被存储在Elasticsearch中，它就可以在集群的任一节点上被检索。它的<strong>搜索存储功</strong>能主要是 Lucene 提供的，Lucene 相当于其存储引擎，它在之上封装了索引，查询，以及分布式相关的接口。</p>
+
+<h2 id="使用场景">使用场景</h2>
+
+<p>Elasticsearch是当今最流行的分布式搜索引擎，首先介绍下使用场景，比如：</p>
+
+<h3 id="全文检索">全文检索</h3>
+
+<p>比如找到与搜索词项(term)最相关的维基百科文章。</p>
+
+<h3 id="聚合">聚合</h3>
+
+<p>比如在广告网络中，可视化的搜索词项的竞价直方图。它允许你在数据上生成复杂的分析统计。它很像SQL中的 GROUP BY 但是功能更强大。</p>
+
+<h3 id="地理空间api">地理空间API</h3>
+
+<p>比如在顺风车平台，匹配最近的司机和乘客。</p>
+
+<h2 id="特点">特点</h2>
+
+<ol>
+<li>分布式的实时文件存储，<strong>每个字段都被索引并可被搜索</strong>。</li>
+<li>分布式实时分析搜索引擎，做不规则查询。</li>
+<li>可以扩展到上百台服务器，处理PB级结构化或非结构化数据。</li>
+<li>通过简单的RESTFul API来隐藏Lucene的复杂性，从而让全文搜索变的简单。</li>
+</ol>
+
+<p>他相当于一个单独的服务器，</p>
+
+<h2 id="es能做什么">ES能做什么</h2>
+
+<p>全文检索(全部字段), 模糊查询(搜索),数据分析(提供分析语法，列如聚合)</p>
+
+<h2 id="es-的基本组件">ES 的基本组件</h2>
+
+<h3 id="索引-index">索引（index）</h3>
+
+<p>文档容器可理解为索引是具有类似属性的文档集合，类似表且索引名须为小写字母；<strong>相当于mysql中的数据库</strong></p>
+
+<h3 id="类型-type">类型（type）</h3>
+
+<p>类型是索引内部的逻辑分区，其意义完全取决于用户需求，一个索引内部可定义一个或多个类型，类型就是其拥有相同的域的文档的预定义,建议一个索引只存一类数据；<strong>相当于mysql中的Tables</strong></p>
+
+<h3 id="文档-document">文档（document）</h3>
+
+<p>文档是lucene索引的搜索原子单位，它包含了一个或多个域。是域的容器；
+每个域的组成部分：一个名字，一个或多个值。拥有多个值的域，通常称为‘多值域’；<strong>相当于mysql中的Rows</strong></p>
+
+<h3 id="映射-mapping">映射（mapping）</h3>
+
+<p>原始内容存储为文档需要事先分析（如何切词，哪些可以过滤等）分析完后要定义这个分析，定义这个分析后让它怎么去根据这个定义去搜索实现，这个过程就叫映射；
+例如：切词、过滤掉某些词等。除此之外ES还为映射提供了诸如将域中的内容排序等功能；</p>
+
+<p><strong>这个mapping有点类似我们定义MySQL的数据库表结构的时候，需要指定每个字段的名字，其数据类型一样。</strong></p>
+
+<p><strong>mapping的目的就是定制化你的字段类型，按照你自己的要求。</strong></p>
+
+<pre><code class="language-json"># 设置postdate数据类型
+PUT test
+{
+  &quot;mappings&quot;:{
+    &quot;my&quot;:{
+      &quot;properties&quot;: {
+        &quot;postdate&quot;:{
+          &quot;type&quot;:&quot;date&quot;,
+          &quot;format&quot;: &quot;yyyy-MM-dd HH:mm:ss||yyyy-MM-dd||epoch_millis&quot;
+        }
+      }
+    }
+  }
+}
+
+# 添加数据
+PUT test/my/1
+{
+  &quot;postdate&quot;:&quot;2018-01-13&quot;
+}
+PUT test/my/2
+{
+  &quot;postdate&quot;:&quot;2018-01-01 00:01:05&quot;
+}
+PUT test/my/3
+{
+  &quot;postdate&quot;:&quot;1420077400001&quot;
+}
+</code></pre>
+
+<h1 id="elasticsearch安装成功">elasticSearch安装成功</h1>
+
+<p><a href="http://localhost:9200/">http://localhost:9200/</a></p>
+
+<pre><code class="language-json">{
+    &quot;name&quot;: &quot;qLcpGmb&quot;,
+    &quot;cluster_name&quot;: &quot;docker-cluster&quot;,
+    &quot;cluster_uuid&quot;: &quot;4MXOww8BSS-y46oN1cXkdA&quot;,
+    &quot;version&quot;: {
+        &quot;number&quot;: &quot;6.8.3&quot;,
+        &quot;build_flavor&quot;: &quot;default&quot;,
+        &quot;build_type&quot;: &quot;docker&quot;,
+        &quot;build_hash&quot;: &quot;0c48c0e&quot;,
+        &quot;build_date&quot;: &quot;2019-08-29T19:05:24.312154Z&quot;,
+        &quot;build_snapshot&quot;: false,
+        &quot;lucene_version&quot;: &quot;7.7.0&quot;,
+        &quot;minimum_wire_compatibility_version&quot;: &quot;5.6.0&quot;,
+        &quot;minimum_index_compatibility_version&quot;: &quot;5.0.0&quot;
+    },
+    &quot;tagline&quot;: &quot;You Know, for Search&quot;
+}
+</code></pre>
+
+<h1 id="kibana-crud">kibana-CRUD</h1>
+
+<pre><code class="language-json">
+#新增
+POST my_inde/doc/3
+{
+  &quot;name&quot;: &quot;maizi-today&quot;,
+  &quot;age&quot;: 18
+}
+
+#删
+DELETE my_inde/doc/3
+
+#查
+GET my_inde/_search
+
+
+#改
+PUT my_inde/doc/1
+{
+  &quot;name&quot;: &quot;maizi-today&quot;,
+  &quot;age&quot;: 180
+}
+</code></pre>
+
+<h1 id="注意">注意</h1>
+
+<p>docker安装上面服务，请查看<strong>Dockerfile安装常用环境</strong>文章。</p>
+
+
+                
+                
+<div class="entry-shang text-center">
+    
+	    <p>「真诚赞赏，手留余香」</p>
+	
+	<button class="zs show-zs btn btn-bred">赞赏支持</button>
+</div>
+<div class="zs-modal-bg"></div>
+<div class="zs-modal-box">
+	<div class="zs-modal-head">
+		<button type="button" class="close">×</button>
+		<span class="author"><a href="http://maizitoday.github.io/"><img src="/img/favicon.png" /></a></span>
+        
+	        <p class="tip"><i></i><span>真诚赞赏，手留余香</span></p>
+		
+ 
+	</div>
+	<div class="zs-modal-body">
+		<div class="zs-modal-btns">
+			<button class="btn btn-blink" data-num="2">2元</button>
+			<button class="btn btn-blink" data-num="5">5元</button>
+			<button class="btn btn-blink" data-num="10">10元</button>
+			<button class="btn btn-blink" data-num="50">50元</button>
+			<button class="btn btn-blink" data-num="100">100元</button>
+			<button class="btn btn-blink" data-num="1">任意金额</button>
+		</div>
+		<div class="zs-modal-pay">
+			<button class="btn btn-bred" id="pay-text">2元</button>
+			<p>使用<span id="pay-type">微信</span>扫描二维码完成支付</p>
+			<img src="/img/reward/wechat-2.png"  id="pay-image"/>
+		</div>
+	</div>
+	<div class="zs-modal-footer">
+		<label><input type="radio" name="zs-type" value="wechat" class="zs-type" checked="checked"><span ><span class="zs-wechat"><img src="/img/reward/wechat-btn.png"/></span></label>
+		<label><input type="radio" name="zs-type" value="alipay" class="zs-type" class="zs-alipay"><img src="/img/reward/alipay-btn.png"/></span></label>
+	</div>
+</div>
+<script type="text/javascript" src="/js/reward.js"></script>
+
+                
+
+                <hr>
+                <ul class="pager">
+                    
+                    <li class="previous">
+                        <a href="/post/mongodb%E7%B3%BB%E5%88%97-gridfs%E5%88%86%E5%B8%83%E5%BC%8F%E6%96%87%E4%BB%B6%E7%B3%BB%E7%BB%9F/" data-toggle="tooltip" data-placement="top" title="mongodb-GridFS分布式文件系统">&larr;
+                            Previous Post</a>
+                    </li>
+                    
+                    
+                    <li class="next">
+                        <a href="/post/elasticsearch-%E6%A3%80%E7%B4%A2/" data-toggle="tooltip" data-placement="top" title="ElasticSearch-检索原理">Next
+                            Post &rarr;</a>
+                    </li>
+                    
+                </ul>
+
+                
+<div id="disqus-comment"></div>
+
+
+
+            </div>
+            
+            <div class="
+                col-lg-8 col-lg-offset-2
+                col-md-10 col-md-offset-1
+                sidebar-container">
+
+                
+                
+                <section>
+                    <hr class="hidden-sm hidden-xs">
+                    <h5><a href="/tags/">FEATURED TAGS</a></h5>
+                    <div class="tags">
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        <a href="/tags/docker" title="docker">
+                            docker
+                        </a>
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        <a href="/tags/dockerfile" title="dockerfile">
+                            dockerfile
+                        </a>
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        <a href="/tags/elasticsearch" title="elasticSearch">
+                            elasticSearch
+                        </a>
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        <a href="/tags/java%E5%9F%BA%E7%A1%80" title="java基础">
+                            java基础
+                        </a>
+                        
+                        
+                        
+                        <a href="/tags/java%E7%9B%B8%E5%85%B3%E6%A6%82%E5%BF%B5" title="java相关概念">
+                            java相关概念
+                        </a>
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        <a href="/tags/jvm" title="jvm">
+                            jvm
+                        </a>
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        <a href="/tags/maven" title="maven">
+                            maven
+                        </a>
+                        
+                        
+                        
+                        <a href="/tags/mongodb" title="mongodb">
+                            mongodb
+                        </a>
+                        
+                        
+                        
+                        
+                        
+                        <a href="/tags/mybatis%E7%B3%BB%E5%88%97" title="mybatis系列">
+                            mybatis系列
+                        </a>
+                        
+                        
+                        
+                        
+                        
+                        <a href="/tags/mysql%E7%B3%BB%E5%88%97" title="mysql系列">
+                            mysql系列
+                        </a>
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        <a href="/tags/nosql" title="nosql">
+                            nosql
+                        </a>
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        <a href="/tags/redis" title="redis">
+                            redis
+                        </a>
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        <a href="/tags/springcloud" title="springCloud">
+                            springCloud
+                        </a>
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        <a href="/tags/springboot%E7%B3%BB%E5%88%97" title="springboot系列">
+                            springboot系列
+                        </a>
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        <a href="/tags/%E4%B8%AD%E9%97%B4%E4%BB%B6" title="中间件">
+                            中间件
+                        </a>
+                        
+                        
+                        
+                        <a href="/tags/%E4%B8%BB%E4%BB%8E%E5%A4%8D%E5%88%B6" title="主从复制">
+                            主从复制
+                        </a>
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        <a href="/tags/%E5%88%86%E5%B8%83%E5%BC%8F%E7%B3%BB%E5%88%97" title="分布式系列">
+                            分布式系列
+                        </a>
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        <a href="/tags/%E5%BC%80%E5%8F%91%E5%B7%A5%E5%85%B7" title="开发工具">
+                            开发工具
+                        </a>
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        <a href="/tags/%E6%95%B0%E6%8D%AE%E5%BA%93" title="数据库">
+                            数据库
+                        </a>
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        <a href="/tags/%E6%9C%8D%E5%8A%A1%E8%84%9A%E6%9C%AC" title="服务脚本">
+                            服务脚本
+                        </a>
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        <a href="/tags/%E7%AE%80%E4%BB%8B" title="简介">
+                            简介
+                        </a>
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        <a href="/tags/%E8%AE%BE%E8%AE%A1%E6%A8%A1%E5%BC%8F" title="设计模式">
+                            设计模式
+                        </a>
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        <a href="/tags/%E8%B4%9F%E8%BD%BD%E5%9D%87%E8%A1%A1" title="负载均衡">
+                            负载均衡
+                        </a>
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        <a href="/tags/%E9%9B%86%E7%BE%A4" title="集群">
+                            集群
+                        </a>
+                        
+                        
+                        
+                        
+                        
+                        
+                    </div>
+                </section>
+                
+
+                
+                
+                <section>
+                    <hr>
+                    <h5>FRIENDS</h5>
+                    <ul class="list-inline">
+                        
+                        <li><a target="_blank" href="https://zhaohuabing.com">赵化冰博客</a></li>
+                        
+                        <li><a target="_blank" href="http://www.tianshouzhi.com">田守枝</a></li>
+                        
+                        <li><a target="_blank" href="http://www.ityouknow.com">纯洁的微笑</a></li>
+                        
+                        <li><a target="_blank" href="https://renchunxiao.com">任春晓</a></li>
+                        
+                        <li><a target="_blank" href="https://www.lihongkun.com">泛泛之辈</a></li>
+                        
+                        <li><a target="_blank" href="https://juejin.im/welcome/backend">后端服务论坛</a></li>
+                        
+                        <li><a target="_blank" href="https://www.javaboy.org">江南一点雨</a></li>
+                        
+                    </ul>
+                </section>
+                
+            </div>
+        </div>
+    </div>
+</article>
+
+
+
+
+<footer>
+    <div class="container">
+        <div class="row">
+            <div class="col-lg-8 col-lg-offset-2 col-md-10 col-md-offset-1">
+                <ul class="list-inline text-center">
+                   
+                   <li>
+                       <a href="" rel="alternate" type="application/rss+xml" title="" >
+                           <span class="fa-stack fa-lg">
+                               <i class="fa fa-circle fa-stack-2x"></i>
+                               <i class="fa fa-rss fa-stack-1x fa-inverse"></i>
+                           </span>
+                       </a>
+                   </li>
+                   
+                    
+                    <li>
+                        <a href="mailto:maiziybtoday@gmail.com">
+                            <span class="fa-stack fa-lg">
+                                <i class="fa fa-circle fa-stack-2x"></i>
+                                <i class="fa fa-envelope fa-stack-1x fa-inverse"></i>
+                            </span>
+                        </a>
+                    </li>
+		    
+                    
+                    
+                    
+                    
+
+                    
+
+		    
+                    
+                    <li>
+                        <a target="_blank" href="/your%20wechat%20qr%20code%20image">
+                            <span class="fa-stack fa-lg">
+                                <i class="fa fa-circle fa-stack-2x"></i>
+                                <i class="fa fa-wechat fa-stack-1x fa-inverse"></i>
+                            </span>
+                        </a>
+                    </li>
+		    
+                    
+                    
+                    <li>
+                        <a target="_blank" href="https://www.linkedin.com/in/yourlinkedinid">
+                            <span class="fa-stack fa-lg">
+                                <i class="fa fa-circle fa-stack-2x"></i>
+                                <i class="fa fa-linkedin fa-stack-1x fa-inverse"></i>
+                            </span>
+                        </a>
+                    </li>
+		    
+                    
+                </ul>
+		<p class="copyright text-muted">
+                    Copyright &copy;  2019
+                    <br>
+                    <a href="https://themes.gohugo.io/hugo-theme-cleanwhite">CleanWhite Hugo Theme</a> by <a href="https://zhaohuabing.com">Huabing</a> |
+                    <iframe
+                        style="margin-left: 2px; margin-bottom:-5px;"
+                        frameborder="0" scrolling="0" width="100px" height="20px"
+                        src="https://ghbtns.com/github-btn.html?user=zhaohuabing&repo=hugo-theme-cleanwhite&type=star&count=true" >
+                    </iframe>
+                </p>
+            </div>
+        </div>
+    </div>
+</footer>
+
+
+
+
+<script>
+    function async(u, c) {
+      var d = document, t = 'script',
+          o = d.createElement(t),
+          s = d.getElementsByTagName(t)[0];
+      o.src = u;
+      if (c) { o.addEventListener('load', function (e) { c(null, e); }, false); }
+      s.parentNode.insertBefore(o, s);
+    }
+</script>
+
+
+
+
+
+
+<script>
+    
+    if($('#tag_cloud').length !== 0){
+        async("/js/jquery.tagcloud.js",function(){
+            $.fn.tagcloud.defaults = {
+                
+                color: {start: '#bbbbee', end: '#0085a1'},
+            };
+            $('#tag_cloud a').tagcloud();
+        })
+    }
+</script>
+
+
+<script>
+    async("https://cdnjs.cloudflare.com/ajax/libs/fastclick/1.0.6/fastclick.js", function(){
+        var $nav = document.querySelector("nav");
+        if($nav) FastClick.attach($nav);
+    })
+</script>
+
+
+
+
+
+
+</body>
+</html>
