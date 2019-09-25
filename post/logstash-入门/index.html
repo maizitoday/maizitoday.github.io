@@ -1,0 +1,1325 @@
+<!DOCTYPE html>
+<html lang="en-us">
+<head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+
+    
+    <meta property="og:site_name" content="">
+    <meta property="og:type" content="article">
+
+    
+    <meta property="og:image" content="http://maizitoday.github.io//img/home-bg-jeep.jpg">
+    <meta property="twitter:image" content="http://maizitoday.github.io//img/home-bg-jeep.jpg" />
+    
+
+    
+    <meta name="title" content="Logstash-入门" />
+    <meta property="og:title" content="Logstash-入门" />
+    <meta property="twitter:title" content="Logstash-入门" />
+    
+
+    
+    <meta name="description" content="麦子，程序员, 开源爱好者，生活探险家 | 这里是 麦子 的博客，与你一起发现更大的世界。">
+    <meta property="og:description" content="麦子，程序员, 开源爱好者，生活探险家 | 这里是 麦子 的博客，与你一起发现更大的世界。" />
+    <meta property="twitter:description" content="麦子，程序员, 开源爱好者，生活探险家 | 这里是 麦子 的博客，与你一起发现更大的世界。" />
+    
+
+    
+    <meta property="twitter:card" content="summary" />
+    
+    
+
+    <meta name="keyword"  content="麦子, maizi, maizi, , 麦子的网络日志, 麦子的博客, maizi Blog, 博客, 个人网站, 互联网, Web, 云原生, PaaS, Istio, Kubernetes, 微服务, Microservice">
+    <link rel="shortcut icon" href="/img/favicon.ico">
+
+    <title>Logstash-入门-麦子的博客</title>
+
+    <link rel="canonical" href="/post/logstash-%E5%85%A5%E9%97%A8/">
+
+    <link rel="stylesheet" href="/css/iDisqus.min.css"/>
+	
+    
+    <link rel="stylesheet" href="/css/bootstrap.min.css">
+
+    
+    <link rel="stylesheet" href="/css/hux-blog.min.css">
+
+    
+    <link rel="stylesheet" href="/css/syntax.css">
+
+    
+    <link rel="stylesheet" href="/css/zanshang.css">
+
+    
+    <link href="//cdnjs.cloudflare.com/ajax/libs/font-awesome/4.6.3/css/font-awesome.min.css" rel="stylesheet" type="text/css">
+    
+    
+    <script src="/js/jquery.min.js"></script>
+    
+    
+    <script src="/js/bootstrap.min.js"></script>
+    
+    
+    <script src="/js/hux-blog.min.js"></script>
+	
+    
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.13.1/styles/docco.min.css">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.13.1/highlight.min.js"></script>
+    <script>hljs.initHighlightingOnLoad();</script>
+</head>
+
+
+<nav class="navbar navbar-default navbar-custom navbar-fixed-top">
+    <div class="container-fluid">
+        
+        <div class="navbar-header page-scroll">
+            <button type="button" class="navbar-toggle">
+                <span class="sr-only">Toggle navigation</span>
+                <span class="icon-bar"></span>
+                <span class="icon-bar"></span>
+                <span class="icon-bar"></span>
+            </button>
+            <a class="navbar-brand" href="/"></a>
+        </div>
+
+        
+        
+        <div id="huxblog_navbar">
+            <div class="navbar-collapse">
+                <ul class="nav navbar-nav navbar-right">
+                    <li>
+                        <a href="/">Home</a>
+                    </li>
+                    
+                    <li>
+                        <a href="/categories/life">Life</a>
+                    </li>
+                    
+                    <li>
+                        <a href="/categories/tech">Tech</a>
+                    </li>
+                    
+                    
+		    
+                        <li><a href="/top/about/">ABOUT</a></li>
+                    
+
+                    
+		    <li>
+                        <a href="/search">SEARCH <img src="/img/search.png" height="15" style="cursor: pointer;" alt="Search"></a>
+		    </li>
+                    
+                </ul>
+            </div>
+        </div>
+        
+    </div>
+    
+</nav>
+<script>
+    
+    
+    
+    var $body   = document.body;
+    var $toggle = document.querySelector('.navbar-toggle');
+    var $navbar = document.querySelector('#huxblog_navbar');
+    var $collapse = document.querySelector('.navbar-collapse');
+
+    $toggle.addEventListener('click', handleMagic)
+    function handleMagic(e){
+        if ($navbar.className.indexOf('in') > 0) {
+        
+            $navbar.className = " ";
+            
+            setTimeout(function(){
+                
+                if($navbar.className.indexOf('in') < 0) {
+                    $collapse.style.height = "0px"
+                }
+            },400)
+        }else{
+        
+            $collapse.style.height = "auto"
+            $navbar.className += " in";
+        }
+    }
+</script>
+
+
+
+
+<style type="text/css">
+    header.intro-header {
+        background-image: url('https://c.pxhere.com/images/e4/46/bd237f6583029424694a0d16589b-1435053.jpg!d')
+    }
+</style>
+<header class="intro-header">
+    <div class="container">
+        <div class="row">
+            <div class="col-lg-8 col-lg-offset-2 col-md-10 col-md-offset-1">
+                <div class="post-heading">
+                    <div class="tags">
+                        
+                        <a class="tag" href="/tags/elasticsearch" title="elasticSearch">
+                            elasticSearch
+                        </a>
+                        
+                        <a class="tag" href="/tags/filebeat" title="Filebeat">
+                            Filebeat
+                        </a>
+                        
+                    </div>
+                    <h1>Logstash-入门</h1>
+                    <h2 class="subheading"></h2>
+                    <span class="meta">
+			Posted by 
+			
+			    麦子
+			 
+			on 
+			Sunday, September 22, 2019
+                        
+                    </span>
+                </div>
+            </div>
+        </div>
+    </div>
+</header>
+
+
+
+
+<article>
+    <div class="container">
+        <div class="row">
+
+            
+            <div class="
+                col-lg-8 col-lg-offset-2
+                col-md-10 col-md-offset-1
+                post-container">
+
+                
+                <header>
+                    <h2>TOC</h2>
+                </header>
+                <nav id="TableOfContents">
+<ul>
+<li><a href="#简介">简介</a></li>
+<li><a href="#常用用途流程">常用用途流程</a>
+<ul>
+<li><a href="#如何处理日志">如何处理日志</a></li>
+</ul></li>
+<li><a href="#配置文件理解">配置文件理解</a>
+<ul>
+<li><a href="#pipelines-yml">pipelines.yml</a></li>
+<li><a href="#logstash-yml">logstash.yml</a></li>
+<li><a href="#logstash-conf">logstash.conf</a>
+<ul>
+<li><a href="#input">input</a>
+<ul>
+<li><a href="#常用-input-插件">常用 input 插件</a></li>
+<li><a href="#file">file</a></li>
+<li><a href="#syslog">syslog</a></li>
+<li><a href="#redis">redis</a></li>
+<li><a href="#beats">beats</a></li>
+</ul></li>
+<li><a href="#filter">filter</a>
+<ul>
+<li><a href="#常用-filter-插件">常用 filter 插件</a></li>
+<li><a href="#grok">grok</a></li>
+<li><a href="#mutate">mutate</a></li>
+<li><a href="#drop">drop</a></li>
+<li><a href="#clone">clone</a></li>
+<li><a href="#geoip">geoip</a></li>
+</ul></li>
+<li><a href="#output">output</a>
+<ul>
+<li><a href="#elasticsearch">elasticsearch</a></li>
+<li><a href="#file-1">file</a></li>
+<li><a href="#graphite">graphite</a></li>
+<li><a href="#statsd">statsd</a></li>
+</ul></li>
+</ul></li>
+<li><a href="#注意">注意</a></li>
+<li><a href="#jvm-options">jvm.options</a></li>
+<li><a href="#startup-options-linux"><strong>startup.options</strong> (Linux)</a></li>
+</ul></li>
+<li><a href="#filebeat">Filebeat</a>
+<ul>
+<li><a href="#filebeat-yml">filebeat.yml</a></li>
+</ul></li>
+</ul>
+</nav>
+                
+                
+
+<p>[TOC]</p>
+
+<p><strong>说明：本文来自于<a href="https://www.bilibili.com/video/av64033816/?p=1&gt;视频讲解">https://www.bilibili.com/video/av64033816/?p=1&gt;视频讲解</a></strong></p>
+
+<p><strong>转载地址：<a href="https://www.cnblogs.com/jingmoxukong/p/8118791.html">https://www.cnblogs.com/jingmoxukong/p/8118791.html</a></strong></p>
+
+<p><strong>官方文档：<a href="https://www.elastic.co/guide/en/logstash/current/index.html">https://www.elastic.co/guide/en/logstash/current/index.html</a> 版本6.8.3</strong></p>
+
+<p><strong>中文文档：<a href="https://www.kancloud.cn/aiyinsi-tan/logstash/849604">https://www.kancloud.cn/aiyinsi-tan/logstash/849604</a></strong></p>
+
+<h1 id="简介">简介</h1>
+
+<p>Logstash可以动态的将不同来源的数据进行归一并将格式化的数据存储到你选择的位置。对你的所有做数据清洗和大众化处理，踩踏做数据分析和可视化。Logstash 是插件式管理模式，在输入、过滤、输出以及编码过程中都可以使用插件进行定制。Logstash 社区有超过 200 种可用插件。</p>
+
+<p><strong>Logstash 可以传输和处理你的日志、事务或其他数据。</strong></p>
+
+<p><strong>搜集数据&mdash;&gt;过滤数据&mdash;&gt;处理数据。</strong></p>
+
+<p><img src="/img/Xnip2019-09-23_22-01-06.png" alt="Xnip2019-09-23_22-01-06" /></p>
+
+<p>根据提供的不同的插件， 我们可以用来做<strong>分析，监控，警报</strong>等。</p>
+
+<h1 id="常用用途流程">常用用途流程</h1>
+
+<p><img src="/img/Xnip2019-09-23_22-05-29.png" alt="Xnip2019-09-23_22-05-29" /></p>
+
+<p>通过从数据库或者文件中，收集好数据， 然后放到了Logstash中对数据进行清洗，这里的清洗包括对数据的过滤，数据的格式化等，最后存入到ES中。</p>
+
+<p>同时如上面的划线地方， 他也可以监控ES，mysql中的sql语句或者是数据的变化， 然后把变化的数据发送到存储库中。</p>
+
+<h2 id="如何处理日志">如何处理日志</h2>
+
+<p><img src="/img/Xnip2019-09-23_22-19-18.png" alt="Xnip2019-09-23_22-19-18" /></p>
+
+<p>读取每一条日志， 然后产生一个event事件，这个事件放入到队列中，然后在filter中进行过滤，最后输出。 内部是已event来进行处理的。</p>
+
+<p><strong>在实际应用场景中，通常输入、输出、过滤器不止一个。</strong>Logstash 的这三个元素都使用插件式管理方式，用户可以根据应用需要，灵活的选用各阶段需要的插件，并组合使用。</p>
+
+<h1 id="配置文件理解">配置文件理解</h1>
+
+<p><img src="/img/Xnip2019-09-25_17-50-22.png" alt="Xnip2019-09-25_17-50-22" /></p>
+
+<h2 id="pipelines-yml">pipelines.yml</h2>
+
+<p>Logstash 在 6.0 推出了 multiple pipeline 的解决方案，即在一个 logstash 实例中可以同时进行多个独立数据流程的处理工作。如下可以配置两个配置文件获取数据源。</p>
+
+<pre><code>pipeline.id: nginx
+path.config: &quot;/usr/share/logstash/config/logstash-nginx.conf&quot;
+
+pipeline.id: Tomcat
+path.config: &quot;/usr/share/logstash/config/logstash-Tomcat.conf&quot;
+</code></pre>
+
+<h2 id="logstash-yml">logstash.yml</h2>
+
+<p>logstash 的默认启动配置文件。虽然可以通过指定命令行参数的方式，来控制 logstash 的运行方式，但显然这么做很麻烦。建议通过指定配置文件的方式，来控制 logstash 运行，启动命令如下：</p>
+
+<pre><code class="language-shell">bin/logstash -f logstash.conf
+</code></pre>
+
+<p>我在搭建环境的时候，直接把里面的都给屏蔽掉了。</p>
+
+<h2 id="logstash-conf">logstash.conf</h2>
+
+<pre><code class="language-json"># input{
+#     file{
+#         path =&gt; [&quot;/rmc.log&quot;]
+#         start_position =&gt; beginning
+#         sincedb_path =&gt; &quot;/dev/null&quot;
+#     }
+# }
+
+input{
+  tcp {
+        port =&gt; &quot;6666&quot;
+        mode =&gt; &quot;server&quot;
+    }
+}
+ 
+output {
+  elasticsearch {
+    hosts =&gt; [&quot;http://192.168.1.100:9200&quot;]
+    id =&gt; &quot;my_plugin_id&quot;
+    index =&gt; &quot;viewdata-%{+YYYY.MM.dd}&quot;
+    #user =&gt; &quot;elastic&quot;
+    #password =&gt; &quot;changeme&quot;
+  }
+  stdout {
+        codec =&gt; rubydebug
+    }
+}
+
+#nc 192.168.1.100 6666 &lt; /var/log/nginx/access.log
+如此，在另一台机子上不需要搭建Logstash， 用脚本就好了,持续收集数据。 
+同时很多日志框架可以通过TCP和UDP进行通信处理。 
+</code></pre>
+
+<h3 id="input">input</h3>
+
+<p>Logstash 支持各种输入选择 ，可以在同一时间从众多常用来源捕捉事件。能够以连续的流式传输方式，轻松地从您的日志、指标、Web 应用、数据存储以及各种 AWS 服务采集数据。</p>
+
+<h4 id="常用-input-插件">常用 input 插件</h4>
+
+<h4 id="file">file</h4>
+
+<p>从文件系统上的文件读取，就像UNIX命令 <code>tail -0F</code> 一样</p>
+
+<h4 id="syslog">syslog</h4>
+
+<p>在众所周知的端口514上侦听系统日志消息，并根据RFC3164格式进行解析</p>
+
+<h4 id="redis">redis</h4>
+
+<p>从redis服务器读取，使用redis通道和redis列表。 Redis经常用作集中式Logstash安装中的“代理”，它将来自远程Logstash“托运人”的Logstash事件排队。</p>
+
+<h4 id="beats">beats</h4>
+
+<p>处理由Filebeat发送的事件。</p>
+
+<h3 id="filter">filter</h3>
+
+<p>过滤器是Logstash管道中的中间处理设备。如果符合特定条件，您可以将条件过滤器组合在一起，对事件执行操作。</p>
+
+<h4 id="常用-filter-插件">常用 filter 插件</h4>
+
+<h4 id="grok">grok</h4>
+
+<p>解析和结构任意文本。 Grok目前是Logstash中将非结构化日志数据解析为结构化和可查询的最佳方法。</p>
+
+<h4 id="mutate">mutate</h4>
+
+<p>对事件字段执行一般转换。您可以重命名，删除，替换和修改事件中的字段。</p>
+
+<h4 id="drop">drop</h4>
+
+<p>完全放弃一个事件，例如调试事件。</p>
+
+<h4 id="clone">clone</h4>
+
+<p>制作一个事件的副本，可能会添加或删除字段。</p>
+
+<h4 id="geoip">geoip</h4>
+
+<p>添加有关IP地址的地理位置的信息（也可以在Kibana中显示惊人的图表！）</p>
+
+<h3 id="output">output</h3>
+
+<p>输出是Logstash管道的最后阶段。一个事件可以<strong>通过多个输出</strong>，但是一旦所有输出处理完成，事件就完成了执行。</p>
+
+<h4 id="elasticsearch">elasticsearch</h4>
+
+<p>将事件数据发送给 Elasticsearch（推荐模式）。</p>
+
+<h4 id="file-1">file</h4>
+
+<p>将事件数据写入文件或磁盘。</p>
+
+<h4 id="graphite">graphite</h4>
+
+<p>将事件数据发送给 graphite（一个流行的开源工具，存储和绘制指标。 <a href="http://graphite.readthedocs.io/en/latest/）。">http://graphite.readthedocs.io/en/latest/）。</a></p>
+
+<h4 id="statsd">statsd</h4>
+
+<p>将事件数据发送到 statsd （这是一种侦听统计数据的服务，如计数器和定时器，通过UDP发送并将聚合发送到一个或多个可插入的后端服务）。</p>
+
+<h2 id="注意">注意</h2>
+
+<p>编写配置文件的时候， 一定要注意里面的格式或者空格， 不然运行错误。 多个插件配置按顺序执行。</p>
+
+<p>对于我们的一些日志框架， 可以通过TCP和UDP来进行采集处理。</p>
+
+<h2 id="jvm-options">jvm.options</h2>
+
+<p>logstash 的 JVM 配置文件。</p>
+
+<h2 id="startup-options-linux"><strong>startup.options</strong> (Linux)</h2>
+
+<p>包含系统安装脚本在 <code>/usr/share/logstash/bin</code> 中使用的选项为您的系统构建适当的启动脚本。安装 Logstash 软件包时，系统安装脚本将在安装过程结束时执行，并使用 <code>startup.options</code> 中指定的设置来设置用户，组，服务名称和服务描述等选项。</p>
+
+<h1 id="filebeat">Filebeat</h1>
+
+<pre><code class="language-shell">sudo yum install filebeat
+
+curl -L -O https://artifacts.elastic.co/downloads/beats/filebeat/filebeat-7.3.2-linux-x86_64.tar.gz
+tar xzvf filebeat-7.3.2-linux-x86_64.tar.gz
+
+后台启动
+nohup ./filebeat -e &gt; filebeat.log &amp;
+停止
+ps -ef |grep filebeat
+kill -9  进程号
+</code></pre>
+
+<h2 id="filebeat-yml">filebeat.yml</h2>
+
+<p>配置Nginx，把nginx日志中的access.log上传到logstash中</p>
+
+<pre><code class="language-yml">#=========================== Filebeat inputs =============================
+filebeat.inputs:
+- type: log
+
+  # Change to true to enable this input configuration.
+  enabled: true
+
+  # Paths that should be crawled and fetched. Glob based paths.
+  paths:
+    - /var/log/nginx/access.log
+    #- c:\programdata\elasticsearch\logs\*
+#============================= Filebeat modules ===============================
+
+filebeat.config.modules:
+  # Glob pattern for configuration loading
+  path: ${path.config}/modules.d/*.yml
+
+  # Set to true to enable config reloading
+  reload.enabled: false
+
+  # Period on which files under path should be checked for changes
+  #reload.period: 10s
+#==================== Elasticsearch template setting ==========================
+
+setup.template.settings:
+  index.number_of_shards: 1
+  #index.codec: best_compression
+  #_source.enabled: false
+  
+#============================== Kibana =====================================
+
+# Starting with Beats version 6.0.0, the dashboards are loaded via the Kibana API.
+# This requires a Kibana endpoint configuration.
+setup.kibana:
+
+
+#----------------------------- Logstash output --------------------------------
+output.logstash:
+  hosts: [&quot;192.168.1.100:5044&quot;]
+#================================ Processors =====================================
+
+# Configure processors to enhance or manipulate events generated by the beat.
+processors:
+  - add_host_metadata: ~
+  - add_cloud_metadata: ~
+</code></pre>
+
+
+                
+                
+<div class="entry-shang text-center">
+    
+	    <p>「真诚赞赏，手留余香」</p>
+	
+	<button class="zs show-zs btn btn-bred">赞赏支持</button>
+</div>
+<div class="zs-modal-bg"></div>
+<div class="zs-modal-box">
+	<div class="zs-modal-head">
+		<button type="button" class="close">×</button>
+		<span class="author"><a href="http://maizitoday.github.io/"><img src="/img/favicon.png" /></a></span>
+        
+	        <p class="tip"><i></i><span>真诚赞赏，手留余香</span></p>
+		
+ 
+	</div>
+	<div class="zs-modal-body">
+		<div class="zs-modal-btns">
+			<button class="btn btn-blink" data-num="2">2元</button>
+			<button class="btn btn-blink" data-num="5">5元</button>
+			<button class="btn btn-blink" data-num="10">10元</button>
+			<button class="btn btn-blink" data-num="50">50元</button>
+			<button class="btn btn-blink" data-num="100">100元</button>
+			<button class="btn btn-blink" data-num="1">任意金额</button>
+		</div>
+		<div class="zs-modal-pay">
+			<button class="btn btn-bred" id="pay-text">2元</button>
+			<p>使用<span id="pay-type">微信</span>扫描二维码完成支付</p>
+			<img src="/img/reward/wechat-2.png"  id="pay-image"/>
+		</div>
+	</div>
+	<div class="zs-modal-footer">
+		<label><input type="radio" name="zs-type" value="wechat" class="zs-type" checked="checked"><span ><span class="zs-wechat"><img src="/img/reward/wechat-btn.png"/></span></label>
+		<label><input type="radio" name="zs-type" value="alipay" class="zs-type" class="zs-alipay"><img src="/img/reward/alipay-btn.png"/></span></label>
+	</div>
+</div>
+<script type="text/javascript" src="/js/reward.js"></script>
+
+                
+
+                <hr>
+                <ul class="pager">
+                    
+                    <li class="previous">
+                        <a href="/post/elasticsearch-%E7%AE%80%E4%BB%8B%E5%92%8C%E5%AE%89%E8%A3%85/" data-toggle="tooltip" data-placement="top" title="ElasticSearch-入门">&larr;
+                            Previous Post</a>
+                    </li>
+                    
+                    
+                    <li class="next">
+                        <a href="/post/elasticsearch-%E6%A3%80%E7%B4%A2/" data-toggle="tooltip" data-placement="top" title="ElasticSearch-检索原理">Next
+                            Post &rarr;</a>
+                    </li>
+                    
+                </ul>
+
+                
+<div id="disqus-comment"></div>
+
+
+
+            </div>
+            
+            <div class="
+                col-lg-8 col-lg-offset-2
+                col-md-10 col-md-offset-1
+                sidebar-container">
+
+                
+                
+                <section>
+                    <hr class="hidden-sm hidden-xs">
+                    <h5><a href="/tags/">FEATURED TAGS</a></h5>
+                    <div class="tags">
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        <a href="/tags/docker" title="docker">
+                            docker
+                        </a>
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        <a href="/tags/dockerfile" title="dockerfile">
+                            dockerfile
+                        </a>
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        <a href="/tags/elasticsearch" title="elasticSearch">
+                            elasticSearch
+                        </a>
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        <a href="/tags/java%E5%9F%BA%E7%A1%80" title="java基础">
+                            java基础
+                        </a>
+                        
+                        
+                        
+                        <a href="/tags/java%E7%9B%B8%E5%85%B3%E6%A6%82%E5%BF%B5" title="java相关概念">
+                            java相关概念
+                        </a>
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        <a href="/tags/jvm" title="jvm">
+                            jvm
+                        </a>
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        <a href="/tags/maven" title="maven">
+                            maven
+                        </a>
+                        
+                        
+                        
+                        <a href="/tags/mongodb" title="mongodb">
+                            mongodb
+                        </a>
+                        
+                        
+                        
+                        
+                        
+                        <a href="/tags/mybatis%E7%B3%BB%E5%88%97" title="mybatis系列">
+                            mybatis系列
+                        </a>
+                        
+                        
+                        
+                        
+                        
+                        <a href="/tags/mysql%E7%B3%BB%E5%88%97" title="mysql系列">
+                            mysql系列
+                        </a>
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        <a href="/tags/nosql" title="nosql">
+                            nosql
+                        </a>
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        <a href="/tags/redis" title="redis">
+                            redis
+                        </a>
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        <a href="/tags/springcloud" title="springCloud">
+                            springCloud
+                        </a>
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        <a href="/tags/springboot%E7%B3%BB%E5%88%97" title="springboot系列">
+                            springboot系列
+                        </a>
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        <a href="/tags/%E4%B8%AD%E9%97%B4%E4%BB%B6" title="中间件">
+                            中间件
+                        </a>
+                        
+                        
+                        
+                        <a href="/tags/%E4%B8%BB%E4%BB%8E%E5%A4%8D%E5%88%B6" title="主从复制">
+                            主从复制
+                        </a>
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        <a href="/tags/%E5%88%86%E5%B8%83%E5%BC%8F%E7%B3%BB%E5%88%97" title="分布式系列">
+                            分布式系列
+                        </a>
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        <a href="/tags/%E5%BC%80%E5%8F%91%E5%B7%A5%E5%85%B7" title="开发工具">
+                            开发工具
+                        </a>
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        <a href="/tags/%E6%95%B0%E6%8D%AE%E5%BA%93" title="数据库">
+                            数据库
+                        </a>
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        <a href="/tags/%E6%9C%8D%E5%8A%A1%E8%84%9A%E6%9C%AC" title="服务脚本">
+                            服务脚本
+                        </a>
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        <a href="/tags/%E7%AE%80%E4%BB%8B" title="简介">
+                            简介
+                        </a>
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        <a href="/tags/%E8%AE%BE%E8%AE%A1%E6%A8%A1%E5%BC%8F" title="设计模式">
+                            设计模式
+                        </a>
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        <a href="/tags/%E8%B4%9F%E8%BD%BD%E5%9D%87%E8%A1%A1" title="负载均衡">
+                            负载均衡
+                        </a>
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        <a href="/tags/%E9%9B%86%E7%BE%A4" title="集群">
+                            集群
+                        </a>
+                        
+                        
+                        
+                        
+                        
+                        
+                    </div>
+                </section>
+                
+
+                
+                
+                <section>
+                    <hr>
+                    <h5>FRIENDS</h5>
+                    <ul class="list-inline">
+                        
+                        <li><a target="_blank" href="https://zhaohuabing.com">赵化冰博客</a></li>
+                        
+                        <li><a target="_blank" href="http://www.tianshouzhi.com">田守枝</a></li>
+                        
+                        <li><a target="_blank" href="http://www.ityouknow.com">纯洁的微笑</a></li>
+                        
+                        <li><a target="_blank" href="https://renchunxiao.com">任春晓</a></li>
+                        
+                        <li><a target="_blank" href="https://www.lihongkun.com">泛泛之辈</a></li>
+                        
+                        <li><a target="_blank" href="https://juejin.im/welcome/backend">后端服务论坛</a></li>
+                        
+                        <li><a target="_blank" href="https://www.javaboy.org">江南一点雨</a></li>
+                        
+                    </ul>
+                </section>
+                
+            </div>
+        </div>
+    </div>
+</article>
+
+
+
+
+<footer>
+    <div class="container">
+        <div class="row">
+            <div class="col-lg-8 col-lg-offset-2 col-md-10 col-md-offset-1">
+                <ul class="list-inline text-center">
+                   
+                   <li>
+                       <a href="" rel="alternate" type="application/rss+xml" title="" >
+                           <span class="fa-stack fa-lg">
+                               <i class="fa fa-circle fa-stack-2x"></i>
+                               <i class="fa fa-rss fa-stack-1x fa-inverse"></i>
+                           </span>
+                       </a>
+                   </li>
+                   
+                    
+                    <li>
+                        <a href="mailto:maiziybtoday@gmail.com">
+                            <span class="fa-stack fa-lg">
+                                <i class="fa fa-circle fa-stack-2x"></i>
+                                <i class="fa fa-envelope fa-stack-1x fa-inverse"></i>
+                            </span>
+                        </a>
+                    </li>
+		    
+                    
+                    
+                    
+                    
+
+                    
+
+		    
+                    
+                    <li>
+                        <a target="_blank" href="/your%20wechat%20qr%20code%20image">
+                            <span class="fa-stack fa-lg">
+                                <i class="fa fa-circle fa-stack-2x"></i>
+                                <i class="fa fa-wechat fa-stack-1x fa-inverse"></i>
+                            </span>
+                        </a>
+                    </li>
+		    
+                    
+                    
+                    <li>
+                        <a target="_blank" href="https://www.linkedin.com/in/yourlinkedinid">
+                            <span class="fa-stack fa-lg">
+                                <i class="fa fa-circle fa-stack-2x"></i>
+                                <i class="fa fa-linkedin fa-stack-1x fa-inverse"></i>
+                            </span>
+                        </a>
+                    </li>
+		    
+                    
+                </ul>
+		<p class="copyright text-muted">
+                    Copyright &copy;  2019
+                    <br>
+                    <a href="https://themes.gohugo.io/hugo-theme-cleanwhite">CleanWhite Hugo Theme</a> by <a href="https://zhaohuabing.com">Huabing</a> |
+                    <iframe
+                        style="margin-left: 2px; margin-bottom:-5px;"
+                        frameborder="0" scrolling="0" width="100px" height="20px"
+                        src="https://ghbtns.com/github-btn.html?user=zhaohuabing&repo=hugo-theme-cleanwhite&type=star&count=true" >
+                    </iframe>
+                </p>
+            </div>
+        </div>
+    </div>
+</footer>
+
+
+
+
+<script>
+    function async(u, c) {
+      var d = document, t = 'script',
+          o = d.createElement(t),
+          s = d.getElementsByTagName(t)[0];
+      o.src = u;
+      if (c) { o.addEventListener('load', function (e) { c(null, e); }, false); }
+      s.parentNode.insertBefore(o, s);
+    }
+</script>
+
+
+
+
+
+
+<script>
+    
+    if($('#tag_cloud').length !== 0){
+        async("/js/jquery.tagcloud.js",function(){
+            $.fn.tagcloud.defaults = {
+                
+                color: {start: '#bbbbee', end: '#0085a1'},
+            };
+            $('#tag_cloud a').tagcloud();
+        })
+    }
+</script>
+
+
+<script>
+    async("https://cdnjs.cloudflare.com/ajax/libs/fastclick/1.0.6/fastclick.js", function(){
+        var $nav = document.querySelector("nav");
+        if($nav) FastClick.attach($nav);
+    })
+</script>
+
+
+
+
+
+
+</body>
+</html>
