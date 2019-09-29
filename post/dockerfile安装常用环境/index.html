@@ -231,6 +231,15 @@
 <li><a href="#docker-network-create-somenetwork">$ docker network create somenetwork</a></li>
 <li><a href="#问题记录">问题记录</a></li>
 </ul></li>
+<li><a href="#rocketmq">rocketmq</a>
+<ul>
+<li><a href="#单主机模式">单主机模式</a>
+<ul>
+<li><a href="#docker-compose-yml">docker-compose.yml</a></li>
+<li><a href="#broker-conf">broker.conf</a></li>
+<li><a href="#启动">启动</a></li>
+</ul></li>
+</ul></li>
 </ul>
 </nav>
                 
@@ -515,6 +524,91 @@ output {
 
 <p>我的ES和logstash, 一个是Networks：esk  一个是Networks：bridge，但是依然可以OK， 不知道为什么。 我的电脑是mac系统。 后期在来解答。</p>
 
+<h1 id="rocketmq">rocketmq</h1>
+
+<h2 id="单主机模式">单主机模式</h2>
+
+<h3 id="docker-compose-yml">docker-compose.yml</h3>
+
+<pre><code class="language-json">version: '2'
+services:
+  namesrv:
+    image: rocketmqinc/rocketmq 
+    container_name: rmqnamesrv
+    ports:
+      - 9876:9876 #namesrv只使用了一个9876端口。
+    volumes:
+      - $PWD/opt/rocketmq/logs:/home/rocketmq/logs
+      - $PWD/opt/rocketmq/store:/home/rocketmq/store
+    command: sh mqnamesrv
+  broker:
+    image: rocketmqinc/rocketmq
+    container_name: rmqbroker
+    ports:
+      - 10909:10909 #主要是fastRemotingServer服务使用
+      - 10911:10911 #这个主要是broker的服务端口号，作为对producer和consumer使用服务的端口号，默认为10911，可以通过配置文件中修改。
+      - 10912:10912 #slave连接使用
+    volumes:
+      - $PWD/opt/rocketmq/logs:/home/rocketmq/logs
+      - $PWD/opt/rocketmq/store:/home/rocketmq/store
+      - $PWD/opt/rocketmq/conf/broker.conf:/opt/rocketmq-4.4.0/conf/broker.conf
+    #command: sh mqbroker -n namesrv:9876
+    command: sh mqbroker -n namesrv:9876 -c ../conf/broker.conf
+    depends_on:
+      - namesrv
+    environment:
+      - JAVA_HOME=/usr/lib/jvm/jre
+  console:
+    image: styletang/rocketmq-console-ng
+    container_name: rocketmq-console-ng
+    ports:
+      - 8087:8080
+    depends_on:
+      - namesrv
+    environment:
+      - JAVA_OPTS= -Dlogging.level.root=info   -Drocketmq.namesrv.addr=rmqnamesrv:9876 
+      - Dcom.rocketmq.sendMessageWithVIPChannel=falseclear
+</code></pre>
+
+<h3 id="broker-conf">broker.conf</h3>
+
+<pre><code class="language-properties"># 所属集群名字
+brokerClusterName = DefaultCluster
+# broker 名字，注意此处不同的配置文件填写的不一样，如果在 broker-a.properties 使用: broker-a,
+# 在 broker-b.properties 使用: broker-b
+brokerName = broker-a
+# 0 表示 Master，&gt; 0 表示 Slave
+brokerId = 0
+# 删除文件时间点，默认凌晨4点
+deleteWhen = 04
+# 文件保留时间，默认48小时
+fileReservedTime = 48
+# Broker 的角色
+# - ASYNC_MASTER 异步复制Master
+# - SYNC_MASTER 同步双写Master
+# - SLAVE
+brokerRole = ASYNC_MASTER
+# 刷盘方式
+# - ASYNC_FLUSH 异步刷盘
+# - SYNC_FLUSH 同步刷盘
+flushDiskType = ASYNC_FLUSH
+#set `brokerIP1` if you want to set physical IP as broker IP.
+brokerIP1=这样ip是你映射到主机的IP地址， 但是一定要放开上面的端口
+</code></pre>
+
+<h3 id="启动">启动</h3>
+
+<pre><code class="language-yaml">docker-compose up -d
+
+#在broker中，执行，
+sh mqadmin clusterList -n rmqnamesrv:9876 
+
+#出现如下数据，证明连接nameserver已经正常。
+OpenJDK 64-Bit Server VM warning: ignoring option MaxPermSize=128m; support was removed in 8.0
+#Cluster Name     #Broker Name            #BID  #Addr                  #Version                #InTPS(LOAD)       #OutTPS(LOAD) #PCWait(ms) #Hour #SPACE
+DefaultCluster    broker-a                0     172.20.0.4 :10911      V4_4_0                   0.00(0,0ms)         0.00(0,0ms)          0 436044.47 -1.0000
+</code></pre>
+
 
                 
                 
@@ -592,6 +686,8 @@ output {
                     <hr class="hidden-sm hidden-xs">
                     <h5><a href="/tags/">FEATURED TAGS</a></h5>
                     <div class="tags">
+                        
+                        
                         
                         
                         
@@ -962,6 +1058,10 @@ output {
                         
                         
                         
+                        
+                        <a href="/tags/%E5%8D%95%E7%82%B9%E7%99%BB%E5%BD%95" title="单点登录">
+                            单点登录
+                        </a>
                         
                         
                         

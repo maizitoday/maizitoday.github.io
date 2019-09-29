@@ -268,19 +268,13 @@
 </ul></li>
 <li><a href="#搭建单master模式">搭建单Master模式</a>
 <ul>
-<li><a href="#启动name-server">启动name server</a></li>
-<li><a href="#启动broker-注意-发布部署时候需要指定配置文件发布">启动broker（注意：发布部署时候需要指定配置文件发布）</a></li>
 <li><a href="#停止name-server-和-broker">停止name server 和 broker</a></li>
 <li><a href="#启动name-server-修改默认端口9876">启动name server，修改默认端口9876</a></li>
-</ul></li>
-<li><a href="#记录本地docker启动">记录本地docker启动</a></li>
-<li><a href="#docker搭建rocketmq-console">docker搭建rocketmq-console</a>
-<ul>
 <li><a href="#broker-a-properties属性说明">broker-a.properties属性说明</a></li>
 </ul></li>
-<li><a href="#使用工具模拟通信">使用工具模拟通信</a></li>
-<li><a href="#docker-hub地址">docker hub地址</a></li>
 </ul></li>
+<li><a href="#生产者">生产者</a></li>
+<li><a href="#消费者">消费者</a></li>
 </ul></li>
 </ul></li>
 </ul>
@@ -414,25 +408,6 @@
 
 <h4 id="搭建单master模式">搭建单Master模式</h4>
 
-<p>查看官网， 下载提供的zip包</p>
-
-<h5 id="启动name-server">启动name server</h5>
-
-<pre><code class="language-shell"> &gt; nohup sh bin/mqnamesrv &amp;
- &gt; tail -f ~/logs/rocketmqlogs/namesrv.log
-   The Name Server boot success...
-</code></pre>
-
-<h5 id="启动broker-注意-发布部署时候需要指定配置文件发布">启动broker（注意：发布部署时候需要指定配置文件发布）</h5>
-
-<pre><code class="language-shell"> &gt; nohup sh bin/mqbroker -n 192.168.70.102:9876 &amp;
- &gt; tail -f ~/logs/rocketmqlogs/broker.log 
-   The broker[%s, 172.30.30.233:10911] boot success...
-   
-   注意：发布部署时候需要指定配置文件发布
-   nohup sh bin/mqbroker -c  conf/2m-noslave/broker-a.properties -n 192.168.70.102:9876 &amp;
-</code></pre>
-
 <p>需要注意的是默认的name server 启动是内存4G， broker是默认8G，我们需要修改runserver.sh和runbroker.sh中的JAVA_OPT，修改小一点如：JAVA_OPT=&ldquo;${JAVA_OPT} -server -Xms256m -Xmx256m -Xmn128m&rdquo;，然后就可以启动成功了， 不然启动后电脑太卡。</p>
 
 <h5 id="停止name-server-和-broker">停止name server 和 broker</h5>
@@ -453,18 +428,6 @@ Send shutdown request to mqnamesrv(36664) OK
 <pre><code class="language-shell">nohup sh  bin/mqnamesrv  -c  conf/namesrv.properties &gt; ~/logs/rocketmqlogs/namesrv.log 2&gt;&amp;1
 
 nohup sh  bin/mqnamesrv  -c  conf/namesrv.properties &amp;
-</code></pre>
-
-<h4 id="记录本地docker启动">记录本地docker启动</h4>
-
-<pre><code class="language-shell">docker run --privileged -itd -p 8022:22 -p 9876:9876 -p 10911:10911 -p 10909:10909  rmq_master /usr/sbin/init  
-</code></pre>
-
-<h4 id="docker搭建rocketmq-console">docker搭建rocketmq-console</h4>
-
-<pre><code class="language-shell">docker pull styletang/rocketmq-console-ng
-
-docker run -e &quot;JAVA_OPTS=-Drocketmq.namesrv.addr=192.168.70.102:9876 -Dcom.rocketmq.sendMessageWithVIPChannel=false&quot; -p 8086:8080 -t styletang/rocketmq-console-ng
 </code></pre>
 
 <h5 id="broker-a-properties属性说明">broker-a.properties属性说明</h5>
@@ -542,24 +505,71 @@ maxMessageSize=65536
 #sendMessageThreadPoolNums=128
 #拉消息线程池数量
 #pullMessageThreadPoolNums=128
-
-
- 
 </code></pre>
 
-<h4 id="使用工具模拟通信">使用工具模拟通信</h4>
+<h3 id="生产者">生产者</h3>
 
-<pre><code class="language-shell">#生产端
-export NAMESRV_ADDR=192.168.70.102:9876
-sh bin/tools.sh org.apache.rocketmq.example.quickstart.Producer
+<pre><code class="language-java">public class SyncProducer {
 
-#消费端
-sh bin/tools.sh org.apache.rocketmq.example.quickstart.Consumer
+    public static void main(String[] args) throws MQClientException, UnsupportedEncodingException, RemotingException,
+            MQBrokerException, InterruptedException {
+   
+        DefaultMQProducer producer = new DefaultMQProducer(&quot;maizi_007&quot;);
+        // Specify name server addresses.
+        producer.setNamesrvAddr(&quot;192.168.1.100:9876&quot;);
+        // Launch the instance.
+        producer.start();
+        for (int i = 0; i &lt; 10; i++) {
+            // Create a message instance, specifying topic, tag and message body.
+            Message msg = new Message(&quot;yb-007&quot; /* Topic */, &quot;TagA&quot; /* Tag */,
+                    (&quot;maizi_today, Hello RocketMQ &quot; + i).getBytes(RemotingHelper.DEFAULT_CHARSET) /* Message body */
+            );
+            // Call send message to deliver message to one of brokers.
+            SendResult sendResult = producer.send(msg);
+            System.out.printf(&quot;%s%n&quot;, sendResult);
+        }
+        // Shut down once the producer instance is not longer in use.
+        // 把这个隐掉后，才控制台才可以看到你的生产组
+        // producer.shutdown();
+    }
+
+}
 </code></pre>
 
-<h4 id="docker-hub地址">docker hub地址</h4>
+<h3 id="消费者">消费者</h3>
 
-<pre><code class="language-shell">
+<pre><code class="language-java">public class Consumer {
+
+    public static void main(String[] args) throws MQClientException {
+         // Instantiate with specified consumer group name.
+        DefaultMQPushConsumer consumer = new DefaultMQPushConsumer(&quot;myconsumer&quot;);
+         
+        // Specify name server addresses.
+        consumer.setNamesrvAddr(&quot;192.168.1.100:9876&quot;);
+        
+        // Subscribe one more more topics to consume.
+        consumer.subscribe(&quot;yb-007&quot;, &quot;*&quot;);
+        // Register callback to execute on arrival of messages fetched from brokers.
+        consumer.registerMessageListener(new MessageListenerConcurrently() {
+
+            @Override
+            public ConsumeConcurrentlyStatus consumeMessage(List&lt;MessageExt&gt; msgs,
+                ConsumeConcurrentlyContext context) {
+                msgs.forEach(item-&gt;System.out.println(new String(item.getBody())));
+
+                System.out.printf(&quot;--------------------------------&quot;);
+
+                // System.out.printf(&quot;%s Receive New Messages: %s %n&quot;, Thread.currentThread().getName(), msgs);
+                return ConsumeConcurrentlyStatus.CONSUME_SUCCESS;
+            }
+        });
+
+        //Launch the consumer instance.
+        consumer.start();
+
+        System.out.printf(&quot;Consumer Started.%n&quot;);
+     }
+}
 </code></pre>
 
 
@@ -639,6 +649,8 @@ sh bin/tools.sh org.apache.rocketmq.example.quickstart.Consumer
                     <hr class="hidden-sm hidden-xs">
                     <h5><a href="/tags/">FEATURED TAGS</a></h5>
                     <div class="tags">
+                        
+                        
                         
                         
                         
@@ -1009,6 +1021,10 @@ sh bin/tools.sh org.apache.rocketmq.example.quickstart.Consumer
                         
                         
                         
+                        
+                        <a href="/tags/%E5%8D%95%E7%82%B9%E7%99%BB%E5%BD%95" title="单点登录">
+                            单点登录
+                        </a>
                         
                         
                         
