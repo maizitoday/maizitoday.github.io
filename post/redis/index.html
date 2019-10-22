@@ -215,10 +215,20 @@
                 </header>              
                 <nav id="TableOfContents">
 <ul>
-<li>
+<li><a href="#为什么使用nosql">为什么使用NOSQL</a>
 <ul>
-<li>
+<li><a href="#诞生的原因">诞生的原因</a></li>
+<li><a href="#优缺点">优缺点</a></li>
+</ul></li>
+<li><a href="#选择redis的理由">选择Redis的理由</a>
 <ul>
+<li><a href="#redis都可以干什么事儿">Redis都可以干什么事儿</a></li>
+<li><a href="#redis不能干什么事儿">Redis不能干什么事儿</a></li>
+<li><a href="#选择总需要找个理由">选择总需要找个理由</a></li>
+</ul></li>
+<li><a href="#redis作为mysql缓存理由">redis作为mysql缓存理由</a></li>
+<li><a href="#什么是redis">什么是redis</a></li>
+<li><a href="#redis内存满了的几种解决方法">Redis内存满了的几种解决方法</a></li>
 <li><a href="#redis基础-version-redis5-0">redis基础(version=redis5.0)</a>
 <ul>
 <li><a href="#redis-conf-常用配置">redis.conf 常用配置</a></li>
@@ -240,14 +250,14 @@
 <li><a href="#redis消息机制">redis消息机制</a>
 <ul>
 <li><a href="#publish-subscribe-psubscribe">publish,subscribe,psubscribe</a></li>
-</ul></li>
 <li><a href="#redis持久化rdb和aof">redis持久化RDB和AOF</a>
 <ul>
-<li><a href="#优缺点">优缺点</a>
+<li><a href="#优缺点-1">优缺点</a>
 <ul>
 <li><a href="#rdb">RDB</a></li>
 <li><a href="#aof">AOF</a></li>
 <li><a href="#混合持久化">混合持久化</a></li>
+</ul></li>
 </ul></li>
 </ul></li>
 <li><a href="#主从复制">主从复制</a></li>
@@ -263,15 +273,17 @@
 <ul>
 <li><a href="#redis-conf修改">redis.conf修改</a></li>
 <li><a href="#start-sh脚本启动-构建集群">start.sh脚本启动，构建集群</a></li>
-</ul></li>
-<li><a href="#查看cluster信息">查看cluster信息</a></li>
+<li><a href="#查看cluster信息">查看cluster信息</a>
+<ul>
 <li><a href="#cluster命令">cluster命令</a></li>
+</ul></li>
 <li><a href="#集群总结">集群总结</a>
 <ul>
 <li><a href="#集群下线">集群下线</a></li>
 <li><a href="#数据分片">数据分片</a></li>
 <li><a href="#数据一致性保证">数据一致性保证</a></li>
 <li><a href="#集群停止的原因">集群停止的原因</a></li>
+</ul></li>
 </ul></li>
 </ul></li>
 <li><a href="#redis实现分布式锁">redis实现分布式锁</a>
@@ -282,8 +294,6 @@
 <li><a href="#redis分布式锁原理和步骤">redis分布式锁原理和步骤</a></li>
 <li><a href="#java代码实现分布式锁">java代码实现分布式锁</a></li>
 </ul></li>
-</ul></li>
-</ul></li>
 </ul>
 </nav>
                 
@@ -293,9 +303,111 @@
 
 <p>说明： 基于腾讯课堂，<a href="https://ke.qq.com/course/389539">https://ke.qq.com/course/389539</a> 这套视频，笔记收集。</p>
 
-<h3 id="redis基础-version-redis5-0">redis基础(version=redis5.0)</h3>
+<h1 id="为什么使用nosql">为什么使用NOSQL</h1>
 
-<h4 id="redis-conf-常用配置">redis.conf 常用配置</h4>
+<p>转载：<a href="https://blog.csdn.net/xlgen157387/article/details/47908797">https://blog.csdn.net/xlgen157387/article/details/47908797</a></p>
+
+<h2 id="诞生的原因">诞生的原因</h2>
+
+<ol>
+<li>低延迟的读写速度：应用快速地反应能极大地提升用户的满意度;<br /></li>
+<li>支撑海量的数据和流量：对于搜索这样大型应用而言，需要利用PB级别的数据和能应对百万级的流量;<br /></li>
+<li>大规模集群的管理：系统管理员希望分布式应用能更简单的部署和管理;</li>
+<li>庞大运营成本的考量：IT经理们希望在硬件成本、软件成本和人力成本能够有大幅度地降低;</li>
+</ol>
+
+<p>虽然关系型数据库已经在业界的数据存储方面占据不可动摇的地位，但是由于其天生的几个限制，使其很难满足上面这几个需求：</p>
+
+<ol>
+<li>扩展困难：由于存在类似Join这样多表查询机制，使得数据库在扩展方面很艰难;<br /></li>
+<li>读写慢：这种情况主要发生在数据量达到一定规模时由于关系型数据库的系统逻辑非常复杂，使得其非常容易发生<strong>死锁等的并发</strong>问题，所以导致其读写速度下滑非常严重;<br /></li>
+<li>成本高：企业级数据库的License价格很惊人，并且随着系统的规模，而不断上升;<br /></li>
+<li>有限的支撑容量：现有关系型解决方案还无法支撑Google这样海量的数据存储;</li>
+</ol>
+
+<h2 id="优缺点">优缺点</h2>
+
+<ol>
+<li>简单的扩展：典型例子是Cassandra，由于其架构是类似于经典的P2P，所以能通过轻松地添加新的节点来扩展这个集群;<br /></li>
+<li>快速的读写：主要例子有Redis，由于其逻辑简单，而且纯内存操作，使得其性能非常出色，<strong>单节点每秒可以处理超过10万次读写操作</strong>;</li>
+<li>低廉的成本：这是大多数分布式数据库共有的特点，因为主要都是开源软件，没有昂贵的License成本;</li>
+<li>NoSQL具有灵活的数据模型，可以处理非结构化/半结构化的大数据</li>
+<li>NoSQL很容易实现可伸缩性（向上扩展与水平扩展）</li>
+<li>自动分片</li>
+</ol>
+
+<h1 id="选择redis的理由">选择Redis的理由</h1>
+
+<p>转载地址：<a href="https://segmentfault.com/a/1190000015706221">https://segmentfault.com/a/1190000015706221</a></p>
+
+<h2 id="redis都可以干什么事儿">Redis都可以干什么事儿</h2>
+
+<p>缓存，毫无疑问这是Redis当今最为人熟知的使用场景。再提升服务器性能方面非常有效；</p>
+
+<p>排行榜，如果使用传统的关系型数据库来做这个事儿，非常的麻烦，而利用Redis的SortSet数据结构能够非常方便搞定；</p>
+
+<p>计算器/限速器，利用Redis中原子性的自增操作，我们可以统计类似用户点赞数、用户访问数等，这类操作如果用MySQL，频繁的读写会带来相当大的压力；限速器比较典型的使用场景是限制某个用户访问某个API的频率，常用的有抢购时，防止用户疯狂点击带来不必要的压力；</p>
+
+<p>好友关系，利用集合的一些命令，比如求交集、并集、差集等。可以方便搞定一些共同好友、共同爱好之类的功能；</p>
+
+<p>简单消息队列，除了Redis自身的发布/订阅模式，我们也可以利用List来实现一个队列机制，比如：到货通知、邮件发送之类的需求，不需要高可靠，但是会带来非常大的DB压力，完全可以用List来完成异步解耦；</p>
+
+<p>Session共享，以PHP为例，默认Session是保存在服务器的文件中，如果是集群服务，同一个用户过来可能落在不同机器上，这就会导致用户频繁登陆；采用Redis保存Session后，无论用户落在那台机器上都能够获取到对应的Session信息。</p>
+
+<ul>
+<li>排行榜</li>
+<li>计数器</li>
+<li>消息队列推送</li>
+<li>好友关注，粉丝</li>
+</ul>
+
+<p>redis适合放一些频繁使用，比较热的数据，因为是放在内存中，读写速度都非常快，一般会应用在上面面一些场景</p>
+
+<h2 id="redis不能干什么事儿">Redis不能干什么事儿</h2>
+
+<p>Redis感觉能干的事情特别多，但它不是万能的，合适的地方用它事半功倍。如果滥用可能导致系统的不稳定、成本增高等问题。</p>
+
+<p>比如，用Redis去保存用户的基本信息，虽然它能够支持持久化，但是它的持久化方案并不能保证数据绝对的落地，并且还可能带来Redis性能下降，因为持久化太过频繁会增大Redis服务的压力。</p>
+
+<p><strong>简单总结就是数据量太大、数据访问频率非常低的业务都不适合使用Redis，数据太大会增加成本，访问频率太低，保存在内存中纯属浪费资源。</strong></p>
+
+<h2 id="选择总需要找个理由">选择总需要找个理由</h2>
+
+<p>上面说了Redis的一些使用场景，那么这些场景的解决方案也有很多其它选择，比如缓存可以用Memcache，Session共享还能用MySql来实现，消息队列可以用RabbitMQ，我们为什么一定要用Redis呢？</p>
+
+<p>速度快，完全基于内存，使用C语言实现，网络层使用epoll解决高并发问题，丰富的数据类型，Redis有8种数据类型，当然常用的主要是 String、Hash、List、Set、 SortSet 这5种类型，他们都是基于键值的方式组织数据。每一种数据类型提供了非常丰富的操作命令，可以满足绝大部分需求，</p>
+
+<h1 id="redis作为mysql缓存理由">redis作为mysql缓存理由</h1>
+
+<p>首先redis在key value值查询的速度高于mysql，所以缓存有利于提高性能；</p>
+
+<p>redis是内存型数据库，不可能存储过大的数据；而mysql是存储在硬盘上的，可以支持更大规模的数据，成本更低</p>
+
+<p>一般mysql结合redis缓存，读取数据时先从redis中查询，查询不到再从mysql中查询；写入数据首先更新mysql，然后拿到更新结果之后，刷新缓存数据或者删除缓存数据</p>
+
+<h1 id="什么是redis">什么是redis</h1>
+
+<p><a href="http://lib.csdn.net/base/redis">Redis</a> 是一个基于内存的高性能key-value<a href="http://lib.csdn.net/base/mysql">数据库</a>。 ,Redis本质上是一个Key-Value类型的内存数据库，很像memcached，整个数据库统统加载在内存当中进行操作，定期通过异步操作把数据库数据flush到硬盘上进行保存。因为是纯内存操作，Redis的性能非常出色，每秒可以处理超过 10万次读写操作，是已知性能最快的Key-Value DB。
+Redis的出色之处不仅仅是性能，<strong>Redis最大的魅力是支持保存多种<a href="http://lib.csdn.net/base/datastructure">数据结构</a>，此外单个value的最大限制是1GB，不像 memcached只能保存1MB的数据，因此Redis可以用来实现很多有用的功能</strong>，比方说用他的List来做FIFO双向链表，实现一个轻量级的高性 能消息队列服务，用他的Set可以做高性能的tag系统等等。另外Redis也可以对存入的Key-Value设置expire时间，因此也可以被当作一 个功能加强版的memcached来用。
+Redis的主要缺点是数据库容量受到物理内存的限制，不能用作海量数据的高性能读写，因此Redis适合的场景主要局限在较小数据量的高性能操作和运算上。</p>
+
+<p>一般推荐Redis设置内存为最大物理内存的四分之三。</p>
+
+<h1 id="redis内存满了的几种解决方法">Redis内存满了的几种解决方法</h1>
+
+<ol>
+<li><p>增加内存；</p></li>
+
+<li><p>使用内存淘汰策略。</p></li>
+
+<li><p>Redis集群。</p></li>
+</ol>
+
+<p>转载地址：<a href="https://blog.csdn.net/u014590757/article/details/79788076">https://blog.csdn.net/u014590757/article/details/79788076</a></p>
+
+<h1 id="redis基础-version-redis5-0">redis基础(version=redis5.0)</h1>
+
+<h2 id="redis-conf-常用配置">redis.conf 常用配置</h2>
 
 <p>转载地址： <a href="https://www.cnblogs.com/leoxuan/articles/9053514.html">https://www.cnblogs.com/leoxuan/articles/9053514.html</a></p>
 
@@ -453,7 +565,7 @@ include /path/to/local.conf
 
 <p><strong>注意</strong>：配置redis的时候出现了设置密码而不生效的问题，redis客户端命令行下，执行 config set requirepass 123，然后在重启。(我就是这个问题一直连接不上客户端工具)</p>
 
-<h4 id="docker-安装启动redis">docker 安装启动redis</h4>
+<h2 id="docker-安装启动redis">docker 安装启动redis</h2>
 
 <pre><code class="language-yaml">docker run 
 -p 6379:6379 \
@@ -464,7 +576,7 @@ include /path/to/local.conf
 -d redis-master  redis-server /etc/redis/redis.conf --appendonly yes
 </code></pre>
 
-<h4 id="redis可执行文件">redis可执行文件</h4>
+<h2 id="redis可执行文件">redis可执行文件</h2>
 
 <pre><code class="language-yaml">#cd /usr/local/bin  列出了redis的一些可执行文件
 redis-benchmark: 压力测试工具
@@ -475,9 +587,9 @@ redis-sentinel: redis哨兵，通过它实现Redis的HA高可用，用它来监�
 redis-server: redis服务器
 </code></pre>
 
-<h3 id="redis基本操作">redis基本操作</h3>
+<h1 id="redis基本操作">redis基本操作</h1>
 
-<h4 id="string字符串操作类型">String字符串操作类型</h4>
+<h2 id="string字符串操作类型">String字符串操作类型</h2>
 
 <pre><code class="language-yaml">#set指令
 命令： set &lt;key&gt; &lt;value&gt;
@@ -501,7 +613,7 @@ redis-server: redis服务器
 说明:  对key值做减减操作，并返回值，如： DECRBY number  2    每次减2
 </code></pre>
 
-<h4 id="hashes哈希类型操作">Hashes哈希类型操作</h4>
+<h2 id="hashes哈希类型操作">Hashes哈希类型操作</h2>
 
 <pre><code class="language-yaml">#hset指令
 命令: hset &lt;hash&gt; &lt;filed&gt; &lt;value&gt;
@@ -514,7 +626,7 @@ redis-server: redis服务器
 #相当于集合里面的放入了map
 </code></pre>
 
-<h4 id="list列表类型操作">List列表类型操作</h4>
+<h2 id="list列表类型操作">List列表类型操作</h2>
 
 <pre><code class="language-yaml">#rpush指令
 命令: rpush &lt;key&gt; &lt;value&gt;
@@ -527,7 +639,7 @@ redis-server: redis服务器
 
 </code></pre>
 
-<h4 id="sets集合类型操作">Sets集合类型操作</h4>
+<h2 id="sets集合类型操作">Sets集合类型操作</h2>
 
 <pre><code class="language-yaml">#sadd指令
 命令: sadd &lt;key&gt; &lt;value&gt;
@@ -538,7 +650,7 @@ redis-server: redis服务器
 说明: 查看set中的集合
 </code></pre>
 
-<h3 id="redis常用命令">redis常用命令</h3>
+<h1 id="redis常用命令">redis常用命令</h1>
 
 <pre><code class="language-yaml">#### kyes指令
 命令: kyes *
@@ -573,7 +685,7 @@ redis-server: redis服务器
 命令: flushall 表示删除所有数据库中所有的key
 </code></pre>
 
-<h3 id="redis事物管理">redis事物管理</h3>
+<h1 id="redis事物管理">redis事物管理</h1>
 
 <p>redis通过mulit，exec，watch等命令来实现事物功能，他将多个命令请求打包，然后一次性按顺序去执行，注意事物执行期间，服务器不会中断事物而去执行其他客户端请求命令，要等事物中的所有命令执行完毕后，才去执行其他客户端的请求命令。</p>
 
@@ -584,31 +696,31 @@ redis-server: redis服务器
 
 </code></pre>
 
-<h4 id="锁的原理-watch命令">锁的原理(watch命令)</h4>
+<h2 id="锁的原理-watch命令">锁的原理(watch命令)</h2>
 
 <p><img src="/img/4-7-1.png" alt="屏幕快照 2019-04-03 下午5.21.26" /></p>
 
-<h3 id="redis消息机制">redis消息机制</h3>
+<h1 id="redis消息机制">redis消息机制</h1>
 
-<h4 id="publish-subscribe-psubscribe">publish,subscribe,psubscribe</h4>
+<h2 id="publish-subscribe-psubscribe">publish,subscribe,psubscribe</h2>
 
 <p><img src="/img/4-7-2.png" alt="屏幕快照 2019-04-03 下午5.53.10" /></p>
 
-<h3 id="redis持久化rdb和aof">redis持久化RDB和AOF</h3>
+<h2 id="redis持久化rdb和aof">redis持久化RDB和AOF</h2>
 
 <p>RDB 持久化可以在指定的时间间隔内生成数据集的时间点快照，内存。AOF 持久化记录服务器执行的所有写操作命令，并在服务器启动时，通过重新执行这些命令来还原数据集。Redis 还可以同时使用 AOF 持久化和 RDB 持久化。 在这种情况下， 当 Redis 重启时， 它会优先使用 AOF 文件来还原数据集， 因为 AOF 文件保存的数据集通常比 RDB 文件所保存的数据集更完整。</p>
 
-<h4 id="优缺点">优缺点</h4>
+<h3 id="优缺点-1">优缺点</h3>
 
-<h5 id="rdb">RDB</h5>
+<h4 id="rdb">RDB</h4>
 
 <p>持久化能够快速地储存和回复数据， 但是在服务器停机时却会丢失大量数据；</p>
 
-<h5 id="aof">AOF</h5>
+<h4 id="aof">AOF</h4>
 
 <p>持久化能够有效地提高数据的安全性， 但是在储存和恢复数据方面却要耗费大量的时间。</p>
 
-<h5 id="混合持久化">混合持久化</h5>
+<h4 id="混合持久化">混合持久化</h4>
 
 <p>Redis 还可以同时使用 AOF 持久化和 RDB 持久化。 在这种情况下， 当 Redis 重启时， 它会优先使用 AOF 文件来还原数据集， 因为 AOF 文件保存的数据集通常比 RDB 文件所保存的数据集更完整。4.0版本的混合持久化默认关闭的，通过aof-use-rdb-preamble配置参数控制，yes则表示开启，no表示禁用，默认是禁用的，可通过config set修改。</p>
 
@@ -616,7 +728,7 @@ redis-server: redis服务器
 
 <p>缺点：b. 兼容性差，一旦开启了混合持久化，在4.0之前版本都不识别该aof文件，同时由于前部分是RDB格式，阅读性较差</p>
 
-<h3 id="主从复制">主从复制</h3>
+<h1 id="主从复制">主从复制</h1>
 
 <pre><code class="language-yaml">docker run \
 -p 6379:6379 \
@@ -654,7 +766,7 @@ repl_backlog_first_byte_offset:1
 repl_backlog_histlen:3828
 </code></pre>
 
-<h3 id="哨兵机制">哨兵机制</h3>
+<h1 id="哨兵机制">哨兵机制</h1>
 
 <p>为了实现redis故障转移的自动化。自动发现，自动转移。不需要人工参与。当主节点挂掉了， 哨兵去从节点中选择一个从节点来做主节点，当原来的主节点恢复了，他就做从节点了。</p>
 
@@ -681,25 +793,25 @@ sentinel failover-timeout mymaster 180000
 
 <p><strong>无语中</strong> ， docker启动两个redis服务，总是显示从redis服务器ip是 172.17.0.1，醉了，醉了， 没有实现效果。docker也是没有完美的，差评，</p>
 
-<h3 id="集群">集群</h3>
+<h1 id="集群">集群</h1>
 
-<h4 id="哨兵模式和集群区别">哨兵模式和集群区别</h4>
+<h2 id="哨兵模式和集群区别">哨兵模式和集群区别</h2>
 
 <p>转载文章(<a href="https://blog.csdn.net/drdongshiye/article/details/84204392">https://blog.csdn.net/drdongshiye/article/details/84204392</a>) 写的很好</p>
 
-<h5 id="sentinel模式">sentinel模式</h5>
+<h3 id="sentinel模式">sentinel模式</h3>
 
 <p>sentinel的中文含义是哨兵、守卫。也就是说既然主从模式中，当master节点挂了以后，slave节点不能主动选举一个master节点出来，那么我就安排一个或多个sentinel来做这件事，当sentinel发现master节点挂了以后，sentinel就会从slave中重新选举一个master。sentinel模式基本可以满足一般生产的需求，具备高可用性。但是当数据量过大到一台服务器存放不下的情况时，主从模式或sentinel模式就不能满足需求了，这个时候需要对存储的数据进行分片，将数据存储到多个Redis实例中。</p>
 
-<h5 id="cluster模式">cluster模式</h5>
+<h3 id="cluster模式">cluster模式</h3>
 
 <p>cluster的出现是为了解决单机Redis容量有限的问题，将Redis的数据根据一定的规则分配到多台机器。cluster可以说是sentinel和主从模式的结合体，通过cluster可以实现主从和master重选功能，因为Redis的数据是根据一定规则分配到cluster的不同机器的，当数据量过大时，可以新增机器进行扩容。</p>
 
-<h4 id="cluster搭建">cluster搭建</h4>
+<h2 id="cluster搭建">cluster搭建</h2>
 
 <p>官方提供至少6个节点</p>
 
-<h5 id="redis-conf修改">redis.conf修改</h5>
+<h3 id="redis-conf修改">redis.conf修改</h3>
 
 <pre><code class="language-yaml">#开启集群模式
 cluster-enabled yes
@@ -731,7 +843,7 @@ docker run \
 #另外的几个配置文件我用docker cp 命令放入容器redisconf文件中
 </code></pre>
 
-<h5 id="start-sh脚本启动-构建集群">start.sh脚本启动，构建集群</h5>
+<h3 id="start-sh脚本启动-构建集群">start.sh脚本启动，构建集群</h3>
 
 <pre><code>#!/bin/sh
 
@@ -750,7 +862,7 @@ redis-cli --cluster create 127.0.0.1:6380 127.0.0.1:6381 127.0.0.1:6382 127.0.0.
  然后在调用上面的脚本就好了。
 </code></pre>
 
-<h4 id="查看cluster信息">查看cluster信息</h4>
+<h3 id="查看cluster信息">查看cluster信息</h3>
 
 <p>进入客户端:  redis-cli -c -p 6380</p>
 
@@ -808,7 +920,7 @@ cluster getkeysinslot &lt;slot&gt; &lt;count&gt; ：返回 count 个 slot 槽中
 
 <p>同时， redis集群一般都是6个节点起步，也就是说需要3个节点同时挂掉了，才会全部挂掉，这个基本上很难，所以，没有看到集群的重启和停止的命令。</p>
 
-<h4 id="集群总结">集群总结</h4>
+<h3 id="集群总结">集群总结</h3>
 
 <p>转载地址(<a href="https://juejin.im/entry/596343056fb9a06bc340ac15">https://juejin.im/entry/596343056fb9a06bc340ac15</a>)</p>
 
@@ -818,7 +930,7 @@ cluster getkeysinslot &lt;slot&gt; &lt;count&gt; ：返回 count 个 slot 槽中
 
 <p>​         当集群中的一部分节点失效或者无法进行通讯时， 仍然可以继续处理命令请求的能力。</p>
 
-<h5 id="集群下线">集群下线</h5>
+<h4 id="集群下线">集群下线</h4>
 
 <p>当主从同时下线，集群就会(error) CLUSTERDOWN The cluster is down</p>
 
@@ -828,7 +940,7 @@ cluster getkeysinslot &lt;slot&gt; &lt;count&gt; ：返回 count 个 slot 槽中
 <li><p>最后使用<code>redis-cli --cluster check</code>以确保您的群集正常。</p></li>
 </ol>
 
-<h5 id="数据分片">数据分片</h5>
+<h4 id="数据分片">数据分片</h4>
 
 <p>集群中的每个节点负责处理一部分哈希槽。 举个例子， 一个集群可以有三个哈希槽， 其中：</p>
 
@@ -840,7 +952,7 @@ cluster getkeysinslot &lt;slot&gt; &lt;count&gt; ：返回 count 个 slot 槽中
 
 <p>这种将哈希槽分布到不同节点的做法使得用户可以很容易地向集群中添加或者删除节点，我们只要保证槽点能够迁移到指定的节点，就可以对现在的节点进行添加和删除了。动态扩充。</p>
 
-<h5 id="数据一致性保证">数据一致性保证</h5>
+<h4 id="数据一致性保证">数据一致性保证</h4>
 
 <p>Redis 并不能保证数据的强一致性. 这意味这在实际中集群在特定的条件下可能会丢失写操作：第一个原因是因为集群是用了异步复制. 写操作过程:</p>
 
@@ -854,7 +966,7 @@ cluster getkeysinslot &lt;slot&gt; &lt;count&gt; ：返回 count 个 slot 槽中
 
 <p>b. cluster-node-timeout 10000 ，在重启的一段时间,也是主节点服务宕机 从节点顶替上来需要的时间。一般6秒到10秒。</p>
 
-<h5 id="集群停止的原因">集群停止的原因</h5>
+<h4 id="集群停止的原因">集群停止的原因</h4>
 
 <p>转载地址(<a href="https://blog.csdn.net/itcastcn/article/details/78995426">https://blog.csdn.net/itcastcn/article/details/78995426</a>)</p>
 
@@ -864,9 +976,9 @@ cluster getkeysinslot &lt;slot&gt; &lt;count&gt; ：返回 count 个 slot 槽中
 
 <p>ps:当集群不可用时,所有对集群的操作做都不可用，收到((error) CLUSTERDOWN The cluster is down)错误</p>
 
-<h3 id="redis实现分布式锁">redis实现分布式锁</h3>
+<h1 id="redis实现分布式锁">redis实现分布式锁</h1>
 
-<h4 id="分布式锁应用场景">分布式锁应用场景</h4>
+<h2 id="分布式锁应用场景">分布式锁应用场景</h2>
 
 <p>转载地址(<a href="https://blog.csdn.net/lemon89/article/details/52796775">https://blog.csdn.net/lemon89/article/details/52796775</a>)</p>
 
@@ -874,7 +986,7 @@ cluster getkeysinslot &lt;slot&gt; &lt;count&gt; ：返回 count 个 slot 槽中
 在理想的情况下，A从任务组中挑选一个任务，任务组删除该任务，B从剩下的的任务中再挑一个，任务组删除该任务。
 同样的，在真实情况下，如果不做任何处理，可能会出现A和B挑中了同一个任务的情况。</p>
 
-<h4 id="分布式锁一般实现三种方式">分布式锁一般实现三种方式</h4>
+<h2 id="分布式锁一般实现三种方式">分布式锁一般实现三种方式</h2>
 
 <p>a.  数据库乐观锁(不建议，性能很差)</p>
 
@@ -882,11 +994,11 @@ cluster getkeysinslot &lt;slot&gt; &lt;count&gt; ：返回 count 个 slot 槽中
 
 <p>c.  基于zookeep的分布式锁(一般用这种)</p>
 
-<h4 id="分布式锁可用-满足4个条件">分布式锁可用，满足4个条件</h4>
+<h2 id="分布式锁可用-满足4个条件">分布式锁可用，满足4个条件</h2>
 
 <p><img src="/img/4-7-8.png" alt="屏幕快照 2019-04-06 下午11.52.33" /></p>
 
-<h4 id="redis分布式锁原理和步骤">redis分布式锁原理和步骤</h4>
+<h2 id="redis分布式锁原理和步骤">redis分布式锁原理和步骤</h2>
 
 <p>redis的分布式锁实现原理： 控制一个公共资源，也就是redis集群里面的一个key，然后观察这个key的变化，通过setnx这个命令，判断是0还是1，来实现分布式锁功能，找到一个这样的一个依据点。</p>
 
@@ -898,7 +1010,7 @@ cluster getkeysinslot &lt;slot&gt; &lt;count&gt; ：返回 count 个 slot 槽中
 
 <p>​                 c.  删除这个key，让其他客户端来使用。</p>
 
-<h4 id="java代码实现分布式锁">java代码实现分布式锁</h4>
+<h2 id="java代码实现分布式锁">java代码实现分布式锁</h2>
 
 <pre><code class="language-java">@Service
 public class LockService {
@@ -1107,6 +1219,8 @@ SUCCESS: 线程序号:12, Thread-90,获取锁成功，锁ID：2937f358-bec9-40f9
                     <hr class="hidden-sm hidden-xs">
                     <h5><a href="/tags/">FEATURED TAGS</a></h5>
                     <div class="tags">
+                        
+                        
                         
                         
                         
@@ -1577,6 +1691,10 @@ SUCCESS: 线程序号:12, Thread-90,获取锁成功，锁ID：2937f358-bec9-40f9
                         
                         
                         
+                        
+                        <a href="/tags/%E6%95%B0%E6%8D%AE%E7%BB%93%E6%9E%84" title="数据结构">
+                            数据结构
+                        </a>
                         
                         
                         
