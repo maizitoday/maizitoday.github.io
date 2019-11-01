@@ -218,6 +218,8 @@
 <li><a href="#mongodb优势">mongodb优势</a></li>
 <li><a href="#mongodb数据丢失否">mongodb数据丢失否</a></li>
 <li><a href="#mongodb和mysql选择">MongoDB和MySQL选择</a></li>
+<li><a href="#什么是仲裁节点">什么是仲裁节点</a></li>
+<li><a href="#读写锁">读写锁</a></li>
 <li><a href="#mogodb-vs-mysql">mogodb VS mysql</a>
 <ul>
 <li><a href="#区别">区别</a></li>
@@ -254,6 +256,8 @@
 
 <p><strong>官方文档：<a href="https://docs.mongodb.com/">https://docs.mongodb.com/</a>  4.2版本</strong></p>
 
+<p><strong>中文社区：[<a href="http://mongoing.com/">http://mongoing.com/</a></strong>](<a href="http://mongoing.com/">http://mongoing.com/</a>)</p>
+
 <h1 id="mongodb优势">mongodb优势</h1>
 
 <p>它是一个内存数据库，数据都是放在内存里面的。对数据的操作大部分都在内存中，但mongodb并不是单纯的内存数据库。</p>
@@ -273,6 +277,24 @@
 <h1 id="mongodb和mysql选择">MongoDB和MySQL选择</h1>
 
 <p>例如，许多电子商务应用程序使用MongoDB和MySQL的组合。产品目录包括具有不同属性的多个产品，非常适合MongoDB的灵活数据模型。另一方面，需要复杂事务的结帐系统可能建立在MySQL或其他关系数据库技术上。</p>
+
+<h1 id="什么是仲裁节点">什么是仲裁节点</h1>
+
+<p>经过大量血的教训，一个分片配置两个副本集时（一个是primary一个是secondary），如果primary挂掉，secondary是不会升级的，必须要加上一个不存储数据的仲裁节点</p>
+
+<h1 id="读写锁">读写锁</h1>
+
+<p>当进行读操作的时候会加读锁，这个时候其他读操作可以也获得读锁。但是不能或者写锁。</p>
+
+<p>当进行写操作的时候会加写锁，这个时候不能进行其他的读操作和写操作。</p>
+
+<p>所以按照这个道理，是不会出现同时修改同一个文档（如执行++操作）导致数据出错的情况。</p>
+
+<p>而且按照这个道理，因为写操作会阻塞读操作，所以是不会出现脏读的。</p>
+
+<p>但是mongodb在分片和复制集的时候会产生脏读，后面在研究。</p>
+
+<p><strong>在3.0之后的版本，WiredTiger提供了文档（不是集合）级别的锁。</strong></p>
 
 <h1 id="mogodb-vs-mysql">mogodb VS mysql</h1>
 
@@ -929,9 +951,13 @@ printjson(list);
                         
                         
                         
+                        
+                        
                         <a href="/tags/nginx" title="nginx">
                             nginx
                         </a>
+                        
+                        
                         
                         
                         
@@ -970,6 +996,8 @@ printjson(list);
                         <a href="/tags/shiro" title="shiro">
                             shiro
                         </a>
+                        
+                        
                         
                         
                         
@@ -1330,6 +1358,8 @@ printjson(list);
                         <li><a target="_blank" href="https://juejin.im/welcome/backend">后端服务论坛</a></li>
                         
                         <li><a target="_blank" href="https://www.javaboy.org">江南一点雨</a></li>
+                        
+                        <li><a target="_blank" href="https://blog.csdn.net/gwd1154978352">东天里的冬天</a></li>
                         
                     </ul>
                 </section>

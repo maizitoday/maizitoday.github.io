@@ -207,10 +207,6 @@
                 </header>              
                 <nav id="TableOfContents">
 <ul>
-<li>
-<ul>
-<li>
-<ul>
 <li><a href="#dockerfile作用">DockerFile作用</a></li>
 <li><a href="#dockerfile-语法">Dockerfile 语法</a>
 <ul>
@@ -230,9 +226,7 @@
 <li><a href="#如何使用dockerfiles">如何使用Dockerfiles</a>
 <ul>
 <li><a href="#dockerfile-run-cmd-entrypoint命令区别">Dockerfile RUN，CMD，ENTRYPOINT命令区别</a></li>
-</ul></li>
 <li><a href="#dockerfile构建mycat">DockerFile构建mycat</a></li>
-</ul></li>
 </ul></li>
 </ul>
 </nav>
@@ -241,15 +235,17 @@
 
 <p>[TOC]</p>
 
-<h3 id="dockerfile作用">DockerFile作用</h3>
+<p>好文：<a href="https://blog.fundebug.com/2017/05/15/write-excellent-dockerfile/">https://blog.fundebug.com/2017/05/15/write-excellent-dockerfile/</a></p>
+
+<h1 id="dockerfile作用">DockerFile作用</h1>
 
 <p>Dockerfile是由一系列命令和参数构成的脚本，这些命令应用于基础镜像并最终创建一个新的镜像。比用命令更加的灵活。</p>
 
-<h3 id="dockerfile-语法">Dockerfile 语法</h3>
+<h1 id="dockerfile-语法">Dockerfile 语法</h1>
 
 <p>转载地址： <a href="https://www.cnblogs.com/boshen-hzb/p/6400272.html">https://www.cnblogs.com/boshen-hzb/p/6400272.html</a></p>
 
-<h4 id="add">ADD</h4>
+<h2 id="add">ADD</h2>
 
 <p>ADD命令有两个参数，源和目标。它的基本作用是从源系统的文件系统上复制文件到目标容器的文件系统。如果源是一个URL，那该URL的内容将被下载并复制到容器中。</p>
 
@@ -257,7 +253,7 @@
 #ADD /my_app_folder /my_app_folder` 
 </code></pre>
 
-<h4 id="cmd">CMD</h4>
+<h2 id="cmd">CMD</h2>
 
 <p>和RUN命令相似，CMD可以用于执行特定的命令。和RUN不同的是，这些命令不是在镜像构建的过程中执行的，而是在用镜像构建容器后被调用。</p>
 
@@ -271,7 +267,7 @@ CMD [&quot;param1&quot;,&quot;param2&quot;] 提供给 ENTRYPOINT 的默认参数
 如果用户启动容器时候指定了运行的命令，则会覆盖掉 CMD 指定的命令。
 </code></pre>
 
-<h4 id="entrypoint">ENTRYPOINT</h4>
+<h2 id="entrypoint">ENTRYPOINT</h2>
 
 <p>配置容器启动后执行的命令，并且不可被 docker run 提供的参数覆盖。每个 Dockerfile 中只能有一个 ENTRYPOINT，当指定多个时，只有最后一个起效。</p>
 
@@ -280,11 +276,11 @@ ENTRYPOINT [&quot;executable&quot;, &quot;param1&quot;, &quot;param2&quot;]
 ENTRYPOINT command param1 param2（shell中执行）。
 </code></pre>
 
-<h4 id="copy">COPY</h4>
+<h2 id="copy">COPY</h2>
 
 <p>格式为 COPY <src> <dest>,复制本地主机的 <src>（为 Dockerfile 所在目录的相对路径）到容器中的 <dest>。当使用本地目录为源目录时，推荐使用 COPY。</p>
 
-<h4 id="env">ENV</h4>
+<h2 id="env">ENV</h2>
 
 <p>ENV命令用于设置环境变量。这些变量以”key=value”的形式存在，并可以在容器内被脚本或者程序调用。这个机制给在容器中运行应用带来了极大的便利。</p>
 
@@ -294,7 +290,7 @@ ENV CLASSPATH ${JAVA_HOME}/lib/dt.jar:$JAVA_HOME/lib/tools.jar
 ENV PATH $PATH:${JAVA_HOME}/bin
 </code></pre>
 
-<h4 id="expose">EXPOSE</h4>
+<h2 id="expose">EXPOSE</h2>
 
 <p>EXPOSE用来指定端口，使容器内的应用可以通过端口和外界交互。</p>
 
@@ -305,7 +301,7 @@ EXPOSE 8080
 
 </code></pre>
 
-<h4 id="from">FROM</h4>
+<h2 id="from">FROM</h2>
 
 <p>FROM命令可能是最重要的Dockerfile命令。改命令定义了使用哪个基础镜像启动构建流程。基础镜像可以为任意镜 像。如果基础镜像没有被发现，Docker将试图从Docker image index来查找该镜像。FROM命令必须是Dockerfile的首个命令。</p>
 
@@ -313,7 +309,7 @@ EXPOSE 8080
 FROM ubuntu 
 </code></pre>
 
-<h4 id="maintainer">MAINTAINER</h4>
+<h2 id="maintainer">MAINTAINER</h2>
 
 <p>我建议这个命令放在Dockerfile的起始部分，虽然理论上它可以放置于Dockerfile的任意位置。这个命令用于声明作者，并应该放在FROM的后面。</p>
 
@@ -321,7 +317,7 @@ FROM ubuntu
 MAINTAINER authors_name 
 </code></pre>
 
-<h4 id="run">RUN</h4>
+<h2 id="run">RUN</h2>
 
 <p>每一个RUN指令都会是在一个新的container里面运行,并提交为一个image作为下一个RUN的base</p>
 
@@ -341,7 +337,7 @@ MAINTAINER authors_name
 可将executable理解成为可执行文件，后面就是两个参数。
 </code></pre>
 
-<h4 id="user">USER</h4>
+<h2 id="user">USER</h2>
 
 <p>USER命令用于设置运行容器的UID。</p>
 
@@ -349,7 +345,7 @@ MAINTAINER authors_name
 USER 751
 </code></pre>
 
-<h4 id="volume">VOLUME</h4>
+<h2 id="volume">VOLUME</h2>
 
 <p>通过dockerfile的 VOLUME 指令可以在镜像中创建挂载点，这样只要通过该镜像创建的容器都有了挂载点。还有一个区别是，通过 VOLUME 指令创建的挂载点，无法指定主机上对应的目录，是自动生成的。</p>
 
@@ -361,11 +357,11 @@ VOLUME /var/log /var/db
 我们通过docker inspect 查看通过该dockerfile创建的镜像生成的容器，可以看到映射到本地的一个地址
 </code></pre>
 
-<h4 id="workdir">WORKDIR</h4>
+<h2 id="workdir">WORKDIR</h2>
 
 <p>设置工作目录,为后续的RUN、CMD、ENTRYPOINT指令配置工作目录。可以使用多个WORKDIR指令，后续命令如果参数时相对路径，则会基于之前命令指定的路径.</p>
 
-<h3 id="如何使用dockerfiles">如何使用Dockerfiles</h3>
+<h1 id="如何使用dockerfiles">如何使用Dockerfiles</h1>
 
 <p>使用Dockerfiles和手工使用Docker Daemon运行命令一样简单。脚本运行后输出为新的镜像ID。</p>
 
@@ -374,7 +370,7 @@ VOLUME /var/log /var/db
 sudo docker build -t my_mongodb . 
 </code></pre>
 
-<h4 id="dockerfile-run-cmd-entrypoint命令区别">Dockerfile RUN，CMD，ENTRYPOINT命令区别</h4>
+<h2 id="dockerfile-run-cmd-entrypoint命令区别">Dockerfile RUN，CMD，ENTRYPOINT命令区别</h2>
 
 <p>转载地址：<a href="https://www.jianshu.com/p/f0a0f6a43907">https://www.jianshu.com/p/f0a0f6a43907</a></p>
 
@@ -386,7 +382,7 @@ sudo docker build -t my_mongodb .
 <li>ENTRYPOINT配置容器启动时的执行命令（不会被忽略，一定会被执行，即使运行 <code>docker run</code>时指定了其他命令）</li>
 </ul>
 
-<h3 id="dockerfile构建mycat">DockerFile构建mycat</h3>
+<h2 id="dockerfile构建mycat">DockerFile构建mycat</h2>
 
 <p>转载地址： <a href="https://hub.docker.com/r/longhronshens/mycat-docker/dockerfile">https://hub.docker.com/r/longhronshens/mycat-docker/dockerfile</a></p>
 
@@ -740,9 +736,13 @@ docker run -P     #-p 大写， 会默认有一个为容器的对应端口出来
                         
                         
                         
+                        
+                        
                         <a href="/tags/nginx" title="nginx">
                             nginx
                         </a>
+                        
+                        
                         
                         
                         
@@ -781,6 +781,8 @@ docker run -P     #-p 大写， 会默认有一个为容器的对应端口出来
                         <a href="/tags/shiro" title="shiro">
                             shiro
                         </a>
+                        
+                        
                         
                         
                         
@@ -1141,6 +1143,8 @@ docker run -P     #-p 大写， 会默认有一个为容器的对应端口出来
                         <li><a target="_blank" href="https://juejin.im/welcome/backend">后端服务论坛</a></li>
                         
                         <li><a target="_blank" href="https://www.javaboy.org">江南一点雨</a></li>
+                        
+                        <li><a target="_blank" href="https://blog.csdn.net/gwd1154978352">东天里的冬天</a></li>
                         
                     </ul>
                 </section>

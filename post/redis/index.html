@@ -229,6 +229,7 @@
 <li><a href="#redis作为mysql缓存理由">redis作为mysql缓存理由</a></li>
 <li><a href="#什么是redis">什么是redis</a></li>
 <li><a href="#redis内存满了的几种解决方法">Redis内存满了的几种解决方法</a></li>
+<li><a href="#redis的高并发和快速原因">Redis的高并发和快速原因</a></li>
 <li><a href="#redis基础-version-redis5-0">redis基础(version=redis5.0)</a>
 <ul>
 <li><a href="#redis-conf-常用配置">redis.conf 常用配置</a></li>
@@ -259,6 +260,7 @@
 <li><a href="#混合持久化">混合持久化</a></li>
 </ul></li>
 </ul></li>
+<li><a href="#redis的数据恢复">redis的数据恢复</a></li>
 </ul></li>
 <li><a href="#主从复制">主从复制</a></li>
 <li><a href="#哨兵机制">哨兵机制</a></li>
@@ -301,7 +303,9 @@
 
 <p>[TOC]</p>
 
-<p>说明： 基于腾讯课堂，<a href="https://ke.qq.com/course/389539">https://ke.qq.com/course/389539</a> 这套视频，笔记收集。</p>
+<p><strong>说明： 基于腾讯课堂，<a href="https://ke.qq.com/course/389539">https://ke.qq.com/course/389539</a> 这套视频，笔记收集。</strong></p>
+
+<p><strong>中文官方网站：[<a href="http://www.redis.cn/">http://www.redis.cn/</a></strong>](<a href="http://www.redis.cn/">http://www.redis.cn/</a>)</p>
 
 <h1 id="为什么使用nosql">为什么使用NOSQL</h1>
 
@@ -404,6 +408,26 @@ Redis的主要缺点是数据库容量受到物理内存的限制，不能用作
 </ol>
 
 <p>转载地址：<a href="https://blog.csdn.net/u014590757/article/details/79788076">https://blog.csdn.net/u014590757/article/details/79788076</a></p>
+
+<h1 id="redis的高并发和快速原因">Redis的高并发和快速原因</h1>
+
+<p>转载地址：<a href="https://zhuanlan.zhihu.com/p/52600663">https://zhuanlan.zhihu.com/p/52600663</a></p>
+
+<ol>
+<li><p>redis是基于内存的，内存的读写速度非常快；</p></li>
+
+<li><p>redis是单线程的，省去了很多上下文切换线程的时间；</p></li>
+
+<li><p>redis使用多路复用技术，可以处理并发的连接。非阻塞IO 内部实现采用epoll，采用了epoll+自己实现的简单的事件框架。epoll中的读、写、关闭、连接都转化成了事件，然后利用epoll的多路复用特性，绝不在io上浪费一点时间。</p></li>
+</ol>
+
+<p>Redis的数据结构并不全是简单的Key-Value，还有list，hash等复杂的结构，这些结构有可能会进行很细粒度的操作，比如在很长的列表后面添加一个元素，在hash当中添加或者删除</p>
+
+<p>一个对象。这些操作可能就需要加非常多的锁，导致的结果是同步开销大大增加。</p>
+
+<p>总之，在单线程的情况下，就不用去考虑各种锁的问题，不存在加锁释放锁操作，没有因为可能出现死锁而导致的性能消耗。</p>
+
+<p><strong>所以也就没有了mysql ，mongdb中的读写锁了。</strong></p>
 
 <h1 id="redis基础-version-redis5-0">redis基础(version=redis5.0)</h1>
 
@@ -720,6 +744,8 @@ redis-server: redis服务器
 
 <p>持久化能够有效地提高数据的安全性， 但是在储存和恢复数据方面却要耗费大量的时间。</p>
 
+<p>AOF机制对每条写入命令作为日志，以append-only的模式写入一个日志文件中，在redis重启的时候，可以通过回放AOF日志中的写入指令来重新构建整个数据集</p>
+
 <h4 id="混合持久化">混合持久化</h4>
 
 <p>Redis 还可以同时使用 AOF 持久化和 RDB 持久化。 在这种情况下， 当 Redis 重启时， 它会优先使用 AOF 文件来还原数据集， 因为 AOF 文件保存的数据集通常比 RDB 文件所保存的数据集更完整。4.0版本的混合持久化默认关闭的，通过aof-use-rdb-preamble配置参数控制，yes则表示开启，no表示禁用，默认是禁用的，可通过config set修改。</p>
@@ -727,6 +753,20 @@ redis-server: redis服务器
 <p>优点：a. 混合持久化结合了RDB持久化 和 AOF 持久化的优点, 由于绝大部分都是RDB格式，加载速度快，同时结合AOF，增量的数据以AOF方式保存了，数据更少的丢失。</p>
 
 <p>缺点：b. 兼容性差，一旦开启了混合持久化，在4.0之前版本都不识别该aof文件，同时由于前部分是RDB格式，阅读性较差</p>
+
+<h2 id="redis的数据恢复">redis的数据恢复</h2>
+
+<p>当rdb和aof同时开启的时候，redis也会优先aof来进行数据恢复，因为aof的数据相对来说比rdb完整。</p>
+
+<p>指定aof操作中文件同步策略，有三个合法值：always everysec no,默认为everysec</p>
+
+<p>appendfsync everysec</p>
+
+<ol>
+<li>always：每一条aof记录都立即同步到文件，这是最安全的方式，也以为更多的磁盘操作和阻塞延迟，是IO开支较大。</li>
+<li>everysec：每秒同步一次，性能和安全都比较中庸的方式，也是redis推荐的方式。如果遇到物理服务器故障，有可能导致最近一秒内aof记录丢失(可能为部分丢失)。</li>
+<li>no：redis并不直接调用文件同步，而是交给操作系统来处理，操作系统可以根据buffer填充情况/通道空闲时间等择机触发同步；这是一种普通的文件操作方式。性能较好，在物理服务器故障时，数据丢失量会因OS配置有关。</li>
+</ol>
 
 <h1 id="主从复制">主从复制</h1>
 
@@ -1452,9 +1492,13 @@ SUCCESS: 线程序号:12, Thread-90,获取锁成功，锁ID：2937f358-bec9-40f9
                         
                         
                         
+                        
+                        
                         <a href="/tags/nginx" title="nginx">
                             nginx
                         </a>
+                        
+                        
                         
                         
                         
@@ -1493,6 +1537,8 @@ SUCCESS: 线程序号:12, Thread-90,获取锁成功，锁ID：2937f358-bec9-40f9
                         <a href="/tags/shiro" title="shiro">
                             shiro
                         </a>
+                        
+                        
                         
                         
                         
@@ -1853,6 +1899,8 @@ SUCCESS: 线程序号:12, Thread-90,获取锁成功，锁ID：2937f358-bec9-40f9
                         <li><a target="_blank" href="https://juejin.im/welcome/backend">后端服务论坛</a></li>
                         
                         <li><a target="_blank" href="https://www.javaboy.org">江南一点雨</a></li>
+                        
+                        <li><a target="_blank" href="https://blog.csdn.net/gwd1154978352">东天里的冬天</a></li>
                         
                     </ul>
                 </section>
