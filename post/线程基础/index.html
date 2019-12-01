@@ -1,0 +1,2270 @@
+<!DOCTYPE html>
+<html lang="en-us">
+<head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+
+    
+    <meta property="og:site_name" content="">
+    <meta property="og:type" content="article">
+
+    
+    <meta property="og:image" content="http://maizitoday.github.io//img/home-bg-jeep.jpg">
+    <meta property="twitter:image" content="http://maizitoday.github.io//img/home-bg-jeep.jpg" />
+    
+
+    
+    <meta name="title" content="多线程基础" />
+    <meta property="og:title" content="多线程基础" />
+    <meta property="twitter:title" content="多线程基础" />
+    
+
+    
+    <meta name="description" content="麦子，程序员, 开源爱好者，生活探险家 | 这里是 麦子 的博客，与你一起发现更大的世界。">
+    <meta property="og:description" content="麦子，程序员, 开源爱好者，生活探险家 | 这里是 麦子 的博客，与你一起发现更大的世界。" />
+    <meta property="twitter:description" content="麦子，程序员, 开源爱好者，生活探险家 | 这里是 麦子 的博客，与你一起发现更大的世界。" />
+    
+
+    
+    <meta property="twitter:card" content="summary" />
+    
+    
+
+    <meta name="keyword"  content="麦子, maizi, maizi, , 麦子的网络日志, 麦子的博客, maizi Blog, 博客, 个人网站, 互联网, Web, 云原生, PaaS, Istio, Kubernetes, 微服务, Microservice">
+    <link rel="shortcut icon" href="/img/favicon.ico">
+
+    <title>多线程基础-麦子的博客</title>
+
+    <link rel="canonical" href="/post/%E7%BA%BF%E7%A8%8B%E5%9F%BA%E7%A1%80/">
+
+    <link rel="stylesheet" href="/css/iDisqus.min.css"/>
+	
+    
+    <link rel="stylesheet" href="/css/bootstrap.min.css">
+
+    
+    <link rel="stylesheet" href="/css/hux-blog.min.css">
+
+    
+    <link rel="stylesheet" href="/css/syntax.css">
+
+    
+    <link rel="stylesheet" href="/css/zanshang.css">
+
+    
+    <link href="//cdnjs.cloudflare.com/ajax/libs/font-awesome/4.6.3/css/font-awesome.min.css" rel="stylesheet" type="text/css">
+    
+    
+    <script src="/js/jquery.min.js"></script>
+    
+    
+    <script src="/js/bootstrap.min.js"></script>
+    
+    
+    <script src="/js/hux-blog.min.js"></script>
+	
+    
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.13.1/styles/docco.min.css">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.13.1/highlight.min.js"></script>
+    <script>hljs.initHighlightingOnLoad();</script>
+</head>
+
+
+<nav class="navbar navbar-default navbar-custom navbar-fixed-top">
+    <div class="container-fluid">
+        
+        <div class="navbar-header page-scroll">
+            <button type="button" class="navbar-toggle">
+                <span class="sr-only">Toggle navigation</span>
+                <span class="icon-bar"></span>
+                <span class="icon-bar"></span>
+                <span class="icon-bar"></span>
+            </button>
+            <a class="navbar-brand" href="/"></a>
+        </div>
+
+        
+        
+        <div id="huxblog_navbar">
+            <div class="navbar-collapse">
+                <ul class="nav navbar-nav navbar-right">
+                    <li>
+                        <a href="/">Home</a>
+                    </li>
+                    
+                    <li>
+                        <a href="/categories/life">Life</a>
+                    </li>
+                    
+                    <li>
+                        <a href="/categories/tech">Tech</a>
+                    </li>
+                    
+                    
+		    
+                        <li><a href="/top/about/">ABOUT</a></li>
+                    
+
+                    
+		    <li>
+                        <a href="/search">SEARCH <img src="/img/search.png" height="15" style="cursor: pointer;" alt="Search"></a>
+		    </li>
+                    
+                </ul>
+            </div>
+        </div>
+        
+    </div>
+    
+</nav>
+<script>
+    
+    
+    
+    var $body   = document.body;
+    var $toggle = document.querySelector('.navbar-toggle');
+    var $navbar = document.querySelector('#huxblog_navbar');
+    var $collapse = document.querySelector('.navbar-collapse');
+
+    $toggle.addEventListener('click', handleMagic)
+    function handleMagic(e){
+        if ($navbar.className.indexOf('in') > 0) {
+        
+            $navbar.className = " ";
+            
+            setTimeout(function(){
+                
+                if($navbar.className.indexOf('in') < 0) {
+                    $collapse.style.height = "0px"
+                }
+            },400)
+        }else{
+        
+            $collapse.style.height = "auto"
+            $navbar.className += " in";
+        }
+    }
+</script>
+
+
+
+
+<style type="text/css">
+    header.intro-header {
+        background-image: url('https://c.pxhere.com/photos/50/b0/tree_road_archway_symmetry_and_black_white-99031.jpg!d')
+    }
+</style>
+<header class="intro-header">
+    <div class="container">
+        <div class="row">
+            <div class="col-lg-8 col-lg-offset-2 col-md-10 col-md-offset-1">
+                <div class="post-heading">
+                    <div class="tags">
+                        
+                        <a class="tag" href="/tags/%E5%A4%9A%E7%BA%BF%E7%A8%8B%E5%92%8C%E9%AB%98%E5%B9%B6%E5%8F%91" title="多线程和高并发">
+                            多线程和高并发
+                        </a>
+                        
+                        <a class="tag" href="/tags/%E5%A4%9A%E7%BA%BF%E7%A8%8B%E5%9F%BA%E7%A1%80" title="多线程基础">
+                            多线程基础
+                        </a>
+                        
+                        <a class="tag" href="/tags/%E9%94%81%E7%9A%84%E5%88%86%E7%B1%BB" title="锁的分类">
+                            锁的分类
+                        </a>
+                        
+                        <a class="tag" href="/tags/%E9%94%81%E7%9A%84%E7%90%86%E8%A7%A3" title="锁的理解">
+                            锁的理解
+                        </a>
+                        
+                    </div>
+                    <h1>多线程基础</h1>
+                    <h2 class="subheading"></h2>
+                    <span class="meta">
+			Posted by 
+			
+			    麦子
+			 
+			on 
+			Saturday, November 16, 2019
+                        
+                    </span>
+                </div>
+            </div>
+        </div>
+    </div>
+</header>
+
+
+
+
+<article>
+    <div class="container">
+        <div class="row">
+
+            
+            <div class="
+                col-lg-8 col-lg-offset-2
+                col-md-10 col-md-offset-1
+                post-container">
+
+                
+                <header>
+                    <h2>TOC</h2>
+                </header>              
+                <nav id="TableOfContents">
+<ul>
+<li><a href="#进程-线程-协程">进程， 线程， 协程</a>
+<ul>
+<li><a href="#进程">进程</a></li>
+<li><a href="#线程">线程</a></li>
+<li><a href="#协程">协程</a></li>
+</ul></li>
+<li><a href="#什么是上下文">什么是上下文</a></li>
+<li><a href="#守护线程-非守护线程-主线程">守护线程，非守护线程，主线程</a>
+<ul>
+<li><a href="#主线程">主线程</a></li>
+<li><a href="#守护线程">守护线程</a></li>
+<li><a href="#非守护线程">非守护线程</a></li>
+<li><a href="#关系">关系</a></li>
+<li><a href="#优点及使用场景">优点及使用场景</a></li>
+<li><a href="#setdaemon方法转守护线程">setDaemon方法转守护线程</a>
+<ul>
+<li><a href="#thread-setdaemon的用法总结">Thread.setDaemon的用法总结</a></li>
+</ul></li>
+</ul></li>
+<li><a href="#runnable和thread的区别">Runnable和Thread的区别</a>
+<ul>
+<li><a href="#演示多窗口买票问题">演示多窗口买票问题</a></li>
+</ul></li>
+<li><a href="#优先级">优先级</a></li>
+<li><a href="#join用法">join用法</a></li>
+<li><a href="#优雅的方式终止线程">优雅的方式终止线程</a>
+<ul>
+<li><a href="#如何停止线程">如何停止线程</a></li>
+<li><a href="#interrupt方法">interrupt方法</a></li>
+</ul></li>
+<li><a href="#volatile">volatile</a>
+<ul>
+<li><a href="#volatile-的特性">volatile 的特性</a></li>
+<li><a href="#线程之间数据共享原理">线程之间数据共享原理</a></li>
+<li><a href="#volatile为什么无法保证原子性">volatile为什么无法保证原子性</a></li>
+<li><a href="#时序性代码体现">时序性代码体现</a></li>
+<li><a href="#volatile的使用场景">volatile的使用场景</a>
+<ul>
+<li><a href="#模式-1-状态标志">模式 #1：状态标志</a></li>
+<li><a href="#模式-2-独立观察">模式 #2：独立观察</a></li>
+<li><a href="#模式-3-开销较低的-读-写锁-策略">模式 #3：开销较低的“读－写锁”策略</a></li>
+</ul></li>
+</ul></li>
+<li><a href="#synchronized">synchronized</a>
+<ul>
+<li><a href="#synchronized的三种应用方式">synchronized的三种应用方式</a></li>
+<li><a href="#代码验证">代码验证</a></li>
+<li><a href="#同步方法和同步代码块的使用和区别">同步方法和同步代码块的使用和区别</a>
+<ul>
+<li><a href="#同步方法">同步方法</a></li>
+<li><a href="#同步代码块">同步代码块</a></li>
+<li><a href="#区别">区别</a></li>
+</ul></li>
+<li><a href="#this和class的理解">this和class的理解</a>
+<ul>
+<li><a href="#this实例代码">this实例代码</a></li>
+<li><a href="#class实例代码">class实例代码</a></li>
+<li><a href="#总结">总结</a></li>
+</ul></li>
+<li><a href="#synchronized有什么缺陷">synchronized有什么缺陷</a></li>
+</ul></li>
+<li><a href="#锁">锁</a>
+<ul>
+<li><a href="#锁的分类">锁的分类</a>
+<ul>
+<li><a href="#显示锁">显示锁</a></li>
+<li><a href="#隐式锁">隐式锁</a></li>
+<li><a href="#可重入锁">可重入锁</a></li>
+<li><a href="#不可重入锁">不可重入锁</a></li>
+<li><a href="#公平锁">公平锁</a></li>
+<li><a href="#非公平锁">非公平锁</a></li>
+</ul></li>
+<li><a href="#自定义显示锁">自定义显示锁</a>
+<ul>
+<li><a href="#lock接口类">Lock接口类</a></li>
+<li><a href="#booleanlock业务类">BooleanLock业务类</a></li>
+<li><a href="#locktest测试类">LockTest测试类</a></li>
+<li><a href="#运行结果">运行结果</a></li>
+</ul></li>
+</ul></li>
+<li><a href="#sleep和wait的区别">sleep和wait的区别</a>
+<ul>
+<li><a href="#锁池和等待池">锁池和等待池</a>
+<ul>
+<li><a href="#锁池">锁池</a></li>
+<li><a href="#等待池">等待池</a></li>
+</ul></li>
+<li><a href="#wait等待索定池代码演示">wait等待索定池代码演示</a></li>
+<li><a href="#生产者和消费者">生产者和消费者</a>
+<ul>
+<li><a href="#生产者">生产者</a></li>
+<li><a href="#消费者">消费者</a></li>
+<li><a href="#线程通信类">线程通信类</a></li>
+<li><a href="#测试类">测试类</a></li>
+<li><a href="#运行结果-1">运行结果</a></li>
+<li><a href="#总结-1">总结</a></li>
+</ul></li>
+</ul></li>
+<li><a href="#死锁">死锁</a></li>
+</ul>
+</nav>
+                
+                
+
+<p>[TOC]</p>
+
+<h1 id="进程-线程-协程">进程， 线程， 协程</h1>
+
+<p>转载地址：<a href="https://www.cnblogs.com/williamjie/p/11195069.html">https://www.cnblogs.com/williamjie/p/11195069.html</a></p>
+
+<h2 id="进程">进程</h2>
+
+<p>进程是具有一定独立功能的程序关于某个数据集合上的一次运行活动,进程是系统进行资源分配和调度的一个独立单位。每个进程都有自己的独立内存空间，不同进程通过进程间通信来通信。由于进程比较重量，占据独立的内存，所以上下文进程间的切换开销（栈、寄存器、虚拟内存、文件句柄等）比较大，但相对比较稳定安全。</p>
+
+<h2 id="线程">线程</h2>
+
+<p>线程是进程的一个实体,是CPU调度和分派的基本单位,它是比进程更小的能独立运行的基本单位.线程自己基本上不拥有系统资源,只拥有一点在运行中必不可少的资源(如程序计数器,一组寄存器和栈),但是它可与同属一个进程的其他的线程共享进程所拥有的全部资源。线程间通信主要通过共享内存，上下文切换很快，资源开销较少，但相比进程不够稳定容易丢失数据。</p>
+
+<h2 id="协程">协程</h2>
+
+<p><strong>协程是一种用户态的轻量级线程，协程的调度完全由用户控制</strong>。协程拥有自己的寄存器上下文和栈。协程调度切换时，将寄存器上下文和栈保存到其他地方，在切回来的时候，恢复先前保存的寄存器上下文和栈，直接操作栈则基本没有内核切换的开销，可以不加锁的访问全局变量，所以上下文的切换非常快。</p>
+
+<h1 id="什么是上下文">什么是上下文</h1>
+
+<p>所谓上下文，就是当时运行的环境本身。其实说白了，程序上下文可以理解为context实例中的全局变量，你给它什么样的值，它就呈现对应的值或者状态。</p>
+
+<h1 id="守护线程-非守护线程-主线程">守护线程，非守护线程，主线程</h1>
+
+<p>原文链接：<a href="https://blog.csdn.net/lc1010078424/article/details/79613348">https://blog.csdn.net/lc1010078424/article/details/79613348</a></p>
+
+<p>Java中有两类线程：User Thread(用户线程)、Daemon Thread(守护线程)</p>
+
+<p><strong>用户线程即运行在前台的线程，而守护线程是运行在后台的线程。</strong> 守护线程作用是为其他前台线程的运行提供便利服务，而且仅在普通、非守护线程仍然运行时才需要，比如垃圾回收线程就是一个守护线程。当VM检测仅剩一个守护线程，而用户线程都已经退出运行时，VM就会退出，因为没有如果没有了被守护这，也就没有继续运行程序的必要了。如果有非守护线程仍然存活，VM就不会退出。</p>
+
+<p>守护线程并非只有虚拟机内部提供，用户在编写程序时也可以自己设置守护线程。<strong>用户可以用Thread的setDaemon（true）方法设置当前线程为守护线程。</strong></p>
+
+<p>虽然守护线程可能非常有用，但必须小心确保其他所有非守护线程消亡时，不会由于它的终止而产生任何危害。因为你不可能知道在所有的用户线程退出运行前，守护线程是否已经完成了预期的服务任务。一旦所有的用户线程退出了，虚拟机也就退出运行了。 因此，不要在守护线程中执行业务逻辑操作（比如对数据的读写等）。、</p>
+
+<h2 id="主线程">主线程</h2>
+
+<p>main，但不是守护线程。</p>
+
+<h2 id="守护线程">守护线程</h2>
+
+<p>是指在程序运行的时候在后台提供一种通用服务的线程。如gc。</p>
+
+<h2 id="非守护线程">非守护线程</h2>
+
+<p>也叫用户线程，由用户创建。</p>
+
+<h2 id="关系">关系</h2>
+
+<p><strong>注意：主线程（main）和守护线程一起销毁；</strong></p>
+
+<p>主线程和非守护线程互不影响。</p>
+
+<h2 id="优点及使用场景">优点及使用场景</h2>
+
+<p>在主线程关闭后无需手动关闭守护线程，因为会自动关闭，避免了麻烦，Java垃圾回收线程就是一个典型的守护线程，简单粗暴的可以理解为所有为线程服务而不涉及资源的线程都能设置为守护线程。</p>
+
+<h2 id="setdaemon方法转守护线程">setDaemon方法转守护线程</h2>
+
+<pre><code class="language-java">public class App {
+
+    public static void main(String[] args) throws Exception {
+
+        Thread thread = new Thread(new Runnable() {
+
+            @Override
+            public void run() {
+                int i = 0; 
+                while(i&lt;5) {
+                    System.out.println(&quot;work is begin.&quot;);
+                    try {
+                        Thread.sleep(1_000);
+                    } catch (InterruptedException e) {
+                        e.printStackTrace();
+                    }
+                    i++;
+                }
+                System.out.println(&quot;work is end.&quot;);
+            }
+        });
+        // thread.setDaemon(true);
+        thread.start();
+
+        System.out.println(&quot;main is end. &quot;);
+    }
+}
+</code></pre>
+
+<p>运行结果：</p>
+
+<pre><code class="language-java">main is end. 
+work is begin.
+work is begin.
+work is begin.
+work is begin.
+work is begin.
+work is end.
+</code></pre>
+
+<p>设置为true结果</p>
+
+<pre><code class="language-java">main is end. 
+work is begin.
+</code></pre>
+
+<h3 id="thread-setdaemon的用法总结">Thread.setDaemon的用法总结</h3>
+
+<ol>
+<li>setDaemon需要在start方法调用之前使用</li>
+<li>如果jvm中都是后台进程，当前jvm将exit。（随之而来的，所有的一切烟消云散，包括后台线程啦）</li>
+<li>主线程结束后，用户线程将会继续运行，如果没有用户线程，都是后台进程的话，那么jvm结束 。</li>
+<li>setDaemon方法把java的线程设置为守护线程，此方法的调用必须在线程启动之前执行。只有在当前jvm中所有的线程都为守护线程时，jvm才会退出。</li>
+</ol>
+
+<h1 id="runnable和thread的区别">Runnable和Thread的区别</h1>
+
+<p>初步来说接口是为了把线程的控制分离出业务代码，同时接口的好处如下：</p>
+
+<p>1、避免继承的局限，一个类可以继承多个接口。</p>
+
+<p>2、适合于资源的共享。</p>
+
+<h2 id="演示多窗口买票问题">演示多窗口买票问题</h2>
+
+<p>以卖票为例，总共只有10张动车票了，全国3个窗口在卖。</p>
+
+<pre><code class="language-java">public class App implements Runnable {
+
+    // 从这里可以看到，在接口里面这个值是共享处理的，所以在接口中一般直接来处理业务逻辑
+    private static int TICKET_COUNT = 10;
+    private static final Object LOCK = new Object();
+
+    @Override
+    public void run() {
+        for (int i = 0; i &lt; TICKET_COUNT; i++) {
+            synchronized(LOCK){
+                if (TICKET_COUNT &gt; 0) {
+                    System.out.println(Thread.currentThread().getName() + &quot;卖票&quot; + --TICKET_COUNT);
+                }
+            }
+        }
+    }
+
+    public static void main(String[] args) throws Exception {
+        App app = new App();
+        Thread thread1 = new Thread(app, &quot;一号窗口&quot;);
+        Thread thread2 = new Thread(app, &quot;二号窗口&quot;);
+        Thread thread3 = new Thread(app, &quot;三号窗口&quot;);
+
+        thread1.start();
+        thread2.start();
+        thread3.start();
+
+    }
+}
+运行结果如下：
+
+一号窗口卖第 9 张票
+一号窗口卖第 8 张票
+一号窗口卖第 7 张票
+一号窗口卖第 6 张票
+一号窗口卖第 5 张票
+三号窗口卖第 4 张票
+三号窗口卖第 3 张票
+三号窗口卖第 2 张票
+二号窗口卖第 1 张票
+</code></pre>
+
+<h1 id="优先级">优先级</h1>
+
+<p>原文地址：<a href="https://www.cnblogs.com/duanxz/p/5226109.html">https://www.cnblogs.com/duanxz/p/5226109.html</a></p>
+
+<p>Java线程可以有优先级的设定，高优先级的线程比低优先级的线程有更高的几率得到执行（不完全正确，请参考下面的“线程优先级的问题“）。</p>
+
+<ol>
+<li>记住当线程的优先级没有指定时，所有线程都携带普通优先级。</li>
+<li>优先级可以用从1到10的范围指定。10表示最高优先级，1表示最低优先级，5是普通优先级。</li>
+<li>记住优先级最高的线程在执行时被给予优先。但是不能保证线程在启动时就进入运行状态。</li>
+<li>与在线程池中等待运行机会的线程相比，当前正在运行的线程可能总是拥有更高的优先级。</li>
+<li>由调度程序决定哪一个线程被执行。</li>
+<li>t.setPriority()用来设定线程的优先级。</li>
+<li>记住在线程开始方法被调用之前，线程的优先级应该被设定。</li>
+<li>你可以使用常量，如MIN_PRIORITY,MAX_PRIORITY，NORM_PRIORITY来设定优先级。</li>
+</ol>
+
+<p>Thread.setPriority()可能根本不做任何事情，**这跟你的操作系统和虚拟机版本有关，所以并一定就有用，更多是可能会先执行优先级高的线程。 **</p>
+
+<h1 id="join用法">join用法</h1>
+
+<p>当前线程等待子线程结束后才执行，但是子线程和子线程这样的线程还是并行处理。主要针对的是当前线程。如下面针对的就是main线程。</p>
+
+<pre><code class="language-java">public static void main(String[] args) throws Exception {
+
+        Thread t = new Thread(new Runnable() {
+
+            @Override
+            public void run() {
+                for (int i = 0; i &lt; 5; i++) {
+                    try {
+                        Thread.sleep(1_000);
+                        System.out.println(Thread.currentThread().getName() + &quot;-&gt;&gt;我是子线程&quot;);
+                    } catch (InterruptedException e) {
+                        e.printStackTrace();
+                    }
+                }
+
+            }
+        });
+
+        t.start();
+
+        Thread t2 = new Thread(new Runnable() {
+
+            @Override
+            public void run() {
+                for (int i = 0; i &lt; 5; i++) {
+                    try {
+                        Thread.sleep(1_000);
+                        System.out.println(Thread.currentThread().getName() + &quot;-&gt;&gt;我是子线程&quot;);
+                    } catch (InterruptedException e) {
+                        e.printStackTrace();
+                    }
+                }
+
+            }
+        });
+        t2.start();
+
+        t.join();
+        t2.join();
+
+        System.out.println(&quot;我是主线程&quot;);
+
+    }
+
+运行结果如下：
+
+Thread-0-&gt;&gt;我是子线程
+Thread-1-&gt;&gt;我是子线程
+Thread-0-&gt;&gt;我是子线程
+Thread-1-&gt;&gt;我是子线程
+Thread-0-&gt;&gt;我是子线程
+Thread-1-&gt;&gt;我是子线程
+Thread-1-&gt;&gt;我是子线程
+Thread-0-&gt;&gt;我是子线程
+Thread-0-&gt;&gt;我是子线程
+Thread-1-&gt;&gt;我是子线程
+我是主线程
+</code></pre>
+
+<h1 id="优雅的方式终止线程">优雅的方式终止线程</h1>
+
+<p>原文地址：<a href="https://www.cnblogs.com/onlywujun/p/3565082.html">https://www.cnblogs.com/onlywujun/p/3565082.html</a></p>
+
+<h2 id="如何停止线程">如何停止线程</h2>
+
+<ol>
+<li>任务中一般都会有循环结构，只要用一个<strong>标记控制住循环</strong>，就可以结束任务。</li>
+<li>如果线程处于了<code>冻结状态</code>，无法读取标记，此时可以使用<code>interrupt()</code>方法将线程<code>从冻结状态强制恢复到运行状态中</code>来，让线程具备CPU的执行资格。</li>
+</ol>
+
+<h2 id="interrupt方法">interrupt方法</h2>
+
+<p>interrupt方法的目的是给线程发出中断信号，但是不保证线程真的会中断。</p>
+
+<ol>
+<li>中断一个线程只是为了引起该线程的注意，被中断线程可以决定如何应对中断。</li>
+<li>Thread.interrupt()方法不会中断一个正在运行的线程。</li>
+<li>如果线程在调用 Object 类的 wait()、wait(long) 或 wait(long, int) 方法，或者该Thread类的 join()、join(long)、join(long, int)、sleep(long) 或 sleep(long, int) 方法过程中受阻，则其中断状态将被清除，<strong>它还将收到一个InterruptedException异常。这个时候，我们可以通过捕获InterruptedException异常来终止线程的执行，具体可以通过return等退出或改变共享变量的值使其退出。</strong></li>
+<li>synchronized在获锁的过程中是不能被中断的，</li>
+</ol>
+
+<h1 id="volatile">volatile</h1>
+
+<h2 id="volatile-的特性">volatile 的特性</h2>
+
+<ul>
+<li>保证了不同线程对这个变量进行操作时的可见性，即一个线程修改了某个变量的值，这新值对其他线程来说是立即可见的。（实现可见性）</li>
+<li>禁止进行指令重排序。（实现有序性）</li>
+<li>volatile 只能保证对单次读/写的原子性。i++ 这种操作不能保证原子性。</li>
+</ul>
+
+<h2 id="线程之间数据共享原理">线程之间数据共享原理</h2>
+
+<p>原文链接：<a href="https://blog.csdn.net/xdzhouxin/article/details/81236356">https://blog.csdn.net/xdzhouxin/article/details/81236356</a></p>
+
+<ol>
+<li><p>当CPU写入数据的时候， 如果发现改变量被共享了，也就是说，在其他的CPU中也存在改变量的副本，会发出一个信号， 通知其他CPU该变量的缓存是无效。</p></li>
+
+<li><p>当其他CPU访问改变量的时候，重新到主内存中进行获取。</p></li>
+</ol>
+
+<p>可见性与Java的内存模型有关，模型采用缓存与主存的方式对变量进行操作，也就是说，每个线程都有自己的缓存空间，对变量的操作都是在缓存中进行的，之后再将修改后的值返回到主存中，这就带来了问题，有可能一个线程在将共享变量修改后，还没有来的及将缓存中的变量返回给主存中，另外一个线程就对共享变量进行修改，那么这个线程拿到的值是主存中未被修改的值，这就是可见性的问题。</p>
+
+<p>volatile很好的保证了变量的可见性，变量经过volatile修饰后，对此变量进行写操作时，汇编指令中会有一个LOCK前缀指令，这个不需要过多了解，但是加了这个指令后，会引发两件事情：</p>
+
+<p>将当前处理器缓存行的数据写回到系统内存
+这个写回内存的操作会使得在其他处理器缓存了该内存地址无效
+什么意思呢？意思就是说当一个共享变量被volatile修饰时，它会保证修改的值会立即被更新到主存，当有其他线程需要读取时，它会去内存中读取新值，这就保证了可见性。</p>
+
+<h2 id="volatile为什么无法保证原子性">volatile为什么无法保证原子性</h2>
+
+<p>原文链接：<a href="https://blog.csdn.net/xdzhouxin/article/details/81236356">https://blog.csdn.net/xdzhouxin/article/details/81236356</a></p>
+
+<p>问题来了，既然它可以保证修改的值立即能更新到主存，其他线程也会捕捉到被修改后的值，那么为什么不能保证原子性呢？
+首先需要了解的是，Java中只有对基本类型变量的赋值和读取是原子操作，如i = 1的赋值操作，但是像j = i或者i++这样的操作都不是原子操作，因为他们都进行了多次原子操作，比如先读取i的值，再将i的值赋值给j，两个原子操作加起来就不是原子操作了。</p>
+
+<p>所以，如果一个变量被volatile修饰了，那么肯定可以保证每次读取这个变量值的时候得到的值是最新的，但是一旦需要对变量进行自增这样的非原子操作，就不会保证这个变量的原子性了。</p>
+
+<p>举个栗子</p>
+
+<p>一个变量i被volatile修饰，两个线程想对这个变量修改，都对其进行自增操作也就是i++，i++的过程可以分为三步，首先获取i的值，其次对i的值进行加1，最后将得到的新值写会到缓存中。
+线程A首先得到了i的初始值100，但是还没来得及修改，就阻塞了，这时线程B开始了，它也得到了i的值，由于i的值未被修改，即使是被volatile修饰，主存的变量还没变化，那么线程B得到的值也是100，之后对其进行加1操作，得到101后，将新值写入到缓存中，再刷入主存中。根据可见性的原则，这个主存的值可以被其他线程可见。
+问题来了，线程A已经读取到了i的值为100，也就是说读取的这个原子操作已经结束了，所以这个可见性来的有点晚，线程A阻塞结束后，继续将100这个值加1，得到101，再将值写到缓存，最后刷入主存，所以即便是volatile具有可见性，也不能保证对它修饰的变量具有原子性。</p>
+
+<h2 id="时序性代码体现">时序性代码体现</h2>
+
+<p>volatile关键字禁止指令重排序有两层意思：</p>
+
+<ol>
+<li><p>当程序执行到volatile变量的读操作或者写操作时，在其前面的操作的更改肯定全部已经进行，且结果已经对后面的操作可见；在其后面的操作肯定还没有进行；</p></li>
+
+<li><p>在进行指令优化时，不能将在对volatile变量访问的语句放在其后面执行，也不能把volatile变量后面的语句放到其前面执行。</p></li>
+</ol>
+
+<p>代码如下：</p>
+
+<pre><code class="language-java">package app;
+public class SingletionObject4 {
+    private static SingletionObject4 instance;    // 1号 
+    private static volatile SingletionObject4 instance; // 2号
+    private Test obj1;
+    private Test obj2;
+    
+    private SingletionObject4() {
+        System.out.println(&quot;singletion......&quot;);
+        obj1 = new Test(&quot;A&quot;);
+        obj2 = new Test(&quot;B&quot;);
+    }
+
+    public static SingletionObject4 getInstance() {
+         if (instance == null) {
+             synchronized(SingletionObject4.class){
+                 if (instance == null) {
+                     instance = new SingletionObject4();
+                 }
+             }
+         }
+         return SingletionObject4.instance;
+    }
+
+    public static void main(String[] args) {
+         SingletionObject4.getInstance();
+    }
+}
+</code></pre>
+
+<p>如上采取第二种模式编写， 他会先执行里面的obj1和obj2初始化对象后， 然后在初始化SignletionObject4这个对象， 如采取1号的方式， 他是有可能，根据jvm虚拟机的优化处理的时候， 写实例化SigletionObject4这个对象， 在去实例化obj1和obj2，这个时候， 如果你去调用obj1或者obj2的方法的时候， 有可能就是NullPointExection了。</p>
+
+<h2 id="volatile的使用场景">volatile的使用场景</h2>
+
+<p>原文链接：<a href="https://blog.csdn.net/vking_wang/article/details/9982709">https://blog.csdn.net/vking_wang/article/details/9982709</a></p>
+
+<h3 id="模式-1-状态标志">模式 #1：状态标志</h3>
+
+<p>也许实现 volatile 变量的规范使用仅仅是使用一个布尔状态标志，用于指示发生了一个重要的一次性事件，例如完成初始化或请求停机。多个线程之间需要一个公共的变量来控制。</p>
+
+<h3 id="模式-2-独立观察">模式 #2：独立观察</h3>
+
+<p>安全使用 volatile 的另一种简单模式是：定期 “发布” 观察结果供程序内部使用。【例如】假设有一种环境传感器能够感觉环境温度。一个后台线程可能会每隔几秒读取一次该传感器，并更新包含当前文档的 volatile 变量。然后，其他线程可以读取这个变量，从而随时能够看到最新的温度值。</p>
+
+<h3 id="模式-3-开销较低的-读-写锁-策略">模式 #3：开销较低的“读－写锁”策略</h3>
+
+<p>如果读操作远远超过写操作，您可以结合使用<strong>内部锁</strong>和 <strong>volatile 变量</strong>来减少公共代码路径的开销。</p>
+
+<p>使用锁进行所有变化的操作，使用 volatile 进行只读操作。其中，锁一次只允许一个线程访问值，volatile 允许多个线程执行读操作。</p>
+
+<h1 id="synchronized">synchronized</h1>
+
+<p>在并发编程中存在线程安全问题，主要原因有：1.存在共享数据 2.多线程共同操作共享数据。关键字synchronized可以保证在同一时刻，只有一个线程可以执行某个方法或某个代码块，同时synchronized可以保证一个线程的变化可见（可见性），即可以代替volatile。</p>
+
+<p>相当于把并行的问题改成了单行处理，让共享数据串行处理。</p>
+
+<h2 id="synchronized的三种应用方式">synchronized的三种应用方式</h2>
+
+<p>Java中每一个对象都可以作为锁，这是synchronized实现同步的基础：</p>
+
+<ol>
+<li>普通同步方法（实例方法），锁是当前实例对象 ，进入同步代码前要获得当<strong>前实例的锁</strong></li>
+<li>静态同步方法，锁是当前类的class对象 ，进入同步代码前要获得<strong>当前类对象的锁</strong></li>
+<li>同步方法块，锁是括号里面的对象，对给定对象加锁，<strong>进入同步代码库前要获得给定对象的锁</strong>。</li>
+</ol>
+
+<h2 id="代码验证">代码验证</h2>
+
+<ol>
+<li>一个线程获取了该对象的锁之后，其他线程来访问其他synchronized实例方法现象</li>
+</ol>
+
+<pre><code class="language-java">public class SynchronizedTest {
+
+    public synchronized void method1() {
+        System.out.println(&quot;Method 1 start&quot;);
+        try {
+            System.out.println(&quot;Method 1 execute&quot;);
+            Thread.sleep(3000);
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        }
+        System.out.println(&quot;Method 1 end&quot;);
+    }
+
+    public synchronized void method2() {
+        System.out.println(&quot;Method 2 start&quot;);
+        try {
+            System.out.println(&quot;Method 2 execute&quot;);
+            Thread.sleep(1000);
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        }
+        System.out.println(&quot;Method 2 end&quot;);
+    }
+
+    public static void main(final String[] args) throws InterruptedException {
+
+        SynchronizedTest test = new SynchronizedTest();
+        Thread t = new Thread(new Runnable() {
+            @Override
+            public void run() {
+                 test.method1();
+            }
+        });
+
+        Thread t2 = new Thread(new Runnable() {
+            @Override
+            public void run() {
+                 test.method2();
+            }
+        });
+        t.start();
+        t2.start();
+
+    }
+
+}
+
+运行结果如下：
+Method 1 start
+Method 1 execute
+Method 1 end
+Method 2 start
+Method 2 execute
+Method 2 end
+
+分析：可以看出其他线程来访问synchronized修饰的其他方法时需要等待线程1先把锁释放，因为这里的锁对应的事这个对象。 
+</code></pre>
+
+<h2 id="同步方法和同步代码块的使用和区别">同步方法和同步代码块的使用和区别</h2>
+
+<h3 id="同步方法">同步方法</h3>
+
+<pre><code class="language-java">public synchronized void execute()
+{
+}
+</code></pre>
+
+<h3 id="同步代码块">同步代码块</h3>
+
+<pre><code class="language-java">Object object = new Object();
+ 
+synchronized（object）{
+ 
+}
+</code></pre>
+
+<h3 id="区别">区别</h3>
+
+<p>如果使用同步代码块，只将可能会出现多线程问题的代码放在同步代码块里面，那么当一个线程访问同步代码块里面的代码时，其他线程也可以访问方法里其他的代码，这样代码执行效率会大大增加。所以，通常情况下，能使用同步代码块就尽量使用同步代码块。</p>
+
+<h2 id="this和class的理解">this和class的理解</h2>
+
+<h3 id="this实例代码">this实例代码</h3>
+
+<pre><code class="language-java">package app;
+public class synchronizedTest {
+
+    public void method1() {
+        synchronized (this) {
+            System.out.println(&quot;Method 1 start&quot;);
+            try {
+                System.out.println(&quot;Method 1 execute&quot;);
+                Thread.sleep(3000);
+            } catch (InterruptedException e) {
+                e.printStackTrace();
+            }
+            System.out.println(&quot;Method 1 end&quot;);
+        }
+
+    }
+
+    public void method2() {
+        synchronized (this) {
+            System.out.println(&quot;Method 2 start&quot;);
+            try {
+                System.out.println(&quot;Method 2 execute&quot;);
+                Thread.sleep(1000);
+            } catch (InterruptedException e) {
+                e.printStackTrace();
+            }
+            System.out.println(&quot;Method 2 end&quot;);
+
+        }
+    }
+
+    public static void main(final String[] args) throws InterruptedException {
+
+        Thread t = new Thread(new Runnable() {
+            @Override
+            public void run() {
+                synchronizedTest test = new synchronizedTest();
+                test.method1();
+            }
+        });
+
+        Thread t2 = new Thread(new Runnable() {
+            @Override
+            public void run() {
+                synchronizedTest test = new synchronizedTest();
+                test.method2();
+            }
+        });
+        t.start();
+        t2.start();
+
+    }
+
+}
+运行结果如下：
+Method 2 start
+Method 2 execute
+Method 1 start
+Method 1 execute
+Method 2 end
+Method 1 end
+</code></pre>
+
+<h3 id="class实例代码">class实例代码</h3>
+
+<pre><code class="language-java">package app;
+public class synchronizedTest {
+
+    public void method1() {
+        synchronized (synchronizedTest.class) {
+            System.out.println(&quot;Method 1 start&quot;);
+            try {
+                System.out.println(&quot;Method 1 execute&quot;);
+                Thread.sleep(3000);
+            } catch (InterruptedException e) {
+                e.printStackTrace();
+            }
+            System.out.println(&quot;Method 1 end&quot;);
+        }
+
+    }
+
+    public void method2() {
+        synchronized (synchronizedTest.class) {
+            System.out.println(&quot;Method 2 start&quot;);
+            try {
+                System.out.println(&quot;Method 2 execute&quot;);
+                Thread.sleep(1000);
+            } catch (InterruptedException e) {
+                e.printStackTrace();
+            }
+            System.out.println(&quot;Method 2 end&quot;);
+
+        }
+    }
+
+    public static void main(final String[] args) throws InterruptedException {
+
+        Thread t = new Thread(new Runnable() {
+            @Override
+            public void run() {
+                synchronizedTest test = new synchronizedTest();
+                test.method1();
+            }
+        });
+
+        Thread t2 = new Thread(new Runnable() {
+            @Override
+            public void run() {
+                synchronizedTest test = new synchronizedTest();
+                test.method2();
+            }
+        });
+        t.start();
+        t2.start();
+
+    }
+
+}
+运行结果：
+Method 1 start
+Method 1 execute
+Method 1 end
+Method 2 start
+Method 2 execute
+Method 2 end
+</code></pre>
+
+<h3 id="总结">总结</h3>
+
+<p><strong>1、对于静态方法，由于此时对象还未生成，所以只能采用类锁；</strong></p>
+
+<p><strong>2、只要采用类锁，就会拦截所有线程，只能让一个线程访问。</strong></p>
+
+<p><strong>3、对于对象锁（this），如果是同一个实例，就会按顺序访问，但是如果是不同实例，就可以同时访问。</strong></p>
+
+<p><strong>4、如果对象锁跟访问的对象没有关系，那么就会都同时访问。</strong></p>
+
+<h2 id="synchronized有什么缺陷">synchronized有什么缺陷</h2>
+
+<p><strong>效率低</strong></p>
+
+<p>锁的释放情况少，只有代码执行完毕或者异常结束才会释放锁；试图获取锁的时候不能设定超时，不能中断一个正在使用锁的线程，相对而言，Lock可以中断和设置超时。使用synchronized，当多个线程尝试获取锁时，未获取到锁的线程会不断的尝试获取锁，而不会发生中断，这样会造成性能消耗。</p>
+
+<p><strong>不够灵活</strong></p>
+
+<p>加锁和释放的时机单一，每个锁仅有一个单一的条件（某个对象），相对而言，读写锁更加灵活</p>
+
+<p><strong>无法知道是否成功获得锁</strong></p>
+
+<p>相对而言，Lock可以拿到状态，如果成功获取锁，&hellip;.，如果获取失败，&hellip;..</p>
+
+<h1 id="锁">锁</h1>
+
+<h2 id="锁的分类">锁的分类</h2>
+
+<h3 id="显示锁">显示锁</h3>
+
+<p>当调用synchronized修饰的代码时，并不需要显示的加锁和解锁的过程，所以称之为<strong>隐式锁</strong>。</p>
+
+<h3 id="隐式锁">隐式锁</h3>
+
+<p>Lock是一个接口，<strong>提供了无条件的、可轮询的、定时的、可中断的锁获取操作</strong>，所有的加锁和解锁操作方法都是显示的，因而称为<strong>显示锁。</strong></p>
+
+<h3 id="可重入锁">可重入锁</h3>
+
+<p>一个同步方法可以调用另外一个同步方法，一个线程已经拥有某个对象的锁，再次申请的时候仍然会得到该对象的锁。</p>
+
+<h3 id="不可重入锁">不可重入锁</h3>
+
+<p>即当前线程获取这把锁后，要想再拿到这把锁，必须释放当前持有的锁，这时我们称这个锁是不可重入的。</p>
+
+<h3 id="公平锁">公平锁</h3>
+
+<p>如果在时间上，先对锁进行获取的请求，一定先被满足，这个锁就是公平的</p>
+
+<h3 id="非公平锁">非公平锁</h3>
+
+<p>上来就直接尝试占有锁，如果尝试失败，就再采用类似公平锁那种方式。非公平锁效率要高</p>
+
+<h2 id="自定义显示锁">自定义显示锁</h2>
+
+<p>原来主要通过wait(mills) 和 notifyAll(), 加上一个变量来进行控制处理的。</p>
+
+<p><strong>转载地址：<a href="https://www.cnblogs.com/Draymonder/p/10387358.html">https://www.cnblogs.com/Draymonder/p/10387358.html</a></strong></p>
+
+<h3 id="lock接口类">Lock接口类</h3>
+
+<pre><code class="language-java">public interface Lock {
+    static class TimeOutException extends Exception {
+        TimeOutException(String message) {
+            super(message);
+        }
+    }
+
+    void lock() throws InterruptedException;
+
+    void lock(long mills) throws InterruptedException, TimeOutException;
+
+    void unlock();
+
+    Collection&lt;Thread&gt; getBlockedThread();
+
+    int getBlockedSize();
+}
+</code></pre>
+
+<h3 id="booleanlock业务类">BooleanLock业务类</h3>
+
+<pre><code class="language-java">package app.lockdemo;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.Optional;
+
+public class BooleanLock implements Lock {
+
+    public BooleanLock(boolean initValue) {
+        this.initValue = initValue;
+    }
+
+    // false means is free
+    // true means having been used
+    // 通过这个变量来控制时间的长度。 
+    private volatile boolean initValue;
+
+    private Thread currentThread;
+
+    private Collection&lt;Thread&gt; blockedThreads = new ArrayList&lt;&gt;();
+
+    @Override
+    public synchronized void lock() throws InterruptedException {
+        while (initValue) {
+            blockedThreads.add(Thread.currentThread());
+            this.wait();
+        }
+
+        blockedThreads.remove(Thread.currentThread());
+        this.initValue = true;
+        this.currentThread = Thread.currentThread();
+    }
+
+    @Override
+    public synchronized void lock(long mills) throws InterruptedException, TimeOutException {
+
+        System.out.println(&quot;current thread :&quot; + Thread.currentThread().getName() + &quot; 共享变量 &quot; + this.initValue);
+
+        if (mills &lt;= 0)
+            lock();
+        long hasRemaining = mills;
+        long endTime = System.currentTimeMillis() + mills;
+        while (initValue) {
+            if (hasRemaining &lt;= 0)
+                throw new TimeOutException(&quot;time out, and the Thread[&quot; + Thread.currentThread().getName()+ &quot;] do not get the lock---&gt;&quot; + this.initValue);
+            blockedThreads.add(Thread.currentThread());
+            this.wait(mills);
+            System.out.println(&quot;current thread -&gt;&quot;+Thread.currentThread().getName()+&quot; initValue -&gt;&quot; + this.initValue);
+            hasRemaining = endTime - System.currentTimeMillis();
+        }
+        blockedThreads.remove(Thread.currentThread());
+        this.initValue = true;
+        this.currentThread = Thread.currentThread();
+    }
+
+    @Override
+    public synchronized void unlock() {
+        if (currentThread != null &amp;&amp; Thread.currentThread() == currentThread) {
+            this.initValue = false;
+            Optional.of(Thread.currentThread().getName() + &quot; release the lock...&quot;).ifPresent(System.out::println);
+            this.notifyAll();
+        }
+    }
+
+    @Override
+    public Collection&lt;Thread&gt; getBlockedThread() {
+        return Collections.unmodifiableCollection(blockedThreads);
+    }
+
+    @Override
+    public int getBlockedSize() {
+        return blockedThreads.size();
+    }
+}
+</code></pre>
+
+<h3 id="locktest测试类">LockTest测试类</h3>
+
+<pre><code class="language-java">public class LockTest {
+    public static void main(String[] args) throws InterruptedException {
+
+        final BooleanLock booleanLock = new BooleanLock(false);
+        Stream.of(&quot;T1&quot;, &quot;T2&quot;, &quot;T3&quot;, &quot;T4&quot;).forEach(name -&gt; new Thread(() -&gt; {
+            try {
+                booleanLock.lock(10_000L);
+                Optional.of(Thread.currentThread().getName() + &quot; have the lock Monitor&quot;).ifPresent(System.out::println);
+                work();
+            } catch (InterruptedException e) {
+                e.printStackTrace();
+            } catch (Lock.TimeOutException e) {
+                System.out.println(e.getMessage());
+                // Optional.of(Thread.currentThread().getName() + &quot; time out&quot;)
+                // .ifPresent(System.out::println);
+            } finally {
+                booleanLock.unlock();
+            }
+        }, name).start());
+    }
+
+    private static void work() throws InterruptedException {
+        Optional.of(Thread.currentThread().getName() + &quot; is Working...&quot;).ifPresent(System.out::println);
+        Thread.sleep(1_000);
+    }
+
+}
+</code></pre>
+
+<h3 id="运行结果">运行结果</h3>
+
+<pre><code class="language-java">current thread :T1 共享变量 false
+current thread :T4 共享变量 true
+current thread :T3 共享变量 true
+current thread :T2 共享变量 true
+T1 have the lock Monitor
+T1 is Working...
+T1 release the lock...
+current thread -&gt;T2 initValue -&gt;false
+T2 have the lock Monitor
+current thread -&gt;T3 initValue -&gt;true
+T2 is Working...
+current thread -&gt;T4 initValue -&gt;true
+T2 release the lock...
+current thread -&gt;T4 initValue -&gt;false
+T4 have the lock Monitor
+T4 is Working...
+current thread -&gt;T3 initValue -&gt;true
+T4 release the lock...
+current thread -&gt;T3 initValue -&gt;false
+T3 have the lock Monitor
+T3 is Working...
+T3 release the lock...
+</code></pre>
+
+<h1 id="sleep和wait的区别">sleep和wait的区别</h1>
+
+<ol>
+<li><p>sleep方法是Thread类的静态方法,wait()是Object超类的成员方法。</p></li>
+
+<li><p>sleep()方法导致了程序暂停执行指定的时间，让出cpu该其他线程，但是他的监控状态依然保持者，当指定的时间到了又会自动恢复运行状态。在调用sleep()方法的过程中，线程不会释放对象锁。</p></li>
+</ol>
+
+<p>而当调用wait()方法的时候，线程会放弃对象锁，<strong>进入等待此对象的等待锁定池</strong>，只有针对此对象调用notify()方法后本线程才进入对象锁定池准备</p>
+
+<ol>
+<li><p>sleep方法需要抛异常,wait方法不需要。(Thread类中sleep方法就已经进行了抛异常处理)</p></li>
+
+<li><p>sleep方法可以在任何地方使用,wait方法只能在同步方法和同步代码块中使用。</p></li>
+</ol>
+
+<p><strong>注意：  wait不是加入锁，而是放入锁的队列中。</strong></p>
+
+<h2 id="锁池和等待池">锁池和等待池</h2>
+
+<p>转载地址：<a href="https://www.cnblogs.com/tiancai/p/9371357.html">https://www.cnblogs.com/tiancai/p/9371357.html</a></p>
+
+<p>在java中，每个对象都有两个池，锁(monitor)池和等待池，wait() ,notifyAll(),notify() 三个方法都是Object类中的方法.</p>
+
+<h3 id="锁池">锁池</h3>
+
+<p>假设线程A已经拥有了某个对象(注意:不是类)的锁，而其它的线程想要调用这个对象的某个synchronized方法(或者synchronized块)，由于这些线程在进入对象的synchronized方法之前必须先获得该对象的锁的拥有权，但是该对象的锁目前正被线程A拥有，所以这些线程就进入了该对象的锁池中。</p>
+
+<h3 id="等待池">等待池</h3>
+
+<p>假设一个线程A调用了某个对象的wait()方法，<strong>线程A就会释放该对象的锁</strong>(因为wait()方法必须出现在synchronized中，这样自然在执行wait()方法之前线程A就已经拥有了该对象的锁)，同时线程A就进入到了该对象的等待池中。如果另外的一个线程调用了相同对象的notifyAll()方法，那么处于该对象的等待池中的线程就会全部进入该对象的锁池中，准备争夺锁的拥有权。如果另外的一个线程调用了相同对象的notify()方法，那么仅仅有一个处于该对象的等待池中的线程(随机)会进入该对象的锁池.</p>
+
+<h2 id="wait等待索定池代码演示">wait等待索定池代码演示</h2>
+
+<pre><code class="language-java">import java.util.stream.Stream;
+
+public class WaitTest {
+
+    public synchronized void lock() throws InterruptedException {
+        System.out.println(&quot;current thread is &quot; + Thread.currentThread().getName());
+        this.wait();
+        System.out.println(&quot;current thread is &quot; + Thread.currentThread().getName() + &quot; unlock&quot;);
+    }
+
+    public static void main(String[] args) {
+        WaitTest wait = new WaitTest();
+
+        Stream.of(&quot;T1&quot;, &quot;T2&quot;, &quot;T3&quot;, &quot;T4&quot;).forEach(name -&gt; new Thread(new Runnable() {
+
+            @Override
+            public void run() {
+
+                try {
+                    wait.lock();
+                } catch (InterruptedException e) {
+                    e.printStackTrace();
+                }
+            }
+        }, name).start());
+
+    }
+
+}
+
+运行结果：
+current thread is T1
+current thread is T3
+current thread is T2
+current thread is T4
+</code></pre>
+
+<p>如上可以看到， 线程启动后， 全部进入了synchronized方法中，全部在wait方法的前面都执行了， 后面阻塞了， 当时前面的几条线程都直接运行完成了。</p>
+
+<h2 id="生产者和消费者">生产者和消费者</h2>
+
+<p>实现效果， 多个生产者和多个消费者进行消费固定张票，然后终止。</p>
+
+<h3 id="生产者">生产者</h3>
+
+<pre><code class="language-java">public class Producer implements Runnable {
+
+    private TicketBox ticketBox;
+
+    public Producer(TicketBox ticketBox) {
+        this.ticketBox = ticketBox;
+
+    }
+
+    @Override
+    public void run() {
+        boolean flag = true;
+        while (flag) {
+            try {
+                // 这个时间的控制，可以让其先生产一批，然后在消费，
+                // 也可以一边生产一边消费，这个时间主要和消费者那边的时间比较就可以了
+                Thread.sleep(1_00);
+                flag = ticketBox.produceTicket();
+            } catch (InterruptedException e) {
+                e.printStackTrace();
+            }
+        }
+
+    }
+
+}
+</code></pre>
+
+<h3 id="消费者">消费者</h3>
+
+<pre><code class="language-java">public class Consumer implements Runnable {
+
+    private TicketBox ticketBox;
+
+    public Consumer(TicketBox ticketBox) {
+        this.ticketBox = ticketBox;
+    }
+
+    @Override
+    public void run() {
+        boolean flag = true;
+        while (flag) {
+            try {
+                Thread.sleep(1_000);
+                flag = ticketBox.consumeTicket();
+            } catch (InterruptedException e) {
+                e.printStackTrace();
+            }
+        }
+
+    }
+
+}
+</code></pre>
+
+<h3 id="线程通信类">线程通信类</h3>
+
+<pre><code>/**
+ * 生产和消费的业务代码
+ */
+public class TicketBox {
+    private volatile int currentTicket;
+    private volatile List&lt;Integer&gt; produceTicketList = new ArrayList&lt;&gt;();
+    private volatile List&lt;Integer&gt; consumerTicketList = new ArrayList&lt;&gt;();
+    private volatile boolean flag = true;
+    private static final int MAX_TICKET_COUNT = 15;
+
+    /**
+     * 生产票
+     */
+    public synchronized boolean produceTicket() {
+        while (currentTicket != 0 &amp;&amp; currentTicket % 5 == 0) {
+            try {
+                wait();
+            } catch (InterruptedException e) {
+                e.printStackTrace();
+            }
+        }
+        if (produceTicketList.size() &lt; MAX_TICKET_COUNT) {
+            ++currentTicket;
+            produceTicketList.add(currentTicket);
+            System.out.println(Thread.currentThread().getName() + &quot; 生产第&quot; + produceTicketList.size() + &quot;张票&quot;);
+        } else {
+            try {
+                wait();
+                // 这个flag是为了控制多个线程到这里来，打印多次下面语句，通过volatile boolean flag来控制，打印一句出来正常就OK了。
+                if (flag) {
+                    System.out.println(&quot;票已经卖完了.....&quot;);
+                    flag = false;
+                }
+
+            } catch (InterruptedException e) {
+                e.printStackTrace();
+            }
+            return false;
+        }
+        return true;
+
+    }
+
+    /**
+     * 消费票
+     */
+    public synchronized boolean consumeTicket() {
+        if (currentTicket == 0) {
+            notifyAll();
+            System.out.println(&quot;\n&quot;);
+        }
+        if (currentTicket &gt; 0) {
+            currentTicket--;
+            consumerTicketList.add(currentTicket);
+            System.out.println(Thread.currentThread().getName() + &quot; 消费第&quot; + consumerTicketList.size() + &quot;张票 &quot;);
+        } else {
+            // 这里需要加入一个判断不然，会导致currentTicket多线程情况的时候为0，也到了这里来了。
+            if(consumerTicketList.size() == MAX_TICKET_COUNT){
+                notifyAll();
+                return false;
+            }
+        }
+        return true;
+    }
+}
+</code></pre>
+
+<h3 id="测试类">测试类</h3>
+
+<pre><code class="language-java">  public static void main(String[] args) {
+        TicketBox ticketBox = new TicketBox();
+
+        Producer product = new Producer(ticketBox);
+        Consumer consumer = new Consumer(ticketBox);
+
+        Thread producerThread = new Thread(product);
+        Thread producerThread2 = new Thread(product);
+        Thread producerThread3 = new Thread(product);
+        producerThread.start();
+        producerThread3.start();
+        producerThread2.start();
+
+        Thread consumerThread = new Thread(consumer);
+        Thread consumerThread2 = new Thread(consumer);
+        Thread consumerThread3 = new Thread(consumer);
+        consumerThread3.start();
+        consumerThread2.start();
+        consumerThread.start();
+
+    }
+</code></pre>
+
+<h3 id="运行结果-1">运行结果</h3>
+
+<pre><code>Thread-0 生产第1张票
+Thread-1 生产第2张票
+Thread-2 生产第3张票
+Thread-0 生产第4张票
+Thread-2 生产第5张票
+Thread-5 消费第1张票 
+Thread-3 消费第2张票 
+Thread-4 消费第3张票 
+Thread-5 消费第4张票 
+Thread-4 消费第5张票 
+
+Thread-0 生产第6张票
+Thread-2 生产第7张票
+Thread-1 生产第8张票
+Thread-0 生产第9张票
+Thread-1 生产第10张票
+Thread-4 消费第6张票 
+Thread-3 消费第7张票 
+Thread-5 消费第8张票 
+Thread-3 消费第9张票 
+Thread-4 消费第10张票 
+
+Thread-1 生产第11张票
+Thread-0 生产第12张票
+Thread-2 生产第13张票
+Thread-1 生产第14张票
+Thread-2 生产第15张票
+Thread-3 消费第11张票 
+Thread-5 消费第12张票 
+Thread-4 消费第13张票 
+Thread-4 消费第14张票 
+Thread-3 消费第15张票 
+
+ 
+票已经卖完了.....
+</code></pre>
+
+<h3 id="总结-1">总结</h3>
+
+<p>主要是通过wait和notifyAll方法的使用， 以及用volatile关键字的控制。</p>
+
+<h1 id="死锁">死锁</h1>
+
+
+                
+                
+<div class="entry-shang text-center">
+    
+	    <p>「真诚赞赏，手留余香」</p>
+	
+	<button class="zs show-zs btn btn-bred">赞赏支持</button>
+</div>
+<div class="zs-modal-bg"></div>
+<div class="zs-modal-box">
+	<div class="zs-modal-head">
+		<button type="button" class="close">×</button>
+		<span class="author"><a href="http://maizitoday.github.io/"><img src="/img/favicon.png" /></a></span>
+        
+	        <p class="tip"><i></i><span>真诚赞赏，手留余香</span></p>
+		
+ 
+	</div>
+	<div class="zs-modal-body">
+		<div class="zs-modal-btns">
+			<button class="btn btn-blink" data-num="2">2元</button>
+			<button class="btn btn-blink" data-num="5">5元</button>
+			<button class="btn btn-blink" data-num="10">10元</button>
+			<button class="btn btn-blink" data-num="50">50元</button>
+			<button class="btn btn-blink" data-num="100">100元</button>
+			<button class="btn btn-blink" data-num="1">任意金额</button>
+		</div>
+		<div class="zs-modal-pay">
+			<button class="btn btn-bred" id="pay-text">2元</button>
+			<p>使用<span id="pay-type">微信</span>扫描二维码完成支付</p>
+			<img src="/img/reward/wechat-2.png"  id="pay-image"/>
+		</div>
+	</div>
+	<div class="zs-modal-footer">
+		<label><input type="radio" name="zs-type" value="wechat" class="zs-type" checked="checked"><span ><span class="zs-wechat"><img src="/img/reward/wechat-btn.png"/></span></label>
+		<label><input type="radio" name="zs-type" value="alipay" class="zs-type" class="zs-alipay"><img src="/img/reward/alipay-btn.png"/></span></label>
+	</div>
+</div>
+<script type="text/javascript" src="/js/reward.js"></script>
+
+                
+
+                <hr>
+                <ul class="pager">
+                    
+                    <li class="previous">
+                        <a href="/post/smart-doc%E6%8E%A5%E5%8F%A3%E6%96%87%E6%A1%A3%E8%87%AA%E5%8A%A8%E7%94%9F%E6%88%90/" data-toggle="tooltip" data-placement="top" title="smart-doc接口文档自动生成">&larr;
+                            Previous Post</a>
+                    </li>
+                    
+                    
+                </ul>
+
+                
+<div id="disqus-comment"></div>
+
+
+
+            </div>
+            
+            <div class="
+                col-lg-8 col-lg-offset-2
+                col-md-10 col-md-offset-1
+                sidebar-container">
+
+                
+                
+                <section>
+                    <hr class="hidden-sm hidden-xs">
+                    <h5><a href="/tags/">FEATURED TAGS</a></h5>
+                    <div class="tags">
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        <a href="/tags/zookeeper" title="Zookeeper">
+                            Zookeeper
+                        </a>
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        <a href="/tags/docker" title="docker">
+                            docker
+                        </a>
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        <a href="/tags/dockerfile" title="dockerfile">
+                            dockerfile
+                        </a>
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        <a href="/tags/elasticsearch" title="elasticSearch">
+                            elasticSearch
+                        </a>
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        <a href="/tags/java%E5%9F%BA%E7%A1%80" title="java基础">
+                            java基础
+                        </a>
+                        
+                        
+                        
+                        <a href="/tags/java%E7%9B%B8%E5%85%B3%E6%A6%82%E5%BF%B5" title="java相关概念">
+                            java相关概念
+                        </a>
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        <a href="/tags/jvm" title="jvm">
+                            jvm
+                        </a>
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        <a href="/tags/maven" title="maven">
+                            maven
+                        </a>
+                        
+                        
+                        
+                        <a href="/tags/mongodb" title="mongodb">
+                            mongodb
+                        </a>
+                        
+                        
+                        
+                        
+                        
+                        <a href="/tags/mybatis%E7%B3%BB%E5%88%97" title="mybatis系列">
+                            mybatis系列
+                        </a>
+                        
+                        
+                        
+                        <a href="/tags/mycat" title="mycat">
+                            mycat
+                        </a>
+                        
+                        
+                        
+                        
+                        
+                        <a href="/tags/mysql%E7%B3%BB%E5%88%97" title="mysql系列">
+                            mysql系列
+                        </a>
+                        
+                        
+                        
+                        
+                        
+                        <a href="/tags/nginx" title="nginx">
+                            nginx
+                        </a>
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        <a href="/tags/redis" title="redis">
+                            redis
+                        </a>
+                        
+                        
+                        
+                        <a href="/tags/rocketmq" title="rocketmq">
+                            rocketmq
+                        </a>
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        <a href="/tags/shell" title="shell">
+                            shell
+                        </a>
+                        
+                        
+                        
+                        <a href="/tags/shiro" title="shiro">
+                            shiro
+                        </a>
+                        
+                        
+                        
+                        
+                        
+                        <a href="/tags/springcloud" title="springCloud">
+                            springCloud
+                        </a>
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        <a href="/tags/springboot%E7%B3%BB%E5%88%97" title="springboot系列">
+                            springboot系列
+                        </a>
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        <a href="/tags/%E5%88%86%E5%B8%83%E5%BC%8F%E7%B3%BB%E5%88%97" title="分布式系列">
+                            分布式系列
+                        </a>
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        <a href="/tags/%E5%8D%95%E7%82%B9%E7%99%BB%E5%BD%95" title="单点登录">
+                            单点登录
+                        </a>
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        <a href="/tags/%E5%BC%80%E5%8F%91%E5%B7%A5%E5%85%B7" title="开发工具">
+                            开发工具
+                        </a>
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        <a href="/tags/%E6%95%B0%E6%8D%AE%E5%BA%93" title="数据库">
+                            数据库
+                        </a>
+                        
+                        
+                        
+                        
+                        
+                        <a href="/tags/%E6%95%B0%E6%8D%AE%E7%BB%93%E6%9E%84" title="数据结构">
+                            数据结构
+                        </a>
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        <a href="/tags/%E8%AE%BE%E8%AE%A1%E6%A8%A1%E5%BC%8F" title="设计模式">
+                            设计模式
+                        </a>
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        <a href="/tags/%E8%B4%9F%E8%BD%BD%E5%9D%87%E8%A1%A1" title="负载均衡">
+                            负载均衡
+                        </a>
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                    </div>
+                </section>
+                
+
+                
+                
+                <section>
+                    <hr>
+                    <h5>FRIENDS</h5>
+                    <ul class="list-inline">
+                        
+                        <li><a target="_blank" href="https://zhaohuabing.com">赵化冰博客</a></li>
+                        
+                        <li><a target="_blank" href="http://www.tianshouzhi.com">田守枝</a></li>
+                        
+                        <li><a target="_blank" href="http://www.ityouknow.com">纯洁的微笑</a></li>
+                        
+                        <li><a target="_blank" href="https://renchunxiao.com">任春晓</a></li>
+                        
+                        <li><a target="_blank" href="https://www.lihongkun.com">泛泛之辈</a></li>
+                        
+                        <li><a target="_blank" href="https://juejin.im/welcome/backend">后端服务论坛</a></li>
+                        
+                        <li><a target="_blank" href="https://www.javaboy.org">江南一点雨</a></li>
+                        
+                        <li><a target="_blank" href="https://blog.csdn.net/gwd1154978352">东天里的冬天</a></li>
+                        
+                    </ul>
+                </section>
+                
+            </div>
+        </div>
+    </div>
+</article>
+
+
+
+
+<footer>
+    <div class="container">
+        <div class="row">
+            <div class="col-lg-8 col-lg-offset-2 col-md-10 col-md-offset-1">
+                <ul class="list-inline text-center">
+                   
+                   <li>
+                       <a href="" rel="alternate" type="application/rss+xml" title="" >
+                           <span class="fa-stack fa-lg">
+                               <i class="fa fa-circle fa-stack-2x"></i>
+                               <i class="fa fa-rss fa-stack-1x fa-inverse"></i>
+                           </span>
+                       </a>
+                   </li>
+                   
+                    
+                    <li>
+                        <a href="mailto:maiziybtoday@gmail.com">
+                            <span class="fa-stack fa-lg">
+                                <i class="fa fa-circle fa-stack-2x"></i>
+                                <i class="fa fa-envelope fa-stack-1x fa-inverse"></i>
+                            </span>
+                        </a>
+                    </li>
+		    
+                    
+                    
+                    
+                    
+
+                    
+
+		    
+                    
+                    <li>
+                        <a target="_blank" href="/your%20wechat%20qr%20code%20image">
+                            <span class="fa-stack fa-lg">
+                                <i class="fa fa-circle fa-stack-2x"></i>
+                                <i class="fa fa-wechat fa-stack-1x fa-inverse"></i>
+                            </span>
+                        </a>
+                    </li>
+		    
+                    
+                    
+                    <li>
+                        <a target="_blank" href="https://www.linkedin.com/in/yourlinkedinid">
+                            <span class="fa-stack fa-lg">
+                                <i class="fa fa-circle fa-stack-2x"></i>
+                                <i class="fa fa-linkedin fa-stack-1x fa-inverse"></i>
+                            </span>
+                        </a>
+                    </li>
+		    
+                    
+                </ul>
+		<p class="copyright text-muted">
+                    Copyright &copy;  2019
+                    <br>
+                    <a href="https://themes.gohugo.io/hugo-theme-cleanwhite">CleanWhite Hugo Theme</a> by <a href="https://zhaohuabing.com">Huabing</a> |
+                    <iframe
+                        style="margin-left: 2px; margin-bottom:-5px;"
+                        frameborder="0" scrolling="0" width="100px" height="20px"
+                        src="https://ghbtns.com/github-btn.html?user=zhaohuabing&repo=hugo-theme-cleanwhite&type=star&count=true" >
+                    </iframe>
+                </p>
+            </div>
+        </div>
+    </div>
+</footer>
+
+
+
+
+<script>
+    function async(u, c) {
+      var d = document, t = 'script',
+          o = d.createElement(t),
+          s = d.getElementsByTagName(t)[0];
+      o.src = u;
+      if (c) { o.addEventListener('load', function (e) { c(null, e); }, false); }
+      s.parentNode.insertBefore(o, s);
+    }
+</script>
+
+
+
+
+
+
+<script>
+    
+    if($('#tag_cloud').length !== 0){
+        async("/js/jquery.tagcloud.js",function(){
+            $.fn.tagcloud.defaults = {
+                
+                color: {start: '#bbbbee', end: '#0085a1'},
+            };
+            $('#tag_cloud a').tagcloud();
+        })
+    }
+</script>
+
+
+<script>
+    async("https://cdnjs.cloudflare.com/ajax/libs/fastclick/1.0.6/fastclick.js", function(){
+        var $nav = document.querySelector("nav");
+        if($nav) FastClick.attach($nav);
+    })
+</script>
+
+
+
+
+
+
+</body>
+</html>
