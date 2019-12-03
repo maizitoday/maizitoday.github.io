@@ -1,0 +1,1525 @@
+<!DOCTYPE html>
+<html lang="en-us">
+<head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+
+    
+    <meta property="og:site_name" content="">
+    <meta property="og:type" content="article">
+
+    
+    <meta property="og:image" content="http://maizitoday.github.io//img/home-bg-jeep.jpg">
+    <meta property="twitter:image" content="http://maizitoday.github.io//img/home-bg-jeep.jpg" />
+    
+
+    
+    <meta name="title" content="自定义线程池" />
+    <meta property="og:title" content="自定义线程池" />
+    <meta property="twitter:title" content="自定义线程池" />
+    
+
+    
+    <meta name="description" content="麦子，程序员, 开源爱好者，生活探险家 | 这里是 麦子 的博客，与你一起发现更大的世界。">
+    <meta property="og:description" content="麦子，程序员, 开源爱好者，生活探险家 | 这里是 麦子 的博客，与你一起发现更大的世界。" />
+    <meta property="twitter:description" content="麦子，程序员, 开源爱好者，生活探险家 | 这里是 麦子 的博客，与你一起发现更大的世界。" />
+    
+
+    
+    <meta property="twitter:card" content="summary" />
+    
+    
+
+    <meta name="keyword"  content="麦子, maizi, maizi, , 麦子的网络日志, 麦子的博客, maizi Blog, 博客, 个人网站, 互联网, Web, 云原生, PaaS, Istio, Kubernetes, 微服务, Microservice">
+    <link rel="shortcut icon" href="/img/favicon.ico">
+
+    <title>自定义线程池-麦子的博客</title>
+
+    <link rel="canonical" href="/post/%E8%87%AA%E5%AE%9A%E4%B9%89%E7%BA%BF%E7%A8%8B%E6%B1%A0/">
+
+    <link rel="stylesheet" href="/css/iDisqus.min.css"/>
+	
+    
+    <link rel="stylesheet" href="/css/bootstrap.min.css">
+
+    
+    <link rel="stylesheet" href="/css/hux-blog.min.css">
+
+    
+    <link rel="stylesheet" href="/css/syntax.css">
+
+    
+    <link rel="stylesheet" href="/css/zanshang.css">
+
+    
+    <link href="//cdnjs.cloudflare.com/ajax/libs/font-awesome/4.6.3/css/font-awesome.min.css" rel="stylesheet" type="text/css">
+    
+    
+    <script src="/js/jquery.min.js"></script>
+    
+    
+    <script src="/js/bootstrap.min.js"></script>
+    
+    
+    <script src="/js/hux-blog.min.js"></script>
+	
+    
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.13.1/styles/docco.min.css">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.13.1/highlight.min.js"></script>
+    <script>hljs.initHighlightingOnLoad();</script>
+</head>
+
+
+<nav class="navbar navbar-default navbar-custom navbar-fixed-top">
+    <div class="container-fluid">
+        
+        <div class="navbar-header page-scroll">
+            <button type="button" class="navbar-toggle">
+                <span class="sr-only">Toggle navigation</span>
+                <span class="icon-bar"></span>
+                <span class="icon-bar"></span>
+                <span class="icon-bar"></span>
+            </button>
+            <a class="navbar-brand" href="/"></a>
+        </div>
+
+        
+        
+        <div id="huxblog_navbar">
+            <div class="navbar-collapse">
+                <ul class="nav navbar-nav navbar-right">
+                    <li>
+                        <a href="/">Home</a>
+                    </li>
+                    
+                    <li>
+                        <a href="/categories/life">Life</a>
+                    </li>
+                    
+                    <li>
+                        <a href="/categories/tech">Tech</a>
+                    </li>
+                    
+                    
+		    
+                        <li><a href="/top/about/">ABOUT</a></li>
+                    
+
+                    
+		    <li>
+                        <a href="/search">SEARCH <img src="/img/search.png" height="15" style="cursor: pointer;" alt="Search"></a>
+		    </li>
+                    
+                </ul>
+            </div>
+        </div>
+        
+    </div>
+    
+</nav>
+<script>
+    
+    
+    
+    var $body   = document.body;
+    var $toggle = document.querySelector('.navbar-toggle');
+    var $navbar = document.querySelector('#huxblog_navbar');
+    var $collapse = document.querySelector('.navbar-collapse');
+
+    $toggle.addEventListener('click', handleMagic)
+    function handleMagic(e){
+        if ($navbar.className.indexOf('in') > 0) {
+        
+            $navbar.className = " ";
+            
+            setTimeout(function(){
+                
+                if($navbar.className.indexOf('in') < 0) {
+                    $collapse.style.height = "0px"
+                }
+            },400)
+        }else{
+        
+            $collapse.style.height = "auto"
+            $navbar.className += " in";
+        }
+    }
+</script>
+
+
+
+
+<style type="text/css">
+    header.intro-header {
+        background-image: url('https://c.pxhere.com/photos/50/b0/tree_road_archway_symmetry_and_black_white-99031.jpg!d')
+    }
+</style>
+<header class="intro-header">
+    <div class="container">
+        <div class="row">
+            <div class="col-lg-8 col-lg-offset-2 col-md-10 col-md-offset-1">
+                <div class="post-heading">
+                    <div class="tags">
+                        
+                        <a class="tag" href="/tags/%E5%A4%9A%E7%BA%BF%E7%A8%8B%E5%92%8C%E9%AB%98%E5%B9%B6%E5%8F%91" title="多线程和高并发">
+                            多线程和高并发
+                        </a>
+                        
+                        <a class="tag" href="/tags/%E8%87%AA%E5%AE%9A%E4%B9%89%E7%BA%BF%E7%A8%8B%E6%B1%A0" title="自定义线程池">
+                            自定义线程池
+                        </a>
+                        
+                    </div>
+                    <h1>自定义线程池</h1>
+                    <h2 class="subheading"></h2>
+                    <span class="meta">
+			Posted by 
+			
+			    麦子
+			 
+			on 
+			Monday, December 2, 2019
+                        
+                    </span>
+                </div>
+            </div>
+        </div>
+    </div>
+</header>
+
+
+
+
+<article>
+    <div class="container">
+        <div class="row">
+
+            
+            <div class="
+                col-lg-8 col-lg-offset-2
+                col-md-10 col-md-offset-1
+                post-container">
+
+                
+                <header>
+                    <h2>TOC</h2>
+                </header>              
+                <nav id="TableOfContents">
+<ul>
+<li><a href="#blockingqueue-自定义阻塞队列">BlockingQueue（自定义阻塞队列）</a></li>
+<li><a href="#poolthread">PoolThread</a></li>
+<li><a href="#threadpool">ThreadPool</a></li>
+<li><a href="#service">Service</a></li>
+<li><a href="#mywork-抽象任务类">MyWork(抽象任务类)</a>
+<ul>
+<li><a href="#playwork">PlayWork</a></li>
+<li><a href="#teacherwork">TeacherWork</a></li>
+<li><a href="#studentwork">StudentWork</a></li>
+</ul></li>
+<li><a href="#threadpooltest">ThreadPoolTest</a></li>
+<li><a href="#运行结果">运行结果</a></li>
+<li><a href="#自动扩容线程数">自动扩容线程数</a></li>
+</ul>
+</nav>
+                
+                
+
+<p>[TOC]</p>
+
+<p><strong>转载地址：<a href="https://www.jianshu.com/p/6130557eccfb">https://www.jianshu.com/p/6130557eccfb</a></strong></p>
+
+<h1 id="blockingqueue-自定义阻塞队列">BlockingQueue（自定义阻塞队列）</h1>
+
+<p>这个类通过一个队列，设置为一个生产者和消费者的模式，先开始等待任务过来， 也就是直接wait。然后等任务放入到队列中的时候， 然后在唤醒等待的几个线程，唤醒后，获取到任务， 然后进行执行。</p>
+
+<p>需要注意， notifyAll不是马上就进行唤醒了。 下面代码需要主要，不一定就是放入一个任务， 那边就能获取到一个任务出来， 有可能是放入了多个任务后， 那边才被唤醒，然后一次拿出来的。</p>
+
+<pre><code class="language-java">import java.util.LinkedList;
+import java.util.List;
+
+public class BlockingQueue&lt;T&gt; {
+    /**
+     * 使用链表实现一个阻塞队列(数据结构定义数据存储和获取方式，
+       所以只要满足这两点，阻塞队列可以用链表，也可以使用数组等来实现)
+     */
+    private volatile List&lt;T&gt; queue = new LinkedList();
+    /**
+     * limit用来限制提交任务的最大数，默认10
+     */
+    private int limit = 10;
+
+    public BlockingQueue(int limit) {
+        this.limit = limit;
+    }
+
+    /**
+     *
+     * @param item enqueue是一个同步方法，当任务到达上限，便会调用wait方法进行阻塞，
+        否则将任务放入队列中，并唤醒dequeue()任务线程
+     */
+    public synchronized void enqueue(T item) {
+        while (this.queue.size() == this.limit) {
+            try {
+                this.wait();
+            } catch (InterruptedException e) {
+                e.printStackTrace();
+            }
+        }
+        if (this.queue.size() &lt;= limit) {
+            this.notifyAll();
+        }
+        this.queue.add(item);
+        try {
+            Thread.sleep(1_000);
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        }
+    }
+
+    /**
+     *
+     * dequeue也是一个同步方法，当队列中没有任务时便会调用wait方法进入阻塞，
+        当任务到达最大容量是唤醒其他dequeue()线程 ，并出列一个任务。
+     */
+    public synchronized T dequeue() {
+        while (this.queue.size() == 0) {
+            try {
+                this.wait();
+            } catch (InterruptedException e) {
+                e.printStackTrace();
+            }
+        }
+        if (this.queue.size() == this.limit) {
+            this.notifyAll();
+        }
+        T t = this.queue.remove(0);
+        return t;
+    }
+
+    public synchronized int size() {
+        return queue.size();
+    }
+}
+</code></pre>
+
+<h1 id="poolthread">PoolThread</h1>
+
+<p>取出一个任务，进行任务业务代码具体执行。</p>
+
+<pre><code class="language-java">public class PoolThread extends Thread {
+
+    private BlockingQueue&lt;MyWork&gt; taskQueue = null;
+
+    private boolean isStopped = false;
+
+    public PoolThread(BlockingQueue&lt;MyWork&gt; taskQueue) {
+        this.taskQueue = taskQueue;
+    }
+
+    public void run() {
+        // 这里通过判断线程没有被中断的判断， 进行线程的死循环。
+        while (!isStopped() &amp;&amp; !Thread.currentThread().isInterrupted()) {
+            try {
+                // 从任务队列获取任务并执行
+                MyWork myWork = (MyWork) taskQueue.dequeue();
+                myWork.work();
+            } catch (Exception e) {
+                isStopped = true;
+                break;
+            }
+            System.out.println(&quot;当前线程状态:--&gt;&quot;+Thread.currentThread().getState());
+        }
+    }
+
+    public synchronized void doStop() {
+        isStopped = true;
+        this.interrupt();
+    }
+
+    public synchronized boolean isStopped() {
+        return isStopped;
+    }
+}
+</code></pre>
+
+<h1 id="threadpool">ThreadPool</h1>
+
+<p>初始化线程容器， 启动具体的多少条线程。然后启动线程， 线程去获取自定义队列中的任务，在任务那边的拿取时候，会进行wait的等待，直到从任务容器中拿到任务，然后在进行执行任务具体业务代码。</p>
+
+<pre><code class="language-java">public class ThreadPool implements Service {
+
+    /**
+     * 任务队列，用来存储提交的任务
+     */
+    private BlockingQueue&lt;MyWork&gt; taskQueue = null;
+
+    /**
+     * 线程池中存储线程的容器。
+     */
+    private Queue&lt;PoolThread&gt; threads = new ArrayDeque&lt;PoolThread&gt;();
+
+    private boolean isShutdown = false;
+
+    public ThreadPool(final int initSize, final int maxNoOfTasks) {
+        taskQueue = new BlockingQueue&lt;MyWork&gt;(maxNoOfTasks);
+
+        // 初始化线程池
+        for (int i = 0; i &lt; initSize; i++) {
+            threads.add(new PoolThread(taskQueue));
+        }
+
+        // 启动线程池线程
+        threads.forEach(thread -&gt; thread.start());
+    }
+
+    @Override
+    public synchronized void execute(MyWork task) {
+        if (this.isShutdown()) {
+            throw new IllegalStateException(&quot;ThreadPool is stopped&quot;);
+        }
+        // 任务入列
+        taskQueue.enqueue(task);
+    }
+
+    @Override
+    public void execute(List&lt;MyWork&gt; myWorkList) {
+        if (this.isShutdown()) {
+            throw new IllegalStateException(&quot;ThreadPool is stopped&quot;);
+        }
+        // 任务入列
+        if(myWorkList != null &amp;&amp; myWorkList.size() &gt; 0) {
+            for (MyWork myWork : myWorkList) {
+                taskQueue.enqueue(myWork);
+            }
+        }
+    }
+
+    @Override
+    public synchronized void shutdown() {
+        this.isShutdown = true;
+        threads.forEach(thread -&gt; thread.doStop());
+    }
+
+    @Override
+    public boolean isShutdown() {
+        return isShutdown;
+    }
+
+    
+}
+</code></pre>
+
+<h1 id="service">Service</h1>
+
+<pre><code class="language-java">public interface Service {
+
+    // 关闭线程池
+    void shutdown();
+
+    // 查看线程池是否已经被shutdown
+    boolean isShutdown();
+
+    // 提交任务到线程池
+    void execute(MyWork myWork);
+
+    // 提交任务到线程池
+    void execute(List&lt;MyWork&gt; myWorkList);
+
+}
+</code></pre>
+
+<h1 id="mywork-抽象任务类">MyWork(抽象任务类)</h1>
+
+<pre><code class="language-java">public abstract class MyWork {
+
+    private void beforeWork() {
+        System.out.println(&quot;-----------------------&gt;&quot;+Thread.currentThread().getName() + &quot; 开始工作&quot;);
+    }
+
+    public void work(){
+        beforeWork();
+        doWork();
+        afterWork();
+    }
+
+    protected abstract void doWork();
+       
+
+    private void afterWork() {
+        System.out.println(&quot;-----------------------&gt;&quot;+Thread.currentThread().getName() + &quot; 结束工作&quot;);
+    }
+       
+}
+</code></pre>
+
+<h2 id="playwork">PlayWork</h2>
+
+<pre><code class="language-java">public class PlayWork extends MyWork {
+
+    private  String name;
+
+    public PlayWork(String name) {
+        this.name = name;
+    }
+
+    @Override
+    public void doWork() {
+        System.out.println(this.name+&quot;-&gt; 夺取冠军&quot;);
+    }
+    
+    
+}
+</code></pre>
+
+<h2 id="teacherwork">TeacherWork</h2>
+
+<pre><code class="language-java">public class TeacherWork extends MyWork {
+
+    private String name;
+
+    public TeacherWork(String name) {
+        this.name = name;
+    }
+
+    @Override
+    public void doWork() {
+        System.out.println(this.name + &quot;-&gt; 教书&quot;);
+    }
+
+}
+</code></pre>
+
+<h2 id="studentwork">StudentWork</h2>
+
+<pre><code class="language-java">public class StudentWork extends MyWork  {
+
+    private  String name;
+
+    public StudentWork(String name) {
+        this.name = name;
+    }
+
+    @Override
+    public void doWork() {
+        System.out.println(this.name+&quot;-&gt; 读书&quot;);
+    }
+    
+}
+</code></pre>
+
+<h1 id="threadpooltest">ThreadPoolTest</h1>
+
+<pre><code class="language-java">
+public class ThreadPoolTest {
+
+    public static void main(String[] args) {
+
+        // 1. 启动5条线程， 从队列里面去获取任务， 如果没有任务的话，就进行wait等待。
+        final ThreadPool threadPool = new ThreadPool(5, 20);
+
+        List&lt;MyWork&gt; workers = new ArrayList&lt;&gt;();
+
+        for (int i = 1; i &lt;= 5; i++) {
+            MyWork studentWork = new StudentWork(i + &quot;号小明同学&quot;);
+            workers.add(studentWork);
+        }
+
+        for (int i = 1; i &lt;= 5; i++) {
+            MyWork teacherWork = new TeacherWork(i + &quot;号高老师&quot;);
+            workers.add(teacherWork);
+        }
+
+        for (int i = 1; i &lt;= 5; i++) {
+            MyWork playWork = new PlayWork(i + &quot;号太空易&quot;);
+            workers.add(playWork);
+        }
+        
+        // 添加任务
+        threadPool.execute(workers);
+    }
+
+}
+</code></pre>
+
+<h1 id="运行结果">运行结果</h1>
+
+<pre><code class="language-java">-----------------------&gt;Thread-4 开始工作
+1号小明同学-&gt; 读书
+-----------------------&gt;Thread-4 结束工作
+当前线程状态:--&gt;RUNNABLE
+-----------------------&gt;Thread-3 开始工作
+2号小明同学-&gt; 读书
+-----------------------&gt;Thread-3 结束工作
+当前线程状态:--&gt;RUNNABLE
+-----------------------&gt;Thread-2 开始工作
+3号小明同学-&gt; 读书
+-----------------------&gt;Thread-2 结束工作
+当前线程状态:--&gt;RUNNABLE
+-----------------------&gt;Thread-1 开始工作
+4号小明同学-&gt; 读书
+-----------------------&gt;Thread-1 结束工作
+当前线程状态:--&gt;RUNNABLE
+-----------------------&gt;Thread-0 开始工作
+5号小明同学-&gt; 读书
+-----------------------&gt;Thread-0 结束工作
+当前线程状态:--&gt;RUNNABLE
+-----------------------&gt;Thread-0 开始工作
+-----------------------&gt;Thread-3 开始工作
+-----------------------&gt;Thread-2 开始工作
+3号高老师-&gt; 教书
+-----------------------&gt;Thread-2 结束工作
+-----------------------&gt;Thread-1 开始工作
+2号高老师-&gt; 教书
+-----------------------&gt;Thread-1 结束工作
+当前线程状态:--&gt;RUNNABLE
+当前线程状态:--&gt;RUNNABLE
+4号高老师-&gt; 教书
+-----------------------&gt;Thread-3 结束工作
+当前线程状态:--&gt;RUNNABLE
+-----------------------&gt;Thread-3 开始工作
+-----------------------&gt;Thread-4 开始工作
+5号高老师-&gt; 教书
+-----------------------&gt;Thread-4 结束工作
+当前线程状态:--&gt;RUNNABLE
+-----------------------&gt;Thread-4 开始工作
+4号太空易-&gt; 夺取冠军
+-----------------------&gt;Thread-4 结束工作
+当前线程状态:--&gt;RUNNABLE
+-----------------------&gt;Thread-4 开始工作
+5号太空易-&gt; 夺取冠军
+-----------------------&gt;Thread-4 结束工作
+当前线程状态:--&gt;RUNNABLE
+1号高老师-&gt; 教书
+-----------------------&gt;Thread-0 结束工作
+当前线程状态:--&gt;RUNNABLE
+3号太空易-&gt; 夺取冠军
+-----------------------&gt;Thread-3 结束工作
+当前线程状态:--&gt;RUNNABLE
+-----------------------&gt;Thread-2 开始工作
+2号太空易-&gt; 夺取冠军
+-----------------------&gt;Thread-2 结束工作
+当前线程状态:--&gt;RUNNABLE
+-----------------------&gt;Thread-1 开始工作
+1号太空易-&gt; 夺取冠军
+-----------------------&gt;Thread-1 结束工作
+当前线程状态:--&gt;RUNNABLE
+
+</code></pre>
+
+<h1 id="自动扩容线程数">自动扩容线程数</h1>
+
+<p>新增两个控制线程池线程数量的参数。线程池自动扩充时最大的线程池数量max，线程池空闲时需要释放线程但是也要维护一定数量的活跃线程数量或者核心数量core。有了这init , max , core三个参数就能很好的控制线程池中线程数量，三者之间的关系init &lt;= core &lt;= max。</p>
+
+<pre><code class="language-java"> public ThreadPool(final int activeCount, final int maxNoOfTasks) {
+        this.activeCount = activeCount;
+        taskQueue = new BlockingQueue&lt;MyWork&gt;(maxNoOfTasks);
+
+        // 初始化线程池
+        for (int i = 0; i &lt; initSize; i++) {
+            threads.add(new PoolThread(taskQueue,i));
+        }
+
+        // 如果初始化的线程，没有到达活跃的线程数，继续添加
+        if (initSize &lt; activeCount) {
+            for (int i = initSize; i &lt; activeCount; i++) {
+                threads.add(new PoolThread(taskQueue,i));
+            }
+        }
+        // 启动线程池线程
+        threads.forEach(thread -&gt; thread.start());
+    }
+</code></pre>
+
+<p>任务取出来，完成后， 保留2条存活的线程。</p>
+
+<pre><code class="language-java">public void run() {
+        System.out.println(&quot;----&gt;&quot; + ativeThread);
+        // 这里通过判断线程没有被中断的判断， 进行线程的死循环。
+        while (!isStopped() &amp;&amp; !Thread.currentThread().isInterrupted()) {
+            try {
+                // 从任务队列获取任务并执行
+                MyWork myWork = (MyWork) taskQueue.dequeue();
+                myWork.work();
+            } catch (Exception e) {
+                isStopped = true;
+                break;
+            }
+            // 当拿出一个任务完成后， 最后默认保存2条存活线程，在wait中。 
+            System.out.println(&quot;队列当前数:--&gt;&quot; + this.taskQueue.size());
+            if (threadCount - ativeThread &gt; 2) {
+                doStop();
+            }
+
+        }
+        System.out.println(Thread.currentThread().getName() + &quot; 线程已经退出&quot;);
+    }
+</code></pre>
+
+
+                
+                
+<div class="entry-shang text-center">
+    
+	    <p>「真诚赞赏，手留余香」</p>
+	
+	<button class="zs show-zs btn btn-bred">赞赏支持</button>
+</div>
+<div class="zs-modal-bg"></div>
+<div class="zs-modal-box">
+	<div class="zs-modal-head">
+		<button type="button" class="close">×</button>
+		<span class="author"><a href="http://maizitoday.github.io/"><img src="/img/favicon.png" /></a></span>
+        
+	        <p class="tip"><i></i><span>真诚赞赏，手留余香</span></p>
+		
+ 
+	</div>
+	<div class="zs-modal-body">
+		<div class="zs-modal-btns">
+			<button class="btn btn-blink" data-num="2">2元</button>
+			<button class="btn btn-blink" data-num="5">5元</button>
+			<button class="btn btn-blink" data-num="10">10元</button>
+			<button class="btn btn-blink" data-num="50">50元</button>
+			<button class="btn btn-blink" data-num="100">100元</button>
+			<button class="btn btn-blink" data-num="1">任意金额</button>
+		</div>
+		<div class="zs-modal-pay">
+			<button class="btn btn-bred" id="pay-text">2元</button>
+			<p>使用<span id="pay-type">微信</span>扫描二维码完成支付</p>
+			<img src="/img/reward/wechat-2.png"  id="pay-image"/>
+		</div>
+	</div>
+	<div class="zs-modal-footer">
+		<label><input type="radio" name="zs-type" value="wechat" class="zs-type" checked="checked"><span ><span class="zs-wechat"><img src="/img/reward/wechat-btn.png"/></span></label>
+		<label><input type="radio" name="zs-type" value="alipay" class="zs-type" class="zs-alipay"><img src="/img/reward/alipay-btn.png"/></span></label>
+	</div>
+</div>
+<script type="text/javascript" src="/js/reward.js"></script>
+
+                
+
+                <hr>
+                <ul class="pager">
+                    
+                    <li class="previous">
+                        <a href="/post/%E7%BA%BF%E7%A8%8B%E5%9F%BA%E7%A1%80/" data-toggle="tooltip" data-placement="top" title="多线程基础">&larr;
+                            Previous Post</a>
+                    </li>
+                    
+                    
+                    <li class="next">
+                        <a href="/post/%E6%AD%BB%E9%94%81/" data-toggle="tooltip" data-placement="top" title="死锁">Next
+                            Post &rarr;</a>
+                    </li>
+                    
+                </ul>
+
+                
+<div id="disqus-comment"></div>
+
+
+
+            </div>
+            
+            <div class="
+                col-lg-8 col-lg-offset-2
+                col-md-10 col-md-offset-1
+                sidebar-container">
+
+                
+                
+                <section>
+                    <hr class="hidden-sm hidden-xs">
+                    <h5><a href="/tags/">FEATURED TAGS</a></h5>
+                    <div class="tags">
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        <a href="/tags/zookeeper" title="Zookeeper">
+                            Zookeeper
+                        </a>
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        <a href="/tags/docker" title="docker">
+                            docker
+                        </a>
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        <a href="/tags/dockerfile" title="dockerfile">
+                            dockerfile
+                        </a>
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        <a href="/tags/elasticsearch" title="elasticSearch">
+                            elasticSearch
+                        </a>
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        <a href="/tags/java%E5%9F%BA%E7%A1%80" title="java基础">
+                            java基础
+                        </a>
+                        
+                        
+                        
+                        <a href="/tags/java%E7%9B%B8%E5%85%B3%E6%A6%82%E5%BF%B5" title="java相关概念">
+                            java相关概念
+                        </a>
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        <a href="/tags/jvm" title="jvm">
+                            jvm
+                        </a>
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        <a href="/tags/maven" title="maven">
+                            maven
+                        </a>
+                        
+                        
+                        
+                        <a href="/tags/mongodb" title="mongodb">
+                            mongodb
+                        </a>
+                        
+                        
+                        
+                        
+                        
+                        <a href="/tags/mybatis%E7%B3%BB%E5%88%97" title="mybatis系列">
+                            mybatis系列
+                        </a>
+                        
+                        
+                        
+                        <a href="/tags/mycat" title="mycat">
+                            mycat
+                        </a>
+                        
+                        
+                        
+                        
+                        
+                        <a href="/tags/mysql%E7%B3%BB%E5%88%97" title="mysql系列">
+                            mysql系列
+                        </a>
+                        
+                        
+                        
+                        
+                        
+                        <a href="/tags/nginx" title="nginx">
+                            nginx
+                        </a>
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        <a href="/tags/redis" title="redis">
+                            redis
+                        </a>
+                        
+                        
+                        
+                        <a href="/tags/rocketmq" title="rocketmq">
+                            rocketmq
+                        </a>
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        <a href="/tags/shell" title="shell">
+                            shell
+                        </a>
+                        
+                        
+                        
+                        <a href="/tags/shiro" title="shiro">
+                            shiro
+                        </a>
+                        
+                        
+                        
+                        
+                        
+                        <a href="/tags/springcloud" title="springCloud">
+                            springCloud
+                        </a>
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        <a href="/tags/springboot%E7%B3%BB%E5%88%97" title="springboot系列">
+                            springboot系列
+                        </a>
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        <a href="/tags/%E5%88%86%E5%B8%83%E5%BC%8F%E7%B3%BB%E5%88%97" title="分布式系列">
+                            分布式系列
+                        </a>
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        <a href="/tags/%E5%8D%95%E7%82%B9%E7%99%BB%E5%BD%95" title="单点登录">
+                            单点登录
+                        </a>
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        <a href="/tags/%E5%A4%9A%E7%BA%BF%E7%A8%8B%E5%92%8C%E9%AB%98%E5%B9%B6%E5%8F%91" title="多线程和高并发">
+                            多线程和高并发
+                        </a>
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        <a href="/tags/%E5%BC%80%E5%8F%91%E5%B7%A5%E5%85%B7" title="开发工具">
+                            开发工具
+                        </a>
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        <a href="/tags/%E6%95%B0%E6%8D%AE%E5%BA%93" title="数据库">
+                            数据库
+                        </a>
+                        
+                        
+                        
+                        
+                        
+                        <a href="/tags/%E6%95%B0%E6%8D%AE%E7%BB%93%E6%9E%84" title="数据结构">
+                            数据结构
+                        </a>
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        <a href="/tags/%E8%AE%BE%E8%AE%A1%E6%A8%A1%E5%BC%8F" title="设计模式">
+                            设计模式
+                        </a>
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        <a href="/tags/%E8%B4%9F%E8%BD%BD%E5%9D%87%E8%A1%A1" title="负载均衡">
+                            负载均衡
+                        </a>
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                    </div>
+                </section>
+                
+
+                
+                
+                <section>
+                    <hr>
+                    <h5>FRIENDS</h5>
+                    <ul class="list-inline">
+                        
+                        <li><a target="_blank" href="https://zhaohuabing.com">赵化冰博客</a></li>
+                        
+                        <li><a target="_blank" href="http://www.tianshouzhi.com">田守枝</a></li>
+                        
+                        <li><a target="_blank" href="http://www.ityouknow.com">纯洁的微笑</a></li>
+                        
+                        <li><a target="_blank" href="https://renchunxiao.com">任春晓</a></li>
+                        
+                        <li><a target="_blank" href="https://www.lihongkun.com">泛泛之辈</a></li>
+                        
+                        <li><a target="_blank" href="https://juejin.im/welcome/backend">后端服务论坛</a></li>
+                        
+                        <li><a target="_blank" href="https://www.javaboy.org">江南一点雨</a></li>
+                        
+                        <li><a target="_blank" href="https://blog.csdn.net/gwd1154978352">东天里的冬天</a></li>
+                        
+                    </ul>
+                </section>
+                
+            </div>
+        </div>
+    </div>
+</article>
+
+
+
+
+<footer>
+    <div class="container">
+        <div class="row">
+            <div class="col-lg-8 col-lg-offset-2 col-md-10 col-md-offset-1">
+                <ul class="list-inline text-center">
+                   
+                   <li>
+                       <a href="" rel="alternate" type="application/rss+xml" title="" >
+                           <span class="fa-stack fa-lg">
+                               <i class="fa fa-circle fa-stack-2x"></i>
+                               <i class="fa fa-rss fa-stack-1x fa-inverse"></i>
+                           </span>
+                       </a>
+                   </li>
+                   
+                    
+                    <li>
+                        <a href="mailto:maiziybtoday@gmail.com">
+                            <span class="fa-stack fa-lg">
+                                <i class="fa fa-circle fa-stack-2x"></i>
+                                <i class="fa fa-envelope fa-stack-1x fa-inverse"></i>
+                            </span>
+                        </a>
+                    </li>
+		    
+                    
+                    
+                    
+                    
+
+                    
+
+		    
+                    
+                    <li>
+                        <a target="_blank" href="/your%20wechat%20qr%20code%20image">
+                            <span class="fa-stack fa-lg">
+                                <i class="fa fa-circle fa-stack-2x"></i>
+                                <i class="fa fa-wechat fa-stack-1x fa-inverse"></i>
+                            </span>
+                        </a>
+                    </li>
+		    
+                    
+                    
+                    <li>
+                        <a target="_blank" href="https://www.linkedin.com/in/yourlinkedinid">
+                            <span class="fa-stack fa-lg">
+                                <i class="fa fa-circle fa-stack-2x"></i>
+                                <i class="fa fa-linkedin fa-stack-1x fa-inverse"></i>
+                            </span>
+                        </a>
+                    </li>
+		    
+                    
+                </ul>
+		<p class="copyright text-muted">
+                    Copyright &copy;  2019
+                    <br>
+                    <a href="https://themes.gohugo.io/hugo-theme-cleanwhite">CleanWhite Hugo Theme</a> by <a href="https://zhaohuabing.com">Huabing</a> |
+                    <iframe
+                        style="margin-left: 2px; margin-bottom:-5px;"
+                        frameborder="0" scrolling="0" width="100px" height="20px"
+                        src="https://ghbtns.com/github-btn.html?user=zhaohuabing&repo=hugo-theme-cleanwhite&type=star&count=true" >
+                    </iframe>
+                </p>
+            </div>
+        </div>
+    </div>
+</footer>
+
+
+
+
+<script>
+    function async(u, c) {
+      var d = document, t = 'script',
+          o = d.createElement(t),
+          s = d.getElementsByTagName(t)[0];
+      o.src = u;
+      if (c) { o.addEventListener('load', function (e) { c(null, e); }, false); }
+      s.parentNode.insertBefore(o, s);
+    }
+</script>
+
+
+
+
+
+
+<script>
+    
+    if($('#tag_cloud').length !== 0){
+        async("/js/jquery.tagcloud.js",function(){
+            $.fn.tagcloud.defaults = {
+                
+                color: {start: '#bbbbee', end: '#0085a1'},
+            };
+            $('#tag_cloud a').tagcloud();
+        })
+    }
+</script>
+
+
+<script>
+    async("https://cdnjs.cloudflare.com/ajax/libs/fastclick/1.0.6/fastclick.js", function(){
+        var $nav = document.querySelector("nav");
+        if($nav) FastClick.attach($nav);
+    })
+</script>
+
+
+
+
+
+
+</body>
+</html>

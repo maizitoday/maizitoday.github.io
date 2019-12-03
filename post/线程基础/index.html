@@ -222,6 +222,12 @@
 <li><a href="#协程">协程</a></li>
 </ul></li>
 <li><a href="#什么是上下文">什么是上下文</a></li>
+<li><a href="#并发编程中的三个概念">并发编程中的三个概念</a>
+<ul>
+<li><a href="#1-原子性">1.原子性</a></li>
+<li><a href="#2-可见性">2.可见性</a></li>
+<li><a href="#3-有序性">3.有序性</a></li>
+</ul></li>
 <li><a href="#守护线程-非守护线程-主线程">守护线程，非守护线程，主线程</a>
 <ul>
 <li><a href="#主线程">主线程</a></li>
@@ -244,6 +250,8 @@
 <ul>
 <li><a href="#如何停止线程">如何停止线程</a></li>
 <li><a href="#interrupt方法">interrupt方法</a></li>
+<li><a href="#isinterrupted-方法">isInterrupted()方法</a></li>
+<li><a href="#interrupted-方法">interrupted()方法</a></li>
 </ul></li>
 <li><a href="#volatile">volatile</a>
 <ul>
@@ -313,7 +321,17 @@
 <li><a href="#总结-1">总结</a></li>
 </ul></li>
 </ul></li>
-<li><a href="#死锁">死锁</a></li>
+<li><a href="#线程中如何抓住异常">线程中如何抓住异常</a></li>
+<li><a href="#threadgroup">ThreadGroup</a></li>
+<li><a href="#单例模式">单例模式</a>
+<ul>
+<li>
+<ul>
+<li><a href="#常用模式">常用模式</a></li>
+<li><a href="#枚举方式">枚举方式</a></li>
+<li><a href="#注意">注意</a></li>
+</ul></li>
+</ul></li>
 </ul>
 </nav>
                 
@@ -340,6 +358,28 @@
 <h1 id="什么是上下文">什么是上下文</h1>
 
 <p>所谓上下文，就是当时运行的环境本身。其实说白了，程序上下文可以理解为context实例中的全局变量，你给它什么样的值，它就呈现对应的值或者状态。</p>
+
+<h1 id="并发编程中的三个概念">并发编程中的三个概念</h1>
+
+<h2 id="1-原子性">1.原子性</h2>
+
+<p>即一个操作或者多个操作 要么全部执行并且执行的过程不会被任何因素打断，要么就都不执行。</p>
+
+<p>对基本数据类型的变量的读取和赋值是保证原子性的， 要么成功，要么失败， 这些操作是不可被中断的。</p>
+
+<pre><code class="language-java">a = 10; // 原子性 
+b = a; // 不满足 
+c++; // 不满足
+c = c + 1; // 不满足 
+</code></pre>
+
+<h2 id="2-可见性">2.可见性</h2>
+
+<p>可见性是指当多个线程访问同一个变量时，一个线程修改了这个变量的值，其他线程能够立即看得到修改的值。</p>
+
+<h2 id="3-有序性">3.有序性</h2>
+
+<p>有序性：即程序执行的顺序按照代码的先后顺序执行。</p>
 
 <h1 id="守护线程-非守护线程-主线程">守护线程，非守护线程，主线程</h1>
 
@@ -581,14 +621,26 @@ Thread-1-&gt;&gt;我是子线程
 
 <h2 id="interrupt方法">interrupt方法</h2>
 
+<p><strong>本线程中断自身是被允许的，且&rdquo;中断标记&rdquo;设置为true</strong></p>
+
 <p>interrupt方法的目的是给线程发出中断信号，但是不保证线程真的会中断。</p>
 
 <ol>
 <li>中断一个线程只是为了引起该线程的注意，被中断线程可以决定如何应对中断。</li>
-<li>Thread.interrupt()方法不会中断一个正在运行的线程。</li>
+<li>Thread.interrupt()方法<strong>不会中断一个正在运行的线程</strong>。</li>
 <li>如果线程在调用 Object 类的 wait()、wait(long) 或 wait(long, int) 方法，或者该Thread类的 join()、join(long)、join(long, int)、sleep(long) 或 sleep(long, int) 方法过程中受阻，则其中断状态将被清除，<strong>它还将收到一个InterruptedException异常。这个时候，我们可以通过捕获InterruptedException异常来终止线程的执行，具体可以通过return等退出或改变共享变量的值使其退出。</strong></li>
 <li>synchronized在获锁的过程中是不能被中断的，</li>
 </ol>
+
+<h2 id="isinterrupted-方法">isInterrupted()方法</h2>
+
+<p>判断调用线程是否处于中断状态 .</p>
+
+<p><strong>说明</strong>：isInterrupted()是判断线程的中断标记是不是为true。当线程处于运行状态，并且我们需要终止它时；可以调用线程的interrupt()方法，使用线程的中断标记为true，即isInterrupted()会返回true。此时，就会退出while循环。</p>
+
+<h2 id="interrupted-方法">interrupted()方法</h2>
+
+<p>判断的是当前线程是否处于中断状态。是类的静态方法，同时会清除线程的中断状态。</p>
 
 <h1 id="volatile">volatile</h1>
 
@@ -1161,6 +1213,12 @@ T3 release the lock...
 
 <p><strong>注意：  wait不是加入锁，而是放入锁的队列中。</strong></p>
 
+<ol>
+<li>所有的对象都会有一个wait set， 用来存放调用了改对象的wait方法之后进入block状态线程。</li>
+<li>线程被notify之后， 不一定立即得到执行。</li>
+<li>线程从wait set 中被唤醒顺序不一定是FIFO。</li>
+</ol>
+
 <h2 id="锁池和等待池">锁池和等待池</h2>
 
 <p>转载地址：<a href="https://www.cnblogs.com/tiancai/p/9371357.html">https://www.cnblogs.com/tiancai/p/9371357.html</a></p>
@@ -1414,7 +1472,165 @@ Thread-3 消费第15张票
 
 <p>主要是通过wait和notifyAll方法的使用， 以及用volatile关键字的控制。</p>
 
-<h1 id="死锁">死锁</h1>
+<h1 id="线程中如何抓住异常">线程中如何抓住异常</h1>
+
+<p>加入了一个回调类进行处理。</p>
+
+<pre><code class="language-java">public class ThreadException implements Runnable {
+
+    @Override
+    public void run() {
+        System.out.println(&quot; currentThread is  &quot;+Thread.currentThread().getName());
+        int count = 10 / 0;
+    }
+
+    private static final class ThreadExceptionHandler implements Thread.UncaughtExceptionHandler {
+
+        @Override
+        public void uncaughtException(Thread t, Throwable e) {
+            System.out.println(&quot;Thread id=&quot; + t.getId());
+            System.out.println(&quot;Thread name=&quot; + t.getName());
+            e.printStackTrace(System.out);
+        }
+    }
+
+    public static void main(String[] args) {
+        ThreadException t = new ThreadException();
+        Thread thread = new Thread(t);
+        ThreadExceptionHandler threadExceptionHandler = new ThreadExceptionHandler();
+        // 相当于加入了一个线程回调处理类。 
+        thread.setUncaughtExceptionHandler(threadExceptionHandler);
+        thread.start();
+    }
+}
+</code></pre>
+
+<h1 id="threadgroup">ThreadGroup</h1>
+
+<p>线程组(<code>ThreadGroup</code>)简单来说就是一个线程集合。线程组的出现是为了更方便地管理线程。</p>
+
+<pre><code class="language-java">public class ThreadGroupDemo implements Runnable {
+
+    @Override
+    public synchronized void run() {
+        System.out.println(&quot;ThreadName = &quot; + Thread.currentThread().getName() + &quot;准备开始死循环了 \n&quot;);
+        while (!Thread.currentThread().isInterrupted()) {
+            // System.out.println(&quot;循环处理业务中.....&quot;);
+        }
+        try {
+            wait();
+        } catch (InterruptedException e) {
+            System.out.println(&quot;\n wait 方法被打断了 \n&quot;);
+        }
+
+        try {
+            Thread.sleep(2_000);
+        } catch (InterruptedException e) { 
+            System.out.println(&quot;sleep 方法被打断了 \n&quot;);
+        }
+
+        System.out.println(&quot;ThreadName = &quot; + Thread.currentThread().getName() + &quot;结束了&quot;);
+    }
+
+    public static void main(String[] args) {
+        ThreadGroup threadGroup = new ThreadGroup(&quot;maizi-group&quot;);
+        ThreadGroupDemo runnable = new ThreadGroupDemo();
+        Thread thread1 = new Thread(threadGroup, runnable, &quot;麦子1-thread&quot;);
+        Thread thread2 = new Thread(threadGroup, runnable, &quot;麦子2-thread&quot;);
+        thread1.start();
+        thread2.start();
+        try {
+            Thread.sleep(1_000);
+            int totalThread = threadGroup.activeCount();
+            System.out.println(&quot;线程组的存活个数:&quot; + totalThread + &quot;\n&quot;);
+
+            Thread[] lstThreads = new Thread[totalThread];
+            threadGroup.enumerate(lstThreads);
+            for (Thread thread : lstThreads) {
+                System.out.println(&quot;活动线程数量一共：&quot; + totalThread + &quot; 线程id：&quot; + thread.getId() + &quot; 线程名称：&quot; + thread.getName()+ &quot; 线程状态：&quot; + thread.getState());
+            } 
+            threadGroup.interrupt();
+
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        }
+    }
+
+}
+
+运行结果如下：
+ThreadName = 麦子1-thread准备开始死循环了 
+
+线程组的存活个数:2
+
+活动线程数量一共：2 线程id：9 线程名称：麦子1-thread 线程状态：RUNNABLE
+活动线程数量一共：2 线程id：10 线程名称：麦子2-thread 线程状态：BLOCKED
+
+wait 方法被打断了 
+ThreadName = 麦子1-thread结束了
+
+ThreadName = 麦子2-thread准备开始死循环了 
+wait 方法被打断了 
+ThreadName = 麦子2-thread结束了
+</code></pre>
+
+<p><strong>注意：这个 interrupt方法只能打断wait的方法， sleep的是无法打断的。 而且这个打断后， 线程不会马上就无法工作了，需要等一段时间线程才会死亡。</strong></p>
+
+<h1 id="单例模式">单例模式</h1>
+
+<p>转载地址：<a href="https://www.cnblogs.com/saoyou/p/11087462.html">https://www.cnblogs.com/saoyou/p/11087462.html</a></p>
+
+<h3 id="常用模式">常用模式</h3>
+
+<pre><code class="language-java">public class SingletonDemo {
+
+    private volatile static SingletonDemo instance;
+
+    private SingletonDemo() {
+    }
+
+    public static SingletonDemo getInstance() {
+        if (instance == null) {
+            synchronized (SingletonDemo.class) {
+                if (instance == null) {
+                    instance = new SingletonDemo();
+                }
+            }
+        }
+        return instance;
+    }
+
+}
+</code></pre>
+
+<h3 id="枚举方式">枚举方式</h3>
+
+<pre><code class="language-java">public enum EnumSingleton {
+    INSTANCE;
+
+    private static EnumSingleton getInstance() {
+        return INSTANCE;
+    }
+}
+</code></pre>
+
+<h3 id="注意">注意</h3>
+
+<p>如果考虑了放射，则上面的单例就无法做到<strong>单例类只能有一个实例</strong>这种说法了。事实上，通过Java反射机制是能够实例化构造方法为private的类的。这也就是我们现在需要引入的枚举单例模式。</p>
+
+<pre><code class="language-java">  public static void main(String[] args) {
+        EnumSingleton instance = EnumSingleton.getInstance();
+        System.out.println(EnumSingleton.INSTANCE == instance);
+
+        Constructor&lt;EnumSingleton&gt; constructor=EnumSingleton.class.getDeclaredConstructor();
+        constructor.setAccessible(true);
+        EnumSingleton newinstance=constructor.newInstance();
+        System.out.println(instance+&quot;\n&quot;+newinstance);
+        System.out.println(&quot;通过反射攻击单例模式，实例化两个实例是否相同：&quot;+(instance==newinstance));
+    }
+</code></pre>
+
+<p>上面的代码， 结果会报Exception in thread &ldquo;main&rdquo; java.lang.NoSuchMethodException。出现这个异常的原因是因为EnumSingleton.class.getDeclaredConstructors()获取所有构造器，会发现并没有我们所设置的无参构造器，只有一个参数为（String.class,int.class）构造器，而且在反射在通过newInstance创建对象时，会检查该类是否ENUM修饰，如果是则抛出异常，反射失败。所以枚举是不怕发射攻击的。</p>
 
 
                 
@@ -1467,6 +1683,11 @@ Thread-3 消费第15张票
                             Previous Post</a>
                     </li>
                     
+                    
+                    <li class="next">
+                        <a href="/post/%E8%87%AA%E5%AE%9A%E4%B9%89%E7%BA%BF%E7%A8%8B%E6%B1%A0/" data-toggle="tooltip" data-placement="top" title="自定义线程池">Next
+                            Post &rarr;</a>
+                    </li>
                     
                 </ul>
 
@@ -1909,6 +2130,12 @@ Thread-3 消费第15张票
                         
                         
                         
+                        <a href="/tags/%E5%A4%9A%E7%BA%BF%E7%A8%8B%E5%92%8C%E9%AB%98%E5%B9%B6%E5%8F%91" title="多线程和高并发">
+                            多线程和高并发
+                        </a>
+                        
+                        
+                        
                         
                         
                         
@@ -1974,6 +2201,10 @@ Thread-3 消费第15张票
                         <a href="/tags/%E6%95%B0%E6%8D%AE%E7%BB%93%E6%9E%84" title="数据结构">
                             数据结构
                         </a>
+                        
+                        
+                        
+                        
                         
                         
                         
