@@ -170,6 +170,10 @@
                             单线程执行-设计模式
                         </a>
                         
+                        <a class="tag" href="/tags/%E8%AE%BE%E8%AE%A1%E6%A8%A1%E5%BC%8F" title="设计模式">
+                            设计模式
+                        </a>
+                        
                     </div>
                     <h1>单线程执行-设计模式</h1>
                     <h2 class="subheading"></h2>
@@ -205,9 +209,122 @@
                 <header>
                     <h2>TOC</h2>
                 </header>              
+                <nav id="TableOfContents">
+<ul>
+<li><a href="#模拟场景">模拟场景</a></li>
+<li><a href="#user游客">User游客</a></li>
+<li><a href="#gate门闸">Gate门闸</a></li>
+<li><a href="#运行结果">运行结果</a></li>
+<li><a href="#分析原因">分析原因</a></li>
+</ul>
+</nav>
                 
                 
-                <p>[TOC]</p>
+
+<p>[TOC]</p>
+
+<p>转载地址：<a href="https://blog.csdn.net/weixin_39715061/article/details/81065182">https://blog.csdn.net/weixin_39715061/article/details/81065182</a></p>
+
+<h1 id="模拟场景">模拟场景</h1>
+
+<p>很多游客同时通过一个门闸，实现一次只能通过一个的效果。 也就是synchronize的使用。</p>
+
+<h1 id="user游客">User游客</h1>
+
+<pre><code class="language-java">public class User implements Runnable {
+
+    private final String myname;
+    private final String myAddress;
+    public Gate gate;
+     
+
+    public User(String myname, String myAddress, Gate gate) {
+        this.myname = myname;
+        this.myAddress = myAddress;
+        this.gate = gate;
+    }
+
+    @Override
+    public void run() {
+        System.out.println(myname+&quot;--&gt;BEGEN***&quot;);
+        while (true) {
+            this.gate.pass(this.myname,this.myAddress);
+        }
+    }
+
+    public static void main(String[] args) {
+
+        Gate gute = new Gate();
+
+        User bj =new User(&quot;小A&quot;,&quot;A&quot;,gute);
+        User sh =new User(&quot;小B&quot;,&quot;B&quot;,gute);
+        User sx =new User(&quot;小C&quot;,&quot;C&quot;,gute);
+    
+
+        Thread t_A = new Thread(bj);
+        Thread t_B = new Thread(sh);
+        Thread t_C = new Thread(sx);
+
+        t_A.start();
+        t_B.start();
+        t_C.start();
+
+    }
+
+}
+</code></pre>
+
+<h1 id="gate门闸">Gate门闸</h1>
+
+<pre><code>public class Gate {
+    private int counter;
+    private String name = &quot;Nobody&quot;;
+    private String address = &quot;Nowhere&quot;;
+
+    // 临界值
+    // 门里面的一个方法
+    public void pass(String name, String address) {
+        this.counter++;
+        // 因为他是公共资源， 在这个地方赋值的时候， this.name 和 this.address 值有可能被其他线程覆盖。
+        this.name = name;
+        this.address = address;
+        verify();
+    }
+
+    // 通过的方法
+    private void verify() {
+        if (this.name.contains(this.address) != true) {
+            System.out.println(&quot;********BROKE-----&gt;&quot; + this.name+&quot;--&gt;&quot;+this.address);
+        }
+    }
+}
+</code></pre>
+
+<h1 id="运行结果">运行结果</h1>
+
+<pre><code class="language-java">小A--&gt;BEGEN***
+小C--&gt;BEGEN***
+小B--&gt;BEGEN***
+********BROKE-----&gt;小A--&gt;A
+********BROKE-----&gt;小B--&gt;A
+********BROKE-----&gt;小C--&gt;C
+********BROKE-----&gt;小A--&gt;A
+</code></pre>
+
+<p>可以看到， 上面中 小A无法通过A门闸。</p>
+
+<h1 id="分析原因">分析原因</h1>
+
+<pre><code class="language-java"> public void pass(String name, String address) {
+        this.counter++;
+        // 因为他是公共资源， 在这个地方赋值的时候， this.name 和 this.address 值有可能被其他线程覆盖。
+        this.name = name;
+        this.address = address;
+        verify();
+    }
+</code></pre>
+
+<p>在这个方法加入synchronize关键字， 把并行改为串行就可以了。</p>
 
 
                 
@@ -260,6 +377,11 @@
                             Previous Post</a>
                     </li>
                     
+                    
+                    <li class="next">
+                        <a href="/post/%E8%AF%BB%E5%86%99%E9%94%81%E5%88%86%E7%A6%BB-%E8%AE%BE%E8%AE%A1%E6%A8%A1%E5%BC%8F/" data-toggle="tooltip" data-placement="top" title="读写锁分离-设计模式">Next
+                            Post &rarr;</a>
+                    </li>
                     
                 </ul>
 
@@ -366,9 +488,23 @@
                         
                         
                         
+                        
+                        
+                        <a href="/tags/threadlocal" title="ThreadLocal">
+                            ThreadLocal
+                        </a>
+                        
+                        
+                        
+                        
+                        
+                        
+                        
                         <a href="/tags/zookeeper" title="Zookeeper">
                             Zookeeper
                         </a>
+                        
+                        
                         
                         
                         
@@ -660,6 +796,12 @@
                         
                         
                         
+                        
+                        
+                        
+                        
+                        
+                        
                         <a href="/tags/%E5%88%86%E5%B8%83%E5%BC%8F%E7%B3%BB%E5%88%97" title="分布式系列">
                             分布式系列
                         </a>
@@ -683,6 +825,8 @@
                         <a href="/tags/%E5%8D%95%E7%82%B9%E7%99%BB%E5%BD%95" title="单点登录">
                             单点登录
                         </a>
+                        
+                        
                         
                         
                         
@@ -874,9 +1018,13 @@
                         
                         
                         
+                        
+                        
                         <a href="/tags/%E8%B4%9F%E8%BD%BD%E5%9D%87%E8%A1%A1" title="负载均衡">
                             负载均衡
                         </a>
+                        
+                        
                         
                         
                         
