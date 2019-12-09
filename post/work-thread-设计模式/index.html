@@ -209,9 +209,176 @@
                 <header>
                     <h2>TOC</h2>
                 </header>              
+                <nav id="TableOfContents">
+<ul>
+<li><a href="#概述">概述</a></li>
+<li><a href="#代码示例">代码示例</a>
+<ul>
+<li><a href="#request请求类">Request请求类</a></li>
+<li><a href="#clientthread">ClientThread</a></li>
+<li><a href="#workerthread">WorkerThread</a></li>
+<li><a href="#channel">Channel</a></li>
+<li><a href="#main">Main</a></li>
+<li><a href="#运行结果">运行结果</a></li>
+<li><a href="#总结">总结</a></li>
+</ul></li>
+</ul>
+</nav>
                 
                 
-                
+
+<p>[TOC]</p>
+
+<p><strong>转载：<a href="https://blog.csdn.net/weixin_33997389/article/details/88809045">https://blog.csdn.net/weixin_33997389/article/details/88809045</a></strong></p>
+
+<h1 id="概述">概述</h1>
+
+<p>Work Thread模式和Thread-Per-Message模式类似，Thread-Per-Message每次都创建一个新的线程处理请求，而Work Thread模式预先会创建一个线程池（Thread Pool），每次从线程池中取出线程处理请求。</p>
+
+<h1 id="代码示例">代码示例</h1>
+
+<h2 id="request请求类">Request请求类</h2>
+
+<pre><code class="language-java">public class Request {
+    private final String name;
+    private final int number;
+    private static final Random random = new Random();
+    public Request(String name, int number) {
+        this.name = name;
+        this.number = number;
+    }
+    public void execute() {
+        System.out.println(Thread.currentThread().getName() + &quot; executes &quot; + this);
+        try {
+            Thread.sleep(random.nextInt(1000));
+        } catch (InterruptedException e) {
+        }
+    }
+    public String toString() {
+        return &quot;[ Request from &quot; + name + &quot; No.&quot; + number + &quot; ]&quot;;
+    }
+}
+
+
+</code></pre>
+
+<h2 id="clientthread">ClientThread</h2>
+
+<pre><code class="language-java">public class ClientThread extends Thread {
+    private final Channel channel;
+    private static final Random random = new Random();
+    public ClientThread(String name, Channel channel) {
+        super(name);
+        this.channel = channel;
+    }
+    public void run() {
+        try {
+            for (int i = 0; true; i++) {
+                Request request = new Request(getName(), i);
+                channel.putRequest(request);
+                Thread.sleep(random.nextInt(1000));
+            }
+        } catch (InterruptedException e) {
+        }
+    }
+}
+
+
+</code></pre>
+
+<h2 id="workerthread">WorkerThread</h2>
+
+<pre><code class="language-java">public class WorkerThread extends Thread {
+    private final Channel channel;
+    public WorkerThread(String name, Channel channel) {
+        super(name);
+        this.channel = channel;
+    }
+    public void run() {
+        while (true) {
+            Request request = channel.takeRequest();
+            request.execute();
+        }
+    }
+}
+</code></pre>
+
+<h2 id="channel">Channel</h2>
+
+<pre><code class="language-java">public class Channel {
+    private static final int MAX_REQUEST = 100; // 最大请求数
+    private volatile  Queue&lt;Request&gt; requestQueue; 
+    private final WorkerThread[] threadPool;
+
+    public Channel(int threads) {
+        this.requestQueue = new LinkedList&lt;&gt;();
+        threadPool = new WorkerThread[threads];
+        for (int i = 0; i &lt; threadPool.length; i++) {
+            threadPool[i] = new WorkerThread(&quot;Worker-&quot; + i, this);
+        }
+    }
+
+    public void startWorkers() {
+        for (int i = 0; i &lt; threadPool.length; i++) {
+            threadPool[i].start();
+        }
+    }
+
+    public synchronized void putRequest(Request request) {
+        requestQueue.offer(request);
+        notifyAll();
+    }
+
+    public synchronized Request takeRequest() {
+        while (null == requestQueue.peek()) {
+            try {
+                wait();
+            } catch (InterruptedException e) {
+            }
+        }
+        Request request = requestQueue.remove();
+        notifyAll();
+        return request;
+    }
+}
+</code></pre>
+
+<h2 id="main">Main</h2>
+
+<pre><code class="language-java">public class Main {
+    public static void main(String[] args) {
+        Channel channel = new Channel(5);
+        channel.startWorkers();
+        new ClientThread(&quot;Alice&quot;, channel).start();
+        new ClientThread(&quot;Bobby&quot;, channel).start();
+        new ClientThread(&quot;Chris&quot;, channel).start();
+    }
+}
+</code></pre>
+
+<h2 id="运行结果">运行结果</h2>
+
+<pre><code class="language-java">Worker-2 executes [ Request from Chris No.0 ]
+Worker-4 executes [ Request from Alice No.0 ]
+Worker-3 executes [ Request from Bobby No.0 ]
+Worker-0 executes [ Request from Alice No.1 ]
+Worker-0 executes [ Request from Chris No.1 ]
+Worker-1 executes [ Request from Chris No.2 ]
+Worker-2 executes [ Request from Chris No.3 ]
+Worker-3 executes [ Request from Bobby No.1 ]
+Worker-1 executes [ Request from Alice No.2 ]
+Worker-0 executes [ Request from Chris No.4 ]
+Worker-4 executes [ Request from Alice No.3 ]
+Worker-0 executes [ Request from Bobby No.2 ]
+Worker-4 executes [ Request from Alice No.4 ]
+Worker-2 executes [ Request from Bobby No.3 ]
+Worker-0 executes [ Request from Bobby No.4 ]
+</code></pre>
+
+<h2 id="总结">总结</h2>
+
+<p>可以看到， 这里的线程池就是开启几条线程在不停的进行循环， 同时，进行生产者和消费者的模式一个演示处理。</p>
+
 
                 
                 
