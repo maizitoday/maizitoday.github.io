@@ -332,6 +332,20 @@
 <li><a href="#注意">注意</a></li>
 </ul></li>
 </ul></li>
+<li><a href="#futuretask获取线程返回值">FutureTask获取线程返回值</a>
+<ul>
+<li>
+<ul>
+<li><a href="#概述">概述</a></li>
+<li><a href="#futuretask使用">FutureTask使用</a></li>
+<li><a href="#futuretask源码">FutureTask源码</a></li>
+<li><a href="#futuretask启动">FutureTask启动</a></li>
+<li><a href="#futuretask执行完后结果的获取"><strong>FutureTask执行完后结果的获取</strong></a></li>
+<li><a href="#futuretask被取消">FutureTask被取消</a></li>
+<li><a href="#代码示例">代码示例</a></li>
+<li><a href="#运行结果-2">运行结果</a></li>
+</ul></li>
+</ul></li>
 </ul>
 </nav>
                 
@@ -1631,6 +1645,106 @@ ThreadName = 麦子2-thread结束了
 </code></pre>
 
 <p>上面的代码， 结果会报Exception in thread &ldquo;main&rdquo; java.lang.NoSuchMethodException。出现这个异常的原因是因为EnumSingleton.class.getDeclaredConstructors()获取所有构造器，会发现并没有我们所设置的无参构造器，只有一个参数为（String.class,int.class）构造器，而且在反射在通过newInstance创建对象时，会检查该类是否ENUM修饰，如果是则抛出异常，反射失败。所以枚举是不怕发射攻击的。</p>
+
+<h1 id="futuretask获取线程返回值">FutureTask获取线程返回值</h1>
+
+<p>转载地址： <a href="https://blog.csdn.net/tongdanping/article/details/79630637">https://blog.csdn.net/tongdanping/article/details/79630637</a></p>
+
+<h3 id="概述">概述</h3>
+
+<p>当然多线程中继承ThreadPoolExecutor和实现Runnable也可以实现异步工作机制，可是他们没有返回值。这时可以使用FutureTask包装Runnable或者Callable对象，再使用FutureTask来执行任务。</p>
+
+<p>Future接口和<strong>其唯一的实现类FutureTask类</strong>一般用于表示异步计算的结果。Future接口下提供方法来检查计算是否完成，等待其完成，并检索计算结果。 结果只能在计算完成后使用方法get进行检索，如有必要，阻塞，直到准备就绪。 取消由cancel方法执行，isCancelled方法用于检测计算是否被取消，isDone方法用于检测计算是否完成。 提供其他方法来确定任务是否正常完成或被取消。</p>
+
+<p><img src="/img/121.jpg" alt="a08b87d6277f9e2f304c4c50cd284320b899f30e" />201</p>
+
+<h3 id="futuretask使用">FutureTask使用</h3>
+
+<p>根据FutureTask被执行的进度，FutureTask对象可以处于一下3种状态：</p>
+
+<p>未启动：创建了一个FutureTask对象但没有执行futureTask.run()；</p>
+
+<p>已启动：futureTask.run()方法被执行的过程中；</p>
+
+<p>已完成：futureTask.run()正常执行结束，或者futureTask被取消（futureTask.cancel()），或者执行futureTask.run()时抛出异常而异常结束；</p>
+
+<h3 id="futuretask源码">FutureTask源码</h3>
+
+<pre><code class="language-java">   public FutureTask(Callable&lt;V&gt; callable) {
+        if (callable == null)
+            throw new NullPointerException();
+        this.callable = callable;
+        this.state = NEW;       // ensure visibility of callable
+    }
+</code></pre>
+
+<pre><code class="language-java">  public FutureTask(Runnable runnable, V result) {
+        this.callable = Executors.callable(runnable, result);
+        this.state = NEW;       // ensure visibility of callable
+    }
+</code></pre>
+
+<h3 id="futuretask启动">FutureTask启动</h3>
+
+<p>FutureTask实现了Future接口和Runnable接口，因此FutureTask对象的执行有两种方式：</p>
+
+<ol>
+<li><p>交给线程池的Execute或submit方法执行；</p></li>
+
+<li><p>由调用线程直接执行：在调用线程中执行futureTask.run（）方法；</p></li>
+</ol>
+
+<h3 id="futuretask执行完后结果的获取"><strong>FutureTask执行完后结果的获取</strong></h3>
+
+<pre><code class="language-java">futureTask.get( )
+</code></pre>
+
+<ol>
+<li>在已启动的状态调用futureTask.get( )或导致调用线程阻塞，知道FutureTask执行完毕，然后得到返回的FutureTask对象，调用futureTask.get( )获得任务返回值；</li>
+<li>在已完成状态调用futureTask.get( )，将导致调用线程立即返回（正常完成，得到FutureTask对象）或者抛出异常（被取消或者因异常而结束）；</li>
+</ol>
+
+<h3 id="futuretask被取消">FutureTask被取消</h3>
+
+<pre><code class="language-java">futureTask.cancel( )
+</code></pre>
+
+<ol>
+<li>在未启动状态调用futureTask.cancel( )会导致该任务永远不会再执行；</li>
+<li>在已启动状态：
+
+<ul>
+<li>调用futureTask.cancel(true )会以中断的方式尝试停止任务，如果该任务不响应中断则无法停止；</li>
+<li>调用futureTask.cancel(false)将不会对正在执行的线程产生影响，也就是已启动的线程会让他执行完毕；</li>
+</ul></li>
+<li>在已完成状态调用futureTask.cancel( )则会返回false；</li>
+</ol>
+
+<h3 id="代码示例">代码示例</h3>
+
+<pre><code class="language-java">public class FutureTaskTest {
+
+    public static void main(String[] args) throws InterruptedException, ExecutionException {
+        FutureTask&lt;String&gt; task = new FutureTask&lt;String&gt;(new Callable&lt;String&gt;() {
+            @Override
+            public String call() throws Exception {
+                System.out.println(&quot;thread name is : &quot;+Thread.currentThread().getName());
+                return &quot;完成任务&quot;;
+            }
+        });
+        Thread t1 = new Thread(task);
+        t1.start();
+        String result = task.get();
+        System.out.println(&quot;result---&gt;&quot;+result);
+    }
+}
+</code></pre>
+
+<h3 id="运行结果-2">运行结果</h3>
+
+<pre><code class="language-java">thread name is : Thread-0
+result---&gt;完成任务
+</code></pre>
 
 
                 
