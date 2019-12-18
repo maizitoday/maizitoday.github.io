@@ -1,0 +1,1759 @@
+<!DOCTYPE html>
+<html lang="en-us">
+<head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+
+    
+    <meta property="og:site_name" content="">
+    <meta property="og:type" content="article">
+
+    
+    <meta property="og:image" content="http://maizitoday.github.io//img/home-bg-jeep.jpg">
+    <meta property="twitter:image" content="http://maizitoday.github.io//img/home-bg-jeep.jpg" />
+    
+
+    
+    <meta name="title" content="线程池框架" />
+    <meta property="og:title" content="线程池框架" />
+    <meta property="twitter:title" content="线程池框架" />
+    
+
+    
+    <meta name="description" content="麦子，程序员, 开源爱好者，生活探险家 | 这里是 麦子 的博客，与你一起发现更大的世界。">
+    <meta property="og:description" content="麦子，程序员, 开源爱好者，生活探险家 | 这里是 麦子 的博客，与你一起发现更大的世界。" />
+    <meta property="twitter:description" content="麦子，程序员, 开源爱好者，生活探险家 | 这里是 麦子 的博客，与你一起发现更大的世界。" />
+    
+
+    
+    <meta property="twitter:card" content="summary" />
+    
+    
+
+    <meta name="keyword"  content="麦子, maizi, maizi, , 麦子的网络日志, 麦子的博客, maizi Blog, 博客, 个人网站, 互联网, Web, 云原生, PaaS, Istio, Kubernetes, 微服务, Microservice">
+    <link rel="shortcut icon" href="/img/favicon.ico">
+
+    <title>线程池框架-麦子的博客</title>
+
+    <link rel="canonical" href="/post/%E7%BA%BF%E7%A8%8B%E6%B1%A0%E6%A1%86%E6%9E%B6/">
+
+    <link rel="stylesheet" href="/css/iDisqus.min.css"/>
+	
+    
+    <link rel="stylesheet" href="/css/bootstrap.min.css">
+
+    
+    <link rel="stylesheet" href="/css/hux-blog.min.css">
+
+    
+    <link rel="stylesheet" href="/css/syntax.css">
+
+    
+    <link rel="stylesheet" href="/css/zanshang.css">
+
+    
+    <link href="//cdnjs.cloudflare.com/ajax/libs/font-awesome/4.6.3/css/font-awesome.min.css" rel="stylesheet" type="text/css">
+    
+    
+    <script src="/js/jquery.min.js"></script>
+    
+    
+    <script src="/js/bootstrap.min.js"></script>
+    
+    
+    <script src="/js/hux-blog.min.js"></script>
+	
+    
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.13.1/styles/docco.min.css">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.13.1/highlight.min.js"></script>
+    <script>hljs.initHighlightingOnLoad();</script>
+</head>
+
+
+<nav class="navbar navbar-default navbar-custom navbar-fixed-top">
+    <div class="container-fluid">
+        
+        <div class="navbar-header page-scroll">
+            <button type="button" class="navbar-toggle">
+                <span class="sr-only">Toggle navigation</span>
+                <span class="icon-bar"></span>
+                <span class="icon-bar"></span>
+                <span class="icon-bar"></span>
+            </button>
+            <a class="navbar-brand" href="/"></a>
+        </div>
+
+        
+        
+        <div id="huxblog_navbar">
+            <div class="navbar-collapse">
+                <ul class="nav navbar-nav navbar-right">
+                    <li>
+                        <a href="/">Home</a>
+                    </li>
+                    
+                    <li>
+                        <a href="/categories/life">Life</a>
+                    </li>
+                    
+                    <li>
+                        <a href="/categories/tech">Tech</a>
+                    </li>
+                    
+                    
+		    
+                        <li><a href="/top/about/">ABOUT</a></li>
+                    
+
+                    
+		    <li>
+                        <a href="/search">SEARCH <img src="/img/search.png" height="15" style="cursor: pointer;" alt="Search"></a>
+		    </li>
+                    
+                </ul>
+            </div>
+        </div>
+        
+    </div>
+    
+</nav>
+<script>
+    
+    
+    
+    var $body   = document.body;
+    var $toggle = document.querySelector('.navbar-toggle');
+    var $navbar = document.querySelector('#huxblog_navbar');
+    var $collapse = document.querySelector('.navbar-collapse');
+
+    $toggle.addEventListener('click', handleMagic)
+    function handleMagic(e){
+        if ($navbar.className.indexOf('in') > 0) {
+        
+            $navbar.className = " ";
+            
+            setTimeout(function(){
+                
+                if($navbar.className.indexOf('in') < 0) {
+                    $collapse.style.height = "0px"
+                }
+            },400)
+        }else{
+        
+            $collapse.style.height = "auto"
+            $navbar.className += " in";
+        }
+    }
+</script>
+
+
+
+
+<style type="text/css">
+    header.intro-header {
+        background-image: url('https://img.zhaohuabing.com/in-post/2018-04-16-using-helm-to-deploy-to-kubernetes/buffalo.jpg')
+    }
+</style>
+<header class="intro-header">
+    <div class="container">
+        <div class="row">
+            <div class="col-lg-8 col-lg-offset-2 col-md-10 col-md-offset-1">
+                <div class="post-heading">
+                    <div class="tags">
+                        
+                        <a class="tag" href="/tags/%E5%A4%9A%E7%BA%BF%E7%A8%8B%E5%92%8C%E9%AB%98%E5%B9%B6%E5%8F%91" title="多线程和高并发">
+                            多线程和高并发
+                        </a>
+                        
+                        <a class="tag" href="/tags/%E7%BA%BF%E7%A8%8B%E6%B1%A0%E6%A1%86%E6%9E%B6" title="线程池框架">
+                            线程池框架
+                        </a>
+                        
+                    </div>
+                    <h1>线程池框架</h1>
+                    <h2 class="subheading"></h2>
+                    <span class="meta">
+			Posted by 
+			
+			    麦子
+			 
+			on 
+			Sunday, December 15, 2019
+                        
+                    </span>
+                </div>
+            </div>
+        </div>
+    </div>
+</header>
+
+
+
+
+<article>
+    <div class="container">
+        <div class="row">
+
+            
+            <div class="
+                col-lg-8 col-lg-offset-2
+                col-md-10 col-md-offset-1
+                post-container">
+
+                
+                <header>
+                    <h2>TOC</h2>
+                </header>              
+                <nav id="TableOfContents">
+<ul>
+<li><a href="#executor框架">Executor框架</a>
+<ul>
+<li><a href="#概述">概述</a></li>
+<li><a href="#好处">好处</a></li>
+<li><a href="#框架结构图解">框架结构图解</a></li>
+<li><a href="#框架的成员关系图">框架的成员关系图</a></li>
+<li><a href="#框架的使用示意图">框架的使用示意图</a></li>
+<li><a href="#框架成员">框架成员</a>
+<ul>
+<li><a href="#executorservice">ExecutorService</a>
+<ul>
+<li><a href="#创建方式">创建方式</a>
+<ul>
+<li><a href="#corepoolsize">corePoolSize</a></li>
+<li><a href="#maximumpoolsize">maximumPoolSize</a></li>
+<li><a href="#keepalivetime">keepAliveTime</a></li>
+<li><a href="#unit">unit</a></li>
+<li><a href="#workqueue">workQueue</a></li>
+<li><a href="#threadfactory">threadFactory</a></li>
+<li><a href="#handler">handler</a></li>
+</ul></li>
+<li><a href="#线程池的类型">线程池的类型</a>
+<ul>
+<li><a href="#1-可缓存线程池">1. 可缓存线程池</a></li>
+<li><a href="#2-单线程池">2. 单线程池</a></li>
+<li><a href="#3-固定线程数线程池">3. 固定线程数线程池</a></li>
+<li><a href="#4-固定线程数-支持定时和周期性任务">4. 固定线程数，支持定时和周期性任务</a></li>
+<li><a href="#5-手动创建线程池">5. 手动创建线程池</a></li>
+<li><a href="#6-newworkstealingpool-jdk1-8新增">6. newWorkStealingPool：jdk1.8新增</a></li>
+<li><a href="#7-总结">7. 总结</a></li>
+</ul></li>
+</ul></li>
+<li><a href="#threadpoolexecutor">ThreadPoolExecutor</a>
+<ul>
+<li><a href="#常用子类">常用子类</a></li>
+</ul></li>
+<li><a href="#scheduledthreadpoolexecutor">ScheduledThreadPoolExecutor</a>
+<ul>
+<li><a href="#源码">源码</a></li>
+<li><a href="#常用子类-1">常用子类</a></li>
+</ul></li>
+<li><a href="#future-futuretask">Future/FutureTask</a></li>
+<li><a href="#runnable和callable接口">Runnable和Callable接口</a>
+<ul>
+<li><a href="#概述-1">概述</a></li>
+<li><a href="#区别">区别</a></li>
+</ul></li>
+<li><a href="#executors工厂类">Executors工厂类</a>
+<ul>
+<li><a href="#常用方法">常用方法</a></li>
+<li><a href="#代码示例">代码示例</a>
+<ul>
+<li><a href="#缓存线程池">缓存线程池</a></li>
+<li><a href="#固定线程池">固定线程池</a></li>
+<li><a href="#单线程池">单线程池</a></li>
+<li><a href="#固定线程-定时-周期任务">固定线程，定时，周期任务</a></li>
+<li><a href="#newworkstealingpool">newWorkStealingPool</a></li>
+</ul></li>
+<li><a href="#线程返回结果示例">线程返回结果示例</a>
+<ul>
+<li><a href="#runnable模式">Runnable模式</a></li>
+<li><a href="#futuretask模式">FutureTask模式</a></li>
+</ul></li>
+</ul></li>
+</ul></li>
+</ul></li>
+</ul>
+</nav>
+                
+                
+
+<p>[TOC]</p>
+
+<h1 id="executor框架">Executor框架</h1>
+
+<p>转载地址：<a href="https://blog.csdn.net/tongdanping/article/details/79604637">https://blog.csdn.net/tongdanping/article/details/79604637</a></p>
+
+<h2 id="概述">概述</h2>
+
+<p>我们知道线程池就是线程的集合，线程池集中管理线程，以实现线程的重用，降低资源消耗，提高响应速度等。线程用于执行异步任务，单个的线程既是工作单元也是执行机制，从JDK1.5开始，为了把工作单元与执行机制分离开，Executor框架诞生了，他是一个用于统一创建与运行的接口。Executor框架实现的就是线程池的功能。</p>
+
+<h2 id="好处">好处</h2>
+
+<p>也就是说，每次我们需要使用线程的时候，可以通过ExecutorService获得线程。它可以有效控制最大并发线程数，提高系统资源的使用率，同时避免过多资源竞争，避免堵塞，同时提供定时执行、定期执行、单线程、并发数控制等功能，也不用使用TimerTask了。</p>
+
+<h2 id="框架结构图解">框架结构图解</h2>
+
+<p>Executor框架包括3大部分</p>
+
+<p>1）任务。也就是工作单元，包括被执行任务需要实现的接口：Runnable接口或者Callable接口；</p>
+
+<p>2）任务的执行。也就是把任务分派给多个线程的执行机制，包括Executor接口及继承自Executor接口的ExecutorService接口。</p>
+
+<p>3）异步计算的结果。包括Future接口及实现了Future接口的FutureTask类。(这是一种设计模式，前面这个设计模式)</p>
+
+<h2 id="框架的成员关系图">框架的成员关系图</h2>
+
+<p><img src="/img/20180319221031756.jpeg" alt="20180319221031756" /></p>
+
+<pre><code class="language-java">java.util.concurrent.Executor 负责线程的使用和调度的根接口
+		|--ExecutorService 子接口： 线程池的主要接口
+				|--ThreadPoolExecutor 线程池的实现类
+				|--ScheduledExceutorService 子接口： 负责线程的调度
+					|--ScheduledThreadPoolExecutor : 继承ThreadPoolExecutor，实现了ScheduledExecutorService
+</code></pre>
+
+<h2 id="框架的使用示意图">框架的使用示意图</h2>
+
+<p><img src="/img/20180319222418739.jpeg" alt="20180319222418739" /></p>
+
+<ol>
+<li>创建Runnable并重写run（）方法或者Callable对象并重写call（）方法：</li>
+<li>创建Executor接口的实现类ThreadPoolExecutor类或者ScheduledThreadPoolExecutor类的对象，然后调用其execute（）方法或者submit（）方法把工作任务添加到线程中，如果有返回值则返回Future对象。其中Callable对象有返回值，因此使用submit（）方法；而Runnable可以使用execute（）方法，此外还可以使用submit（）方法，只要使用callable（Runnable task）或者callable(Runnable task,  Object result)方法把Runnable对象包装起来就可以，使用callable（Runnable task）方法返回的null，使用callable(Runnable task,  Object result)方法返回result。</li>
+</ol>
+
+<h2 id="框架成员">框架成员</h2>
+
+<p>ThreadPoolExecutor实现类、ScheduledThreadPoolExecutor实现类、Future接口、Runnable和Callable接口、Executors工厂类</p>
+
+<p><img src="/img/20180318215737261.jpeg" alt="20180318215737261" /></p>
+
+<h3 id="executorservice">ExecutorService</h3>
+
+<p>转载地址：<a href="https://blog.csdn.net/fwt336/article/details/81530581">https://blog.csdn.net/fwt336/article/details/81530581</a></p>
+
+<p>ExecutorService是一个接口，提供了管理终止的方法，以及可为跟踪一个或多个异步任务执行状况而生成Future 的方法。</p>
+
+<h4 id="创建方式">创建方式</h4>
+
+<p>所有线程池最终都是通过这个方法来创建的。</p>
+
+<pre><code class="language-java">public ThreadPoolExecutor(int corePoolSize,
+                              int maximumPoolSize,
+                              long keepAliveTime,
+                              TimeUnit unit,
+                              BlockingQueue&lt;Runnable&gt; workQueue,
+                              ThreadFactory threadFactory,
+                              RejectedExecutionHandler handler)
+
+
+</code></pre>
+
+<h5 id="corepoolsize">corePoolSize</h5>
+
+<p>核心线程数，一旦创建将不会再释放。如果创建的线程数还没有达到指定的核心线程数量，将会继续创建新的核心线程，直到达到最大核心线程数后，核心线程数将不在增加；如果没有空闲的核心线程，同时又未达到最大线程数，则将继续创建非核心线程；如果核心线程数等于最大线程数，则当核心线程都处于激活状态时，任务将被挂起，等待空闲线程来执行。</p>
+
+<h5 id="maximumpoolsize">maximumPoolSize</h5>
+
+<p>最大线程数，允许创建的最大线程数量。如果最大线程数等于核心线程数，则无法创建非核心线程；如果非核心线程处于空闲时，超过设置的空闲时间，则将被回收，释放占用的资源。</p>
+
+<h5 id="keepalivetime">keepAliveTime</h5>
+
+<p>也就是当线程空闲时，所允许保存的最大时间，超过这个时间，线程将被释放销毁，但只针对于非核心线程。</p>
+
+<h5 id="unit">unit</h5>
+
+<p>时间单位，TimeUnit.SECONDS等。</p>
+
+<h5 id="workqueue">workQueue</h5>
+
+<p>任务队列，存储暂时无法执行的任务，等待空闲线程来执行任务。</p>
+
+<h5 id="threadfactory">threadFactory</h5>
+
+<p>线程工程，用于创建线程。</p>
+
+<h5 id="handler">handler</h5>
+
+<p>当线程边界和队列容量已经达到最大时，用于处理阻塞时的程序。</p>
+
+<h4 id="线程池的类型">线程池的类型</h4>
+
+<h5 id="1-可缓存线程池">1. 可缓存线程池</h5>
+
+<pre><code class="language-java">ExecutorService cachePool = Executors.newCachedThreadPool();
+</code></pre>
+
+<p><strong>应用场景</strong>：该线程池比较适合没有固定大小并且比较快速就能完成的小任务，它将为每个任务创建一个线程。那这样子它与直接创建线程对象（new Thread()）有什么区别呢？看到它的第三个参数60L和第四个参数TimeUnit.SECONDS了吗？好处就在于60秒内能够重用已创建的线程。<strong>线程池为无限大</strong>，当执行第二个任务时第一个任务已经完成，会复用执行第一个任务的线程，而不用每次新建线程。</p>
+
+<pre><code class="language-java">public static ExecutorService newCachedThreadPool() {
+        return new ThreadPoolExecutor(0, Integer.MAX_VALUE,
+                                      60L, TimeUnit.SECONDS,
+                                      new SynchronousQueue&lt;Runnable&gt;());
+    }
+</code></pre>
+
+<p>通过它的创建方式可以知道，创建的都是非核心线程，而且最大线程数为Interge的最大值，空闲线程存活时间是1分钟。如果有大量耗时的任务，则不适该创建方式。它只适用于生命周期短的任务。</p>
+
+<h5 id="2-单线程池">2. 单线程池</h5>
+
+<pre><code class="language-java">ExecutorService singlePool = Executors.newSingleThreadExecutor();
+</code></pre>
+
+<p>顾名思义，也就是创建一个核心线程：</p>
+
+<p>应用场景：SingleThreadExecutor是只有一个线程的线程池，常用于需要让线程顺序执行，并且在任意时间，只能有一个任务被执行，而不能有多个线程同时执行的场景。</p>
+
+<pre><code class="language-java">public static ExecutorService newSingleThreadExecutor() {
+        return new FinalizableDelegatedExecutorService
+            (new ThreadPoolExecutor(1, 1,
+                                    0L, TimeUnit.MILLISECONDS,
+                                    new LinkedBlockingQueue&lt;Runnable&gt;()));
+    }
+
+
+</code></pre>
+
+<p>只用一个线程来执行任务，保证任务按FIFO顺序一个个执行。</p>
+
+<h5 id="3-固定线程数线程池">3. 固定线程数线程池</h5>
+
+<pre><code class="language-java">Executors.newFixedThreadPool(3);		
+</code></pre>
+
+<p><strong>应用场景</strong>：适用于为了满足资源管理的需求，而需要适当限制当前线程数量的情景，适用于负载比较重的服务器。</p>
+
+<pre><code class="language-java">public static ExecutorService newFixedThreadPool(int nThreads) {
+        return new ThreadPoolExecutor(nThreads, nThreads,
+                                      0L, TimeUnit.MILLISECONDS,
+                                      new LinkedBlockingQueue&lt;Runnable&gt;());
+    }
+
+</code></pre>
+
+<p>也就是创建固定数量的可复用的线程数，来执行任务。当线程数达到最大核心线程数，则加入队列等待有空闲线程时再执行。</p>
+
+<h5 id="4-固定线程数-支持定时和周期性任务">4. 固定线程数，支持定时和周期性任务</h5>
+
+<pre><code class="language-java">ExecutorService scheduledPool = Executors.newScheduledThreadPool(5);
+</code></pre>
+
+<pre><code class="language-java">public ScheduledThreadPoolExecutor(int corePoolSize) {
+    super(corePoolSize, Integer.MAX_VALUE,
+          DEFAULT_KEEPALIVE_MILLIS, MILLISECONDS,
+          new DelayedWorkQueue());
+}
+</code></pre>
+
+<p>可用于替代handler.postDelay和Timer定时器等延时和周期性任务。</p>
+
+<pre><code class="language-java">public ScheduledFuture&lt;?&gt; schedule(Runnable command,
+                                       long delay, TimeUnit unit);
+
+</code></pre>
+
+<pre><code class="language-java">public ScheduledFuture&lt;?&gt; scheduleAtFixedRate(Runnable command,
+                                                  long initialDelay,
+                                                  long period,
+                                                  TimeUnit unit);
+</code></pre>
+
+<pre><code class="language-java">public ScheduledFuture&lt;?&gt; scheduleWithFixedDelay(Runnable command,
+                                                     long initialDelay,
+                                                     long delay,
+                                                     TimeUnit unit);
+</code></pre>
+
+<p>scheduleAtFixedRate和sheduleWithFixedDelay有什么不同呢？</p>
+
+<p>scheduleAtFixedRate：是以固定频率来执行线程任务，固定频率的含义就是可能设定的固定时间不足以完成线程任务，但是它不管，达到设定的延迟时间了就要执行下一次了。</p>
+
+<p>scheduleWithFixedDelay: 从字面意义上可以理解为就是以固定延迟（时间）来执行线程任务，它实际上是不管线程任务的执行时间的，每次都要把任务执行完成后再延迟固定时间后再执行下一次。</p>
+
+<h5 id="5-手动创建线程池">5. 手动创建线程池</h5>
+
+<pre><code class="language-java">private ExecutorService pool = new ThreadPoolExecutor(3, 10,
+            10L, TimeUnit.SECONDS,
+            new LinkedBlockingQueue&lt;Runnable&gt;(512), Executors.defaultThreadFactory(),
+            new ThreadPoolExecutor.AbortPolicy());
+</code></pre>
+
+<p>可以根据自己的需求创建指定的核心线程数和总线程数。</p>
+
+<h5 id="6-newworkstealingpool-jdk1-8新增">6. newWorkStealingPool：jdk1.8新增</h5>
+
+<p>创建持有足够线程的线程池来支持给定的并行级别，并通过使用多个队列，减少竞争，它需要穿一个并行级别的参数，如果不传，则被设定为默认的CPU数量。</p>
+
+<p><strong>应用场景：</strong>newWorkStealingPool适合使用在很耗时的操作，但是newWorkStealingPool不是ThreadPoolExecutor的扩展，它是新的线程池类ForkJoinPool的扩展，但是都是在统一的一个Executors类中实现，由于能够合理的使用CPU进行对任务操作（并行操作），所以适合使用在很耗时的任务中：</p>
+
+<h5 id="7-总结">7. 总结</h5>
+
+<p>他们里面的适用场景， 主要是针对他们里面实现的时候， 用了不同的数据队列结构。</p>
+
+<h3 id="threadpoolexecutor">ThreadPoolExecutor</h3>
+
+<h4 id="常用子类">常用子类</h4>
+
+<ol>
+<li><p>FixedThreadPool：固定线程池</p></li>
+
+<li><p>SingleThreadExecutor：单线程池</p></li>
+
+<li><p>CachedThreadPool：缓存线程池</p></li>
+</ol>
+
+<h3 id="scheduledthreadpoolexecutor">ScheduledThreadPoolExecutor</h3>
+
+<p>转载地址： <a href="https://blog.csdn.net/tongdanping/article/details/79627491">https://blog.csdn.net/tongdanping/article/details/79627491</a></p>
+
+<h4 id="源码">源码</h4>
+
+<p>通过查看源码，可以发现ScheduledThreadPoolExecutor的实现主要是通过把任务封装为ScheduledFutureTask来实现。ScheduledThreadPoolExecutor通过它的scheduledAtFixedTime（）方法或者scheduledWithFixedDelay（）方法向阻塞队列添加一个实现了RunnableScheduledFutureTask接口的ScheduledFutureTask类对象。</p>
+
+<h4 id="常用子类-1">常用子类</h4>
+
+<ol>
+<li>ScheduledThreadPoolExecutor</li>
+</ol>
+
+<p>适用于若干个（固定）线程延时或者定期执行任务，同时为了满足资源管理的需求而需要限制后台线程数量的场景。</p>
+
+<pre><code class="language-java">ScheduledExecutorService stp = Executors.newScheduledThreadPool(int threadNums);
+ScheduledExecutorService stp = Executors.newScheduledThreadPool(int threadNums, ThreadFactory threadFactory);
+</code></pre>
+
+<ol>
+<li>SingleThreadScheduledExecutor</li>
+</ol>
+
+<p>适用于需要单个线程延时或者定期的执行任务，同时需要保证各个任务顺序执行的应用场景。</p>
+
+<pre><code class="language-java">ScheduledExecutorService stse = Executors.newSingleThreadScheduledExecutor(int threadNums);
+ScheduledExecutorService stp = Executors.newSingleThreadScheduledExecutor(int threadNums, ThreadFactory threadFactory);
+</code></pre>
+
+<h3 id="future-futuretask">Future/FutureTask</h3>
+
+<p>转载地址： <a href="https://blog.csdn.net/tongdanping/article/details/79630637">https://blog.csdn.net/tongdanping/article/details/79630637</a></p>
+
+<p>线程运行时候， 返回结果，采用的事Future的一种设计模式， 回调结果。 具体查看博客 [线程基础]</p>
+
+<h3 id="runnable和callable接口">Runnable和Callable接口</h3>
+
+<h4 id="概述-1">概述</h4>
+
+<p>用于实现线程要执行的工作单元。</p>
+
+<h4 id="区别">区别</h4>
+
+<p>转载地址： <a href="https://www.cnblogs.com/baichunyu/p/11150762.html">https://www.cnblogs.com/baichunyu/p/11150762.html</a></p>
+
+<p>Runnable接口中的run()方法的返回值是void，它做的事情只是纯粹地去执行run()方法中的代码而已；Callable接口中的call()方法是有返回值的，是一个泛型，和Future、FutureTask配合可以用来获取异步执行的结果。</p>
+
+<p>这其实是很有用的一个特性，因为多线程相比单线程更难、更复杂的一个重要原因就是因为多线程充满着未知性，某条线程是否执行了？某条线程执行了多久？某条线程执行的时候我们期望的数据是否已经赋值完毕？无法得知，我们能做的只是等待这条多线程的任务执行完毕而已。而Callable+Future/FutureTask却可以获取多线程运行的结果，可以在等待时间太长没获取到需要的数据的情况下取消该线程的任务，真的是非常有用。</p>
+
+<h3 id="executors工厂类">Executors工厂类</h3>
+
+<p>转载地址： <a href="https://www.jianshu.com/p/4a3dc492e123">https://www.jianshu.com/p/4a3dc492e123</a></p>
+
+<p>转载地址：<a href="https://my.oschina.net/u/1054538/blog/1619619">https://my.oschina.net/u/1054538/blog/1619619</a></p>
+
+<p>提供了常见配置线程池的方法，因为ThreadPoolExecutor的参数众多且意义重大，为了避免配置出错，才有了Executors工厂类。</p>
+
+<p>Executors为Executor，ExecutorService，ScheduledExecutorService，ThreadFactory和Callable类提供了一些工具方法，类似于集合中的Collections类的功能。</p>
+
+<h4 id="常用方法">常用方法</h4>
+
+<p><img src="/img/2962875-5317a86bc6fc9cb8.png" alt="2962875-5317a86bc6fc9cb8" /></p>
+
+<h4 id="代码示例">代码示例</h4>
+
+<h5 id="缓存线程池">缓存线程池</h5>
+
+<pre><code class="language-java">public class executorsTest {
+    public static void main(String[] args) {
+        // 这个地方下面代码进行替换。
+        ExecutorService cachedThreadPool = Executors.newCachedThreadPool();
+        List&lt;Work&gt; workList = Work.buildData();
+
+        for (int i = 0; i &lt; workList.size(); i++) {
+            final int index = i; 
+            cachedThreadPool.execute(new Runnable() {
+                @Override
+                public void run() {
+                    System.out.println(&quot; currentThread name is &quot; + Thread.currentThread().getName()+&quot;---&quot;+workList.get(index).name+&quot;开始工作&quot;);
+                }
+            });
+        }
+
+        cachedThreadPool.shutdown();
+    }
+
+}
+
+class Work {
+
+    public String name;
+
+    public Work(String name) {
+        this.name = name;
+    }
+
+    public void doWork() {
+        System.out.println(this.name + &quot; 开始工作 &quot;);
+    }
+
+    public static List&lt;Work&gt; buildData() {
+        List&lt;Work&gt; data = new ArrayList&lt;Work&gt;();
+        for (int i = 0; i &lt; 10; i++) {
+            data.add(new Work(&quot;小明&quot; + i));
+        }
+        return data;
+    }
+
+}
+</code></pre>
+
+<p>运行结果</p>
+
+<pre><code class="language-java">currentThread name is pool-1-thread-1---小明0开始工作
+ currentThread name is pool-1-thread-2---小明1开始工作
+ currentThread name is pool-1-thread-4---小明3开始工作
+ currentThread name is pool-1-thread-3---小明2开始工作
+ currentThread name is pool-1-thread-5---小明4开始工作
+ currentThread name is pool-1-thread-2---小明5开始工作
+ currentThread name is pool-1-thread-3---小明8开始工作
+ currentThread name is pool-1-thread-5---小明6开始工作
+ currentThread name is pool-1-thread-2---小明7开始工作
+ currentThread name is pool-1-thread-4---小明9开始工作
+</code></pre>
+
+<p>可以看到执行一些耗时不是很长的线程， 可以发现有重复的线程来执行了。 线程池为无限大，当执行第二个任务时第一个任务已经完成，会复用执行第一个任务的线程，而不用每次新建线程。</p>
+
+<h5 id="固定线程池">固定线程池</h5>
+
+<p>使用的Thread对象的数量是有限的,如果提交的任务数量大于限制的最大线程数，那么这些任务讲排队，然后当有一个线程的任务结束之后，将会根据调度策略继续等待执行下一个任务。</p>
+
+<pre><code class="language-java"> ExecutorService cachedThreadPool = Executors.newFixedThreadPool(2);
+</code></pre>
+
+<p>运行结果</p>
+
+<pre><code class="language-java">currentThread name is pool-1-thread-1---小明0开始工作
+ currentThread name is pool-1-thread-2---小明1开始工作
+ currentThread name is pool-1-thread-2---小明3开始工作
+ currentThread name is pool-1-thread-1---小明2开始工作
+ currentThread name is pool-1-thread-1---小明5开始工作
+ currentThread name is pool-1-thread-2---小明4开始工作
+ currentThread name is pool-1-thread-1---小明6开始工作
+ currentThread name is pool-1-thread-2---小明7开始工作
+ currentThread name is pool-1-thread-1---小明8开始工作
+ currentThread name is pool-1-thread-2---小明9开始工作
+</code></pre>
+
+<h5 id="单线程池">单线程池</h5>
+
+<p>创建一个单线程的线程池。这个线程池只有一个核心线程在工作，也就是相当于单线程串行执行所有任务。如果这个唯一的线程因为异常结束，那么会有一个新的线程来替代它。此线程池保证所有任务的执行顺序按照任务的提交顺序执行。</p>
+
+<pre><code class="language-java">ExecutorService cachedThreadPool = Executors.newSingleThreadExecutor();   
+</code></pre>
+
+<p>运行结果</p>
+
+<pre><code class="language-java">currentThread name is pool-1-thread-1---小明0开始工作
+ currentThread name is pool-1-thread-1---小明1开始工作
+ currentThread name is pool-1-thread-1---小明2开始工作
+ currentThread name is pool-1-thread-1---小明3开始工作
+ currentThread name is pool-1-thread-1---小明4开始工作
+ currentThread name is pool-1-thread-1---小明5开始工作
+ currentThread name is pool-1-thread-1---小明6开始工作
+ currentThread name is pool-1-thread-1---小明7开始工作
+ currentThread name is pool-1-thread-1---小明8开始工作
+ currentThread name is pool-1-thread-1---小明9开始工作
+</code></pre>
+
+<h5 id="固定线程-定时-周期任务">固定线程，定时，周期任务</h5>
+
+<pre><code class="language-java">// 线程启动后， 延迟3秒在进行 
+public class executorsTest {
+    public static void main(String[] args) {
+        ScheduledExecutorService service = Executors.newScheduledThreadPool(5);
+        service.schedule(new Runnable() {
+            @Override
+            public void run() {
+                 System.out.println(&quot;thread name is &quot;+Thread.currentThread().getName());
+            }
+        }, 3, TimeUnit.SECONDS);
+    }
+}
+</code></pre>
+
+<pre><code class="language-java">public class executorsTest {
+    public static void main(String[] args) {
+        ScheduledExecutorService service = Executors.newScheduledThreadPool(5);
+        service.scheduleAtFixedRate(new Runnable() {
+            public void run() {
+                System.out.println(&quot;不管你现在这个线程是否执行,我从线程延迟启动1秒后， 每3秒就执行一次&quot;);
+            }
+        }, 1, 3, TimeUnit.SECONDS);
+    }
+}
+
+pool-1-thread-1不管你现在这个线程是否执行,我从线程延迟启动1秒后， 每3秒就执行一次
+pool-1-thread-1不管你现在这个线程是否执行,我从线程延迟启动1秒后， 每3秒就执行一次
+pool-1-thread-2不管你现在这个线程是否执行,我从线程延迟启动1秒后， 每3秒就执行一次
+pool-1-thread-1不管你现在这个线程是否执行,我从线程延迟启动1秒后， 每3秒就执行一次
+pool-1-thread-3不管你现在这个线程是否执行,我从线程延迟启动1秒后， 每3秒就执行一次
+</code></pre>
+
+<pre><code class="language-java">public class executorsTest {
+    public static void main(String[] args) {
+        ScheduledExecutorService service = Executors.newScheduledThreadPool(5);
+        service.scheduleWithFixedDelay(new Runnable() {
+            @Override
+            public void run() {
+                try {
+                    Thread.sleep(3_000);
+                } catch (InterruptedException e) {
+                    e.printStackTrace();
+                }
+                System.out.println(Thread.currentThread().getName() + &quot; 我从线程延迟启动1秒后， 等上一个线程执行完了， 我在过3秒来执行&quot;);
+            }
+        }, 1, 3, TimeUnit.SECONDS);
+    }
+}
+
+pool-1-thread-1 我从线程延迟启动1秒后， 等上一个线程执行完了， 我在过3秒来执行
+pool-1-thread-1 我从线程延迟启动1秒后， 等上一个线程执行完了， 我在过3秒来执行
+pool-1-thread-2 我从线程延迟启动1秒后， 等上一个线程执行完了， 我在过3秒来执行
+</code></pre>
+
+<h5 id="newworkstealingpool">newWorkStealingPool</h5>
+
+<pre><code class="language-java">public class executorsTest {
+    public static void main(String[] args) {
+        ExecutorService executorService = Executors.newWorkStealingPool();
+        for (int i = 0; i &lt; 3; i++) {
+            executorService.execute(new Runnable() {
+                @Override
+                public void run() {
+                    System.out.println(Thread.currentThread().getName());
+                }
+            });
+        }
+    }
+}
+ForkJoinPool-1-worker-2
+ForkJoinPool-1-worker-2
+ForkJoinPool-1-worker-1
+</code></pre>
+
+<h4 id="线程返回结果示例">线程返回结果示例</h4>
+
+<h5 id="runnable模式">Runnable模式</h5>
+
+<pre><code class="language-java">public class executorsTest {
+    public static void main(final String[] args) throws InterruptedException, ExecutionException {
+        final ExecutorService service = Executors.newFixedThreadPool(5);
+        FutureTask&lt;String&gt; task = (FutureTask&lt;String&gt;) service.submit(new Runnable() {
+            @Override
+            public void run() {
+                try {
+                    Thread.sleep(3_000);
+                } catch (InterruptedException e) {
+                    e.printStackTrace();
+                }
+                System.out.println(Thread.currentThread().getName());
+            }
+        }, &quot;线程已经完成&quot;);
+        System.out.println(task.get());
+        service.shutdown();
+    }
+}
+
+pool-1-thread-1
+线程已经完成
+</code></pre>
+
+<h5 id="futuretask模式">FutureTask模式</h5>
+
+<pre><code class="language-java">public class executorsTest {
+    public static void main(final String[] args) throws InterruptedException, ExecutionException {
+        ExecutorService service = Executors.newFixedThreadPool(5);
+
+        List&lt;Work&gt; workers = Work.buildData();
+        List&lt;FutureTask&lt;String&gt;&gt; tasks = new ArrayList&lt;&gt;();
+        for (Work worker : workers){
+            FutureTask&lt;String&gt; task = new FutureTask&lt;String&gt;(worker);
+            service.submit(task);
+            tasks.add(task);
+        }
+        
+        for (FutureTask&lt;String&gt; task : tasks){
+             System.out.println(task.get());
+        }
+        service.shutdown();
+    }
+}
+
+class Work implements Callable&lt;String&gt; {
+
+    public String name;
+
+    public Work(final String name) {
+        this.name = name;
+    }
+
+    public Work() {
+    }
+
+    public void doWork() {
+        System.out.println(this.name + &quot; 开始工作 &quot;);
+    }
+
+    public static List&lt;Work&gt; buildData() {
+        final List&lt;Work&gt; data = new ArrayList&lt;Work&gt;();
+        for (int i = 0; i &lt; 10; i++) {
+            data.add(new Work(&quot;小明&quot; + i));
+        }
+        return data;
+    }
+
+    public static void name() {
+        
+    }
+
+    @Override
+    public String call() throws Exception {
+         System.out.println(Thread.currentThread().getName()+&quot;---&quot;+this.name);
+        return this.name+&quot;: 任务已经完成&quot;;
+    }
+
+}
+</code></pre>
+
+<p>运行结果</p>
+
+<pre><code class="language-java">pool-1-thread-1---小明0
+pool-1-thread-4---小明3
+pool-1-thread-3---小明2
+pool-1-thread-2---小明1
+pool-1-thread-5---小明4
+小明0: 任务已经完成
+小明1: 任务已经完成
+pool-1-thread-5---小明9
+pool-1-thread-3---小明6
+小明2: 任务已经完成
+小明3: 任务已经完成
+小明4: 任务已经完成
+pool-1-thread-1---小明8
+pool-1-thread-2---小明7
+pool-1-thread-4---小明5
+小明5: 任务已经完成
+小明6: 任务已经完成
+小明7: 任务已经完成
+小明8: 任务已经完成
+小明9: 任务已经完成
+</code></pre>
+
+
+                
+                
+<div class="entry-shang text-center">
+    
+	    <p>「真诚赞赏，手留余香」</p>
+	
+	<button class="zs show-zs btn btn-bred">赞赏支持</button>
+</div>
+<div class="zs-modal-bg"></div>
+<div class="zs-modal-box">
+	<div class="zs-modal-head">
+		<button type="button" class="close">×</button>
+		<span class="author"><a href="http://maizitoday.github.io/"><img src="/img/favicon.png" /></a></span>
+        
+	        <p class="tip"><i></i><span>真诚赞赏，手留余香</span></p>
+		
+ 
+	</div>
+	<div class="zs-modal-body">
+		<div class="zs-modal-btns">
+			<button class="btn btn-blink" data-num="2">2元</button>
+			<button class="btn btn-blink" data-num="5">5元</button>
+			<button class="btn btn-blink" data-num="10">10元</button>
+			<button class="btn btn-blink" data-num="50">50元</button>
+			<button class="btn btn-blink" data-num="100">100元</button>
+			<button class="btn btn-blink" data-num="1">任意金额</button>
+		</div>
+		<div class="zs-modal-pay">
+			<button class="btn btn-bred" id="pay-text">2元</button>
+			<p>使用<span id="pay-type">微信</span>扫描二维码完成支付</p>
+			<img src="/img/reward/wechat-2.png"  id="pay-image"/>
+		</div>
+	</div>
+	<div class="zs-modal-footer">
+		<label><input type="radio" name="zs-type" value="wechat" class="zs-type" checked="checked"><span ><span class="zs-wechat"><img src="/img/reward/wechat-btn.png"/></span></label>
+		<label><input type="radio" name="zs-type" value="alipay" class="zs-type" class="zs-alipay"><img src="/img/reward/alipay-btn.png"/></span></label>
+	</div>
+</div>
+<script type="text/javascript" src="/js/reward.js"></script>
+
+                
+
+                <hr>
+                <ul class="pager">
+                    
+                    <li class="previous">
+                        <a href="/post/%E5%B9%B6%E5%8F%91%E7%B1%BB/" data-toggle="tooltip" data-placement="top" title="并发类">&larr;
+                            Previous Post</a>
+                    </li>
+                    
+                    
+                    <li class="next">
+                        <a href="/post/%E9%94%81%E6%A1%86%E6%9E%B6/" data-toggle="tooltip" data-placement="top" title="锁框架">Next
+                            Post &rarr;</a>
+                    </li>
+                    
+                </ul>
+
+                
+<div id="disqus-comment"></div>
+
+
+
+            </div>
+            
+            <div class="
+                col-lg-8 col-lg-offset-2
+                col-md-10 col-md-offset-1
+                sidebar-container">
+
+                
+                
+                <section>
+                    <hr class="hidden-sm hidden-xs">
+                    <h5><a href="/tags/">FEATURED TAGS</a></h5>
+                    <div class="tags">
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        <a href="/tags/threadlocal" title="ThreadLocal">
+                            ThreadLocal
+                        </a>
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        <a href="/tags/zookeeper" title="Zookeeper">
+                            Zookeeper
+                        </a>
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        <a href="/tags/docker" title="docker">
+                            docker
+                        </a>
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        <a href="/tags/dockerfile" title="dockerfile">
+                            dockerfile
+                        </a>
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        <a href="/tags/elasticsearch" title="elasticSearch">
+                            elasticSearch
+                        </a>
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        <a href="/tags/java%E5%9F%BA%E7%A1%80" title="java基础">
+                            java基础
+                        </a>
+                        
+                        
+                        
+                        <a href="/tags/java%E7%9B%B8%E5%85%B3%E6%A6%82%E5%BF%B5" title="java相关概念">
+                            java相关概念
+                        </a>
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        <a href="/tags/jvm" title="jvm">
+                            jvm
+                        </a>
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        <a href="/tags/maven" title="maven">
+                            maven
+                        </a>
+                        
+                        
+                        
+                        <a href="/tags/mongodb" title="mongodb">
+                            mongodb
+                        </a>
+                        
+                        
+                        
+                        
+                        
+                        <a href="/tags/mybatis%E7%B3%BB%E5%88%97" title="mybatis系列">
+                            mybatis系列
+                        </a>
+                        
+                        
+                        
+                        <a href="/tags/mycat" title="mycat">
+                            mycat
+                        </a>
+                        
+                        
+                        
+                        
+                        
+                        <a href="/tags/mysql%E7%B3%BB%E5%88%97" title="mysql系列">
+                            mysql系列
+                        </a>
+                        
+                        
+                        
+                        
+                        
+                        <a href="/tags/nginx" title="nginx">
+                            nginx
+                        </a>
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        <a href="/tags/redis" title="redis">
+                            redis
+                        </a>
+                        
+                        
+                        
+                        <a href="/tags/rocketmq" title="rocketmq">
+                            rocketmq
+                        </a>
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        <a href="/tags/shell" title="shell">
+                            shell
+                        </a>
+                        
+                        
+                        
+                        <a href="/tags/shiro" title="shiro">
+                            shiro
+                        </a>
+                        
+                        
+                        
+                        
+                        
+                        <a href="/tags/springcloud" title="springCloud">
+                            springCloud
+                        </a>
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        <a href="/tags/springboot%E7%B3%BB%E5%88%97" title="springboot系列">
+                            springboot系列
+                        </a>
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        <a href="/tags/%E5%88%86%E5%B8%83%E5%BC%8F%E7%B3%BB%E5%88%97" title="分布式系列">
+                            分布式系列
+                        </a>
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        <a href="/tags/%E5%8D%95%E7%82%B9%E7%99%BB%E5%BD%95" title="单点登录">
+                            单点登录
+                        </a>
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        <a href="/tags/%E5%A4%9A%E7%BA%BF%E7%A8%8B%E5%92%8C%E9%AB%98%E5%B9%B6%E5%8F%91" title="多线程和高并发">
+                            多线程和高并发
+                        </a>
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        <a href="/tags/%E5%BC%80%E5%8F%91%E5%B7%A5%E5%85%B7" title="开发工具">
+                            开发工具
+                        </a>
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        <a href="/tags/%E6%95%B0%E6%8D%AE%E5%BA%93" title="数据库">
+                            数据库
+                        </a>
+                        
+                        
+                        
+                        
+                        
+                        <a href="/tags/%E6%95%B0%E6%8D%AE%E7%BB%93%E6%9E%84" title="数据结构">
+                            数据结构
+                        </a>
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        <a href="/tags/%E8%AE%BE%E8%AE%A1%E6%A8%A1%E5%BC%8F" title="设计模式">
+                            设计模式
+                        </a>
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        <a href="/tags/%E8%B4%9F%E8%BD%BD%E5%9D%87%E8%A1%A1" title="负载均衡">
+                            负载均衡
+                        </a>
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                    </div>
+                </section>
+                
+
+                
+                
+                <section>
+                    <hr>
+                    <h5>FRIENDS</h5>
+                    <ul class="list-inline">
+                        
+                        <li><a target="_blank" href="https://zhaohuabing.com">赵化冰博客</a></li>
+                        
+                        <li><a target="_blank" href="http://www.tianshouzhi.com">田守枝</a></li>
+                        
+                        <li><a target="_blank" href="http://www.ityouknow.com">纯洁的微笑</a></li>
+                        
+                        <li><a target="_blank" href="https://renchunxiao.com">任春晓</a></li>
+                        
+                        <li><a target="_blank" href="https://www.lihongkun.com">泛泛之辈</a></li>
+                        
+                        <li><a target="_blank" href="https://juejin.im/welcome/backend">后端服务论坛</a></li>
+                        
+                        <li><a target="_blank" href="https://www.javaboy.org">江南一点雨</a></li>
+                        
+                        <li><a target="_blank" href="https://blog.csdn.net/gwd1154978352">东天里的冬天</a></li>
+                        
+                    </ul>
+                </section>
+                
+            </div>
+        </div>
+    </div>
+</article>
+
+
+
+
+<footer>
+    <div class="container">
+        <div class="row">
+            <div class="col-lg-8 col-lg-offset-2 col-md-10 col-md-offset-1">
+                <ul class="list-inline text-center">
+                   
+                   <li>
+                       <a href="" rel="alternate" type="application/rss+xml" title="" >
+                           <span class="fa-stack fa-lg">
+                               <i class="fa fa-circle fa-stack-2x"></i>
+                               <i class="fa fa-rss fa-stack-1x fa-inverse"></i>
+                           </span>
+                       </a>
+                   </li>
+                   
+                    
+                    <li>
+                        <a href="mailto:maiziybtoday@gmail.com">
+                            <span class="fa-stack fa-lg">
+                                <i class="fa fa-circle fa-stack-2x"></i>
+                                <i class="fa fa-envelope fa-stack-1x fa-inverse"></i>
+                            </span>
+                        </a>
+                    </li>
+		    
+                    
+                    
+                    
+                    
+
+                    
+
+		    
+                    
+                    <li>
+                        <a target="_blank" href="/your%20wechat%20qr%20code%20image">
+                            <span class="fa-stack fa-lg">
+                                <i class="fa fa-circle fa-stack-2x"></i>
+                                <i class="fa fa-wechat fa-stack-1x fa-inverse"></i>
+                            </span>
+                        </a>
+                    </li>
+		    
+                    
+                    
+                    <li>
+                        <a target="_blank" href="https://www.linkedin.com/in/yourlinkedinid">
+                            <span class="fa-stack fa-lg">
+                                <i class="fa fa-circle fa-stack-2x"></i>
+                                <i class="fa fa-linkedin fa-stack-1x fa-inverse"></i>
+                            </span>
+                        </a>
+                    </li>
+		    
+                    
+                </ul>
+		<p class="copyright text-muted">
+                    Copyright &copy;  2019
+                    <br>
+                    <a href="https://themes.gohugo.io/hugo-theme-cleanwhite">CleanWhite Hugo Theme</a> by <a href="https://zhaohuabing.com">Huabing</a> |
+                    <iframe
+                        style="margin-left: 2px; margin-bottom:-5px;"
+                        frameborder="0" scrolling="0" width="100px" height="20px"
+                        src="https://ghbtns.com/github-btn.html?user=zhaohuabing&repo=hugo-theme-cleanwhite&type=star&count=true" >
+                    </iframe>
+                </p>
+            </div>
+        </div>
+    </div>
+</footer>
+
+
+
+
+<script>
+    function async(u, c) {
+      var d = document, t = 'script',
+          o = d.createElement(t),
+          s = d.getElementsByTagName(t)[0];
+      o.src = u;
+      if (c) { o.addEventListener('load', function (e) { c(null, e); }, false); }
+      s.parentNode.insertBefore(o, s);
+    }
+</script>
+
+
+
+
+
+
+<script>
+    
+    if($('#tag_cloud').length !== 0){
+        async("/js/jquery.tagcloud.js",function(){
+            $.fn.tagcloud.defaults = {
+                
+                color: {start: '#bbbbee', end: '#0085a1'},
+            };
+            $('#tag_cloud a').tagcloud();
+        })
+    }
+</script>
+
+
+<script>
+    async("https://cdnjs.cloudflare.com/ajax/libs/fastclick/1.0.6/fastclick.js", function(){
+        var $nav = document.querySelector("nav");
+        if($nav) FastClick.attach($nav);
+    })
+</script>
+
+
+
+
+
+
+</body>
+</html>

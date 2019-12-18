@@ -1,0 +1,1976 @@
+<!DOCTYPE html>
+<html lang="en-us">
+<head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+
+    
+    <meta property="og:site_name" content="">
+    <meta property="og:type" content="article">
+
+    
+    <meta property="og:image" content="http://maizitoday.github.io//img/home-bg-jeep.jpg">
+    <meta property="twitter:image" content="http://maizitoday.github.io//img/home-bg-jeep.jpg" />
+    
+
+    
+    <meta name="title" content="锁框架" />
+    <meta property="og:title" content="锁框架" />
+    <meta property="twitter:title" content="锁框架" />
+    
+
+    
+    <meta name="description" content="麦子，程序员, 开源爱好者，生活探险家 | 这里是 麦子 的博客，与你一起发现更大的世界。">
+    <meta property="og:description" content="麦子，程序员, 开源爱好者，生活探险家 | 这里是 麦子 的博客，与你一起发现更大的世界。" />
+    <meta property="twitter:description" content="麦子，程序员, 开源爱好者，生活探险家 | 这里是 麦子 的博客，与你一起发现更大的世界。" />
+    
+
+    
+    <meta property="twitter:card" content="summary" />
+    
+    
+
+    <meta name="keyword"  content="麦子, maizi, maizi, , 麦子的网络日志, 麦子的博客, maizi Blog, 博客, 个人网站, 互联网, Web, 云原生, PaaS, Istio, Kubernetes, 微服务, Microservice">
+    <link rel="shortcut icon" href="/img/favicon.ico">
+
+    <title>锁框架-麦子的博客</title>
+
+    <link rel="canonical" href="/post/%E9%94%81%E6%A1%86%E6%9E%B6/">
+
+    <link rel="stylesheet" href="/css/iDisqus.min.css"/>
+	
+    
+    <link rel="stylesheet" href="/css/bootstrap.min.css">
+
+    
+    <link rel="stylesheet" href="/css/hux-blog.min.css">
+
+    
+    <link rel="stylesheet" href="/css/syntax.css">
+
+    
+    <link rel="stylesheet" href="/css/zanshang.css">
+
+    
+    <link href="//cdnjs.cloudflare.com/ajax/libs/font-awesome/4.6.3/css/font-awesome.min.css" rel="stylesheet" type="text/css">
+    
+    
+    <script src="/js/jquery.min.js"></script>
+    
+    
+    <script src="/js/bootstrap.min.js"></script>
+    
+    
+    <script src="/js/hux-blog.min.js"></script>
+	
+    
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.13.1/styles/docco.min.css">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.13.1/highlight.min.js"></script>
+    <script>hljs.initHighlightingOnLoad();</script>
+</head>
+
+
+<nav class="navbar navbar-default navbar-custom navbar-fixed-top">
+    <div class="container-fluid">
+        
+        <div class="navbar-header page-scroll">
+            <button type="button" class="navbar-toggle">
+                <span class="sr-only">Toggle navigation</span>
+                <span class="icon-bar"></span>
+                <span class="icon-bar"></span>
+                <span class="icon-bar"></span>
+            </button>
+            <a class="navbar-brand" href="/"></a>
+        </div>
+
+        
+        
+        <div id="huxblog_navbar">
+            <div class="navbar-collapse">
+                <ul class="nav navbar-nav navbar-right">
+                    <li>
+                        <a href="/">Home</a>
+                    </li>
+                    
+                    <li>
+                        <a href="/categories/life">Life</a>
+                    </li>
+                    
+                    <li>
+                        <a href="/categories/tech">Tech</a>
+                    </li>
+                    
+                    
+		    
+                        <li><a href="/top/about/">ABOUT</a></li>
+                    
+
+                    
+		    <li>
+                        <a href="/search">SEARCH <img src="/img/search.png" height="15" style="cursor: pointer;" alt="Search"></a>
+		    </li>
+                    
+                </ul>
+            </div>
+        </div>
+        
+    </div>
+    
+</nav>
+<script>
+    
+    
+    
+    var $body   = document.body;
+    var $toggle = document.querySelector('.navbar-toggle');
+    var $navbar = document.querySelector('#huxblog_navbar');
+    var $collapse = document.querySelector('.navbar-collapse');
+
+    $toggle.addEventListener('click', handleMagic)
+    function handleMagic(e){
+        if ($navbar.className.indexOf('in') > 0) {
+        
+            $navbar.className = " ";
+            
+            setTimeout(function(){
+                
+                if($navbar.className.indexOf('in') < 0) {
+                    $collapse.style.height = "0px"
+                }
+            },400)
+        }else{
+        
+            $collapse.style.height = "auto"
+            $navbar.className += " in";
+        }
+    }
+</script>
+
+
+
+
+<style type="text/css">
+    header.intro-header {
+        background-image: url('https://img.zhaohuabing.com/in-post/2018-04-16-using-helm-to-deploy-to-kubernetes/buffalo.jpg')
+    }
+</style>
+<header class="intro-header">
+    <div class="container">
+        <div class="row">
+            <div class="col-lg-8 col-lg-offset-2 col-md-10 col-md-offset-1">
+                <div class="post-heading">
+                    <div class="tags">
+                        
+                        <a class="tag" href="/tags/%E5%A4%9A%E7%BA%BF%E7%A8%8B%E5%92%8C%E9%AB%98%E5%B9%B6%E5%8F%91" title="多线程和高并发">
+                            多线程和高并发
+                        </a>
+                        
+                        <a class="tag" href="/tags/%E9%94%81%E6%A1%86%E6%9E%B6" title="锁框架">
+                            锁框架
+                        </a>
+                        
+                    </div>
+                    <h1>锁框架</h1>
+                    <h2 class="subheading"></h2>
+                    <span class="meta">
+			Posted by 
+			
+			    麦子
+			 
+			on 
+			Tuesday, December 17, 2019
+                        
+                    </span>
+                </div>
+            </div>
+        </div>
+    </div>
+</header>
+
+
+
+
+<article>
+    <div class="container">
+        <div class="row">
+
+            
+            <div class="
+                col-lg-8 col-lg-offset-2
+                col-md-10 col-md-offset-1
+                post-container">
+
+                
+                <header>
+                    <h2>TOC</h2>
+                </header>              
+                <nav id="TableOfContents">
+<ul>
+<li><a href="#概述">概述</a></li>
+<li><a href="#synchronized-的局限性-与-lock-的优点">synchronized 的局限性 与 Lock 的优点</a>
+<ul>
+<li><a href="#1-无法自动释放锁">1. 无法自动释放锁</a></li>
+<li><a href="#2-多线程读也会被锁">2. 多线程读也会被锁</a></li>
+<li><a href="#3-无法查看是否获取到锁">3. 无法查看是否获取到锁</a></li>
+<li><a href="#总结">总结</a></li>
+</ul></li>
+<li><a href="#lock-和-synchronized-的选择">Lock 和 Synchronized 的选择</a></li>
+<li><a href="#锁的相关概念介绍">锁的相关概念介绍</a>
+<ul>
+<li><a href="#1-可重入锁">1. 可重入锁</a></li>
+<li><a href="#2-可中断锁">2. 可中断锁</a></li>
+<li><a href="#3-公平锁">3. 公平锁</a></li>
+<li><a href="#4-读写锁">4. 读写锁</a></li>
+</ul></li>
+<li><a href="#java-util-concurrent-locks包下常用的类与接口">java.util.concurrent.locks包下常用的类与接口</a>
+<ul>
+<li><a href="#lock">Lock</a>
+<ul>
+<li><a href="#源码">源码</a></li>
+<li><a href="#常用方法">常用方法</a>
+<ul>
+<li><a href="#1-lock-方法">1. lock()方法</a></li>
+<li><a href="#2-trylock-trylock-time-unit">2. tryLock() &amp; tryLock(time, unit)</a></li>
+<li><a href="#3-lockinterruptibly">3. lockInterruptibly()</a></li>
+</ul></li>
+<li><a href="#注意">注意</a></li>
+<li><a href="#子类锁-reentrantlock">子类锁&mdash;ReentrantLock</a>
+<ul>
+<li><a href="#概述-1">概述</a></li>
+<li><a href="#常用方法-1">常用方法</a></li>
+<li><a href="#代码示例">代码示例</a></li>
+</ul></li>
+</ul></li>
+<li><a href="#readwritelock">ReadWriteLock</a>
+<ul>
+<li><a href="#子类锁-reentrantreadwritelock">子类锁&mdash;ReentrantReadWriteLock</a>
+<ul>
+<li><a href="#概述-2">概述</a></li>
+<li><a href="#reentrantreadwritelock支持以下功能">ReentrantReadWriteLock支持以下功能</a></li>
+<li><a href="#代码示例-1">代码示例</a></li>
+<li><a href="#注意-1">注意</a></li>
+</ul></li>
+</ul></li>
+<li><a href="#stampedlock">StampedLock</a>
+<ul>
+<li><a href="#概述-3">概述</a></li>
+<li><a href="#比reentrantreadwritelock优势">比ReentrantReadWriteLock优势</a></li>
+<li><a href="#stampedlock的三种状态">StampedLock的三种状态</a></li>
+<li><a href="#代码示例-2">代码示例</a></li>
+<li><a href="#总结-1">总结</a></li>
+</ul></li>
+<li><a href="#condition">Condition</a>
+<ul>
+<li><a href="#概述-4">概述</a></li>
+<li><a href="#condition-wait-notifyall-对比">Condition &amp; wait &amp; NotifyAll 对比</a></li>
+<li><a href="#常用方法-2">常用方法</a>
+<ul>
+<li><a href="#1-await">1. await()</a></li>
+<li><a href="#2-await-long-time-timeunit-unit">2. await(long time, TimeUnit unit)</a></li>
+<li><a href="#3-awaitnanos-long-nanostimeout">3. awaitNanos(long nanosTimeout)</a></li>
+<li><a href="#4-awaituninterruptibly">4. awaitUninterruptibly()</a></li>
+<li><a href="#5-awaituntil-date-deadline">5. awaitUntil(Date deadline)</a></li>
+<li><a href="#6-signal">6. signal()</a></li>
+<li><a href="#7-signal-all">7. signal()All</a></li>
+</ul></li>
+<li><a href="#condition接口原理简单解析">Condition接口原理简单解析</a>
+<ul>
+<li><a href="#总结-2">总结</a></li>
+</ul></li>
+<li><a href="#生产者和消费者模式">生产者和消费者模式</a></li>
+</ul></li>
+</ul></li>
+</ul>
+</nav>
+                
+                
+
+<p>[TOC]</p>
+
+<p><strong>转载地址： <a href="https://blog.csdn.net/justloveyou_/article/details/54972105">https://blog.csdn.net/justloveyou_/article/details/54972105</a></strong></p>
+
+<h1 id="概述">概述</h1>
+
+<p>　我们已经知道，synchronized 是java的关键字，是Java的内置特性，在JVM层面实现了对临界资源的同步互斥访问，但 synchronized 粒度有些大，在处理实际问题时存在诸多局限性，比如响应中断等。Lock 提供了比 synchronized更广泛的锁操作，它能以更优雅的方式处理线程同步问题。</p>
+
+<h1 id="synchronized-的局限性-与-lock-的优点">synchronized 的局限性 与 Lock 的优点</h1>
+
+<p>如果一个代码块被synchronized关键字修饰，当一个线程获取了对应的锁，并执行该代码块时，其他线程便只能一直等待直至占有锁的线程释放锁。事实上，占有锁的线程释放锁一般会是以下三种情况之一</p>
+
+<ul>
+<li>占有锁的线程执行完了该代码块，然后释放对锁的占有；</li>
+<li>占有锁线程执行发生异常，此时JVM会让线程自动释放锁；</li>
+<li>占有锁线程进入 WAITING 状态从而释放锁，例如在该线程中调用wait()方法等。</li>
+</ul>
+
+<p>synchronized 是Java语言的内置特性，可以轻松实现对临界资源的同步互斥访问。那么，为什么还会出现Lock呢？试考虑以下三种情况：</p>
+
+<h2 id="1-无法自动释放锁">1. 无法自动释放锁</h2>
+
+<p>在使用synchronized关键字的情形下，假如占有锁的线程由于要等待IO或者其他原因（比如调用sleep方法）被阻塞了，但是又没有释放锁，那么其他线程就只能一直等待，别无他法。这会极大影响程序执行效率。因此，就需要有一种机制可以不让等待的线程一直无期限地等待下去（比如只等待一定的时间 (解决方案：tryLock(long time, TimeUnit unit)) 或者 能够响应中断 (解决方案：lockInterruptibly())），这种情况可以通过 Lock 解决。</p>
+
+<h2 id="2-多线程读也会被锁">2. 多线程读也会被锁</h2>
+
+<p>我们知道，当多个线程读写文件时，读操作和写操作会发生冲突现象，写操作和写操作也会发生冲突现象，但是读操作和读操作不会发生冲突现象。但是如果采用synchronized关键字实现同步的话，就会导致一个问题，即当多个线程都只是进行读操作时，也只有一个线程在可以进行读操作，其他线程只能等待锁的释放而无法进行读操作。因此，需要一种机制来使得当多个线程都只是进行读操作时，线程之间不会发生冲突。同样地，Lock也可以解决这种情况 (解决方案：ReentrantReadWriteLock) 。</p>
+
+<h2 id="3-无法查看是否获取到锁">3. 无法查看是否获取到锁</h2>
+
+<p>我们可以通过Lock得知线程有没有成功获取到锁 <strong>(解决方案：ReentrantLock)</strong> ，但这个是synchronized无法办到的。</p>
+
+<h2 id="总结">总结</h2>
+
+<p>上面提到的三种情形，我们都可以通过Lock来解决，但 synchronized 关键字却无能为力。事实上，Lock 是 java.util.concurrent.locks包 下的接口，Lock 实现提供了比 synchronized 关键字 更灵活、更广泛、粒度更细 的锁操作，它能以更优雅的方式处理线程同步问题。也就是说，Lock提供了比synchronized更多的功能。但是要注意以下几点：</p>
+
+<p>1) synchronized是Java的关键字，因此是Java的内置特性，是基于JVM层面实现的，其经过编译之后，会在同步块的前后分别形成 monitorenter 和 monitorexit 两个字节码指令；而Lock是一个Java接口，是基于JDK层面实现的，通过这个接口可以实现同步访问；</p>
+
+<p>2) 采用synchronized方式不需要用户去手动释放锁，当synchronized方法或者synchronized代码块执行完之后，系统会自动让线程释放对锁的占用；而 Lock则必须要用户去手动释放锁 (发生异常时，不会自动释放锁)，如果没有主动释放锁，就有可能导致死锁现象。</p>
+
+<p>这是很好理解的。Synchronized方式是Java原生支持的，开发人员在使用它来解决并发问题时，一定会方便很多，在这里，开发人员就不需要手动获取锁和释放锁，这些操作均有Java自身自动完成；而Lock方式是JDK层面的提供给开发人员的接口，因此开发人员在使用它来解决并发问题时，需要手动获取锁和释放锁。</p>
+
+<h1 id="lock-和-synchronized-的选择">Lock 和 Synchronized 的选择</h1>
+
+<p>总的来说，Lock 和 Synchronized 有以下几点不同：</p>
+
+<p>(1) Lock是一个接口，是JDK层面的实现；而synchronized是Java中的关键字，是Java的内置特性，是JVM层面的实现；</p>
+
+<p>(2) synchronized 在发生异常时，会自动释放线程占有的锁，因此不会导致死锁现象发生；而Lock在发生异常时，如果没有主动通过unLock()去释放锁，则很可能造成死锁现象，因此使用Lock时需要在finally块中释放锁；</p>
+
+<p>(3) Lock 可以让等待锁的线程响应中断，而使用synchronized时，等待的线程会一直等待下去，不能够响应中断；</p>
+
+<p>(4) 通过Lock可以知道有没有成功获取锁，而synchronized却无法办到；</p>
+
+<p>(5) Lock可以提高多个线程进行读操作的效率。</p>
+
+<p>在性能上来说，如果竞争资源不激烈，两者的性能是差不多的。而当竞争资源非常激烈时（即有大量线程同时竞争），此时Lock的性能要远远优于synchronized。所以说，在具体使用时要根据适当情况选择。</p>
+
+<h1 id="锁的相关概念介绍">锁的相关概念介绍</h1>
+
+<h2 id="1-可重入锁">1. 可重入锁</h2>
+
+<p>广义上的可重入锁指的是可重复可递归调用的锁，在外层使用锁之后，在内层仍然可以使用，并且不发生死锁（前提得是同一个对象或者class），这样的锁就叫做可重入锁。</p>
+
+<p>举个简单的例子，当一个线程执行到某个synchronized方法时，比如说method1，而在method1中会调用另外一个synchronized方法method2，此时线程不必重新去申请锁，而是可以直接执行方法method2。</p>
+
+<pre><code class="language-java">class MyClass {
+    public synchronized void method1() {
+        method2();
+    }
+
+    public synchronized void method2() {
+
+    }
+}
+</code></pre>
+
+<p>上述代码中的两个方法method1和method2都用synchronized修饰了。假如某一时刻，线程A执行到了method1，此时线程A获取了这个对象的锁，而由于method2也是synchronized方法，假如synchronized不具备可重入性，此时线程A需要重新申请锁。但是，这就会造成死锁，因为线程A已经持有了该对象的锁，而又在申请获取该对象的锁，这样就会线程A一直等待永远不会获取到的锁。而由于synchronized和Lock都具备可重入性，所以不会发生上述现象。</p>
+
+<h2 id="2-可中断锁">2. 可中断锁</h2>
+
+<p>顾名思义，可中断锁就是可以响应中断的锁。在Java中，<strong>synchronized就不是可中断锁，而Lock是可中断锁。</strong></p>
+
+<p>如果某一线程A正在执行锁中的代码，另一线程B正在等待获取该锁，可能由于等待时间过长，线程B不想等待了，想先处理其他事情，我们可以让它中断自己或者在别的线程中中断它，这种就是可中断锁。在前面演示tryLock(long time, TimeUnit unit)和lockInterruptibly()的用法时已经体现了Lock的可中断性。(<strong>只能中断在等待的线程</strong>)</p>
+
+<h2 id="3-公平锁">3. 公平锁</h2>
+
+<p>公平锁即 <strong>尽量</strong> 以请求锁的顺序来获取锁。比如，同是有多个线程在等待一个锁，当这个锁被释放时，等待时间最久的线程（最先请求的线程）会获得该所，这种就是公平锁。而非公平锁则无法保证锁的获取是按照请求锁的顺序进行的，这样就可能导致某个或者一些线程永远获取不到锁。</p>
+
+<p>在Java中，<strong>synchronized就是非公平锁（抢占锁）</strong>，它无法保证等待的线程获取锁的顺序。而对于ReentrantLock 和 ReentrantReadWriteLock，它默认情况下是非公平锁，但是可以设置为 <strong>公平锁（协同式线程调度）</strong>。</p>
+
+<pre><code class="language-java">new ReentrantLock(true); // 公平锁
+new ReentrantReadWriteLock(true);
+
+new ReentrantLock(false); // 非公平锁
+new ReentrantReadWriteLock(true);
+</code></pre>
+
+<h2 id="4-读写锁">4. 读写锁</h2>
+
+<p>读写锁将对临界资源的访问分成了两个锁，一个读锁和一个写锁。正因为有了读写锁，才使得多个线程之间的读操作不会发生冲突。ReadWriteLock就是读写锁，它是一个接口，ReentrantReadWriteLock实现了这个接口。可以通过readLock()获取读锁，通过writeLock()获取写锁。</p>
+
+<h1 id="java-util-concurrent-locks包下常用的类与接口">java.util.concurrent.locks包下常用的类与接口</h1>
+
+<p><img src="/img/20170211102428481.png" alt="20170211102428481" /></p>
+
+<h2 id="lock">Lock</h2>
+
+<h3 id="源码">源码</h3>
+
+<pre><code class="language-java">public interface Lock {
+    void lock();
+    void lockInterruptibly() throws InterruptedException;  // 可以响应中断
+    boolean tryLock();
+    boolean tryLock(long time, TimeUnit unit) throws InterruptedException;  // 可以响应中断
+    void unlock();
+    Condition newCondition();
+}
+</code></pre>
+
+<p>下面来逐个分析Lock接口中每个方法。lock()、tryLock()、tryLock(long time, TimeUnit unit) 和 lockInterruptibly()都是用来获取锁的。unLock()方法是用来释放锁的。newCondition() 返回 绑定到此 Lock 的新的 Condition 实例 ，<strong>用于线程间的协作</strong></p>
+
+<h3 id="常用方法">常用方法</h3>
+
+<h4 id="1-lock-方法">1. lock()方法</h4>
+
+<p>lock()方法是平常使用得最多的一个方法，就是用来获取锁。<strong>如果锁已被其他线程获取，则进行等待。</strong>在前面已经讲到，如果采用Lock，必须主动去释放锁，并且在发生异常时，不会自动释放锁。因此，一般来说，使用Lock必须在try…catch…块中进行，并且将释放锁的操作放在finally块中进行，以保证锁一定被被释放，防止死锁的发生。</p>
+
+<p>通常使用Lock来进行同步的话，是以下面这种形式去使用的：</p>
+
+<pre><code class="language-java">Lock lock = ...;
+lock.lock();
+try{
+    //处理任务
+}catch(Exception ex){
+
+}finally{
+    lock.unlock();   //释放锁
+}
+</code></pre>
+
+<h4 id="2-trylock-trylock-time-unit">2. tryLock() &amp; tryLock(time, unit)</h4>
+
+<p>tryLock()方法是有返回值的，它表示用来尝试获取锁，如果获取成功，则返回true；如果获取失败（即锁已被其他线程获取），则返回false，也就是说，<strong>这个方法无论如何都会立即返回（在拿不到锁时不会一直在那等待）。</strong></p>
+
+<p>tryLock(long time, TimeUnit unit)方法和tryLock()方法是类似的，只不过区别在于<strong>这个方法在拿不到锁时会等待一定的时间，在时间期限之内如果还拿不到锁，就返回false，同时可以响应中断。</strong>如果一开始拿到锁或者在等待期间内拿到了锁，则返回true。</p>
+
+<p>一般情况下，通过tryLock来获取锁时是这样使用的：</p>
+
+<pre><code class="language-java">Lock lock = ...;
+if(lock.tryLock()) {
+     try{
+         //处理任务
+     }catch(Exception ex){
+
+     }finally{
+         lock.unlock();   //释放锁
+     } 
+}else {
+    //如果不能获取锁，则直接做其他事情
+}
+</code></pre>
+
+<h4 id="3-lockinterruptibly">3. lockInterruptibly()</h4>
+
+<p>lockInterruptibly()方法比较特殊，当通过这个方法去获取锁时，如果线程 正在等待获取锁，则这个线程能够响应中断，即中断线程的等待状态。例如，当两个线程同时通过lock.lockInterruptibly()想获取某个锁时，假若此时线程A获取到了锁，而线程B只有在等待，那么对线程B调用threadB.interrupt()方法能够中断线程B的等待过程。</p>
+
+<p>由于lockInterruptibly()的声明中抛出了异常，所以lock.lockInterruptibly()必须放在try块中或者在调用lockInterruptibly()的方法外声明抛出 InterruptedException，但推荐使用后者，原因稍后阐述。</p>
+
+<p>因此，lockInterruptibly()一般的使用形式如下：</p>
+
+<pre><code class="language-java">public void method() throws InterruptedException {
+    lock.lockInterruptibly();
+    try {  
+     //.....
+    }
+    finally {
+        lock.unlock();
+    }  
+}
+</code></pre>
+
+<p>注意，当一个线程获取了锁之后，是不会被interrupt()方法中断的。<strong>因为interrupt()方法只能中断阻塞过程中的线程而不能中断正在运行过程中的线程。</strong>因此，当通过lockInterruptibly()方法获取某个锁时，如果不能获取到，那么只有进行等待的情况下，才可以响应中断的。与 synchronized 相比，当一个线程处于等待某个锁的状态，是无法被中断的，只有一直等待下去。</p>
+
+<h3 id="注意">注意</h3>
+
+<p>在使用Lock时，无论以哪种方式获取锁，习惯上最好一律将获取锁的代码放到 try…catch…，因为我们一般将锁的unlock操作放到finally子句中，如果线程没有获取到锁，在执行finally子句时，就会执行unlock操作，从而抛出 IllegalMonitorStateException，因为该线程并未获得到锁却执行了解锁操作。</p>
+
+<h3 id="子类锁-reentrantlock">子类锁&mdash;ReentrantLock</h3>
+
+<h4 id="概述-1">概述</h4>
+
+<p>ReentrantLock，即可重入锁。<strong>ReentrantLock是唯一实现了Lock接口的类，并且ReentrantLock提供了更多的方法。</strong></p>
+
+<h4 id="常用方法-1">常用方法</h4>
+
+<pre><code class="language-java">isFair() //判断锁是否是公平锁
+
+isLocked() //判断锁是否被任何线程获取了
+
+isHeldByCurrentThread() //判断锁是否被当前线程获取了
+
+hasQueuedThreads() //判断是否有线程在等待该锁
+
+getHoldCount() //查询当前线程占有lock锁的次数
+
+getQueueLength() // 获取正在等待此锁的线程数
+
+getWaitQueueLength(Condition condition) // 获取正在等待此锁相关条件condition的线程数
+</code></pre>
+
+<h4 id="代码示例">代码示例</h4>
+
+<pre><code class="language-java">public class ReentrantLockTest {
+
+    public static void main(String[] args) {
+
+        ExecutorService service = Executors.newFixedThreadPool(3);
+        Lock lock = new ReentrantLock();
+        Work work = new Work(lock);
+        for (int i = 0; i &lt; 3; i++) {
+            service.execute(new Runnable() {
+                @Override
+                public void run() {
+                    work.doWork();
+                }
+            });
+        }
+
+    }
+}
+
+class Work {
+
+    private String name;
+    private Lock lock;
+
+    public Work(Lock lock) {
+        this.lock = lock;
+    }
+
+    public void doWork() {
+        try {
+            lock.lock();
+            List&lt;String&gt; names = Arrays.asList(&quot;小强&quot;, &quot;小米&quot;, &quot;小明&quot;);
+            int index = (int) (Math.random() * names.size());
+            this.name = names.get(index);
+            System.out.println(this.name + &quot;: 被锁定&quot; + Thread.currentThread().getName());
+            System.out.println(this.name + &quot;: 努力工作&quot; + Thread.currentThread().getName());
+            TimeUnit.SECONDS.sleep(2);
+            System.out.println(this.name + &quot;: 工作已经完成&quot; + Thread.currentThread().getName());
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        } finally {
+            lock.unlock();
+            System.out.println(this.name + &quot;锁已经释放&quot;);
+        }
+    }
+
+}
+
+
+小明: 被锁定pool-1-thread-1
+小明: 努力工作pool-1-thread-1
+小明: 工作已经完成pool-1-thread-1
+小明锁已经释放
+小强: 被锁定pool-1-thread-2
+小强: 努力工作pool-1-thread-2
+小强: 工作已经完成pool-1-thread-2
+小强锁已经释放
+小米: 被锁定pool-1-thread-3
+小米: 努力工作pool-1-thread-3
+小米: 工作已经完成pool-1-thread-3
+小米锁已经释放
+</code></pre>
+
+<h2 id="readwritelock">ReadWriteLock</h2>
+
+<p>ReadWriteLock也是一个接口，在它里面只定义了两个方法：</p>
+
+<pre><code class="language-java">public interface ReadWriteLock {
+    /**
+     * Returns the lock used for reading.
+     *
+     * @return the lock used for reading.
+     */
+    Lock readLock();
+
+    /**
+     * Returns the lock used for writing.
+     *
+     * @return the lock used for writing.
+     */
+    Lock writeLock();
+}
+</code></pre>
+
+<p>一个用来获取读锁，一个用来获取写锁。也就是说，将对临界资源的读写操作分成两个锁来分配给线程，从而使得多个线程可以同时进行读操作。</p>
+
+<h3 id="子类锁-reentrantreadwritelock">子类锁&mdash;ReentrantReadWriteLock</h3>
+
+<p>转载地址：<a href="https://www.cnblogs.com/zaizhoumo/p/7782941.html">https://www.cnblogs.com/zaizhoumo/p/7782941.html</a></p>
+
+<h4 id="概述-2">概述</h4>
+
+<p>ReentrantReadWriteLock是Lock的另一种实现方式，我们已经知道了ReentrantLock是一个排他锁，同一时间只允许一个线程访问，而ReentrantReadWriteLock允许多个读线程同时访问，<strong>但不允许写线程和读线程、写线程和写线程同时访问。</strong>相对于排他锁，提高了并发性。在实际应用中，大部分情况下对共享数据（如缓存）的访问都是读操作远多于写操作，这时ReentrantReadWriteLock能够提供比排他锁更好的并发性和吞吐量。</p>
+
+<p>读写锁内部维护了两个锁，一个用于读操作，一个用于写操作。所有 ReadWriteLock实现都必须保证 writeLock操作的内存同步效果也要保持与相关 readLock的联系。也就是说，成功获取读锁的线程会看到写入锁之前版本所做的所有更新。</p>
+
+<h4 id="reentrantreadwritelock支持以下功能">ReentrantReadWriteLock支持以下功能</h4>
+
+<p>1）支持公平和非公平的获取锁的方式；</p>
+
+<p>2）支持可重入。读线程在获取了读锁后还可以获取读锁；写线程在获取了写锁之后既可以再次获取写锁又可以获取读锁；</p>
+
+<p>3）还允许从写入锁降级为读取锁，其实现方式是：先获取写入锁，然后获取读取锁，最后释放写入锁。但是，从读取锁升级到写入锁是不允许的；</p>
+
+<p>4）读取锁和写入锁都支持锁获取期间的中断；</p>
+
+<p>5）Condition支持。仅写入锁提供了一个 Conditon 实现；读取锁不支持 Conditon ，readLock().newCondition() 会抛出 UnsupportedOperationException。</p>
+
+<h4 id="代码示例-1">代码示例</h4>
+
+<p>模拟场景， 三个动漫， 只有浏览到是进击的巨人的动漫的时候，必须看完才能继续进行影片的浏览。</p>
+
+<pre><code class="language-java">public class ReentrantReadWriteLockTest {
+
+    public static void main(String[] args) {
+        ExecutorService service = Executors.newFixedThreadPool(10);
+        ReentrantReadWriteLock lock = new ReentrantReadWriteLock();
+        WatchTV watch = new WatchTV(lock, &quot;海绵宝宝&quot;);
+        for (int i = 0; i &lt; 10; i++) {
+            service.execute(new Runnable() {
+                @Override
+                public void run() {
+                    watch.watchTime();
+                }
+            });
+        }
+        service.shutdown();
+    }
+
+}
+
+class WatchTV {
+
+    private String tvName;
+
+    private ReentrantReadWriteLock lock;
+
+    private Lock writeLock;
+    private Lock readLock;
+
+    public WatchTV(String tvName) {
+        this.tvName = tvName;
+    }
+
+    public WatchTV(ReentrantReadWriteLock lock, String tvName) {
+        this.lock = lock;
+        this.tvName = tvName;
+        writeLock = lock.writeLock();
+        readLock = lock.readLock();
+    }
+
+    public WatchTV(ReentrantReadWriteLock lock) {
+        this.lock = lock;
+    }
+
+    public void watchTime() {
+        findTv();
+        System.out.println(Thread.currentThread().getName() + &quot; 开始查看有什么好看的动漫&quot;);
+        try {
+            switch (this.tvName) {
+            case &quot;海绵宝宝&quot;:
+                readLock.lock();
+                System.out.println(Thread.currentThread().getName() + &quot;--&gt;找到: 海绵宝宝 不看，换台&quot;);
+                findTv();
+                readLock.unlock();
+                break;
+            case &quot;死神&quot;:
+                readLock.lock();
+                System.out.println(Thread.currentThread().getName() + &quot;--&gt;找到: 死神  不看，换台&quot;);
+                findTv();
+                readLock.unlock();
+                break;
+            case &quot;进击的巨人&quot;:
+                writeLock.lock();
+                System.out.println(Thread.currentThread().getName() + &quot;--&gt;找到: 进击的巨人---&gt;不要换台，我要看看&quot;);
+                TimeUnit.SECONDS.sleep(5);
+                System.out.println(Thread.currentThread().getName() + &quot;--&gt;已经看完: 进击的巨人---&gt;继续换台&quot;);
+                findTv();
+                writeLock.unlock();
+                break;
+            default:
+                break;
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+
+    }
+
+    private void findTv() {
+        List&lt;String&gt; names = Arrays.asList(&quot;海绵宝宝&quot;, &quot;进击的巨人&quot;, &quot;死神&quot;);
+        int index = (int) (Math.random() * names.size());
+        this.tvName = names.get(index);
+    }
+}
+</code></pre>
+
+<p>运行结果</p>
+
+<pre><code class="language-java">pool-1-thread-1 开始查看有什么好看的动漫
+pool-1-thread-6 开始查看有什么好看的动漫
+pool-1-thread-9 开始查看有什么好看的动漫
+pool-1-thread-9--&gt;找到: 死神  不看，换台
+pool-1-thread-2 开始查看有什么好看的动漫
+pool-1-thread-2--&gt;找到: 海绵宝宝 不看，换台
+pool-1-thread-8 开始查看有什么好看的动漫
+pool-1-thread-8--&gt;找到: 死神  不看，换台
+pool-1-thread-7 开始查看有什么好看的动漫
+pool-1-thread-7--&gt;找到: 海绵宝宝 不看，换台
+pool-1-thread-5 开始查看有什么好看的动漫
+pool-1-thread-5--&gt;找到: 死神  不看，换台
+pool-1-thread-3 开始查看有什么好看的动漫
+pool-1-thread-3--&gt;找到: 海绵宝宝 不看，换台
+pool-1-thread-4 开始查看有什么好看的动漫
+pool-1-thread-10 开始查看有什么好看的动漫
+pool-1-thread-6--&gt;找到: 海绵宝宝 不看，换台
+pool-1-thread-1--&gt;找到: 海绵宝宝 不看，换台
+pool-1-thread-4--&gt;找到: 进击的巨人---&gt;不要换台，我要看看
+pool-1-thread-4--&gt;已经看完: 进击的巨人---&gt;继续换台
+pool-1-thread-10--&gt;找到: 进击的巨人---&gt;不要换台，我要看看
+pool-1-thread-10--&gt;已经看完: 进击的巨人---&gt;继续换台
+</code></pre>
+
+<p>如上可以看到， 10条线程，全部先到了方法watchTime()里面， 然后如果是读的操作，都是可以几条线程一起读的。 但是到了写的操作的时候，就必须让写的操作完成才可以。</p>
+
+<p><strong>注意这个读的锁并没有直接去读取数据， 只是为了判断在读的时候， 有没有线程对公共数据进行写的操作， 如果没有的话， 后面方法的读都是并发操作的。具体可以参考博客  《读写锁分离-设计模式》，这个并发读是不获取锁的。</strong></p>
+
+<h4 id="注意-1">注意</h4>
+
+<p>ReentrantReadWriteLock 实现了 ReadWriteLock 接口( 注意，<strong>ReentrantReadWriteLock 并没有实现 Lock 接口</strong> )，其包含两个很重要的方法：readLock() 和 writeLock() 分别用来获取读锁和写锁，<strong>并且这两个锁实现了Lock接口</strong>。</p>
+
+<h2 id="stampedlock">StampedLock</h2>
+
+<p>转载地址： <a href="https://my.oschina.net/benhaile/blog/264383">https://my.oschina.net/benhaile/blog/264383</a></p>
+
+<h3 id="概述-3">概述</h3>
+
+<p>StampedLock是Java8引入的一种新的所机制,简单的理解,可以认为它是读写锁的一个改进版本,读写锁虽然分离了读和写的功能,使得读与读之间可以完全并发,但是读和写之间依然是冲突的,读锁会完全阻塞写锁,它使用的依然是悲观的锁策略.如果有大量的读线程,他也有可能引起写线程的饥饿。</p>
+
+<p>而StampedLock则提供了一种乐观的读策略,这种乐观策略的锁非常类似于无锁的操作,<strong>使得乐观锁完全不会阻塞写线程</strong></p>
+
+<h3 id="比reentrantreadwritelock优势">比ReentrantReadWriteLock优势</h3>
+
+<p>如果读取执行情况很多，写入很少的情况下，使用 ReentrantReadWriteLock 可能会使写入线程遭遇饥饿（Starvation）问题，也就是写入线程吃吃无法竞争到锁定而一直处于等待状态。</p>
+
+<ol>
+<li><p><code>StampedLock</code> 提供了读锁和写锁相互转换的功能，使得该类支持更多的应用场景。</p></li>
+
+<li><p>StampedLock的内部实现是基于CLH锁的,CLH锁是一种自旋锁,它保证没有饥饿的发生,并且可以保证FIFO(先进先出)的服务顺序.</p></li>
+
+<li><p>有一个<strong>乐观读取的机制</strong>。</p></li>
+</ol>
+
+<h3 id="stampedlock的三种状态">StampedLock的三种状态</h3>
+
+<p>原文链接：<a href="https://blog.csdn.net/LightOfMiracle/article/details/73201442">https://blog.csdn.net/LightOfMiracle/article/details/73201442</a></p>
+
+<p><strong>写入（Writing）</strong>：writeLock方法获取独占式同步状态而阻塞当前线程，返回一个stamp，这个stamp能够在unlockWrite方法中使用从而释放锁。也提供了tryWriteLock。当锁被写模式所占有，读或者乐观的读操作都不能获取到同步状态。</p>
+
+<p><strong>读取（Reading）</strong>：readLock方法获取共享式同步状态而阻塞随后的写线程，返回一个stamp变量，能够在unlockRead方法中用于释放锁。同时也提供了tryReadLock方法。</p>
+
+<p><strong>乐观读取（Optimistic Reading）</strong>：提供了tryOptimisticRead方法返回一个非0的stamp，只有当前同步状态没有被写模式所占有是才能获取到。如果在获得stamp变量之后没有被写模式持有，方法validate将返回true。这种模式可以被看做一种弱版本的读锁，可以被一个写入者在任何时间打断。乐观读取模式仅用于短时间读取操作时经常能够降低竞争和提高吞吐量。同时使用的时候一般需要读取并存储到另外一个副本，以用做对比使用。</p>
+
+<h3 id="代码示例-2">代码示例</h3>
+
+<pre><code class="language-java">public class StampedLockTest {
+
+    public static void main(String[] args) {
+        ExecutorService service = Executors.newFixedThreadPool(6);
+        StampedLock lock = new StampedLock();
+        Book book = new Book(&quot;小蝌蚪找妈妈&quot;, lock);
+
+        for (int i = 0; i &lt; 3; i++) {
+            service.execute(new Runnable() {
+                @Override
+                public void run() {
+                    book.update();
+                }
+            });
+        }
+
+        for (int i = 0; i &lt; 3; i++) {
+            service.execute(new Runnable() {
+                @Override
+                public void run() {
+                    book.watch();
+                }
+            });
+        }
+
+        service.shutdown();
+
+    }
+
+}
+
+class Book {
+
+    private String name;
+    private StampedLock lock;// 定义了StampedLock锁,
+
+    public Book(String name, StampedLock lock) {
+        this.name = name;
+        this.lock = lock;
+    }
+
+    public void update() {
+        long stamp = lock.writeLock();// 这里的含义和distanceFormOrigin方法中 s1.readLock()是类似的
+
+        try {
+            this.name = &quot;大江东去&quot;;
+            TimeUnit.SECONDS.sleep(2);
+            System.out.println(&quot;写操作----&gt;&quot; + Thread.currentThread().getName() + &quot; &quot; + this.name +&quot;  &quot;+ new Date().getTime());
+        } catch (Exception e) {
+            e.printStackTrace();
+        } finally {
+            System.out.println(&quot;修改完成  &quot; + new Date().getTime());
+            lock.unlockWrite(stamp);
+        }
+    }
+
+    public void watch() {
+        // 试图尝试一次乐观读 返回一个类似于时间戳的邮戳整数stamp 这个stamp就可以作为这一个所获取的凭证
+        long stamp = lock.tryOptimisticRead(); 
+        // 判断这个stamp是否在读过程发生期间被修改过,如果stamp没有被修改过,责任无这次读取时有效的,因此就可以直接return了,反之,如果stamp是不可用的,则意味着在读取的过程中,可能被其他线程改写了数据,因此,有可能出现脏读,如果如果出现这种情况,我们可以像CAS操作那样在一个死循环中一直使用乐观锁,知道成功为止。
+        if (!lock.validate(stamp)) {
+            try {
+                // stamp = lock.readLock();//也可以升级锁的级别,这里我们升级乐观锁的级别,将乐观锁变为悲观锁, 如果当前对象正在被修改,则读锁的申请可能导致线程挂起.
+                TimeUnit.SECONDS.sleep(2);
+                System.out.println(&quot;读操作----&gt;&quot; + Thread.currentThread().getName() + &quot; &quot; + this.name +&quot;  &quot;+ new Date().getTime());
+            } catch (Exception e) {
+                e.printStackTrace();
+            } finally {
+                // System.out.println(&quot;读取完成  &quot; + new Date().getTime());
+                // lock.unlockRead(stamp);// 退出临界区,释放读锁
+            }
+        } else {
+            // watch();
+        }
+    }
+
+}
+</code></pre>
+
+<p>运行结果</p>
+
+<pre><code class="language-java">写操作----&gt;pool-1-thread-1 大江东去  1576641410875
+读操作----&gt;pool-1-thread-5 大江东去  1576641410875
+读操作----&gt;pool-1-thread-6 大江东去  1576641410875
+读操作----&gt;pool-1-thread-4 大江东去  1576641410875
+修改完成  1576641410875
+写操作----&gt;pool-1-thread-3 大江东去  1576641412876
+修改完成  1576641412876
+写操作----&gt;pool-1-thread-2 大江东去  1576641414881
+修改完成  1576641414881
+</code></pre>
+
+<p>可以看到这里在写的时候， 我们的读的操作也是在进行中的。 并没有需要等他锁释放后在读取的。</p>
+
+<p>如果把上面的<strong>将乐观锁变为悲观锁</strong></p>
+
+<pre><code class="language-java">public void watch() {
+
+        long stamp = lock.tryOptimisticRead();  
+        if (!lock.validate(stamp)) { 
+            try {
+                stamp = lock.readLock();
+                TimeUnit.SECONDS.sleep(2);
+                System.out.println(&quot;读操作----&gt;&quot; + Thread.currentThread().getName() + &quot; &quot; + this.name +&quot;  &quot;+ new Date().getTime());
+            } catch (Exception e) {
+                e.printStackTrace();
+            } finally {
+                System.out.println(&quot;读取完成  &quot; + new Date().getTime());
+                lock.unlockRead(stamp);// 退出临界区,释放读锁
+            }
+        } else {
+            // watch();
+        }
+    }
+</code></pre>
+
+<p>运行结果如下：</p>
+
+<pre><code class="language-java">写操作----&gt;pool-1-thread-1 大江东去  1576642637434
+修改完成  1576642637434
+写操作----&gt;pool-1-thread-2 大江东去  1576642639436
+修改完成  1576642639436
+写操作----&gt;pool-1-thread-3 大江东去  1576642641441
+修改完成  1576642641441
+读操作----&gt;pool-1-thread-5 大江东去  1576642643446
+读操作----&gt;pool-1-thread-4 大江东去  1576642643446
+读操作----&gt;pool-1-thread-6 大江东去  1576642643446
+读取完成  1576642643446
+读取完成  1576642643446
+读取完成  1576642643446
+</code></pre>
+
+<p>可以看到， 必须等写的锁释放完成后， 在可以进行读的操作。</p>
+
+<h3 id="总结-1">总结</h3>
+
+<p>在写的时候， writeLock的时候，照样可以进行读取的操作。 同时，<strong>这个StampedLock完全可以代替ReentrantReadWriteLock这个类。</strong></p>
+
+<h2 id="condition">Condition</h2>
+
+<p>转载地址： <a href="https://www.cnblogs.com/gemine/p/9039012.html">https://www.cnblogs.com/gemine/p/9039012.html</a></p>
+
+<h3 id="概述-4">概述</h3>
+
+<p>在使用Lock之前，我们使用的最多的同步方式应该是synchronized关键字来实现同步方式了。配合Object的wait()、notify()系列方法可以实现等待/通知模式。Condition接口也提供了类似Object的监视器方法，与Lock配合可以实现等待/通知模式，但是这两者在使用方式以及功能特性上还是有差别的。Object和Condition接口的一些对比。摘自《Java并发编程的艺术》</p>
+
+<h3 id="condition-wait-notifyall-对比">Condition &amp; wait &amp; NotifyAll 对比</h3>
+
+<p><img src="/img/Xnip2019-12-17_12-16-26.png" alt="Xnip2019-12-17_12-16-26" /></p>
+
+<h3 id="常用方法-2">常用方法</h3>
+
+<p>condition可以通俗的理解为条件队列。当一个线程在调用了await方法以后，直到线程等待的某个条件为真的时候才会被唤醒。这种方式为线程提供了更加简单的等待/通知模式。Condition必须要配合锁一起使用，因为对共享状态变量的访问发生在多线程环境下。一个Condition的实例必须与一个Lock绑定，因此Condition一般都是作为Lock的内部实现。</p>
+
+<h4 id="1-await">1. await()</h4>
+
+<p>造成当前线程在接到信号或被中断之前一直处于等待状态。</p>
+
+<h4 id="2-await-long-time-timeunit-unit">2. await(long time, TimeUnit unit)</h4>
+
+<p>造成当前线程在接到信号、被中断或到达指定等待时间之前一直处于等待状态。</p>
+
+<h4 id="3-awaitnanos-long-nanostimeout">3. awaitNanos(long nanosTimeout)</h4>
+
+<p>造成当前线程在接到信号、被中断或到达指定等待时间之前一直处于等待状态。返回值表示剩余时间，如果在nanosTimesout之前唤醒，那么返回值 = nanosTimeout - 消耗时间，如果返回值 &lt;= 0 ,则可以认定它已经超时了。</p>
+
+<h4 id="4-awaituninterruptibly">4. awaitUninterruptibly()</h4>
+
+<p>造成当前线程在接到信号之前一直处于等待状态。【注意：该方法对中断不敏感】。</p>
+
+<h4 id="5-awaituntil-date-deadline">5. awaitUntil(Date deadline)</h4>
+
+<p>造成当前线程在接到信号、被中断或到达指定最后期限之前一直处于等待状态。如果没有到指定时间就被通知，则返回true，否则表示到了指定时间，返回返回false。</p>
+
+<h4 id="6-signal">6. signal()</h4>
+
+<p>唤醒一个等待线程。该线程从等待方法返回前必须获得与Condition相关的锁。</p>
+
+<h4 id="7-signal-all">7. signal()All</h4>
+
+<p>唤醒所有等待线程。能够从等待方法返回的线程必须获得与Condition相关的锁。</p>
+
+<h3 id="condition接口原理简单解析">Condition接口原理简单解析</h3>
+
+<p>转载地址： <a href="https://www.cnblogs.com/gemine/p/9039012.html">https://www.cnblogs.com/gemine/p/9039012.html</a></p>
+
+<h4 id="总结-2">总结</h4>
+
+<p>调用await方法后，将当前线程加入Condition等待队列中。当前线程释放锁。否则别的线程就无法拿到锁而发生死锁。自旋(while)挂起，不断检测节点是否在同步队列中了，如果是则尝试获取锁，否则挂起。当线程被signal方法唤醒，被唤醒的线程将从await()方法中的while循环中退出来，然后调用acquireQueued()方法竞争同步状态。</p>
+
+<h3 id="生产者和消费者模式">生产者和消费者模式</h3>
+
+<pre><code class="language-java">public class BoundedQueue {
+
+    private final LinkedList&lt;Object&gt; buffer; // 生产者容器
+    private final int maxSize; // 容器最大值是多少
+    private final Lock lock;
+    private final Condition produceCondition;
+    private final Condition consumerCondition;
+
+    BoundedQueue(final int maxSize) {
+        this.maxSize = maxSize;
+        buffer = new LinkedList&lt;Object&gt;();
+        lock = new ReentrantLock();
+        produceCondition = lock.newCondition();
+        consumerCondition = lock.newCondition();
+    }
+
+    /**
+     * 生产者
+     * 
+     * @param obj
+     * @throws InterruptedException
+     */
+    public void put(final Object obj) throws InterruptedException {
+        lock.lock(); // 获取锁
+        TimeUnit.SECONDS.sleep(1);
+        System.out.println(&quot;生产方： &quot; + Thread.currentThread().getName() + &quot; 获取到锁 &quot;);
+        try {
+            while (maxSize == buffer.size()) {
+                System.out.println(&quot;生产已经满了.....&quot;);
+                produceCondition.await(); // 满了，添加的线程进入等待状态
+            }
+            buffer.add(obj);
+            System.out.println(obj);
+            consumerCondition.signal(); // 通知
+        } finally {
+            lock.unlock();
+        }
+    }
+
+    /**
+     * 消费者
+     * 
+     * @return
+     * @throws InterruptedException
+     */
+    public Object get() throws InterruptedException {
+        lock.lock();
+        Object obj;
+        TimeUnit.SECONDS.sleep(1);
+        System.out.println(&quot;消费方：&quot; + Thread.currentThread().getName() + &quot; 获取到锁 &quot;);
+        try {
+            while (buffer.size() == 0) { // 队列中没有数据了 线程进入等待状态
+                System.out.println(&quot;产品已经卖完了.....&quot;);
+                consumerCondition.await();
+            }
+            obj = buffer.poll();
+            System.out.println(&quot;卖掉产品: &quot; + obj);
+            produceCondition.signalAll(); // 通知
+        } finally {
+            lock.unlock();
+        }
+        return obj;
+    }
+
+    public static void main(final String[] args) {
+        final BoundedQueue queue = new BoundedQueue(5);
+        final ExecutorService service = Executors.newCachedThreadPool();
+        for (int i = 0; i &lt; 5; i++) {
+            final int index = i;
+            service.execute(new Runnable() {
+                @Override
+                public void run() {
+                    try {
+                        queue.put(&quot;生成-&quot; + index);
+                    } catch (final InterruptedException e) {
+                        e.printStackTrace();
+                    }
+                }
+            });
+        }
+
+        for (int i = 0; i &lt; 5; i++) {
+            service.execute(new Runnable() {
+                @Override
+                public void run() {
+                    try {
+                        queue.get();
+                    } catch (final InterruptedException e) {
+                        e.printStackTrace();
+                    }
+                }
+            });
+        }
+        service.shutdown();
+    }
+}
+</code></pre>
+
+<p>运行结果</p>
+
+<pre><code class="language-java">生产方： pool-1-thread-1 获取到锁 
+生成-0
+生产方： pool-1-thread-2 获取到锁 
+生成-1
+生产方： pool-1-thread-3 获取到锁 
+生成-2
+生产方： pool-1-thread-4 获取到锁 
+生成-3
+生产方： pool-1-thread-5 获取到锁 
+生成-4
+消费方：pool-1-thread-6 获取到锁 
+卖掉产品: 生成-0
+消费方：pool-1-thread-7 获取到锁 
+卖掉产品: 生成-1
+消费方：pool-1-thread-8 获取到锁 
+卖掉产品: 生成-2
+消费方：pool-1-thread-9 获取到锁 
+卖掉产品: 生成-3
+消费方：pool-1-thread-10 获取到锁 
+卖掉产品: 生成-4
+</code></pre>
+
+
+                
+                
+<div class="entry-shang text-center">
+    
+	    <p>「真诚赞赏，手留余香」</p>
+	
+	<button class="zs show-zs btn btn-bred">赞赏支持</button>
+</div>
+<div class="zs-modal-bg"></div>
+<div class="zs-modal-box">
+	<div class="zs-modal-head">
+		<button type="button" class="close">×</button>
+		<span class="author"><a href="http://maizitoday.github.io/"><img src="/img/favicon.png" /></a></span>
+        
+	        <p class="tip"><i></i><span>真诚赞赏，手留余香</span></p>
+		
+ 
+	</div>
+	<div class="zs-modal-body">
+		<div class="zs-modal-btns">
+			<button class="btn btn-blink" data-num="2">2元</button>
+			<button class="btn btn-blink" data-num="5">5元</button>
+			<button class="btn btn-blink" data-num="10">10元</button>
+			<button class="btn btn-blink" data-num="50">50元</button>
+			<button class="btn btn-blink" data-num="100">100元</button>
+			<button class="btn btn-blink" data-num="1">任意金额</button>
+		</div>
+		<div class="zs-modal-pay">
+			<button class="btn btn-bred" id="pay-text">2元</button>
+			<p>使用<span id="pay-type">微信</span>扫描二维码完成支付</p>
+			<img src="/img/reward/wechat-2.png"  id="pay-image"/>
+		</div>
+	</div>
+	<div class="zs-modal-footer">
+		<label><input type="radio" name="zs-type" value="wechat" class="zs-type" checked="checked"><span ><span class="zs-wechat"><img src="/img/reward/wechat-btn.png"/></span></label>
+		<label><input type="radio" name="zs-type" value="alipay" class="zs-type" class="zs-alipay"><img src="/img/reward/alipay-btn.png"/></span></label>
+	</div>
+</div>
+<script type="text/javascript" src="/js/reward.js"></script>
+
+                
+
+                <hr>
+                <ul class="pager">
+                    
+                    <li class="previous">
+                        <a href="/post/%E7%BA%BF%E7%A8%8B%E6%B1%A0%E6%A1%86%E6%9E%B6/" data-toggle="tooltip" data-placement="top" title="线程池框架">&larr;
+                            Previous Post</a>
+                    </li>
+                    
+                    
+                </ul>
+
+                
+<div id="disqus-comment"></div>
+
+
+
+            </div>
+            
+            <div class="
+                col-lg-8 col-lg-offset-2
+                col-md-10 col-md-offset-1
+                sidebar-container">
+
+                
+                
+                <section>
+                    <hr class="hidden-sm hidden-xs">
+                    <h5><a href="/tags/">FEATURED TAGS</a></h5>
+                    <div class="tags">
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        <a href="/tags/threadlocal" title="ThreadLocal">
+                            ThreadLocal
+                        </a>
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        <a href="/tags/zookeeper" title="Zookeeper">
+                            Zookeeper
+                        </a>
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        <a href="/tags/docker" title="docker">
+                            docker
+                        </a>
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        <a href="/tags/dockerfile" title="dockerfile">
+                            dockerfile
+                        </a>
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        <a href="/tags/elasticsearch" title="elasticSearch">
+                            elasticSearch
+                        </a>
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        <a href="/tags/java%E5%9F%BA%E7%A1%80" title="java基础">
+                            java基础
+                        </a>
+                        
+                        
+                        
+                        <a href="/tags/java%E7%9B%B8%E5%85%B3%E6%A6%82%E5%BF%B5" title="java相关概念">
+                            java相关概念
+                        </a>
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        <a href="/tags/jvm" title="jvm">
+                            jvm
+                        </a>
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        <a href="/tags/maven" title="maven">
+                            maven
+                        </a>
+                        
+                        
+                        
+                        <a href="/tags/mongodb" title="mongodb">
+                            mongodb
+                        </a>
+                        
+                        
+                        
+                        
+                        
+                        <a href="/tags/mybatis%E7%B3%BB%E5%88%97" title="mybatis系列">
+                            mybatis系列
+                        </a>
+                        
+                        
+                        
+                        <a href="/tags/mycat" title="mycat">
+                            mycat
+                        </a>
+                        
+                        
+                        
+                        
+                        
+                        <a href="/tags/mysql%E7%B3%BB%E5%88%97" title="mysql系列">
+                            mysql系列
+                        </a>
+                        
+                        
+                        
+                        
+                        
+                        <a href="/tags/nginx" title="nginx">
+                            nginx
+                        </a>
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        <a href="/tags/redis" title="redis">
+                            redis
+                        </a>
+                        
+                        
+                        
+                        <a href="/tags/rocketmq" title="rocketmq">
+                            rocketmq
+                        </a>
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        <a href="/tags/shell" title="shell">
+                            shell
+                        </a>
+                        
+                        
+                        
+                        <a href="/tags/shiro" title="shiro">
+                            shiro
+                        </a>
+                        
+                        
+                        
+                        
+                        
+                        <a href="/tags/springcloud" title="springCloud">
+                            springCloud
+                        </a>
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        <a href="/tags/springboot%E7%B3%BB%E5%88%97" title="springboot系列">
+                            springboot系列
+                        </a>
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        <a href="/tags/%E5%88%86%E5%B8%83%E5%BC%8F%E7%B3%BB%E5%88%97" title="分布式系列">
+                            分布式系列
+                        </a>
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        <a href="/tags/%E5%8D%95%E7%82%B9%E7%99%BB%E5%BD%95" title="单点登录">
+                            单点登录
+                        </a>
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        <a href="/tags/%E5%A4%9A%E7%BA%BF%E7%A8%8B%E5%92%8C%E9%AB%98%E5%B9%B6%E5%8F%91" title="多线程和高并发">
+                            多线程和高并发
+                        </a>
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        <a href="/tags/%E5%BC%80%E5%8F%91%E5%B7%A5%E5%85%B7" title="开发工具">
+                            开发工具
+                        </a>
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        <a href="/tags/%E6%95%B0%E6%8D%AE%E5%BA%93" title="数据库">
+                            数据库
+                        </a>
+                        
+                        
+                        
+                        
+                        
+                        <a href="/tags/%E6%95%B0%E6%8D%AE%E7%BB%93%E6%9E%84" title="数据结构">
+                            数据结构
+                        </a>
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        <a href="/tags/%E8%AE%BE%E8%AE%A1%E6%A8%A1%E5%BC%8F" title="设计模式">
+                            设计模式
+                        </a>
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        <a href="/tags/%E8%B4%9F%E8%BD%BD%E5%9D%87%E8%A1%A1" title="负载均衡">
+                            负载均衡
+                        </a>
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                    </div>
+                </section>
+                
+
+                
+                
+                <section>
+                    <hr>
+                    <h5>FRIENDS</h5>
+                    <ul class="list-inline">
+                        
+                        <li><a target="_blank" href="https://zhaohuabing.com">赵化冰博客</a></li>
+                        
+                        <li><a target="_blank" href="http://www.tianshouzhi.com">田守枝</a></li>
+                        
+                        <li><a target="_blank" href="http://www.ityouknow.com">纯洁的微笑</a></li>
+                        
+                        <li><a target="_blank" href="https://renchunxiao.com">任春晓</a></li>
+                        
+                        <li><a target="_blank" href="https://www.lihongkun.com">泛泛之辈</a></li>
+                        
+                        <li><a target="_blank" href="https://juejin.im/welcome/backend">后端服务论坛</a></li>
+                        
+                        <li><a target="_blank" href="https://www.javaboy.org">江南一点雨</a></li>
+                        
+                        <li><a target="_blank" href="https://blog.csdn.net/gwd1154978352">东天里的冬天</a></li>
+                        
+                    </ul>
+                </section>
+                
+            </div>
+        </div>
+    </div>
+</article>
+
+
+
+
+<footer>
+    <div class="container">
+        <div class="row">
+            <div class="col-lg-8 col-lg-offset-2 col-md-10 col-md-offset-1">
+                <ul class="list-inline text-center">
+                   
+                   <li>
+                       <a href="" rel="alternate" type="application/rss+xml" title="" >
+                           <span class="fa-stack fa-lg">
+                               <i class="fa fa-circle fa-stack-2x"></i>
+                               <i class="fa fa-rss fa-stack-1x fa-inverse"></i>
+                           </span>
+                       </a>
+                   </li>
+                   
+                    
+                    <li>
+                        <a href="mailto:maiziybtoday@gmail.com">
+                            <span class="fa-stack fa-lg">
+                                <i class="fa fa-circle fa-stack-2x"></i>
+                                <i class="fa fa-envelope fa-stack-1x fa-inverse"></i>
+                            </span>
+                        </a>
+                    </li>
+		    
+                    
+                    
+                    
+                    
+
+                    
+
+		    
+                    
+                    <li>
+                        <a target="_blank" href="/your%20wechat%20qr%20code%20image">
+                            <span class="fa-stack fa-lg">
+                                <i class="fa fa-circle fa-stack-2x"></i>
+                                <i class="fa fa-wechat fa-stack-1x fa-inverse"></i>
+                            </span>
+                        </a>
+                    </li>
+		    
+                    
+                    
+                    <li>
+                        <a target="_blank" href="https://www.linkedin.com/in/yourlinkedinid">
+                            <span class="fa-stack fa-lg">
+                                <i class="fa fa-circle fa-stack-2x"></i>
+                                <i class="fa fa-linkedin fa-stack-1x fa-inverse"></i>
+                            </span>
+                        </a>
+                    </li>
+		    
+                    
+                </ul>
+		<p class="copyright text-muted">
+                    Copyright &copy;  2019
+                    <br>
+                    <a href="https://themes.gohugo.io/hugo-theme-cleanwhite">CleanWhite Hugo Theme</a> by <a href="https://zhaohuabing.com">Huabing</a> |
+                    <iframe
+                        style="margin-left: 2px; margin-bottom:-5px;"
+                        frameborder="0" scrolling="0" width="100px" height="20px"
+                        src="https://ghbtns.com/github-btn.html?user=zhaohuabing&repo=hugo-theme-cleanwhite&type=star&count=true" >
+                    </iframe>
+                </p>
+            </div>
+        </div>
+    </div>
+</footer>
+
+
+
+
+<script>
+    function async(u, c) {
+      var d = document, t = 'script',
+          o = d.createElement(t),
+          s = d.getElementsByTagName(t)[0];
+      o.src = u;
+      if (c) { o.addEventListener('load', function (e) { c(null, e); }, false); }
+      s.parentNode.insertBefore(o, s);
+    }
+</script>
+
+
+
+
+
+
+<script>
+    
+    if($('#tag_cloud').length !== 0){
+        async("/js/jquery.tagcloud.js",function(){
+            $.fn.tagcloud.defaults = {
+                
+                color: {start: '#bbbbee', end: '#0085a1'},
+            };
+            $('#tag_cloud a').tagcloud();
+        })
+    }
+</script>
+
+
+<script>
+    async("https://cdnjs.cloudflare.com/ajax/libs/fastclick/1.0.6/fastclick.js", function(){
+        var $nav = document.querySelector("nav");
+        if($nav) FastClick.attach($nav);
+    })
+</script>
+
+
+
+
+
+
+</body>
+</html>
