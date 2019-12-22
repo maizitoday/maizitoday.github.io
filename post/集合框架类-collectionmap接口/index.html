@@ -1,0 +1,2476 @@
+<!DOCTYPE html>
+<html lang="en-us">
+<head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+
+    
+    <meta property="og:site_name" content="">
+    <meta property="og:type" content="article">
+
+    
+    <meta property="og:image" content="http://maizitoday.github.io//img/home-bg-jeep.jpg">
+    <meta property="twitter:image" content="http://maizitoday.github.io//img/home-bg-jeep.jpg" />
+    
+
+    
+    <meta name="title" content="集合框架类-Collection，Map接口" />
+    <meta property="og:title" content="集合框架类-Collection，Map接口" />
+    <meta property="twitter:title" content="集合框架类-Collection，Map接口" />
+    
+
+    
+    <meta name="description" content="麦子，程序员, 开源爱好者，生活探险家 | 这里是 麦子 的博客，与你一起发现更大的世界。">
+    <meta property="og:description" content="麦子，程序员, 开源爱好者，生活探险家 | 这里是 麦子 的博客，与你一起发现更大的世界。" />
+    <meta property="twitter:description" content="麦子，程序员, 开源爱好者，生活探险家 | 这里是 麦子 的博客，与你一起发现更大的世界。" />
+    
+
+    
+    <meta property="twitter:card" content="summary" />
+    
+    
+
+    <meta name="keyword"  content="麦子, maizi, maizi, , 麦子的网络日志, 麦子的博客, maizi Blog, 博客, 个人网站, 互联网, Web, 云原生, PaaS, Istio, Kubernetes, 微服务, Microservice">
+    <link rel="shortcut icon" href="/img/favicon.ico">
+
+    <title>集合框架类-Collection，Map接口-麦子的博客</title>
+
+    <link rel="canonical" href="/post/%E9%9B%86%E5%90%88%E6%A1%86%E6%9E%B6%E7%B1%BB-collectionmap%E6%8E%A5%E5%8F%A3/">
+
+    <link rel="stylesheet" href="/css/iDisqus.min.css"/>
+	
+    
+    <link rel="stylesheet" href="/css/bootstrap.min.css">
+
+    
+    <link rel="stylesheet" href="/css/hux-blog.min.css">
+
+    
+    <link rel="stylesheet" href="/css/syntax.css">
+
+    
+    <link rel="stylesheet" href="/css/zanshang.css">
+
+    
+    <link href="//cdnjs.cloudflare.com/ajax/libs/font-awesome/4.6.3/css/font-awesome.min.css" rel="stylesheet" type="text/css">
+    
+    
+    <script src="/js/jquery.min.js"></script>
+    
+    
+    <script src="/js/bootstrap.min.js"></script>
+    
+    
+    <script src="/js/hux-blog.min.js"></script>
+	
+    
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.13.1/styles/docco.min.css">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.13.1/highlight.min.js"></script>
+    <script>hljs.initHighlightingOnLoad();</script>
+</head>
+
+
+<nav class="navbar navbar-default navbar-custom navbar-fixed-top">
+    <div class="container-fluid">
+        
+        <div class="navbar-header page-scroll">
+            <button type="button" class="navbar-toggle">
+                <span class="sr-only">Toggle navigation</span>
+                <span class="icon-bar"></span>
+                <span class="icon-bar"></span>
+                <span class="icon-bar"></span>
+            </button>
+            <a class="navbar-brand" href="/"></a>
+        </div>
+
+        
+        
+        <div id="huxblog_navbar">
+            <div class="navbar-collapse">
+                <ul class="nav navbar-nav navbar-right">
+                    <li>
+                        <a href="/">Home</a>
+                    </li>
+                    
+                    <li>
+                        <a href="/categories/life">Life</a>
+                    </li>
+                    
+                    <li>
+                        <a href="/categories/tech">Tech</a>
+                    </li>
+                    
+                    
+		    
+                        <li><a href="/top/about/">ABOUT</a></li>
+                    
+
+                    
+		    <li>
+                        <a href="/search">SEARCH <img src="/img/search.png" height="15" style="cursor: pointer;" alt="Search"></a>
+		    </li>
+                    
+                </ul>
+            </div>
+        </div>
+        
+    </div>
+    
+</nav>
+<script>
+    
+    
+    
+    var $body   = document.body;
+    var $toggle = document.querySelector('.navbar-toggle');
+    var $navbar = document.querySelector('#huxblog_navbar');
+    var $collapse = document.querySelector('.navbar-collapse');
+
+    $toggle.addEventListener('click', handleMagic)
+    function handleMagic(e){
+        if ($navbar.className.indexOf('in') > 0) {
+        
+            $navbar.className = " ";
+            
+            setTimeout(function(){
+                
+                if($navbar.className.indexOf('in') < 0) {
+                    $collapse.style.height = "0px"
+                }
+            },400)
+        }else{
+        
+            $collapse.style.height = "auto"
+            $navbar.className += " in";
+        }
+    }
+</script>
+
+
+
+
+<style type="text/css">
+    header.intro-header {
+        background-image: url('https://img.zhaohuabing.com/in-post/2018-04-16-using-helm-to-deploy-to-kubernetes/buffalo.jpg')
+    }
+</style>
+<header class="intro-header">
+    <div class="container">
+        <div class="row">
+            <div class="col-lg-8 col-lg-offset-2 col-md-10 col-md-offset-1">
+                <div class="post-heading">
+                    <div class="tags">
+                        
+                        <a class="tag" href="/tags/%E5%A4%9A%E7%BA%BF%E7%A8%8B%E5%92%8C%E9%AB%98%E5%B9%B6%E5%8F%91" title="多线程和高并发">
+                            多线程和高并发
+                        </a>
+                        
+                        <a class="tag" href="/tags/java%E5%9F%BA%E7%A1%80" title="java基础">
+                            java基础
+                        </a>
+                        
+                    </div>
+                    <h1>集合框架类-Collection，Map接口</h1>
+                    <h2 class="subheading"></h2>
+                    <span class="meta">
+			Posted by 
+			
+			    麦子
+			 
+			on 
+			Wednesday, December 18, 2019
+                        
+                    </span>
+                </div>
+            </div>
+        </div>
+    </div>
+</header>
+
+
+
+
+<article>
+    <div class="container">
+        <div class="row">
+
+            
+            <div class="
+                col-lg-8 col-lg-offset-2
+                col-md-10 col-md-offset-1
+                post-container">
+
+                
+                <header>
+                    <h2>TOC</h2>
+                </header>              
+                <nav id="TableOfContents">
+<ul>
+<li><a href="#集合框架">集合框架</a>
+<ul>
+<li><a href="#结构图">结构图</a></li>
+<li><a href="#概述">概述</a></li>
+<li><a href="#常见集合框架介绍">常见集合框架介绍</a></li>
+</ul></li>
+<li><a href="#collection-接口">Collection 接口</a>
+<ul>
+<li><a href="#概述-1">概述</a></li>
+<li><a href="#子类接口">子类接口</a>
+<ul>
+<li><a href="#list接口">List接口</a>
+<ul>
+<li><a href="#概述-2">概述</a></li>
+<li><a href="#实现类">实现类</a>
+<ul>
+<li><a href="#arraylist">ArrayList</a>
+<ul>
+<li><a href="#概述-3">概述</a></li>
+<li><a href="#常用方法">常用方法</a></li>
+<li><a href="#总结"><strong>总结</strong></a></li>
+</ul></li>
+<li><a href="#linkedlist">LinkedList</a>
+<ul>
+<li><a href="#概述-4">概述</a></li>
+<li><a href="#总结-1">总结</a></li>
+</ul></li>
+<li><a href="#vector">Vector</a>
+<ul>
+<li><a href="#概述-5">概述</a></li>
+<li><a href="#总结-2">总结</a></li>
+<li><a href="#子类-stack">子类&ndash;Stack</a></li>
+</ul></li>
+<li><a href="#copyonwritearraylist">CopyOnWriteArrayList</a>
+<ul>
+<li><a href="#概述-6">概述</a></li>
+<li><a href="#几个要点">几个要点</a></li>
+<li><a href="#缺点">缺点</a></li>
+<li><a href="#设计思想">设计思想</a></li>
+</ul></li>
+</ul></li>
+</ul></li>
+<li><a href="#set接口">Set接口</a>
+<ul>
+<li><a href="#概述-7">概述</a></li>
+<li><a href="#实现类-1">实现类</a>
+<ul>
+<li><a href="#hashset">HashSet</a>
+<ul>
+<li><a href="#概述-8">概述</a></li>
+<li><a href="#常用方法-1">常用方法</a></li>
+<li><a href="#总结-3">总结</a></li>
+<li><a href="#子类-linkedhashset">子类&ndash;LinkedHashSet</a></li>
+</ul></li>
+<li><a href="#treeset">TreeSet</a>
+<ul>
+<li><a href="#概述-9">概述</a></li>
+</ul></li>
+<li><a href="#concurrentskiplistset">ConcurrentSkipListSet</a>
+<ul>
+<li><a href="#概述-10">概述</a></li>
+<li><a href="#源码">源码</a></li>
+</ul></li>
+<li><a href="#copyonwritearrayset">CopyOnWriteArraySet</a>
+<ul>
+<li><a href="#概述-11">概述</a></li>
+<li><a href="#具有以下特性">具有以下特性</a></li>
+</ul></li>
+<li><a href="#enumset">EnumSet</a>
+<ul>
+<li><a href="#概述-12">概述</a></li>
+<li><a href="#常用方法-2">常用方法</a></li>
+</ul></li>
+</ul></li>
+</ul></li>
+</ul></li>
+</ul></li>
+<li><a href="#map接口">Map接口</a>
+<ul>
+<li><a href="#概述-13">概述</a></li>
+<li><a href="#结构图-1">结构图</a></li>
+<li><a href="#实现类-2">实现类</a>
+<ul>
+<li><a href="#hashmap">HashMap</a>
+<ul>
+<li><a href="#概述-14">概述</a></li>
+<li><a href="#map集合的特点">Map集合的特点</a></li>
+<li><a href="#数据结构">数据结构</a></li>
+<li><a href="#entry键值对对象">Entry键值对对象</a></li>
+<li><a href="#key判断">key判断</a></li>
+<li><a href="#总结-4">总结</a></li>
+<li><a href="#子类-linkedhashmap">子类&ndash;LinkedHashMap</a>
+<ul>
+<li><a href="#概述-15">概述</a></li>
+<li><a href="#特点">特点</a></li>
+</ul></li>
+</ul></li>
+<li><a href="#treemap">TreeMap</a>
+<ul>
+<li><a href="#概述-16">概述</a></li>
+<li><a href="#特点-1">特点</a></li>
+<li><a href="#源码查看">源码查看</a></li>
+</ul></li>
+<li><a href="#weakhashmap">WeakHashmap</a>
+<ul>
+<li><a href="#概述-17">概述</a></li>
+<li><a href="#特点-2">特点</a></li>
+</ul></li>
+<li><a href="#enummap">EnumMap</a>
+<ul>
+<li><a href="#概述-18">概述</a></li>
+<li><a href="#代码示例">代码示例</a></li>
+</ul></li>
+<li><a href="#identityhashmap">IdentityHashMap</a>
+<ul>
+<li><a href="#概述-19">概述</a></li>
+<li><a href="#和-equals比较">== 和 equals比较</a></li>
+<li><a href="#代码示例-1">代码示例</a></li>
+<li><a href="#特点-3">特点</a></li>
+</ul></li>
+<li><a href="#hashtable">HashTable</a>
+<ul>
+<li><a href="#概述-20">概述</a>
+<ul>
+<li><a href="#子类-dictionary">子类&ndash;Dictionary</a>
+<ul>
+<li><a href="#概述-21">概述</a></li>
+</ul></li>
+</ul></li>
+</ul></li>
+<li><a href="#concurrenthashmap">ConcurrentHashMap</a>
+<ul>
+<li><a href="#概述-22">概述</a></li>
+<li><a href="#为什么用它">为什么用它</a></li>
+</ul></li>
+<li><a href="#concurrentskiplistmap">ConcurrentSkipListMap</a>
+<ul>
+<li><a href="#概述-23">概述</a></li>
+<li><a href="#concurrentskiplistmap-vs-concurrenthashmap-不能比拟的优点">ConcurrentSkipListMap VS ConcurrentHashMap 不能比拟的优点</a></li>
+<li><a href="#总结-5">总结</a></li>
+</ul></li>
+</ul></li>
+</ul></li>
+<li><a href="#comparable接口">Comparable接口</a>
+<ul>
+<li><a href="#概述-24">概述</a></li>
+<li><a href="#comparable接口简介">Comparable接口简介</a></li>
+<li><a href="#实例显示">实例显示</a></li>
+<li><a href="#注意">注意</a></li>
+</ul></li>
+<li><a href="#iterator接口">Iterator接口</a>
+<ul>
+<li><a href="#概述-25">概述</a></li>
+<li><a href="#常用方法-3">常用方法</a></li>
+<li><a href="#显示结构">显示结构</a>
+<ul>
+<li><a href="#remove方法">remove方法</a></li>
+<li><a href="#注意-1">注意</a></li>
+<li><a href="#相关子类">相关子类</a>
+<ul>
+<li><a href="#listiterator">ListIterator</a>
+<ul>
+<li><a href="#局限">局限</a></li>
+<li><a href="#优势">优势</a></li>
+</ul></li>
+</ul></li>
+</ul></li>
+</ul></li>
+<li><a href="#工具类">工具类</a>
+<ul>
+<li><a href="#collections">Collections</a>
+<ul>
+<li><a href="#概述-26">概述</a></li>
+<li><a href="#主要方法">主要方法</a>
+<ul>
+<li><a href="#排序">排序</a></li>
+<li><a href="#查找-替换">查找，替换</a></li>
+<li><a href="#同步控制">同步控制</a></li>
+<li><a href="#设置不可变集合">设置不可变集合</a></li>
+</ul></li>
+</ul></li>
+<li><a href="#arrays">Arrays</a>
+<ul>
+<li><a href="#概述-27">概述</a></li>
+<li><a href="#常用方法-4">常用方法</a></li>
+</ul></li>
+<li><a href="#集合类互相转换">集合类互相转换</a>
+<ul>
+<li>
+<ul>
+<li><a href="#list与set互相转换">List与Set互相转换</a>
+<ul>
+<li><a href="#list转set">list转set</a></li>
+<li><a href="#set转list">set转list</a></li>
+</ul></li>
+<li><a href="#map转list-set">Map转List，Set</a></li>
+<li><a href="#注意-2">注意</a></li>
+</ul></li>
+</ul></li>
+</ul></li>
+<li><a href="#常见问题">常见问题</a>
+<ul>
+<li><a href="#1-linkedlist和arraylist的对比">1. LinkedList和ArrayList的对比</a></li>
+<li><a href="#2-copyonwritearraylist为什么并发安全且性能比vector好">2. CopyOnWriteArrayList为什么并发安全且性能比Vector好</a></li>
+<li><a href="#3-hashset-treeset和linkedhashset的区别">3. HashSet，TreeSet和LinkedHashSet的区别</a>
+<ul>
+<li><a href="#hashset-1">HashSet</a></li>
+<li><a href="#linkedhashset">LinkedHashSet</a></li>
+</ul></li>
+<li><a href="#4-linkedhashmap-vs-treemap">4.  LinkedHashMap VS TreeMap</a></li>
+<li><a href="#5-set排序-list排序-map排序">5. set排序 ， List排序， map排序</a>
+<ul>
+<li>
+<ul>
+<li><a href="#示例公共代码">示例公共代码</a></li>
+<li><a href="#list排序">List排序</a></li>
+<li><a href="#set排序">Set排序</a></li>
+<li><a href="#map排序">Map排序</a>
+<ul>
+<li><a href="#key排序">key排序</a></li>
+<li><a href="#value排序">value排序</a></li>
+</ul></li>
+</ul></li>
+<li><a href="#6-hashmap怎么存放大量数据">6. HashMap怎么存放大量数据。</a></li>
+</ul></li>
+</ul></li>
+</ul>
+</nav>
+                
+                
+
+<p>[TOC]</p>
+
+<p><strong>转载地址：<a href="https://blog.csdn.net/qq407388356/article/details/78319585">https://blog.csdn.net/qq407388356/article/details/78319585</a></strong></p>
+
+<h1 id="集合框架">集合框架</h1>
+
+<h2 id="结构图">结构图</h2>
+
+<p><img src="/img//20190321160846610.png" alt="20190321160846610" /></p>
+
+<h2 id="概述">概述</h2>
+
+<p>集合包最常用的有Collection和Map两个接口的实现类，Colleciton用于存放多个单对象，Map用于存放Key-Value形式的键值对。</p>
+
+<p>Collection中最常用的又分为两种类型的接口：List和Set，两者最明显的差别为List支持放入重复的元素，而Set不支持。</p>
+
+<h2 id="常见集合框架介绍">常见集合框架介绍</h2>
+
+<p><img src="/img//Xnip2019-12-19_13-53-46.png" alt="Xnip2019-12-19_13-53-46" /></p>
+
+<p><strong>说明：Queue这一块后续单独一篇文章。</strong></p>
+
+<h1 id="collection-接口">Collection 接口</h1>
+
+<h2 id="概述-1">概述</h2>
+
+<p>Collection 是最基本的集合接口，一个 Collection 代表一组 Object，即 Collection 的元素, Java不提供直接继承自Collection的类，只提供继承于的子接口(如List和set)。</p>
+
+<h2 id="子类接口">子类接口</h2>
+
+<h3 id="list接口">List接口</h3>
+
+<h4 id="概述-2">概述</h4>
+
+<p>List接口是一个有序的Collection，使用此接口能够精确的控制每个元素插入的位置，能够通过索引(元素在List中位置，类似于数组的小标)来访问List中的元素，而且允许有相同的元素。</p>
+
+<h4 id="实现类">实现类</h4>
+
+<h5 id="arraylist">ArrayList</h5>
+
+<h6 id="概述-3">概述</h6>
+
+<p>ArrayList基于数组方式实现，默认构造器通过调用ArrayList(int)来完成创建，传入的值为10，实例化了一个Object数组，并将此数组赋给了当前实例的elementData属性，此Object数组的大小即为传入的initialCapacity，因此调用空构造器的情况下会创建一个大小为10的Object数组。</p>
+
+<h6 id="常用方法">常用方法</h6>
+
+<p><strong>1.  插入对象：add(E)</strong></p>
+
+<p>基于已有元素数量加1作为名叫minCapacity的变量，比较此值和Object数组的大小，若大于数组值，那么先将当前Object数组值赋给一个数组对象，接着产生一个新的数组容量值。此值的计算方法为当前数组值*1.5+1，如得出的容量值仍然小于minCapacity，那么就以minCapacity作为新的容量值，调用Arrays.copyOf来生成新的数组对象。</p>
+
+<p>还提供了add(int,E)这样的方法将元素直接插入指定的int位置上，将目前index及其后的数据都往后挪一位，然后才能将指定的index位置的赋值为传入的对象，这种方式要多付出一次复制数组的代价。还提供了addAll。</p>
+
+<p><strong>2.  删除对象：remove(E)</strong></p>
+
+<p>这里调用了faseRemove方法将index后的<strong>对象往前复制一位</strong>，并将数组中的最后一个元素的值设置为null，即释放了对此对象的引用。还提供了remove(int)方法来删除指定位置的对象，remove(int)的实现比remove(E)多了一个数组范围的检测，但少了对象位置的查找，因此性能会更好。</p>
+
+<p><strong>3. 获取单个对象：get(int)</strong></p>
+
+<p><strong>4. 遍历对象：iterator()</strong></p>
+
+<p><strong>5. 判断对象是否存在：contains(E)</strong></p>
+
+<h6 id="总结"><strong>总结</strong></h6>
+
+<ol>
+<li>ArrayList基于数组方式实现，无容量的限制；</li>
+<li>ArrayList在执行插入元素时可能要扩容，在删除元素时并不会减小数组的容量（如希望相应的缩小数组容量，可以调用ArrayList的trimToSize()），<strong>在查找元素时要遍历数组，对于非null的元素采取equals的方式寻找；</strong></li>
+<li>ArrayList是非线程安全的。可以使用CopyOnWriteArrayList保证线程安全。</li>
+</ol>
+
+<h5 id="linkedlist">LinkedList</h5>
+
+<h6 id="概述-4">概述</h6>
+
+<p>LinkedList基于双向链表机制，所谓双向链表机制，就是集合中的每个元素都知道其前一个元素及其后一个元素的位置。在LinkedList中，以一个内部的Entry类来代表集合中的元素，元素的值赋给element属性，Entry中的next属性指向元素的后一个元素，Entry中的previous属性指向元素的前一个元素，基于这样的机制可以快速实现集合中元素的移动。</p>
+
+<h6 id="总结-1">总结</h6>
+
+<ol>
+<li>LinkedList基于双向链表机制实现；</li>
+<li>LinkedList在插入元素时，须创建一个新的Entry对象，并切换相应元素的前后元素的引用；在查找元素时，须遍历链表；在删除元素时，要遍历链表，找到要删除的元素，然后从链表上将此元素删除即可，此时原有的前后元素改变引用连在一起；</li>
+<li>LinkedList是非线程安全的。</li>
+<li>他也实现了Queue队列接口，他也是一个队列。</li>
+</ol>
+
+<h5 id="vector">Vector</h5>
+
+<h6 id="概述-5">概述</h6>
+
+<p>Vector类实现了一个动态数组。和ArrayList和相似，但是两者是不同的：</p>
+
+<ol>
+<li><p>Vector是同步访问的。</p></li>
+
+<li><p>Vector包含了许多传统的方法，这些方法不属于集合框架。</p></li>
+</ol>
+
+<p>其add、remove、get(int)方法都加了synchronized关键字，默认创建一个大小为10的Object数组，并将capacityIncrement设置为0。容量扩充策略：如果capacityIncrement大于0，则将Object数组的大小扩大为现有size加上capacityIncrement的值；如果capacity等于或小于0，则将Object数组的大小扩大为现有size的两倍，这种容量的控制策略比ArrayList更为可控。</p>
+
+<h6 id="总结-2">总结</h6>
+
+<p><strong>Vector是基于Synchronized实现的线程安全的ArrayList，</strong>但在插入元素时容量扩充的机制和ArrayList稍有不同，并可通过传入capacityIncrement来控制容量的扩充。</p>
+
+<h6 id="子类-stack">子类&ndash;Stack</h6>
+
+<p>栈是Vector的一个子类，<strong>它实现了一个标准的后进先出的栈</strong>。堆栈只定义了默认构造函数，用来创建一个空栈。Stack继承于Vector，在其基础上实现了Stack所要求的后进先出(LIFO)的弹出与压入操作，其提供了push、pop、peek三个主要的方法。</p>
+
+<p><strong>注意：线程是安全的。</strong></p>
+
+<h5 id="copyonwritearraylist">CopyOnWriteArrayList</h5>
+
+<p>转载链接：<a href="https://blog.csdn.net/zongyeqing/article/details/81807681">https://blog.csdn.net/zongyeqing/article/details/81807681</a></p>
+
+<p>转载地址：<a href="https://www.xttblog.com/?p=4006">https://www.xttblog.com/?p=4006</a></p>
+
+<h6 id="概述-6">概述</h6>
+
+<p>为了将读取的性能发挥到极致，jdk中提供了CopyOnWriteArrayList类。对它来说，读取是完全不用加锁的，写入也不会阻塞读取操作。只有写入与写入之间需要进行同步等待。那么它是如何做到的呢？从这个类的名字中可以看出，CopyOnWrite就是在写入操作时，进行一次自我复制。也就是对原有的数据进行一次复制，将修改的内容写入副本中。写完之后，再将修改完的副本替换原来的数据。这样就可以保证写操作不影响读了。</p>
+
+<h6 id="几个要点">几个要点</h6>
+
+<ol>
+<li>实现了List接口</li>
+<li>内部持有一个ReentrantLock lock = new ReentrantLock();</li>
+<li>底层是用volatile transient声明的数组 array</li>
+<li>读写分离，写时复制出一个新的数组，完成插入、修改或者移除操作后将新数组赋值给array。</li>
+</ol>
+
+<h6 id="缺点">缺点</h6>
+
+<ol>
+<li>由于写操作的时候，需要拷贝数组，会消耗内存，如果原数组的内容比较多的情况下，可能导致 young gc 或者 full gc。</li>
+<li>不能用于实时读的场景，像拷贝数组、新增元素都需要时间，所以调用一个 set 操作后，读取到数据可能还是旧的，虽然CopyOnWriteArrayList 能做到最终一致性,但是还是没法满足实时性要求</li>
+<li>由于实际使用中可能没法保证 CopyOnWriteArrayList 到底要放置多少数据，万一数据稍微有点多，每次 add/set 都要重新复制数组，这个代价实在太高昂了。在高性能的互联网应用中，这种操作分分钟引起故障。</li>
+</ol>
+
+<h6 id="设计思想">设计思想</h6>
+
+<ol>
+<li>读写分离，读和写分开</li>
+<li>最终一致性</li>
+<li>使用另外开辟空间的思路，来解决并发冲突</li>
+</ol>
+
+<h3 id="set接口">Set接口</h3>
+
+<h4 id="概述-7">概述</h4>
+
+<p>Set 具有与 Collection 完全一样的接口，只是行为上不同，Set 不保存重复的元素。</p>
+
+<ol>
+<li>Set不允许包含相同的元素，如果试图把两个相同元素加入同一个集合中，add方法返回false。</li>
+<li>Set判断两个对象相同不是使用==运算符，而是根据equals方法。也就是说，只要两个对象用equals方法比较返回true，Set就不会接受这两个对象。</li>
+</ol>
+
+<p><strong>因为Object的equal方法默认是两个对象的引用的比较，意思就是指向同一内存,地址则相等，否则不相等；如果你现在需要利用对象里面的值来判断是否相等，则重载equal方法。先检索hashcode值，不等的情况下才会去比较equals方法的。</strong></p>
+
+<h4 id="实现类-1">实现类</h4>
+
+<h5 id="hashset">HashSet</h5>
+
+<h6 id="概述-8">概述</h6>
+
+<p>默认构造创建一个HashMap对象，HashSet是基于HashMap实现的。</p>
+
+<h6 id="常用方法-1">常用方法</h6>
+
+<pre><code class="language-java">// 调用HashMap的put方法来完成此操作，将需要增加的元素作为Map中的key，value则传入一个之前已创建的Object对象。
+add(E)：  
+</code></pre>
+
+<pre><code class="language-java">// 调用HashMap的remove(E)方法完成此操作。
+remove(E)： 
+</code></pre>
+
+<pre><code class="language-java">// HashMap的containsKey
+contains(E)：
+</code></pre>
+
+<pre><code class="language-java">// 调用HashMap的keySet的iterator方法。
+iterator() ：   
+</code></pre>
+
+<h6 id="总结-3">总结</h6>
+
+<ol>
+<li>HashSet基于HashMap实现，无容量限制；</li>
+<li><strong>HashSet是非线程安全的</strong>.</li>
+</ol>
+
+<h6 id="子类-linkedhashset">子类&ndash;LinkedHashSet</h6>
+
+<p>LinkedHashSet集合也是根据元素<strong>hashCode值来决定元素存储位置</strong>，但它同时使用链表维护元素的次序，这样使得元素看起来是以插入的顺序保存的。也就是说，当遍历LinkedHashSet集合里元素时，HashSet将会按元素的添加顺序来访问集合里的元素。</p>
+
+<p>LinkedHashSet需要维护元素的插入顺序，因此性能略低于HashSet的性能，但在迭代访问Set里的全部元素时将有很好的性能，因为它以链表来维护内部顺序。</p>
+
+<h5 id="treeset">TreeSet</h5>
+
+<h6 id="概述-9">概述</h6>
+
+<p>TreeSet和HashSet的主要不同在于TreeSet对于排序的支持，TreeSet基于TreeMap实现。<strong>依托于Compared接口的处理。</strong></p>
+
+<h5 id="concurrentskiplistset">ConcurrentSkipListSet</h5>
+
+<h6 id="概述-10">概述</h6>
+
+<p>ConcurrentSkipListSet是<strong>线程安全</strong>的有序的集合，适用于高并发的场景。</p>
+
+<p>ConcurrentSkipListSet和<a href="http://www.cnblogs.com/skywang12345/p/3311268.html">TreeSet</a>，<strong>它们虽然都是有序的集合</strong>。但是，第一，它们的线程安全机制不同，TreeSet是非线程安全的，而ConcurrentSkipListSet是线程安全的。第二，ConcurrentSkipListSet是通过<a href="http://www.cnblogs.com/skywang12345/p/3498556.html">ConcurrentSkipListMap</a>实现的，而TreeSet是通过TreeMap实现的。</p>
+
+<h6 id="源码">源码</h6>
+
+<pre><code class="language-java"> public TreeSet(Comparator&lt;? super E&gt; comparator) {
+        this(new TreeMap&lt;&gt;(comparator));
+    }
+</code></pre>
+
+<h5 id="copyonwritearrayset">CopyOnWriteArraySet</h5>
+
+<p>转载地址： <a href="https://www.cnblogs.com/xiaolovewei/p/9142046.html">https://www.cnblogs.com/xiaolovewei/p/9142046.html</a></p>
+
+<h6 id="概述-11">概述</h6>
+
+<p>它是<strong>线程安全</strong>的无序的集合，可以将它理解成线程安全的<a href="http://www.cnblogs.com/skywang12345/p/3311252.html">HashSet</a>。CopyOnWriteArraySet包含CopyOnWriteArrayList对象，它是通过CopyOnWriteArrayList实现的。而CopyOnWriteArrayList本质是个动态数组队列，</p>
+
+<p>所以CopyOnWriteArraySet相当于通过通过动态数组实现的“集合”！ CopyOnWriteArrayList中允许有重复的元素；但是，<strong>CopyOnWriteArraySet是一个集合，所以它不能有重复集合</strong>。因此，CopyOnWriteArrayList额外提供了addIfAbsent()和addAllAbsent()这两个添加元素的API，通过这些API来添加元素时，只有当元素不存在时才执行添加操作！</p>
+
+<h6 id="具有以下特性">具有以下特性</h6>
+
+<ol>
+<li>它最适合于具有以下特征的应用程序：Set 大小通常保持很小，只读操作远多于可变操作，需要在遍历期间防止线程间的冲突。</li>
+<li>它是线程安全的。</li>
+<li>因为通常需要复制整个基础数组，所以可变操作（add()、set() 和 remove() 等等）的开销很大。</li>
+<li>迭代器支持hasNext(), next()等不可变操作，但不支持可变 remove()等 操作。</li>
+<li>使用迭代器进行遍历的速度很快，并且不会与其他线程发生冲突。在构造迭代器时，迭代器依赖于不变的数组快照。</li>
+</ol>
+
+<h5 id="enumset">EnumSet</h5>
+
+<p>转载地址： <a href="https://www.cnblogs.com/treeshu/p/11013511.html">https://www.cnblogs.com/treeshu/p/11013511.html</a></p>
+
+<h6 id="概述-12">概述</h6>
+
+<p>EnumSet这是一个用来操作Enum的集合，是一个抽象类，它有两个继承类：JumboEnumSet和RegularEnumSet。在使用的时候，需要确定枚举类型。它的特点也是速度非常快，为什么速度很快呢？因为每次add的时候，每个枚举值只占一个长整型的一位。</p>
+
+<h6 id="常用方法-2">常用方法</h6>
+
+<p><img src="/img//Xnip2019-12-21_15-58-00.png" alt="Xnip2019-12-21_15-58-00" /></p>
+
+<h1 id="map接口">Map接口</h1>
+
+<h2 id="概述-13">概述</h2>
+
+<p>将唯一的键映射到值。Map.Entry，描述在一个Map中的一个元素（键/值对）。<strong>是一个Map的内部类</strong>。</p>
+
+<h2 id="结构图-1">结构图</h2>
+
+<p><img src="/img//p.jpg" alt="p" /></p>
+
+<h2 id="实现类-2">实现类</h2>
+
+<h3 id="hashmap">HashMap</h3>
+
+<h4 id="概述-14">概述</h4>
+
+<p>基于数组+链表的结合体(链表散列)实现，当链表长度大于8时，则转换为红黑树实现，减少查找时间复杂度，将key-value看成一个整体，存放于Entity[]数组，put的时候根据key hash后的hashcode和数组length-1按位与的结果值判断放在数组的哪个位置，如果该数组位置上若已经存放其他元素，则在这个位置上的元素以链表的形式存放。如果该位置上没有元素则直接存放。</p>
+
+<p>当系统决定存储HashMap中的key-value对时，完全没有考虑Entry中的value，仅仅只是根据key来计算并决定每个Entry的存储位置。我们完全可以把Map集合中的value当成key的附属，当系统决定了key的存储位置之后，value随之保存在那里即可。get取值也是根据key的hashCode确定在数组的位置，在根据key的equals确定在链表处的位置。</p>
+
+<p>当HashMap中的元素越来越多的时候，hash冲突的几率也就越来越高，因为数组的长度是固定的。所以为了提高查询的效率，就要对HashMap的数组进行扩容，而在HashMap数组扩容之后，最消耗性能的点就出现了：原数组中的数据必须重新计算其在新数组中的位置，并放进去，这就是resize。那么HashMap什么时候进行扩容呢？当HashMap中的元素个数超过数组大小*loadFactor时，就会进行数组扩容，loadFactor的默认值为0.75，这是一个折中的取值。</p>
+
+<h4 id="map集合的特点">Map集合的特点</h4>
+
+<ol>
+<li><p>Map集合是一个<strong>双列集合</strong>，一个元素包含两值（一个key，一个value）</p></li>
+
+<li><p>Map集合中的元素，key和value的数据类型<strong>可以相同，也可以不同</strong></p></li>
+
+<li><p>Map集合中的元素，<strong>key是不允许重复的，value是可以重复的</strong></p></li>
+
+<li><p>Map集合中的元素，key和value是<strong>一一对应的</strong></p></li>
+</ol>
+
+<h4 id="数据结构">数据结构</h4>
+
+<p>HashMap集合底层是哈希值：查询的速度特别的快。</p>
+
+<ol>
+<li><p>JDK.8之前：数组+单向链表</p></li>
+
+<li><p>JDK.8之后：数组+单向链表/红黑树<strong>（链表的长度超过8）</strong>：提高查询的速度</p></li>
+</ol>
+
+<h4 id="entry键值对对象">Entry键值对对象</h4>
+
+<p>Map.Entry<K,V>:在Map接口中有一个<strong>内部接口Entry</strong>
+<strong>作用：</strong>当Map集合一创建，那么就会在Map集合中创建一个Entry对象，用来记录键与值（键值对对象,键与值的映射关系)</p>
+
+<h4 id="key判断">key判断</h4>
+
+<p>只有equals()和hashcode()两个相等的时候， 才表示key是一样的。</p>
+
+<h4 id="总结-4">总结</h4>
+
+<ol>
+<li>HashMap采用数组方式存储key、value构成的Entry对象，无容量限制；</li>
+<li>HashMap基于key hash寻找Entry对象存放到数组的位置，对于hash冲突采用链表的方式解决；</li>
+<li>HashMap在插入元素时可能会扩大数组的容量，在扩大容量时须要重新计算hash，并复制对象到新的数组中；</li>
+<li><strong>HashMap是非线程安全的。</strong></li>
+<li>不过HashMap有一个问题，就是<strong>迭代HashMap的顺序并不是HashMap放置的顺序</strong>，也就是无序。</li>
+</ol>
+
+<h4 id="子类-linkedhashmap">子类&ndash;LinkedHashMap</h4>
+
+<p>转载地址：<a href="https://www.cnblogs.com/ericguoxiaofeng/p/10326014.html">https://www.cnblogs.com/ericguoxiaofeng/p/10326014.html</a></p>
+
+<h5 id="概述-15">概述</h5>
+
+<p>LinkedHashMap 在 HashMap 的基础上单独维护了一个具有所有数据的双向链表，该链表保证了元素迭代的顺序。</p>
+
+<p>所以我们可以直接这样说：LinkedHashMap = HashMap + LinkedList。LinkedHashMap 就是在 HashMap 的基础上多维护了一个双向链表，用来保证元素迭代顺序。</p>
+
+<p><strong><em>所以在概念上面说，比hashmap多了before，after，head，tail这几个东东</em></strong></p>
+
+<h5 id="特点">特点</h5>
+
+<table>
+<thead>
+<tr>
+<th>关 注 点</th>
+<th>结 论</th>
+</tr>
+</thead>
+
+<tbody>
+<tr>
+<td>LinkedHashMap是否允许键值对为空</td>
+<td>Key和Value都允许空</td>
+</tr>
+
+<tr>
+<td>LinkedHashMap是否允许重复数据</td>
+<td>Key重复会覆盖、Value允许重复</td>
+</tr>
+
+<tr>
+<td>LinkedHashMap是否有序</td>
+<td>有序</td>
+</tr>
+
+<tr>
+<td>LinkedHashMap是否线程安全</td>
+<td>非线程安全</td>
+</tr>
+</tbody>
+</table>
+
+<h3 id="treemap">TreeMap</h3>
+
+<p>转载地址： <a href="https://blog.csdn.net/aa1215018028/article/details/90477177">https://blog.csdn.net/aa1215018028/article/details/90477177</a></p>
+
+<h4 id="概述-16">概述</h4>
+
+<p>TreeMap基于<strong>红黑树（Red-Black tree）实现</strong>。该映射根据<strong>其键的自然顺序进行排序</strong>，或者根据<strong>创建映射时提供的 Comparator 进行排序</strong>，具体取决于使用的构造方法。</p>
+
+<p>TreeMap的基本操作 containsKey、get、put 和 remove 的时间复杂度是 log(n) 。</p>
+
+<p>另外，TreeMap是<strong>非同步</strong>的。 它的iterator 方法返回的<strong>迭代器是fail-fastl</strong>的。</p>
+
+<h4 id="特点-1">特点</h4>
+
+<ol>
+<li><p>TreeMap 是一个<strong>有序的key-value集合</strong>，它是通过<a href="http://www.cnblogs.com/skywang12345/p/3245399.html">红黑树</a>实现的。</p></li>
+
+<li><p>TreeMap <strong>继承于AbstractMap</strong>，所以它是一个Map，即一个key-value集合。</p></li>
+
+<li><p>TreeMap 实现了NavigableMap接口，意味着它<strong>支持一系列的导航方法。</strong>比如返回有序的key集合。</p></li>
+
+<li><p>TreeMap 实现了Cloneable接口，意味着<strong>它能被克隆</strong>。</p></li>
+
+<li><p>TreeMap 实现了java.io.Serializable接口，意味着<strong>它支持序列化</strong>。</p></li>
+
+<li><p>TreeMap只能根据key来排序，是不能根据value来排序的</p></li>
+</ol>
+
+<h4 id="源码查看">源码查看</h4>
+
+<pre><code class="language-java"> public TreeMap() {
+        comparator = null;
+    }
+    
+ public TreeMap(Comparator&lt;? super K&gt; comparator) {
+        this.comparator = comparator;
+    }   
+</code></pre>
+
+<p>提供排序的接口：Comparator</p>
+
+<h3 id="weakhashmap">WeakHashmap</h3>
+
+<p>转载地址：<a href="https://blog.csdn.net/m0_37564531/article/details/88042987">https://blog.csdn.net/m0_37564531/article/details/88042987</a></p>
+
+<h4 id="概述-17">概述</h4>
+
+<p>WeakHashMap也是Map中的一种，它的特殊之处在于它其中的对象，可能会被GC自动回收，也就是数据会凭空消失，即使程序员没有调用remove()或者clean()方法，那么你就会有疑问了，这种数据会凭空消失，那为什么还要设计这种类？其实答案是WeakHashMap主要用于缓存的情况，缓存一般用于内存不够的情况下，设置缓存可以大大提高系统的效率，缓存的空间也是有限的所以说，WeakHashMap用来存储需要缓存的对象，如果命中了当然是很好的，如果没命中也无关紧要，而且正是这种自动回收不需要(GC认为不需要)的数据，反而能帮我们管理缓存的空间。</p>
+
+<h4 id="特点-2">特点</h4>
+
+<ol>
+<li>WeakHashMap的初始容量为16，且必须为2的次幂</li>
+<li>WeakHashMap的最大容量为2的30次方</li>
+<li>负载因子为0.75</li>
+<li>WeakHashMap是线程不安全的</li>
+</ol>
+
+<h3 id="enummap">EnumMap</h3>
+
+<p>转载地址：<a href="https://blog.csdn.net/chinakite/article/details/3244934">https://blog.csdn.net/chinakite/article/details/3244934</a></p>
+
+<h4 id="概述-18">概述</h4>
+
+<p>EnumMap是专门为枚举类型量身定做的Map实现。虽然使用其它的Map实现（如HashMap）也能完成枚举类型实例到值得映射，但是使用EnumMap会更加高效：它只能接收同一枚举类型的实例作为键值，并且由于枚举类型实例的数量相对固定并且有限，所以EnumMap使用数组来存放与枚举类型对应的值。这使得EnumMap的效率非常高。</p>
+
+<h4 id="代码示例">代码示例</h4>
+
+<pre><code class="language-java">//现支持的数据库类型枚举类型定义
+
+public enum DataBaseType{
+     MYSQL,ORACLE,DB2,SQLSERVER
+}
+
+//某类中定义的获取数据库URL的方法以及EnumMap的声明。
+private EnumMap&lt;DataBaseType ,String&gt; urls = new EnumMap&lt;DataBaseType ,String&gt;(DataBaseType.class);
+
+
+public DataBaseInfo(){
+         urls.put(DataBaseType.DB2,&quot;jdbc:db2://localhost:5000/sample&quot;);
+         urls.put(DataBaseType.MYSQL,&quot;jdbc:mysql://localhost/mydb&quot;);
+         urls.put(DataBaseType.ORACLE,&quot;jdbc:oracle:thin:@localhost:1521:sample&quot;);
+        urls.put(DataBaseType.SQLSERVER,&quot;jdbc:microsoft:sqlserver://localhost:1433;DatabaseName=mydb&quot;);
+
+}
+
+/**
+
+* 根据不同的数据库类型，返回对应的URL
+
+* @param type     DataBaseType枚举类新实例
+
+* @return
+
+*/
+
+public String getURL(DataBaseType type){
+         return this.urls.get(type);
+}
+</code></pre>
+
+<h3 id="identityhashmap">IdentityHashMap</h3>
+
+<h4 id="概述-19">概述</h4>
+
+<p>在<a href="http://lib.csdn.net/base/java">Java</a>中，有一种key值可以重复的map，就是IdentityHashMap。在IdentityHashMap中，判断两个键值k1和 k2相等的条件是 k1 == k2 。在正常的Map 实现（如 HashMap）中， 要比较equals和hascode方法，都相等时候才相等。</p>
+
+<p><strong>而我们的IdentityHashMap，比较key值，直接使用的是==</strong></p>
+
+<h4 id="和-equals比较">== 和 equals比较</h4>
+
+<p><img src="/img//20180602183200272.png" alt="20180602183200272" /></p>
+
+<h4 id="代码示例-1">代码示例</h4>
+
+<pre><code class="language-java">public class CollectionTest {
+
+    public static void main(String[] args) {
+
+        // IdentityHashMap使用===================================
+        Map&lt;Person, String&gt; hashmap = new HashMap&lt;&gt;();
+        Person pp1 = new Person(1);
+        Person pp2 = new Person(1);
+        Person pp3 = new Person(1);
+        hashmap.put(pp1, &quot;1&quot;);
+        hashmap.put(pp2, &quot;2&quot;);
+        hashmap.put(pp3, &quot;3&quot;);
+        System.out.println(hashmap.size()); // 3
+
+        Map&lt;Person, String&gt; identityHashMap2 = new IdentityHashMap&lt;&gt;();
+        Person p1 = new Person(1);
+        Person p2 = new Person(1);
+        Person p3 = new Person(1);
+        identityHashMap2.put(p1, &quot;1&quot;);
+        identityHashMap2.put(p2, &quot;2&quot;);
+        identityHashMap2.put(p3, &quot;3&quot;);
+        System.out.println(identityHashMap2.size()); // 3
+
+        System.out.println(&quot;--------------------------------&quot; + identityHashMap2.get(p1));
+
+    }
+}
+
+class Person {
+
+    public String name;
+    public int age;
+
+    public Person(int age) {
+        this.age = age;
+    }
+
+    @Override
+    public int hashCode() {
+        return 0;
+    }
+
+    @Override
+    public boolean equals(Object obj) {
+        return true;
+    }
+
+    @Override
+    public String toString() {
+        return this.name + &quot;:&quot; + this.age;
+    }
+
+}
+运行结果
+1
+3
+--------------------------------1
+</code></pre>
+
+<h4 id="特点-3">特点</h4>
+
+<ol>
+<li>IdentityHashMap也是无序的</li>
+<li>该类不是线程安全的。</li>
+</ol>
+
+<h3 id="hashtable">HashTable</h3>
+
+<h4 id="概述-20">概述</h4>
+
+<p>HashTable数据结构的原理大致一样，区别在于put、get时加了同步关键字，<strong>而且HashTable不可存放null值。</strong></p>
+
+<h5 id="子类-dictionary">子类&ndash;Dictionary</h5>
+
+<h6 id="概述-21">概述</h6>
+
+<p>Dictionary 类是一个抽象类，用来存储键/值对，作用和Map类相似。<strong>此类已过时。新的实现应该实现 Map 接口，而不是扩展此类。</strong></p>
+
+<h3 id="concurrenthashmap">ConcurrentHashMap</h3>
+
+<p>转载地址：<a href="https://baijiahao.baidu.com/s?id=1617089947709260129&amp;wfr=spider&amp;for=pc">https://baijiahao.baidu.com/s?id=1617089947709260129&amp;wfr=spider&amp;for=pc</a></p>
+
+<h4 id="概述-22">概述</h4>
+
+<p>ConcurrentHashMap是Java中的一个<strong>线程安全且高效的HashMap实现</strong>。平时涉及高并发如果要用map结构，那第一时间想到的就是它。</p>
+
+<h4 id="为什么用它">为什么用它</h4>
+
+<ol>
+<li>我们知道HashMap是线程不安全的，在多线程环境下，使用Hashmap进行put操作会引起死循环，导致CPU利用率接近100%，所以在并发情况下不能使用HashMap。</li>
+<li>HashTable线程安全的策略实现代价却太大了，简单粗暴，get/put所有相关操作都是synchronized的，这相当于给整个哈希表加了一把大锁。多线程访问时候，只要有一个线程访问或操作该对象，那其他线程只能阻塞，相当于将所有的操作串行化，在竞争激烈的并发场景中性能就会非常差。</li>
+</ol>
+
+<p>主要就是为了应对hashmap在并发环境下不安全而诞生的，ConcurrentHashMap的设计与实现非常精巧，大量的利用了volatile，final，CAS等lock-free技术来减少锁竞争对于性能的影响。</p>
+
+<h3 id="concurrentskiplistmap">ConcurrentSkipListMap</h3>
+
+<p>转载地址：<a href="https://www.cnblogs.com/java-zzl/p/9767255.html">https://www.cnblogs.com/java-zzl/p/9767255.html</a></p>
+
+<h4 id="概述-23">概述</h4>
+
+<p>ConcurrentSkipListMap是线程安全的有序的哈希表，适用于高并发的场景。ConcurrentSkipListMap和TreeMap，它们虽然都是有序的哈希表。但是，第一，它们的线程安全机制不同，TreeMap是非线程安全的，而ConcurrentSkipListMap是线程安全的。第二，ConcurrentSkipListMap是通过跳表实现的，而TreeMap是通过红黑树实现的。</p>
+
+<h4 id="concurrentskiplistmap-vs-concurrenthashmap-不能比拟的优点">ConcurrentSkipListMap VS ConcurrentHashMap 不能比拟的优点</h4>
+
+<ol>
+<li>ConcurrentSkipListMap 的key是有序的</li>
+<li>ConcurrentSkipListMap 支持更高的并发。ConcurrentSkipListMap 的存取时间是log（N），和线程数几乎无关。也就是说在数据量一定的情况下，并发的线程越多，ConcurrentSkipListMap越能体现出他的优势。</li>
+</ol>
+
+<h4 id="总结-5">总结</h4>
+
+<p>在非多线程的情况下，应当尽量使用TreeMap。此外对于并发性相对较低的并行程序可以使用Collections.synchronizedSortedMap将TreeMap进行包装，也可以提供较好的效率。对于高并发程序，应当使用ConcurrentSkipListMap，能够提供更高的并发度。</p>
+
+<h1 id="comparable接口">Comparable接口</h1>
+
+<p>原文链接：<a href="https://blog.csdn.net/nvd11/article/details/27393445">https://blog.csdn.net/nvd11/article/details/27393445</a></p>
+
+<h2 id="概述-24">概述</h2>
+
+<p>此接口强行对实现它的<strong>每个类的对象进行整体排序</strong>。这种排序被称为类的*自然排序*，类的 compareTo 方法被称为它的*自然比较方法*。</p>
+
+<p>总而言之,  如果你想1个类的对象支持比较(排序), 就必须实现Comparable接口.</p>
+
+<h2 id="comparable接口简介">Comparable接口简介</h2>
+
+<p>Comparable 接口内部只有1个要重写的关键的方法.</p>
+
+<p>就是</p>
+
+<pre><code class="language-java">int compareTo(T o)
+</code></pre>
+
+<p>这个方法返回1个Int数值,  例如 i = x.compareTo(y)</p>
+
+<p>如果i=0, 也表明对象x与y排位上是相等的(并非意味x.equals(y) = true, 但是jdk api上强烈建议这样处理)</p>
+
+<p>如果返回数值i&gt;0 则意味者, x &gt; y啦，　</p>
+
+<p>反之若i&lt;0则　意味x &lt; y</p>
+
+<h2 id="实例显示">实例显示</h2>
+
+<pre><code class="language-java">public class CollectionTest {
+
+    public static void main(String[] args) {
+        List&lt;Person&gt; persons = new ArrayList&lt;Person&gt;();
+        Person person = new Person();
+        person.name = &quot;小米-麦子&quot;;
+        person.age = 30;
+        persons.add(person);
+
+        for (int i = 0; i &lt; 10; i++) {
+            person = new Person();
+            person.name = &quot;小米-&quot; + i;
+            person.age = i + 1;
+            persons.add(person);
+        }
+        Collections.sort(persons);
+        persons.forEach(System.out::println);
+    }
+}
+
+class Person implements Comparable&lt;Person&gt; {
+
+    public String name;
+    public int age;
+
+    @Override
+    public int compareTo(Person o) {
+
+        return this.age - o.age;
+    }
+
+    @Override
+    public String toString() {
+        return this.name + &quot;:&quot; + this.age;
+    }
+
+}
+</code></pre>
+
+<p>运行结果</p>
+
+<pre><code class="language-java">小米-0:1
+小米-1:2
+小米-2:3
+小米-3:4
+小米-4:5
+小米-5:6
+小米-6:7
+小米-7:8
+小米-8:9
+小米-9:10
+</code></pre>
+
+<h2 id="注意">注意</h2>
+
+<p>我们常用的String， Integer等类，都是实现了这个接口， 所以在Arrays.sort()排序的时候可以直接使用。</p>
+
+<h1 id="iterator接口">Iterator接口</h1>
+
+<p>转载地址：<a href="https://www.cnblogs.com/Exton-Learning/articles/10351260.html">https://www.cnblogs.com/Exton-Learning/articles/10351260.html</a></p>
+
+<h2 id="概述-25">概述</h2>
+
+<p>Iterator接口也是Java集合框架的成员，但它与Collection系列、Map系列的集合不一样：Collection系列集合、Map系列集合主要用于盛装其他对象，而Iterator则主要用于遍历（即迭代访问）Collection集合中的元素，Iterator对象也被称为迭代器。<strong>迭代器是一种设计模式,具体查看博客《迭代器设计模式》</strong></p>
+
+<p><strong>迭代器是一种设计模式，它是一个对象，可以遍历并选择序列中的对象，而开发人员不需要了解该序列的底层结构。迭代器通常器被称为“轻量级”对象，因为创建它的代价小。</strong></p>
+
+<p><strong>Iterator的一个很强的用处：能够将遍历序列的操作与序列底层的结构分离。</strong></p>
+
+<h2 id="常用方法-3">常用方法</h2>
+
+<p>Iterator接口里定义了如下4个方法：</p>
+
+<ol>
+<li>boolean hasNext()：如果被迭代的集合还元素没有被遍历，则返回true。</li>
+<li>Object next()：返回集合里下一个元素。</li>
+<li>void remove() ：删除集合里上一次next方法返回的元素</li>
+<li>void forEachRemaining(Consumer action)，这是Java 8为Iterator新增的默认方法，该方法可使用Lambda表达式来遍历集合元素</li>
+</ol>
+
+<h2 id="显示结构">显示结构</h2>
+
+<p><img src="/img//2018062816262240.png" alt="2018062816262240" /></p>
+
+<h3 id="remove方法">remove方法</h3>
+
+<p>一开始迭代器<strong>在所有元素的左边</strong>，调用next()之后，<strong>迭代器移到第一个和第二个元素之间</strong>，next()方法<strong>返回迭代器刚刚经过的元素</strong>。
+hasNext()若<strong>返回True，则表明接下来还有元素</strong>，迭代器不在尾部。
+remove()方法必须和next方法一起使用，功能是<strong>去除刚刚next方法返回的元素</strong>。</p>
+
+<h3 id="注意-1">注意</h3>
+
+<p>iterator()方法是java.lang.Iterable接口,被Collection继承.</p>
+
+<pre><code class="language-java">public interface Collection&lt;E&gt; extends Iterable&lt;E&gt; {}
+
+public interface Iterable&lt;T&gt; {
+    /**
+     * Returns an iterator over elements of type {@code T}.
+     *
+     * @return an Iterator.
+     */
+    Iterator&lt;T&gt; iterator();
+ }   
+</code></pre>
+
+<h3 id="相关子类">相关子类</h3>
+
+<h4 id="listiterator">ListIterator</h4>
+
+<h5 id="局限">局限</h5>
+
+<p>只能应用于各种List类的访问。</p>
+
+<h5 id="优势">优势</h5>
+
+<ol>
+<li>Iterator只能向前移动，而ListIterator可以双向移动。</li>
+<li>还可以产生相对于迭代器在列表中指向的当前位置的前一个和后一个元素的索引nextIndex()、previousIndex()方法。</li>
+<li>还可以通过set（）方法替换它访问过的最后一个元素。</li>
+<li>还可以通过调用listIterator（）方法产生一个指向List开始处的ListIterator，当然也可以有参数，即指向索引为参数处的ListIterator。</li>
+<li>ListIterator 有 add() 方法，可以向 List 中添加对象，而 Iterator 不能。</li>
+</ol>
+
+<h1 id="工具类">工具类</h1>
+
+<h2 id="collections">Collections</h2>
+
+<p>转载地址：<a href="https://www.cnblogs.com/ZeroMZ/p/11402577.html">https://www.cnblogs.com/ZeroMZ/p/11402577.html</a></p>
+
+<h3 id="概述-26">概述</h3>
+
+<p>工具类中提供的方法主要针对Set、List、Map的排序、查询、修改等操作，以及将集合对象设置为不可变、对集合对象实现同步控制（线程安全）等方法。</p>
+
+<h3 id="主要方法">主要方法</h3>
+
+<h4 id="排序">排序</h4>
+
+<p><img src="/img//1242064-20190823203501488-926112856.png" alt="1242064-20190823203501488-926112856" /></p>
+
+<h4 id="查找-替换">查找，替换</h4>
+
+<p><img src="/img//1242064-20190823203638404-641551560.png" alt="1242064-20190823203638404-641551560" /></p>
+
+<h4 id="同步控制">同步控制</h4>
+
+<p>Collections类中提供了多个synchronizedXxx()方法，这些方法可以将指定集合包装成线程同步的集合，从而可以解决多线程并发访问集合时的线程安全问题。</p>
+
+<p>Java中常用的实现类HashSet、TreeSet、ArrayList、ArrayDeque、LinkedList、HashMap、TreeMap共<strong>7</strong>种集合都是线程不安全的。</p>
+
+<pre><code class="language-java">//通过以下的包装，就可以实现线程安全的集合对象
+Collection c= Collections.synchronizedCollection(new ArrayList());
+List list=Collections.synchronizedList(new ArrayList());
+Set s=Collections.synchronizedSet(new HashSet());
+Map m=Collections.synchronizedMap(new HashMap());
+</code></pre>
+
+<h4 id="设置不可变集合">设置不可变集合</h4>
+
+<p><img src="/img//1242064-20190823204851112-2089645757.png" alt="1242064-20190823204851112-2089645757" /></p>
+
+<p>上面三类方法的参数是原有的集合对象，返回值是该集合的“只读”版本。即无论集合中的元素个数、还是集合中的元素的修改，都会引发错误。</p>
+
+<h2 id="arrays">Arrays</h2>
+
+<p>转载地址：<a href="https://blog.csdn.net/Goodbye_Youth/article/details/81003817">https://blog.csdn.net/Goodbye_Youth/article/details/81003817</a></p>
+
+<h3 id="概述-27">概述</h3>
+
+<p>Arrays类位于 <strong>java.util</strong> 包中，主要包含了操纵数组的各种方法。</p>
+
+<h3 id="常用方法-4">常用方法</h3>
+
+<p><strong>1.  Arrays.asList(T… data)</strong></p>
+
+<pre><code class="language-java">注意：该方法返回的是 Arrays 内部静态类 ArrayList，而不是我们平常使用的 ArrayList,，该静态类 ArrayList 没有覆盖父类的 add(), remove() 等方法，所以如果直接调用，会报 UnsupportedOperationException 异常
+ 
+List&lt;Integer&gt; list = Arrays.asList(1, 2, 3);
+list.forEach(System.out::println); // 1 2 3
+</code></pre>
+
+<p><strong>2.  Arrays.fill(Object[] array, Object obj)</strong></p>
+
+<pre><code class="language-java">用指定元素填充整个数组 (会替换掉数组中原来的元素)
+
+Integer[] data = {1, 2, 3, 4};
+Arrays.fill(data, 9);
+System.out.println(Arrays.toString(data)); // [9, 9, 9, 9]
+</code></pre>
+
+<p><strong>3.  Arrays.fill(Object[] array, int fromIndex, int toIndex, Object obj)</strong></p>
+
+<pre><code class="language-java">用指定元素填充数组，从起始位置到结束位置，取头不取尾 (会替换掉数组中原来的元素)
+
+Integer[] data = {1, 2, 3, 4};
+Arrays.fill(data, 0, 2, 9);
+System.out.println(Arrays.toString(data)); // [9, 9, 3, 4]
+</code></pre>
+
+<p><strong>4.  Arrays.sort(Object[] array)</strong></p>
+
+<pre><code class="language-java">对数组元素进行排序 (串行排序)
+
+String[] data = {&quot;1&quot;, &quot;4&quot;, &quot;3&quot;, &quot;2&quot;};
+System.out.println(Arrays.toString(data)); // [1, 4, 3, 2]
+Arrays.sort(data);
+System.out.println(Arrays.toString(data)); // [1, 2, 3, 4]
+
+// 使用自定义比较器，对数组元素进行排序 (串行排序)
+Arrays.sort(T[] array, Comparator&lt;? super T&gt; comparator)
+  
+// 对指定范围内的数组元素进行排序 (串行排序)
+Arrays.sort(Object[] array, int fromIndex, int toIndex)
+  
+Arrays.sort(T[] array, int fromIndex, int toIndex, Comparator&lt;? super T&gt; c)
+</code></pre>
+
+<p><strong>5.  Arrays.parallelSort(T[] array)</strong></p>
+
+<pre><code class="language-java">注意：其余重载方法与 Arrays.sort() 相同
+对数组元素进行排序 (并行排序)，当数据规模较大时，会有更好的性能
+
+String[] data = {&quot;1&quot;, &quot;4&quot;, &quot;3&quot;, &quot;2&quot;};
+Arrays.parallelSort(data);
+System.out.println(Arrays.toString(data)); // [1, 2, 3, 4]
+</code></pre>
+
+<p><strong>6. Arrays.binarySearch(Object[] array, Object key)</strong></p>
+
+<pre><code class="language-java">注意：在调用该方法之前，必须先调用 Arrays.sort() 方法进行排序，如果数组没有排序，那么结果是不确定的，此外如果数组中包含多个指定元素，则无法保证将找到哪个元素
+
+使用二分法查找数组内指定元素的索引值
+
+// 使用二分法查找数组内指定范围内的指定元素的索引值 
+Arrays.binarySearch(Object[] array, int fromIndex, int toIndex, Object obj)
+
+Integer[] data = {1, 3, 5, 7};
+Arrays.sort(data);
+// {1, 3}，3的索引值为1
+System.out.println(Arrays.binarySearch(data, 0, 2, 3)); // 1
+
+</code></pre>
+
+<p><strong>7.  Arrays.copyOf(T[] original, int newLength)</strong></p>
+
+<pre><code class="language-java">拷贝数组，其内部调用了 System.arraycopy() 方法，从下标 0 开始，如果超过原数组长度，则会用 null 进行填充
+
+Integer[] data1 = {1, 2, 3, 4};
+Integer[] data2 = Arrays.copyOf(data1, 2);
+System.out.println(Arrays.toString(data2)); // [1, 2]
+Integer[] data3 = Arrays.copyOf(data1, 5);
+System.out.println(Arrays.toString(data3)); // [1, 2, 3, 4, null]
+</code></pre>
+
+<p><strong>8.  Arrays.toString(Object[] array)</strong></p>
+
+<pre><code class="language-java">返回数组元素的字符串形式
+
+Integer[] data = {1, 2, 3};
+System.out.println(Arrays.toString(data)); // [1, 2, 3]
+</code></pre>
+
+<p><strong>9.  Arrays.setAll(T[] array, IntFunction&lt;? extends T&gt; generator)</strong></p>
+
+<pre><code class="language-java">让数组中的所有元素，串行地使用方法提供的生成器函数来计算每个元素 (一元操作)
+
+Integer[] data = {1, 2, 3, 4};
+// i为索引值
+Arrays.setAll(data, i -&gt; data[i] * 2);
+System.out.println(Arrays.toString(data)); // [2, 4, 6, 8]
+</code></pre>
+
+<p><strong>10. Arrays.parallelSetAll(T[] array, IntFunction&lt;? extends T&gt; generator)</strong></p>
+
+<pre><code class="language-java">让数组中的所有元素，并行地使用方法提供的生成器函数来计算每个元素 (一元操作)，当数据规模较大时，会有更好的性能
+
+Integer[] data = {1, 2, 3, 4};
+// i为索引值
+Arrays.parallelSetAll(data, i -&gt; data[i] * 2);
+System.out.println(Arrays.toString(data)); // [2, 4, 6, 8]
+</code></pre>
+
+<p><strong>11. Arrays.spliterator(T[] array)</strong></p>
+
+<pre><code class="language-java">返回数组的分片迭代器，用于并行地遍历数组
+</code></pre>
+
+<p><strong>12. Arrays.stream(T[] array)</strong></p>
+
+<pre><code class="language-java">返回数组的流 (Stream)，然后我们就可以使用 Stream 相关的许多方法了
+
+Integer[] data = {1, 2, 3, 4};
+List&lt;Integer&gt; list = Arrays.stream(data).collect(toList());
+System.out.println(list); // [1, 2, 3, 4]
+</code></pre>
+
+<h2 id="集合类互相转换">集合类互相转换</h2>
+
+<p>转载地址：<a href="https://blog.csdn.net/moye666/article/details/93601135">https://blog.csdn.net/moye666/article/details/93601135</a></p>
+
+<h4 id="list与set互相转换">List与Set互相转换</h4>
+
+<h5 id="list转set">list转set</h5>
+
+<pre><code class="language-java">// 这个转换通常用来做去重 
+
+List&lt;String&gt; arrayList = new ArrayList&lt;&gt;();
+arrayList.add(&quot;a&quot;);
+arrayList.add(&quot;b&quot;);
+arrayList.add(&quot;c&quot;);
+arrayList.add(&quot;a&quot;);
+Set&lt;String&gt; newHashSet = new HashSet&lt;&gt;(arrayList);
+
+System.out.println(&quot;arrayList:&quot; + arrayList.toString());
+System.out.println(&quot;newHashSet:&quot; + newHashSet.toString());
+</code></pre>
+
+<h5 id="set转list">set转list</h5>
+
+<pre><code class="language-java">Set&lt;String&gt; hashSet = new HashSet&lt;&gt;();
+hashSet.add(&quot;a&quot;);
+hashSet.add(&quot;c&quot;);
+hashSet.add(&quot;b&quot;);
+hashSet.add(&quot;c&quot;);
+hashSet.add(&quot;d&quot;);
+List&lt;String&gt; newArrayList = new ArrayList&lt;&gt;(hashSet);
+List&lt;String&gt; newLinkedList = new LinkedList&lt;&gt;(hashSet);
+</code></pre>
+
+<h4 id="map转list-set">Map转List，Set</h4>
+
+<pre><code class="language-java">Map&lt;Integer, Person&gt; map = new HashMap&lt;Integer, Person&gt;();
+Set&lt;Entry&lt;Integer, Person&gt;&gt; data = map.entrySet();
+List&lt;Entry&lt;Integer, Person&gt;&gt; listdata = new ArrayList&lt;Entry&lt;Integer, Person&gt;&gt;(data);
+</code></pre>
+
+<h4 id="注意-2">注意</h4>
+
+<p><strong>需要更多的去选择用流来进行集合类的转换。</strong></p>
+
+<h1 id="常见问题">常见问题</h1>
+
+<h2 id="1-linkedlist和arraylist的对比">1. LinkedList和ArrayList的对比</h2>
+
+<p>转载地址： <a href="https://www.cnblogs.com/xiaoxi/p/6102220.html">https://www.cnblogs.com/xiaoxi/p/6102220.html</a></p>
+
+<p>有些说法认为LinkedList做插入和删除更快，这种说法其实是不准确的：</p>
+
+<ol>
+<li><p>LinkedList做插入、删除的时候，慢在寻址，快在只需要改变前后Entry的引用地址</p></li>
+
+<li><p>ArrayList做插入、删除的时候，慢在数组元素的批量copy，快在寻址。同时删除时候要把数据往前移动数据</p></li>
+</ol>
+
+<p>所以，如果待插入、删除的元素是在数据结构的前半段尤其是非常靠前的位置的时候，LinkedList的效率将大大快过ArrayList，因为ArrayList将批量copy大量的元素；越往后，对于LinkedList来说，因为它是双向链表，所以在第2个元素后面插入一个数据和在倒数第2个元素后面插入一个元素在效率上基本没有差别，但是ArrayList由于要批量copy的元素越来越少，操作速度必然追上乃至超过LinkedList。</p>
+
+<p>从这个分析看出，如果你十分确定你插入、删除的元素是在前半段，那么就使用LinkedList；如果你十分确定你删除、删除的元素在比较靠后的位置，那么可以考虑使用ArrayList。如果你不能确定你要做的插入、删除是在哪儿呢？那还是建议你使用LinkedList吧，因为一来LinkedList整体插入、删除的执行效率比较稳定，没有ArrayList这种越往后越快的情况；二来插入元素的时候，弄得不好ArrayList就要进行一次扩容，记住，<strong>ArrayList底层数组扩容是一个既消耗时间又消耗空间的操作。</strong></p>
+
+<h2 id="2-copyonwritearraylist为什么并发安全且性能比vector好">2. CopyOnWriteArrayList为什么并发安全且性能比Vector好</h2>
+
+<p>我知道Vector是增删改查方法都加了synchronized，保证同步，但是每个方法执行的时候都要去获得锁，性能就会大大下降，而CopyOnWriteArrayList 只是在增删改上加锁，但是读不加锁，在读方面的性能就好于VectorCopyOnWriteArrayList支持读多写少的并发情况。</p>
+
+<h2 id="3-hashset-treeset和linkedhashset的区别">3. HashSet，TreeSet和LinkedHashSet的区别</h2>
+
+<p>总体而言，如果你需要一个访问快速的Set，你应该使用HashSet；当你需要一个排序的Set，你应该使用TreeSet；当你需要记录下插入时的顺序时，你应该使用LinedHashSet。</p>
+
+<h3 id="hashset-1">HashSet</h3>
+
+<ol>
+<li>不能保证元素的排列顺序，顺序有可能发生变化</li>
+<li>不是同步的</li>
+<li>集合元素可以是null,但只能放入一个null(注：List可以添加多个null对象。)</li>
+</ol>
+
+<h3 id="linkedhashset">LinkedHashSet</h3>
+
+<p>LinkedHashSet在迭代访问Set中的全部元素时，性能比HashSet好，但是插入时性能稍微逊色于HashSet。</p>
+
+<h2 id="4-linkedhashmap-vs-treemap">4.  LinkedHashMap VS TreeMap</h2>
+
+<p>LinkedHashMap将按照将条目放入地图的顺序进行迭代。</p>
+
+<p>TreeMap将根据密钥的“自然顺序”按其</p>
+
+<pre><code>compareTo()
+</code></pre>
+
+<p>方法(或外部提供的</p>
+
+<pre><code>Comparator
+</code></pre>
+
+<p>)。此外，它还实现了SortedMap 接口，它包含依赖于此排序顺序的方法。</p>
+
+<h2 id="5-set排序-list排序-map排序">5. set排序 ， List排序， map排序</h2>
+
+<h4 id="示例公共代码">示例公共代码</h4>
+
+<pre><code class="language-java">class Person {
+
+    public String name;
+    public int age;
+
+    public Person(String name, int age) {
+        this.age = age;
+        this.name = name;
+    }
+
+    @Override
+    public String toString() {
+        return this.name + &quot;:&quot; + this.age;
+    }
+
+}
+</code></pre>
+
+<h4 id="list排序">List排序</h4>
+
+<pre><code class="language-java">    public static void main(String[] args) {
+        List&lt;Person&gt; persionList = new ArrayList&lt;Person&gt;();
+        Person pp1 = new Person(&quot;小米&quot;,10);
+        Person pp2 = new Person(&quot;小花&quot;,2);
+        Person pp3 = new Person(&quot;小猫&quot;,5);
+        persionList.add(pp1);
+        persionList.add(pp2);
+        persionList.add(pp3);
+
+        Collections.sort(persionList, new Comparator&lt;Person&gt;(){
+
+                 @Override
+                 public int compare(Person o1, Person o2) {
+                     
+                     return o1.age - o2.age;
+                 }
+        });
+
+        persionList.forEach(System.out::println);
+    }
+}
+</code></pre>
+
+<h4 id="set排序">Set排序</h4>
+
+<pre><code class="language-java"> public static void main(String[] args) {
+ 
+        Set&lt;Person&gt; persionList = new HashSet&lt;Person&gt;();
+        Person pp1 = new Person(&quot;小米&quot;,10);
+        Person pp2 = new Person(&quot;小花&quot;,2);
+        Person pp3 = new Person(&quot;小猫&quot;,5);
+        persionList.add(pp1);
+        persionList.add(pp2);
+        persionList.add(pp3);
+
+
+        TreeSet&lt;Person&gt; set = new TreeSet&lt;Person&gt;(new Comparator&lt;Person&gt;(){
+              @Override
+              public int compare(Person o1, Person o2) {
+                  
+                  return o1.age - o2.age;
+              }
+        });
+        set.addAll(persionList);
+        set.forEach(System.out::println);
+    }
+</code></pre>
+
+<h4 id="map排序">Map排序</h4>
+
+<h5 id="key排序">key排序</h5>
+
+<pre><code class="language-java"> public static void main(String[] args) {
+
+        Map&lt;Integer, Person&gt; map = new HashMap&lt;Integer, Person&gt;();
+        Person pp1 = new Person(&quot;小米&quot;, 10);
+        Person pp2 = new Person(&quot;小花&quot;, 2);
+        Person pp3 = new Person(&quot;小猫&quot;, 5);
+        map.put(10, pp1);
+        map.put(1, pp2);
+        map.put(2, pp3);
+
+        TreeMap&lt;Integer, Person&gt; treeMap = new TreeMap&lt;Integer, Person&gt;(new Comparator&lt;Integer&gt;() {
+            @Override
+            public int compare(Integer o1, Integer o2) {
+
+                return o1 - o2;
+            }
+        });
+        treeMap.putAll(map);
+
+        Iterator iter = map.entrySet().iterator();
+        while (iter.hasNext()) {
+            Map.Entry&lt;Integer, Person&gt; entry = (Map.Entry&lt;Integer, Person&gt;) iter.next();
+            int key = entry.getKey();
+            Person person = entry.getValue();
+            System.out.println(key + &quot;---&gt;&quot; + person);
+        }
+
+    }
+</code></pre>
+
+<h5 id="value排序">value排序</h5>
+
+<p>大致的思路是把TreeMap的EntrySet转换成list，然后使用Collections.sor排序。</p>
+
+<pre><code class="language-java">   public static void main(String[] args) {
+
+        Map&lt;Integer, Person&gt; map = new HashMap&lt;Integer, Person&gt;();
+        Person pp1 = new Person(&quot;小米&quot;, 10);
+        Person pp2 = new Person(&quot;小花&quot;, 20);
+        Person pp3 = new Person(&quot;小猫&quot;, 5);
+        map.put(10, pp1);
+        map.put(1, pp2);
+        map.put(2, pp3);
+
+        List&lt;Entry&lt;Integer, Person&gt;&gt; list = new ArrayList&lt;Entry&lt;Integer, Person&gt;&gt;(map.entrySet());
+        Collections.sort(list, new Comparator&lt;Entry&lt;Integer, Person&gt;&gt;() {
+
+            @Override
+            public int compare(Entry&lt;Integer, Person&gt; o1, Entry&lt;Integer, Person&gt; o2) {
+                Person p1 = o1.getValue();
+                Person p2 = o2.getValue();
+                return p1.age - p2.age;
+            }
+
+        });
+
+        list.forEach(System.out::println);
+
+    }
+</code></pre>
+
+<h3 id="6-hashmap怎么存放大量数据">6. HashMap怎么存放大量数据。</h3>
+
+
+                
+                
+<div class="entry-shang text-center">
+    
+	    <p>「真诚赞赏，手留余香」</p>
+	
+	<button class="zs show-zs btn btn-bred">赞赏支持</button>
+</div>
+<div class="zs-modal-bg"></div>
+<div class="zs-modal-box">
+	<div class="zs-modal-head">
+		<button type="button" class="close">×</button>
+		<span class="author"><a href="http://maizitoday.github.io/"><img src="/img/favicon.png" /></a></span>
+        
+	        <p class="tip"><i></i><span>真诚赞赏，手留余香</span></p>
+		
+ 
+	</div>
+	<div class="zs-modal-body">
+		<div class="zs-modal-btns">
+			<button class="btn btn-blink" data-num="2">2元</button>
+			<button class="btn btn-blink" data-num="5">5元</button>
+			<button class="btn btn-blink" data-num="10">10元</button>
+			<button class="btn btn-blink" data-num="50">50元</button>
+			<button class="btn btn-blink" data-num="100">100元</button>
+			<button class="btn btn-blink" data-num="1">任意金额</button>
+		</div>
+		<div class="zs-modal-pay">
+			<button class="btn btn-bred" id="pay-text">2元</button>
+			<p>使用<span id="pay-type">微信</span>扫描二维码完成支付</p>
+			<img src="/img/reward/wechat-2.png"  id="pay-image"/>
+		</div>
+	</div>
+	<div class="zs-modal-footer">
+		<label><input type="radio" name="zs-type" value="wechat" class="zs-type" checked="checked"><span ><span class="zs-wechat"><img src="/img/reward/wechat-btn.png"/></span></label>
+		<label><input type="radio" name="zs-type" value="alipay" class="zs-type" class="zs-alipay"><img src="/img/reward/alipay-btn.png"/></span></label>
+	</div>
+</div>
+<script type="text/javascript" src="/js/reward.js"></script>
+
+                
+
+                <hr>
+                <ul class="pager">
+                    
+                    <li class="previous">
+                        <a href="/post/juc-%E9%94%81%E6%A1%86%E6%9E%B6%E7%B1%BB/" data-toggle="tooltip" data-placement="top" title="juc-锁框架类">&larr;
+                            Previous Post</a>
+                    </li>
+                    
+                    
+                </ul>
+
+                
+<div id="disqus-comment"></div>
+
+
+
+            </div>
+            
+            <div class="
+                col-lg-8 col-lg-offset-2
+                col-md-10 col-md-offset-1
+                sidebar-container">
+
+                
+                
+                <section>
+                    <hr class="hidden-sm hidden-xs">
+                    <h5><a href="/tags/">FEATURED TAGS</a></h5>
+                    <div class="tags">
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        <a href="/tags/threadlocal" title="ThreadLocal">
+                            ThreadLocal
+                        </a>
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        <a href="/tags/zookeeper" title="Zookeeper">
+                            Zookeeper
+                        </a>
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        <a href="/tags/docker" title="docker">
+                            docker
+                        </a>
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        <a href="/tags/dockerfile" title="dockerfile">
+                            dockerfile
+                        </a>
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        <a href="/tags/elasticsearch" title="elasticSearch">
+                            elasticSearch
+                        </a>
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        <a href="/tags/java%E5%9F%BA%E7%A1%80" title="java基础">
+                            java基础
+                        </a>
+                        
+                        
+                        
+                        <a href="/tags/java%E7%9B%B8%E5%85%B3%E6%A6%82%E5%BF%B5" title="java相关概念">
+                            java相关概念
+                        </a>
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        <a href="/tags/jvm" title="jvm">
+                            jvm
+                        </a>
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        <a href="/tags/maven" title="maven">
+                            maven
+                        </a>
+                        
+                        
+                        
+                        <a href="/tags/mongodb" title="mongodb">
+                            mongodb
+                        </a>
+                        
+                        
+                        
+                        
+                        
+                        <a href="/tags/mybatis%E7%B3%BB%E5%88%97" title="mybatis系列">
+                            mybatis系列
+                        </a>
+                        
+                        
+                        
+                        <a href="/tags/mycat" title="mycat">
+                            mycat
+                        </a>
+                        
+                        
+                        
+                        
+                        
+                        <a href="/tags/mysql%E7%B3%BB%E5%88%97" title="mysql系列">
+                            mysql系列
+                        </a>
+                        
+                        
+                        
+                        
+                        
+                        <a href="/tags/nginx" title="nginx">
+                            nginx
+                        </a>
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        <a href="/tags/redis" title="redis">
+                            redis
+                        </a>
+                        
+                        
+                        
+                        <a href="/tags/rocketmq" title="rocketmq">
+                            rocketmq
+                        </a>
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        <a href="/tags/shell" title="shell">
+                            shell
+                        </a>
+                        
+                        
+                        
+                        <a href="/tags/shiro" title="shiro">
+                            shiro
+                        </a>
+                        
+                        
+                        
+                        
+                        
+                        <a href="/tags/springcloud" title="springCloud">
+                            springCloud
+                        </a>
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        <a href="/tags/springboot%E7%B3%BB%E5%88%97" title="springboot系列">
+                            springboot系列
+                        </a>
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        <a href="/tags/%E5%88%86%E5%B8%83%E5%BC%8F%E7%B3%BB%E5%88%97" title="分布式系列">
+                            分布式系列
+                        </a>
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        <a href="/tags/%E5%8D%95%E7%82%B9%E7%99%BB%E5%BD%95" title="单点登录">
+                            单点登录
+                        </a>
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        <a href="/tags/%E5%A4%9A%E7%BA%BF%E7%A8%8B%E5%92%8C%E9%AB%98%E5%B9%B6%E5%8F%91" title="多线程和高并发">
+                            多线程和高并发
+                        </a>
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        <a href="/tags/%E5%BC%80%E5%8F%91%E5%B7%A5%E5%85%B7" title="开发工具">
+                            开发工具
+                        </a>
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        <a href="/tags/%E6%95%B0%E6%8D%AE%E5%BA%93" title="数据库">
+                            数据库
+                        </a>
+                        
+                        
+                        
+                        
+                        
+                        <a href="/tags/%E6%95%B0%E6%8D%AE%E7%BB%93%E6%9E%84" title="数据结构">
+                            数据结构
+                        </a>
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        <a href="/tags/%E8%AE%BE%E8%AE%A1%E6%A8%A1%E5%BC%8F" title="设计模式">
+                            设计模式
+                        </a>
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        <a href="/tags/%E8%B4%9F%E8%BD%BD%E5%9D%87%E8%A1%A1" title="负载均衡">
+                            负载均衡
+                        </a>
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                    </div>
+                </section>
+                
+
+                
+                
+                <section>
+                    <hr>
+                    <h5>FRIENDS</h5>
+                    <ul class="list-inline">
+                        
+                        <li><a target="_blank" href="https://zhaohuabing.com">赵化冰博客</a></li>
+                        
+                        <li><a target="_blank" href="http://www.tianshouzhi.com">田守枝</a></li>
+                        
+                        <li><a target="_blank" href="http://www.ityouknow.com">纯洁的微笑</a></li>
+                        
+                        <li><a target="_blank" href="https://renchunxiao.com">任春晓</a></li>
+                        
+                        <li><a target="_blank" href="https://www.lihongkun.com">泛泛之辈</a></li>
+                        
+                        <li><a target="_blank" href="https://juejin.im/welcome/backend">后端服务论坛</a></li>
+                        
+                        <li><a target="_blank" href="https://www.javaboy.org">江南一点雨</a></li>
+                        
+                        <li><a target="_blank" href="https://blog.csdn.net/gwd1154978352">东天里的冬天</a></li>
+                        
+                    </ul>
+                </section>
+                
+            </div>
+        </div>
+    </div>
+</article>
+
+
+
+
+<footer>
+    <div class="container">
+        <div class="row">
+            <div class="col-lg-8 col-lg-offset-2 col-md-10 col-md-offset-1">
+                <ul class="list-inline text-center">
+                   
+                   <li>
+                       <a href="" rel="alternate" type="application/rss+xml" title="" >
+                           <span class="fa-stack fa-lg">
+                               <i class="fa fa-circle fa-stack-2x"></i>
+                               <i class="fa fa-rss fa-stack-1x fa-inverse"></i>
+                           </span>
+                       </a>
+                   </li>
+                   
+                    
+                    <li>
+                        <a href="mailto:maiziybtoday@gmail.com">
+                            <span class="fa-stack fa-lg">
+                                <i class="fa fa-circle fa-stack-2x"></i>
+                                <i class="fa fa-envelope fa-stack-1x fa-inverse"></i>
+                            </span>
+                        </a>
+                    </li>
+		    
+                    
+                    
+                    
+                    
+
+                    
+
+		    
+                    
+                    <li>
+                        <a target="_blank" href="/your%20wechat%20qr%20code%20image">
+                            <span class="fa-stack fa-lg">
+                                <i class="fa fa-circle fa-stack-2x"></i>
+                                <i class="fa fa-wechat fa-stack-1x fa-inverse"></i>
+                            </span>
+                        </a>
+                    </li>
+		    
+                    
+                    
+                    <li>
+                        <a target="_blank" href="https://www.linkedin.com/in/yourlinkedinid">
+                            <span class="fa-stack fa-lg">
+                                <i class="fa fa-circle fa-stack-2x"></i>
+                                <i class="fa fa-linkedin fa-stack-1x fa-inverse"></i>
+                            </span>
+                        </a>
+                    </li>
+		    
+                    
+                </ul>
+		<p class="copyright text-muted">
+                    Copyright &copy;  2019
+                    <br>
+                    <a href="https://themes.gohugo.io/hugo-theme-cleanwhite">CleanWhite Hugo Theme</a> by <a href="https://zhaohuabing.com">Huabing</a> |
+                    <iframe
+                        style="margin-left: 2px; margin-bottom:-5px;"
+                        frameborder="0" scrolling="0" width="100px" height="20px"
+                        src="https://ghbtns.com/github-btn.html?user=zhaohuabing&repo=hugo-theme-cleanwhite&type=star&count=true" >
+                    </iframe>
+                </p>
+            </div>
+        </div>
+    </div>
+</footer>
+
+
+
+
+<script>
+    function async(u, c) {
+      var d = document, t = 'script',
+          o = d.createElement(t),
+          s = d.getElementsByTagName(t)[0];
+      o.src = u;
+      if (c) { o.addEventListener('load', function (e) { c(null, e); }, false); }
+      s.parentNode.insertBefore(o, s);
+    }
+</script>
+
+
+
+
+
+
+<script>
+    
+    if($('#tag_cloud').length !== 0){
+        async("/js/jquery.tagcloud.js",function(){
+            $.fn.tagcloud.defaults = {
+                
+                color: {start: '#bbbbee', end: '#0085a1'},
+            };
+            $('#tag_cloud a').tagcloud();
+        })
+    }
+</script>
+
+
+<script>
+    async("https://cdnjs.cloudflare.com/ajax/libs/fastclick/1.0.6/fastclick.js", function(){
+        var $nav = document.querySelector("nav");
+        if($nav) FastClick.attach($nav);
+    })
+</script>
+
+
+
+
+
+
+</body>
+</html>
