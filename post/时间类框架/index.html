@@ -15,9 +15,9 @@
     
 
     
-    <meta name="title" content="java常用框架图" />
-    <meta property="og:title" content="java常用框架图" />
-    <meta property="twitter:title" content="java常用框架图" />
+    <meta name="title" content="时间类框架" />
+    <meta property="og:title" content="时间类框架" />
+    <meta property="twitter:title" content="时间类框架" />
     
 
     
@@ -34,7 +34,7 @@
     <meta name="keyword"  content="麦子, maizi, maizi, , 麦子的网络日志, 麦子的博客, maizi Blog, 博客, 个人网站, 互联网, Web, 云原生, PaaS, Istio, Kubernetes, 微服务, Microservice">
     <link rel="shortcut icon" href="/img/favicon.ico">
 
-    <title>java常用框架图-麦子的博客</title>
+    <title>时间类框架-麦子的博客</title>
 
     <link rel="canonical" href="/post/%E6%97%B6%E9%97%B4%E7%B1%BB%E6%A1%86%E6%9E%B6/">
 
@@ -167,7 +167,7 @@
                         </a>
                         
                     </div>
-                    <h1>java常用框架图</h1>
+                    <h1>时间类框架</h1>
                     <h2 class="subheading"></h2>
                     <span class="meta">
 			Posted by 
@@ -201,9 +201,659 @@
                 <header>
                     <h2>TOC</h2>
                 </header>              
+                <nav id="TableOfContents">
+<ul>
+<li><a href="#时间结构图">时间结构图</a>
+<ul>
+<li><a href="#java-time包">java.time包</a>
+<ul>
+<li><a href="#常用类介绍">常用类介绍</a></li>
+<li><a href="#方法前缀的含义-统一了api">方法前缀的含义,统一了api</a></li>
+</ul></li>
+</ul></li>
+<li><a href="#常用方法">常用方法</a>
+<ul>
+<li><a href="#localdate-如何获得日期">LocalDate-如何获得日期</a></li>
+<li><a href="#localtime-如何获取时间">LocalTime-如何获取时间</a></li>
+<li><a href="#localdatetime-日期和时间的组合">LocalDateTime-日期和时间的组合</a></li>
+<li><a href="#instant-获取时间戳">Instant-获取时间戳</a></li>
+<li><a href="#duration-获取时间段">Duration-获取时间段</a></li>
+<li><a href="#period-获取日期段">Period-获取日期段</a></li>
+<li><a href="#zoneddatetime-创建时区时间">ZonedDateTime-创建时区时间</a></li>
+<li><a href="#时间日期格式化">时间日期格式化</a></li>
+<li><a href="#clock">Clock</a></li>
+</ul></li>
+<li><a href="#timeunit">TimeUnit</a>
+<ul>
+<li><a href="#常用的颗粒度">常用的颗粒度</a></li>
+<li><a href="#颗粒度转换">颗粒度转换</a></li>
+<li><a href="#延时-可替代thread-sleep">延时，可替代Thread.sleep()</a></li>
+</ul></li>
+<li><a href="#20个常用使用示例">20个常用使用示例</a>
+<ul>
+<li><a href="#获取当天的日期">获取当天的日期</a></li>
+<li><a href="#获取当前的年月日">获取当前的年月日</a></li>
+<li><a href="#获取某个特定的日期">获取某个特定的日期</a></li>
+<li><a href="#检查两个日期是否相等">检查两个日期是否相等</a></li>
+<li><a href="#检查重复事件-比如说生日">检查重复事件，比如说生日</a></li>
+<li><a href="#获取当前时间">获取当前时间</a></li>
+<li><a href="#如何增加时间里面的小时数">如何增加时间里面的小时数</a></li>
+<li><a href="#如何获取1周后的日期">如何获取1周后的日期</a></li>
+<li><a href="#一年前后的日期">一年前后的日期</a></li>
+<li><a href="#如何判断某个日期是在另一个日期的前面还是后面">如何判断某个日期是在另一个日期的前面还是后面</a></li>
+<li><a href="#表示固定的日期-比如信用卡过期时间">表示固定的日期，比如信用卡过期时间</a></li>
+<li><a href="#检查闰年">检查闰年</a></li>
+<li><a href="#两个日期之间包含多少天-多少个月">两个日期之间包含多少天，多少个月</a></li>
+<li><a href="#如何获取当前时间戳">如何获取当前时间戳</a></li>
+<li><a href="#使用预定义的格式器来对日期进行解析-格式化">使用预定义的格式器来对日期进行解析/格式化</a></li>
+<li><a href="#使用自定义的格式器来解析日期">使用自定义的格式器来解析日期</a></li>
+<li><a href="#对日期进行格式化-转换成字符串">对日期进行格式化，转换成字符串</a></li>
+</ul></li>
+</ul>
+</nav>
                 
                 
-                
+
+<p>[TOC]</p>
+
+<h1 id="时间结构图">时间结构图</h1>
+
+<p>jdk1.8比以前的时间操作类比较，<strong>所有类都是不可变的、线程安全的</strong>。</p>
+
+<pre><code class="language-java">java.time – 包含值对象的基础包
+java.time.chrono – 提供对不同的日历系统的访问
+java.time.format – 格式化和解析时间和日期
+java.time.temporal – 包括底层框架和扩展特性
+java.time.zone – 包含时区支持的类
+</code></pre>
+
+<h2 id="java-time包">java.time包</h2>
+
+<p><img src="/img/377964-20190928151623416-1124322506.png" alt="377964-20190928151623416-1124322506" /></p>
+
+<h3 id="常用类介绍">常用类介绍</h3>
+
+<p>转载：<a href="https://www.jianshu.com/p/19bd58b30660">https://www.jianshu.com/p/19bd58b30660</a></p>
+
+<p><strong>LocalDateTime：</strong>只存储了日期和时间，如：2017-03-21T14:02:43.455。(后面的.455表示毫秒值的最后三位,使用.withNano(0)可把毫秒值设为0)</p>
+
+<p><strong>LocalDate：</strong>只存储了日期，如：2017-03-21。</p>
+
+<p><strong>LocalTime：</strong>只存储了时间，如：14:02:43.455。(<strong>后面的.455表示毫秒值的最后三位,使用.withNano(0)可把毫秒值设为0</strong>)</p>
+
+<p><strong>ZonedDateTime：</strong>包含时区的完整的日期时间，偏移量是以UTC/格林威治时间为基准的。</p>
+
+<p><strong>Year：</strong>只表示年份。</p>
+
+<p><strong>Month：</strong>只表示月份。</p>
+
+<p><strong>YearMonth：</strong>只表示年月。</p>
+
+<p><strong>MonthDay：</strong>只表示月日。</p>
+
+<p><strong>DayOfWeek：</strong>只存储星期的一天。</p>
+
+<p><strong>Clock:</strong> 它通过指定一个时区，然后就可以获取到当前的时刻，日期与时间。Clock可以替换System.currentTimeMillis()与TimeZone.getDefault()。</p>
+
+<p><strong>Instant:</strong> 时间戳，与System.currentTimeMillis()类似。</p>
+
+<p><strong>ZonedDateTime:</strong> 可以得到特定时区的日期/时间</p>
+
+<p><strong>Duration:</strong> 是用来计算两个日期的时间差，表示一个时间段。</p>
+
+<p><strong>Period：</strong>用来表示以年月日来衡量一个时间段。</p>
+
+<h3 id="方法前缀的含义-统一了api">方法前缀的含义,统一了api</h3>
+
+<pre><code class="language-java">   of： 静态工厂方法(用类名去调用)
+parse： 静态工厂方法，关注于解析(用类名去调用)
+  now： 静态工厂方法，用当前时间创建实例(用类名去调用)
+  get： 获取某些东西的值
+   is： 检查某些东西的是否是true。
+ with： 返回一个部分状态改变了的时间日期对象拷贝(单独一个with方法,参数为TemporalAdjusters类型)
+ plus： 返回一个时间增加了的、时间日期对象拷贝(如果参数是负数也能够有minus方法的效果)
+minus： 返回一个时间减少了的、时间日期对象拷贝
+   to： 把当前时间日期对象转换成另外一个，可能会损失部分状态.
+   at： 把这个对象与另一个对象组合起来，例如： date.atTime(time)。
+ format :根据某一个DateTimeFormatter格式化为字符串
+
+</code></pre>
+
+<p>新时间API类都实现了一系列方法用以完成通用的任务，如：加、减、格式化、解析、从日期/时间中提取单独部分，等等</p>
+
+<p><strong>time包里面的类实例如果用了上面的方法而被修改了,那么会返回一个新的实例过来,而不像Calendar那样可以在同一个实例进行不同的修改,体现了不可变</strong></p>
+
+<h1 id="常用方法">常用方法</h1>
+
+<p>转载地址：<a href="https://juejin.im/post/5da3fd81f265da5b81794e71">https://juejin.im/post/5da3fd81f265da5b81794e71</a></p>
+
+<h2 id="localdate-如何获得日期">LocalDate-如何获得日期</h2>
+
+<pre><code class="language-java"> // 只获取日期
+LocalDate today = LocalDate.now();
+System.out.println(today);
+
+int year = today.getYear();
+int month = today.getMonthValue();
+int day = today.getDayOfMonth();
+
+System.out.printf(&quot;Year : %d Month : %d day : %d \t %n&quot;, year, month, day);
+
+运行结果：
+2019-12-26
+Year : 2019 Month : 12 day : 26  
+  
+// 只获取日期
+LocalDate today = LocalDate.now();
+// 月份中的第几天
+int dayOfMonth = today.getDayOfMonth();
+// 一周的第几天
+DayOfWeek dayOfWeek = today.getDayOfWeek();
+// 月份的天数
+int length = today.lengthOfMonth();
+// 是否为闰年
+boolean leapYear = today.isLeapYear();
+
+System.out.println(today+&quot; &quot;+dayOfMonth+&quot; &quot;+&quot; &quot;+dayOfWeek+&quot; &quot;+length+&quot; &quot;+leapYear);  
+
+运行结果：
+2019-12-26 26  THURSDAY 31 false  
+</code></pre>
+
+<p>上面通过now获取LocalDate对象，也可以通过静态方法of()或parse创建任意一个日期。再也不用像之前一样年只能从1900年开始，月必须从0开始等。</p>
+
+<pre><code class="language-java">LocalDate oneDay = LocalDate.of(2019,10,1);
+System.out.println(oneDay);
+
+LocalDate parseDay = LocalDate.parse(&quot;2019-10-01&quot;);
+System.out.println(parseDay);
+
+运行结果：
+2019-10-01
+</code></pre>
+
+<p>LocalDate重写了equals方法，让日期的比较也变得简单了。</p>
+
+<pre><code class="language-java">// 定义任意日期
+LocalDate oneDay = LocalDate.of(2019, 10, 1);
+System.out.println(oneDay);
+
+// 定义任意比较
+LocalDate anyDay = LocalDate.of(2019, 10, 1);
+System.out.println(oneDay.equals(anyDay));
+
+运行结果：
+2019-10-01
+true
+</code></pre>
+
+<p>同时，针对日期还可延伸出MonthDay或YearMonth类，顾名思义，只包含月天或年月。同样适用于equals方法来比较。</p>
+
+<p>另外使用before和after可以比较两个日期前后时间。</p>
+
+<pre><code class="language-java">boolean notBefore = LocalDate.parse(&quot;2019-10-01&quot;).isBefore(LocalDate.parse(&quot;2019-10-02&quot;));
+boolean isAfter = LocalDate.parse(&quot;2019-10-01&quot;).isAfter(LocalDate.parse(&quot;2019-10-02&quot;));
+</code></pre>
+
+<p>对日期进行前一天后一天或前一个月的加减也变得十分方便。</p>
+
+<pre><code class="language-java">LocalDate tomorrowDay = LocalDate.now().plusDays(1);
+LocalDate nextMonth =  LocalDate.now().plusMonths(1);
+</code></pre>
+
+<p>还有，我们在实战的时候往往要获取某一天的开始时间和当天所在月的第一天等。</p>
+
+<pre><code class="language-java">LocalDate.now().atStartOfDay();
+LocalDate.now().with(TemporalAdjusters.firstDayOfMonth());
+</code></pre>
+
+<h2 id="localtime-如何获取时间">LocalTime-如何获取时间</h2>
+
+<p>LocalTime和LocalDate类似，区别在于LocalDate不包含具体时间，而LocalTime包含具体时间。同样可以使用now或of方法来获得对象。</p>
+
+<pre><code class="language-java">LocalTime localTime = LocalTime.now();
+
+LocalTime oneTime = LocalTime.of(10,10,10);
+</code></pre>
+
+<p>LocalDate类似它也拥有parse、isBefore、获取时间单元等方法，就不再赘述。</p>
+
+<p><strong>需要注意</strong>的是，LocalTime获得的时间格式为：11:41:58.904。也就是，HH:mm:ss.nnn，这里nnn是纳秒。</p>
+
+<p>还有一个在实战中查询日期区间时我们经常定义的“23:59:59.99”常量再也不用自己定义了。</p>
+
+<pre><code class="language-java">// 23:59:59.999999999
+LocalTime maxTime = LocalTime.MAX;
+// 00:00
+LocalTime minTime = LocalTime.MIN;
+</code></pre>
+
+<h2 id="localdatetime-日期和时间的组合">LocalDateTime-日期和时间的组合</h2>
+
+<p>LocalDateTime表示日期和时间组合。可以通过of()方法直接创建，也可以调用LocalDate的atTime()方法或LocalTime的atDate()方法将LocalDate或LocalTime合并成一个LocalDateTime。</p>
+
+<pre><code class="language-java">LocalDateTime now = LocalDateTime.now();
+
+LocalDateTime oneTime = LocalDateTime.of(2019,10,14,10,12,12);
+
+// 拼接日期
+LocalTime.now().atDate(LocalDate.now());
+</code></pre>
+
+<p>LocalDateTime与LocalDate和LocalTime之间可以相互转化。其他日期增减等操作与上面的类似。</p>
+
+<h2 id="instant-获取时间戳">Instant-获取时间戳</h2>
+
+<p>Instant用于一个时间戳，与System.currentTimeMillis()类似，但Instant可以精确到纳秒（Nano-Second）。</p>
+
+<p>Instant除了可以使用now()方法创建，还可以通过ofEpochSecond方法创建。</p>
+
+<pre><code class="language-java">Instant now = Instant.now();
+
+Instant.ofEpochSecond(365 * 24 * 60, 100);
+</code></pre>
+
+<p>其中ofEpochSecond第一个参数表示秒，第二个参数表示纳秒。整体表示：从1970-01-01 00:00:00开始后的365天100纳秒的时间点。</p>
+
+<h2 id="duration-获取时间段">Duration-获取时间段</h2>
+
+<p>Duration的内部实现与Instant类似，但Duration表示时间段，通过between方法创建。</p>
+
+<pre><code class="language-java">LocalDateTime from = LocalDateTime.now();
+LocalDateTime to = LocalDateTime.now().plusDays(1);
+Duration duration = Duration.between(from, to);
+
+// 区间统计换算
+// 总天数
+long days = duration.toDays();
+// 小时数
+long hours = duration.toHours();
+// 分钟数
+long minutes = duration.toMinutes();
+// 秒数
+long seconds = duration.getSeconds();
+// 毫秒数
+long milliSeconds = duration.toMillis();
+// 纳秒数
+long nanoSeconds = duration.toNanos();
+</code></pre>
+
+<p>Duration对象还可以通过of()方法创建，该方法参数为时间段长度和时间单位。</p>
+
+<pre><code class="language-java">// 7天
+Duration duration1 = Duration.of(7, ChronoUnit.DAYS);
+// 60秒
+Duration duration2 = Duration.of(60, ChronoUnit.SECONDS);
+</code></pre>
+
+<h2 id="period-获取日期段">Period-获取日期段</h2>
+
+<p>Period与Duration类似，获取一个时间段，只不过单位为年月日，也可以通过of方法和between方法创建，between方法接收的参数为LocalDate。</p>
+
+<pre><code class="language-java">Period period = Period.of(1, 10, 25);
+
+Period period1 = Period.between(LocalDate.now(), LocalDate.now().plusYears(1));
+</code></pre>
+
+<h2 id="zoneddatetime-创建时区时间">ZonedDateTime-创建时区时间</h2>
+
+<p>ZonedDateTime类，用于处理带时区的日期和时间。ZoneId表示不同的时区。大约有40不同的时区。</p>
+
+<p>获取所有时区集合：</p>
+
+<pre><code class="language-java">Set allZoneIds = ZoneId.getAvailableZoneIds();
+</code></pre>
+
+<p>创建时区：</p>
+
+<pre><code class="language-java">ZoneId zoneId = ZoneId.of(&quot;Asia/Shanghai&quot;);
+</code></pre>
+
+<p>把LocalDateTime转换成特定的时区：</p>
+
+<pre><code class="language-java">ZonedDateTime zonedDateTime = ZonedDateTime.of(LocalDateTime.now(), zoneId);
+</code></pre>
+
+<p>另外和时区一起使用的类是OffsetDateTime类，OffsetDateTime是不变的，表示date-time偏移，存储所有日期和时间字段，精确至纳秒，从UTC/Greenwich计算偏移。</p>
+
+<h2 id="时间日期格式化">时间日期格式化</h2>
+
+<p>Java8对日期的格式化操作非常简单，首先看到上面的类大多都提供了parse方法，可以直接通过解析字符串得到对应的对象。</p>
+
+<p>而日期和时间的格式化可通过LocalDateTime的format方法进行格式化。</p>
+
+<pre><code class="language-java">/***************时间转字符串*************************/ 
+LocalDateTime dateTime = LocalDateTime.now();
+String str = dateTime.format(DateTimeFormatter.ISO_LOCAL_DATE_TIME);
+System.out.println(str);
+
+str = dateTime.format(DateTimeFormatter.ofPattern(&quot;yyyy-MM-dd&quot;));
+System.out.println(str);
+
+
+
+/***************字符串转时间格式*************************/ 
+String str1 = &quot;2014==04==12 01时06分09秒&quot;;
+// 根据需要解析的日期、时间字符串定义解析所用的格式器
+DateTimeFormatter fomatter1 = DateTimeFormatter.ofPattern(&quot;yyyy==MM==dd HH时mm分ss秒&quot;);
+// 执行解析
+LocalDateTime dt1 = LocalDateTime.parse(str1, fomatter1);
+System.out.println(dt1); // 输出 2014-04-12T01:06:09
+
+String time = &quot;2019-12-26 17:48:22&quot;;
+DateTimeFormatter fomatter2 = DateTimeFormatter.ofPattern(&quot;yyyy-MM-dd HH:mm:ss&quot;);
+LocalDateTime timeDate = LocalDateTime.parse(time, fomatter2);
+System.out.println(timeDate);
+
+</code></pre>
+
+<h2 id="clock">Clock</h2>
+
+<p>Clock 它通过指定一个时区，然后就可以获取到当前的时刻，日期与时间。Clock可以替换System.currentTimeMillis()与TimeZone.getDefault()。</p>
+
+<h1 id="timeunit">TimeUnit</h1>
+
+<p>转载地址：<a href="https://www.jianshu.com/p/4ab62e4a328f">https://www.jianshu.com/p/4ab62e4a328f</a></p>
+
+<p>TimeUnit是java.util.concurrent包下面的一个类，表示给定单元粒度的时间段。</p>
+
+<h2 id="常用的颗粒度">常用的颗粒度</h2>
+
+<pre><code class="language-java">TimeUnit.DAYS          //天
+TimeUnit.HOURS         //小时
+TimeUnit.MINUTES       //分钟
+TimeUnit.SECONDS       //秒
+TimeUnit.MILLISECONDS  //毫秒
+</code></pre>
+
+<h2 id="颗粒度转换">颗粒度转换</h2>
+
+<pre><code class="language-java">public long toMillis(long d)    //转化成毫秒
+public long toSeconds(long d)  //转化成秒
+public long toMinutes(long d)  //转化成分钟
+public long toHours(long d)    //转化成小时
+public long toDays(long d)     //转化天
+</code></pre>
+
+<pre><code class="language-java">import java.util.concurrent.TimeUnit;
+
+public class TimeUnitTest {
+
+    public static void main(String[] args) {
+        // 默认转换只能和上一级进行转换。    
+        
+        //convert 1 day to 24 hour
+        System.out.println(TimeUnit.DAYS.toHours(1));
+        //convert 1 hour to 60*60 second.
+        System.out.println(TimeUnit.HOURS.toSeconds(1));
+    }
+
+}
+</code></pre>
+
+<p>自己带上单位转换</p>
+
+<pre><code class="language-java">//convert 3 days to 72 hours.
+System.out.println(TimeUnit.HOURS.convert(3, TimeUnit.DAYS));
+</code></pre>
+
+<h2 id="延时-可替代thread-sleep">延时，可替代Thread.sleep()</h2>
+
+<pre><code class="language-java">import java.util.concurrent.TimeUnit;
+
+public class ThreadSleep {
+
+    public static void main(String[] args) {
+        Thread t = new Thread(new Runnable() {
+            private int count = 0;
+
+            @Override
+            public void run() {
+                for (int i = 0; i &lt; 10; i++) {
+                    try {
+                        // Thread.sleep(500); //sleep 单位是毫秒
+                        TimeUnit.SECONDS.sleep(1); // 单位可以自定义,more convinent
+                    } catch (InterruptedException e) {
+                        e.printStackTrace();
+                    }
+                    count++;
+                    System.out.println(count);
+                }
+            }
+        });
+        t.start();
+    }
+}
+</code></pre>
+
+<h1 id="20个常用使用示例">20个常用使用示例</h1>
+
+<p>转载地址：<a href="https://blog.csdn.net/chenleixing/article/details/44408875">https://blog.csdn.net/chenleixing/article/details/44408875</a></p>
+
+<h2 id="获取当天的日期">获取当天的日期</h2>
+
+<pre><code class="language-java">LocalDate today = LocalDate.now(); System.out.println(&quot;Today's Local date : &quot; + today); 
+ 
+Output 
+Today's Local date : 2014-01-14
+</code></pre>
+
+<h2 id="获取当前的年月日">获取当前的年月日</h2>
+
+<pre><code class="language-java">LocalDate today = LocalDate.now(); 
+int year = today.getYear(); 
+int month = today.getMonthValue(); 
+int day = today.getDayOfMonth(); 
+System.out.printf(&quot;Year : %d Month : %d day : %d \t %n&quot;, year, month, day); 
+ 
+Output 
+Today's Local date : 2014-01-14 
+Year : 2014 Month : 1 day : 14
+</code></pre>
+
+<h2 id="获取某个特定的日期">获取某个特定的日期</h2>
+
+<pre><code class="language-java">LocalDate dateOfBirth = LocalDate.of(2010, 01, 14); 
+System.out.println(&quot;Your Date of birth is : &quot; + dateOfBirth); 
+
+Output : Your Date of birth is : 2010-01-14
+</code></pre>
+
+<h2 id="检查两个日期是否相等">检查两个日期是否相等</h2>
+
+<pre><code class="language-java">LocalDate date1 = LocalDate.of(2014, 01, 14); 
+if(date1.equals(today)){ 
+    System.out.printf(&quot;Today %s and date1 %s are same date %n&quot;, today, date1); 
+} 
+ 
+Output 
+today 2014-01-14 and date1 2014-01-14 are same date  
+</code></pre>
+
+<h2 id="检查重复事件-比如说生日">检查重复事件，比如说生日</h2>
+
+<pre><code class="language-java">LocalDate dateOfBirth = LocalDate.of(2010, 01, 14); 
+MonthDay birthday = MonthDay.of(dateOfBirth.getMonth(), dateOfBirth.getDayOfMonth()); 
+MonthDay currentMonthDay = MonthDay.from(today); 
+if(currentMonthDay.equals(birthday)){ 
+    System.out.println(&quot;Many Many happy returns of the day !!&quot;); 
+}else{ 
+    System.out.println(&quot;Sorry, today is not your birthday&quot;); 
+} 
+ 
+Output: Many Many happy returns of the day !!
+</code></pre>
+
+<h2 id="获取当前时间">获取当前时间</h2>
+
+<pre><code class="language-java">LocalTime time = LocalTime.now(); System.out.println(&quot;local time now : &quot; + time);
+ 
+Output 
+local time now : 16:33:33.369 // in hour, minutes, seconds, nano seconds
+</code></pre>
+
+<h2 id="如何增加时间里面的小时数">如何增加时间里面的小时数</h2>
+
+<pre><code class="language-java">LocalTime time = LocalTime.now(); 
+LocalTime newTime = time.plusHours(2); // adding two hours 
+System.out.println(&quot;Time after 2 hours : &quot; + newTime); 
+ 
+Output : 
+Time after 2 hours : 18:33:33.369
+</code></pre>
+
+<h2 id="如何获取1周后的日期">如何获取1周后的日期</h2>
+
+<pre><code class="language-java">LocalDate nextWeek = today.plus(1, ChronoUnit.WEEKS); 
+System.out.println(&quot;Today is : &quot; + today); 
+System.out.println(&quot;Date after 1 week : &quot; + nextWeek); 
+ 
+Output: 
+Today is : 2014-01-14 
+Date after 1 week : 2014-01-21
+</code></pre>
+
+<h2 id="一年前后的日期">一年前后的日期</h2>
+
+<pre><code class="language-java">LocalDate previousYear = today.minus(1, ChronoUnit.YEARS); 
+System.out.println(&quot;Date before 1 year : &quot; + previousYear); 
+LocalDate nextYear = today.plus(1, YEARS); 
+System.out.println(&quot;Date after 1 year : &quot; + nextYear); 
+ 
+Output: 
+Date before 1 year : 2013-01-14 
+Date after 1 year : 2015-01-14
+</code></pre>
+
+<h2 id="如何判断某个日期是在另一个日期的前面还是后面">如何判断某个日期是在另一个日期的前面还是后面</h2>
+
+<pre><code class="language-java">LocalDate tomorrow = LocalDate.of(2014, 1, 15); 
+if(tommorow.isAfter(today)){ 
+    System.out.println(&quot;Tomorrow comes after today&quot;); 
+}
+
+LocalDate yesterday = today.minus(1, DAYS); 
+if(yesterday.isBefore(today)){ 
+    System.out.println(&quot;Yesterday is day before today&quot;); 
+} 
+ 
+Output: 
+Tomorrow comes after today 
+Yesterday is day before today
+</code></pre>
+
+<h2 id="表示固定的日期-比如信用卡过期时间">表示固定的日期，比如信用卡过期时间</h2>
+
+<pre><code class="language-java">YearMonth currentYearMonth = YearMonth.now(); 
+System.out.printf(&quot;Days in month year %s: %d%n&quot;, currentYearMonth, currentYearMonth.lengthOfMonth()); 
+
+YearMonth creditCardExpiry = YearMonth.of(2018, Month.FEBRUARY); 
+System.out.printf(&quot;Your credit card expires on %s %n&quot;, creditCardExpiry); 
+ 
+Output: 
+Days in month year 2014-01: 31 
+Your credit card expires on 2018-02
+</code></pre>
+
+<h2 id="检查闰年">检查闰年</h2>
+
+<pre><code class="language-java">if(today.isLeapYear()){ 
+    System.out.println(&quot;This year is Leap year&quot;); 
+}else { 
+    System.out.println(&quot;2014 is not a Leap year&quot;); 
+} 
+ 
+Output: 2014 is not a Leap year
+</code></pre>
+
+<h2 id="两个日期之间包含多少天-多少个月">两个日期之间包含多少天，多少个月</h2>
+
+<pre><code class="language-java">LocalDate java8Release = LocalDate.of(2014, Month.MARCH, 14); 
+Period periodToNextJavaRelease = 
+Period.between(today, java8Release); 
+System.out.println(&quot;Months left between today and Java 8 release : &quot; + periodToNextJavaRelease.getMonths() ); 
+ 
+Output: 
+Months left between today and Java 8 release : 2
+</code></pre>
+
+<h2 id="如何获取当前时间戳">如何获取当前时间戳</h2>
+
+<pre><code class="language-java">Instant timestamp = Instant.now(); 
+System.out.println(&quot;What is value of this instant &quot; + timestamp); 
+ 
+Output : 
+What is value of this instant 2014-01-14T08:33:33.379Z
+</code></pre>
+
+<h2 id="使用预定义的格式器来对日期进行解析-格式化">使用预定义的格式器来对日期进行解析/格式化</h2>
+
+<pre><code class="language-java">String dayAfterTommorrow = &quot;20140116&quot;; 
+LocalDate formatted = LocalDate.parse(dayAfterTommorrow, 
+DateTimeFormatter.BASIC_ISO_DATE); 
+System.out.printf(&quot;Date generated from String %s is %s %n&quot;, dayAfterTommorrow, formatted); 
+ 
+Output : 
+Date generated from String 20140116 is 2014-01-16
+</code></pre>
+
+<h2 id="使用自定义的格式器来解析日期">使用自定义的格式器来解析日期</h2>
+
+<pre><code class="language-java">String goodFriday = &quot;Apr 18 2014&quot;; 
+try { 
+    DateTimeFormatter formatter = DateTimeFormatter.ofPattern(&quot;MMM dd yyyy&quot;);     
+    LocalDate holiday = LocalDate.parse(goodFriday, formatter); 
+    System.out.printf(&quot;Successfully parsed String %s, date is %s%n&quot;, goodFriday, holiday); 
+} catch (DateTimeParseException ex) { 
+    System.out.printf(&quot;%s is not parsable!%n&quot;, goodFriday); 
+    ex.printStackTrace(); 
+} 
+ 
+Output : 
+Successfully parsed String Apr 18 2014, date is 2014-04-18
+</code></pre>
+
+<h2 id="对日期进行格式化-转换成字符串">对日期进行格式化，转换成字符串</h2>
+
+<pre><code class="language-java">LocalDateTime arrivalDate = LocalDateTime.now(); 
+try { 
+    DateTimeFormatter format = DateTimeFormatter.ofPattern(&quot;MMM dd yyyy hh:mm a&quot;); 
+    String landing = arrivalDate.format(format); 
+    System.out.printf(&quot;Arriving at : %s %n&quot;, landing); 
+    } catch (DateTimeException ex) { 
+    System.out.printf(&quot;%s can't be formatted!%n&quot;, arrivalDate); 
+    ex.printStackTrace(); 
+} 
+ 
+Output : Arriving at : Jan 14 2014 04:33 PM
+
+
+/***************时间转字符串*************************/ 
+LocalDateTime dateTime = LocalDateTime.now();
+String str = dateTime.format(DateTimeFormatter.ISO_LOCAL_DATE_TIME);
+System.out.println(str);
+
+str = dateTime.format(DateTimeFormatter.ofPattern(&quot;yyyy-MM-dd&quot;));
+System.out.println(str);
+
+
+
+/***************字符串转时间格式*************************/ 
+String str1 = &quot;2014==04==12 01时06分09秒&quot;;
+// 根据需要解析的日期、时间字符串定义解析所用的格式器
+DateTimeFormatter fomatter1 = DateTimeFormatter.ofPattern(&quot;yyyy==MM==dd HH时mm分ss秒&quot;);
+// 执行解析
+LocalDateTime dt1 = LocalDateTime.parse(str1, fomatter1);
+System.out.println(dt1); // 输出 2014-04-12T01:06:09
+
+String time = &quot;2019-12-26 17:48:22&quot;;
+DateTimeFormatter fomatter2 = DateTimeFormatter.ofPattern(&quot;yyyy-MM-dd HH:mm:ss&quot;);
+LocalDateTime timeDate = LocalDateTime.parse(time, fomatter2);
+System.out.println(timeDate);
+
+
+</code></pre>
+
 
                 
                 
@@ -251,13 +901,13 @@
                 <ul class="pager">
                     
                     <li class="previous">
-                        <a href="/post/%E5%BC%BA%E5%BC%95%E7%94%A8%E8%BD%AF%E5%BC%95%E7%94%A8%E5%BC%B1%E5%BC%95%E7%94%A8/" data-toggle="tooltip" data-placement="top" title="强引用，软引用，弱引用">&larr;
+                        <a href="/post/%E8%8E%AB%E8%A8%80%E5%BD%93%E4%BD%A0%E7%9A%84%E6%89%8D%E5%8D%8E%E8%BF%98%E6%92%91%E4%B8%8D%E8%B5%B7%E4%BD%A0%E7%9A%84%E9%87%8E%E5%BF%83%E7%9A%84%E6%97%B6%E5%80%99/" data-toggle="tooltip" data-placement="top" title="莫言:当你的才华还撑不起你的野心的时候">&larr;
                             Previous Post</a>
                     </li>
                     
                     
                     <li class="next">
-                        <a href="/post/io%E7%B1%BB%E6%A1%86%E6%9E%B6/" data-toggle="tooltip" data-placement="top" title="java常用框架图">Next
+                        <a href="/post/%E5%BC%BA%E5%BC%95%E7%94%A8%E8%BD%AF%E5%BC%95%E7%94%A8%E5%BC%B1%E5%BC%95%E7%94%A8/" data-toggle="tooltip" data-placement="top" title="强引用，软引用，弱引用">Next
                             Post &rarr;</a>
                     </li>
                     
