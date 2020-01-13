@@ -216,8 +216,19 @@
 </ul></li>
 <li><a href="#核心api">核心API</a>
 <ul>
-<li><a href="#发送数据包">发送数据包</a></li>
-<li><a href="#datagram">Datagram</a></li>
+<li>
+<ul>
+<li><a href="#datagrampacket">DatagramPacket</a>
+<ul>
+<li><a href="#构建接收包">构建接收包</a></li>
+<li><a href="#构建发送包">构建发送包</a></li>
+</ul></li>
+<li><a href="#datagramsocket">DatagramSocket</a>
+<ul>
+<li><a href="#服务端接收">服务端接收</a></li>
+<li><a href="#客户端发送">客户端发送</a></li>
+</ul></li>
+</ul></li>
 <li><a href="#注意">注意</a></li>
 <li><a href="#单播代码演示">单播代码演示</a>
 <ul>
@@ -351,13 +362,40 @@
 
 <p>在 Java 中使用 UDP 时关键的两个类分别是：<strong>DatagramSocket</strong> 和 <strong>DatagramPacket</strong>。DatagramPacket 表示数据包，而 DatagrameSocket 用来发送和接收数据包。</p>
 
-<h2 id="发送数据包">发送数据包</h2>
-
 <p>因为 UDP 协议并不需要建立连接，所以我们将数据（byte数组）放入 DatagramPacket 之后，还需要将目的地（IP地址和端口）放入到 DatagramPacket 中 —— DatagramSocket 的 <em>send(DatagramPacket packet)</em> 方法根据 packet 中指定目的地，将其包含的数据往这个目的地发送。至于数据是否能（准确）到达目的地，DatagramSocket 并不关心。</p>
 
-<h2 id="datagram">Datagram</h2>
+<h3 id="datagrampacket">DatagramPacket</h3>
+
+<p>原文链接：<a href="https://blog.csdn.net/Robot__Man/article/details/80657727">https://blog.csdn.net/Robot__Man/article/details/80657727</a></p>
+
+<h4 id="构建接收包">构建接收包</h4>
+
+<p>　- DatagramPacket(byte[] buf,int length)，将数据包中length长的数据装进buf数组。
+　　- DatagramPacket(byte[] buf,int offset,int length)，将数据包中从offset开始，length长的数据装进buf数组。</p>
+
+<h4 id="构建发送包">构建发送包</h4>
+
+<ul>
+<li>-DatagramPacket(byte[] buf,int length,InetAddress clientAddress,int clientPort)，从buf数组中，取出length长的数据创建数据包对象，目标是clientAddress地址，clientPort端口，通常用来发送数据给客户端。</li>
+<li>-DatagramPacket(byte[] buf,int offset,int length,InetAddress clientAddress,int clientPort)，从buf数组中，取出offset开始的、length长的数据创建数据包对象，目标是clientAddress地址，clientPort端口，通常用来发送数据给客户端。</li>
+</ul>
+
+<h3 id="datagramsocket">DatagramSocket</h3>
 
 <p>DatagramSocket 在接收数据包时，我们需要为其指定一个监听的端口。当有包含了接收端机器 IP 地址和 DatagramSocket 所监听端口的数据包到达时，DatagramSocket 的 <em>receive(DatagramPacket packet)</em> 方法便会对数据包进行接收，并将接收到的数据包填入到 packet 中。</p>
+
+<h4 id="服务端接收">服务端接收</h4>
+
+<ul>
+<li>DatagramSocket(int port)，创建实例，并固定监听port端口的报文，通常用于服务端。
+　　- receive(DatagramPacket d)，接收数据报文到d中，receive方法产生“阻塞”。</li>
+</ul>
+
+<h4 id="客户端发送">客户端发送</h4>
+
+<p>无参的构造方法DatagramSocket()，通常用于客户端编程，它并没有特定监听的端口，仅仅使用一个临时的。程序会让操作系统分配一个可用的端口。</p>
+
+<p>send(DatagramPacket dp)，该方法用于发送报文dp到目的地。</p>
 
 <h2 id="注意">注意</h2>
 
