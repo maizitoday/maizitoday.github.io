@@ -15,9 +15,9 @@
     
 
     
-    <meta name="title" content="网络编程理论知识" />
-    <meta property="og:title" content="网络编程理论知识" />
-    <meta property="twitter:title" content="网络编程理论知识" />
+    <meta name="title" content="UDP辅助TCP实现点对点数据传输" />
+    <meta property="og:title" content="UDP辅助TCP实现点对点数据传输" />
+    <meta property="twitter:title" content="UDP辅助TCP实现点对点数据传输" />
     
 
     
@@ -34,9 +34,9 @@
     <meta name="keyword"  content="麦子, maizi, maizi, , 麦子的网络日志, 麦子的博客, maizi Blog, 博客, 个人网站, 互联网, Web, 云原生, PaaS, Istio, Kubernetes, 微服务, Microservice">
     <link rel="shortcut icon" href="/img/favicon.ico">
 
-    <title>网络编程理论知识-麦子的博客</title>
+    <title>UDP辅助TCP实现点对点数据传输-麦子的博客</title>
 
-    <link rel="canonical" href="/post/%E7%BD%91%E7%BB%9C%E7%BC%96%E7%A8%8B%E7%90%86%E8%AE%BA%E7%9F%A5%E8%AF%86/">
+    <link rel="canonical" href="/post/udp%E8%BE%85%E5%8A%A9tcp%E5%AE%9E%E7%8E%B0%E7%82%B9%E5%AF%B9%E7%82%B9%E6%95%B0%E6%8D%AE%E4%BC%A0%E8%BE%93/">
 
     <link rel="stylesheet" href="/css/iDisqus.min.css"/>
 	
@@ -167,7 +167,7 @@
                         </a>
                         
                     </div>
-                    <h1>网络编程理论知识</h1>
+                    <h1>UDP辅助TCP实现点对点数据传输</h1>
                     <h2 class="subheading"></h2>
                     <span class="meta">
 			Posted by 
@@ -175,7 +175,7 @@
 			    麦子
 			 
 			on 
-			Saturday, January 4, 2020
+			Saturday, January 11, 2020
                         
                     </span>
                 </div>
@@ -203,66 +203,36 @@
                 </header>              
                 <nav id="TableOfContents">
 <ul>
-<li><a href="#7层网络模型-osi">7层网络模型-OSI</a>
+<li><a href="#大致流程">大致流程</a></li>
+<li><a href="#具体代码如下">具体代码如下</a>
 <ul>
-<li><a href="#结构图">结构图</a></li>
-<li><a href="#分析qq消息流程">分析QQ消息流程</a></li>
+<li><a href="#客户端代码">客户端代码</a>
+<ul>
+<li><a href="#client">Client</a></li>
+<li><a href="#udpsearcher">UDPSearcher</a></li>
+<li><a href="#tcpclient">TCPClient</a></li>
 </ul></li>
-<li><a href="#tcp-ip模型">TCP/IP模型</a>
+<li><a href="#服务端代码">服务端代码</a>
 <ul>
-<li><a href="#结构">结构</a></li>
-<li><a href="#协议">协议</a></li>
-<li><a href="#物理层">物理层</a></li>
-<li><a href="#数据链路层">数据链路层</a></li>
-<li><a href="#网络层">网络层</a>
-<ul>
-<li><a href="#选址">选址</a></li>
-<li><a href="#路由">路由</a></li>
-<li><a href="#ip头">IP头</a></li>
+<li><a href="#server">Server</a></li>
+<li><a href="#udpprovider">UDPProvider</a></li>
+<li><a href="#tcpserver">TCPServer</a></li>
 </ul></li>
-<li><a href="#传输层">传输层</a>
+<li><a href="#相关工具类">相关工具类</a>
 <ul>
-<li><a href="#tcp和udp">TCP和UDP</a></li>
-<li><a href="#tcp的功能">TCP的功能</a></li>
-<li><a href="#传说中的三次握手">传说中的三次握手</a></li>
-<li><a href="#数据传输">数据传输</a></li>
-<li><a href="#四次挥手">四次挥手</a></li>
-</ul></li>
-<li><a href="#应用层">应用层</a></li>
-<li><a href="#分析邮件发送接受流程">分析邮件发送接受流程</a></li>
-</ul></li>
-<li><a href="#socket">Socket</a>
-<ul>
-<li><a href="#什么是socket">什么是Socket</a></li>
-<li><a href="#socket通信流程">Socket通信流程</a></li>
-<li><a href="#socket编程理解">Socket编程理解</a></li>
-</ul></li>
-<li><a href="#概念理解">概念理解</a>
-<ul>
-<li><a href="#协议-1">协议</a>
-<ul>
-<li><a href="#概述">概述</a></li>
-</ul></li>
-<li><a href="#mac地址">Mac地址</a>
-<ul>
-<li><a href="#概述-1">概述</a></li>
-<li><a href="#为什么要用到mac地址">为什么要用到MAC地址</a></li>
-</ul></li>
-<li><a href="#报文和帧">报文和帧</a>
-<ul>
-<li><a href="#概述-2">概述</a></li>
-<li><a href="#报文">报文</a></li>
-<li><a href="#帧">帧</a></li>
-</ul></li>
-<li><a href="#ipv4和ipv6">IPV4和IPV6</a></li>
-<li><a href="#端口">端口</a></li>
-<li><a href="#ip地址结构">IP地址结构</a>
-<ul>
-<li><a href="#子网掩码">子网掩码</a></li>
-<li><a href="#广播地址">广播地址</a></li>
-<li><a href="#dhcp简介">DHCP简介</a></li>
+<li><a href="#tcpconstants">TCPConstants</a></li>
+<li><a href="#udpconstants">UDPConstants</a></li>
+<li><a href="#jsonserilizable">JsonSerilizable</a></li>
+<li><a href="#serverinfo">ServerInfo</a></li>
+<li><a href="#pom-xml">pom.xml</a></li>
 </ul></li>
 </ul></li>
+<li><a href="#运行结果">运行结果</a>
+<ul>
+<li><a href="#服务端">服务端</a></li>
+<li><a href="#客户端">客户端</a></li>
+</ul></li>
+<li><a href="#说明">说明</a></li>
 </ul>
 </nav>
                 
@@ -270,293 +240,746 @@
 
 <p>[TOC]</p>
 
-<h1 id="7层网络模型-osi">7层网络模型-OSI</h1>
-
-<p>转载地址：<a href="https://www.zhihu.com/question/24002080/answer/31817536">https://www.zhihu.com/question/24002080/answer/31817536</a></p>
-
-<h2 id="结构图">结构图</h2>
-
-<p><img src="/img/be078715b1914a9ff86882019d8d65fc_hd.jpg" alt="be078715b1914a9ff86882019d8d65fc_hd" /></p>
-
-<p><strong>应用层：</strong>就是应用软件使用的协议，如邮箱使用的POP3，SMTP、远程登录使用的Telnet、获取IP地址的DHCP、域名解析的DNS、网页浏览的http协议等；<strong>这部分协议主要是规定应用软件如何去进行通信的</strong>。</p>
-
-<p><strong>表示层：</strong>决定数据的展现（编码）形式，如同一部电影可以采样、量化、编码为RMVB、AVI，一张图片能够是JPEG、BMP、PNG等, 感觉把我们认识的数据格式转为计算机认识的数据格式。</p>
-
-<p><strong>会话层：</strong>为两端通信实体建立连接（会话），中间有认证鉴权以及检查点记录（供会话意外中断的时候可以继续，类似断点续传）。</p>
-
-<p><strong>传输层：</strong>将一个数据/文件斩件分成很多小段，标记顺序以被对端接收后可以按顺序重组数据，另外标记该应用程序使用的端口号及提供QOS。（不同的应用程序使用不同计算机的端口号，同样的应用程序需要使用一样的端口号才能正常通信）</p>
-
-<p><strong>网络层：</strong>路由选路，选择本次通信使用的协议（http、ftp等），指定路由策略及访问控制策略。（IP地址在这一层）</p>
-
-<p><strong>数据链路层：</strong>根据端口与MAC地址，做分组（VLAN）隔离、端口安全、访问控制。（MAC地址在这一层）处理VLAN内的数据帧转发，跨VLAN间的访问，需要上升到网络层。</p>
-
-<p><strong>物理层：</strong>将数据最终编码为用0、1标识的比特流，然后传输。（例如将题主头像的图片，变为一串01100111100这样的数字来表示）。</p>
-
-<h2 id="分析qq消息流程">分析QQ消息流程</h2>
-
-<p>1、 当A打开了QQ这个软件，相当就到达<strong>应用层</strong>了；因为软件会根据你的操作调动机器底层的硬件工作了。</p>
-
-<p>2、 当A往QQ这个软件的聊天窗口里面输入信息，发出后，QQ会将这个信息保存在本地聊天记录文件MSGEX.db（一般就保存在QQ目录下以你的QQ号码为文件夹里）。以某种格式编码/保存某种信息，这可以理解为<strong>表示层</strong>了。</p>
-
-<p>3、 当A打开与B的聊天窗口，输入信息，按下“输入”按钮，用户的操作就完结了，剩下都是机器自己的操作了。实际传输之前QQ会先建立A与B的会话连接，才真正开始传输信息/数据（你可以理解借传输文件理解：你发送文件给对方，要等待对方按下接收，才算建立了会话，然后才开始传输。）这算<strong>会话层</strong>了。</p>
-
-<p>4、 会话建立后，会将A发的信息斩件，如A发送“你吃了饭没有”？<strong>传输层</strong>将这句话斩成“你”“吃”“了”“饭”“没”“有”6个数据段，标记号使用的端口号，然后准备发出去。</p>
-
-<p>5、 接上一层，信息还未发出去，这时候在<strong>网络层</strong>做路由选路，可以理解为，从A家出去，可以分别经“联通”“电信”“移动”3个网络中的一个再到B家。</p>
-
-<p>网络层根据路由协议负责选路（根据链路质量、带宽、开销等方法论）。假设最后选了2条，可能就A-&gt;联通-&gt;B发送“你”“吃”“了”3个数据段，A-&gt;电信-&gt;B发送“饭”“没”“有”3个数据段。</p>
-
-<p>选路后，这一层要标记IP包头，包头主要内容是源IP地址，目的IP地址，使用什么协议。其中源、目的IP相当于你寄信的时候的收发的地址与邮政编码，标记出发送者与接收者。而协议相当于这封信到底用什么语言书写。</p>
-
-<p>6、 然后再到<strong>数据链路层</strong>，数据链路层主要是负责同一个子网内的通信的。例如A、B连接在同一台二层交换机，就属于同一个子网，那么数据帧的通信室是不需要通过网络层的（即三层交换机或者路由器），直接在这台二层交换机就过去了。这一层打的是MAC地址的帧头，对于上述通信过程来说，就是为数据帧打上A的机器的MAC与A的网关的MAC。这一层的工作就完成了。</p>
-
-<p>7、 最后一层了，经过上述斩件、打完各层标签后的6个数据帧，物理层将他们翻译文6段0、1表示的比特流，然后通过光纤、铜缆进行传输。</p>
-
-<p>8、 当比特流传输到了远端，接着B的机器按照上述的1~7的步骤反方向运行一次即可（即有物理层到应用层）。就是一层层读取标签，传输给标签标记着的相应对象，然后摘除标签，再读取上一层标签，直到最后B的应用程序能够读到A往应用程序输入的数据为止。</p>
-
-<p><img src="/img/6e5c71b163a849019ec55a1267d64930_hd.jpg" alt="6e5c71b163a849019ec55a1267d64930_hd" /></p>
-
-<h1 id="tcp-ip模型">TCP/IP模型</h1>
-
-<p>转载地址：<a href="https://zhuanlan.zhihu.com/p/33797520">https://zhuanlan.zhihu.com/p/33797520</a></p>
-
-<h2 id="结构">结构</h2>
-
-<p>TCP/IP 模型是由 OSI 模型演化而来，TCP/IP 模型将 OSI 模型由七层简化为五层（一开始为四层），应用层、表示层、会话层统一为应用层。</p>
-
-<p><img src="/img/v2-72754ddc9c8133906ade003ad4a346d5_hd.jpg" alt="v2-72754ddc9c8133906ade003ad4a346d5_hd" /></p>
-
-<h2 id="协议">协议</h2>
-
-<p>TCP/IP协议被称为传输控制协议/互联网协议，又称网络通讯协议(Transmission Control Protocol)。是由网络层的IP协议和传输层的TCP协议组成，是一个很大的协议集合。</p>
-
-<ul>
-<li>物理层和数据链路层没有定义任何特定协议，支持所有的标准和专用的协议。</li>
-<li>网络层定义了网络互联也就是IP协议，主要包括IP、ARP、RARP、ICMP、IGMP。</li>
-<li>传输层定义了TCP和UDP(User Datagram Protocol)，我们会后面重点介绍一下TCP协议。</li>
-<li>应用层定义了HTTP(超文本传输协议)、FTP(文件传输协议)、DNS(域名系统)等协议。</li>
-</ul>
-
-<h2 id="物理层">物理层</h2>
-
-<p>计算机在传递数据的时候传递的都是0和1的数字，而物理层关心的是用什么信号来表示0和1，是否可以双向通信，最初的连接如何建立以及完成连接如何终止,总之，物理层是为数据传输提供可靠的环境。</p>
-
-<h2 id="数据链路层">数据链路层</h2>
-
-<p>数据链路层们于物理层和网络层之间，用来向网络层提供数据，就是把源计算机网络层传过来的信息传递给目标主机。</p>
-
-<p>数据链路层主要的作用包括：</p>
-
-<ul>
-<li>如何将数据组合成数据帧(Frame)，帧是数据链路层的传输单位</li>
-<li>数据链路的建立、维护和拆除</li>
-<li>帧包装、帧传输、帧同步</li>
-<li>帧的差错恢复</li>
-<li>流量控制</li>
-</ul>
-
-<h2 id="网络层">网络层</h2>
-
-<p>网络层位于传输层和数据链路层之间,用于把数据从源主机经过若干个中间节点传送到目标主机,并向传输层提供最基础的数据传输服务,它要提供路由和选址的工作。</p>
-
-<p>那什么是路由和选址呢？</p>
-
-<h3 id="选址">选址</h3>
-
-<p>交换机是靠MAC来寻址的，而因为MAC地址是无层次的,所以要靠IP地址来确认计算机的位置,这就是选址。</p>
-
-<h3 id="路由">路由</h3>
-
-<p>在能够选择的多条道路之间选择一条最短的路径就是路由的工作。</p>
-
-<p>路由和选址都离不开IP，我们就详细介绍一下IP头部。</p>
-
-<h3 id="ip头">IP头</h3>
-
-<p>IP头部是由20个字节组成的，具体项所占的位数如下图：</p>
-
-<p><img src="/img/v2-7060962aca6abdc95435330415f968fa_hd.jpg" alt="v2-7060962aca6abdc95435330415f968fa_hd" /></p>
-
-<h2 id="传输层">传输层</h2>
-
-<p>传输层是面向连接的、可靠的的进程到进程通信的协议。TCP提供全双工服务，即数据可在同一时间双向传播。TCP将若干个字节构成一个分组，此分组称为报文段(Segment)。提供了一种端到端的连接。</p>
-
-<p>传输层的协议主要有TCP 和 UDP，TCP(Transimision Control Protocal)是一种可靠的、面向连接的协议，传输效率低。UDP(User Datagram Protocal)是一种不可靠的、无连接的服务，传输效率高。</p>
-
-<h3 id="tcp和udp">TCP和UDP</h3>
-
-<p><img src="/img/v2-8775416b2e21e02a72fd65b2c9749741_hd.jpg" alt="v2-8775416b2e21e02a72fd65b2c9749741_hd" /></p>
-
-<h3 id="tcp的功能">TCP的功能</h3>
-
-<p>TCP主要是将数据进行分段打包传输，对每个数据包编号控制顺序，运输中丢失、重发和丢弃处理。</p>
-
-<h3 id="传说中的三次握手">传说中的三次握手</h3>
-
-<p><img src="/img/v2-b93fef4ca387c4aa50071dad72fc2085_hd.jpg" alt="v2-b93fef4ca387c4aa50071dad72fc2085_hd" /></p>
-
-<ul>
-<li>第一次握手: 建立连接。客户端发送连接请求，发送SYN报文，将seq设置为0。然后，客户端进入SYN_SEND状态，等待服务器的确认。</li>
-<li>第二次握手: 服务器收到客户端的SYN报文段。需要对这个SYN报文段进行确认，发送ACK报文，将ack设置为1。同时，自己还要发送SYN请求信息，将seq为0。服务器端将上述所有信息一并发送给客户端，此时服务器进入SYN_RECV状态。</li>
-<li>第三次握手: 客户端收到服务器的ACK和SYN报文后，进行确认，然后将ack设置为1，seq设置为1，向服务器发送ACK报文段，这个报文段发送完毕以后，客户端和服务器端都进入ESTABLISHED状态，完成TCP三次握手。</li>
-</ul>
-
-<p><strong>相当于打电话， A：你听的到嘛。  B：我听的到， 你听的到嘛。 A：我听的到。  连接就成功了</strong></p>
-
-<h3 id="数据传输">数据传输</h3>
-
-<p><img src="/img/v2-325456c5c7054ee6b29795a684cbbffb_hd.jpg" alt="v2-325456c5c7054ee6b29795a684cbbffb_hd" /></p>
-
-<ul>
-<li>客户端先向服务器发送数据，该数据报是lenth为159的数据。</li>
-<li>服务器收到报文后, 也向客户端发送了一个数据进行确认（ACK），并且返回客户端要请求的数据，数据的长度为111，将seq设置为1，ack设置为160（1 + 159）。</li>
-<li>客户端收到服务器返回的数据后进行确认（ACK），将seq设置为160， ack设置为112（1 + 111）。</li>
-</ul>
-
-<h3 id="四次挥手">四次挥手</h3>
-
-<p>当客户端和服务器通过三次握手建立了TCP连接以后，当数据传送完毕，就要断开TCP连接了，就有了神秘的“四次挥手”。</p>
-
-<p><img src="/img/v2-6704e393bd622132d3dac3773412ec26_hd.jpg" alt="v2-6704e393bd622132d3dac3773412ec26_hd" /></p>
-
-<ul>
-<li>第一次挥手：客户端向服务器发送一个FIN报文段，将设置seq为160和ack为112，;此时，客户端进入 <strong>FIN_WAIT_1</strong>状态,这表示客户端没有数据要发送服务器了，请求关闭连接;</li>
-<li>第二次挥手：服务器收到了客户端发送的FIN报文段，向客户端回一个ACK报文段，ack设置为1，seq设置为112;服务器进入了<strong>CLOSE_WAIT</strong>状态，客户端收到服务器返回的ACK报文后，进入<strong>FIN_WAIT_2</strong>状态;</li>
-<li>第三次挥手：服务器会观察自己是否还有数据没有发送给客户端，如果有，先把数据发送给客户端，再发送FIN报文；如果没有，那么服务器直接发送FIN报文给客户端。请求关闭连接，同时服务器进入<strong>LAST_ACK</strong>状态;</li>
-<li>第四次挥手：客户端收到服务器发送的FIN报文段，向服务器发送ACK报文段，将seq设置为161，将ack设置为113，然后客户端进入<strong>TIME_WAIT</strong>状态;服务器收到客户端的ACK报文段以后，就关闭连接;此时，客户端等待2MSL后依然没有收到回复，则证明Server端已正常关闭，客户端也可以关闭连接了。</li>
-</ul>
-
-<p><strong>注意</strong>：在握手和挥手时确认号应该是对方序列号加1,传输数据时则是对方序列号加上对方携带应用层数据的长度。</p>
-
-<p><strong>A：我开始断开了。  B：我收到， 你可以断开了。断开了输出流，输入流还没关闭。  B：发送完所有数据后， 我服务器开始断开了，持续发送FIN命令。 A：发送ACK命令后， 就真的断开了。</strong></p>
-
-<h2 id="应用层">应用层</h2>
-
-<p>应用层常见协议有HTTP、HTTPS 、FTP 、SMTP等。</p>
-
-<h2 id="分析邮件发送接受流程">分析邮件发送接受流程</h2>
-
-<p><img src="/img/v2-fddf614d20e94c08a02861297fb95a99_hd.jpg" alt="v2-fddf614d20e94c08a02861297fb95a99_hd" /></p>
-
-<p><img src="/img/v2-1ede5aa9c734a98c0d9c259cd92308fe_hd.jpg" alt="v2-1ede5aa9c734a98c0d9c259cd92308fe_hd" /></p>
-
-<h1 id="socket">Socket</h1>
-
-<p>转载地址：<a href="https://www.cnblogs.com/dolphinx/p/3460545.html">https://www.cnblogs.com/dolphinx/p/3460545.html</a></p>
-
-<h2 id="什么是socket">什么是Socket</h2>
-
-<p>我们知道两个进程如果需要进行通讯最基本的一个前提能能够唯一的标示一个进程，在本地进程通讯中我们可以使用PID来唯一标示一个进程，但PID只在本地唯一，网络中的两个进程PID冲突几率很大，这时候我们需要另辟它径了，我们知道IP层的ip地址可以唯一标示主机，而TCP层协议和端口号可以唯一标示主机的一个进程，这样我们可以利用ip地址＋协议＋端口号唯一标示网络中的一个进程。</p>
-
-<p>能够唯一标示网络中的进程后，它们就可以利用socket进行通信了，什么是socket呢？我们经常把socket翻译为套接字，<strong>socket是在应用层和传输层之间的一个抽象层</strong>，它把TCP/IP层复杂的操作抽象为几个简单的接口供应用层调用已实现进程在网络中通信。</p>
-
-<p><img src="/img/05225723-2ffa89aad91f46099afa530ef8660b20.jpg" alt="05225723-2ffa89aad91f46099afa530ef8660b20" /></p>
-
-<p>socket起源于UNIX，在Unix一切皆文件哲学的思想下，socket是一种&rdquo;打开—读/写—关闭&rdquo;模式的实现，服务器和客户端各自维护一个&rdquo;文件&rdquo;，在建立连接打开后，可以向自己文件写入内容供对方读取或者读取对方内容，通讯结束时关闭文件。</p>
-
-<p><strong>而我们平时说的最多的socket是什么呢，实际上socket是对TCP/IP协议的封装，Socket本身并不是协议，而是一个调用接口(API)。通过Socket，我们才能使用TCP/IP协议，更好说的就是一个使用TCP/IP协议的程序接口API</strong></p>
-
-<h2 id="socket通信流程">Socket通信流程</h2>
-
-<p>socket是&rdquo;打开—读/写—关闭&rdquo;模式的实现，以使用TCP协议通讯的socket为例，其交互流程大概是这样子的</p>
-
-<p><img src="/img/05232335-fb19fc7527e944d4845ef40831da4ec2.png" alt="05232335-fb19fc7527e944d4845ef40831da4ec2" /></p>
-
-<h2 id="socket编程理解">Socket编程理解</h2>
-
-<p>现在我们了解到TCP/IP只是一个协议栈，就像操作系统的运行机制一样，必须要具体实现，同时还要提供对外的操作接口。就像操作系统会提供标准的编程接口，比如Win32编程接口一样，TCP/IP也必须对外提供编程接口，这就是Socket。现在我们知道，<strong>Socket跟TCP/IP并没有必然的联系</strong>。Socket编程接口在设计的时候，就希望也能适应其他的网络协议。所以，Socket的出现只是可以更方便的使用TCP/IP协议栈而已，其对TCP/IP进行了抽象，形成了几个最基本的函数接口。比如create，listen，accept，connect，read和write等等。</p>
-
-<h1 id="概念理解">概念理解</h1>
-
-<h2 id="协议-1">协议</h2>
-
-<h3 id="概述">概述</h3>
-
-<p><img src="/img/Xnip2020-01-04_11-31-54.png" alt="Xnip2020-01-04_11-31-54" /></p>
-
-<h2 id="mac地址">Mac地址</h2>
-
-<p>转载地址：<a href="https://blog.csdn.net/weibo1230123/article/details/82778993">https://blog.csdn.net/weibo1230123/article/details/82778993</a></p>
-
-<h3 id="概述-1">概述</h3>
-
-<p>MAC地址就是在媒体接入层上使用的地址，也叫物理地址、硬件地址或链路地址，由网络设备制造商生产时写在硬件内部。MAC地址与网络无关，也即无论将带有这个地址的硬件（如网卡、集线器、路由器等）接入到网络的何处，都有相同的MAC地址，它由厂商写在网卡的BIOS里。</p>
-
-<h3 id="为什么要用到mac地址">为什么要用到MAC地址</h3>
-
-<p>这是由组网方式决定的，如今比较流行的接入Internet的方式（也是未来发展的方向）是把主机通过局域网组织在一起，然后再通过交换机和 Internet相连接。这样一来就出现了如何区分具体用户，防止盗用的问题。由于IP只是逻辑上标识，任何人都随意修改，因此不能用来标识用户；而 MAC地址则不然，它是固化在网卡里面的。从理论上讲，除非盗来硬件（网卡），否则是没有办法冒名顶替的</p>
-
-<p>基于MAC地址的这种特点，局域网采用了用MAC地址来标识具体用户的方法。注意：具体实现：在交换机内部通过“表”的方式把MAC地址和IP地址一一对应，也就是所说的IP、MAC绑定。</p>
-
-<p><strong>具体的通信方式：接收过程，当有发给本地局域网内一台主机的数据包时，交换机接收下来，然后把数据包中的IP地址按照“表”中的对应关系映射成MAC地址，转发到对应的MAC地址的主机上，这样一来，即使某台主机盗用了这个IP地址，但由于他没有这个MAC地址，因此也不会收到数据包。</strong></p>
-
-<h2 id="报文和帧">报文和帧</h2>
-
-<p>转载地址：<a href="https://zhuanlan.zhihu.com/p/26175504">https://zhuanlan.zhihu.com/p/26175504</a></p>
-
-<h3 id="概述-2">概述</h3>
-
-<p>在OSI七层与TCP/IP五层网络架构中，数据发送时，由上层向下层封装，报文（4层叫法）是网络传输的单位，传输过程中会不断封装成分组、包（3层叫法）、帧（2层叫法）来传输，封装的方式就是添加一些信息段。</p>
-
-<h3 id="报文">报文</h3>
-
-<p><strong>传输层传输的是数据报文，主要是协议格式。</strong></p>
-
-<p><strong>报文(message)：</strong>网络中交换与传输的数据单元，即站点一次性要发送的数据块。报文包含了将要发送的完整的数据信息，其长短很不一致，长度不限且可变。</p>
-
-<p>报文就是个数据块，包括要传送的数据，也包括必要的附加信息（包括目的IP，目的端口，源地址，源端口，数据长度，所用协议，加密等等）。<strong>就好像是邮寄一封信，对方要得到的只是里边的内容，但你要发送，就必须有信封，有邮票，有地址邮编，等等附加的东西，报文指的就是包括信封在内的所有东西，而不是单指客户要发送的数据。</strong></p>
-
-<p><strong>报文段（segment）：组成报文的每个分组。分组交换也称为包交换</strong>，它将用户通信的数据划分成多个更小的等长数据段，在每个数据段的前面加上必要的控制信息作为数据段的首部，每个带有首部的数据段就构成了一个分组。首部指明了该分组发送的地址，当交换机收到分组之后，将根据首部中的地址信息将分组转发到目的地，这个过程就是分组交换。能够进行分组交换的通信网被称为分组交换网。</p>
-
-<p><strong>三层，网络层传输的是数据包，包含数据报文，并且增加传输使用的IP地址等三层信息。</strong></p>
-
-<p><strong>数据报（Datagram）：</strong>通过网络传输的数据的基本单元，包含一个报头（header）和数据本身，其中报头描述了数据的目的地以及和其它数据之间的关系。可以理解为传输数据的分组。我们将通过网络传输的数据的基本单元称为数据报。</p>
-
-<h3 id="帧">帧</h3>
-
-<p>数据链路层的协议数据单元。我们将链路层分组称为帧。</p>
-
-<p>数据在网络上是以很小的称为帧（Frame）的单位传输的，帧由几部分组成，不同的部分执行不同的功能。帧通过特定的称为网络驱动程序的软件进行成型，然后通过网卡发送到网线上，通过网线到达它们的目的机器，在目的机器的一端执行相反的过程。接收端机器的以太网卡捕获到这些帧，并告诉操作系统帧已到达，然后对其进行存储。</p>
-
-<h2 id="ipv4和ipv6">IPV4和IPV6</h2>
-
-<p>转载地址： <a href="https://blog.csdn.net/li563868273/article/details/51126735">https://blog.csdn.net/li563868273/article/details/51126735</a></p>
-
-<p>目前的全球因特网所采用的协议族是TCP/IP协议族。IP是TCP/IP协议族中网络层的协议，是TCP/IP协议族的核心协议。目前IP协议的版本号是4(简称为IPv4)，发展至今已经使用了30多年。IPv4的地址位数为32位，也就是最多有2的32次方的电脑可以联到Internet上，近十年来由于互联网的蓬勃发展，IP位址的需求量愈来愈大，使得IP位址的发放愈趋严格，各项资料显示全球IPv4位址可能在2005至2008年间全部发完。</p>
-
-<p>什么是IPv6什么是IPv6?IPv6是下一版本的互联网协议，也可以说是下一代互联网的协议，它的提出最初是因为随着互联网的迅速发展，IPv4定义的有限地址空间将被耗尽，地址空间的不足必将妨碍互联网的进一步发展。</p>
-
-<p>为了扩大地址空间，拟通过IPv6重新定义地址空间。IPv6采用128位地址长度，几乎可以不受限制地提供地址。按保守方法估算IPv6实际可分配的地址，整个地球的每平方米面积上仍可分配1000多个地址。在IPv6的设计过程中除了一劳永逸地解决了地址短缺问题以外，还考虑了在IPv4中解决不好的其它问题，主要有端到端IP连接、服务质量（QoS）、安全性、多播、移动性、即插即用等。</p>
-
-<p><img src="/img/Xnip2020-01-04_11-37-37.png" alt="Xnip2020-01-04_11-37-37" /></p>
-
-<h2 id="端口">端口</h2>
-
-<p><img src="/img/Xnip2020-01-04_11-41-15.png" alt="Xnip2020-01-04_11-41-15" /></p>
-
-<p><img src="/img/Xnip2020-01-04_11-39-58.png" alt="Xnip2020-01-04_11-39-58" /></p>
-
-<h2 id="ip地址结构">IP地址结构</h2>
-
-<p><img src="/img/Xnip2020-01-07_17-34-24.png" alt="Xnip2020-01-07_17-34-24" /></p>
-
-<h3 id="子网掩码">子网掩码</h3>
-
-<p>链接：<a href="https://www.jianshu.com/p/afce4b3f4f83">https://www.jianshu.com/p/afce4b3f4f83</a></p>
-
-<p>对于子网掩码这个名字相信很多人并不陌生，在我们查看电脑的IP地址时，会看到IP地址下面就是子网掩码。那么子网掩码到底是什么呢？它有有什么用呢？在说这个问题之前，我们先来看下这样一个场景，一个规模100人的公司申请了一个C类IP地址网段218.17.21.0(不清楚IP地址分类的可以查看<a href="https://www.jianshu.com/p/77efb9fb585a"><strong>IPv4</strong>的<strong>IP</strong>地址</a>)，可以容纳254台主机。公司分行政、财务、市场、销售、售后、研发六个部门，每个部门有十几台主机，现在需要按照部门来划分子网，要怎么划分呢？那这里就需要用到子网掩码了。</p>
-
-<p>子网掩码是用于将一个IP地址划分成网络地址和主机地址2个部分，它是不能单独存在的，它必须和IP地址一起使用。子网掩码中1的个数表示IP地址的前面多少位表示网络地址，0的格式表示IP地址后面多少位表示主机地址。</p>
-
-<h3 id="广播地址">广播地址</h3>
-
-<p>广播地址(Broadcast Address)是专门用于同时向网络中（<strong>通常指同一子网</strong>）所有工作站进行发送的一个地址。在使用TCP/IP 协议的网络中，主机标识段host ID（<strong>简称主机 ID</strong>） 为全 1 的 IP 地址为广播地址，广播的分组传送给同一个子网的所有计算机。例如，对于10.1.1.0 （255.255.255.0 ）网段，其广播地址为10.1.1.255 （255 即为 2 进制的 11111111 ），当发出一个目的地址为10.1.1.255 的数据包时，它将被分发给该网段上的所有计算机。<strong>广播地址应用于网络内的所有主机</strong>。</p>
-
-<h3 id="dhcp简介">DHCP简介</h3>
-
-<p>原文链接：<a href="https://blog.csdn.net/u011857683/article/details/83019895">https://blog.csdn.net/u011857683/article/details/83019895</a></p>
-
-<p>DHCP（Dynamic Host Configuration Protocol，动态主机配置协议）使用UDP协议工作，采用67（DHCP服务器端）和68（DHCP客户端）两个端口号。546号端口用于DHCPv6 Client，而不用于DHCPv4，是为DHCP failover服务。DHCP客户端向DHCP服务器发送的报文称之为DHCP请求报文，而DHCP服务器向DHCP客户端发送的报文称之为DHCP应答报文。DHCP采用C/S（客户端/服务器）模式，可以为客户机自动分配IP地址、子网掩码以及缺省网关、DNS服务器的IP地址等，并能够提升地址的使用率。</p>
+<p><strong>转载地址:   <a href="https://blog.csdn.net/weixin_42089175/article/details/88697374">https://blog.csdn.net/weixin_42089175/article/details/88697374</a></strong></p>
+
+<h1 id="大致流程">大致流程</h1>
+
+<p>先启动一个UDP的接收端，监听端口<strong>30201</strong>， 再启动一个UDP的发送端，进行广播发送到<strong>30201</strong>，同时这个发送端也进行一个监听端口<strong>30202</strong>的UDP线程接受。这个<strong>30202</strong>会作为参数发送给接收端UDP。</p>
+
+<p>当UDP发送端发送给UDP的接受端的时候，接收端马上也向这个原来发送端<strong>30202</strong>的UDP回复一条消息，这个消息里面就带有TCP的连接的端口<strong>30401</strong></p>
+
+<p>我们把接受UDP端的程序中启动<strong>ServerSocket</strong>，在UDP的发送端启动<strong>Socket</strong>，如此端口就已经知道了，也就完成了通过UDP知道接受广播的IP地址和端口，从而进行TCP网络的连接。</p>
+
+<p>**注意： ** 我们把需要的口令和参数通过map封装，然后转成byte进行传输。</p>
+
+<h1 id="具体代码如下">具体代码如下</h1>
+
+<h2 id="客户端代码">客户端代码</h2>
+
+<h3 id="client">Client</h3>
+
+<pre><code class="language-java">import java.io.IOException;
+
+import com.tcp.udp.client.bean.ServerInfo;
+
+public class Client {
+    public static void main(String[] args) {
+        ServerInfo info = UDPSearcher.searchServer(10000);
+        System.out.println(&quot;Server:&quot; + info);
+
+        if (info != null) {
+            try {
+                TCPClient.linkWith(info );
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+        }
+    }
+}
+</code></pre>
+
+<h3 id="udpsearcher">UDPSearcher</h3>
+
+<p>udp的发送和监听，最后获取TCP服务端的IP和端口</p>
+
+<pre><code class="language-java">import java.io.IOException;
+import java.net.DatagramPacket;
+import java.net.DatagramSocket;
+import java.net.InetAddress;
+import java.nio.ByteBuffer;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.Iterator;
+import java.util.List;
+import java.util.Map;
+import java.util.Map.Entry;
+import java.util.concurrent.CountDownLatch;
+import java.util.concurrent.TimeUnit;
+
+import com.tcp.udp.client.bean.ServerInfo;
+import com.tcp.udp.clink.utils.ByteUtils;
+import com.tcp.udp.clink.utils.JsonSerilizable;
+import com.tcp.udp.constants.UDPConstants;
+
+public class UDPSearcher {
+    private static final int LISTEN_PORT = UDPConstants.PORT_CLIENT_RESPONSE;
+
+    public static ServerInfo searchServer(int timeout) {
+        System.out.println(&quot;UDPSearcher Started.&quot;);
+
+        // 成功收到回送的栅栏
+        CountDownLatch receiveLatch = new CountDownLatch(1);
+        Listener listener = null;
+        try {
+            // 发送广播
+            listener = listen(receiveLatch);
+            // 搜索10秒
+            sendBroadcast();
+            receiveLatch.await(timeout, TimeUnit.MILLISECONDS);
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        // 完成
+        System.out.println(&quot;UDPSearcher Finished.&quot;);
+        if (listener == null) {
+            return null;
+        }
+        List&lt;ServerInfo&gt; devices = listener.getServerAndClose();
+        if (devices.size() &gt; 0) {
+            return devices.get(0);
+        }
+        return null;
+    }
+
+    private static Listener listen(CountDownLatch receiveLatch) throws InterruptedException {
+        System.out.println(&quot;UDPSearcher start listen.&quot;);
+        CountDownLatch startDownLatch = new CountDownLatch(1);
+        Listener listener = new Listener(LISTEN_PORT, startDownLatch, receiveLatch);
+        listener.start();
+        startDownLatch.await();
+        return listener;
+    }
+
+    private static void sendBroadcast() throws IOException {
+        System.out.println(&quot;UDPSearcher sendBroadcast started.&quot;);
+
+        // 作为搜索方，让系统自动分配端口
+        DatagramSocket ds = new DatagramSocket();
+        Map&lt;String, Object&gt; map = new HashMap&lt;String, Object&gt;();
+        // CMD命名
+        map.put(&quot;CMD&quot;, UDPConstants.UDP_PASSWORD_KEY);
+        // 回送端口信息
+        map.put(&quot;port&quot;, LISTEN_PORT);
+        byte[] bytes = JsonSerilizable.changeMapToByte(map);
+
+        // 直接构建packet
+        DatagramPacket requestPacket = new DatagramPacket(bytes, bytes.length);
+        // 广播地址
+        requestPacket.setAddress(InetAddress.getByName(&quot;255.255.255.255&quot;));
+        // 设置服务器端口
+        requestPacket.setPort(UDPConstants.PORT_SERVER);
+
+        // 发送
+        ds.send(requestPacket);
+        ds.close();
+
+        // 完成
+        System.out.println(&quot;UDPSearcher sendBroadcast finished.&quot;);
+    }
+
+    private static class Listener extends Thread {
+        private final int listenPort;
+        private final CountDownLatch startDownLatch;
+        private final CountDownLatch receiveDownLatch;
+        private final List&lt;ServerInfo&gt; serverInfoList = new ArrayList&lt;&gt;();
+        private final byte[] buffer = new byte[128];
+        private boolean done = false;
+        private DatagramSocket ds = null;
+
+        private Listener(int listenPort, CountDownLatch startDownLatch, CountDownLatch receiveDownLatch) {
+            super();
+            this.listenPort = listenPort;
+            this.startDownLatch = startDownLatch;
+            this.receiveDownLatch = receiveDownLatch;
+        }
+
+        @Override
+        public void run() {
+            super.run();
+            // 通知已启动
+            startDownLatch.countDown();
+
+            try {
+                // 监听30202回送端口
+                ds = new DatagramSocket(listenPort);
+                // 构建接收实体
+                DatagramPacket receivePack = new DatagramPacket(buffer, buffer.length);
+
+                while (!done) {
+                    // 接收
+                    ds.receive(receivePack);
+
+                    // 打印接收到的信息与发送者的信息
+                    // 发送者的IP地址
+                    String ip = receivePack.getAddress().getHostAddress();
+                    byte[] data = receivePack.getData();
+
+                    Map&lt;String, Object&gt; map = JsonSerilizable.changeByteToMap(data);
+                    Iterator&lt;Entry&lt;String, Object&gt;&gt; entries = map.entrySet().iterator();
+
+                    String cmdVal = null;
+                    String snVal = null;
+                    Integer serverPort = null;
+
+                    while (entries.hasNext()) {
+                        Map.Entry&lt;String, Object&gt; entry = entries.next();
+                        String key = entry.getKey();
+                        Object value = entry.getValue();
+                        if (key.equals(&quot;CMD&quot;)) {
+                            cmdVal = (String) value;
+                        } else if (key.equals(&quot;sn&quot;)) {
+                            snVal = (String) value;
+                        } else if (key.equals(&quot;port&quot;)) {
+                            serverPort = (Integer) value;
+                        }
+                    }
+                    if (UDPConstants.UDP_PASSWORD_KEY.equals(cmdVal)) {
+                        ServerInfo info = new ServerInfo(serverPort, ip, snVal);
+                        serverInfoList.add(info);
+                    }
+                    // 成功接收到一份
+                    receiveDownLatch.countDown();
+                    done = true;
+                }
+            } catch (Exception e) {
+                e.printStackTrace();
+            } finally {
+                close();
+            }
+            System.out.println(&quot;UDPSearcher listener finished.&quot;);
+        }
+
+        private void close() {
+            if (ds != null) {
+                ds.close();
+                ds = null;
+                done = true;
+            }
+        }
+
+        List&lt;ServerInfo&gt; getServerAndClose() {
+            done = true;
+            close();
+            return serverInfoList;
+        }
+    }
+}
+
+</code></pre>
+
+<h3 id="tcpclient">TCPClient</h3>
+
+<pre><code class="language-java">import java.io.BufferedReader;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.InputStreamReader;
+import java.io.OutputStream;
+import java.io.PrintStream;
+import java.net.Inet4Address;
+import java.net.InetSocketAddress;
+import java.net.Socket;
+
+import com.tcp.udp.client.bean.ServerInfo;
+
+public class TCPClient {
+    public static void linkWith(ServerInfo info) throws IOException {
+        Socket socket = new Socket();
+        // 超时时间
+        socket.setSoTimeout(3000);
+
+        // 连接本地，端口2000；超时时间3000ms
+        socket.connect(new InetSocketAddress(Inet4Address.getByName(info.getAddress()), info.getPort()), 3000);
+
+        System.out.println(&quot;已发起服务器连接，并进入后续流程～&quot;);
+        System.out.println(&quot;客户端信息：&quot; + socket.getLocalAddress() + &quot; P:&quot; + socket.getLocalPort());
+        System.out.println(&quot;服务器信息：&quot; + socket.getInetAddress() + &quot; P:&quot; + socket.getPort());
+
+        try {
+            // 发送接收数据
+            todo(socket);
+        } catch (Exception e) {
+            System.out.println(&quot;异常关闭&quot;);
+        }
+
+        // 释放资源
+        socket.close();
+        System.out.println(&quot;客户端已退出～&quot;);
+
+    }
+
+    private static void todo(Socket client) throws IOException {
+        // 构建键盘输入流
+        InputStream in = System.in;
+        BufferedReader input = new BufferedReader(new InputStreamReader(in));
+
+
+        // 得到Socket输出流，并转换为打印流
+        OutputStream outputStream = client.getOutputStream();
+        PrintStream socketPrintStream = new PrintStream(outputStream);
+
+
+        // 得到Socket输入流，并转换为BufferedReader
+        InputStream inputStream = client.getInputStream();
+        BufferedReader socketBufferedReader = new BufferedReader(new InputStreamReader(inputStream));
+
+        boolean flag = true;
+        do {
+            // 键盘读取一行
+            String str = input.readLine();
+            // 发送到服务器
+            socketPrintStream.println(str);
+
+
+            // 从服务器读取一行
+            String echo = socketBufferedReader.readLine();
+            if (&quot;bye&quot;.equalsIgnoreCase(echo)) {
+                flag = false;
+            } else {
+                System.out.println(echo);
+            }
+        } while (flag);
+
+        // 资源释放
+        socketPrintStream.close();
+        socketBufferedReader.close();
+
+    }
+
+}
+
+</code></pre>
+
+<h2 id="服务端代码">服务端代码</h2>
+
+<h3 id="server">Server</h3>
+
+<pre><code class="language-java">import java.io.IOException;
+
+import com.tcp.udp.constants.TCPConstants;
+
+public class Server {
+    public static void main(String[] args) {
+        TCPServer tcpServer = new TCPServer(TCPConstants.PORT_SERVER);
+        boolean isSucceed = tcpServer.start();
+        if (!isSucceed) {
+            System.out.println(&quot;Start TCP server failed!&quot;);
+            return;
+        }
+
+        UDPProvider.start(TCPConstants.PORT_SERVER);
+
+        try {
+            //noinspection ResultOfMethodCallIgnored
+            System.in.read();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+
+        UDPProvider.stop();
+        tcpServer.stop();
+    }
+}
+
+</code></pre>
+
+<h3 id="udpprovider">UDPProvider</h3>
+
+<p>udp的广播的接受和回复，解析对应的口令处理，把TCP服务启动的端口通过UDP发送给客户端。</p>
+
+<pre><code class="language-java">import java.net.DatagramPacket;
+import java.net.DatagramSocket;
+import java.nio.ByteBuffer;
+import java.util.HashMap;
+import java.util.Iterator;
+import java.util.Map;
+import java.util.Map.Entry;
+import java.util.UUID;
+
+import com.tcp.udp.clink.utils.JsonSerilizable;
+import com.tcp.udp.constants.UDPConstants;
+
+class UDPProvider {
+    private static Provider PROVIDER_INSTANCE;
+
+    static void start(int port) {
+        stop();
+        String sn = UUID.randomUUID().toString();
+        Provider provider = new Provider(sn, port);
+        provider.start();
+        PROVIDER_INSTANCE = provider;
+    }
+
+    static void stop() {
+        if (PROVIDER_INSTANCE != null) {
+            PROVIDER_INSTANCE.exit();
+            PROVIDER_INSTANCE = null;
+        }
+    }
+
+    private static class Provider extends Thread {
+        private final String sn;
+        private final int port;
+        private boolean done = false;
+        private DatagramSocket ds = null;
+        // 存储消息的Buffer
+        final byte[] buffer = new byte[128];
+
+        Provider(String sn, int port) {
+            super();
+            this.sn = sn;
+            this.port = port;
+        }
+
+        @Override
+        public void run() {
+            super.run();
+            System.out.println(&quot;UDPProvider Started.&quot;);
+            try {
+                // 监听30201 端口
+                ds = new DatagramSocket(UDPConstants.PORT_SERVER);
+                // 接收消息的Packet
+                DatagramPacket receivePack = new DatagramPacket(buffer, buffer.length);
+                while (!done) {
+                    // 接收
+                    ds.receive(receivePack);
+                    // 打印接收到的信息与发送者的信息
+                    // 发送者的IP地址
+                    String clientIp = receivePack.getAddress().getHostAddress();
+                    int clientPort = receivePack.getPort();
+                    System.out.println(clientPort);
+                    byte[] clientData = receivePack.getData();
+
+                    Map&lt;String, Object&gt; map = JsonSerilizable.changeByteToMap(clientData);
+                    Iterator&lt;Entry&lt;String, Object&gt;&gt; entries = map.entrySet().iterator();
+
+                    String cmdVal = null;
+                    int udpPort = 0;
+
+                    while (entries.hasNext()) {
+                        Map.Entry&lt;String, Object&gt; entry = entries.next();
+                        String key = entry.getKey();
+                        Object value = entry.getValue();
+                        if (key.equals(&quot;CMD&quot;)) {
+                            cmdVal = (String) value;
+                        } else if (key.equals(&quot;port&quot;)) {
+                            udpPort = (int) value;
+                        }
+                    }
+                    // 判断合法性
+                    if (UDPConstants.UDP_PASSWORD_KEY.equals(cmdVal)) {
+                        // 构建一份回送数据
+                        Map&lt;String, Object&gt; responseMap = new HashMap&lt;String, Object&gt;();
+                        // CMD命名
+                        responseMap.put(&quot;sn&quot;, sn);
+                        // 回送端口信息
+                        responseMap.put(&quot;port&quot;, port);
+                        responseMap.put(&quot;CMD&quot;, UDPConstants.UDP_PASSWORD_KEY);
+
+                        byte[] responseBytes = JsonSerilizable.changeMapToByte(responseMap);
+
+                        // 直接根据发送者构建一份回送信息
+                        DatagramPacket responsePacket = new DatagramPacket(responseBytes, responseBytes.length,
+                                receivePack.getAddress(), udpPort);
+                        ds.send(responsePacket);
+                        System.out.println(&quot;UDPProvider response to:&quot; + clientIp + &quot;\tport:&quot;
+                                + udpPort + &quot;\tdataLen:&quot; + responseBytes.length);
+                    } else {
+                        System.out.println(&quot;UDPProvider receive cmd nonsupport; cmd:&quot; + cmdVal + &quot;\tport:&quot; + port);
+                    }
+                }
+            } catch (Exception e) {
+                e.printStackTrace();
+            } finally {
+                close();
+            }
+            // 完成
+            System.out.println(&quot;UDPProvider Finished.&quot;);
+        }
+
+        private void close() {
+            if (ds != null) {
+                ds.close();
+                ds = null;
+            }
+        }
+
+        /**
+         * 提供结束
+         */
+        void exit() {
+            done = true;
+            close();
+        }
+    }
+}
+
+</code></pre>
+
+<h3 id="tcpserver">TCPServer</h3>
+
+<pre><code class="language-java">import java.io.BufferedReader;
+import java.io.IOException;
+import java.io.InputStreamReader;
+import java.io.PrintStream;
+import java.net.ServerSocket;
+import java.net.Socket;
+
+public class TCPServer {
+    private final int port;
+    private ClientListener mListener;
+
+    public TCPServer(int port) {
+        this.port = port;
+    }
+
+    public boolean start() {
+        try {
+            ClientListener listener = new ClientListener(port);
+            mListener = listener;
+            listener.start();
+        } catch (IOException e) {
+            e.printStackTrace();
+            return false;
+        }
+        return true;
+    }
+
+    public void stop() {
+        if (mListener != null) {
+            mListener.exit();
+        }
+    }
+
+    private static class ClientListener extends Thread {
+        private ServerSocket server;
+        private boolean done = false;
+
+        private ClientListener(int port) throws IOException {
+            server = new ServerSocket(port);
+            System.out.println(&quot;服务器信息：&quot; + server.getInetAddress() + &quot; P:&quot; + server.getLocalPort());
+        }
+
+        @Override
+        public void run() {
+            super.run();
+
+            System.out.println(&quot;服务器准备就绪～&quot;);
+            // 等待客户端连接
+            do {
+                // 得到客户端
+                Socket client;
+                try {
+                    client = server.accept();
+                } catch (IOException e) {
+                    continue;
+                }
+                // 客户端构建异步线程
+                ClientHandler clientHandler = new ClientHandler(client);
+                // 启动线程
+                clientHandler.start();
+            } while (!done);
+
+            System.out.println(&quot;服务器已关闭！&quot;);
+        }
+
+        void exit() {
+            done = true;
+            try {
+                server.close();
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+        }
+    }
+
+    /**
+     * 客户端消息处理
+     */
+    private static class ClientHandler extends Thread {
+        private Socket socket;
+        private boolean flag = true;
+
+        ClientHandler(Socket socket) {
+            this.socket = socket;
+        }
+
+        @Override
+        public void run() {
+            super.run();
+            System.out.println(&quot;新客户端连接：&quot; + socket.getInetAddress() +
+                    &quot; P:&quot; + socket.getPort());
+
+            try {
+                // 得到打印流，用于数据输出；服务器回送数据使用
+                PrintStream socketOutput = new PrintStream(socket.getOutputStream());
+                // 得到输入流，用于接收数据
+                BufferedReader socketInput = new BufferedReader(new InputStreamReader(
+                        socket.getInputStream()));
+
+                do {
+                    // 客户端拿到一条数据
+                    String str = socketInput.readLine();
+                    if (&quot;bye&quot;.equalsIgnoreCase(str)) {
+                        flag = false;
+                        // 回送
+                        socketOutput.println(&quot;bye&quot;);
+                    } else {
+                        // 打印到屏幕。并回送数据长度
+                        System.out.println(str);
+                        socketOutput.println(&quot;回送：&quot; + str.length());
+                    }
+
+                } while (flag);
+
+                socketInput.close();
+                socketOutput.close();
+
+            } catch (Exception e) {
+                System.out.println(&quot;连接异常断开&quot;);
+            } finally {
+                // 连接关闭
+                try {
+                    socket.close();
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
+            }
+
+            System.out.println(&quot;客户端已退出：&quot; + socket.getInetAddress() +
+                    &quot; P:&quot; + socket.getPort());
+        }
+    }
+}
+</code></pre>
+
+<h2 id="相关工具类">相关工具类</h2>
+
+<h3 id="tcpconstants">TCPConstants</h3>
+
+<pre><code class="language-java">public class TCPConstants {
+    // 服务器固化UDP接收端口
+    public static int PORT_SERVER = 30401;
+}
+</code></pre>
+
+<h3 id="udpconstants">UDPConstants</h3>
+
+<pre><code class="language-java">public class UDPConstants {
+    // 服务器固化UDP接收端口
+    public static int PORT_SERVER = 30201;
+    // 客户端回送端口
+    public static int PORT_CLIENT_RESPONSE = 30202;
+
+    // UDP 密码口令
+    public static String UDP_PASSWORD_KEY = &quot;maizi&quot;;
+}
+
+</code></pre>
+
+<h3 id="jsonserilizable">JsonSerilizable</h3>
+
+<pre><code class="language-java">import java.io.IOException;
+import java.util.HashMap;
+import java.util.Map;
+
+import com.alibaba.fastjson.JSON;
+import com.alibaba.fastjson.TypeReference;
+
+public class JsonSerilizable {
+    /* 将HashMap序列化为字符串存入json文件中 */
+    public static String serilizableForMap(Object objMap) throws IOException {
+
+        String listString = JSON.toJSONString(objMap, true);// (maps,CityEntity.class);
+        return listString;
+    }
+
+    /* 将json文件中的内容读取出来，反序列化为HashMap */
+    public static &lt;T, K&gt; HashMap&lt;K, T&gt; deserilizableForMapFromFile(String listString2, Class&lt;T&gt; clazz)
+            throws IOException {
+
+        Map&lt;K, T&gt; map = JSON.parseObject(listString2, new TypeReference&lt;Map&lt;K, T&gt;&gt;() {
+        });
+
+        return (HashMap&lt;K, T&gt;) map;
+    }
+
+    public static byte[] changeMapToByte(Map&lt;String, Object&gt; map) {
+
+        byte[] bytes = null;
+        try {
+            bytes = JsonSerilizable.serilizableForMap(map).getBytes();
+        } catch (Exception e) {
+            System.out.println(&quot;map到byte[]转换异常&quot;);
+            e.printStackTrace();
+        }
+
+        return bytes;
+    }
+
+    public static Map&lt;String, Object&gt; changeByteToMap(byte[] bytes) {
+        Map&lt;String, Object&gt; retmap = null;
+        try {
+            if (bytes != null) {
+                retmap = JsonSerilizable.deserilizableForMapFromFile(new String(bytes), Object.class);
+            } else {
+                System.out.println(&quot;changeByteToMap中bytes为null&quot;);
+            }
+        } catch (Exception e) {
+            System.out.println(&quot;byte到map转换异常&quot;);
+            e.printStackTrace();
+        }
+        return retmap;
+    }
+
+}
+</code></pre>
+
+<h3 id="serverinfo">ServerInfo</h3>
+
+<pre><code class="language-java">public class ServerInfo {
+    private String sn;
+    private int port;
+    private String address;
+
+    public ServerInfo(int port, String ip, String sn) {
+        this.port = port;
+        this.address = ip;
+        this.sn = sn;
+    }
+   .....
+</code></pre>
+
+<h3 id="pom-xml">pom.xml</h3>
+
+<pre><code class="language-xml">&lt;dependency&gt;
+      &lt;groupId&gt;com.alibaba&lt;/groupId&gt;
+      &lt;artifactId&gt;fastjson&lt;/artifactId&gt;
+      &lt;version&gt;1.2.51&lt;/version&gt;
+ &lt;/dependency&gt;
+</code></pre>
+
+<h1 id="运行结果">运行结果</h1>
+
+<h2 id="服务端">服务端</h2>
+
+<pre><code class="language-java">服务器信息：0.0.0.0/0.0.0.0 P:30401
+服务器准备就绪～
+UDPProvider Started.
+60360
+UDPProvider response to:192.168.0.7     port:30202      dataLen:79
+新客户端连接：/192.168.0.7 P:62086
+sssss
+</code></pre>
+
+<h2 id="客户端">客户端</h2>
+
+<pre><code class="language-java">UDPSearcher Started.
+UDPSearcher start listen.
+UDPSearcher sendBroadcast started.
+UDPSearcher sendBroadcast finished.
+UDPSearcher Finished.
+UDPSearcher listener finished.
+Server:ServerInfo{sn='cdb9cdb4-6772-4e9b-8414-3dea10de9de3', port=30401, address='192.168.0.7'}
+已发起服务器连接，并进入后续流程～
+客户端信息：/127.0.0.1 P:62085
+服务器信息：/192.168.0.7 P:30401
+sssss
+回送：5
+</code></pre>
+
+<h1 id="说明">说明</h1>
+
+<p>这边的服务端目前只可以接受数据， 无法发送数据，后期在进行升级处理。</p>
 
 
                 
@@ -605,13 +1028,13 @@
                 <ul class="pager">
                     
                     <li class="previous">
-                        <a href="/post/go%E5%8D%B8%E8%BD%BD%E5%AE%89%E8%A3%85/" data-toggle="tooltip" data-placement="top" title="go环境配置">&larr;
+                        <a href="/post/%E7%AE%80%E6%98%93%E8%81%8A%E5%A4%A9%E5%AE%A4%E6%A1%88%E4%BE%8B/" data-toggle="tooltip" data-placement="top" title="简易聊天室案例">&larr;
                             Previous Post</a>
                     </li>
                     
                     
                     <li class="next">
-                        <a href="/post/socket-tcp%E7%AE%80%E5%8D%95%E5%AE%9E%E4%BE%8B/" data-toggle="tooltip" data-placement="top" title="Socket-TCP简单实例">Next
+                        <a href="/post/tcp%E5%85%A5%E9%97%A8%E4%BD%BF%E7%94%A8/" data-toggle="tooltip" data-placement="top" title="TCP入门使用">Next
                             Post &rarr;</a>
                     </li>
                     
