@@ -175,7 +175,7 @@
 			    麦子
 			 
 			on 
-			Saturday, January 11, 2020
+			Sunday, January 19, 2020
                         
                     </span>
                 </div>
@@ -201,9 +201,582 @@
                 <header>
                     <h2>TOC</h2>
                 </header>              
+                <nav id="TableOfContents">
+<ul>
+<li><a href="#概述">概述</a></li>
+<li><a href="#客户端">客户端</a>
+<ul>
+<li><a href="#serverinfo">ServerInfo</a></li>
+<li><a href="#tcpclient">TCPClient</a></li>
+<li><a href="#closeutils">CloseUtils</a></li>
+<li><a href="#client">Client</a></li>
+</ul></li>
+<li><a href="#服务端">服务端</a>
+<ul>
+<li><a href="#server">Server</a></li>
+<li><a href="#tcpserver">TCPServer</a></li>
+<li><a href="#clienthandler">ClientHandler</a></li>
+</ul></li>
+<li><a href="#效果如下">效果如下</a></li>
+<li><a href="#注意">注意</a></li>
+</ul>
+</nav>
                 
                 
-                
+
+<p>[TOC]</p>
+
+<p>**转载地址: <a href="https://blog.csdn.net/weixin_42089175/article/details/89045904">https://blog.csdn.net/weixin_42089175/article/details/89045904</a> **</p>
+
+<p><strong>说明：《Socket网络编程进阶与实战》系列视频</strong></p>
+
+<h1 id="概述">概述</h1>
+
+<p>实现群发的效果， 客服端和客户端直接通过服务器中转消息实现通信处理。</p>
+
+<h1 id="客户端">客户端</h1>
+
+<h2 id="serverinfo">ServerInfo</h2>
+
+<pre><code class="language-java">public class ServerInfo {
+    private int port;
+    private String address;
+
+    public ServerInfo(int port, String ip) {
+        this.port = port;
+        this.address = ip;
+
+    }
+
+    /**
+     * @return int return the port
+     */
+    public int getPort() {
+        return port;
+    }
+
+    /**
+     * @param port the port to set
+     */
+    public void setPort(int port) {
+        this.port = port;
+    }
+
+    /**
+     * @return String return the address
+     */
+    public String getAddress() {
+        return address;
+    }
+
+    /**
+     * @param address the address to set
+     */
+    public void setAddress(String address) {
+        this.address = address;
+    }
+
+    @Override
+    public String toString() {
+        return super.toString();
+    }
+
+}
+
+</code></pre>
+
+<h2 id="tcpclient">TCPClient</h2>
+
+<p>发送消息和接受服务器转发消息</p>
+
+<pre><code class="language-java">import java.io.BufferedReader;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.InputStreamReader;
+import java.io.OutputStream;
+import java.io.PrintStream;
+import java.net.Inet4Address;
+import java.net.InetSocketAddress;
+import java.net.Socket;
+import java.net.SocketTimeoutException;
+import java.util.Scanner;
+
+import com.chatroom.client.bean.ServerInfo;
+import com.chatroom.clink.utils.CloseUtils;
+
+public class TCPClient {
+
+    private static final String QQ_NAME = &quot;小画: &quot;;
+
+    public static void linkWith(ServerInfo info) throws IOException {
+        Socket socket = new Socket();
+        // 超时时间
+        socket.setSoTimeout(3000);
+
+        // 连接本地，端口2000；超时时间3000ms
+        socket.connect(new InetSocketAddress(Inet4Address.getByName(info.getAddress()), info.getPort()), 3000);
+
+        System.out.println(&quot;已发起服务器连接，并进入后续流程～&quot;);
+        System.out.println(&quot;客户端信息：&quot; + socket.getLocalAddress() + &quot; P:&quot; + socket.getLocalPort());
+        System.out.println(&quot;服务器信息：&quot; + socket.getInetAddress() + &quot; P:&quot; + socket.getPort());
+
+        try {
+            ReadHandler readHandler = new ReadHandler(socket.getInputStream());
+            readHandler.start();
+
+            // 发送接收数据
+            write(socket);
+
+            // 退出操作
+            readHandler.exit();
+        } catch (Exception e) {
+            System.out.println(&quot;异常关闭&quot;);
+        }
+
+        // 释放资源
+        socket.close();
+        System.out.println(&quot;客户端已退出～&quot;);
+    }
+
+    private static void write(Socket client) throws IOException {
+        // 构建键盘输入流
+        Scanner scanner = new Scanner(System.in);
+
+        // 得到Socket输出流，并转换为打印流
+        OutputStream outputStream = client.getOutputStream();
+        PrintStream socketPrintStream = new PrintStream(outputStream);
+
+        System.out.print(QQ_NAME);
+        while (!scanner.hasNext(&quot;bye&quot;)) {
+            System.out.print(QQ_NAME);
+            String str = scanner.nextLine();
+            str = QQ_NAME + str;
+            socketPrintStream.println(str);
+        }
+        // 资源释放
+        socketPrintStream.close();
+    }
+
+    static class ReadHandler extends Thread {
+        private boolean done = false;
+        private final InputStream inputStream;
+
+        ReadHandler(InputStream inputStream) {
+            this.inputStream = inputStream;
+        }
+
+        @Override
+        public void run() {
+            super.run();
+            try {
+                // 得到输入流，用于接收数据
+                BufferedReader socketInput = new BufferedReader(new InputStreamReader(inputStream));
+
+                do {
+                    String str;
+                    try {
+                        // 客户端拿到一条数据
+                        str = socketInput.readLine();
+                    } catch (SocketTimeoutException e) {
+                        continue;
+                    }
+                    if (str == null) {
+                        System.out.println(&quot;连接已关闭，无法读取数据！&quot;);
+                        break;
+                    }
+                    // 打印到屏幕
+                    System.out.println(str);
+                    if (!str.contains(&quot;:&quot;)) {
+                        System.out.print(QQ_NAME);
+                    }
+                } while (!done);
+            } catch (Exception e) {
+                if (!done) {
+                    System.out.println(&quot;连接异常断开：&quot; + e.getMessage());
+                }
+            } finally {
+                // 连接关闭
+                CloseUtils.close(inputStream);
+            }
+        }
+
+        void exit() {
+            done = true;
+            CloseUtils.close(inputStream);
+        }
+    }
+}
+
+</code></pre>
+
+<h2 id="closeutils">CloseUtils</h2>
+
+<pre><code class="language-java">public class CloseUtils {
+    public static void close(Closeable... closeables) {
+        if (closeables == null) {
+            return;
+        }
+        for (Closeable closeable : closeables) {
+            try {
+                closeable.close();
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+        }
+    }
+}
+</code></pre>
+
+<h2 id="client">Client</h2>
+
+<pre><code class="language-java">public class Client {
+    public static void main(String[] args) {
+        ServerInfo info = new ServerInfo(30401,&quot;127.0.0.1&quot;);
+        if (info != null) {
+            try {
+                TCPClient.linkWith(info);
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+        }
+    }
+}
+</code></pre>
+
+<h1 id="服务端">服务端</h1>
+
+<h2 id="server">Server</h2>
+
+<pre><code class="language-java">import java.io.BufferedReader;
+import java.io.IOException;
+import java.io.InputStreamReader;
+
+public class Server {
+    public static void main(String[] args) throws IOException {
+        TCPServer tcpServer = new TCPServer(30401);
+        boolean isSucceed = tcpServer.start();
+        if (!isSucceed) {
+            System.out.println(&quot;Start TCP server failed!&quot;);
+            return;
+        }
+        BufferedReader bufferedReader = new BufferedReader(new InputStreamReader(System.in));
+        String str;
+        do {
+            str = bufferedReader.readLine();
+            tcpServer.broadcast(str);
+        } while (!&quot;00bye00&quot;.equalsIgnoreCase(str));
+
+        tcpServer.stop();
+    }
+}
+</code></pre>
+
+<h2 id="tcpserver">TCPServer</h2>
+
+<p>为每一个进来的客户端，重新创建一条线程。</p>
+
+<pre><code class="language-java">import java.io.IOException;
+import java.net.ServerSocket;
+import java.net.Socket;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+
+import com.chatroom.server.handle.ClientHandler;
+
+public class TCPServer implements ClientHandler.ClientHandlerCallback {
+    private final int port;
+    private ClientListener mListener;
+    private List&lt;ClientHandler&gt; clientHandlerList = new ArrayList&lt;&gt;();
+    private final ExecutorService forwardingThreadPoolExecutor;
+
+    public TCPServer(int port) {
+        this.port = port;
+        // 转发线程池
+        this.forwardingThreadPoolExecutor = Executors.newSingleThreadExecutor();
+    }
+
+    public boolean start() {
+        try {
+            ClientListener listener = new ClientListener(port);
+            mListener = listener;
+            listener.start();
+        } catch (IOException e) {
+            e.printStackTrace();
+            return false;
+        }
+        return true;
+    }
+
+    public void stop() {
+        if (mListener != null) {
+            mListener.exit();
+        }
+
+        synchronized (TCPServer.this) {
+            for (ClientHandler clientHandler : clientHandlerList) {
+                clientHandler.exit();
+            }
+
+            clientHandlerList.clear();
+        }
+
+        // 停止线程池
+        forwardingThreadPoolExecutor.shutdownNow();
+    }
+
+    public synchronized void broadcast(String str) {
+        for (ClientHandler clientHandler : clientHandlerList) {
+            clientHandler.send(str);
+        }
+    }
+
+    @Override
+    public synchronized void onSelfClosed(ClientHandler handler) {
+        clientHandlerList.remove(handler);
+    }
+
+    @Override
+    public void onNewMessageArrived(final ClientHandler handler, final String msg) {
+        // 打印到屏幕
+        System.out.println(&quot;Received-&quot; + handler.getClientInfo() + &quot;:&quot; + msg);
+        // 异步提交转发任务
+        forwardingThreadPoolExecutor.execute(() -&gt; {
+            synchronized (TCPServer.this) {
+                for (ClientHandler clientHandler : clientHandlerList) {
+                    if (clientHandler.equals(handler)) {
+                        // 跳过自己
+                        continue;
+                    }
+                    // 对其他客户端发送消息
+                    clientHandler.send(msg);
+                }
+            }
+        });
+
+    }
+
+    private class ClientListener extends Thread {
+        private ServerSocket server;
+        private boolean done = false;
+
+        private ClientListener(int port) throws IOException {
+            server = new ServerSocket(port);
+            System.out.println(&quot;服务器信息：&quot; + server.getInetAddress() + &quot; P:&quot; + server.getLocalPort());
+        }
+
+        @Override
+        public void run() {
+            super.run();
+
+            System.out.println(&quot;服务器准备就绪～&quot;);
+            // 等待客户端连接
+            do {
+                // 得到客户端
+                Socket client;
+                try {
+                    client = server.accept();
+                } catch (IOException e) {
+                    continue;
+                }
+                try {
+                    // 客户端构建异步线程
+                    ClientHandler clientHandler = new ClientHandler(client, TCPServer.this);
+                    // 读取数据并打印
+                    clientHandler.readToPrint();
+                    // 添加同步处理
+                    synchronized (TCPServer.this) {
+                        clientHandlerList.add(clientHandler);
+                    }
+                } catch (IOException e) {
+                    e.printStackTrace();
+                    System.out.println(&quot;客户端连接异常：&quot; + e.getMessage());
+                }
+            } while (!done);
+
+            System.out.println(&quot;服务器已关闭！&quot;);
+        }
+
+        void exit() {
+            done = true;
+            try {
+                server.close();
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+        }
+    }
+}
+
+</code></pre>
+
+<h2 id="clienthandler">ClientHandler</h2>
+
+<p>读和写采用不同的线程</p>
+
+<pre><code class="language-java">import java.io.BufferedReader;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.InputStreamReader;
+import java.io.OutputStream;
+import java.io.PrintStream;
+import java.net.Socket;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+
+import com.chatroom.clink.utils.CloseUtils;
+
+public class ClientHandler {
+    private final Socket socket;
+    private final ClientReadHandler readHandler;
+    private final ClientWriteHandler writeHandler;
+    private final ClientHandlerCallback clientHandlerCallback;
+    private final String clientInfo;
+
+    public ClientHandler(Socket socket, ClientHandlerCallback clientHandlerCallback) throws IOException {
+        this.socket = socket;
+        this.readHandler = new ClientReadHandler(socket.getInputStream());
+        this.writeHandler = new ClientWriteHandler(socket.getOutputStream());
+        this.clientHandlerCallback = clientHandlerCallback;
+        this.clientInfo = &quot;A[&quot; + socket.getInetAddress().getHostAddress()
+                + &quot;] P[&quot; + socket.getPort() + &quot;]&quot;;
+        System.out.println(&quot;新客户端连接：&quot; + clientInfo);
+    }
+
+    public String getClientInfo() {
+        return clientInfo;
+    }
+
+    public void exit() {
+        readHandler.exit();
+        writeHandler.exit();
+        CloseUtils.close(socket);
+        System.out.println(&quot;客户端已退出：&quot; + socket.getInetAddress() +
+                &quot; P:&quot; + socket.getPort());
+    }
+
+    public void send(String str) {
+        writeHandler.send(str);
+    }
+
+    public void readToPrint() {
+        readHandler.start();
+    }
+
+    private void exitBySelf() {
+        exit();
+        clientHandlerCallback.onSelfClosed(this);
+    }
+
+    public interface ClientHandlerCallback {
+        // 自身关闭通知
+        void onSelfClosed(ClientHandler handler);
+
+        // 收到消息时通知
+        void onNewMessageArrived(ClientHandler handler, String msg);
+    }
+
+    class ClientReadHandler extends Thread {
+        private boolean done = false;
+        private final InputStream inputStream;
+
+        ClientReadHandler(InputStream inputStream) {
+            this.inputStream = inputStream;
+        }
+
+        @Override
+        public void run() {
+            super.run();
+            try {
+                // 得到输入流，用于接收数据
+                BufferedReader socketInput = new BufferedReader(new InputStreamReader(inputStream));
+
+                do {
+                    // 客户端拿到一条数据
+                    String str = socketInput.readLine();
+                    if (str == null) {
+                        System.out.println(&quot;客户端已无法读取数据！&quot;);
+                        // 退出当前客户端
+                        ClientHandler.this.exitBySelf();
+                        break;
+                    }
+                    // 通知到TCPServer
+                    clientHandlerCallback.onNewMessageArrived(ClientHandler.this, str);
+                } while (!done);
+            } catch (Exception e) {
+                if (!done) {
+                    System.out.println(&quot;连接异常断开&quot;);
+                    ClientHandler.this.exitBySelf();
+                }
+            } finally {
+                // 连接关闭
+                CloseUtils.close(inputStream);
+            }
+        }
+
+        void exit() {
+            done = true;
+            CloseUtils.close(inputStream);
+        }
+    }
+
+    class ClientWriteHandler {
+        private boolean done = false;
+        private final PrintStream printStream;
+        private final ExecutorService executorService;
+
+        ClientWriteHandler(OutputStream outputStream) {
+            this.printStream = new PrintStream(outputStream);
+            this.executorService = Executors.newSingleThreadExecutor();
+        }
+
+        void exit() {
+            done = true;
+            CloseUtils.close(printStream);
+            executorService.shutdownNow();
+        }
+
+        void send(String str) {
+            if(done){
+                return;
+            }
+            executorService.execute(new WriteRunnable(str));
+        }
+
+        class WriteRunnable implements Runnable {
+            private final String msg;
+
+            WriteRunnable(String msg) {
+                this.msg = msg;
+            }
+
+            @Override
+            public void run() {
+                if (ClientWriteHandler.this.done) {
+                    return;
+                }
+
+                try {
+                    ClientWriteHandler.this.printStream.println(msg);
+                } catch (Exception e) {
+                    e.printStackTrace();
+                }
+            }
+        }
+    }
+}
+
+</code></pre>
+
+<h1 id="效果如下">效果如下</h1>
+
+<p><img src="/img/Xnip2020-01-19_11-32-07.png" alt="Xnip2020-01-19_11-32-07" /></p>
+
+<h1 id="注意">注意</h1>
+
+<p>从上面的代码可以看到， 我们系统中使用了非常多的线程，其中客户端来一个就开启一个线程监听，同时我们的每一个客户端的读和写都是单独的线程处理。 所以性能并不理想。后期改进处理。</p>
+
 
                 
                 
@@ -251,15 +824,10 @@
                 <ul class="pager">
                     
                     <li class="previous">
-                        <a href="/post/udp%E5%85%A5%E9%97%A8%E4%BD%BF%E7%94%A8/" data-toggle="tooltip" data-placement="top" title="UDP入门使用">&larr;
+                        <a href="/post/tcp%E5%85%A5%E9%97%A8%E4%BD%BF%E7%94%A8/" data-toggle="tooltip" data-placement="top" title="TCP入门使用">&larr;
                             Previous Post</a>
                     </li>
                     
-                    
-                    <li class="next">
-                        <a href="/post/udp%E8%BE%85%E5%8A%A9tcp%E5%AE%9E%E7%8E%B0%E7%82%B9%E5%AF%B9%E7%82%B9%E6%95%B0%E6%8D%AE%E4%BC%A0%E8%BE%93/" data-toggle="tooltip" data-placement="top" title="UDP辅助TCP实现点对点数据传输">Next
-                            Post &rarr;</a>
-                    </li>
                     
                 </ul>
 
