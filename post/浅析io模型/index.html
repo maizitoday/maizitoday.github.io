@@ -15,9 +15,9 @@
     
 
     
-    <meta name="title" content="简易聊天室案例" />
-    <meta property="og:title" content="简易聊天室案例" />
-    <meta property="twitter:title" content="简易聊天室案例" />
+    <meta name="title" content="浅析I/O模型" />
+    <meta property="og:title" content="浅析I/O模型" />
+    <meta property="twitter:title" content="浅析I/O模型" />
     
 
     
@@ -34,9 +34,9 @@
     <meta name="keyword"  content="麦子, maizi, maizi, , 麦子的网络日志, 麦子的博客, maizi Blog, 博客, 个人网站, 互联网, Web, 云原生, PaaS, Istio, Kubernetes, 微服务, Microservice">
     <link rel="shortcut icon" href="/img/favicon.ico">
 
-    <title>简易聊天室案例-麦子的博客</title>
+    <title>浅析I/O模型-麦子的博客</title>
 
-    <link rel="canonical" href="/post/%E7%AE%80%E6%98%93%E8%81%8A%E5%A4%A9%E5%AE%A4%E6%A1%88%E4%BE%8B/">
+    <link rel="canonical" href="/post/%E6%B5%85%E6%9E%90io%E6%A8%A1%E5%9E%8B/">
 
     <link rel="stylesheet" href="/css/iDisqus.min.css"/>
 	
@@ -166,8 +166,12 @@
                             网络编程
                         </a>
                         
+                        <a class="tag" href="/tags/java%E5%9F%BA%E7%A1%80" title="java基础">
+                            java基础
+                        </a>
+                        
                     </div>
-                    <h1>简易聊天室案例</h1>
+                    <h1>浅析I/O模型</h1>
                     <h2 class="subheading"></h2>
                     <span class="meta">
 			Posted by 
@@ -175,7 +179,7 @@
 			    麦子
 			 
 			on 
-			Sunday, January 19, 2020
+			Tuesday, January 28, 2020
                         
                     </span>
                 </div>
@@ -203,22 +207,24 @@
                 </header>              
                 <nav id="TableOfContents">
 <ul>
-<li><a href="#概述">概述</a></li>
-<li><a href="#客户端">客户端</a>
+<li><a href="#浅析i-o模型">浅析I/O模型</a>
 <ul>
-<li><a href="#serverinfo">ServerInfo</a></li>
-<li><a href="#tcpclient">TCPClient</a></li>
-<li><a href="#closeutils">CloseUtils</a></li>
-<li><a href="#client">Client</a></li>
-</ul></li>
-<li><a href="#服务端">服务端</a>
-<ul>
-<li><a href="#server">Server</a></li>
-<li><a href="#tcpserver">TCPServer</a></li>
-<li><a href="#clienthandler">ClientHandler</a></li>
-</ul></li>
-<li><a href="#效果如下">效果如下</a></li>
+<li><a href="#什么是阻塞-什么是非阻塞">什么是阻塞？什么是非阻塞？</a></li>
+<li><a href="#什么是阻塞io-什么是非阻塞io">什么是阻塞IO？什么是非阻塞IO？</a></li>
+<li><a href="#什么是同步io-什么是异步io">什么是同步IO？什么是异步IO？</a></li>
 <li><a href="#注意">注意</a></li>
+</ul></li>
+<li><a href="#五种io模型">五种IO模型</a>
+<ul>
+<li><a href="#概述">概述</a></li>
+<li><a href="#1-阻塞io模型">1.  阻塞IO模型</a></li>
+<li><a href="#2-非阻塞io模型">2.  非阻塞IO模型</a></li>
+<li><a href="#3-多路复用io模型">3.  多路复用IO模型</a></li>
+<li><a href="#4-信号驱动io模型">4.  信号驱动IO模型</a></li>
+<li><a href="#5-异步io模型">5.   异步IO模型</a></li>
+<li><a href="#总结">总结</a></li>
+</ul></li>
+<li><a href="#两种高性能io设计模式">两种高性能IO设计模式</a></li>
 </ul>
 </nav>
                 
@@ -226,556 +232,146 @@
 
 <p>[TOC]</p>
 
-<p>**转载地址: <a href="https://blog.csdn.net/weixin_42089175/article/details/89045904">https://blog.csdn.net/weixin_42089175/article/details/89045904</a> **</p>
+<h1 id="浅析i-o模型">浅析I/O模型</h1>
 
-<p><strong>说明：《Socket网络编程进阶与实战》系列视频</strong></p>
+<p>转载地址：<a href="https://blog.csdn.net/weixin_34206899/article/details/91771982">https://blog.csdn.net/weixin_34206899/article/details/91771982</a></p>
 
-<h1 id="概述">概述</h1>
+<h2 id="什么是阻塞-什么是非阻塞">什么是阻塞？什么是非阻塞？</h2>
 
-<p>实现群发的效果， 客服端和客户端直接通过服务器中转消息实现通信处理。</p>
+<p>阻塞就是：当某个事件或者任务在执行过程中，它发出一个请求操作，但是由于该请求操作需要的条件不满足，那么就会一直在那等待，直至条件满足；</p>
 
-<h1 id="客户端">客户端</h1>
+<p>非阻塞就是：当某个事件或者任务在执行过程中，它发出一个请求操作，如果该请求操作需要的条件不满足，会立即返回一个标志信息告知条件不满足，不会一直在那等待。</p>
 
-<h2 id="serverinfo">ServerInfo</h2>
+<p>这就是阻塞和非阻塞的区别。也就是说阻塞和非阻塞的区别关键在于 <strong>当发出请求一个操作时，如果条件不满足，是会一直等待还是返回一个标志信息</strong>。</p>
 
-<pre><code class="language-java">public class ServerInfo {
-    private int port;
-    private String address;
+<h2 id="什么是阻塞io-什么是非阻塞io">什么是阻塞IO？什么是非阻塞IO？</h2>
 
-    public ServerInfo(int port, String ip) {
-        this.port = port;
-        this.address = ip;
+<p>在了解阻塞IO和非阻塞IO之前，先看下一个具体的IO操作过程是怎么进行的。</p>
 
-    }
+<p><strong>通常来说，IO操作包括：对硬盘的读写、对socket的读写以及外设的读写。</strong></p>
 
-    /**
-     * @return int return the port
-     */
-    public int getPort() {
-        return port;
-    }
+<p>当用户线程发起一个IO请求操作（本文以读请求操作为例），内核会去查看要读取的数据是否就绪，对于阻塞IO来说，如果数据没有就绪，则会一直在那等待，直到数据就绪；对于非阻塞IO来说，如果数据没有就绪，则会返回一个标志信息告知用户线程当前要读的数据没有就绪。当数据就绪之后，便将数据拷贝到用户线程，这样才完成了一个完整的IO读请求操作，也就是说一个完整的IO读请求操作包括两个阶段：</p>
 
-    /**
-     * @param port the port to set
-     */
-    public void setPort(int port) {
-        this.port = port;
-    }
+<p>1）查看数据是否就绪；</p>
 
-    /**
-     * @return String return the address
-     */
-    public String getAddress() {
-        return address;
-    }
+<p>2）进行数据拷贝（内核将数据拷贝到用户线程）。</p>
 
-    /**
-     * @param address the address to set
-     */
-    public void setAddress(String address) {
-        this.address = address;
-    }
+<p>那么阻塞（blocking IO）和非阻塞（non-blocking IO）的区别就在于第一个阶段，<strong>如果数据没有就绪，在查看数据是否就绪的过程中是一直等待，还是直接返回一个标志信息。</strong></p>
 
-    @Override
-    public String toString() {
-        return super.toString();
-    }
+<p>Java中传统的IO都是阻塞IO，比如通过socket来读数据，调用read()方法之后，如果数据没有就绪，当前线程就会一直阻塞在read方法调用那里，直到有数据才返回；而如果是非阻塞IO的话，当数据没有就绪，read()方法应该返回一个标志信息，告知当前线程数据没有就绪，而不是一直在那里等待。</p>
 
-}
+<h2 id="什么是同步io-什么是异步io">什么是同步IO？什么是异步IO？</h2>
 
+<p>同步IO即 如果一个线程请求进行IO操作，在IO操作完成之前，该线程会被阻塞；而异步IO为 如果一个线程请求进行IO操作，IO操作不会导致请求线程被阻塞。</p>
+
+<p>事实上，同步IO和异步IO模型是针对用户线程和内核的交互来说的：</p>
+
+<p>对于同步IO：当用户发出IO请求操作之后，如果数据没有就绪，需要通过用户线程或者内核不断地去轮询数据是否就绪，当数据就绪时，再将数据从内核拷贝到用户线程；</p>
+
+<p>而异步IO：只有IO请求操作的发出是由用户线程来进行的，<strong>IO操作的两个阶段都是由内核自动完成，然后发送通知告知用户线程IO操作已经完成</strong>。也就是说在异步IO中，不会对用户线程产生任何阻塞。</p>
+
+<p>这是同步IO和异步IO关键区别所在，<strong>同步IO和异步IO的关键区别反映在数据拷贝阶段是由用户线程完成还是内核完成。所以说异步IO必须要有操作系统的底层支持</strong>。</p>
+
+<h2 id="注意">注意</h2>
+
+<p>注意同步IO和异步IO与阻塞IO和非阻塞IO是不同的两组概念。</p>
+
+<p>阻塞IO和非阻塞IO是反映在当用户请求IO操作时，如果数据没有就绪，是用户线程一直等待数据就绪，还是会收到一个标志信息这一点上面的。<strong>也就是说，阻塞IO和非阻塞IO是反映在IO操作的第一个阶段，在查看数据是否就绪时是如何处理的</strong>。</p>
+
+<h1 id="五种io模型">五种IO模型</h1>
+
+<h2 id="概述">概述</h2>
+
+<p>分别是：阻塞IO、非阻塞IO、多路复用IO、信号驱动IO以及异步IO。</p>
+
+<h2 id="1-阻塞io模型">1.  阻塞IO模型</h2>
+
+<p>最传统的一种IO模型，即在读写数据过程中会发生阻塞现象。</p>
+
+<p>当用户线程发出IO请求之后，内核会去查看数据是否就绪，如果没有就绪就会等待数据就绪，而用户线程就会处于阻塞状态，用户线程交出CPU。当数据就绪之后，内核会将数据拷贝到用户线程，并返回结果给用户线程，用户线程才解除block状态。</p>
+
+<p>典型的阻塞IO模型的例子为：</p>
+
+<pre><code class="language-java">data = socket.read();
 </code></pre>
 
-<h2 id="tcpclient">TCPClient</h2>
+<p>如果数据没有就绪，就会一直阻塞在read方法。</p>
 
-<p>发送消息和接受服务器转发消息</p>
+<h2 id="2-非阻塞io模型">2.  非阻塞IO模型</h2>
 
-<pre><code class="language-java">import java.io.BufferedReader;
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.InputStreamReader;
-import java.io.OutputStream;
-import java.io.PrintStream;
-import java.net.Inet4Address;
-import java.net.InetSocketAddress;
-import java.net.Socket;
-import java.net.SocketTimeoutException;
-import java.util.Scanner;
+<p>当用户线程发起一个read操作后，并不需要等待，而是马上就得到了一个结果。如果结果是一个error时，它就知道数据还没有准备好，于是它可以再次发送read操作。一旦内核中的数据准备好了，并且又再次收到了用户线程的请求，那么它马上就将数据拷贝到了用户线程，然后返回。</p>
 
-import com.chatroom.client.bean.ServerInfo;
-import com.chatroom.clink.utils.CloseUtils;
+<p>所以事实上，在非阻塞IO模型中，用户线程需要不断地询问内核数据是否就绪，也就说非阻塞IO不会交出CPU，而会一直占用CPU。</p>
 
-public class TCPClient {
+<p>典型的非阻塞IO模型一般如下：</p>
 
-    private static final String QQ_NAME = &quot;小画: &quot;;
-
-    public static void linkWith(ServerInfo info) throws IOException {
-        Socket socket = new Socket();
-        // 超时时间
-        socket.setSoTimeout(3000);
-
-        // 连接本地，端口2000；超时时间3000ms
-        socket.connect(new InetSocketAddress(Inet4Address.getByName(info.getAddress()), info.getPort()), 3000);
-
-        System.out.println(&quot;已发起服务器连接，并进入后续流程～&quot;);
-        System.out.println(&quot;客户端信息：&quot; + socket.getLocalAddress() + &quot; P:&quot; + socket.getLocalPort());
-        System.out.println(&quot;服务器信息：&quot; + socket.getInetAddress() + &quot; P:&quot; + socket.getPort());
-
-        try {
-            ReadHandler readHandler = new ReadHandler(socket.getInputStream());
-            readHandler.start();
-
-            // 发送接收数据
-            write(socket);
-
-            // 退出操作
-            readHandler.exit();
-        } catch (Exception e) {
-            System.out.println(&quot;异常关闭&quot;);
-        }
-
-        // 释放资源
-        socket.close();
-        System.out.println(&quot;客户端已退出～&quot;);
-    }
-
-    private static void write(Socket client) throws IOException {
-        // 构建键盘输入流
-        Scanner scanner = new Scanner(System.in);
-
-        // 得到Socket输出流，并转换为打印流
-        OutputStream outputStream = client.getOutputStream();
-        PrintStream socketPrintStream = new PrintStream(outputStream);
-
-        System.out.print(QQ_NAME);
-        while (!scanner.hasNext(&quot;bye&quot;)) {
-            System.out.print(QQ_NAME);
-            String str = scanner.nextLine();
-            str = QQ_NAME + str;
-            socketPrintStream.println(str);
-        }
-        // 资源释放
-        socketPrintStream.close();
-    }
-
-    static class ReadHandler extends Thread {
-        private boolean done = false;
-        private final InputStream inputStream;
-
-        ReadHandler(InputStream inputStream) {
-            this.inputStream = inputStream;
-        }
-
-        @Override
-        public void run() {
-            super.run();
-            try {
-                // 得到输入流，用于接收数据
-                BufferedReader socketInput = new BufferedReader(new InputStreamReader(inputStream));
-
-                do {
-                    String str;
-                    try {
-                        // 客户端拿到一条数据
-                        str = socketInput.readLine();
-                    } catch (SocketTimeoutException e) {
-                        continue;
-                    }
-                    if (str == null) {
-                        System.out.println(&quot;连接已关闭，无法读取数据！&quot;);
-                        break;
-                    }
-                    // 打印到屏幕
-                    System.out.println(str);
-                    if (!str.contains(&quot;:&quot;)) {
-                        System.out.print(QQ_NAME);
-                    }
-                } while (!done);
-            } catch (Exception e) {
-                if (!done) {
-                    System.out.println(&quot;连接异常断开：&quot; + e.getMessage());
-                }
-            } finally {
-                // 连接关闭
-                CloseUtils.close(inputStream);
-            }
-        }
-
-        void exit() {
-            done = true;
-            CloseUtils.close(inputStream);
-        }
-    }
-}
-
-</code></pre>
-
-<h2 id="closeutils">CloseUtils</h2>
-
-<pre><code class="language-java">public class CloseUtils {
-    public static void close(Closeable... closeables) {
-        if (closeables == null) {
-            return;
-        }
-        for (Closeable closeable : closeables) {
-            try {
-                closeable.close();
-            } catch (IOException e) {
-                e.printStackTrace();
-            }
-        }
+<pre><code class="language-java">while(true){
+    data = socket.read();
+    if(data!= error){
+        处理数据
+        break;
     }
 }
 </code></pre>
 
-<h2 id="client">Client</h2>
+<p>但是对于非阻塞IO就有一个非常严重的问题，在while循环中需要不断地去询问内核数据是否就绪，这样会导致CPU占用率非常高，因此一般情况下很少使用while循环这种方式来读取数据。</p>
 
-<pre><code class="language-java">public class Client {
-    public static void main(String[] args) {
-        ServerInfo info = new ServerInfo(30401,&quot;127.0.0.1&quot;);
-        if (info != null) {
-            try {
-                TCPClient.linkWith(info);
-            } catch (IOException e) {
-                e.printStackTrace();
-            }
-        }
-    }
-}
-</code></pre>
+<h2 id="3-多路复用io模型">3.  多路复用IO模型</h2>
 
-<h1 id="服务端">服务端</h1>
+<p>多路复用IO模型是目前使用得比较多的模型。<strong>Java NIO实际上就是多路复用IO</strong>。</p>
 
-<h2 id="server">Server</h2>
+<p>在多路复用IO模型中，会有一个线程不断去轮询多个socket的状态，只有当socket真正有读写事件时，才真正调用实际的IO读写操作。因为在多路复用IO模型中，只需要使用一个线程就可以管理多个socket，系统不需要建立新的进程或者线程，也不必维护这些线程和进程，并且只有在真正有socket读写事件进行时，才会使用IO资源，所以它大大减少了资源占用。</p>
 
-<pre><code class="language-java">import java.io.BufferedReader;
-import java.io.IOException;
-import java.io.InputStreamReader;
+<p>在Java NIO中，是通过selector.select()去查询每个通道是否有到达事件，如果没有事件，则一直阻塞在那里，因此这种方式会导致用户线程的阻塞。</p>
 
-public class Server {
-    public static void main(String[] args) throws IOException {
-        TCPServer tcpServer = new TCPServer(30401);
-        boolean isSucceed = tcpServer.start();
-        if (!isSucceed) {
-            System.out.println(&quot;Start TCP server failed!&quot;);
-            return;
-        }
-        BufferedReader bufferedReader = new BufferedReader(new InputStreamReader(System.in));
-        String str;
-        do {
-            str = bufferedReader.readLine();
-            tcpServer.broadcast(str);
-        } while (!&quot;00bye00&quot;.equalsIgnoreCase(str));
+<p>也许有朋友会说，我可以采用 多线程+ 阻塞IO 达到类似的效果，但是由于在多线程 + 阻塞IO 中，每个socket对应一个线程，这样会造成很大的资源占用，并且尤其是对于长连接来说，线程的资源一直不会释放，如果后面陆续有很多连接的话，就会造成性能上的瓶颈。</p>
 
-        tcpServer.stop();
-    }
-}
-</code></pre>
+<p>而多路复用IO模式，通过一个线程就可以管理多个socket，只有当socket真正有读写事件发生才会占用资源来进行实际的读写操作。因此，多路复用IO比较适合连接数比较多的情况。</p>
 
-<h2 id="tcpserver">TCPServer</h2>
+<p>另外多路复用IO为何比非阻塞IO模型的效率高是因为在非阻塞IO中，不断地询问socket状态时通过用户线程去进行的，而在多路复用IO中，轮询每个socket状态是内核在进行的，这个效率要比用户线程要高的多。</p>
 
-<p>为每一个进来的客户端，重新创建一条线程。</p>
+<p>不过要注意的是，多路复用IO模型是通过轮询的方式来检测是否有事件到达，并且对到达的事件逐一进行响应。因此对于多路复用IO模型来说，一旦事件响应体很大，那么就会导致后续的事件迟迟得不到处理，并且会影响新的事件轮询。</p>
 
-<pre><code class="language-java">import java.io.IOException;
-import java.net.ServerSocket;
-import java.net.Socket;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
+<h2 id="4-信号驱动io模型">4.  信号驱动IO模型</h2>
 
-import com.chatroom.server.handle.ClientHandler;
+<p>在信号驱动IO模型中，当用户线程发起一个IO请求操作，会给对应的socket注册一个信号函数，然后用户线程会继续执行，当内核数据就绪时会发送一个信号给用户线程，用户线程接收到信号之后，便在信号函数中调用IO读写操作来进行实际的IO请求操作。</p>
 
-public class TCPServer implements ClientHandler.ClientHandlerCallback {
-    private final int port;
-    private ClientListener mListener;
-    private List&lt;ClientHandler&gt; clientHandlerList = new ArrayList&lt;&gt;();
-    private final ExecutorService forwardingThreadPoolExecutor;
+<h2 id="5-异步io模型">5.   异步IO模型</h2>
 
-    public TCPServer(int port) {
-        this.port = port;
-        // 转发线程池
-        this.forwardingThreadPoolExecutor = Executors.newSingleThreadExecutor();
-    }
+<p>异步IO模型才是最理想的IO模型，在异步IO模型中，当用户线程发起read操作之后，立刻就可以开始去做其它的事。而另一方面，从内核的角度，当它受到一个asynchronous read之后，它会立刻返回，说明read请求已经成功发起了，因此不会对用户线程产生任何block。然后，内核会等待数据准备完成，然后将数据拷贝到用户线程，当这一切都完成之后，内核会给用户线程发送一个信号，告诉它read操作完成了。也就说用户线程完全不需要实际的整个IO操作是如何进行的，只需要先发起一个请求，当接收内核返回的成功信号时表示IO操作已经完成，可以直接去使用数据了。</p>
 
-    public boolean start() {
-        try {
-            ClientListener listener = new ClientListener(port);
-            mListener = listener;
-            listener.start();
-        } catch (IOException e) {
-            e.printStackTrace();
-            return false;
-        }
-        return true;
-    }
+<p>也就说在异步IO模型中，IO操作的两个阶段都不会阻塞用户线程，这两个阶段都是由内核自动完成，然后发送一个信号告知用户线程操作已完成。用户线程中不需要再次调用IO函数进行具体的读写。这点是和信号驱动模型有所不同的，在信号驱动模型中，当用户线程接收到信号表示数据已经就绪，然后需要用户线程调用IO函数进行实际的读写操作；而在异步IO模型中，收到信号表示IO操作已经完成，不需要再在用户线程中调用iO函数进行实际的读写操作。</p>
 
-    public void stop() {
-        if (mListener != null) {
-            mListener.exit();
-        }
+<h2 id="总结">总结</h2>
 
-        synchronized (TCPServer.this) {
-            for (ClientHandler clientHandler : clientHandlerList) {
-                clientHandler.exit();
-            }
+<p>注意，异步IO是需要操作系统的底层支持，在Java 7中，提供了Asynchronous IO。
+前面四种IO模型实际上都属于同步IO，只有最后一种是真正的异步IO，因为无论是多路复用IO还是信号驱动模型，IO操作的第2个阶段都会引起用户线程阻塞，也就是内核进行数据拷贝的过程都会让用户线程阻塞。</p>
 
-            clientHandlerList.clear();
-        }
+<h1 id="两种高性能io设计模式">两种高性能IO设计模式</h1>
 
-        // 停止线程池
-        forwardingThreadPoolExecutor.shutdownNow();
-    }
+<p>在传统的网络服务设计模式中，有两种比较经典的模式：</p>
 
-    public synchronized void broadcast(String str) {
-        for (ClientHandler clientHandler : clientHandlerList) {
-            clientHandler.send(str);
-        }
-    }
+<p>一种是多线程，一种是线程池。</p>
 
-    @Override
-    public synchronized void onSelfClosed(ClientHandler handler) {
-        clientHandlerList.remove(handler);
-    }
+<p>对于多线程模式，也就说来了client，服务器就会新建一个线程来处理该client的读写事件，如下图所示：</p>
 
-    @Override
-    public void onNewMessageArrived(final ClientHandler handler, final String msg) {
-        // 打印到屏幕
-        System.out.println(&quot;Received-&quot; + handler.getClientInfo() + &quot;:&quot; + msg);
-        // 异步提交转发任务
-        forwardingThreadPoolExecutor.execute(() -&gt; {
-            synchronized (TCPServer.this) {
-                for (ClientHandler clientHandler : clientHandlerList) {
-                    if (clientHandler.equals(handler)) {
-                        // 跳过自己
-                        continue;
-                    }
-                    // 对其他客户端发送消息
-                    clientHandler.send(msg);
-                }
-            }
-        });
+<p><img src="/img/154812_6JVq_1024408.jpg" alt="154812_6JVq_1024408" /></p>
 
-    }
+<p>这种模式虽然处理起来简单方便，但是由于服务器为每个client的连接都采用一个线程去处理，使得资源占用非常大。因此，当连接数量达到上限时，再有用户请求连接，直接会导致资源瓶颈，严重的可能会直接导致服务器崩溃。</p>
 
-    private class ClientListener extends Thread {
-        private ServerSocket server;
-        private boolean done = false;
+<p>因此，为了解决这种一个线程对应一个客户端模式带来的问题，提出了采用线程池的方式，也就说创建一个固定大小的线程池，来一个客户端，就从线程池取一个空闲线程来处理，当客户端处理完读写操作之后，就交出对线程的占用。因此这样就避免为每一个客户端都要创建线程带来的资源浪费，使得线程可以重用。</p>
 
-        private ClientListener(int port) throws IOException {
-            server = new ServerSocket(port);
-            System.out.println(&quot;服务器信息：&quot; + server.getInetAddress() + &quot; P:&quot; + server.getLocalPort());
-        }
+<p><strong>但是线程池也有它的弊端，如果连接大多是长连接，因此可能会导致在一段时间内，线程池中的线程都被占用，那么当再有用户请求连接时，由于没有可用的空闲线程来处理，就会导致客户端连接失败，从而影响用户体验。因此，线程池比较适合大量的短连接应用。</strong></p>
 
-        @Override
-        public void run() {
-            super.run();
+<p><strong>因此便出现了下面的两种高性能IO设计模式：Reactor和Proactor。</strong></p>
 
-            System.out.println(&quot;服务器准备就绪～&quot;);
-            // 等待客户端连接
-            do {
-                // 得到客户端
-                Socket client;
-                try {
-                    client = server.accept();
-                } catch (IOException e) {
-                    continue;
-                }
-                try {
-                    // 客户端构建异步线程
-                    ClientHandler clientHandler = new ClientHandler(client, TCPServer.this);
-                    // 读取数据并打印
-                    clientHandler.readToPrint();
-                    // 添加同步处理
-                    synchronized (TCPServer.this) {
-                        clientHandlerList.add(clientHandler);
-                    }
-                } catch (IOException e) {
-                    e.printStackTrace();
-                    System.out.println(&quot;客户端连接异常：&quot; + e.getMessage());
-                }
-            } while (!done);
+<p>在Reactor模式中，会先对每个client注册感兴趣的事件，然后有一个线程专门去轮询每个client是否有事件发生，当有事件发生时，便顺序处理每个事件，当所有事件处理完之后，便再转去继续轮询，如下图所示：</p>
 
-            System.out.println(&quot;服务器已关闭！&quot;);
-        }
+<p><img src="/img/154919_psWE_1024408.jpg" alt="154919_psWE_1024408" /></p>
 
-        void exit() {
-            done = true;
-            try {
-                server.close();
-            } catch (IOException e) {
-                e.printStackTrace();
-            }
-        }
-    }
-}
+<p>从这里可以看出，上面的五种IO模型中的多路复用IO就是采用Reactor模式。注意，上面的图中展示的 是顺序处理每个事件，当然为了提高事件处理速度，可以通过多线程或者线程池的方式来处理事件。</p>
 
-</code></pre>
-
-<h2 id="clienthandler">ClientHandler</h2>
-
-<p>读和写采用不同的线程</p>
-
-<pre><code class="language-java">import java.io.BufferedReader;
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.InputStreamReader;
-import java.io.OutputStream;
-import java.io.PrintStream;
-import java.net.Socket;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
-
-import com.chatroom.clink.utils.CloseUtils;
-
-public class ClientHandler {
-    private final Socket socket;
-    private final ClientReadHandler readHandler;
-    private final ClientWriteHandler writeHandler;
-    private final ClientHandlerCallback clientHandlerCallback;
-    private final String clientInfo;
-
-    public ClientHandler(Socket socket, ClientHandlerCallback clientHandlerCallback) throws IOException {
-        this.socket = socket;
-        this.readHandler = new ClientReadHandler(socket.getInputStream());
-        this.writeHandler = new ClientWriteHandler(socket.getOutputStream());
-        this.clientHandlerCallback = clientHandlerCallback;
-        this.clientInfo = &quot;A[&quot; + socket.getInetAddress().getHostAddress()
-                + &quot;] P[&quot; + socket.getPort() + &quot;]&quot;;
-        System.out.println(&quot;新客户端连接：&quot; + clientInfo);
-    }
-
-    public String getClientInfo() {
-        return clientInfo;
-    }
-
-    public void exit() {
-        readHandler.exit();
-        writeHandler.exit();
-        CloseUtils.close(socket);
-        System.out.println(&quot;客户端已退出：&quot; + socket.getInetAddress() +
-                &quot; P:&quot; + socket.getPort());
-    }
-
-    public void send(String str) {
-        writeHandler.send(str);
-    }
-
-    public void readToPrint() {
-        readHandler.start();
-    }
-
-    private void exitBySelf() {
-        exit();
-        clientHandlerCallback.onSelfClosed(this);
-    }
-
-    public interface ClientHandlerCallback {
-        // 自身关闭通知
-        void onSelfClosed(ClientHandler handler);
-
-        // 收到消息时通知
-        void onNewMessageArrived(ClientHandler handler, String msg);
-    }
-
-    class ClientReadHandler extends Thread {
-        private boolean done = false;
-        private final InputStream inputStream;
-
-        ClientReadHandler(InputStream inputStream) {
-            this.inputStream = inputStream;
-        }
-
-        @Override
-        public void run() {
-            super.run();
-            try {
-                // 得到输入流，用于接收数据
-                BufferedReader socketInput = new BufferedReader(new InputStreamReader(inputStream));
-
-                do {
-                    // 客户端拿到一条数据
-                    String str = socketInput.readLine();
-                    if (str == null) {
-                        System.out.println(&quot;客户端已无法读取数据！&quot;);
-                        // 退出当前客户端
-                        ClientHandler.this.exitBySelf();
-                        break;
-                    }
-                    // 通知到TCPServer
-                    clientHandlerCallback.onNewMessageArrived(ClientHandler.this, str);
-                } while (!done);
-            } catch (Exception e) {
-                if (!done) {
-                    System.out.println(&quot;连接异常断开&quot;);
-                    ClientHandler.this.exitBySelf();
-                }
-            } finally {
-                // 连接关闭
-                CloseUtils.close(inputStream);
-            }
-        }
-
-        void exit() {
-            done = true;
-            CloseUtils.close(inputStream);
-        }
-    }
-
-    class ClientWriteHandler {
-        private boolean done = false;
-        private final PrintStream printStream;
-        private final ExecutorService executorService;
-
-        ClientWriteHandler(OutputStream outputStream) {
-            this.printStream = new PrintStream(outputStream);
-            this.executorService = Executors.newSingleThreadExecutor();
-        }
-
-        void exit() {
-            done = true;
-            CloseUtils.close(printStream);
-            executorService.shutdownNow();
-        }
-
-        void send(String str) {
-            if(done){
-                return;
-            }
-            executorService.execute(new WriteRunnable(str));
-        }
-
-        class WriteRunnable implements Runnable {
-            private final String msg;
-
-            WriteRunnable(String msg) {
-                this.msg = msg;
-            }
-
-            @Override
-            public void run() {
-                if (ClientWriteHandler.this.done) {
-                    return;
-                }
-
-                try {
-                    ClientWriteHandler.this.printStream.println(msg);
-                } catch (Exception e) {
-                    e.printStackTrace();
-                }
-            }
-        }
-    }
-}
-
-</code></pre>
-
-<h1 id="效果如下">效果如下</h1>
-
-<p><img src="/img/Xnip2020-01-19_11-32-07.png" alt="Xnip2020-01-19_11-32-07" /></p>
-
-<h1 id="注意">注意</h1>
-
-<p>从上面的代码可以看到， 我们系统中使用了非常多的线程，其中客户端来一个就开启一个线程监听，同时我们的每一个客户端的读和写都是单独的线程处理。 所以性能并不理想。后期改进处理。</p>
+<p><strong>在Proactor模式中</strong>，当检测到有事件发生时，会新起一个异步操作，然后交由内核线程去处理，当内核线程完成IO操作之后，发送一个通知告知操作已完成，可以得知，异步IO模型采用的就是Proactor模式。</p>
 
 
                 
@@ -824,15 +420,10 @@ public class ClientHandler {
                 <ul class="pager">
                     
                     <li class="previous">
-                        <a href="/post/tcp%E5%85%A5%E9%97%A8%E4%BD%BF%E7%94%A8/" data-toggle="tooltip" data-placement="top" title="TCP入门使用">&larr;
+                        <a href="/post/%E4%BA%8B%E4%BB%B6%E9%A9%B1%E5%8A%A8%E7%90%86%E8%A7%A3/" data-toggle="tooltip" data-placement="top" title="事件驱动理解">&larr;
                             Previous Post</a>
                     </li>
                     
-                    
-                    <li class="next">
-                        <a href="/post/%E4%BA%8B%E4%BB%B6%E9%A9%B1%E5%8A%A8%E7%90%86%E8%A7%A3/" data-toggle="tooltip" data-placement="top" title="事件驱动理解">Next
-                            Post &rarr;</a>
-                    </li>
                     
                 </ul>
 
