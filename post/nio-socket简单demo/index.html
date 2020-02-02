@@ -207,12 +207,25 @@
                 </header>              
                 <nav id="TableOfContents">
 <ul>
+<li><a href="#socket">Socket</a>
+<ul>
+<li><a href="#读">读</a></li>
+<li><a href="#写">写</a></li>
 <li><a href="#服务端">服务端</a></li>
 <li><a href="#客户端">客户端</a></li>
 <li><a href="#运行结果">运行结果</a>
 <ul>
 <li><a href="#服务端-1">服务端</a></li>
 <li><a href="#客户端-1">客户端</a></li>
+</ul></li>
+</ul></li>
+<li><a href="#读写操作">读写操作</a>
+<ul>
+<li><a href="#运行结果-1">运行结果</a></li>
+</ul></li>
+<li><a href="#注意">注意</a>
+<ul>
+<li><a href="#java异步i-o编程实现的两种方式-将来式和回调式">Java异步I/O编程实现的两种方式：将来式和回调式</a></li>
 </ul></li>
 </ul>
 </nav>
@@ -223,7 +236,53 @@
 
 <p><strong>转载地址：<a href="https://juejin.im/post/5ae33c026fb9a07a9c03f45b">https://juejin.im/post/5ae33c026fb9a07a9c03f45b</a></strong></p>
 
-<h1 id="服务端">服务端</h1>
+<h1 id="socket">Socket</h1>
+
+<h2 id="读">读</h2>
+
+<pre><code class="language-java">if (key.isReadable()) {
+    SocketChannel client = (SocketChannel) key.channel();
+    // 清空操作
+    byteBuffer.clear();
+    // 读取
+    int read = client.read(byteBuffer);
+    if (read &gt; 0) {
+    // 丢弃换行符
+    String str = new String(byteBuffer.array(), 0, read);
+       // 通知到TCPServer
+       clientHandlerCallback.onNewMessageArrived(ClientHandler.this, str);
+    } else {
+       System.out.println(&quot;客户端已无法读取数据！&quot;);
+       // 退出当前客户端
+       ClientHandler.this.exitBySelf();
+       break;
+    }
+}
+</code></pre>
+
+<h2 id="写">写</h2>
+
+<pre><code class="language-java">byteBuffer.clear();
+byteBuffer.put(msg.getBytes());
+// 将bytebuffer的position改为0，读取时从0开始
+byteBuffer.flip();
+
+while (!done &amp;&amp; byteBuffer.hasRemaining()) {
+try {
+      int len = socketChannel.write(byteBuffer);
+      // len = 0 合法
+      if (len &lt; 0) {
+          System.out.println(&quot;客户端已无法发送数据！&quot;);
+          ClientHandler.this.exitBySelf();
+          break;
+      }
+    } catch (Exception e) {
+         e.printStackTrace();
+    }
+}
+</code></pre>
+
+<h2 id="服务端">服务端</h2>
 
 <pre><code class="language-java">import java.io.IOException;
 import java.net.InetSocketAddress;
@@ -319,7 +378,7 @@ public class ChannelServer {
 
 </code></pre>
 
-<h1 id="客户端">客户端</h1>
+<h2 id="客户端">客户端</h2>
 
 <pre><code class="language-java">import java.io.IOException;
 import java.net.InetAddress;
@@ -382,9 +441,9 @@ public class ChannelClient {
 
 </code></pre>
 
-<h1 id="运行结果">运行结果</h1>
+<h2 id="运行结果">运行结果</h2>
 
-<h2 id="服务端-1">服务端</h2>
+<h3 id="服务端-1">服务端</h3>
 
 <pre><code class="language-java">Client said: hello
 closed.......
@@ -400,12 +459,80 @@ Client said: hello
 closed.......
 </code></pre>
 
-<h2 id="客户端-1">客户端</h2>
+<h3 id="客户端-1">客户端</h3>
 
 <pre><code class="language-java">服务器连接成功!
 等待服务器回应.....
 Server said: Welcome maizi !!!
 </code></pre>
+
+<h1 id="读写操作">读写操作</h1>
+
+<pre><code class="language-java">public class NioReadWriter {
+
+    public static void main(String[] args) {
+        // 创建一个缓冲区
+        ByteBuffer byteBuffer = ByteBuffer.allocate(1024);
+        String str = &quot;Java_Android_IOS_Pyth_GO_HTML_CSS_JavaScript_SQL_docker_NOSQL_Frame&quot;;
+        // 数据放入到一个缓存区 
+        byteBuffer.put(str.getBytes());
+        // 查看这个缓存区
+        System.out.println(&quot;查看缓冲区: --&gt; &quot;+byteBuffer);
+
+        System.out.println(&quot;初始时--&gt;limit---&gt;&quot; + byteBuffer.limit());
+        System.out.println(&quot;初始时--&gt;position---&gt;&quot; + byteBuffer.position());
+        System.out.println(&quot;初始时--&gt;capacity---&gt;&quot; + byteBuffer.capacity());
+        System.out.println(&quot;初始时--&gt;mark---&gt;&quot; + byteBuffer.mark());
+
+
+        System.out.println(&quot;---------------------------------------------------&gt;&quot;);
+        byteBuffer.flip();
+
+        System.out.println(&quot;flip--&gt;limit---&gt;&quot; + byteBuffer.limit());
+        System.out.println(&quot;flip--&gt;position---&gt;&quot; + byteBuffer.position());
+        System.out.println(&quot;flip--&gt;capacity---&gt;&quot; + byteBuffer.capacity());
+        System.out.println(&quot;flip--&gt;mark---&gt;&quot; + byteBuffer.mark());
+        System.out.println(&quot;查看缓冲区: --&gt; &quot;+byteBuffer);
+
+        byte[] bytes = new byte[byteBuffer.limit()];
+        // 缓冲区数据放入到byte数组中
+        byteBuffer.get(bytes);
+
+        System.out.println(new String(bytes));
+
+    }
+
+}
+</code></pre>
+
+<h2 id="运行结果-1">运行结果</h2>
+
+<pre><code class="language-java">查看缓冲区: --&gt; java.nio.HeapByteBuffer[pos=67 lim=1024 cap=1024]
+初始时--&gt;limit---&gt;1024
+初始时--&gt;position---&gt;67
+初始时--&gt;capacity---&gt;1024
+初始时--&gt;mark---&gt;java.nio.HeapByteBuffer[pos=67 lim=1024 cap=1024]
+---------------------------------------------------&gt;
+flip--&gt;limit---&gt;67
+flip--&gt;position---&gt;0
+flip--&gt;capacity---&gt;1024
+flip--&gt;mark---&gt;java.nio.HeapByteBuffer[pos=0 lim=67 cap=1024]
+查看缓冲区: --&gt; java.nio.HeapByteBuffer[pos=0 lim=67 cap=1024]
+Java_Android_IOS_Pyth_GO_HTML_CSS_JavaScript_SQL_docker_NOSQL_Frame
+</code></pre>
+
+<h1 id="注意">注意</h1>
+
+<h2 id="java异步i-o编程实现的两种方式-将来式和回调式">Java异步I/O编程实现的两种方式：将来式和回调式</h2>
+
+<ol>
+<li>将来式：主线程发起I/O操作，主线程在读取数据过程继续完成别的事情，之后通过轮询等待结果完成。</li>
+<li>回调式：采用事件处理机制。</li>
+</ol>
+
+<p>具体列子查看： <a href="https://blog.csdn.net/zmx729618/article/details/78919707">https://blog.csdn.net/zmx729618/article/details/78919707</a></p>
+
+<p><strong>异步IO通道有三种</strong>： AsynchronousFileChannel   AsynchronousSocketChannel   AsynchronousServerSocketChannel</p>
 
 
                 

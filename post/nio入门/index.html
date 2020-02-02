@@ -256,6 +256,11 @@
 <li><a href="#四种注册事件">四种注册事件</a></li>
 <li><a href="#完整selector实例">完整Selector实例</a></li>
 <li><a href="#使用流程">使用流程</a></li>
+<li><a href="#selector的wakeup理解">selector的wakeup理解</a>
+<ul>
+<li><a href="#代码测试">代码测试</a></li>
+<li><a href="#运行结果">运行结果</a></li>
+</ul></li>
 </ul></li>
 </ul></li>
 <li><a href="#nio-vs-io">NIO vs IO</a>
@@ -263,6 +268,10 @@
 <li><a href="#io是面向流的-nio是面向缓冲区的">IO是面向流的，NIO是面向缓冲区的</a></li>
 <li><a href="#io流是阻塞的-nio流是不阻塞的">IO流是阻塞的，NIO流是不阻塞的</a></li>
 <li><a href="#选择器">选择器</a></li>
+</ul></li>
+<li><a href="#问题">问题</a>
+<ul>
+<li><a href="#1-filechannel无法设置为非阻塞模式的原因">1.  FileChannel无法设置为非阻塞模式的原因</a></li>
 </ul></li>
 </ul>
 </nav>
@@ -808,6 +817,120 @@ while(true) {
 
 <p><img src="/img/Xnip2020-01-21_10-12-40.png" alt="Xnip2020-01-21_10-12-40" /></p>
 
+<h3 id="selector的wakeup理解">selector的wakeup理解</h3>
+
+<p>转载地址：<a href="https://www.hxlzpnyist.site/2017/12/21/NIO-selector的wakeup/">https://www.hxlzpnyist.site/2017/12/21/NIO-selector%E7%9A%84wakeup/</a></p>
+
+<p>某个线程调用select()方法后阻塞了，即使没有通道已经就绪，也有办法让其从select()方法返回。只要让其它线程在第一个线程调用select()方法的那个对象上调用Selector.wakeup()方法即可。阻塞在select()方法上的线程会立马返回。</p>
+
+<p>如果有其它线程调用了wakeup()方法，但当前没有线程阻塞在select()方法上，下个调用select()方法的线程会立即“醒来（wake up）”</p>
+
+<h4 id="代码测试">代码测试</h4>
+
+<pre><code class="language-java">import java.io.IOException;
+import java.net.InetSocketAddress;
+import java.nio.channels.SelectionKey;
+import java.nio.channels.Selector;
+import java.nio.channels.ServerSocketChannel;
+import java.util.concurrent.TimeUnit;
+
+public class NioWakeUp {
+
+    private Selector selector;
+
+    public void start() throws IOException {
+        // 开启选择器 selector
+        selector = Selector.open();
+
+        // 开启服务端 socket 通道
+        ServerSocketChannel serverSocketChannel = ServerSocketChannel.open();
+        // 设置为非阻塞
+        serverSocketChannel.configureBlocking(false);
+        // 绑定服务端端口
+        serverSocketChannel.socket().bind(new InetSocketAddress(8888));
+        // 通道注册到选择器上 并监听 接收客户端事件
+        serverSocketChannel.register(selector, SelectionKey.OP_ACCEPT);
+
+        // 因 selector.select 会阻塞当前线程 故异步处理
+        new Thread(new Runnable() {
+            @Override
+            public void run() {
+                while (true) {
+                    System.out.println(&quot;select 前执行&quot;);
+
+                    try {
+                        selector.select();
+                    } catch (IOException e) {
+                        e.printStackTrace();
+                    }
+
+                    System.out.println(&quot;select 后执行&quot;);
+                }
+            }
+        }).start();
+
+    }
+
+    public void wakeup() {
+        System.out.println(&quot;开始唤醒&quot;);
+        selector.wakeup();
+    }
+
+    public static void main(String[] args) throws IOException, InterruptedException {
+        final NioWakeUp app = new NioWakeUp();
+        app.start();
+
+        Thread thread = new Thread(new Runnable() {
+            @Override
+            public void run() {
+                while (true) {
+                    try {
+                        TimeUnit.SECONDS.sleep(3);
+                    } catch (InterruptedException e) {
+                        e.printStackTrace();
+                    }
+                    app.wakeup();
+                }
+            }
+        });
+
+        thread.start();
+
+        thread.join();
+    }
+
+}
+</code></pre>
+
+<h4 id="运行结果">运行结果</h4>
+
+<pre><code class="language-java">select-----&gt;前执行
+开始唤醒
+select-----&gt;后执行
+
+select-----&gt;前执行
+开始唤醒
+select-----&gt;后执行
+
+select-----&gt;前执行
+开始唤醒
+select-----&gt;后执行
+
+select-----&gt;前执行
+开始唤醒
+select-----&gt;后执行
+
+select-----&gt;前执行
+开始唤醒
+select-----&gt;后执行
+
+select-----&gt;前执行
+开始唤醒
+select-----&gt;后执行
+
+select-----&gt;前执行
+</code></pre>
+
 <h1 id="nio-vs-io">NIO vs IO</h1>
 
 <p>学习了NIO之后我们都会有这样一个疑问：到底什么时候该用NIO，什么时候该用传统的I/O呢？</p>
@@ -841,6 +964,12 @@ while(true) {
 </ol>
 
 <p><img src="/img/401339-20171228231302459-2106552668.png" alt="401339-20171228231302459-2106552668" /></p>
+
+<h1 id="问题">问题</h1>
+
+<h2 id="1-filechannel无法设置为非阻塞模式的原因">1.  FileChannel无法设置为非阻塞模式的原因</h2>
+
+<p>在SelectableChannel中有configureBlocking方法，AbstractInterruptibleChannel中没有此方法，FileChannel类中也没有此方法。所以从源码的角度分析FileChannel不能切换到非阻塞模式，这就是原因。</p>
 
 
                 
