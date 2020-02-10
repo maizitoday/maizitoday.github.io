@@ -1,0 +1,1441 @@
+<!DOCTYPE html>
+<html lang="en-us">
+<head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+
+    
+    <meta property="og:site_name" content="">
+    <meta property="og:type" content="article">
+
+    
+    <meta property="og:image" content="http://maizitoday.github.io//img/home-bg-jeep.jpg">
+    <meta property="twitter:image" content="http://maizitoday.github.io//img/home-bg-jeep.jpg" />
+    
+
+    
+    <meta name="title" content="NIO的网络编程-简单Demo(一)" />
+    <meta property="og:title" content="NIO的网络编程-简单Demo(一)" />
+    <meta property="twitter:title" content="NIO的网络编程-简单Demo(一)" />
+    
+
+    
+    <meta name="description" content="麦子，程序员, 开源爱好者，生活探险家 | 这里是 麦子 的博客，与你一起发现更大的世界。">
+    <meta property="og:description" content="麦子，程序员, 开源爱好者，生活探险家 | 这里是 麦子 的博客，与你一起发现更大的世界。" />
+    <meta property="twitter:description" content="麦子，程序员, 开源爱好者，生活探险家 | 这里是 麦子 的博客，与你一起发现更大的世界。" />
+    
+
+    
+    <meta property="twitter:card" content="summary" />
+    
+    
+
+    <meta name="keyword"  content="麦子, maizi, maizi, , 麦子的网络日志, 麦子的博客, maizi Blog, 博客, 个人网站, 互联网, Web, 云原生, PaaS, Istio, Kubernetes, 微服务, Microservice">
+    <link rel="shortcut icon" href="/img/favicon.ico">
+
+    <title>NIO的网络编程-简单Demo(一)-麦子的博客</title>
+
+    <link rel="canonical" href="/post/nio%E7%9A%84%E7%BD%91%E7%BB%9C%E7%BC%96%E7%A8%8B-%E7%AE%80%E5%8D%95demo%E4%B8%80/">
+
+    <link rel="stylesheet" href="/css/iDisqus.min.css"/>
+	
+    
+    <link rel="stylesheet" href="/css/bootstrap.min.css">
+
+    
+    <link rel="stylesheet" href="/css/hux-blog.min.css">
+
+    
+    <link rel="stylesheet" href="/css/syntax.css">
+
+    
+    <link rel="stylesheet" href="/css/zanshang.css">
+
+    
+    <link href="//cdnjs.cloudflare.com/ajax/libs/font-awesome/4.6.3/css/font-awesome.min.css" rel="stylesheet" type="text/css">
+    
+    
+    <script src="/js/jquery.min.js"></script>
+    
+    
+    <script src="/js/bootstrap.min.js"></script>
+    
+    
+    <script src="/js/hux-blog.min.js"></script>
+	
+    
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.13.1/styles/docco.min.css">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.13.1/highlight.min.js"></script>
+    <script>hljs.initHighlightingOnLoad();</script>
+</head>
+
+
+<nav class="navbar navbar-default navbar-custom navbar-fixed-top">
+    <div class="container-fluid">
+        
+        <div class="navbar-header page-scroll">
+            <button type="button" class="navbar-toggle">
+                <span class="sr-only">Toggle navigation</span>
+                <span class="icon-bar"></span>
+                <span class="icon-bar"></span>
+                <span class="icon-bar"></span>
+            </button>
+            <a class="navbar-brand" href="/"></a>
+        </div>
+
+        
+        
+        <div id="huxblog_navbar">
+            <div class="navbar-collapse">
+                <ul class="nav navbar-nav navbar-right">
+                    <li>
+                        <a href="/">Home</a>
+                    </li>
+                    
+                    <li>
+                        <a href="/categories/life">Life</a>
+                    </li>
+                    
+                    <li>
+                        <a href="/categories/tech">Tech</a>
+                    </li>
+                    
+                    
+		    
+                        <li><a href="/top/about/">ABOUT</a></li>
+                    
+
+                    
+		    <li>
+                        <a href="/search">SEARCH <img src="/img/search.png" height="15" style="cursor: pointer;" alt="Search"></a>
+		    </li>
+                    
+                </ul>
+            </div>
+        </div>
+        
+    </div>
+    
+</nav>
+<script>
+    
+    
+    
+    var $body   = document.body;
+    var $toggle = document.querySelector('.navbar-toggle');
+    var $navbar = document.querySelector('#huxblog_navbar');
+    var $collapse = document.querySelector('.navbar-collapse');
+
+    $toggle.addEventListener('click', handleMagic)
+    function handleMagic(e){
+        if ($navbar.className.indexOf('in') > 0) {
+        
+            $navbar.className = " ";
+            
+            setTimeout(function(){
+                
+                if($navbar.className.indexOf('in') < 0) {
+                    $collapse.style.height = "0px"
+                }
+            },400)
+        }else{
+        
+            $collapse.style.height = "auto"
+            $navbar.className += " in";
+        }
+    }
+</script>
+
+
+
+
+<style type="text/css">
+    header.intro-header {
+        background-image: url('https://c.pxhere.com/images/e4/46/bd237f6583029424694a0d16589b-1435053.jpg!d')
+    }
+</style>
+<header class="intro-header">
+    <div class="container">
+        <div class="row">
+            <div class="col-lg-8 col-lg-offset-2 col-md-10 col-md-offset-1">
+                <div class="post-heading">
+                    <div class="tags">
+                        
+                        <a class="tag" href="/tags/%E7%BD%91%E7%BB%9C%E7%BC%96%E7%A8%8B" title="网络编程">
+                            网络编程
+                        </a>
+                        
+                        <a class="tag" href="/tags/java%E5%9F%BA%E7%A1%80" title="java基础">
+                            java基础
+                        </a>
+                        
+                    </div>
+                    <h1>NIO的网络编程-简单Demo(一)</h1>
+                    <h2 class="subheading"></h2>
+                    <span class="meta">
+			Posted by 
+			
+			    麦子
+			 
+			on 
+			Monday, February 10, 2020
+                        
+                    </span>
+                </div>
+            </div>
+        </div>
+    </div>
+</header>
+
+
+
+
+<article>
+    <div class="container">
+        <div class="row">
+
+            
+            <div class="
+                col-lg-8 col-lg-offset-2
+                col-md-10 col-md-offset-1
+                post-container">
+
+                
+                <header>
+                    <h2>TOC</h2>
+                </header>              
+                <nav id="TableOfContents">
+<ul>
+<li><a href="#socket">Socket</a>
+<ul>
+<li><a href="#读">读</a></li>
+<li><a href="#写">写</a></li>
+<li><a href="#服务端">服务端</a></li>
+<li><a href="#客户端">客户端</a></li>
+<li><a href="#运行结果">运行结果</a>
+<ul>
+<li><a href="#服务端-1">服务端</a></li>
+<li><a href="#客户端-1">客户端</a></li>
+</ul></li>
+</ul></li>
+<li><a href="#读写api操作">读写API操作</a>
+<ul>
+<li><a href="#运行结果-1">运行结果</a></li>
+</ul></li>
+<li><a href="#注意">注意</a>
+<ul>
+<li><a href="#java异步i-o编程实现的两种方式-将来式和回调式">Java异步I/O编程实现的两种方式：将来式和回调式</a></li>
+</ul></li>
+</ul>
+</nav>
+                
+                
+
+<p>[TOC]</p>
+
+<p><strong>转载地址： <a href="https://blog.csdn.net/MOTUI/article/details/52792146">https://blog.csdn.net/MOTUI/article/details/52792146</a></strong></p>
+
+<h1 id="socket">Socket</h1>
+
+<h2 id="读">读</h2>
+
+<pre><code class="language-java">if (key.isReadable()) {
+    SocketChannel client = (SocketChannel) key.channel();
+    // 清空操作
+    byteBuffer.clear();
+    // 读取
+    int read = client.read(byteBuffer);
+    if (read &gt; 0) {
+    // 丢弃换行符
+    String str = new String(byteBuffer.array(), 0, read);
+       // 通知到TCPServer
+       clientHandlerCallback.onNewMessageArrived(ClientHandler.this, str);
+    } else {
+       System.out.println(&quot;客户端已无法读取数据！&quot;);
+       // 退出当前客户端
+       ClientHandler.this.exitBySelf();
+       break;
+    }
+}
+</code></pre>
+
+<h2 id="写">写</h2>
+
+<pre><code class="language-java">byteBuffer.clear();
+byteBuffer.put(msg.getBytes());
+// 将bytebuffer的position改为0，读取时从0开始
+byteBuffer.flip();
+
+while (!done &amp;&amp; byteBuffer.hasRemaining()) {
+try {
+      int len = socketChannel.write(byteBuffer);
+      // len = 0 合法
+      if (len &lt; 0) {
+          System.out.println(&quot;客户端已无法发送数据！&quot;);
+          ClientHandler.this.exitBySelf();
+          break;
+      }
+    } catch (Exception e) {
+         e.printStackTrace();
+    }
+}
+</code></pre>
+
+<h2 id="服务端">服务端</h2>
+
+<pre><code class="language-java">import java.io.IOException;
+import java.net.InetSocketAddress;
+import java.nio.ByteBuffer;
+import java.nio.channels.SelectionKey;
+import java.nio.channels.Selector;
+import java.nio.channels.ServerSocketChannel;
+import java.nio.channels.SocketChannel;
+import java.util.Iterator;
+import java.util.Set;
+
+public class ChannelServer {
+    public static void main(String[] args) {
+        Selector selector = null;
+        try {
+            // 1. 创建 Selector 实例
+            selector = Selector.open();
+            // 2. 创建 ServerSocketChannel 实例，配置为非阻塞模式，绑定本地端口。
+            ServerSocketChannel ssc = ServerSocketChannel.open();
+            ssc.configureBlocking(false);
+            ssc.bind(new InetSocketAddress(8899));
+            // 3. 把 ServerSocketChannel实例 注册到 Selector 实例中
+            ssc.register(selector, SelectionKey.OP_ACCEPT);
+
+            while (true) {
+                // 4. 这里设置了3秒超时时间，也就是阻塞3秒
+                if (selector.select(3000) == 0) {
+                    continue;
+                }
+                // 5. 获取选中的 SelectionKey 的集合
+                Set&lt;SelectionKey&gt; selectionKeys = selector.selectedKeys();
+                Iterator&lt;SelectionKey&gt; iterator = selectionKeys.iterator();
+                // 6. 处理 SelectionKey 的感兴趣的操作。注册到 selector 中的 serverSocketChannel 只能是
+                // isAcceptable() ，因此通过它的 accept() 方法，
+                // 我们可以获取到客户端的请求 SocketChannel 实例，然后再把这个 socketChannel 注册到 selector
+                // 中，设置为可读的操作。那么下次遍历 selectionKeys 的时候，就可以处理那么可读的操作
+                while (iterator.hasNext()) {
+                    SelectionKey key = iterator.next();
+
+                    // 准备好连接
+                    if (key.isAcceptable()) {
+                        ServerSocketChannel serverSocketChannel = (ServerSocketChannel) key.channel();
+                        SocketChannel clientChannel = serverSocketChannel.accept();
+                        clientChannel.configureBlocking(false);
+                        clientChannel.register(key.selector(), SelectionKey.OP_READ);
+                    }
+
+                    // 准备好读的操作
+                    if (key.isReadable()) {
+                        SocketChannel clientChannel = (SocketChannel) key.channel();
+                        ByteBuffer readBuffer = ByteBuffer.allocate(10);
+                        int readBytes = clientChannel.read(readBuffer);
+                        if (readBytes == -1) {
+                            System.out.println(&quot;closed.......&quot;);
+                            clientChannel.close();
+                        } else if (readBytes &gt; 0) {
+                            String s = new String(readBuffer.array());
+                            System.out.println(&quot;Client said: &quot; + s);
+                            if (s.trim().equalsIgnoreCase(&quot;Hello&quot;)) {
+                                // attachment is content used to write
+                                key.interestOps(SelectionKey.OP_WRITE);
+                                key.attach(&quot;Welcome maizi !!!&quot;);
+                            }
+                        }
+                    }
+
+                    if (key.isValid() &amp;&amp; key.isWritable()) {
+                        SocketChannel clientChannel = (SocketChannel) key.channel();
+                        String content = (String) key.attachment();
+                        // write content to socket channel
+                        clientChannel.write(ByteBuffer.wrap(content.getBytes()));
+                        key.interestOps(SelectionKey.OP_READ);
+                    }
+
+                    // remove handled key from selected keys
+                    iterator.remove();
+                }
+            }
+        } catch (IOException e) {
+            e.printStackTrace();
+        } finally {
+            // close selector
+            if (selector != null) {
+                try {
+                    selector.close();
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
+            }
+        }
+    }
+}
+
+</code></pre>
+
+<h2 id="客户端">客户端</h2>
+
+<pre><code class="language-java">import java.io.IOException;
+import java.net.InetAddress;
+import java.net.InetSocketAddress;
+import java.net.SocketException;
+import java.nio.ByteBuffer;
+import java.nio.channels.SocketChannel;
+
+public class ChannelClient {
+    public static void main(String[] args) {
+        byte[] data = &quot;hello&quot;.getBytes();
+        SocketChannel channel = null;
+        try {
+            // 1. 创建 SocketChannel 实例，并配置为非阻塞模式，只有在非阻塞模式下，任何在 SocketChannel 实例上的 I/O
+            // 操作才是非阻塞的。这样我们的客户端就是一个非阻塞式客户端，也就可以提升客户端性能。
+            channel = SocketChannel.open();
+            channel.configureBlocking(false);
+            // 2. 用 connect() 方法连接服务器，同时用 while 循环不断检测并完全连接。 其实我们可以不用这样盲等，这里只是为了演示连接的过程。
+            // 当你在需要马上进行 I/O 操作前，必须要用 finishConnect() 完成连接过程。
+            if (!channel.connect(new InetSocketAddress(InetAddress.getLocalHost(), 8899))) {
+                while (!channel.finishConnect()) {
+                    System.out.print(&quot;正在尝试连接服务器.....&quot;);
+                }
+            }
+
+            System.out.println(&quot;服务器连接成功!&quot;);
+
+            ByteBuffer writeBuffer = ByteBuffer.wrap(data);
+            ByteBuffer readBuffer = ByteBuffer.allocate(1024);
+            int totalBytesReceived = 0;
+            int bytesReceived;
+            // 3. 用 ByteBuffer 读写字节，这里我们为何和一个 while 循环不断地读写呢？ 还记得前面讲 SelectableChannel
+            // 非阻塞时的特性吗？ 如果一个 SelectableChannel 为非阻塞模式，它的 I/O 操作读写的字节数可能比实际的要少，甚至没有。
+            // 所以我们这里用循环不断的读写，保证读写完成。
+            while (totalBytesReceived &lt; data.length) {
+                if (writeBuffer.hasRemaining()) {
+                    channel.write(writeBuffer);
+                }
+                if ((bytesReceived = channel.read(readBuffer)) == -1) {
+                    throw new SocketException(&quot;Connection closed prematurely&quot;);
+                }
+                totalBytesReceived += bytesReceived;
+                System.out.println(&quot;等待服务器回应.....&quot;);
+            }
+            System.out.println(&quot;Server said: &quot; + new String(readBuffer.array()));
+        } catch (IOException e) {
+            e.printStackTrace();
+        } finally {
+            // 4 .close socket channel
+            try {
+                if (channel != null) {
+                    channel.close();
+                }
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+        }
+    }
+}
+
+</code></pre>
+
+<h2 id="运行结果">运行结果</h2>
+
+<h3 id="服务端-1">服务端</h3>
+
+<pre><code class="language-java">Client said: hello
+closed.......
+Client said: hello
+closed.......
+Client said: hello
+closed.......
+Client said: hello
+closed.......
+Client said: hello
+closed.......
+Client said: hello
+closed.......
+</code></pre>
+
+<h3 id="客户端-1">客户端</h3>
+
+<pre><code class="language-java">服务器连接成功!
+等待服务器回应.....
+Server said: Welcome maizi !!!
+</code></pre>
+
+<h1 id="读写api操作">读写API操作</h1>
+
+<pre><code class="language-java">public class NioReadWriter {
+
+    public static void main(String[] args) {
+        // 创建一个缓冲区
+        ByteBuffer byteBuffer = ByteBuffer.allocate(1024);
+        String str = &quot;Java_Android_IOS_Pyth_GO_HTML_CSS_JavaScript_SQL_docker_NOSQL_Frame&quot;;
+        // 数据放入到一个缓存区 
+        byteBuffer.put(str.getBytes());
+        // 查看这个缓存区
+        System.out.println(&quot;查看缓冲区: --&gt; &quot;+byteBuffer);
+
+        System.out.println(&quot;初始时--&gt;limit---&gt;&quot; + byteBuffer.limit());
+        System.out.println(&quot;初始时--&gt;position---&gt;&quot; + byteBuffer.position());
+        System.out.println(&quot;初始时--&gt;capacity---&gt;&quot; + byteBuffer.capacity());
+        System.out.println(&quot;初始时--&gt;mark---&gt;&quot; + byteBuffer.mark());
+
+
+        System.out.println(&quot;---------------------------------------------------&gt;&quot;);
+        byteBuffer.flip();
+
+        System.out.println(&quot;flip--&gt;limit---&gt;&quot; + byteBuffer.limit());
+        System.out.println(&quot;flip--&gt;position---&gt;&quot; + byteBuffer.position());
+        System.out.println(&quot;flip--&gt;capacity---&gt;&quot; + byteBuffer.capacity());
+        System.out.println(&quot;flip--&gt;mark---&gt;&quot; + byteBuffer.mark());
+        System.out.println(&quot;查看缓冲区: --&gt; &quot;+byteBuffer);
+
+        byte[] bytes = new byte[byteBuffer.limit()];
+        // 缓冲区数据放入到byte数组中
+        byteBuffer.get(bytes);
+
+        System.out.println(new String(bytes));
+
+    }
+
+}
+</code></pre>
+
+<h2 id="运行结果-1">运行结果</h2>
+
+<pre><code class="language-java">查看缓冲区: --&gt; java.nio.HeapByteBuffer[pos=67 lim=1024 cap=1024]
+初始时--&gt;limit---&gt;1024
+初始时--&gt;position---&gt;67
+初始时--&gt;capacity---&gt;1024
+初始时--&gt;mark---&gt;java.nio.HeapByteBuffer[pos=67 lim=1024 cap=1024]
+---------------------------------------------------&gt;
+flip--&gt;limit---&gt;67
+flip--&gt;position---&gt;0
+flip--&gt;capacity---&gt;1024
+flip--&gt;mark---&gt;java.nio.HeapByteBuffer[pos=0 lim=67 cap=1024]
+查看缓冲区: --&gt; java.nio.HeapByteBuffer[pos=0 lim=67 cap=1024]
+Java_Android_IOS_Pyth_GO_HTML_CSS_JavaScript_SQL_docker_NOSQL_Frame
+</code></pre>
+
+<h1 id="注意">注意</h1>
+
+<h2 id="java异步i-o编程实现的两种方式-将来式和回调式">Java异步I/O编程实现的两种方式：将来式和回调式</h2>
+
+<ol>
+<li>将来式：主线程发起I/O操作，主线程在读取数据过程继续完成别的事情，之后通过轮询等待结果完成。</li>
+<li>回调式：采用事件处理机制。</li>
+</ol>
+
+<p>具体列子查看： <a href="https://blog.csdn.net/zmx729618/article/details/78919707">https://blog.csdn.net/zmx729618/article/details/78919707</a></p>
+
+<p><strong>异步IO通道有三种</strong>： AsynchronousFileChannel   AsynchronousSocketChannel   AsynchronousServerSocketChannel</p>
+
+
+                
+                
+<div class="entry-shang text-center">
+    
+	    <p>「真诚赞赏，手留余香」</p>
+	
+	<button class="zs show-zs btn btn-bred">赞赏支持</button>
+</div>
+<div class="zs-modal-bg"></div>
+<div class="zs-modal-box">
+	<div class="zs-modal-head">
+		<button type="button" class="close">×</button>
+		<span class="author"><a href="http://maizitoday.github.io/"><img src="/img/favicon.png" /></a></span>
+        
+	        <p class="tip"><i></i><span>真诚赞赏，手留余香</span></p>
+		
+ 
+	</div>
+	<div class="zs-modal-body">
+		<div class="zs-modal-btns">
+			<button class="btn btn-blink" data-num="2">2元</button>
+			<button class="btn btn-blink" data-num="5">5元</button>
+			<button class="btn btn-blink" data-num="10">10元</button>
+			<button class="btn btn-blink" data-num="50">50元</button>
+			<button class="btn btn-blink" data-num="100">100元</button>
+			<button class="btn btn-blink" data-num="1">任意金额</button>
+		</div>
+		<div class="zs-modal-pay">
+			<button class="btn btn-bred" id="pay-text">2元</button>
+			<p>使用<span id="pay-type">微信</span>扫描二维码完成支付</p>
+			<img src="/img/reward/wechat-2.png"  id="pay-image"/>
+		</div>
+	</div>
+	<div class="zs-modal-footer">
+		<label><input type="radio" name="zs-type" value="wechat" class="zs-type" checked="checked"><span ><span class="zs-wechat"><img src="/img/reward/wechat-btn.png"/></span></label>
+		<label><input type="radio" name="zs-type" value="alipay" class="zs-type" class="zs-alipay"><img src="/img/reward/alipay-btn.png"/></span></label>
+	</div>
+</div>
+<script type="text/javascript" src="/js/reward.js"></script>
+
+                
+
+                <hr>
+                <ul class="pager">
+                    
+                    <li class="previous">
+                        <a href="/post/tcp%E7%B2%98%E5%8C%85%E5%92%8C%E6%B6%88%E6%81%AF%E4%B8%8D%E5%AE%8C%E6%95%B4/" data-toggle="tooltip" data-placement="top" title="TCP粘包和消息不完整">&larr;
+                            Previous Post</a>
+                    </li>
+                    
+                    
+                    <li class="next">
+                        <a href="/post/nio%E7%9A%84%E7%BD%91%E7%BB%9C%E7%BC%96%E7%A8%8B-%E5%A4%9A%E7%BA%BF%E7%A8%8B%E4%BA%8C/" data-toggle="tooltip" data-placement="top" title="NIO的网络编程-多线程(二)">Next
+                            Post &rarr;</a>
+                    </li>
+                    
+                </ul>
+
+                
+<div id="disqus-comment"></div>
+
+
+
+            </div>
+            
+            <div class="
+                col-lg-8 col-lg-offset-2
+                col-md-10 col-md-offset-1
+                sidebar-container">
+
+                
+                
+                <section>
+                    <hr class="hidden-sm hidden-xs">
+                    <h5><a href="/tags/">FEATURED TAGS</a></h5>
+                    <div class="tags">
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        <a href="/tags/threadlocal" title="ThreadLocal">
+                            ThreadLocal
+                        </a>
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        <a href="/tags/zookeeper" title="Zookeeper">
+                            Zookeeper
+                        </a>
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        <a href="/tags/docker" title="docker">
+                            docker
+                        </a>
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        <a href="/tags/dockerfile" title="dockerfile">
+                            dockerfile
+                        </a>
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        <a href="/tags/elasticsearch" title="elasticSearch">
+                            elasticSearch
+                        </a>
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        <a href="/tags/java%E5%9F%BA%E7%A1%80" title="java基础">
+                            java基础
+                        </a>
+                        
+                        
+                        
+                        <a href="/tags/java%E7%9B%B8%E5%85%B3%E6%A6%82%E5%BF%B5" title="java相关概念">
+                            java相关概念
+                        </a>
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        <a href="/tags/jvm" title="jvm">
+                            jvm
+                        </a>
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        <a href="/tags/maven" title="maven">
+                            maven
+                        </a>
+                        
+                        
+                        
+                        <a href="/tags/mongodb" title="mongodb">
+                            mongodb
+                        </a>
+                        
+                        
+                        
+                        
+                        
+                        <a href="/tags/mybatis%E7%B3%BB%E5%88%97" title="mybatis系列">
+                            mybatis系列
+                        </a>
+                        
+                        
+                        
+                        <a href="/tags/mycat" title="mycat">
+                            mycat
+                        </a>
+                        
+                        
+                        
+                        
+                        
+                        <a href="/tags/mysql%E7%B3%BB%E5%88%97" title="mysql系列">
+                            mysql系列
+                        </a>
+                        
+                        
+                        
+                        
+                        
+                        <a href="/tags/nginx" title="nginx">
+                            nginx
+                        </a>
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        <a href="/tags/redis" title="redis">
+                            redis
+                        </a>
+                        
+                        
+                        
+                        <a href="/tags/rocketmq" title="rocketmq">
+                            rocketmq
+                        </a>
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        <a href="/tags/shell" title="shell">
+                            shell
+                        </a>
+                        
+                        
+                        
+                        <a href="/tags/shiro" title="shiro">
+                            shiro
+                        </a>
+                        
+                        
+                        
+                        
+                        
+                        <a href="/tags/springcloud" title="springCloud">
+                            springCloud
+                        </a>
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        <a href="/tags/springboot%E7%B3%BB%E5%88%97" title="springboot系列">
+                            springboot系列
+                        </a>
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        <a href="/tags/%E5%88%86%E5%B8%83%E5%BC%8F%E7%B3%BB%E5%88%97" title="分布式系列">
+                            分布式系列
+                        </a>
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        <a href="/tags/%E5%8D%95%E7%82%B9%E7%99%BB%E5%BD%95" title="单点登录">
+                            单点登录
+                        </a>
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        <a href="/tags/%E5%A4%9A%E7%BA%BF%E7%A8%8B%E5%92%8C%E9%AB%98%E5%B9%B6%E5%8F%91" title="多线程和高并发">
+                            多线程和高并发
+                        </a>
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        <a href="/tags/%E5%BC%80%E5%8F%91%E5%B7%A5%E5%85%B7" title="开发工具">
+                            开发工具
+                        </a>
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        <a href="/tags/%E6%95%B0%E6%8D%AE%E5%BA%93" title="数据库">
+                            数据库
+                        </a>
+                        
+                        
+                        
+                        
+                        
+                        <a href="/tags/%E6%95%B0%E6%8D%AE%E7%BB%93%E6%9E%84" title="数据结构">
+                            数据结构
+                        </a>
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        <a href="/tags/%E7%BD%91%E7%BB%9C%E7%BC%96%E7%A8%8B" title="网络编程">
+                            网络编程
+                        </a>
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        <a href="/tags/%E8%AE%BE%E8%AE%A1%E6%A8%A1%E5%BC%8F" title="设计模式">
+                            设计模式
+                        </a>
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        <a href="/tags/%E8%B4%9F%E8%BD%BD%E5%9D%87%E8%A1%A1" title="负载均衡">
+                            负载均衡
+                        </a>
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                    </div>
+                </section>
+                
+
+                
+                
+                <section>
+                    <hr>
+                    <h5>FRIENDS</h5>
+                    <ul class="list-inline">
+                        
+                        <li><a target="_blank" href="https://zhaohuabing.com">赵化冰博客</a></li>
+                        
+                        <li><a target="_blank" href="http://www.tianshouzhi.com">田守枝</a></li>
+                        
+                        <li><a target="_blank" href="http://www.ityouknow.com">纯洁的微笑</a></li>
+                        
+                        <li><a target="_blank" href="https://renchunxiao.com">任春晓</a></li>
+                        
+                        <li><a target="_blank" href="https://www.lihongkun.com">泛泛之辈</a></li>
+                        
+                        <li><a target="_blank" href="https://juejin.im/welcome/backend">后端服务论坛</a></li>
+                        
+                        <li><a target="_blank" href="https://www.javaboy.org">江南一点雨</a></li>
+                        
+                        <li><a target="_blank" href="https://blog.csdn.net/gwd1154978352">东天里的冬天</a></li>
+                        
+                    </ul>
+                </section>
+                
+            </div>
+        </div>
+    </div>
+</article>
+
+
+
+
+<footer>
+    <div class="container">
+        <div class="row">
+            <div class="col-lg-8 col-lg-offset-2 col-md-10 col-md-offset-1">
+                <ul class="list-inline text-center">
+                   
+                   <li>
+                       <a href="" rel="alternate" type="application/rss+xml" title="" >
+                           <span class="fa-stack fa-lg">
+                               <i class="fa fa-circle fa-stack-2x"></i>
+                               <i class="fa fa-rss fa-stack-1x fa-inverse"></i>
+                           </span>
+                       </a>
+                   </li>
+                   
+                    
+                    <li>
+                        <a href="mailto:maiziybtoday@gmail.com">
+                            <span class="fa-stack fa-lg">
+                                <i class="fa fa-circle fa-stack-2x"></i>
+                                <i class="fa fa-envelope fa-stack-1x fa-inverse"></i>
+                            </span>
+                        </a>
+                    </li>
+		    
+                    
+                    
+                    
+                    
+
+                    
+
+		    
+                    
+                    <li>
+                        <a target="_blank" href="/your%20wechat%20qr%20code%20image">
+                            <span class="fa-stack fa-lg">
+                                <i class="fa fa-circle fa-stack-2x"></i>
+                                <i class="fa fa-wechat fa-stack-1x fa-inverse"></i>
+                            </span>
+                        </a>
+                    </li>
+		    
+                    
+                    
+                    <li>
+                        <a target="_blank" href="https://www.linkedin.com/in/yourlinkedinid">
+                            <span class="fa-stack fa-lg">
+                                <i class="fa fa-circle fa-stack-2x"></i>
+                                <i class="fa fa-linkedin fa-stack-1x fa-inverse"></i>
+                            </span>
+                        </a>
+                    </li>
+		    
+                    
+                </ul>
+		<p class="copyright text-muted">
+                    Copyright &copy;  2020
+                    <br>
+                    <a href="https://themes.gohugo.io/hugo-theme-cleanwhite">CleanWhite Hugo Theme</a> by <a href="https://zhaohuabing.com">Huabing</a> |
+                    <iframe
+                        style="margin-left: 2px; margin-bottom:-5px;"
+                        frameborder="0" scrolling="0" width="100px" height="20px"
+                        src="https://ghbtns.com/github-btn.html?user=zhaohuabing&repo=hugo-theme-cleanwhite&type=star&count=true" >
+                    </iframe>
+                </p>
+            </div>
+        </div>
+    </div>
+</footer>
+
+
+
+
+<script>
+    function async(u, c) {
+      var d = document, t = 'script',
+          o = d.createElement(t),
+          s = d.getElementsByTagName(t)[0];
+      o.src = u;
+      if (c) { o.addEventListener('load', function (e) { c(null, e); }, false); }
+      s.parentNode.insertBefore(o, s);
+    }
+</script>
+
+
+
+
+
+
+<script>
+    
+    if($('#tag_cloud').length !== 0){
+        async("/js/jquery.tagcloud.js",function(){
+            $.fn.tagcloud.defaults = {
+                
+                color: {start: '#bbbbee', end: '#0085a1'},
+            };
+            $('#tag_cloud a').tagcloud();
+        })
+    }
+</script>
+
+
+<script>
+    async("https://cdnjs.cloudflare.com/ajax/libs/fastclick/1.0.6/fastclick.js", function(){
+        var $nav = document.querySelector("nav");
+        if($nav) FastClick.attach($nav);
+    })
+</script>
+
+
+
+
+
+
+</body>
+</html>
