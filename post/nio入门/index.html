@@ -273,6 +273,8 @@
 <ul>
 <li><a href="#1-filechannel无法设置为非阻塞模式的原因">1.  FileChannel无法设置为非阻塞模式的原因</a></li>
 <li><a href="#2-selectionkey-cancel-取消读事件的监控">2.  SelectionKey.cancel(); 取消读事件的监控</a></li>
+<li><a href="#3-socketchannel-register-和key-interestops-之间的区别">3.  SocketChannel.register()和key.interestOps()之间的区别</a></li>
+<li><a href="#4-完全理解nio-selector">4.  完全理解NIO Selector</a></li>
 </ul></li>
 </ul>
 </nav>
@@ -974,6 +976,20 @@ select-----&gt;前执行
 
 <h2 id="2-selectionkey-cancel-取消读事件的监控">2.  SelectionKey.cancel(); 取消读事件的监控</h2>
 
+<p>链接：<a href="https://juejin.im/post/5da960185188257a63539646">https://juejin.im/post/5da960185188257a63539646</a></p>
+
+<p>无论通过<a href="https://docs.oracle.com/javase/8/docs/api/java/nio/channels/Channel.html#close--">channel.close()</a>还是通过<a href="https://docs.oracle.com/javase/8/docs/api/java/nio/channels/SelectionKey.html#cancel--">selectionKey.cancel()</a>来<code>取消</code>一个<code>selectionKey</code> ，这个<code>selectionKey</code>都会被立即添加到<code>selector</code>的 *<strong>cancelled-key</strong>  set* 中，但是所关联的<code>channel</code>并没有立即被<code>撤销登记</code>，直到发生下次 <strong>selection operations</strong>, 这些<code>channel</code>才被从<code>selector</code>中<code>撤销登记</code>，与此同时这些<strong>Cancelled keys</strong>才会被从这个<code>selector</code>的所有<code>selectionKey set</code>（可能是_<strong>key</strong> set_、*<strong>selected-key</strong> set*、*<strong>cancelled-key</strong> set*）中移除，但是不会影响这些集合本身。</p>
+
+<h2 id="3-socketchannel-register-和key-interestops-之间的区别">3.  SocketChannel.register()和key.interestOps()之间的区别</h2>
+
+<p>在<a href="https://stackoom.com/link/aHR0cHM6Ly9zdGFja292ZXJmbG93LmNvbS9xdWVzdGlvbnMvMTc1NTY5MDEvamF2YS1oaWdoLWxvYWQtbmlvLXRjcC1zZXJ2ZXI=">这个SO问题中</a>找到的echo NIO服务器<a href="https://stackoom.com/link/aHR0cHM6Ly9zdGFja292ZXJmbG93LmNvbS9xdWVzdGlvbnMvMTc1NTY5MDEvamF2YS1oaWdoLWxvYWQtbmlvLXRjcC1zZXJ2ZXI=">中</a> ，对于每个接受的密钥，都会调用一个寄存器来进行读操作。 然后，一旦读取消息，就再次调用寄存器以进行写操作。 但是，在写入消息之后，不是注册另一个读取操作，而是调用<code>key.interestOps(SelectionKey.OP_READ)</code> 。为什么用这个了？</p>
+
+<p>register()<code>将丢失或更改密钥附件，并可能完全返回一个新的</code>SelectionKey<code>：未指定。 在这种情况下使用</code>interestOps()` 。</p>
+
+<h2 id="4-完全理解nio-selector">4.  完全理解NIO Selector</h2>
+
+<p>好文：<a href="https://juejin.im/post/5da960185188257a63539646">https://juejin.im/post/5da960185188257a63539646</a></p>
+
 
                 
                 
@@ -1668,6 +1684,8 @@ select-----&gt;前执行
                         
                         
                         
+                        
+                        
                         <a href="/tags/%E8%AE%BE%E8%AE%A1%E6%A8%A1%E5%BC%8F" title="设计模式">
                             设计模式
                         </a>
@@ -1683,6 +1701,8 @@ select-----&gt;前执行
                         <a href="/tags/%E8%B4%9F%E8%BD%BD%E5%9D%87%E8%A1%A1" title="负载均衡">
                             负载均衡
                         </a>
+                        
+                        
                         
                         
                         
