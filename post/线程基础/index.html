@@ -350,6 +350,11 @@
 <li><a href="#运行结果-2">运行结果</a></li>
 </ul></li>
 </ul></li>
+<li><a href="#线程之间通信">线程之间通信</a>
+<ul>
+<li><a href="#同步">同步</a></li>
+<li><a href="#wait-notify机制">wait/notify机制</a></li>
+</ul></li>
 </ul>
 </nav>
                 
@@ -1750,6 +1755,174 @@ ThreadName = 麦子2-thread结束了
 result---&gt;完成任务
 </code></pre>
 
+<h1 id="线程之间通信">线程之间通信</h1>
+
+<p>转载地址：<a href="https://www.cnblogs.com/lgyxrk/p/10404839.html">https://www.cnblogs.com/lgyxrk/p/10404839.html</a></p>
+
+<h2 id="同步">同步</h2>
+
+<p>这里讲的同步是指多个线程通过synchronized关键字这种方式来实现线程间的通信。</p>
+
+<pre><code class="language-java">public class MyObject {
+
+    synchronized public void methodA() {
+        //do something....
+    }
+
+    synchronized public void methodB() {
+        //do some other thing
+    }
+}
+
+public class ThreadA extends Thread {
+
+    private MyObject object;
+//省略构造方法
+    @Override
+    public void run() {
+        super.run();
+        object.methodA();
+    }
+}
+
+public class ThreadB extends Thread {
+
+    private MyObject object;
+//省略构造方法
+    @Override
+    public void run() {
+        super.run();
+        object.methodB();
+    }
+}
+
+public class Run {
+    public static void main(String[] args) {
+        MyObject object = new MyObject();
+
+        //线程A与线程B 持有的是同一个对象:object
+        ThreadA a = new ThreadA(object);
+        ThreadB b = new ThreadB(object);
+        a.start();
+        b.start();
+    }
+}
+</code></pre>
+
+<p>由于线程A和线程B持有同一个MyObject类的对象object，尽管这两个线程需要调用不同的方法，但是它们是同步执行的，比如：<strong>线程B需要等待线程A执行完了methodA()方法之后，它才能执行methodB()方法。这样，线程A和线程B就实现了 通信。</strong></p>
+
+<p><strong>这种方式，本质上就是“共享内存”式的通信。多个线程需要访问同一个共享变量，谁拿到了锁（获得了访问权限），谁就可以执行。</strong></p>
+
+<h2 id="wait-notify机制">wait/notify机制</h2>
+
+<pre><code class="language-java">import java.util.ArrayList;
+import java.util.List;
+
+public class MyList {
+
+    private static List&lt;String&gt; list = new ArrayList&lt;String&gt;();
+
+    public static void add() {
+        list.add(&quot;anyString&quot;);
+    }
+
+    public static int size() {
+        return list.size();
+    }
+}
+
+
+public class ThreadA extends Thread {
+
+    private Object lock;
+
+    public ThreadA(Object lock) {
+        super();
+        this.lock = lock;
+    }
+
+    @Override
+    public void run() {
+        try {
+            synchronized (lock) {
+                if (MyList.size() != 5) {
+                    System.out.println(&quot;wait begin &quot;
+                            + System.currentTimeMillis());
+                    lock.wait();
+                    System.out.println(&quot;wait end  &quot;
+                            + System.currentTimeMillis());
+                }
+            }
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        }
+    }
+}
+
+
+public class ThreadB extends Thread {
+    private Object lock;
+
+    public ThreadB(Object lock) {
+        super();
+        this.lock = lock;
+    }
+
+    @Override
+    public void run() {
+        try {
+            synchronized (lock) {
+                for (int i = 0; i &lt; 10; i++) {
+                    MyList.add();
+                    if (MyList.size() == 5) {
+                        lock.notify();
+                        System.out.println(&quot;已经发出了通知&quot;);
+                    }
+                    System.out.println(&quot;添加了&quot; + (i + 1) + &quot;个元素!&quot;);
+                    Thread.sleep(1000);
+                }
+            }
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        }
+    }
+}
+
+public class Run {
+
+    public static void main(String[] args) {
+
+        try {
+            Object lock = new Object();
+
+            ThreadA a = new ThreadA(lock);
+            a.start();
+
+            Thread.sleep(50);
+
+            ThreadB b = new ThreadB(lock);
+            b.start();
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        }
+    }
+}
+</code></pre>
+
+<p>线程A要等待某个条件满足时(list.size()==5)，才执行操作。线程B则向list中添加元素，改变list 的size。</p>
+
+<p>A,B之间如何通信的呢？也就是说，线程A如何知道 list.size() 已经为5了呢？</p>
+
+<p>这里用到了Object类的 wait() 和 notify() 方法。</p>
+
+<p>当条件未满足时(list.size() !=5)，线程A调用wait() 放弃CPU，并进入阻塞状态。</p>
+
+<p>当条件满足时，线程B调用 notify()通知 线程A，所谓通知线程A，就是唤醒线程A，并让它进入可运行状态。</p>
+
+<p>这种方式的一个好处就是CPU的利用率提高了。</p>
+
+<p>但是也有一些缺点：比如，线程B先执行，一下子添加了5个元素并调用了notify()发送了通知，而此时线程A还执行；当线程A执行并调用wait()时，那它永远就不可能被唤醒了。因为，线程B已经发了通知了，以后不再发通知了。这说明：<strong>通知过早，会打乱程序的执行逻辑。</strong></p>
+
 
                 
                 
@@ -1914,6 +2087,18 @@ result---&gt;完成任务
                         
                         
                         
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
                         <a href="/tags/threadlocal" title="ThreadLocal">
                             ThreadLocal
                         </a>
@@ -1927,6 +2112,8 @@ result---&gt;完成任务
                         <a href="/tags/zookeeper" title="Zookeeper">
                             Zookeeper
                         </a>
+                        
+                        
                         
                         
                         
@@ -1977,6 +2164,8 @@ result---&gt;完成任务
                         <a href="/tags/elasticsearch" title="elasticSearch">
                             elasticSearch
                         </a>
+                        
+                        
                         
                         
                         
@@ -2105,6 +2294,8 @@ result---&gt;完成任务
                         <a href="/tags/rocketmq" title="rocketmq">
                             rocketmq
                         </a>
+                        
+                        
                         
                         
                         
@@ -2316,9 +2507,13 @@ result---&gt;完成任务
                         
                         
                         
+                        
+                        
                         <a href="/tags/%E5%BC%80%E5%8F%91%E5%B7%A5%E5%85%B7" title="开发工具">
                             开发工具
                         </a>
+                        
+                        
                         
                         
                         
@@ -2345,6 +2540,8 @@ result---&gt;完成任务
                         <a href="/tags/%E6%95%B0%E6%8D%AE%E7%BB%93%E6%9E%84" title="数据结构">
                             数据结构
                         </a>
+                        
+                        
                         
                         
                         
