@@ -357,8 +357,11 @@
 <li><a href="#futuretask启动">FutureTask启动</a></li>
 <li><a href="#futuretask执行完后结果的获取"><strong>FutureTask执行完后结果的获取</strong></a></li>
 <li><a href="#futuretask被取消">FutureTask被取消</a></li>
+<li><a href="#futuretask状态">FutureTask状态</a></li>
+<li><a href="#futuretask的get和cancel的执行示意图">FutureTask的get和cancel的执行示意图</a></li>
 <li><a href="#代码示例">代码示例</a></li>
 <li><a href="#运行结果-2">运行结果</a></li>
+<li><a href="#futuretask使用场景">FutureTask使用场景</a></li>
 </ul></li>
 </ul></li>
 <li><a href="#线程之间通信">线程之间通信</a>
@@ -1670,6 +1673,8 @@ ThreadName = 麦子2-thread结束了
 
 <p>转载地址： <a href="https://blog.csdn.net/tongdanping/article/details/79630637">https://blog.csdn.net/tongdanping/article/details/79630637</a></p>
 
+<p>好文：<a href="https://blog.csdn.net/qq_39654841/article/details/90631795">https://blog.csdn.net/qq_39654841/article/details/90631795</a></p>
+
 <h3 id="概述">概述</h3>
 
 <p>当然多线程中继承ThreadPoolExecutor和实现Runnable也可以实现异步工作机制，可是他们没有返回值。这时可以使用FutureTask包装Runnable或者Callable对象，再使用FutureTask来执行任务。</p>
@@ -1740,6 +1745,19 @@ ThreadName = 麦子2-thread结束了
 <li>在已完成状态调用futureTask.cancel( )则会返回false；</li>
 </ol>
 
+<h3 id="futuretask状态">FutureTask状态</h3>
+
+<p>原文链接：<a href="https://blog.csdn.net/qq_39654841/article/details/90631795">https://blog.csdn.net/qq_39654841/article/details/90631795</a></p>
+
+<ol>
+<li>当FutureTask处于未启动或者已启动的状态时，调用FutureTask对象的get方法会将导致调用线程阻塞。当FutureTask处于已完成的状态时，调用FutureTask的get方法会立即放回调用结果或者抛出异常。</li>
+<li>当FutureTask处于未启动状态时，调用FutureTask对象的cancel方法将导致线程永远不会被执行；当FutureTask处于已启动状态时，调用FutureTask对象cancel(true)方法将以中断执行此任务的线程的方式来试图停止此任务;当FutureTask处于已启动状态时，调用FutureTask对象cancel(false)方法将不会对正在进行的任务产生任何影响；当FutureTask处于已完成状态时，调用FutureTask对象cancel方法将返回false；</li>
+</ol>
+
+<h3 id="futuretask的get和cancel的执行示意图">FutureTask的get和cancel的执行示意图</h3>
+
+<p><img src="/img/20190530214704456.png" alt="20190530214704456" /></p>
+
 <h3 id="代码示例">代码示例</h3>
 
 <pre><code class="language-java">public class FutureTaskTest {
@@ -1765,6 +1783,14 @@ ThreadName = 麦子2-thread结束了
 <pre><code class="language-java">thread name is : Thread-0
 result---&gt;完成任务
 </code></pre>
+
+<h3 id="futuretask使用场景">FutureTask使用场景</h3>
+
+<ol>
+<li>当一个线程需要等待另一个线程把某个任务执行完以后它才能继续执行时；</li>
+<li>有若干线程执行若干任务，每个任务最多只能被执行一次；</li>
+<li>当多个线程师徒执行同一个任务，但只能允许一个线程执行此任务，其它线程需要等这个任务被执行完毕以后才能继续执行时；</li>
+</ol>
 
 <h1 id="线程之间通信">线程之间通信</h1>
 
@@ -2723,6 +2749,12 @@ public class Run {
                         
                         
                         
+                        
+                        
+                        
+                        <a href="/tags/%E9%9D%A2%E8%AF%95%E9%97%AE%E9%A2%98%E6%94%B6%E9%9B%86" title="面试问题收集">
+                            面试问题收集
+                        </a>
                         
                         
                     </div>

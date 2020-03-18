@@ -227,7 +227,7 @@
 </ul></li>
 <li><a href="#三个核心部分组成">三个核心部分组成</a>
 <ul>
-<li><a href="#buffer缓冲区">buffer缓冲区</a>
+<li><a href="#buffer缓冲区">Buffer缓冲区</a>
 <ul>
 <li><a href="#buffer缓冲区和channel管道">buffer缓冲区和Channel管道</a></li>
 <li><a href="#buffer缓冲区核心要点">buffer缓冲区核心要点</a>
@@ -248,6 +248,7 @@
 <li><a href="#channel通道">Channel通道</a>
 <ul>
 <li><a href="#概述-1">概述</a></li>
+<li><a href="#filechannel">FileChannel</a></li>
 <li><a href="#使用通道">使用通道</a></li>
 <li><a href="#关闭通道">关闭通道</a></li>
 <li><a href="#发散-聚集">发散、聚集</a></li>
@@ -263,6 +264,7 @@
 <ul>
 <li><a href="#概述-2">概述</a></li>
 <li><a href="#为什么要用selector">为什么要用Selector</a></li>
+<li><a href="#常用方法-2">常用方法</a></li>
 <li><a href="#使用">使用</a></li>
 <li><a href="#四种注册事件">四种注册事件</a></li>
 <li><a href="#完整selector实例">完整Selector实例</a></li>
@@ -280,12 +282,14 @@
 <li><a href="#io流是阻塞的-nio流是不阻塞的">IO流是阻塞的，NIO流是不阻塞的</a></li>
 <li><a href="#选择器">选择器</a></li>
 </ul></li>
+<li><a href="#selector-channel-buffer-关系图">Selector, Channel Buffer 关系图</a></li>
 <li><a href="#问题">问题</a>
 <ul>
 <li><a href="#1-filechannel无法设置为非阻塞模式的原因">1.  FileChannel无法设置为非阻塞模式的原因</a></li>
 <li><a href="#2-selectionkey-cancel-取消读事件的监控">2.  SelectionKey.cancel(); 取消读事件的监控</a></li>
 <li><a href="#3-socketchannel-register-和key-interestops-之间的区别">3.  SocketChannel.register()和key.interestOps()之间的区别</a></li>
 <li><a href="#4-完全理解nio-selector">4.  完全理解NIO Selector</a></li>
+<li><a href="#5-bio和nio对比">5. BIO和NIO对比</a></li>
 </ul></li>
 </ul>
 </nav>
@@ -340,6 +344,8 @@
 
 <p>NIO中，客户端创建一个连接后，先要将连接注册到Selector，相当于客人进入餐厅后，告诉前台你要用餐，前台会告诉你你的桌号是几号，然后你就可能到那张桌子坐下了，SelectionKey就是桌号。当某一桌需要服务时，前台就记录哪一桌需要什么服务，比如1号桌要点菜，2号桌要结帐，服务员从前台取一条记录，根据记录提供服务，完了再来取下一条。这样服务的时间就被最有效的利用起来了。</p>
 
+<p><img src="/img/Xnip2020-03-14_16-16-42.png" alt="Xnip2020-03-14_16-16-42" /></p>
+
 <h1 id="为什么用">为什么用</h1>
 
 <p><img src="/img/Xnip2020-01-28_10-59-22.png" alt="Xnip2020-01-28_10-59-22" /></p>
@@ -362,7 +368,9 @@
 
 <h1 id="三个核心部分组成">三个核心部分组成</h1>
 
-<h2 id="buffer缓冲区">buffer缓冲区</h2>
+<h2 id="buffer缓冲区">Buffer缓冲区</h2>
+
+<p><img src="/img/Xnip2020-03-14_17-21-45.png" alt="Xnip2020-03-14_17-21-45" /></p>
 
 <p>缓冲区实质上就是一个数组，但它不仅仅是一个数组，缓冲区还提供了对数据的结构化访问，而且还可以跟踪系统的读/写进程。</p>
 
@@ -600,9 +608,17 @@ clear完之后--&gt;mark---&gt;java.nio.HeapByteBuffer[pos=0 lim=1024 cap=1024]
   设置为这段数据末尾的下一个位置。其实就等价于重新向缓冲区中写入了这么一段数据。
 </code></pre>
 
+<p><img src="/img/Xnip2020-03-14_17-30-45.png" alt="Xnip2020-03-14_17-30-45" /></p>
+
+<p><img src="/img/Xnip2020-03-14_17-33-03.png" alt="Xnip2020-03-14_17-33-03" /></p>
+
+<p><img src="/img/Xnip2020-03-14_17-33-59.png" alt="Xnip2020-03-14_17-33-59" /></p>
+
 <h2 id="channel通道">Channel通道</h2>
 
 <h3 id="概述-1">概述</h3>
+
+<p><img src="/img/Xnip2020-03-14_17-46-13.png" alt="Xnip2020-03-14_17-46-13" /></p>
 
 <p>Channel和传统IO中的Stream很相似。虽然很相似，但是有很大的区别，主要区别为：通道是双向的，通过一个Channel既可以进行读，也可以进行写；而Stream只能进行单向操作，通过一个Stream只能进行读或者写，比如InputStream只能进行读取操作，OutputStream只能进行写操作；</p>
 
@@ -617,6 +633,10 @@ clear完之后--&gt;mark---&gt;java.nio.HeapByteBuffer[pos=0 lim=1024 cap=1024]
 <p>Channel通道<strong>只负责传输数据、不直接操作数据的</strong>。操作数据都是通过Buffer缓冲区来进行操作！</p>
 
 <p><img src="/img/da765298fc108442b3918dc51b6c7ec48e713a88.png" alt="da765298fc108442b3918dc51b6c7ec48e713a88" /></p>
+
+<h3 id="filechannel">FileChannel</h3>
+
+<p><img src="/img/Xnip2020-03-14_17-52-43.png" alt="Xnip2020-03-14_17-52-43" /></p>
 
 <h3 id="使用通道">使用通道</h3>
 
@@ -638,6 +658,8 @@ clear完之后--&gt;mark---&gt;java.nio.HeapByteBuffer[pos=0 lim=1024 cap=1024]
 <li>Scatter(发散):  从一个Channel读取的信息分散到N个缓冲区中(Buufer).</li>
 <li>Gather(聚集):  将N个Buffer里面内容按照顺序发送到一个Channel.</li>
 </ul>
+
+<p><img src="/img/Xnip2020-03-15_11-19-49.png" alt="Xnip2020-03-15_11-19-49" /></p>
 
 <h3 id="socket通道">Socket通道</h3>
 
@@ -669,6 +691,8 @@ clear完之后--&gt;mark---&gt;java.nio.HeapByteBuffer[pos=0 lim=1024 cap=1024]
 
 <h3 id="概述-2">概述</h3>
 
+<p><img src="/img/Xnip2020-03-16_09-51-46.png" alt="Xnip2020-03-16_09-51-46" /></p>
+
 <p>Selector类是NIO的核心类，Selector能够检测多个注册的通道上是否有事件发生，如果有事件发生，便获取事件然后针对每个事件进行相应的响应处理。这样一来，只是用一个单线程就可以管理多个通道，也就是管理多个连接。这样使得只有在连接真正有读写事件发生时，才会调用函数来进行读写，就大大地减少了系统开销，并且不必为每个连接都创建一个线程，不用去维护多个线程，并且避免了多线程之间的上下文切换导致的开销。</p>
 
 <p>与Selector有关的一个关键类是SelectionKey，一个SelectionKey表示一个到达的事件，这2个类构成了服务端处理业务的关键逻辑。</p>
@@ -682,6 +706,12 @@ clear完之后--&gt;mark---&gt;java.nio.HeapByteBuffer[pos=0 lim=1024 cap=1024]
 <h3 id="为什么要用selector">为什么要用Selector</h3>
 
 <p>如果用阻塞I/O，需要多线程（浪费内存），如果用非阻塞I/O，需要不断重试（耗费CPU）。Selector的出现解决了这尴尬的问题，非阻塞模式下，通过Selector，我们的线程只为已就绪的通道工作，不用盲目的重试了。比如，当所有通道都没有数据到达时，也就没有Read事件发生，我们的线程会在select()方法处被挂起，从而让出了CPU资源。</p>
+
+<h3 id="常用方法-2">常用方法</h3>
+
+<p><img src="/img/Xnip2020-03-16_10-00-17.png" alt="Xnip2020-03-16_10-00-17" /></p>
+
+<p><img src="/img/Xnip2020-03-16_10-55-15.png" alt="Xnip2020-03-16_10-55-15" /></p>
 
 <h3 id="使用">使用</h3>
 
@@ -979,6 +1009,10 @@ select-----&gt;前执行
 
 <p><img src="/img/401339-20171228231302459-2106552668.png" alt="401339-20171228231302459-2106552668" /></p>
 
+<h1 id="selector-channel-buffer-关系图">Selector, Channel Buffer 关系图</h1>
+
+<p><img src="/img/Xnip2020-03-14_16-30-53.png" alt="Xnip2020-03-14_16-30-53" /></p>
+
 <h1 id="问题">问题</h1>
 
 <h2 id="1-filechannel无法设置为非阻塞模式的原因">1.  FileChannel无法设置为非阻塞模式的原因</h2>
@@ -1000,6 +1034,18 @@ select-----&gt;前执行
 <h2 id="4-完全理解nio-selector">4.  完全理解NIO Selector</h2>
 
 <p>好文：<a href="https://juejin.im/post/5da960185188257a63539646">https://juejin.im/post/5da960185188257a63539646</a></p>
+
+<h2 id="5-bio和nio对比">5. BIO和NIO对比</h2>
+
+<p><img src="/img/Xnip2020-03-14_11-12-37.png" alt="Xnip2020-03-14_11-12-37" /></p>
+
+<p>也可以多个线程来接受。</p>
+
+<p><img src="/img/Xnip2020-03-14_11-13-30.png" alt="Xnip2020-03-14_11-13-30" /></p>
+
+<p><img src="/img/Xnip2020-03-14_16-22-56.png" alt="Xnip2020-03-14_16-22-56" /></p>
+
+<p><img src="/img/Xnip2020-03-16_12-12-17.png" alt="Xnip2020-03-16_12-12-17" /></p>
 
 
                 
@@ -1790,6 +1836,12 @@ select-----&gt;前执行
                         
                         
                         
+                        
+                        
+                        
+                        <a href="/tags/%E9%9D%A2%E8%AF%95%E9%97%AE%E9%A2%98%E6%94%B6%E9%9B%86" title="面试问题收集">
+                            面试问题收集
+                        </a>
                         
                         
                     </div>
