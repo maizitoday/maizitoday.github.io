@@ -15,9 +15,9 @@
     
 
     
-    <meta name="title" content="java内存映射理解" />
-    <meta property="og:title" content="java内存映射理解" />
-    <meta property="twitter:title" content="java内存映射理解" />
+    <meta name="title" content="FileChannel和MappedByteBuffer" />
+    <meta property="og:title" content="FileChannel和MappedByteBuffer" />
+    <meta property="twitter:title" content="FileChannel和MappedByteBuffer" />
     
 
     
@@ -34,9 +34,9 @@
     <meta name="keyword"  content="麦子, maizi, maizi, , 麦子的网络日志, 麦子的博客, maizi Blog, 博客, 个人网站, 互联网, Web, 云原生, PaaS, Istio, Kubernetes, 微服务, Microservice">
     <link rel="shortcut icon" href="/img/favicon.ico">
 
-    <title>java内存映射理解-麦子的博客</title>
+    <title>FileChannel和MappedByteBuffer-麦子的博客</title>
 
-    <link rel="canonical" href="/post/java%E5%9F%BA%E7%A1%80-%E9%9B%B6%E6%8B%B7%E8%B4%9D/">
+    <link rel="canonical" href="/post/filechannel/">
 
     <link rel="stylesheet" href="/css/iDisqus.min.css"/>
 	
@@ -182,7 +182,7 @@
                         </a>
                         
                     </div>
-                    <h1>java内存映射理解</h1>
+                    <h1>FileChannel和MappedByteBuffer</h1>
                     <h2 class="subheading"></h2>
                     <span class="meta">
 			Posted by 
@@ -190,7 +190,7 @@
 			    麦子
 			 
 			on 
-			Friday, March 13, 2020
+			Wednesday, March 18, 2020
                         
                     </span>
                 </div>
@@ -218,10 +218,12 @@
                 </header>              
                 <nav id="TableOfContents">
 <ul>
-<li><a href="#简介">简介</a></li>
-<li><a href="#什么是java内存映射文件-io">什么是Java内存映射文件/IO</a></li>
-<li><a href="#内存映射文件的优缺点">内存映射文件的优缺点</a></li>
-<li><a href="#原理">原理</a></li>
+<li><a href="#常见方法">常见方法</a></li>
+<li><a href="#应用实例-1-本地文件写数据">应用实例 1-本地文件写数据</a></li>
+<li><a href="#应用实例-2-本地文件读数据">应用实例 2-本地文件读数据</a></li>
+<li><a href="#应用实例-3-使用一个-buffer-完成文件读取-写入">应用实例 3-使用一个 Buffer 完成文件读取、写入</a></li>
+<li><a href="#应用实例-4-拷贝文件-transferfrom-方法">应用实例 4-拷贝文件 transferFrom 方法</a></li>
+<li><a href="#mappedbytebuffer">MappedByteBuffer</a></li>
 </ul>
 </nav>
                 
@@ -229,37 +231,173 @@
 
 <p>[TOC]</p>
 
-<p><a href="https://blog.csdn.net/napolunyishi/article/details/18214929">https://blog.csdn.net/napolunyishi/article/details/18214929</a></p>
+<p>说明文章资料来源：尚硅谷韩顺平Netty视频教程（2019发布） <a href="https://www.bilibili.com/video/av76227904?p=36">https://www.bilibili.com/video/av76227904?p=36</a></p>
 
-<h1 id="简介">简介</h1>
+<h1 id="常见方法">常见方法</h1>
 
-<p>相信现在做Java的人没有人不用NIO来进行IO相关的操作了吧。这个新的IO类库[虽然现在已经不新了]为我们带来了基于块的IO处理方式，通过预定义的Buffer，我们可以更高效地完成IO操作。在NIO中，我比较关注的是一个成为mmap的文件映射功能，其特点是可以把文件的一部分或全部映射到内存中，之后我们就可以通过MappedBuffer对内存进行操作，而操作的结果会由操作系统负责flush到文件中。由于应用程序只是操作内存，所以处理速度比普通的文件操作快很多，在某些应用场景下mmap可以发挥相当大的作用。本文就来揭秘java的mmap背后的工作原理和实现方法，以及使用java的mmap要注意的一些问题。</p>
+<p>FileChannel 主要用来对本地文件进行 IO 操作，常见的方法有</p>
 
-<p><img src="/img/Xnip2020-03-16_11-50-54.png" alt="Xnip2020-03-16_11-50-54" /></p>
+<pre><code class="language-java">public int read(ByteBuffer dst) ，从通道读取数据并放到缓冲区中
+public int write(ByteBuffer src) ，把缓冲区的数据写到通道中 
+public long transferFrom(ReadableByteChannel src, long position, long count)，从目标通道中复制数据到当前通道
+public long transferTo(long position, long count, WritableByteChannel target)，把数据从当前通道复制给目标通道
+</code></pre>
 
-<p><img src="/img/Xnip2020-03-16_12-01-05.png" alt="Xnip2020-03-16_12-01-05" /></p>
+<h1 id="应用实例-1-本地文件写数据">应用实例 1-本地文件写数据</h1>
 
-<h1 id="什么是java内存映射文件-io">什么是Java内存映射文件/IO</h1>
+<pre><code class="language-java">package com.nio;
+/*
+ * @Description: 请输入....
+ * @Author: 麦子
+ * @Date: 2020-03-18 10:30:03
+ * @LastEditTime: 2020-03-18 10:38:22
+ * @LastEditors: 麦子
+ */
 
-<p>内存映射文件是一种允许Java程序直接从内存访问的特殊文件。通过将整个文件或者文件的一部分映射到内存中、操作系统负责获取页面请求和写入文件，应用程序就只需要处理内存数据，这样可以实现非常快速的IO操作。用于内存映射文件的内存在Java的堆空间以外。Java中的java.nio包支持内存映射文件，可以使用MappedByteBuffer来读写内存。</p>
+import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.nio.ByteBuffer;
+import java.nio.channels.FileChannel;
 
-<p>简而言之，将文件直接映射到用户态的内存地址，这样对文件的操作不再是write/read,而是直接对内存地址的操作。</p>
+public class FileChannelDemo {
 
-<p>作为NIO的一个重要的功能，Mmap方法为我们提供了将文件的部分或全部映射到内存地址空间的能力，同当这块内存区域被写入数据之后[dirty]，操作系统会用一定的算法把这些数据写入到文件中[这一过程java并没有提供API，后面会提到]。这样我们实际上就获得了间接操纵内存的能力，而且内存与文件之间的同步是由操作系统完成的，不用我们额外操心。也就是说，只要我们把内存数据块规划好[也就是实现一下C语言的SharedMemory功能]，剩下的事情交给操作系统烦恼就好了。我们既获得了高效的读写操作能力，又解决了数据的持久化问题，多么理想的功能啊！但必须说明的是mmap毕竟不是数据库，不能很方便地提供事务功能、类似sql语句那样的查找功能，也不具备备份、回滚、迁移的能力，这些都要自己实现。不过这样显然不如放在数据库里放心，所以我们的经验是特别重要的数据还是存数据库，不太重要的、但是又访问量很大、读写操作多且需要持久化功能的数据是最适合使用mmap功能的。
-————————————————
-版权声明：本文为CSDN博主「kabini」的原创文章，遵循 CC 4.0 BY-SA 版权协议，转载请附上原文出处链接及本声明。
-原文链接：<a href="https://blog.csdn.net/kabini/article/details/4286737">https://blog.csdn.net/kabini/article/details/4286737</a></p>
+    public static void main(String[] args) throws IOException {
+        String str = &quot;hello,尚硅谷&quot;; // 创建一个输出流-&gt;
+        FileOutputStream fileOutputStream = new FileOutputStream(&quot;/Users/maizi/Desktop/1.txt&quot;);
 
-<h1 id="内存映射文件的优缺点">内存映射文件的优缺点</h1>
+        // 通过 fileOutputStream 获取 对应的 FileChannel //这个 fileChannel 真实 类型是
+        FileChannel fileChannel = fileOutputStream.getChannel();
 
-<p>可能内存映射IO的主要优势是性能，内存映射文件比通过普通的IO来访问文件要快，这对于繁忙的电子交易系统来说非常重要。内存映射IO另外一个优势是能够加载普通方式无法访问的大文件，实验表明内存映射IO在大文件处理中表现得更好；但缺点是有增加页面错误（page fault）的可能，因为操作系统仅仅加载一部分文件到内存中，如果被请求的页面不在内存中那就会导致一个页面错误。大多数主流操作系统如Windows, Unix, Solaris和其他类Unix的操作系统都支持内存映射IO，在64位架构下，你几乎可以将任何文件映射到内存中并直接使用Java访问。另外一个优势是这些文件能够共享，在进程间提供共享内存，而且比普通的基于loopback接口的Socket要快10倍。</p>
+        // 创建一个缓冲区 ByteBuffer
+        ByteBuffer byteBuffer = ByteBuffer.allocate(1024);
 
-<h1 id="原理">原理</h1>
+        // 将 str 放入 byteBuffer
+        byteBuffer.put(str.getBytes());
 
-<p>首先，“映射”这个词，就和数学课上说的“一一映射”是一个意思，就是建立一种一一对应关系，在这里主要是只 硬盘上文件 的位置与进程 逻辑地址空间 中一块大小相同的区域之间的一一对应，如图1中过程1所示。这种对应关系纯属是逻辑上的概念，物理上是不存在的，原因是进程的逻辑地址空间本身就是不存在的。在内存映射的过程中，并没有实际的数据拷贝，文件没有被载入内存，只是逻辑上被放入了内存，具体到代码，就是建立并初始化了相关的数据结构（struct address_space），这个过程有系统调用mmap()实现，所以建立内存映射的效率很高。
-————————————————
-版权声明：本文为CSDN博主「mg0832058」的原创文章，遵循 CC 4.0 BY-SA 版权协议，转载请附上原文出处链接及本声明。
-原文链接：<a href="https://blog.csdn.net/mg0832058/article/details/5890688">https://blog.csdn.net/mg0832058/article/details/5890688</a></p>
+        // 对 byteBuffer 进行 flip
+        byteBuffer.flip();
+
+        // 将 byteBuffer 数据写入到 fileChannel
+        fileChannel.write(byteBuffer);
+        fileOutputStream.close();
+    }
+
+}
+</code></pre>
+
+<h1 id="应用实例-2-本地文件读数据">应用实例 2-本地文件读数据</h1>
+
+<pre><code class="language-java">// 创建文件的输入流
+File file = new File(&quot;/Users/maizi/Desktop/1.txt&quot;);
+FileInputStream fileInputStream = new FileInputStream(file);
+
+// 通过 fileInputStream 获取对应的 FileChannel -&gt; 实际类型
+FileChannel fileChannel = fileInputStream.getChannel();
+
+// 创建缓冲区
+ByteBuffer byteBuffer = ByteBuffer.allocate((int) file.length());
+
+// 将 通道的数据读入到 Buffer
+fileChannel.read(byteBuffer);
+
+// 将 byteBuffer 的 字节数据 转成 String
+System.out.println(new String(byteBuffer.array()));
+fileInputStream.close();
+
+</code></pre>
+
+<h1 id="应用实例-3-使用一个-buffer-完成文件读取-写入">应用实例 3-使用一个 Buffer 完成文件读取、写入</h1>
+
+<p>使用 FileChannel(通道) 和 方法 read , write，完成文件的拷贝</p>
+
+<pre><code class="language-java"> public static void main(String[] args) throws IOException {
+
+        FileInputStream fileInputStream = new FileInputStream(&quot;/Users/maizi/Desktop/1.txt&quot;);
+        FileChannel fileChannel01 = fileInputStream.getChannel();
+
+        FileOutputStream fileOutputStream = new FileOutputStream(&quot;/Users/maizi/Desktop/2.txt&quot;);
+        FileChannel fileChannel02 = fileOutputStream.getChannel();
+
+        ByteBuffer byteBuffer = ByteBuffer.allocate(512);
+
+        while (true) { // 循环读取
+            //这里有一个重要的操作，一定不要忘了
+            /* 
+              public final Buffer clear() 
+                { 
+                     position = 0; 
+                     limit = capacity; 
+                     mark = -1; 
+                     return this;
+                }
+            */
+            byteBuffer.clear(); // 清空 buffer
+            int read = fileChannel01.read(byteBuffer);
+            System.out.println(&quot;read =&quot; + read);
+            if (read == -1) { // 表示读完
+                break;
+            } // 将 buffer 中的数据写入到 fileChannel02 -- 2.txt
+            byteBuffer.flip();
+            fileChannel02.write(byteBuffer);
+
+        }
+
+        // 关闭相关的流
+        fileInputStream.close();
+        fileOutputStream.close();
+
+    }
+</code></pre>
+
+<h1 id="应用实例-4-拷贝文件-transferfrom-方法">应用实例 4-拷贝文件 transferFrom 方法</h1>
+
+<pre><code class="language-java">public class FileChannelDemo {
+    public static void main(String[] args) throws IOException {
+        FileInputStream fileInputStream = new FileInputStream(&quot;/Users/maizi/Desktop/1.txt&quot;);
+        FileOutputStream fileOutputStream = new FileOutputStream(&quot;/Users/maizi/Desktop/3.txt&quot;);
+
+        // 获取各个流对应的 filechannel
+        FileChannel sourceCh = fileInputStream.getChannel();
+        FileChannel destCh = fileOutputStream.getChannel();
+
+        // 使用 transferForm 完成拷贝
+        destCh.transferFrom(sourceCh, 0, sourceCh.size()); // 关闭相关通道和流
+        sourceCh.close();
+        destCh.close();
+        fileInputStream.close();
+        fileOutputStream.close();
+    }
+} 
+</code></pre>
+
+<h1 id="mappedbytebuffer">MappedByteBuffer</h1>
+
+<pre><code class="language-java">RandomAccessFile randomAccessFile = new RandomAccessFile(&quot;/Users/maizi/Desktop/1.txt&quot;, &quot;rw&quot;); // 获取对应的通道
+        FileChannel channel = randomAccessFile.getChannel();
+
+        /**
+         * * 参数 
+         * 1: FileChannel.MapMode.READ_WRITE 使用的读写模式 * 参数 
+         * 2： 0 ： 可以直接修改的起始位置 * 参数
+         * 3:  5: 是映射到内存的大小(不是索引位置) ,
+               即将 1.txt 的多少个字节映射到内存 * 可以直接修改的范围就是 0-5 * 实际类型DirectByteBuffer
+         * 
+         */
+        MappedByteBuffer mappedByteBuffer = channel.map(FileChannel.MapMode.READ_WRITE, 0, 5);
+
+        mappedByteBuffer.put(0, (byte) 'H');
+        mappedByteBuffer.put(3, (byte) '9');
+        //mappedByteBuffer.put(5, (byte) 'Y');// IndexOutOfBoundsException
+
+        randomAccessFile.close();
+        System.out.println(&quot;修改成功~~&quot;);
+
+原文件内容：hello,尚硅谷
+
+程序运行后打印结果： Hel9o,尚硅谷
+
+</code></pre>
 
 
                 
@@ -308,15 +446,10 @@
                 <ul class="pager">
                     
                     <li class="previous">
-                        <a href="/post/java%E7%9B%B8%E5%85%B3%E6%A6%82%E5%BF%B5-%E4%BA%92%E8%81%94%E7%BD%91%E6%9E%B6%E6%9E%84%E6%BC%94%E5%8F%98/" data-toggle="tooltip" data-placement="top" title="互联网架构演变">&larr;
+                        <a href="/post/java%E5%9F%BA%E7%A1%80-%E9%9B%B6%E6%8B%B7%E8%B4%9D/" data-toggle="tooltip" data-placement="top" title="java内存映射理解">&larr;
                             Previous Post</a>
                     </li>
                     
-                    
-                    <li class="next">
-                        <a href="/post/filechannel/" data-toggle="tooltip" data-placement="top" title="FileChannel和MappedByteBuffer">Next
-                            Post &rarr;</a>
-                    </li>
                     
                 </ul>
 
