@@ -15,15 +15,15 @@
     
 
     
-    <meta name="title" content="零拷贝" />
-    <meta property="og:title" content="零拷贝" />
-    <meta property="twitter:title" content="零拷贝" />
+    <meta name="title" content="RandomAccessFile" />
+    <meta property="og:title" content="RandomAccessFile" />
+    <meta property="twitter:title" content="RandomAccessFile" />
     
 
     
-    <meta name="description" content="麦子，程序员, 开源爱好者，生活探险家 | 这里是 麦子 的博客，与你一起发现更大的世界。">
-    <meta property="og:description" content="麦子，程序员, 开源爱好者，生活探险家 | 这里是 麦子 的博客，与你一起发现更大的世界。" />
-    <meta property="twitter:description" content="麦子，程序员, 开源爱好者，生活探险家 | 这里是 麦子 的博客，与你一起发现更大的世界。" />
+    <meta name="description" content="RandomAccessFile类使用说明">
+    <meta property="og:description" content="RandomAccessFile类使用说明" />
+    <meta property="twitter:description" content="RandomAccessFile类使用说明" />
     
 
     
@@ -34,9 +34,9 @@
     <meta name="keyword"  content="麦子, maizi, maizi, , 麦子的网络日志, 麦子的博客, maizi Blog, 博客, 个人网站, 互联网, Web, 云原生, PaaS, Istio, Kubernetes, 微服务, Microservice">
     <link rel="shortcut icon" href="/img/favicon.ico">
 
-    <title>零拷贝-麦子的博客</title>
+    <title>RandomAccessFile-麦子的博客</title>
 
-    <link rel="canonical" href="/post/java%E5%9F%BA%E7%A1%80-%E9%9B%B6%E6%8B%B7%E8%B4%9D/">
+    <link rel="canonical" href="/post/java%E5%9F%BA%E7%A1%80-randomaccessfile/">
 
     <link rel="stylesheet" href="/css/iDisqus.min.css"/>
 	
@@ -173,8 +173,8 @@
                 <div class="post-heading">
                     <div class="tags">
                         
-                        <a class="tag" href="/tags/%E7%BD%91%E7%BB%9C%E7%BC%96%E7%A8%8B" title="网络编程">
-                            网络编程
+                        <a class="tag" href="/tags/randomaccessfile" title="RandomAccessFile">
+                            RandomAccessFile
                         </a>
                         
                         <a class="tag" href="/tags/java%E5%9F%BA%E7%A1%80" title="java基础">
@@ -182,7 +182,7 @@
                         </a>
                         
                     </div>
-                    <h1>零拷贝</h1>
+                    <h1>RandomAccessFile</h1>
                     <h2 class="subheading"></h2>
                     <span class="meta">
 			Posted by 
@@ -190,7 +190,7 @@
 			    麦子
 			 
 			on 
-			Friday, March 13, 2020
+			Monday, March 30, 2020
                         
                     </span>
                 </div>
@@ -218,19 +218,18 @@
                 </header>              
                 <nav id="TableOfContents">
 <ul>
-<li><a href="#什么是零拷贝">什么是零拷贝</a></li>
-<li><a href="#零拷贝给我们带来的好处">零拷贝给我们带来的好处</a></li>
-<li><a href="#零拷贝的实现">零拷贝的实现</a></li>
-<li><a href="#io读写的方式">io读写的方式</a>
+<li><a href="#简述">简述</a></li>
+<li><a href="#构造函数">构造函数</a></li>
+<li><a href="#构造函数中mode参数传值介绍">构造函数中mode参数传值介绍</a></li>
+<li><a href="#以下是读取和写入文件的实例">以下是读取和写入文件的实例</a>
 <ul>
-<li><a href="#中断">中断</a></li>
-<li><a href="#dma-直接内存存取">DMA-直接内存存取</a></li>
+<li><a href="#1-读指定文件的内容-并且输出控制台">1、读指定文件的内容，并且输出控制台</a></li>
+<li><a href="#2-通过指定记录指针的位置及跳过的字节数-输出内容">2、通过指定记录指针的位置及跳过的字节数，输出内容</a></li>
+<li><a href="#3-在内容后面插入一个字符串-并输出">3、在内容后面插入一个字符串，并输出</a></li>
+<li><a href="#4-通过临时文件插入内容">4、通过临时文件插入内容</a></li>
+<li><a href="#方法摘要">方法摘要</a></li>
 </ul></li>
-<li><a href="#传统方式数据拷贝">传统方式数据拷贝</a></li>
-<li><a href="#零拷贝-sendfile-对应到java中">零拷贝-sendfile 对应到java中</a></li>
-<li><a href="#零拷贝-mmap">零拷贝-mmap</a></li>
-<li><a href="#零拷贝-sendfile">零拷贝-sendFile</a></li>
-<li><a href="#mmap和sendfile的区别">mmap和sendFile的区别</a></li>
+<li><a href="#应用场景">应用场景</a></li>
 </ul>
 </nav>
                 
@@ -238,147 +237,259 @@
 
 <p>[TOC]</p>
 
-<p><strong>转载地址：<a href="https://zhuanlan.zhihu.com/p/78869158">https://zhuanlan.zhihu.com/p/78869158</a></strong></p>
+<p>原文链接：<a href="https://blog.csdn.net/qq496013218/article/details/69397380">https://blog.csdn.net/qq496013218/article/details/69397380</a></p>
 
-<p><strong>转载地址：<a href="https://www.cnblogs.com/fengli9998/p/10231329.html">https://www.cnblogs.com/fengli9998/p/10231329.html</a></strong></p>
+<h1 id="简述">简述</h1>
 
-<h1 id="什么是零拷贝">什么是零拷贝</h1>
+<p>Java中的RandomAccessFile提供了对文件的读写功能。RandomAccessFile 虽然属于java.io下的类，但它不是InputStream或者OutputStream的子类；它也不同于FileInputStream和FileOutputStream。 FileInputStream 只能对文件进行读操作，而FileOutputStream 只能对文件进行写操作；但是，RandomAccessFile 与输入流和输出流不同之处就是RandomAccessFile可以访问文件的任意地方同时支持文件的读和写，并且它支持随机访问。RandomAccessFile包含InputStream的三个read方法，也包含OutputStream的三个write方法。同时RandomAccessFile还包含一系列的readXxx和writeXxx方法完成输入输出。
+RandomAccessFile父类：java.lang.Object</p>
 
-<p>零拷贝(英语: Zero-copy) 技术是指计算机执行操作时，CPU不需要先将数据从某处内存复制到另一个特定区域。这种技术通常用于通过网络传输文件时节省CPU周期和内存带宽。</p>
+<h1 id="构造函数">构造函数</h1>
 
-<p>➢零拷贝技术可以减少数据拷贝和共享总线操作的次数，消除传输数据在存储器之间不必要的中间拷贝次数，从而有效地提高数据传输效率</p>
+<pre><code class="language-java">创建随机访问文件流，以从File参数指定的文件中读取，并可选择写入文件。
+RandomAccessFile(File file, String mode)
 
-<p>➢零拷贝技术减少了用户进程地址空间和内核地址空间之间因为上:下文切换而带来的开销</p>
+创建随机访问文件流，以从中指定名称的文件读取，并可选择写入文件。
+RandomAccessFile(String name, String mode)
+ 
+</code></pre>
 
-<p><strong>可以看出没有说不需要拷贝，只是说减少冗余[不必要]的拷贝。</strong></p>
+<h1 id="构造函数中mode参数传值介绍">构造函数中mode参数传值介绍</h1>
 
-<h1 id="零拷贝给我们带来的好处">零拷贝给我们带来的好处</h1>
-
-<ul>
-<li>减少甚至完全避免不必要的CPU拷贝，从而让CPU解脱出来去执行其他的任务</li>
-<li>减少内存带宽的占用</li>
-<li>通常零拷贝技术还能够减少用户空间和操作系统内核空间之间的上下文切换</li>
+<ul class="task-list">
+<li><label><input type="checkbox" disabled class="task-list-item"> r 代表以只读方式打开指定文件</label></li>
+<li><label><input type="checkbox" disabled class="task-list-item"> rw 以读写方式打开指定文件</label></li>
+<li><label><input type="checkbox" disabled class="task-list-item"> rws 读写方式打开，并对内容或元数据都同步写入底层存储设备</label></li>
+<li><label><input type="checkbox" disabled class="task-list-item"> rwd 读写方式打开，对文件内容的更新同步更新至底层存储设备</label></li>
 </ul>
 
-<h1 id="零拷贝的实现">零拷贝的实现</h1>
+<p>RandomAccessFile包含了一个对象记录的指针，用于标识当前流的读写位置RandomAccessFile包含两个方法来操作文件记录指针。文件指针可以通过getFilePointer方法读取，并由seek方法设置。</p>
 
-<p>零拷贝实际的实现并没有真正的标准，取决于操作系统如何实现这一点。零拷贝完全依赖于操作系统。操作系统支持，就有；不支持，就没有。不依赖Java本身。</p>
+<ul>
+<li><p>[ ] <strong>long getFilePoint()</strong>:设置文件指针偏移，从该文件的开头测量，发生下一次读取或写入。(前面是文档原文翻译通俗一点就是：返回文件记录指针的当前位置,不指定指针的位置默认是0。</p></li>
 
-<p>Kafka
-Netty
-rocketmq
-nginx
-apache</p>
+<li><p>[ ] <strong>void seek(long pos)</strong>:设置文件指针偏移，从该文件的开头测量，发生下一次读取或写入。（前面是文档原文翻译通俗一点就是：将文件记录指针定位到pos位置。</p></li>
+</ul>
 
-<p>上面这些组件都使用了。</p>
+<h1 id="以下是读取和写入文件的实例">以下是读取和写入文件的实例</h1>
 
-<h1 id="io读写的方式">io读写的方式</h1>
+<h2 id="1-读指定文件的内容-并且输出控制台">1、读指定文件的内容，并且输出控制台</h2>
 
-<h2 id="中断">中断</h2>
-
-<p><img src="/img/20160919145719523.png" alt="20160919145719523" /></p>
-
-<pre><code class="language-java">1. 用户进程发起数据读取请求
-2. 系统调度为该进程分配cpu
-3. cpu向io控制器(ide,scsi)发送io请求
-4. 用户进程等待io完成，让出cpu
-5. 系统调度cpu执行其他任务
-6. 数据写入至io控制器的缓冲寄存器
-7. 缓冲寄存器满了向cpu发出中断信号
-8. cpu读取数据至内存
-
-缺点：中断次数取决于缓冲寄存器的大小
+<pre><code class="language-java">    public static void main(String[] args) throws Exception{
+        RandomAccessFile raf=new RandomAccessFile(&quot;G:\\java-lambda\\work.txt&quot;,&quot;r&quot;);
+        byte[] buff = new byte[1024];
+        int len = 0;
+        while ((len = raf.read(buff,0,1024))!=-1){
+            System.out.println(new String(buff,0,len));
+        }
+     }
 </code></pre>
 
-<p>用户进程需要读取磁盘数据，需要CPU中断，发起IO请求，每次的IO中断，都带来CPU的上下文切换。</p>
+<h2 id="2-通过指定记录指针的位置及跳过的字节数-输出内容">2、通过指定记录指针的位置及跳过的字节数，输出内容</h2>
 
-<p><strong>因此出现了——DMA</strong></p>
-
-<h2 id="dma-直接内存存取">DMA-直接内存存取</h2>
-
-<p>DMA(Direct Memory Access，直接内存存取) 是所有现代电脑的重要特色，它允许不同速度的硬件装置来沟通，而不需要依赖于CPU 的大量中断负载。</p>
-
-<p>DMA控制器，接管了数据读写请求，减少CPU的负担。这样一来，CPU能高效工作了。
-现代硬盘基本都支持DMA。</p>
-
-<p><img src="/img/20160919145730460.png" alt="20160919145730460" /></p>
-
-<pre><code class="language-java">1. 用户进程发起数据读取请求
-2. 系统调度为该进程分配cpu
-3. cpu向DMA发送io请求
-4. 用户进程等待io完成，让出cpu
-5. 系统调度cpu执行其他任务
-6. 数据写入至io控制器的缓冲寄存器
-7. DMA不断获取缓冲寄存器中的数据（需要cpu时钟）
-8. 传输至内存（需要cpu时钟）
-9. 所需的全部数据获取完毕后向cpu发出中断信号
-
-优点：减少cpu中断次数，不用cpu拷贝数据
+<pre><code class="language-java">public static void RandomAccess(String path,String mode,long seek,int skipBytes){
+        RandomAccessFile raf = null;
+        try {
+            raf = new RandomAccessFile(path,mode);
+            raf.writeBytes(&quot;If you interesting to me,please give the kiss to me!&quot;);
+            raf.seek(seek);//指定记录指针的位置
+            //System.out.println(raf.readLine());//使用seek指针指向0，readLine读取所有内容
+            raf.getFilePointer();//获取指针的位置
+            raf.skipBytes(skipBytes);//跳过的字节数
+            byte[] buff = new byte[1024];
+            int len = 0;
+            while ((len = raf.read(buff))&gt;0){
+                System.out.println(new String(buff,0,len));
+            }
+        }catch (Exception e){
+            e.printStackTrace();
+        }finally {
+            if(raf != null){
+                try {
+                    raf.close();
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
+            }
+        }
+    }
 </code></pre>
 
-<h1 id="传统方式数据拷贝">传统方式数据拷贝</h1>
+<h2 id="3-在内容后面插入一个字符串-并输出">3、在内容后面插入一个字符串，并输出</h2>
 
-<ol>
-<li>下面展示了 传统方式读取数据后并通过网络发送 所发生的数据拷贝：</li>
-</ol>
-
-<p><img src="/img/20160919145740562.png" alt="20160919145740562" /></p>
-
-<pre><code class="language-java">1. 一个read系统调用后，DMA执行了一次数据拷贝，从磁盘到内核空间
-2. read结束后，发生第二次数据拷贝，由cpu将数据从内核空间拷贝至用户空间
-3. send系统调用，cpu发生第三次数据拷贝，由cpu将数据从用户空间拷贝至内核空间(socket缓冲区)
-4. send系统调用结束后，DMA执行第四次数据拷贝，将数据从内核拷贝至协议引擎
-5. 另外，这四个过程中，每个过程都发生一次上下文切换
+<pre><code class="language-java">public static void RandomAccessTem(String path,String mode,long seek,int skipBytes){
+        RandomAccessFile raf = null;
+        try {
+            raf = new RandomAccessFile(path,mode);
+            raf.writeBytes(&quot;If you interesting to me,please give the kiss to me!&quot;);
+            raf.seek(raf.length());//通过raf.length()获取总长度，记录指针指向最后
+            raf.write(&quot;oh yes！&quot;.getBytes());//在最后插入oh yes!s
+            raf.seek(0);//记录指针指向初始位置
+            byte[] buff = new byte[1024];
+            int len = 0;
+            while ((len = raf.read(buff))&gt;0){
+                System.out.println(new String(buff,0,len));
+            }
+        }catch (Exception e){
+            e.printStackTrace();
+        }finally {
+            if(raf != null){
+                try {
+                    raf.close();
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
+            }
+        }
+    }
 </code></pre>
 
-<ol>
-<li>内存缓冲数据，主要是为了提高性能，内核可以预读部分数据，当所需数据小于内存缓冲区大小时，将极大的提高性能。</li>
-<li>零拷贝是为了消除这个过程中冗余的拷贝</li>
-</ol>
+<h2 id="4-通过临时文件插入内容">4、通过临时文件插入内容</h2>
 
-<h1 id="零拷贝-sendfile-对应到java中">零拷贝-sendfile 对应到java中</h1>
-
-<pre><code class="language-java">//将数据从文件通道传输到了给定的可写字节通道
-为FileChannel.transferTo(long position, long count, WritableByteChannel target)
+<pre><code class="language-java">public static void RandomAccessTemp(String path,String mode){
+        File tempFile = null;
+        RandomAccessFile raf = null;
+        FileOutputStream out = null;
+        FileInputStream input = null;
+        try {
+            //创建临时文件
+            tempFile =File.createTempFile(&quot;temp&quot;,&quot;_temp&quot;);
+            //在JVM进程退出的时候删除文件,通常用在临时文件的删除
+            tempFile.deleteOnExit();
+            //创建一个临时文件夹来保存插入点后的数据
+            out = new FileOutputStream(tempFile);
+            input=new FileInputStream(tempFile);
+            //指定文件路径和读写方式
+            raf = new RandomAccessFile(path,mode);
+            //raf.writeBytes(&quot;If you interesting to me,please give the kiss to me!&quot;);
+            //记录指针指向初始位置
+            raf.seek(0);
+            byte[] buff = new byte[1024];
+            int len = 0;
+            //循环读取插入点后的内容
+            //读取文件，存入字节数组buff，返回读取到的字符数赋值给len,默认每次将buff数组装满
+            while ((len = raf.read(buff))&gt;0){
+                // 将读取的数据写入临时文件中
+                out.write(buff,0,len);
+                System.out.println(new String(buff,0,len));
+            }
+            //记录指针指向初始位置
+            raf.seek(0);
+            //插入指定内容
+            raf.writeBytes(&quot;my name's Toms!&quot;);
+            //在临时文件中插入指定内容
+            while ((len = input.read(buff))&gt;0){
+                raf.write(buff,0,len);
+            }
+            out.close();
+            input.close();
+        }catch (Exception e){
+            e.printStackTrace();
+        }finally {
+            if(raf != null){
+                try {
+                    raf.close();
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
+            }
+        }
+    }
 </code></pre>
 
-<ol>
-<li>避免了第2，3步的数据拷贝，参考下图：</li>
-</ol>
+<h2 id="方法摘要">方法摘要</h2>
 
-<p><img src="/img/20160919145750929.png" alt="20160919145750929" /></p>
+<pre><code class="language-java">void close() ：关闭此随机访问文件流并释放与该流关联的所有系统资源。
 
-<pre><code class="language-java">1. DMA从拷贝至内核缓冲区
-2. cpu将数据从内核缓冲区拷贝至内核空间(socket缓冲区)
-3. DMA将数据从内核拷贝至协议引擎
-4. 这三个过程中共发生2次上下文切换，分别为发起读取文件和发送数据
+FileChannel getChannel() ： 返回与此文件关联的唯一 FileChannel 对象。
+
+FileDescriptor getFD() ：返回与此流关联的不透明文件描述符对象。
+
+long getFilePointer() ：返回此文件中的当前偏移量。
+
+long length() ：返回此文件的长度。
+
+int read() ：从此文件中读取一个数据字节。
+
+int read(byte[] b) ： 将最多 b.length 个数据字节从此文件读入 byte 数组。
+
+int read(byte[] b, int off, int len) ：将最多 len 个数据字节从此文件读入 byte 数组。
+
+boolean readBoolean() ：从此文件读取一个 boolean。
+
+byte readByte() ：从此文件读取一个有符号的八位值。
+
+char readChar() ：从此文件读取一个字符。
+
+double readDouble() ：从此文件读取一个 double。
+
+float readFloat() ：从此文件读取一个 float。
+
+void readFully(byte[] b) ： 将 b.length 个字节从此文件读入 byte 数组，并从当前文件指针开始。
+
+void readFully(byte[] b, int off, int len) ：将正好 len 个字节从此文件读入 byte 数组，并从当前文件指针开始。
+
+int readInt() ：从此文件读取一个有符号的 32 位整数。
+
+String readLine() ：从此文件读取文本的下一行。
+
+long readLong() ： 从此文件读取一个有符号的 64 位整数。
+
+short readShort() ：从此文件读取一个有符号的 16 位数。
+
+int readUnsignedByte() ：从此文件读取一个无符号的八位数。
+
+int readUnsignedShort() ：从此文件读取一个无符号的 16 位数。
+
+String readUTF() ：从此文件读取一个字符串。
+
+void seek(long pos) ：设置到此文件开头测量到的文件指针偏移量，在该位置发生下一个读取或写入操作。
+
+void setLength(long newLength) ：设置此文件的长度。
+
+int skipBytes(int n) ：尝试跳过输入的 n 个字节以丢弃跳过的字节。
+
+void write(byte[] b) ： 将 b.length 个字节从指定 byte 数组写入到此文件，并从当前文件指针开始。
+
+void write(byte[] b, int off, int len) ：将 len 个字节从指定 byte 数组写入到此文件，并从偏移量 off 处开始。
+
+void write(int b) ：向此文件写入指定的字节。
+
+void writeBoolean(boolean v) ：按单字节值将 boolean 写入该文件。
+
+void writeByte(int v) ：按单字节值将 byte 写入该文件。
+
+void writeBytes(String s) ： 按字节序列将该字符串写入该文件。
+
+void writeChar(int v) ：按双字节值将 char 写入该文件，先写高字节。
+
+void writeChars(String s) ： 按字符序列将一个字符串写入该文件。
+
+void writeDouble(double v) ：使用 Double 类中的 doubleToLongBits 方法将双精度参数转换为一个 long，然后按八字节数量将该 long 值写入该文件，先定高字节。
+
+void writeFloat(float v) ：使用 Float 类中的 floatToIntBits 方法将浮点参数转换为一个 int，然后按四字节数量将该 int 值写入该文件，先写高字节。
+
+void writeInt(int v) ：按四个字节将 int 写入该文件，先写高字节。
+
+void writeLong(long v) ：按八个字节将 long 写入该文件，先写高字节。
+
+void writeShort(int v) ：按两个字节将 short 写入该文件，先写高字节。
+
+void writeUTF(String str) ：使用 modified UTF-8 编码以与机器无关的方式将一个字符串写入该文件。
+ 
 </code></pre>
 
-<ol>
-<li>以上过程发生了三次数据拷贝，其中有一次为cpu完成</li>
-<li>linux内核2.4以后，socket缓冲区做了调整，DMA带收集功能，如下图：</li>
-</ol>
+<h1 id="应用场景">应用场景</h1>
 
-<p><img src="/img/20160919145802734.png" alt="20160919145802734" /></p>
+<p>1、 是JAVA I/O流体系中功能最丰富的文件内容访问类，它提供了众多方法来访问文件内容。</p>
 
-<pre><code class="language-java">1. DMA从拷贝至内核缓冲区
-2. 将数据的位置和长度的信息的描述符增加至内核空间(socket缓冲区)
-3. DMA将数据从内核拷贝至协议引擎
-</code></pre>
+<p>2、 由于可以自由访问文件的任意位置，所以如果需要访问文件的部分内容，RandomAccessFile将是更好的选择。</p>
 
-<p><strong>所谓零拷贝，指的是应用内存与内核内存不存在拷贝。</strong></p>
+<p>3、 可以用来访问保存数据记录的文件，文件的记录的大小不必相同，但是其大小和位置必须是可知的。</p>
 
-<h1 id="零拷贝-mmap">零拷贝-mmap</h1>
+<p>4、 断点续传，使用seek()方法不断的更新下载资源的位置。</p>
 
-<p><img src="/img/998342-20190109085005656-1249109565.png" alt="998342-20190109085005656-1249109565" /></p>
-
-<h1 id="零拷贝-sendfile">零拷贝-sendFile</h1>
-
-<p><img src="/img/998342-20190109085021607-1245221430.png" alt="998342-20190109085021607-1245221430" /></p>
-
-<h1 id="mmap和sendfile的区别">mmap和sendFile的区别</h1>
-
-<p><img src="/img/Xnip2020-03-16_12-01-05.png" alt="Xnip2020-03-16_12-01-05" /></p>
+<p>5、 向10G文件末尾插入指定内容，或者向指定指针位置进行插入或者修改内容。</p>
 
 
                 
@@ -427,15 +538,10 @@ apache</p>
                 <ul class="pager">
                     
                     <li class="previous">
-                        <a href="/post/%E7%9F%A5%E8%AF%86%E6%B5%81%E7%A8%8B%E5%9B%BE%E6%94%B6%E9%9B%86/" data-toggle="tooltip" data-placement="top" title="知识流程图收集">&larr;
+                        <a href="/post/%E4%BA%BA%E6%98%AF%E6%80%8E%E4%B9%88%E5%BA%9F%E6%8E%89%E7%9A%84/" data-toggle="tooltip" data-placement="top" title="人是怎么废掉的？">&larr;
                             Previous Post</a>
                     </li>
                     
-                    
-                    <li class="next">
-                        <a href="/post/java-%E5%B8%B8%E8%A7%81%E9%9D%A2%E8%AF%95%E9%97%AE%E9%A2%98%E6%94%B6%E9%9B%86/" data-toggle="tooltip" data-placement="top" title="常见面试问题收集">Next
-                            Post &rarr;</a>
-                    </li>
                     
                 </ul>
 
