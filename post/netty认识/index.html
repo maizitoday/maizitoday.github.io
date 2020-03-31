@@ -1,0 +1,1935 @@
+<!DOCTYPE html>
+<html lang="en-us">
+<head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+
+    
+    <meta property="og:site_name" content="">
+    <meta property="og:type" content="article">
+
+    
+    <meta property="og:image" content="http://maizitoday.github.io//img/home-bg-jeep.jpg">
+    <meta property="twitter:image" content="http://maizitoday.github.io//img/home-bg-jeep.jpg" />
+    
+
+    
+    <meta name="title" content="Netty高性能架构设计原理" />
+    <meta property="og:title" content="Netty高性能架构设计原理" />
+    <meta property="twitter:title" content="Netty高性能架构设计原理" />
+    
+
+    
+    <meta name="description" content="netty工作原理，异步模型，初步认识">
+    <meta property="og:description" content="netty工作原理，异步模型，初步认识" />
+    <meta property="twitter:description" content="netty工作原理，异步模型，初步认识" />
+    
+
+    
+    <meta property="twitter:card" content="summary" />
+    
+    
+
+    <meta name="keyword"  content="麦子, maizi, maizi, , 麦子的网络日志, 麦子的博客, maizi Blog, 博客, 个人网站, 互联网, Web, 云原生, PaaS, Istio, Kubernetes, 微服务, Microservice">
+    <link rel="shortcut icon" href="/img/favicon.ico">
+
+    <title>Netty高性能架构设计原理-麦子的博客</title>
+
+    <link rel="canonical" href="/post/netty%E8%AE%A4%E8%AF%86/">
+
+    <link rel="stylesheet" href="/css/iDisqus.min.css"/>
+	
+    
+    <link rel="stylesheet" href="/css/bootstrap.min.css">
+
+    
+    <link rel="stylesheet" href="/css/hux-blog.min.css">
+
+    
+    <link rel="stylesheet" href="/css/syntax.css">
+
+    
+    <link rel="stylesheet" href="/css/zanshang.css">
+
+    
+    <link href="//cdnjs.cloudflare.com/ajax/libs/font-awesome/4.6.3/css/font-awesome.min.css" rel="stylesheet" type="text/css">
+    
+    
+    <script src="/js/jquery.min.js"></script>
+    
+    
+    <script src="/js/bootstrap.min.js"></script>
+    
+    
+    <script src="/js/hux-blog.min.js"></script>
+	
+    
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.13.1/styles/docco.min.css">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.13.1/highlight.min.js"></script>
+    <script>hljs.initHighlightingOnLoad();</script>
+</head>
+
+
+
+<nav class="navbar navbar-default navbar-custom navbar-fixed-top">
+    <div class="container-fluid">
+        
+        <div class="navbar-header page-scroll">
+            <button type="button" class="navbar-toggle">
+                <span class="sr-only">Toggle navigation</span>
+                <span class="icon-bar"></span>
+                <span class="icon-bar"></span>
+                <span class="icon-bar"></span>
+            </button>
+            <a class="navbar-brand" href="/"></a>
+        </div>
+
+        
+        
+        <div id="huxblog_navbar">
+            <div class="navbar-collapse">
+                <ul class="nav navbar-nav navbar-right">
+                    <li>
+                        <a href="/">Home</a>
+                    </li>
+                    
+                    <li>
+                        <a href="/categories/life">Life</a>
+                    </li>
+                    
+                    <li>
+                        <a href="/categories/tech">Tech</a>
+                    </li>
+                    
+
+                    
+                    <li><a href="/top/about/">ABOUT</a></li>
+                    
+
+
+                    
+                    <li>
+                        <a href="/archive">ARCHIVE</a>
+                    </li>
+                    
+
+
+                    
+                    <li>
+                        <a href="/search">SEARCH <img src="/img/search.png" height="15"
+                                style="cursor: pointer;" alt="Search"></a>
+                    </li>
+                    
+
+                </ul>
+            </div>
+        </div>
+        
+    </div>
+    
+</nav>
+<script>
+    
+    
+    
+    var $body = document.body;
+    var $toggle = document.querySelector('.navbar-toggle');
+    var $navbar = document.querySelector('#huxblog_navbar');
+    var $collapse = document.querySelector('.navbar-collapse');
+
+    $toggle.addEventListener('click', handleMagic)
+
+    function handleMagic(e) {
+        if ($navbar.className.indexOf('in') > 0) {
+            
+            $navbar.className = " ";
+            
+            setTimeout(function () {
+                
+                if ($navbar.className.indexOf('in') < 0) {
+                    $collapse.style.height = "0px"
+                }
+            }, 400)
+        } else {
+            
+            $collapse.style.height = "auto"
+            $navbar.className += " in";
+        }
+    }
+</script>
+
+
+
+<style type="text/css">
+    header.intro-header {
+        background-image: url('https://c.pxhere.com/images/e4/46/bd237f6583029424694a0d16589b-1435053.jpg!d')
+    }
+</style>
+<header class="intro-header">
+    <div class="container">
+        <div class="row">
+            <div class="col-lg-8 col-lg-offset-2 col-md-10 col-md-offset-1">
+                <div class="post-heading">
+                    <div class="tags">
+                        
+                        <a class="tag" href="/tags/%E7%BD%91%E7%BB%9C%E7%BC%96%E7%A8%8B" title="网络编程">
+                            网络编程
+                        </a>
+                        
+                    </div>
+                    <h1>Netty高性能架构设计原理</h1>
+                    <h2 class="subheading"></h2>
+                    <span class="meta">
+			Posted by 
+			
+			    麦子
+			 
+			on 
+			Tuesday, March 31, 2020
+                        
+                    </span>
+                </div>
+            </div>
+        </div>
+    </div>
+</header>
+
+
+
+
+<article>
+    <div class="container">
+        <div class="row">
+
+            
+            <div class="
+                col-lg-8 col-lg-offset-2
+                col-md-10 col-md-offset-1
+                post-container">
+
+                
+                <header>
+                    <h2>TOC</h2>
+                </header>              
+                <nav id="TableOfContents">
+<ul>
+<li><a href="#原生nio-存在的问题">原生NIO 存在的问题</a></li>
+<li><a href="#优点">优点</a></li>
+<li><a href="#版本说明">版本说明</a></li>
+<li><a href="#线程模型基本介绍">线程模型基本介绍</a>
+<ul>
+<li><a href="#线程模型">线程模型</a>
+<ul>
+<li><a href="#传统阻塞-i-o-服务模型">传统阻塞 I/O 服务模型</a>
+<ul>
+<li><a href="#模型特点">模型特点</a></li>
+<li><a href="#问题分析">问题分析</a></li>
+</ul></li>
+<li><a href="#reactor模型-多路复用io模型">Reactor模型(多路复用IO模型)</a>
+<ul>
+<li><a href="#针对传统阻塞-i-o-服务模型的-2-个缺点-解决方案">针对传统阻塞 I/O 服务模型的 2 个缺点，解决方案</a></li>
+<li><a href="#reactor-模式基本设计思想">Reactor 模式基本设计思想</a></li>
+<li><a href="#reactor-模式分类">Reactor 模式分类</a>
+<ul>
+<li><a href="#1-单-reactor-单线程图">1.  单 Reactor 单线程图</a>
+<ul>
+<li><a href="#模型图流程说明">模型图流程说明</a></li>
+<li><a href="#模型优缺点分析">模型优缺点分析</a></li>
+</ul></li>
+<li><a href="#2-单-reactor-多线程图">2. 单 Reactor 多线程图</a>
+<ul>
+<li><a href="#模型图流程说明-1">模型图流程说明</a></li>
+<li><a href="#模型优缺点分析-1">模型优缺点分析</a></li>
+</ul></li>
+<li><a href="#3-主从-reactor-多线程图">3.  主从 Reactor 多线程图</a>
+<ul>
+<li><a href="#模型图流程说明-2">模型图流程说明</a></li>
+<li><a href="#模型优缺点说明">模型优缺点说明</a></li>
+</ul></li>
+</ul></li>
+<li><a href="#reactor-模式小结">Reactor 模式小结</a>
+<ul>
+<li>
+<ul>
+<li><a href="#优点-1">优点</a></li>
+</ul></li>
+</ul></li>
+</ul></li>
+<li><a href="#netty-模型">Netty 模型</a>
+<ul>
+<li>
+<ul>
+<li><a href="#工作原理示意图">工作原理示意图</a></li>
+<li><a href="#模型图流程说明-3">模型图流程说明</a></li>
+<li><a href="#工作原理示意图-进阶版">工作原理示意图-进阶版</a></li>
+<li><a href="#工作原理示意图-详细版">工作原理示意图-详细版</a>
+<ul>
+<li><a href="#工作原理图流程说明">工作原理图流程说明</a></li>
+</ul></li>
+</ul></li>
+</ul></li>
+</ul></li>
+</ul></li>
+<li><a href="#netty-快速入门实例-tcp-服务">Netty 快速入门实例-TCP 服务</a>
+<ul>
+<li><a href="#nettyserver">NettyServer</a></li>
+<li><a href="#nettyserverhandler">NettyServerHandler</a></li>
+<li><a href="#nettyclient">NettyClient</a></li>
+<li><a href="#nettyclienthandler">NettyClientHandler</a></li>
+<li><a href="#运行结果">运行结果</a>
+<ul>
+<li><a href="#nettyserver-1">NettyServer</a></li>
+<li><a href="#nettyclient-1">NettyClient</a></li>
+</ul></li>
+</ul></li>
+<li><a href="#任务队列中的-task-有-3-种典型使用场景">任务队列中的 Task 有 3 种典型使用场景</a>
+<ul>
+<li><a href="#1-用户程序自定义的普通任务">1. 用户程序自定义的普通任务</a></li>
+<li><a href="#2-用户自定义定时任务">2.  用户自定义定时任务</a></li>
+<li><a href="#3-非当前-reactor-线程调用-channel-的各种方法">3. 非当前 Reactor 线程调用 Channel 的各种方法</a></li>
+<li><a href="#针对队列方案流程说明">针对队列方案流程说明</a></li>
+</ul></li>
+<li><a href="#异步模型">异步模型</a>
+<ul>
+<li><a href="#基本介绍">基本介绍</a></li>
+<li><a href="#future-说明">Future 说明</a></li>
+<li><a href="#future-listener-机制">Future-Listener 机制</a>
+<ul>
+<li><a href="#举例说明">举例说明</a></li>
+</ul></li>
+</ul></li>
+</ul>
+</nav>
+                
+                
+
+<p>[TOC]</p>
+
+<p><strong>说明文章资料来源：尚硅谷韩顺平Netty视频教程（2019发布） <a href="https://www.bilibili.com/video/av76227904?p=36">https://www.bilibili.com/video/av76227904?p=36</a></strong></p>
+
+<h1 id="原生nio-存在的问题">原生NIO 存在的问题</h1>
+
+<ol>
+<li><p>NIO 的类库和 API 繁杂，使用麻烦：需要熟练掌握 Selector、ServerSocketChannel、SocketChannel、ByteBuffer 等。</p></li>
+
+<li><p>开发工作量和难度都非常大：例如客户端面临断连重连、网络闪断、半包读写、失败缓存、网络拥塞和异常流 的处理等等。</p></li>
+
+<li><p>JDK NIO 的 Bug：例如臭名昭著的 Epoll Bug，它会导致 Selector 空轮询，最终导致 CPU 100%。直到 JDK 1.7 版本该问题仍旧存在，没有被根本解决。</p></li>
+</ol>
+
+<h1 id="优点">优点</h1>
+
+<p>Netty 对 JDK 自带的 NIO 的 API 进行了封装，解决了上述问题。</p>
+
+<ol>
+<li><p>使用方便：详细记录的 Javadoc，用户指南和示例；没有其他依赖项，JDK 5（Netty 3.x）或 6（Netty 4.x）就 足够了。</p></li>
+
+<li><p>高性能、吞吐量更高：延迟更低；减少资源消耗；最小化不必要的内存复制。</p></li>
+
+<li><p>社区活跃、不断更新：社区活跃，版本迭代周期短，发现的 Bug 可以被及时修复，同时，更多的新功能会被 加入.</p></li>
+</ol>
+
+<h1 id="版本说明">版本说明</h1>
+
+<p>因为 Netty5 出现重大 bug，已经被官网废弃了，目前推荐使用的是 Netty4.x 的稳定版本.</p>
+
+<pre><code class="language-xml">&lt;dependency&gt;
+      &lt;groupId&gt;io.netty&lt;/groupId&gt;
+      &lt;artifactId&gt;netty-all&lt;/artifactId&gt;
+      &lt;version&gt;4.1.42.Final&lt;/version&gt;
+&lt;/dependency&gt;
+</code></pre>
+
+<h1 id="线程模型基本介绍">线程模型基本介绍</h1>
+
+<p>不同的线程模式，对程序的性能有很大影响，为了搞清 Netty 线程模式，我们来系统的讲解下 各个线程模式， 最后看看 Netty 线程模型有什么优越性.</p>
+
+<h2 id="线程模型">线程模型</h2>
+
+<p>查看文章《浅析I/O模型》</p>
+
+<h3 id="传统阻塞-i-o-服务模型">传统阻塞 I/O 服务模型</h3>
+
+<p><img src="/img/Xnip2020-03-31_11-01-19.png" alt="Xnip2020-03-31_11-01-19" /></p>
+
+<h4 id="模型特点">模型特点</h4>
+
+<p>1)   采用阻塞 IO 模式获取输入的数据</p>
+
+<p>2)   每个连接都需要独立的线程完成数据的输入，业务处理, 数据返回</p>
+
+<h4 id="问题分析">问题分析</h4>
+
+<p>1)   当并发数很大，就会创建大量的线程，占用很大系统资源</p>
+
+<p>2)   连接创建后，如果当前线程暂时没有数据可读，该线程 会阻塞在 read 操作，造成线程资源浪费</p>
+
+<h3 id="reactor模型-多路复用io模型">Reactor模型(多路复用IO模型)</h3>
+
+<h4 id="针对传统阻塞-i-o-服务模型的-2-个缺点-解决方案">针对传统阻塞 I/O 服务模型的 2 个缺点，解决方案</h4>
+
+<p>1)   基于 I/O 复用模型：多个连接共用一个阻塞对象，应用程序只需要在一个阻塞对象等待，无需阻塞等待所有连 接。当某个连接有新的数据可以处理时，操作系统通知应用程序，线程从阻塞状态返回，开始进行业务处理 Reactor 对应的叫法: 1. 反应器模式 2. 分发者模式(Dispatcher) 3. 通知者模式(notifier)</p>
+
+<p>2)   基于线程池复用线程资源：不必再为每个连接创建线程，将连接完成后的业务处理任务分配给线程进行处理， 一个线程可以处理多个连接的业务。</p>
+
+<p><img src="/img/Xnip2020-03-31_11-09-24.png" alt="Xnip2020-03-31_11-09-24" /></p>
+
+<p><strong>复用结合线程池，就是 Reactor 模式基本设计思想</strong></p>
+
+<h4 id="reactor-模式基本设计思想">Reactor 模式基本设计思想</h4>
+
+<p><img src="/img/Xnip2020-03-31_11-12-31.png" alt="Xnip2020-03-31_11-12-31" /></p>
+
+<p>对上图说明：</p>
+
+<p>1)  Reactor 模式，通过一个或多个输入同时传递给服务处理器的模式(基于事件驱动)</p>
+
+<p>2)  服务器端程序处理传入的多个请求,并将它们同步分派到相应的处理线程， 因此 Reactor 模式也叫 Dispatcher 模式</p>
+
+<p>3)  Reactor 模式使用 IO 复用监听事件, 收到事件后，分发给某个线程(进程), 这点就是网络服务器高并发处理关键</p>
+
+<p><strong>Reactor 模式中 核心组成</strong></p>
+
+<p><strong>Reactor：</strong>Reactor 在一个单独的线程中运行，负责监听和分发事件，分发给适当的处理程序来对 IO 事件做出 反应。 它就像公司的电话接线员，它接听来自客户的电话并将线路转移到适当的联系人；</p>
+
+<p><strong>Handlers：</strong>处理程序执行 I/O 事件要完成的实际事件，类似于客户想要与之交谈的公司中的实际官员。Reactor 通过调度适当的处理程序来响应 I/O 事件，处理程序执行非阻塞操作。</p>
+
+<h4 id="reactor-模式分类">Reactor 模式分类</h4>
+
+<p>根据 Reactor 的数量和处理资源池线程的数量不同，有 3 种典型的实现</p>
+
+<h5 id="1-单-reactor-单线程图">1.  单 Reactor 单线程图</h5>
+
+<p><img src="/img/Xnip2020-03-31_11-19-02.png" alt="Xnip2020-03-31_11-19-02" /></p>
+
+<h6 id="模型图流程说明">模型图流程说明</h6>
+
+<p>1)   Select 是前面 I/O 复用模型介绍的标准网络编程 API，可以实现应用程序通过一个阻塞对象监听多路连接请求</p>
+
+<p>2)   Reactor 对象通过 Select 监控客户端请求事件，收到事件后通过 Dispatch 进行分发</p>
+
+<p>3)   如果是建立连接请求事件，则由 Acceptor 通过 Accept 处理连接请求，然后创建一个 Handler 对象处理连接 完成后的后续业务处理</p>
+
+<p>4)   如果不是建立连接事件，则 Reactor 会分发调用连接对应的 Handler 来响应</p>
+
+<p>5)   Handler 会完成 Read→业务处理→Send 的完整业务流程</p>
+
+<p>结合实例：服务器端用一个线程通过多路复用搞定所有的 IO 操作（包括连接，读、写等），编码简单，清晰明了， 但是<strong>如果客户端连接数量较多，将无法支撑，前面的 NIO 案例就属于这种模型</strong>。</p>
+
+<h6 id="模型优缺点分析">模型优缺点分析</h6>
+
+<p>1) 优点： 模型简单，没有多线程、进程通信、竞争的问题，全部都在一个线程中完成</p>
+
+<p>2) 缺点： 性能问题，只有一个线程，无法完全发挥多核 CPU 的性能。Handler 在处理某个连接上的业务时，整 个进程无法处理其他连接事件，很容易导致性能瓶颈</p>
+
+<p>3) 缺点： 可靠性问题，线程意外终止，或者进入死循环，会导致整个系统通信模块不可用，不能接收和处理外部 消息，造成节点故障</p>
+
+<p>4) 使用场景：客户端的数量有限，业务处理非常快速，比如 Redis 在业务处理的时间复杂度 O(1) 的情况.</p>
+
+<h5 id="2-单-reactor-多线程图">2. 单 Reactor 多线程图</h5>
+
+<p><img src="/img/Xnip2020-03-31_11-27-20.png" alt="Xnip2020-03-31_11-27-20" /></p>
+
+<h6 id="模型图流程说明-1">模型图流程说明</h6>
+
+<p>1)  Reactor 对象通过 select 监控客户端请求事件, 收到事件后，通过 dispatch 进行分发</p>
+
+<p>2)  如果建立连接请求, 则右 Acceptor 通过 accept 处理连接请求, 然后创建一个 Handler 对象处理完成连接后的各种事件</p>
+
+<p>3)  如果不是连接请求，则由 reactor 分发调用连接对应的 handler 来处理</p>
+
+<p>4)  handler 只负责响应事件，不做具体的业务处理, 通过 read 读取数据后，会分发给后面的 worker 线程池的某个 线程处理业务</p>
+
+<p>5)  worker 线程池会分配独立线程完成真正的业务，并将结果返回给 handler</p>
+
+<p>6)  handler 收到响应后，通过 send 将结果返回给 client</p>
+
+<h6 id="模型优缺点分析-1">模型优缺点分析</h6>
+
+<p>1)  优点：可以充分的利用多核 cpu 的处理能力</p>
+
+<p>2)  缺点：多线程数据共享和访问比较复杂， reactor 处理所有的事件的监听和响应，在单线程运行， 在高并发场 景容易出现性能瓶颈.</p>
+
+<h5 id="3-主从-reactor-多线程图">3.  主从 Reactor 多线程图</h5>
+
+<p>针对单 Reactor 多线程模型中，Reactor 在单线程中运行，高并发场景下容易成为性能瓶颈，可以让 Reactor 在 多线程中运行</p>
+
+<p><img src="/img/Xnip2020-03-31_11-32-19.png" alt="Xnip2020-03-31_11-32-19" /></p>
+
+<h6 id="模型图流程说明-2">模型图流程说明</h6>
+
+<p>1)  Reactor 主线程 MainReactor 对象通过 select 监听连接事件, 收到事件后，通过 Acceptor 处理连接事件</p>
+
+<p>2)  当 Acceptor 处理连接事件后，MainReactor 将连接分配给 SubReactor</p>
+
+<p>3)  subreactor 将连接加入到连接队列进行监听,并创建 handler 进行各种事件处理</p>
+
+<p>4)  当有新事件发生时， subreactor 就会调用对应的 handler 处理</p>
+
+<p>5)  handler 通过 read 读取数据，分发给后面的 worker 线程处理</p>
+
+<p>6)  worker 线程池分配独立的 worker 线程进行业务处理，并返回结果</p>
+
+<p>7)  handler 收到响应的结果后，再通过 send 将结果返回给 client</p>
+
+<p>8)  Reactor 主线程可以对应多个 Reactor 子线程, 即 MainRecator 可以关联多个 SubReactor</p>
+
+<h6 id="模型优缺点说明">模型优缺点说明</h6>
+
+<p>1) 优点：父线程与子线程的数据交互简单职责明确，父线程只需要接收新连接，子线程完成后续的业务处理。</p>
+
+<p>2) 优点：父线程与子线程的数据交互简单，Reactor 主线程只需要把新连接传给子线程，子线程无需返回数据。</p>
+
+<p>3) 缺点：编程复杂度较高</p>
+
+<p>结合实例：这种模型在许多项目中广泛使用，包括 Nginx 主从 Reactor 多进程模型，Memcached 主从多线程， Netty 主从多线程模型的支持</p>
+
+<h4 id="reactor-模式小结">Reactor 模式小结</h4>
+
+<p>3 种模式用生活案例来理解</p>
+
+<p>1) 单 Reactor 单线程，前台接待员和服务员是同一个人，全程为顾客服</p>
+
+<p>2) 单 Reactor 多线程，1 个前台接待员，多个服务员，接待员只负责接待</p>
+
+<p>3) 主从 Reactor 多线程，多个前台接待员，多个服务生</p>
+
+<h6 id="优点-1">优点</h6>
+
+<p>1) 响应快，不必为单个同步时间所阻塞，虽然 Reactor 本身依然是同步的</p>
+
+<p>2) 可以最大程度的避免复杂的多线程及同步问题，并且避免了多线程/进程的切换开销</p>
+
+<p>3) 扩展性好，可以方便的通过增加 Reactor 实例个数来充分利用 CPU 资源</p>
+
+<p>4) 复用性好，Reactor 模型本身与具体事件处理逻辑无关，具有很高的复用性</p>
+
+<h3 id="netty-模型">Netty 模型</h3>
+
+<p>Netty 主要基于主从 Reactors 多线程模型（如图）做了一定的改进，其中主从 Reactor 多线程模型有多个 Reactor</p>
+
+<h5 id="工作原理示意图">工作原理示意图</h5>
+
+<p><img src="/img/Xnip2020-03-31_14-20-37.png" alt="Xnip2020-03-31_14-20-37" /></p>
+
+<h5 id="模型图流程说明-3">模型图流程说明</h5>
+
+<p>1) BossGroup 线程维护 Selector , 只关注 Accecpt</p>
+
+<p>2) 当接收到 Accept 事件，获取到对应的 SocketChannel, 封装成 NIOScoketChannel 并注册到 Worker 线程(事件循 环), 并进行维护</p>
+
+<p>3) 当 Worker 线程监听到 selector 中通道发生自己感兴趣的事件后，就进行处理(就由 handler)， 注意 handler 已 经加入到通道</p>
+
+<h5 id="工作原理示意图-进阶版">工作原理示意图-进阶版</h5>
+
+<p><img src="/img/Xnip2020-03-31_14-23-36.png" alt="Xnip2020-03-31_14-23-36" /></p>
+
+<h5 id="工作原理示意图-详细版">工作原理示意图-详细版</h5>
+
+<p><img src="/img/Xnip2020-03-31_14-25-52.png" alt="Xnip2020-03-31_14-25-52" /></p>
+
+<h6 id="工作原理图流程说明">工作原理图流程说明</h6>
+
+<p>1) Netty 抽象出两组线程池 BossGroup 专门负责接收客户端的连接, WorkerGroup 专门负责网络的读写</p>
+
+<p>2) BossGroup 和 WorkerGroup 类型都是 NioEventLoopGroup</p>
+
+<p>3) NioEventLoopGroup 相当于一个事件循环组, 这个组中含有多个事件循环 ，每一个事件循环是 NioEventLoop</p>
+
+<p>4) NioEventLoop 表示一个不断循环的执行处理任务的线程， 每个 NioEventLoop 都有一个 selector , 用于监听绑 定在其上的 socket 的网络通讯</p>
+
+<p>5) NioEventLoopGroup 可以有多个线程, 即可以含有多个 NioEventLoop</p>
+
+<p>6) 每个 Boss NioEventLoop 循环执行的步骤有 3 步</p>
+
+<ul>
+<li>轮询 accept 事件</li>
+<li>处理 accept 事件 , 与 client 建立连接 , 生成 NioScocketChannel , 并将其注册到某个 worker NIOEventLoop 上 的 selector</li>
+<li>处理任务队列的任务 ， 即 runAllTasks</li>
+</ul>
+
+<p>7) 每个 Worker NIOEventLoop 循环执行的步骤</p>
+
+<ul>
+<li>轮询 read, write 事件</li>
+<li>处理 i/o 事件， 即 read , write 事件，在对应 NioScocketChannel 处理</li>
+<li>处理任务队列的任务 ， 即 runAllTasks</li>
+</ul>
+
+<p>8) <strong>每个Worker NIOEventLoop 处理业务时，会使用pipeline(管道)</strong>, pipeline 中包含了 channel , 即通过pipeline 可以获取到对应通道, 管道中维护了很多的 处理器</p>
+
+<h1 id="netty-快速入门实例-tcp-服务">Netty 快速入门实例-TCP 服务</h1>
+
+<h2 id="nettyserver">NettyServer</h2>
+
+<pre><code class="language-java">package com.nettycode;
+/*
+ * @Description: 请输入....
+ * @Author: 麦子
+ * @Date: 2020-03-23 15:54:55
+ * @LastEditTime: 2020-03-23 17:46:08
+ * @LastEditors: 麦子
+ */
+
+import io.netty.bootstrap.ServerBootstrap;
+import io.netty.channel.ChannelFuture;
+import io.netty.channel.ChannelInitializer;
+import io.netty.channel.ChannelOption;
+import io.netty.channel.EventLoopGroup;
+import io.netty.channel.nio.NioEventLoopGroup;
+import io.netty.channel.socket.SocketChannel;
+import io.netty.channel.socket.nio.NioServerSocketChannel;
+
+public class NettyServer {
+
+    public static void main(String[] args) throws Exception {
+        // 创建 BossGroup 和 WorkerGroup
+        // 说明
+        // 1. 创建两个线程组 bossGroup 和 workerGroup
+        // 2. bossGroup 只是处理连接请求 , 真正的和客户端业务处理，会交给 workerGroup 完成
+        // 3. 两个都是无限循环
+        // 4. bossGroup 和 workerGroup 含有的子线程(NioEventLoop)的个数
+        // 默认实际 cpu 核数 * 2
+        EventLoopGroup bossGroup = new NioEventLoopGroup(1);
+        EventLoopGroup workerGroup = new NioEventLoopGroup();
+        try {
+            // 创建服务器端的启动对象，配置参数
+            ServerBootstrap bootstrap = new ServerBootstrap();
+
+            // 使用链式编程来进行设置
+            bootstrap.group(bossGroup, workerGroup) // 设置两个线程组
+                    .channel(NioServerSocketChannel.class) // 使用 NioSocketChannel 作为服务器的通道实现
+                    .option(ChannelOption.SO_BACKLOG, 128) // 设置线程队列得到连接个数
+                    .childOption(ChannelOption.SO_KEEPALIVE, true) // 设置保持活动连接状态
+                    .childHandler(new ChannelInitializer&lt;SocketChannel&gt;() {// 创建一个通道测试对象(匿名对象)
+                        // 给 pipeline 设置处理器
+                        @Override
+                        protected void initChannel(SocketChannel ch) throws Exception {
+                            
+                            ch.pipeline().addLast(new NettyServerHandler());
+                        }
+                    }); // 给我们的 workerGroup 的 EventLoop 对应的管道设置处理器
+
+            System.out.println(&quot;.....服务器 is ready...&quot;);
+
+            // 绑定一个端口并且同步, 生成了一个 ChannelFuture 对象
+            // 启动服务器(并绑定端口)
+            ChannelFuture cf = bootstrap.bind(6668).sync();
+
+            // 对关闭通道进行监听
+            cf.channel().closeFuture().sync();
+        } finally {
+            bossGroup.shutdownGracefully();
+            workerGroup.shutdownGracefully();
+        }
+
+    }
+
+}
+</code></pre>
+
+<h2 id="nettyserverhandler">NettyServerHandler</h2>
+
+<pre><code class="language-java">package com.nettycode;
+/*
+ * @Description: 请输入....
+ * @Author: 麦子
+ * @Date: 2020-03-23 16:04:39
+ * @LastEditTime: 2020-03-23 16:09:08
+ * @LastEditors: 麦子
+ */
+
+import io.netty.buffer.ByteBuf;
+import io.netty.buffer.Unpooled;
+import io.netty.channel.Channel;
+import io.netty.channel.ChannelHandlerContext;
+import io.netty.channel.ChannelInboundHandlerAdapter;
+import io.netty.channel.ChannelPipeline;
+import io.netty.util.CharsetUtil;
+
+/* 说明 
+    1. 我们自定义一个 Handler 需要继续 netty 规定好的某个 HandlerAdapter(规范) 
+    2. 这时我们自定义一个 Handler , 才能称为一个 handler 
+*/
+public class NettyServerHandler extends ChannelInboundHandlerAdapter {
+
+    // 读取数据实际(这里我们可以读取客户端发送的消息)
+    /*
+     * 1. ChannelHandlerContext ctx:上下文对象, 含有 管道 pipeline , 通道 channel, 地址 
+     * 2. Object msg: 就是客户端发送的数据 默认 Object
+     */
+
+    @Override
+    public void channelRead(ChannelHandlerContext ctx, Object msg) throws Exception {
+
+        System.out.println(&quot;服务器读取线程 &quot; + Thread.currentThread().getName());
+        System.out.println(&quot;server ctx =&quot; + ctx);
+        System.out.println(&quot;看看 channel 和 pipeline 的关系&quot;);
+        Channel channel = ctx.channel();
+        ChannelPipeline pipeline = ctx.pipeline(); // 本质是一个双向链接, 出站入站
+
+        // 将 msg 转成一个 ByteBuf
+        // ByteBuf 是 Netty 提供的，不是 NIO 的 ByteBuffer.
+        ByteBuf buf = (ByteBuf) msg;
+        System.out.println(&quot;客户端发送消息是:&quot; + buf.toString(CharsetUtil.UTF_8));
+        System.out.println(&quot;客户端地址:&quot; + channel.remoteAddress());
+
+    }
+
+    // 数据读取完毕
+    @Override
+    public void channelReadComplete(ChannelHandlerContext ctx) throws Exception {
+
+        // writeAndFlush 是 write + flush
+        // 将数据写入到缓存，并刷新
+        // 一般讲，我们对这个发送的数据进行编码
+        ctx.writeAndFlush(Unpooled.copiedBuffer(&quot;hello, 客户端~(&gt;^ω^&lt;)喵&quot;, CharsetUtil.UTF_8));
+
+    }
+
+    // 处理异常, 一般是需要关闭通道
+    @Override
+    public void exceptionCaught(ChannelHandlerContext ctx, Throwable cause) throws Exception {
+
+        ctx.close();
+    }
+
+}
+</code></pre>
+
+<h2 id="nettyclient">NettyClient</h2>
+
+<pre><code class="language-java">package com.nettycode;
+/*
+ * @Description: 请输入....
+ * @Author: 麦子
+ * @Date: 2020-03-23 16:09:31
+ * @LastEditTime: 2020-03-23 16:13:18
+ * @LastEditors: 麦子
+ */
+
+import io.netty.bootstrap.Bootstrap;
+import io.netty.channel.ChannelFuture;
+import io.netty.channel.ChannelInitializer;
+import io.netty.channel.EventLoopGroup;
+import io.netty.channel.nio.NioEventLoopGroup;
+import io.netty.channel.socket.SocketChannel;
+import io.netty.channel.socket.nio.NioSocketChannel;
+
+public class NettyClient {
+    public static void main(String[] args) throws Exception {
+        // 客户端需要一个事件循环组
+        EventLoopGroup group = new NioEventLoopGroup();
+        try {
+            // 创建客户端启动对象
+            // 注意客户端使用的不是 ServerBootstrap 而是 Bootstrap
+            Bootstrap bootstrap = new Bootstrap();
+            // 设置相关参数
+            bootstrap.group(group) // 设置线程组
+                    .channel(NioSocketChannel.class) // 设置客户端通道的实现类(反射)
+                    .handler(new ChannelInitializer&lt;SocketChannel&gt;() {
+                        @Override
+                        protected void initChannel(SocketChannel ch) throws Exception {
+
+                            ch.pipeline().addLast(new NettyClientHandler()); // 加入自己的处理器
+                        }
+
+                    });
+            System.out.println(&quot;客户端 ok..&quot;);
+            // 启动客户端去连接服务器端
+            // 关于 ChannelFuture 要分析，涉及到 netty 的异步模型
+            ChannelFuture channelFuture = bootstrap.connect(&quot;127.0.0.1&quot;, 6668).sync();
+            // 给关闭通道进行监听
+            channelFuture.channel().closeFuture().sync();
+        } catch (Exception e) {
+            e.printStackTrace();
+        } finally {
+            group.shutdownGracefully();
+        }
+    }
+}
+</code></pre>
+
+<h2 id="nettyclienthandler">NettyClientHandler</h2>
+
+<pre><code class="language-java">package com.nettycode;
+/*
+ * @Description: 请输入....
+ * @Author: 麦子
+ * @Date: 2020-03-23 16:13:37
+ * @LastEditTime: 2020-03-23 17:34:14
+ * @LastEditors: 麦子
+ */
+
+import io.netty.buffer.ByteBuf;
+import io.netty.buffer.Unpooled;
+import io.netty.channel.ChannelHandlerContext;
+import io.netty.channel.ChannelInboundHandlerAdapter;
+import io.netty.util.CharsetUtil;
+
+public class NettyClientHandler extends ChannelInboundHandlerAdapter {
+    // 当通道就绪就会触发该方法
+    @Override
+    public void channelActive(ChannelHandlerContext ctx) throws Exception {
+        System.out.println(&quot;client &quot; + ctx);
+        ctx.writeAndFlush(Unpooled.copiedBuffer(&quot;hello, server: (&gt;^ω^&lt;)喵&quot;, CharsetUtil.UTF_8));
+    }
+
+    // 当通道有读取事件时，会触发
+    @Override
+    public void channelRead(ChannelHandlerContext ctx, Object msg) throws Exception {
+        ByteBuf buf = (ByteBuf) msg;
+        System.out.println(&quot;服务器回复的消息:&quot; + buf.toString(CharsetUtil.UTF_8));
+        System.out.println(&quot;服务器的地址： &quot; + ctx.channel().remoteAddress());
+
+    }
+
+    @Override
+    public void exceptionCaught(ChannelHandlerContext ctx, Throwable cause) throws Exception {
+        cause.printStackTrace();
+        ctx.close();
+    }
+}
+</code></pre>
+
+<h2 id="运行结果">运行结果</h2>
+
+<h3 id="nettyserver-1">NettyServer</h3>
+
+<pre><code class="language-java">.....服务器 is ready...
+服务器读取线程 nioEventLoopGroup-3-1
+server ctx =ChannelHandlerContext(NettyServerHandler#0, [id: 0xbdccf16a, L:/127.0.0.1:6668 - R:/127.0.0.1:51303])
+看看 channel 和 pipeline 的关系
+客户端发送消息是:hello, server: (&gt;^ω^&lt;)喵
+客户端地址:/127.0.0.1:51303
+</code></pre>
+
+<h3 id="nettyclient-1">NettyClient</h3>
+
+<pre><code class="language-java">客户端 ok..
+client ChannelHandlerContext(NettyClientHandler#0, [id: 0x3a07b054, L:/127.0.0.1:51303 - R:/127.0.0.1:6668])
+服务器回复的消息:hello, 客户端~(&gt;^ω^&lt;)喵
+服务器的地址： /127.0.0.1:6668
+</code></pre>
+
+<h1 id="任务队列中的-task-有-3-种典型使用场景">任务队列中的 Task 有 3 种典型使用场景</h1>
+
+<h2 id="1-用户程序自定义的普通任务">1. 用户程序自定义的普通任务</h2>
+
+<pre><code class="language-java"> @Override
+    public void channelRead(ChannelHandlerContext ctx, Object msg) throws Exception {
+
+        // 比如这里我们有一个非常耗时长的业务-&gt; 异步执行 -&gt; 提交该 channel 对应的
+        // NIOEventLoop 的 taskQueue 中,
+        // 解决方案 1 用户程序自定义的普通任务
+        ctx.channel().eventLoop().execute(new Runnable() {
+            @Override
+            public void run() {
+
+                try {
+
+                    Thread.sleep(5 * 1000);
+                    ctx.writeAndFlush(Unpooled.copiedBuffer(&quot;hello, 客户端~(&gt;^ω^&lt;)喵 2&quot;, CharsetUtil.UTF_8));
+                    System.out.println(&quot;channel code=&quot; + ctx.channel().hashCode());
+                } catch (Exception ex) {
+
+                    System.out.println(&quot;发生异常&quot; + ex.getMessage());
+                }
+
+            }
+
+        });
+
+        ctx.channel().eventLoop().execute(new Runnable() {
+            @Override
+            public void run() {
+
+                try {
+
+                    Thread.sleep(5 * 1000);
+                    ctx.writeAndFlush(Unpooled.copiedBuffer(&quot;hello, 客户端~(&gt;^ω^&lt;)喵 3&quot;, CharsetUtil.UTF_8));
+                    System.out.println(&quot;channel code=&quot; + ctx.channel().hashCode());
+                } catch (Exception ex) {
+
+                    System.out.println(&quot;发生异常&quot; + ex.getMessage());
+                }
+
+            }
+
+        });
+
+    }
+
+</code></pre>
+
+<p><strong>注意：这里的都是放到一个队列中的，两个任务，有先后顺序的。</strong></p>
+
+<h2 id="2-用户自定义定时任务">2.  用户自定义定时任务</h2>
+
+<pre><code class="language-java">   @Override
+    public void channelRead(ChannelHandlerContext ctx, Object msg) throws Exception {
+        // 解决方案 2 : 用户自定义定时任务 -》 该任务是提交到 scheduledTaskQueue 中
+
+        ctx.channel().eventLoop().schedule(new Runnable() {
+            @Override
+            public void run() {
+
+                try {
+
+                    Thread.sleep(5 * 1000);
+                    ctx.writeAndFlush(Unpooled.copiedBuffer(&quot;hello, 客户端~(&gt;^ω^&lt;)喵 4&quot;, CharsetUtil.UTF_8));
+                    System.out.println(&quot;channel code=&quot; + ctx.channel().hashCode());
+                } catch (Exception ex) {
+
+                    System.out.println(&quot;发生异常&quot; + ex.getMessage());
+                }
+
+            }
+        }, 5, TimeUnit.SECONDS);
+
+    }
+</code></pre>
+
+<h2 id="3-非当前-reactor-线程调用-channel-的各种方法">3. 非当前 Reactor 线程调用 Channel 的各种方法</h2>
+
+<p>例如在推送系统的业务线程里面，<strong>根据用户的标识，找到对应的 Channel 引用，然后调用 Write 类方法向该用户推送消息，就会进入到这种场景。</strong>最终的 Write 会提交到任务队列中后被异步消费。</p>
+
+<h2 id="针对队列方案流程说明">针对队列方案流程说明</h2>
+
+<p>1) Netty 抽象出两组线程池， BossGroup 专门负责接收客户端连接， WorkerGroup 专门负责网络读写操作。</p>
+
+<p>2) NioEventLoop 表示一个不断循环执行处理任务的线程，每个 NioEventLoop 都有一个 selector， 用于监听绑定 在其上的 socket 网络通道。</p>
+
+<p>3) NioEventLoop 内部采用串行化设计，<strong>从消息的读取-&gt;解码-&gt;处理-&gt;编码-&gt;发送</strong>，始终由 IO 线程 NioEventLoop 负责</p>
+
+<p>   </p>
+
+<p>NioEventLoopGroup 下包含多个 NioEventLoop</p>
+
+<ul>
+<li>每个 NioEventLoop 中包含有一个 Selector， 一个 taskQueue</li>
+<li>每个 NioEventLoop 的 Selector 上可以注册监听多个 NioChannel</li>
+<li>每个 NioChannel 只会绑定在唯一的 NioEventLoop 上</li>
+<li>每个 NioChannel 都绑定有一个自己的 ChannelPipeline</li>
+</ul>
+
+<h1 id="异步模型">异步模型</h1>
+
+<p>和java自带的FutureTask相同。查看文章《多线程基础》里面对FutureTask基础。</p>
+
+<h2 id="基本介绍">基本介绍</h2>
+
+<p>1)  异步的概念和同步相对。当一个异步过程调用发出后，调用者不能立刻得到结果。实际处理这个调用的组件在 完成后，通过状态、通知和回调来通知调用者。</p>
+
+<p>2)  Netty 中的 I/O 操作是异步的，包括 Bind、Write、Connect 等操作会简单的返回一个 ChannelFuture。</p>
+
+<p>3)  调用者并不能立刻获得结果，而是通过 Future-Listener 机制，用户可以方便的主动获取或者通过通知机制获得 IO 操作结果</p>
+
+<p>4)  Netty 的异步模型是建立在 future 和 callback 的之上的。callback 就是回调。重点说 Future，它的核心思想 是：假设一个方法 fun，计算过程可能非常耗时，等待 fun 返回显然不合适。那么可以在调用 fun 的时候，立 马返回一个 Future，后续可以通过 Future 去监控方法 fun 的处理过程(即 ： Future-Listener 机制)</p>
+
+<h2 id="future-说明">Future 说明</h2>
+
+<p>1) 表示异步的执行结果, 可以通过它提供的方法来检测执行是否完成，比如检索计算等等.</p>
+
+<p>2) ChannelFuture 是一个接口 ：</p>
+
+<pre><code class="language-java"> public interface ChannelFuture extends Future&lt;Void&gt; 
+</code></pre>
+
+<p>我们可以添加监听器，当监听的事件发生时，就会通知到监听器.</p>
+
+<p><img src="/img/Xnip2020-03-31_14-59-19.png" alt="Xnip2020-03-31_14-59-19" /></p>
+
+<p>说明:</p>
+
+<p>1) 在使用 Netty 进行编程时，拦截操作和转换出入站数据只需要您提供 callback 或利用 future 即可。这使得链 式操作简单、高效, 并有利于编写可重用的、通用的代码。</p>
+
+<p>2) Netty 框架的目标就是让你的业务逻辑从网络基础应用编码中分离出来、解脱出来</p>
+
+<h2 id="future-listener-机制">Future-Listener 机制</h2>
+
+<p>1) 当 Future 对象刚刚创建时，处于非完成状态，调用者可以通过返回的 ChannelFuture 来获取操作执行的状态， 注册监听函数来执行完成后的操作。</p>
+
+<p>2) 常见有如下操作</p>
+
+<pre><code class="language-java">isDone #方法来判断当前操作是否完成； 
+isSuccess #方法来判断已完成的当前操作是否成功； 
+getCause #方法来获取已完成的当前操作失败的原因； 
+isCancelled #方法来判断已完成的当前操作是否被取消； 
+addListener #方法来注册监听器，当操作已完成(isDone 方法返回完成)，将会通知指定的监听器；如果 Future 对象已完成，则通知指定的监听器
+</code></pre>
+
+<h3 id="举例说明">举例说明</h3>
+
+<pre><code class="language-java">ChannelFuture cf = bootstrap.bind(6668).sync();
+cf.addListener(new ChannelFutureListener() {
+            @Override
+            public void operationComplete(ChannelFuture future) throws Exception {
+                if (cf.isSuccess()) {
+
+                    System.out.println(&quot;监听端口 6668 成功&quot;);
+                } else {
+
+                    System.out.println(&quot;监听端口 6668 失败&quot;);
+                }
+
+            }
+
+        });
+</code></pre>
+
+
+                
+                
+<div class="entry-shang text-center">
+    
+	    <p>「真诚赞赏，手留余香」</p>
+	
+	<button class="zs show-zs btn btn-bred">赞赏支持</button>
+</div>
+<div class="zs-modal-bg"></div>
+<div class="zs-modal-box">
+	<div class="zs-modal-head">
+		<button type="button" class="close">×</button>
+		<span class="author"><a href="http://maizitoday.github.io/"><img src="/img/favicon.png" /></a></span>
+        
+	        <p class="tip"><i></i><span>真诚赞赏，手留余香</span></p>
+		
+ 
+	</div>
+	<div class="zs-modal-body">
+		<div class="zs-modal-btns">
+			<button class="btn btn-blink" data-num="2">2元</button>
+			<button class="btn btn-blink" data-num="5">5元</button>
+			<button class="btn btn-blink" data-num="10">10元</button>
+			<button class="btn btn-blink" data-num="50">50元</button>
+			<button class="btn btn-blink" data-num="100">100元</button>
+			<button class="btn btn-blink" data-num="1">任意金额</button>
+		</div>
+		<div class="zs-modal-pay">
+			<button class="btn btn-bred" id="pay-text">2元</button>
+			<p>使用<span id="pay-type">微信</span>扫描二维码完成支付</p>
+			<img src="/img/reward/wechat-2.png"  id="pay-image"/>
+		</div>
+	</div>
+	<div class="zs-modal-footer">
+		<label><input type="radio" name="zs-type" value="wechat" class="zs-type" checked="checked"><span ><span class="zs-wechat"><img src="/img/reward/wechat-btn.png"/></span></label>
+		<label><input type="radio" name="zs-type" value="alipay" class="zs-type" class="zs-alipay"><img src="/img/reward/alipay-btn.png"/></span></label>
+	</div>
+</div>
+<script type="text/javascript" src="/js/reward.js"></script>
+
+                
+
+                <hr>
+                <ul class="pager">
+                    
+                    <li class="previous">
+                        <a href="/post/java%E5%9F%BA%E7%A1%80-randomaccessfile/" data-toggle="tooltip" data-placement="top" title="RandomAccessFile">&larr;
+                            Previous Post</a>
+                    </li>
+                    
+                    
+                </ul>
+
+                
+<div id="disqus-comment"></div>
+
+
+
+            </div>
+            
+            <div class="
+                col-lg-8 col-lg-offset-2
+                col-md-10 col-md-offset-1
+                sidebar-container">
+
+                
+                
+                <section>
+                    <hr class="hidden-sm hidden-xs">
+                    <h5><a href="/tags/">FEATURED TAGS</a></h5>
+                    <div class="tags">
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        <a href="/tags/zookeeper" title="Zookeeper">
+                            Zookeeper
+                        </a>
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        <a href="/tags/docker" title="docker">
+                            docker
+                        </a>
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        <a href="/tags/elasticsearch" title="elasticSearch">
+                            elasticSearch
+                        </a>
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        <a href="/tags/java%E5%9F%BA%E7%A1%80" title="java基础">
+                            java基础
+                        </a>
+                        
+                        
+                        
+                        <a href="/tags/java%E7%9B%B8%E5%85%B3%E6%A6%82%E5%BF%B5" title="java相关概念">
+                            java相关概念
+                        </a>
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        <a href="/tags/jvm" title="jvm">
+                            jvm
+                        </a>
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        <a href="/tags/maven" title="maven">
+                            maven
+                        </a>
+                        
+                        
+                        
+                        <a href="/tags/mongodb" title="mongodb">
+                            mongodb
+                        </a>
+                        
+                        
+                        
+                        
+                        
+                        <a href="/tags/mybatis%E7%B3%BB%E5%88%97" title="mybatis系列">
+                            mybatis系列
+                        </a>
+                        
+                        
+                        
+                        <a href="/tags/mycat" title="mycat">
+                            mycat
+                        </a>
+                        
+                        
+                        
+                        
+                        
+                        <a href="/tags/mysql%E7%B3%BB%E5%88%97" title="mysql系列">
+                            mysql系列
+                        </a>
+                        
+                        
+                        
+                        
+                        
+                        <a href="/tags/nginx" title="nginx">
+                            nginx
+                        </a>
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        <a href="/tags/redis" title="redis">
+                            redis
+                        </a>
+                        
+                        
+                        
+                        <a href="/tags/rocketmq" title="rocketmq">
+                            rocketmq
+                        </a>
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        <a href="/tags/shell" title="shell">
+                            shell
+                        </a>
+                        
+                        
+                        
+                        <a href="/tags/shiro" title="shiro">
+                            shiro
+                        </a>
+                        
+                        
+                        
+                        
+                        
+                        <a href="/tags/springcloud" title="springCloud">
+                            springCloud
+                        </a>
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        <a href="/tags/springboot%E7%B3%BB%E5%88%97" title="springboot系列">
+                            springboot系列
+                        </a>
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        <a href="/tags/%E5%88%86%E5%B8%83%E5%BC%8F%E7%B3%BB%E5%88%97" title="分布式系列">
+                            分布式系列
+                        </a>
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        <a href="/tags/%E5%8D%95%E7%82%B9%E7%99%BB%E5%BD%95" title="单点登录">
+                            单点登录
+                        </a>
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        <a href="/tags/%E5%A4%9A%E7%BA%BF%E7%A8%8B%E5%92%8C%E9%AB%98%E5%B9%B6%E5%8F%91" title="多线程和高并发">
+                            多线程和高并发
+                        </a>
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        <a href="/tags/%E5%BC%80%E5%8F%91%E5%B7%A5%E5%85%B7" title="开发工具">
+                            开发工具
+                        </a>
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        <a href="/tags/%E6%95%B0%E6%8D%AE%E5%BA%93" title="数据库">
+                            数据库
+                        </a>
+                        
+                        
+                        
+                        
+                        
+                        <a href="/tags/%E6%95%B0%E6%8D%AE%E7%BB%93%E6%9E%84" title="数据结构">
+                            数据结构
+                        </a>
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        <a href="/tags/%E7%BD%91%E7%BB%9C%E7%BC%96%E7%A8%8B" title="网络编程">
+                            网络编程
+                        </a>
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        <a href="/tags/%E8%AE%BE%E8%AE%A1%E6%A8%A1%E5%BC%8F" title="设计模式">
+                            设计模式
+                        </a>
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        <a href="/tags/%E8%B4%9F%E8%BD%BD%E5%9D%87%E8%A1%A1" title="负载均衡">
+                            负载均衡
+                        </a>
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        <a href="/tags/%E9%9D%A2%E8%AF%95%E9%97%AE%E9%A2%98%E6%94%B6%E9%9B%86" title="面试问题收集">
+                            面试问题收集
+                        </a>
+                        
+                        
+                    </div>
+                </section>
+                
+
+                
+                
+                <section>
+                    <hr>
+                    <h5>FRIENDS</h5>
+                    <ul class="list-inline">
+                        
+                        <li><a target="_blank" href="https://zhaohuabing.com">赵化冰博客</a></li>
+                        
+                        <li><a target="_blank" href="http://www.tianshouzhi.com">田守枝</a></li>
+                        
+                        <li><a target="_blank" href="http://www.ityouknow.com">纯洁的微笑</a></li>
+                        
+                        <li><a target="_blank" href="https://renchunxiao.com">任春晓</a></li>
+                        
+                        <li><a target="_blank" href="https://www.lihongkun.com">泛泛之辈</a></li>
+                        
+                        <li><a target="_blank" href="https://juejin.im/welcome/backend">后端服务论坛</a></li>
+                        
+                        <li><a target="_blank" href="https://www.javaboy.org">江南一点雨</a></li>
+                        
+                        <li><a target="_blank" href="https://blog.csdn.net/gwd1154978352">东天里的冬天</a></li>
+                        
+                    </ul>
+                </section>
+                
+            </div>
+        </div>
+    </div>
+</article>
+
+
+
+
+<footer>
+    <div class="container">
+        <div class="row">
+            <div class="col-lg-8 col-lg-offset-2 col-md-10 col-md-offset-1">
+                <ul class="list-inline text-center">
+                   
+                   <li>
+                       <a href="" rel="alternate" type="application/rss+xml" title="" >
+                           <span class="fa-stack fa-lg">
+                               <i class="fa fa-circle fa-stack-2x"></i>
+                               <i class="fa fa-rss fa-stack-1x fa-inverse"></i>
+                           </span>
+                       </a>
+                   </li>
+                   
+                    
+                    <li>
+                        <a href="mailto:maiziybtoday@gmail.com">
+                            <span class="fa-stack fa-lg">
+                                <i class="fa fa-circle fa-stack-2x"></i>
+                                <i class="fa fa-envelope fa-stack-1x fa-inverse"></i>
+                            </span>
+                        </a>
+                    </li>
+		    
+                    
+                    
+                    
+                    
+
+                    
+
+		    
+                    
+                    <li>
+                        <a target="_blank" href="/your%20wechat%20qr%20code%20image">
+                            <span class="fa-stack fa-lg">
+                                <i class="fa fa-circle fa-stack-2x"></i>
+                                <i class="fa fa-wechat fa-stack-1x fa-inverse"></i>
+                            </span>
+                        </a>
+                    </li>
+		    
+                    
+                    
+                    <li>
+                        <a target="_blank" href="https://www.linkedin.com/in/yourlinkedinid">
+                            <span class="fa-stack fa-lg">
+                                <i class="fa fa-circle fa-stack-2x"></i>
+                                <i class="fa fa-linkedin fa-stack-1x fa-inverse"></i>
+                            </span>
+                        </a>
+                    </li>
+		    
+                    
+                </ul>
+		<p class="copyright text-muted">
+                    Copyright &copy;  2020
+                    <br>
+                    <a href="https://themes.gohugo.io/hugo-theme-cleanwhite">CleanWhite Hugo Theme</a> by <a href="https://zhaohuabing.com">Huabing</a> |
+                    <iframe
+                        style="margin-left: 2px; margin-bottom:-5px;"
+                        frameborder="0" scrolling="0" width="100px" height="20px"
+                        src="https://ghbtns.com/github-btn.html?user=zhaohuabing&repo=hugo-theme-cleanwhite&type=star&count=true" >
+                    </iframe>
+                </p>
+            </div>
+        </div>
+    </div>
+</footer>
+
+
+
+
+<script>
+    function async(u, c) {
+      var d = document, t = 'script',
+          o = d.createElement(t),
+          s = d.getElementsByTagName(t)[0];
+      o.src = u;
+      if (c) { o.addEventListener('load', function (e) { c(null, e); }, false); }
+      s.parentNode.insertBefore(o, s);
+    }
+</script>
+
+
+
+
+
+
+<script>
+    
+    if($('#tag_cloud').length !== 0){
+        async("/js/jquery.tagcloud.js",function(){
+            $.fn.tagcloud.defaults = {
+                
+                color: {start: '#bbbbee', end: '#0085a1'},
+            };
+            $('#tag_cloud a').tagcloud();
+        })
+    }
+</script>
+
+
+<script>
+    async("https://cdnjs.cloudflare.com/ajax/libs/fastclick/1.0.6/fastclick.js", function(){
+        var $nav = document.querySelector("nav");
+        if($nav) FastClick.attach($nav);
+    })
+</script>
+
+
+
+
+
+
+</body>
+</html>
