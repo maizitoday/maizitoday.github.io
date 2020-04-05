@@ -1,0 +1,1679 @@
+<!DOCTYPE html>
+<html lang="en-us">
+<head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+
+    
+    <meta property="og:site_name" content="">
+    <meta property="og:type" content="article">
+
+    
+    <meta property="og:image" content="http://maizitoday.github.io//img/home-bg-jeep.jpg">
+    <meta property="twitter:image" content="http://maizitoday.github.io//img/home-bg-jeep.jpg" />
+    
+
+    
+    <meta name="title" content="Netty编码和解码--Protobuf" />
+    <meta property="og:title" content="Netty编码和解码--Protobuf" />
+    <meta property="twitter:title" content="Netty编码和解码--Protobuf" />
+    
+
+    
+    <meta name="description" content="Protobuf传输，Protobuf取代JSON格式">
+    <meta property="og:description" content="Protobuf传输，Protobuf取代JSON格式" />
+    <meta property="twitter:description" content="Protobuf传输，Protobuf取代JSON格式" />
+    
+
+    
+    <meta property="twitter:card" content="summary" />
+    
+    
+
+    <meta name="keyword"  content="麦子, maizi, maizi, , 麦子的网络日志, 麦子的博客, maizi Blog, 博客, 个人网站, 互联网, Web, 云原生, PaaS, Istio, Kubernetes, 微服务, Microservice">
+    <link rel="shortcut icon" href="/img/favicon.ico">
+
+    <title>Netty编码和解码--Protobuf-麦子的博客</title>
+
+    <link rel="canonical" href="/post/netty-google-protobuf/">
+
+    <link rel="stylesheet" href="/css/iDisqus.min.css"/>
+	
+    
+    <link rel="stylesheet" href="/css/bootstrap.min.css">
+
+    
+    <link rel="stylesheet" href="/css/hux-blog.min.css">
+
+    
+    <link rel="stylesheet" href="/css/syntax.css">
+
+    
+    <link rel="stylesheet" href="/css/zanshang.css">
+
+    
+    <link href="//cdnjs.cloudflare.com/ajax/libs/font-awesome/4.6.3/css/font-awesome.min.css" rel="stylesheet" type="text/css">
+    
+    
+    <script src="/js/jquery.min.js"></script>
+    
+    
+    <script src="/js/bootstrap.min.js"></script>
+    
+    
+    <script src="/js/hux-blog.min.js"></script>
+	
+    
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.13.1/styles/docco.min.css">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.13.1/highlight.min.js"></script>
+    <script>hljs.initHighlightingOnLoad();</script>
+</head>
+
+
+
+<nav class="navbar navbar-default navbar-custom navbar-fixed-top">
+    <div class="container-fluid">
+        
+        <div class="navbar-header page-scroll">
+            <button type="button" class="navbar-toggle">
+                <span class="sr-only">Toggle navigation</span>
+                <span class="icon-bar"></span>
+                <span class="icon-bar"></span>
+                <span class="icon-bar"></span>
+            </button>
+            <a class="navbar-brand" href="/"></a>
+        </div>
+
+        
+        
+        <div id="huxblog_navbar">
+            <div class="navbar-collapse">
+                <ul class="nav navbar-nav navbar-right">
+                    <li>
+                        <a href="/">Home</a>
+                    </li>
+                    
+                    <li>
+                        <a href="/categories/life">Life</a>
+                    </li>
+                    
+                    <li>
+                        <a href="/categories/tech">Tech</a>
+                    </li>
+                    
+
+                    
+                    <li><a href="/top/about/">ABOUT</a></li>
+                    
+
+
+                    
+                    <li>
+                        <a href="/archive">ARCHIVE</a>
+                    </li>
+                    
+
+
+                    
+                    <li>
+                        <a href="/search">SEARCH <img src="/img/search.png" height="15"
+                                style="cursor: pointer;" alt="Search"></a>
+                    </li>
+                    
+
+                </ul>
+            </div>
+        </div>
+        
+    </div>
+    
+</nav>
+<script>
+    
+    
+    
+    var $body = document.body;
+    var $toggle = document.querySelector('.navbar-toggle');
+    var $navbar = document.querySelector('#huxblog_navbar');
+    var $collapse = document.querySelector('.navbar-collapse');
+
+    $toggle.addEventListener('click', handleMagic)
+
+    function handleMagic(e) {
+        if ($navbar.className.indexOf('in') > 0) {
+            
+            $navbar.className = " ";
+            
+            setTimeout(function () {
+                
+                if ($navbar.className.indexOf('in') < 0) {
+                    $collapse.style.height = "0px"
+                }
+            }, 400)
+        } else {
+            
+            $collapse.style.height = "auto"
+            $navbar.className += " in";
+        }
+    }
+</script>
+
+
+
+<style type="text/css">
+    header.intro-header {
+        background-image: url('https://c.pxhere.com/images/e4/46/bd237f6583029424694a0d16589b-1435053.jpg!d')
+    }
+</style>
+<header class="intro-header">
+    <div class="container">
+        <div class="row">
+            <div class="col-lg-8 col-lg-offset-2 col-md-10 col-md-offset-1">
+                <div class="post-heading">
+                    <div class="tags">
+                        
+                        <a class="tag" href="/tags/%E7%BD%91%E7%BB%9C%E7%BC%96%E7%A8%8B" title="网络编程">
+                            网络编程
+                        </a>
+                        
+                    </div>
+                    <h1>Netty编码和解码--Protobuf</h1>
+                    <h2 class="subheading"></h2>
+                    <span class="meta">
+			Posted by 
+			
+			    麦子
+			 
+			on 
+			Tuesday, March 31, 2020
+                        
+                    </span>
+                </div>
+            </div>
+        </div>
+    </div>
+</header>
+
+
+
+
+<article>
+    <div class="container">
+        <div class="row">
+
+            
+            <div class="
+                col-lg-8 col-lg-offset-2
+                col-md-10 col-md-offset-1
+                post-container">
+
+                
+                <header>
+                    <h2>TOC</h2>
+                </header>              
+                <nav id="TableOfContents">
+<ul>
+<li><a href="#编码和解码的基本介绍">编码和解码的基本介绍</a></li>
+<li><a href="#netty-本身的编码解码的机制和问题分析">Netty 本身的编码解码的机制和问题分析</a></li>
+<li><a href="#protobuf">Protobuf</a>
+<ul>
+<li><a href="#简介">简介</a></li>
+<li><a href="#优点">优点</a></li>
+<li><a href="#与json的比较">与json的比较</a></li>
+<li><a href="#相比json的优点">相比json的优点</a></li>
+<li><a href="#相比json的劣势">相比json的劣势</a></li>
+<li><a href="#mac安装protobuf">mac安装protobuf</a></li>
+<li><a href="#pom-xml-安装">pom.xml 安装</a></li>
+<li><a href="#proto文件和java字段转换">.proto文件和Java字段转换</a></li>
+<li><a href="#编写-proto文件">编写.proto文件</a></li>
+<li><a href="#编译生成-java-代码">编译生成 Java 代码</a></li>
+<li><a href="#使用生成的java代码">使用生成的Java代码</a></li>
+<li><a href="#运行结果">运行结果</a></li>
+</ul></li>
+<li><a href="#protobuf-快速入门实例">Protobuf 快速入门实例</a>
+<ul>
+<li><a href="#student-proto">Student.proto</a></li>
+<li><a href="#nettyserver">NettyServer</a></li>
+<li><a href="#nettyserverhandler">NettyServerHandler</a></li>
+<li><a href="#nettyclient">NettyClient</a></li>
+<li><a href="#nettyclienthandler">NettyClientHandler</a></li>
+<li><a href="#总结">总结</a></li>
+</ul></li>
+</ul>
+</nav>
+                
+                
+
+<p>[TOC]</p>
+
+<p><strong>说明文章资料来源：尚硅谷韩顺平Netty视频教程（2019发布） <a href="https://www.bilibili.com/video/av76227904?p=36">https://www.bilibili.com/video/av76227904?p=36</a></strong></p>
+
+<h1 id="编码和解码的基本介绍">编码和解码的基本介绍</h1>
+
+<p>1) 编写网络应用程序时，因为数据在网络中传输的都是二进制字节码数据，在发送数据时就需要编码，接收数据 时就需要解码 [示意图]</p>
+
+<p>2) codec(编解码器) 的组成部分有两个：decoder(解码器)和 encoder(编码器)。encoder 负责把业务数据转换成字节 码数据，decoder 负责把字节码数据转换成业务数据</p>
+
+<p><img src="/img/Xnip2020-04-01_17-18-08.png" alt="Xnip2020-04-01_17-18-08" /></p>
+
+<h1 id="netty-本身的编码解码的机制和问题分析">Netty 本身的编码解码的机制和问题分析</h1>
+
+<p>1) Netty 自身提供了一些 codec(编解码器)</p>
+
+<p>2) Netty 提供的编码器</p>
+
+<p>​      StringEncoder：对字符串数据进行编码</p>
+
+<p>​      ObjectEncoder：对 Java 对象进行编码</p>
+
+<p>3) Netty 提供的解码器</p>
+
+<p>​     StringDecoder, 对字符串数据进行解码</p>
+
+<p>​     ObjectDecoder，对 Java 对象进行解码</p>
+
+<p><strong>自带缺点</strong></p>
+
+<p>Netty 本身自带的 ObjectDecoder 和 ObjectEncoder 可以用来实现 POJO 对象或各种业务对象的编码和解码，底层使用的仍是 Java 序列化技术 , 而 Java 序列化技术本身效率就不高，存在如下问题</p>
+
+<ul>
+<li>无法跨语言</li>
+<li>序列化后的体积太大，是二进制编码的 5 倍多</li>
+<li>序列化性能太低</li>
+</ul>
+
+<h1 id="protobuf">Protobuf</h1>
+
+<p>原文链接：<a href="https://blog.csdn.net/love666666shen/article/details/89228450">https://blog.csdn.net/love666666shen/article/details/89228450</a></p>
+
+<p>原文地址：<a href="https://www.jianshu.com/p/bb3ac7e5834e">https://www.jianshu.com/p/bb3ac7e5834e</a></p>
+
+<h2 id="简介">简介</h2>
+
+<p>protobuf是Google开发出来的一个语言无关、平台无关的数据序列化工具，在rpc或tcp通信等很多场景都可以使用。通俗来讲，如果客户端和服务端使用的是不同的语言，那么在服务端定义一个数据结构，通过protobuf转化为字节流，再传送到客户端解码，就可以得到对应的数据结构。这就是protobuf神奇的地方。并且，它的通信效率极高，“一条消息数据，用protobuf序列化后的大小是json的10分之一，xml格式的20分之一，是二进制序列化的10分之一”</p>
+
+<p>支持跨平台、跨语言，即[客户端和服务器端可以是不同的语言编写的] （支持目前绝大多数语言，例如 C++、 C#、Java、python 等）</p>
+
+<p>在一些场景下，数据需要在不同的平台，不同的程序中进行传输和使用，例如某个消息是用C++程序产生的，而另一个程序是用java写的，当前者产生一个消息数据时，需要在不同的语言编写的不同的程序中进行操作，如何将消息发送并在各个程序中使用呢？这就需要设计一种消息格式，常用的就有json和xml，protobuf出现的则较晚。</p>
+
+<h2 id="优点">优点</h2>
+
+<ul>
+<li>protobuf 的主要有点是简单，快。</li>
+<li>protobuf将数据序列化为二进制之后，占用的空间相当小，基本仅保留了数据部分，而xml和json会附带消息结构在数据中。</li>
+<li>protobuf使用起来很方便，只需要反序列化就可以了，而不需要xml和json那样层层解析。</li>
+</ul>
+
+<h2 id="与json的比较">与json的比较</h2>
+
+<p>虽然Json用起来的确很方便，但相对于protobuf数据量更大些。无论是移动端还是PC端应用，为用户省点流量还是很有必要的，减少数据传输量不仅可以节约带宽而且可以更快地得到响应，提升用户体验。</p>
+
+<h2 id="相比json的优点">相比json的优点</h2>
+
+<ul>
+<li>跟Json相比protobuf性能更高，更加规范</li>
+<li>编解码速度快，数据体积小</li>
+<li>使用统一的规范，不用再担心大小写不同导致解析失败等问题</li>
+</ul>
+
+<h2 id="相比json的劣势">相比json的劣势</h2>
+
+<ul>
+<li>改动协议字段，需要重新生成文件。</li>
+<li>数据没有可读性</li>
+</ul>
+
+<h2 id="mac安装protobuf">mac安装protobuf</h2>
+
+<p>使用brew命令进行protobuf安装默认安装最新的版本</p>
+
+<pre><code>brew install protobuf
+
+#查看protoc版本
+lcc@lcc ~$ protoc --version
+libprotoc 3.6.0
+</code></pre>
+
+<h2 id="pom-xml-安装">pom.xml 安装</h2>
+
+<pre><code class="language-xml">&lt;dependency&gt;
+      &lt;groupId&gt;com.google.protobuf&lt;/groupId&gt;
+      &lt;artifactId&gt;protobuf-java&lt;/artifactId&gt;
+      &lt;version&gt;3.7.0&lt;/version&gt;
+&lt;/dependency&gt;
+</code></pre>
+
+<p><strong>注意：这个版本要和你安装的protobuf的版本要是一致的。</strong></p>
+
+<h2 id="proto文件和java字段转换">.proto文件和Java字段转换</h2>
+
+<p><img src="/img/Xnip2020-04-03_09-42-07.png" alt="Xnip2020-04-03_09-42-07" /></p>
+
+<h2 id="编写-proto文件">编写.proto文件</h2>
+
+<pre><code class="language-java">syntax = &quot;proto3&quot;;
+
+option java_package = &quot;com.nettycode&quot;; 
+option java_outer_classname = &quot;GpsDataProto&quot;;
+
+message gps_data {
+   int64 id = 1;
+    string terminalId = 2;
+    string dataTime = 3;
+    double lon = 4;
+    double lat = 5;
+    float speed = 6;
+    int32 altitude = 7;
+    int32 locType = 8;
+    int32 gpsStatus = 9;
+    float direction = 10;
+    int32 satellite = 11;
+}
+</code></pre>
+
+<h2 id="编译生成-java-代码">编译生成 Java 代码</h2>
+
+<ul>
+<li>-I 后面是 proto 文件所在目录</li>
+<li>&ndash;java_out 后面是 java 文件存放地址</li>
+<li>最后一行是 proto 文件名称</li>
+</ul>
+
+<pre><code class="language-shell">protoc -I=/vscode/高并发和网络编程/nettydemo/src/main/java/com/nettycode/proto --java_out=/vscode/高并发和网络编程/nettydemo/src/main/java/com/nettycode gps_data.proto
+</code></pre>
+
+<p><strong>注意：这里的地址要是绝对地址。</strong></p>
+
+<h2 id="使用生成的java代码">使用生成的Java代码</h2>
+
+<pre><code class="language-java">package com.nettycode;
+/*
+ * @Description: 请输入....
+ * @Author: 麦子
+ * @Date: 2020-04-03 10:04:27
+ * @LastEditTime: 2020-04-03 10:05:28
+ * @LastEditors: 麦子
+ */
+
+import com.google.protobuf.InvalidProtocolBufferException;
+
+public class GPSDataProtoTest {
+
+    public static void main(String[] args) {
+        System.out.println(&quot;===== 构建一个GPS模型开始 =====&quot;);
+        GpsDataProto.gps_data.Builder gps_builder = GpsDataProto.gps_data.newBuilder();
+        gps_builder.setAltitude(1);
+        gps_builder.setDataTime(&quot;2017-12-17 16:21:44&quot;);
+        gps_builder.setGpsStatus(1);
+        gps_builder.setLat(39.123);
+        gps_builder.setLon(120.112);
+        gps_builder.setDirection(30.2F);
+        gps_builder.setId(100L);
+
+        GpsDataProto.gps_data gps_data = gps_builder.build();
+        System.out.println(gps_data.toString());
+        System.out.println(&quot;===== 构建GPS模型结束 =====&quot;);
+
+        System.out.println(&quot;===== gps Byte 开始=====&quot;);
+        for (byte b : gps_data.toByteArray()) {
+            System.out.print(b);
+        }
+        System.out.println(&quot;\n&quot; + &quot;bytes长度&quot; + gps_data.toByteString().size());
+        System.out.println(&quot;===== gps Byte 结束 =====&quot;);
+
+        System.out.println(&quot;===== 使用gps 反序列化生成对象开始 =====&quot;);
+        GpsDataProto.gps_data gd = null;
+        try {
+            gd = GpsDataProto.gps_data.parseFrom(gps_data.toByteArray());
+        } catch (InvalidProtocolBufferException e) {
+            e.printStackTrace();
+        }
+        System.out.print(gd.toString());
+        System.out.println(&quot;===== 使用gps 反序列化生成对象结束 =====&quot;);
+    }
+    
+}
+</code></pre>
+
+<h2 id="运行结果">运行结果</h2>
+
+<pre><code class="language-java">===== 构建一个GPS模型开始 =====
+id: 100
+dataTime: &quot;2017-12-17 16:21:44&quot;
+lon: 120.112
+lat: 39.123
+altitude: 1
+gpsStatus: 1
+direction: 30.2
+
+===== 构建GPS模型结束 =====
+===== gps Byte 开始=====
+810026195048495545495045495532495458504958525233-707312243794644157-76-56118-66-113676456172185-102-103-1565
+bytes长度50
+===== gps Byte 结束 =====
+===== 使用gps 反序列化生成对象开始 =====
+id: 100
+dataTime: &quot;2017-12-17 16:21:44&quot;
+lon: 120.112
+lat: 39.123
+altitude: 1
+gpsStatus: 1
+direction: 30.2
+===== 使用gps 反序列化生成对象结束 =====
+</code></pre>
+
+<h1 id="protobuf-快速入门实例">Protobuf 快速入门实例</h1>
+
+<h2 id="student-proto">Student.proto</h2>
+
+<pre><code class="language-java">syntax = &quot;proto3&quot;; //版本
+option java_outer_classname = &quot;StudentPOJO&quot;;//生成的外部类名，同时也是文件名
+//protobuf 使用message 管理数据
+message Student { //会在 StudentPOJO 外部类生成一个内部类 Student， 他是真正发送的POJO对象
+    int32 id = 1; // Student 类中有 一个属性 名字为 id 类型为int32(protobuf类型) 1表示属性序号，不是值
+    string name = 2;
+}
+</code></pre>
+
+<h2 id="nettyserver">NettyServer</h2>
+
+<pre><code class="language-java">package com.atguigu.netty.codec;
+/*
+ * @Description: 请输入....
+ * @Author: 麦子
+ * @Date: 2019-10-28 11:40:46
+ * @LastEditTime: 2020-04-03 10:15:36
+ * @LastEditors: 麦子
+ */
+
+import io.netty.bootstrap.ServerBootstrap;
+import io.netty.channel.*;
+import io.netty.channel.nio.NioEventLoopGroup;
+import io.netty.channel.socket.SocketChannel;
+import io.netty.channel.socket.nio.NioServerSocketChannel;
+import io.netty.handler.codec.protobuf.ProtobufDecoder;
+
+public class NettyServer {
+    public static void main(String[] args) throws Exception {
+
+        EventLoopGroup bossGroup = new NioEventLoopGroup(1);
+        EventLoopGroup workerGroup = new NioEventLoopGroup(); // 8
+
+        try {
+
+            ServerBootstrap bootstrap = new ServerBootstrap();
+
+            bootstrap.group(bossGroup, workerGroup).channel(NioServerSocketChannel.class)
+                    .option(ChannelOption.SO_BACKLOG, 128) // 设置线程队列得到连接个数
+                    .childOption(ChannelOption.SO_KEEPALIVE, true) // 设置保持活动连接状态
+                    // .handler(null) // 该 handler对应 bossGroup , childHandler 对应 workerGroup
+                    .childHandler(new ChannelInitializer&lt;SocketChannel&gt;() {// 创建一个通道初始化对象(匿名对象)
+                        // 给pipeline 设置处理器
+                        @Override
+                        protected void initChannel(SocketChannel ch) throws Exception {
+                            ChannelPipeline pipeline = ch.pipeline();
+                            // 在pipeline加入ProtoBufDecoder
+                            // 指定对哪种对象进行解码
+                            pipeline.addLast(&quot;decoder&quot;, new ProtobufDecoder(StudentPOJO.Student.getDefaultInstance()));
+                            pipeline.addLast(new NettyServerHandler());
+                        }
+                    }); // 给我们的workerGroup 的 EventLoop 对应的管道设置处理器
+
+            System.out.println(&quot;.....服务器 is ready...&quot;);
+
+            // 绑定一个端口并且同步, 生成了一个 ChannelFuture 对象
+            // 启动服务器(并绑定端口)
+            ChannelFuture cf = bootstrap.bind(6668).sync();
+
+            // 给cf 注册监听器，监控我们关心的事件
+
+            cf.addListener(new ChannelFutureListener() {
+                @Override
+                public void operationComplete(ChannelFuture future) throws Exception {
+                    if (cf.isSuccess()) {
+                        System.out.println(&quot;监听端口 6668 成功&quot;);
+                    } else {
+                        System.out.println(&quot;监听端口 6668 失败&quot;);
+                    }
+                }
+            });
+
+            // 对关闭通道进行监听
+            cf.channel().closeFuture().sync();
+        } finally {
+            bossGroup.shutdownGracefully();
+            workerGroup.shutdownGracefully();
+        }
+
+    }
+
+}
+
+</code></pre>
+
+<h2 id="nettyserverhandler">NettyServerHandler</h2>
+
+<pre><code class="language-java">package com.atguigu.netty.codec;
+/*
+ * @Description: 请输入....
+ * @Author: 麦子
+ * @Date: 2019-10-28 11:44:22
+ * @LastEditTime: 2020-04-03 10:16:57
+ * @LastEditors: 麦子
+ */
+
+import io.netty.buffer.ByteBuf;
+import io.netty.buffer.Unpooled;
+import io.netty.channel.*;
+import io.netty.util.CharsetUtil;
+
+public class NettyServerHandler extends SimpleChannelInboundHandler&lt;StudentPOJO.Student&gt; {
+
+    // 读取数据实际(这里我们可以读取客户端发送的消息)
+    /*
+     * 1. ChannelHandlerContext ctx:上下文对象, 含有 管道pipeline , 通道channel, 地址 2. Object
+     * msg: 就是客户端发送的数据 默认Object
+     */
+    @Override
+    public void channelRead0(ChannelHandlerContext ctx, StudentPOJO.Student msg) throws Exception {
+
+        // 读取从客户端发送的StudentPojo.Student
+        System.out.println(&quot;客户端发送的数据 id=&quot; + msg.getId() + &quot; 名字=&quot; + msg.getName());
+    }
+
+
+    // 数据读取完毕
+    @Override
+    public void channelReadComplete(ChannelHandlerContext ctx) throws Exception {
+
+        // writeAndFlush 是 write + flush
+        // 将数据写入到缓存，并刷新
+        // 一般讲，我们对这个发送的数据进行编码
+        ctx.writeAndFlush(Unpooled.copiedBuffer(&quot;hello, 客户端~(&gt;^ω^&lt;)喵1&quot;, CharsetUtil.UTF_8));
+    }
+
+    // 处理异常, 一般是需要关闭通道
+
+    @Override
+    public void exceptionCaught(ChannelHandlerContext ctx, Throwable cause) throws Exception {
+        ctx.close();
+    }
+}
+
+</code></pre>
+
+<h2 id="nettyclient">NettyClient</h2>
+
+<pre><code class="language-java">package com.atguigu.netty.codec;
+/*
+ * @Description: 请输入....
+ * @Author: 麦子
+ * @Date: 2019-10-28 11:36:14
+ * @LastEditTime: 2020-04-03 10:17:42
+ * @LastEditors: 麦子
+ */
+
+import io.netty.bootstrap.Bootstrap;
+import io.netty.channel.ChannelFuture;
+import io.netty.channel.ChannelInitializer;
+import io.netty.channel.ChannelPipeline;
+import io.netty.channel.EventLoopGroup;
+import io.netty.channel.nio.NioEventLoopGroup;
+import io.netty.channel.socket.SocketChannel;
+import io.netty.channel.socket.nio.NioSocketChannel;
+import io.netty.handler.codec.protobuf.ProtobufEncoder;
+
+public class NettyClient {
+    public static void main(String[] args) throws Exception {
+
+        EventLoopGroup group = new NioEventLoopGroup();
+
+        try {
+
+            Bootstrap bootstrap = new Bootstrap();
+
+            // 设置相关参数
+            bootstrap.group(group) // 设置线程组
+                    .channel(NioSocketChannel.class) // 设置客户端通道的实现类(反射)
+                    .handler(new ChannelInitializer&lt;SocketChannel&gt;() {
+                        @Override
+                        protected void initChannel(SocketChannel ch) throws Exception {
+                            ChannelPipeline pipeline = ch.pipeline();
+                            // 在pipeline中加入 ProtoBufEncoder
+                            pipeline.addLast(&quot;encoder&quot;, new ProtobufEncoder());
+                            pipeline.addLast(new NettyClientHandler()); // 加入自己的处理器
+                        }
+                    });
+
+            System.out.println(&quot;客户端 ok..&quot;);
+
+            // 启动客户端去连接服务器端
+            // 关于 ChannelFuture 要分析，涉及到netty的异步模型
+            ChannelFuture channelFuture = bootstrap.connect(&quot;127.0.0.1&quot;, 6668).sync();
+            // 给关闭通道进行监听
+            channelFuture.channel().closeFuture().sync();
+        } finally {
+
+            group.shutdownGracefully();
+
+        }
+    }
+}
+
+</code></pre>
+
+<h2 id="nettyclienthandler">NettyClientHandler</h2>
+
+<pre><code class="language-java">package com.atguigu.netty.codec;
+
+import io.netty.buffer.ByteBuf;
+import io.netty.buffer.Unpooled;
+import io.netty.channel.ChannelHandlerContext;
+import io.netty.channel.ChannelInboundHandlerAdapter;
+import io.netty.util.CharsetUtil;
+
+public class NettyClientHandler extends ChannelInboundHandlerAdapter {
+
+    // 当通道就绪就会触发该方法
+    @Override
+    public void channelActive(ChannelHandlerContext ctx) throws Exception {
+
+        // 发生一个Student 对象到服务器
+
+        StudentPOJO.Student student = StudentPOJO.Student.newBuilder().setId(4).setName(&quot;智多星 吴用&quot;).build();
+        // Teacher , Member ,Message
+        ctx.writeAndFlush(student);
+    }
+
+    // 当通道有读取事件时，会触发
+    @Override
+    public void channelRead(ChannelHandlerContext ctx, Object msg) throws Exception {
+
+        ByteBuf buf = (ByteBuf) msg;
+        System.out.println(&quot;服务器回复的消息:&quot; + buf.toString(CharsetUtil.UTF_8));
+        System.out.println(&quot;服务器的地址： &quot; + ctx.channel().remoteAddress());
+    }
+
+    @Override
+    public void exceptionCaught(ChannelHandlerContext ctx, Throwable cause) throws Exception {
+        cause.printStackTrace();
+        ctx.close();
+    }
+}
+
+</code></pre>
+
+<h2 id="总结">总结</h2>
+
+<p>可以看到在编码和解码的时候都指定了这个protobuf生成的java文件类型，这里的ProtobufEncoder，ProtobufDecoder</p>
+
+<pre><code class="language-java"> pipeline.addLast(&quot;encoder&quot;, new ProtobufEncoder());
+ pipeline.addLast(&quot;decoder&quot;, new ProtobufDecoder(StudentPOJO.Student.getDefaultInstance()));
+</code></pre>
+
+<p>都是Netty包里面自带的类。</p>
+
+
+                
+                
+<div class="entry-shang text-center">
+    
+	    <p>「真诚赞赏，手留余香」</p>
+	
+	<button class="zs show-zs btn btn-bred">赞赏支持</button>
+</div>
+<div class="zs-modal-bg"></div>
+<div class="zs-modal-box">
+	<div class="zs-modal-head">
+		<button type="button" class="close">×</button>
+		<span class="author"><a href="http://maizitoday.github.io/"><img src="/img/favicon.png" /></a></span>
+        
+	        <p class="tip"><i></i><span>真诚赞赏，手留余香</span></p>
+		
+ 
+	</div>
+	<div class="zs-modal-body">
+		<div class="zs-modal-btns">
+			<button class="btn btn-blink" data-num="2">2元</button>
+			<button class="btn btn-blink" data-num="5">5元</button>
+			<button class="btn btn-blink" data-num="10">10元</button>
+			<button class="btn btn-blink" data-num="50">50元</button>
+			<button class="btn btn-blink" data-num="100">100元</button>
+			<button class="btn btn-blink" data-num="1">任意金额</button>
+		</div>
+		<div class="zs-modal-pay">
+			<button class="btn btn-bred" id="pay-text">2元</button>
+			<p>使用<span id="pay-type">微信</span>扫描二维码完成支付</p>
+			<img src="/img/reward/wechat-2.png"  id="pay-image"/>
+		</div>
+	</div>
+	<div class="zs-modal-footer">
+		<label><input type="radio" name="zs-type" value="wechat" class="zs-type" checked="checked"><span ><span class="zs-wechat"><img src="/img/reward/wechat-btn.png"/></span></label>
+		<label><input type="radio" name="zs-type" value="alipay" class="zs-type" class="zs-alipay"><img src="/img/reward/alipay-btn.png"/></span></label>
+	</div>
+</div>
+<script type="text/javascript" src="/js/reward.js"></script>
+
+                
+
+                <hr>
+                <ul class="pager">
+                    
+                    <li class="previous">
+                        <a href="/post/netty%E9%AB%98%E6%80%A7%E8%83%BD%E6%9E%B6%E6%9E%84%E8%AE%BE%E8%AE%A1%E5%8E%9F%E7%90%86/" data-toggle="tooltip" data-placement="top" title="Netty高性能架构设计原理">&larr;
+                            Previous Post</a>
+                    </li>
+                    
+                    
+                    <li class="next">
+                        <a href="/post/netty%E6%A0%B8%E5%BF%83%E6%A8%A1%E5%9D%97%E7%BB%84%E4%BB%B6/" data-toggle="tooltip" data-placement="top" title="Netty核心模块组件">Next
+                            Post &rarr;</a>
+                    </li>
+                    
+                </ul>
+
+                
+<div id="disqus-comment"></div>
+
+
+
+            </div>
+            
+            <div class="
+                col-lg-8 col-lg-offset-2
+                col-md-10 col-md-offset-1
+                sidebar-container">
+
+                
+                
+                <section>
+                    <hr class="hidden-sm hidden-xs">
+                    <h5><a href="/tags/">FEATURED TAGS</a></h5>
+                    <div class="tags">
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        <a href="/tags/zookeeper" title="Zookeeper">
+                            Zookeeper
+                        </a>
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        <a href="/tags/docker" title="docker">
+                            docker
+                        </a>
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        <a href="/tags/elasticsearch" title="elasticSearch">
+                            elasticSearch
+                        </a>
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        <a href="/tags/java%E5%9F%BA%E7%A1%80" title="java基础">
+                            java基础
+                        </a>
+                        
+                        
+                        
+                        <a href="/tags/java%E7%9B%B8%E5%85%B3%E6%A6%82%E5%BF%B5" title="java相关概念">
+                            java相关概念
+                        </a>
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        <a href="/tags/jvm" title="jvm">
+                            jvm
+                        </a>
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        <a href="/tags/maven" title="maven">
+                            maven
+                        </a>
+                        
+                        
+                        
+                        <a href="/tags/mongodb" title="mongodb">
+                            mongodb
+                        </a>
+                        
+                        
+                        
+                        
+                        
+                        <a href="/tags/mybatis%E7%B3%BB%E5%88%97" title="mybatis系列">
+                            mybatis系列
+                        </a>
+                        
+                        
+                        
+                        <a href="/tags/mycat" title="mycat">
+                            mycat
+                        </a>
+                        
+                        
+                        
+                        
+                        
+                        <a href="/tags/mysql%E7%B3%BB%E5%88%97" title="mysql系列">
+                            mysql系列
+                        </a>
+                        
+                        
+                        
+                        
+                        
+                        <a href="/tags/nginx" title="nginx">
+                            nginx
+                        </a>
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        <a href="/tags/redis" title="redis">
+                            redis
+                        </a>
+                        
+                        
+                        
+                        <a href="/tags/rocketmq" title="rocketmq">
+                            rocketmq
+                        </a>
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        <a href="/tags/shell" title="shell">
+                            shell
+                        </a>
+                        
+                        
+                        
+                        <a href="/tags/shiro" title="shiro">
+                            shiro
+                        </a>
+                        
+                        
+                        
+                        
+                        
+                        <a href="/tags/springcloud" title="springCloud">
+                            springCloud
+                        </a>
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        <a href="/tags/springboot%E7%B3%BB%E5%88%97" title="springboot系列">
+                            springboot系列
+                        </a>
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        <a href="/tags/%E5%88%86%E5%B8%83%E5%BC%8F%E7%B3%BB%E5%88%97" title="分布式系列">
+                            分布式系列
+                        </a>
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        <a href="/tags/%E5%8D%95%E7%82%B9%E7%99%BB%E5%BD%95" title="单点登录">
+                            单点登录
+                        </a>
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        <a href="/tags/%E5%A4%9A%E7%BA%BF%E7%A8%8B%E5%92%8C%E9%AB%98%E5%B9%B6%E5%8F%91" title="多线程和高并发">
+                            多线程和高并发
+                        </a>
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        <a href="/tags/%E5%BC%80%E5%8F%91%E5%B7%A5%E5%85%B7" title="开发工具">
+                            开发工具
+                        </a>
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        <a href="/tags/%E6%95%B0%E6%8D%AE%E5%BA%93" title="数据库">
+                            数据库
+                        </a>
+                        
+                        
+                        
+                        
+                        
+                        <a href="/tags/%E6%95%B0%E6%8D%AE%E7%BB%93%E6%9E%84" title="数据结构">
+                            数据结构
+                        </a>
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        <a href="/tags/%E7%BD%91%E7%BB%9C%E7%BC%96%E7%A8%8B" title="网络编程">
+                            网络编程
+                        </a>
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        <a href="/tags/%E8%AE%BE%E8%AE%A1%E6%A8%A1%E5%BC%8F" title="设计模式">
+                            设计模式
+                        </a>
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        <a href="/tags/%E8%B4%9F%E8%BD%BD%E5%9D%87%E8%A1%A1" title="负载均衡">
+                            负载均衡
+                        </a>
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        <a href="/tags/%E9%9D%A2%E8%AF%95%E9%97%AE%E9%A2%98%E6%94%B6%E9%9B%86" title="面试问题收集">
+                            面试问题收集
+                        </a>
+                        
+                        
+                    </div>
+                </section>
+                
+
+                
+                
+                <section>
+                    <hr>
+                    <h5>FRIENDS</h5>
+                    <ul class="list-inline">
+                        
+                        <li><a target="_blank" href="https://zhaohuabing.com">赵化冰博客</a></li>
+                        
+                        <li><a target="_blank" href="http://www.tianshouzhi.com">田守枝</a></li>
+                        
+                        <li><a target="_blank" href="http://www.ityouknow.com">纯洁的微笑</a></li>
+                        
+                        <li><a target="_blank" href="https://renchunxiao.com">任春晓</a></li>
+                        
+                        <li><a target="_blank" href="https://www.lihongkun.com">泛泛之辈</a></li>
+                        
+                        <li><a target="_blank" href="https://juejin.im/welcome/backend">后端服务论坛</a></li>
+                        
+                        <li><a target="_blank" href="https://www.javaboy.org">江南一点雨</a></li>
+                        
+                        <li><a target="_blank" href="https://blog.csdn.net/gwd1154978352">东天里的冬天</a></li>
+                        
+                    </ul>
+                </section>
+                
+            </div>
+        </div>
+    </div>
+</article>
+
+
+
+
+<footer>
+    <div class="container">
+        <div class="row">
+            <div class="col-lg-8 col-lg-offset-2 col-md-10 col-md-offset-1">
+                <ul class="list-inline text-center">
+                   
+                   <li>
+                       <a href="" rel="alternate" type="application/rss+xml" title="" >
+                           <span class="fa-stack fa-lg">
+                               <i class="fa fa-circle fa-stack-2x"></i>
+                               <i class="fa fa-rss fa-stack-1x fa-inverse"></i>
+                           </span>
+                       </a>
+                   </li>
+                   
+                    
+                    <li>
+                        <a href="mailto:maiziybtoday@gmail.com">
+                            <span class="fa-stack fa-lg">
+                                <i class="fa fa-circle fa-stack-2x"></i>
+                                <i class="fa fa-envelope fa-stack-1x fa-inverse"></i>
+                            </span>
+                        </a>
+                    </li>
+		    
+                    
+                    
+                    
+                    
+
+                    
+
+		    
+                    
+                    <li>
+                        <a target="_blank" href="/your%20wechat%20qr%20code%20image">
+                            <span class="fa-stack fa-lg">
+                                <i class="fa fa-circle fa-stack-2x"></i>
+                                <i class="fa fa-wechat fa-stack-1x fa-inverse"></i>
+                            </span>
+                        </a>
+                    </li>
+		    
+                    
+                    
+                    <li>
+                        <a target="_blank" href="https://www.linkedin.com/in/yourlinkedinid">
+                            <span class="fa-stack fa-lg">
+                                <i class="fa fa-circle fa-stack-2x"></i>
+                                <i class="fa fa-linkedin fa-stack-1x fa-inverse"></i>
+                            </span>
+                        </a>
+                    </li>
+		    
+                    
+                </ul>
+		<p class="copyright text-muted">
+                    Copyright &copy;  2020
+                    <br>
+                    <a href="https://themes.gohugo.io/hugo-theme-cleanwhite">CleanWhite Hugo Theme</a> by <a href="https://zhaohuabing.com">Huabing</a> |
+                    <iframe
+                        style="margin-left: 2px; margin-bottom:-5px;"
+                        frameborder="0" scrolling="0" width="100px" height="20px"
+                        src="https://ghbtns.com/github-btn.html?user=zhaohuabing&repo=hugo-theme-cleanwhite&type=star&count=true" >
+                    </iframe>
+                </p>
+            </div>
+        </div>
+    </div>
+</footer>
+
+
+
+
+<script>
+    function async(u, c) {
+      var d = document, t = 'script',
+          o = d.createElement(t),
+          s = d.getElementsByTagName(t)[0];
+      o.src = u;
+      if (c) { o.addEventListener('load', function (e) { c(null, e); }, false); }
+      s.parentNode.insertBefore(o, s);
+    }
+</script>
+
+
+
+
+
+
+<script>
+    
+    if($('#tag_cloud').length !== 0){
+        async("/js/jquery.tagcloud.js",function(){
+            $.fn.tagcloud.defaults = {
+                
+                color: {start: '#bbbbee', end: '#0085a1'},
+            };
+            $('#tag_cloud a').tagcloud();
+        })
+    }
+</script>
+
+
+<script>
+    async("https://cdnjs.cloudflare.com/ajax/libs/fastclick/1.0.6/fastclick.js", function(){
+        var $nav = document.querySelector("nav");
+        if($nav) FastClick.attach($nav);
+    })
+</script>
+
+
+
+
+
+
+</body>
+</html>
