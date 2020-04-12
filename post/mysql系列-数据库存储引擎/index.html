@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="en-us">
+
 <head>
     <meta charset="utf-8">
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
@@ -193,12 +194,12 @@
                     <h1>mysql系列-数据库存储引擎</h1>
                     <h2 class="subheading"></h2>
                     <span class="meta">
-			Posted by 
-			
-			         &#34;麦子&#34;
-			 
-			on 
-			Wednesday, August 28, 2019
+                        Posted by
+                        
+                             &#34;麦子&#34;
+                        
+                        on
+                        Wednesday, August 28, 2019
                         
                     </span>
                 </div>
@@ -216,94 +217,15 @@
 
             
             <div class="
-                col-lg-8 col-lg-offset-2
+                col-lg-8 col-lg-offset-0
                 col-md-10 col-md-offset-1
                 post-container">
 
                 
-                <header>
-                    <h2>TOC</h2>
-                </header>              
-                <nav id="TableOfContents">
-<ul>
-<li><a href="#为什么要合理选择数据库存储引擎">为什么要合理选择数据库存储引擎</a>
-<ul>
-<li><a href="#定义">定义</a></li>
-<li><a href="#如何修改数据库引擎">如何修改数据库引擎</a>
-<ul>
-<li><a href="#1-修改配置文件my-ini">1.  修改配置文件my.ini</a></li>
-<li><a href="#2-在建表的时候指定">2.   在建表的时候指定</a></li>
-<li><a href="#3-建表后更改">3.   建表后更改</a></li>
-<li><a href="#4-查看修改成功">4.  查看修改成功</a></li>
-<li><a href="#5-查看当前支持的引擎">5.  查看当前支持的引擎</a></li>
-</ul></li>
-</ul></li>
-<li><a href="#常用三种引擎">常用三种引擎</a>
-<ul>
-<li><a href="#innodb引擎-默认的存储引擎">InnoDB引擎（默认的存储引擎）</a>
-<ul>
-<li><a href="#定义-1">定义</a></li>
-<li><a href="#适用场景">适用场景</a>
-<ul>
-<li><a href="#1-经常更新的表-适合处理多重并发的更新请求">1.  经常更新的表，适合处理多重并发的更新请求。</a></li>
-<li><a href="#2-支持事务">2.  支持事务。</a></li>
-<li><a href="#3-可以从灾难中恢复-通过bin-log日志等">3.  可以从灾难中恢复（通过bin-log日志等）。</a></li>
-<li><a href="#4-外键约束-只有他支持外键">4.  外键约束。只有他支持外键。</a></li>
-<li><a href="#5-支持自动增加列属性auto-increment">5.  支持自动增加列属性auto_increment。</a></li>
-</ul></li>
-</ul></li>
-<li><a href="#myisam">MyIsam</a>
-<ul>
-<li><a href="#定义-2">定义</a></li>
-<li><a href="#适用场景-1">适用场景</a>
-<ul>
-<li><a href="#1-不支持事务的设计-可以在service层进行根据自己的业务需求进行相应的控制">1.  不支持事务的设计，可以在service层进行根据自己的业务需求进行相应的控制。</a></li>
-<li><a href="#2-不支持外键的表设计">2.  不支持外键的表设计。</a></li>
-<li><a href="#3-查询速度很快-如果数据库insert和update的操作比较多的话比较适用">3.  查询速度很快，如果数据库insert和update的操作比较多的话比较适用。</a></li>
-<li><a href="#4-整天-对表进行加锁的场景">4.   整天 对表进行加锁的场景。</a></li>
-<li><a href="#5-myisam极度强调快速读取操作">5.   MyISAM极度强调快速读取操作。</a></li>
-<li><a href="#6-myiasm中存储了表的行数-于是select-count-from-table时只需要直接读取已经保存好的值而不需要进行全表扫描-如果表的读操作远远多于写操作且不需要数据库事务的支持-那么myiasm也是很好的选择">6.   MyIASM中存储了表的行数，于是SELECT COUNT(*) FROM TABLE时只需要直接读取已经保存好的值而不需要进行全表扫描。如果表的读操作远远多于写操作且不需要数据库事务的支持，那么MyIASM也是很好的选择。</a></li>
-<li><a href="#7-isam执行读取操作的速度很快-而且不占用大量的内存和存储资源">7.   ISAM执行读取操作的速度很快，而且不占用大量的内存和存储资源。</a></li>
-</ul></li>
-<li><a href="#缺点">缺点</a>
-<ul>
-<li><a href="#1-就是不能在表损坏后恢复数据-是不能主动恢复">1.  就是不能在表损坏后恢复数据。（是不能主动恢复）</a></li>
-<li><a href="#2-也不能够容错">2.  也不能够容错。</a></li>
-</ul></li>
-</ul></li>
-<li><a href="#mrg-myisam-分表的一种方式-水平分表">Mrg_Myisam(分表的一种方式–水平分表)</a>
-<ul>
-<li><a href="#定义-3">定义</a></li>
-</ul></li>
-</ul></li>
-<li><a href="#innodb和myisam使用及其原理对比">InnoDB和MyIsam使用及其原理对比</a>
-<ul>
-<li><a href="#1-百万级插入">1.  百万级插入</a></li>
-<li><a href="#2-对比更新">2.  对比更新</a></li>
-<li><a href="#3-查询总数目">3.  查询总数目</a></li>
-<li><a href="#4-存储大小">4.  存储大小</a></li>
-<li><a href="#效果对比总述">效果对比总述</a>
-<ul>
-<li><a href="#1-事务">1.  事务</a></li>
-<li><a href="#2-性能主题">2.  性能主题</a></li>
-<li><a href="#3-行数保存">3.  行数保存</a></li>
-<li><a href="#4-索引存储">4.  索引存储</a></li>
-<li><a href="#5-服务器数据备份">5.  服务器数据备份</a></li>
-<li><a href="#6-锁的支持">6.  锁的支持</a></li>
-</ul></li>
-<li><a href="#使用建议">使用建议</a>
-<ul>
-<li><a href="#以下两点-必须使用-innodb">以下两点<strong>必须使用</strong> InnoDB</a></li>
-<li><a href="#myisam的使用场景">MyISAM的使用场景</a></li>
-</ul></li>
-</ul></li>
-<li><a href="#innodb和myisam引擎原理">InnoDB和MyIsam引擎原理</a>
-<ul>
-<li><a href="#myiasm引擎的索引结构">MyIASM引擎的索引结构</a></li>
-<li><a href="#innodb引擎的索引结构">InnoDB引擎的索引结构</a></li>
-</ul></li>
-</ul>
-</nav>
+                
+                
+                
+                
                 
                 
 
@@ -652,13 +574,15 @@ select count(*) from school.testMyIsam; // 0.002 秒
                 <ul class="pager">
                     
                     <li class="previous">
-                        <a href="/post/mysql%E7%B3%BB%E5%88%97-%E7%B4%A2%E5%BC%95%E7%9A%84%E4%BD%BF%E7%94%A8%E5%8E%9F%E7%90%86%E5%92%8C%E8%AE%BE%E8%AE%A1%E4%BC%98%E5%8C%96/" data-toggle="tooltip" data-placement="top" title="mysql系列-索引的使用、原理和设计优化">&larr;
+                        <a href="/post/mysql%E7%B3%BB%E5%88%97-%E7%B4%A2%E5%BC%95%E7%9A%84%E4%BD%BF%E7%94%A8%E5%8E%9F%E7%90%86%E5%92%8C%E8%AE%BE%E8%AE%A1%E4%BC%98%E5%8C%96/" data-toggle="tooltip" data-placement="top"
+                            title="mysql系列-索引的使用、原理和设计优化">&larr;
                             Previous Post</a>
                     </li>
                     
                     
                     <li class="next">
-                        <a href="/post/java%E7%9B%B8%E5%85%B3%E6%A6%82%E5%BF%B5-%E5%AD%97%E8%8A%82%E4%B8%BA%E4%BB%80%E4%B9%88%E5%8F%AF%E4%BB%A5%E5%AD%98%E5%82%A8%E6%B1%89%E5%AD%97/" data-toggle="tooltip" data-placement="top" title="字节为什么可以存储汉字">Next
+                        <a href="/post/java%E7%9B%B8%E5%85%B3%E6%A6%82%E5%BF%B5-%E5%AD%97%E8%8A%82%E4%B8%BA%E4%BB%80%E4%B9%88%E5%8F%AF%E4%BB%A5%E5%AD%98%E5%82%A8%E6%B1%89%E5%AD%97/" data-toggle="tooltip" data-placement="top"
+                            title="字节为什么可以存储汉字">Next
                             Post &rarr;</a>
                     </li>
                     
@@ -670,9 +594,102 @@ select count(*) from school.testMyIsam; // 0.002 秒
 
 
             </div>
+
             
             <div class="
-                col-lg-8 col-lg-offset-2
+            col-lg-4 col-lg-offset-0
+            visible-lg-block
+            sidebar-container
+            catalog-container">
+
+                <hr class="hidden-sm hidden-xs">
+                <nav id="TableOfContents">
+<ul>
+<li><a href="#为什么要合理选择数据库存储引擎">为什么要合理选择数据库存储引擎</a>
+<ul>
+<li><a href="#定义">定义</a></li>
+<li><a href="#如何修改数据库引擎">如何修改数据库引擎</a>
+<ul>
+<li><a href="#1-修改配置文件my-ini">1.  修改配置文件my.ini</a></li>
+<li><a href="#2-在建表的时候指定">2.   在建表的时候指定</a></li>
+<li><a href="#3-建表后更改">3.   建表后更改</a></li>
+<li><a href="#4-查看修改成功">4.  查看修改成功</a></li>
+<li><a href="#5-查看当前支持的引擎">5.  查看当前支持的引擎</a></li>
+</ul></li>
+</ul></li>
+<li><a href="#常用三种引擎">常用三种引擎</a>
+<ul>
+<li><a href="#innodb引擎-默认的存储引擎">InnoDB引擎（默认的存储引擎）</a>
+<ul>
+<li><a href="#定义-1">定义</a></li>
+<li><a href="#适用场景">适用场景</a>
+<ul>
+<li><a href="#1-经常更新的表-适合处理多重并发的更新请求">1.  经常更新的表，适合处理多重并发的更新请求。</a></li>
+<li><a href="#2-支持事务">2.  支持事务。</a></li>
+<li><a href="#3-可以从灾难中恢复-通过bin-log日志等">3.  可以从灾难中恢复（通过bin-log日志等）。</a></li>
+<li><a href="#4-外键约束-只有他支持外键">4.  外键约束。只有他支持外键。</a></li>
+<li><a href="#5-支持自动增加列属性auto-increment">5.  支持自动增加列属性auto_increment。</a></li>
+</ul></li>
+</ul></li>
+<li><a href="#myisam">MyIsam</a>
+<ul>
+<li><a href="#定义-2">定义</a></li>
+<li><a href="#适用场景-1">适用场景</a>
+<ul>
+<li><a href="#1-不支持事务的设计-可以在service层进行根据自己的业务需求进行相应的控制">1.  不支持事务的设计，可以在service层进行根据自己的业务需求进行相应的控制。</a></li>
+<li><a href="#2-不支持外键的表设计">2.  不支持外键的表设计。</a></li>
+<li><a href="#3-查询速度很快-如果数据库insert和update的操作比较多的话比较适用">3.  查询速度很快，如果数据库insert和update的操作比较多的话比较适用。</a></li>
+<li><a href="#4-整天-对表进行加锁的场景">4.   整天 对表进行加锁的场景。</a></li>
+<li><a href="#5-myisam极度强调快速读取操作">5.   MyISAM极度强调快速读取操作。</a></li>
+<li><a href="#6-myiasm中存储了表的行数-于是select-count-from-table时只需要直接读取已经保存好的值而不需要进行全表扫描-如果表的读操作远远多于写操作且不需要数据库事务的支持-那么myiasm也是很好的选择">6.   MyIASM中存储了表的行数，于是SELECT COUNT(*) FROM TABLE时只需要直接读取已经保存好的值而不需要进行全表扫描。如果表的读操作远远多于写操作且不需要数据库事务的支持，那么MyIASM也是很好的选择。</a></li>
+<li><a href="#7-isam执行读取操作的速度很快-而且不占用大量的内存和存储资源">7.   ISAM执行读取操作的速度很快，而且不占用大量的内存和存储资源。</a></li>
+</ul></li>
+<li><a href="#缺点">缺点</a>
+<ul>
+<li><a href="#1-就是不能在表损坏后恢复数据-是不能主动恢复">1.  就是不能在表损坏后恢复数据。（是不能主动恢复）</a></li>
+<li><a href="#2-也不能够容错">2.  也不能够容错。</a></li>
+</ul></li>
+</ul></li>
+<li><a href="#mrg-myisam-分表的一种方式-水平分表">Mrg_Myisam(分表的一种方式–水平分表)</a>
+<ul>
+<li><a href="#定义-3">定义</a></li>
+</ul></li>
+</ul></li>
+<li><a href="#innodb和myisam使用及其原理对比">InnoDB和MyIsam使用及其原理对比</a>
+<ul>
+<li><a href="#1-百万级插入">1.  百万级插入</a></li>
+<li><a href="#2-对比更新">2.  对比更新</a></li>
+<li><a href="#3-查询总数目">3.  查询总数目</a></li>
+<li><a href="#4-存储大小">4.  存储大小</a></li>
+<li><a href="#效果对比总述">效果对比总述</a>
+<ul>
+<li><a href="#1-事务">1.  事务</a></li>
+<li><a href="#2-性能主题">2.  性能主题</a></li>
+<li><a href="#3-行数保存">3.  行数保存</a></li>
+<li><a href="#4-索引存储">4.  索引存储</a></li>
+<li><a href="#5-服务器数据备份">5.  服务器数据备份</a></li>
+<li><a href="#6-锁的支持">6.  锁的支持</a></li>
+</ul></li>
+<li><a href="#使用建议">使用建议</a>
+<ul>
+<li><a href="#以下两点-必须使用-innodb">以下两点<strong>必须使用</strong> InnoDB</a></li>
+<li><a href="#myisam的使用场景">MyISAM的使用场景</a></li>
+</ul></li>
+</ul></li>
+<li><a href="#innodb和myisam引擎原理">InnoDB和MyIsam引擎原理</a>
+<ul>
+<li><a href="#myiasm引擎的索引结构">MyIASM引擎的索引结构</a></li>
+<li><a href="#innodb引擎的索引结构">InnoDB引擎的索引结构</a></li>
+</ul></li>
+</ul>
+</nav>
+
+            </div>
+
+
+            
+            <div class="
+                col-lg-10 col-lg-offset-0
                 col-md-10 col-md-offset-1
                 sidebar-container">
 
@@ -1458,7 +1475,6 @@ select count(*) from school.testMyIsam; // 0.002 秒
         </div>
     </div>
 </article>
-
 
 
 
