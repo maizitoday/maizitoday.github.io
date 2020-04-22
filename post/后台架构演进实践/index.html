@@ -22,9 +22,9 @@
     
 
     
-    <meta name="description" content="达达O2O后台架构演进实践：从0到4000高并发请求背后的努力">
-    <meta property="og:description" content="达达O2O后台架构演进实践：从0到4000高并发请求背后的努力" />
-    <meta property="twitter:description" content="达达O2O后台架构演进实践：从0到4000高并发请求背后的努力" />
+    <meta name="description" content="读写分离，主从复制，水平扩展，业务垂直拆分">
+    <meta property="og:description" content="读写分离，主从复制，水平扩展，业务垂直拆分" />
+    <meta property="twitter:description" content="读写分离，主从复制，水平扩展，业务垂直拆分" />
     
 
     
@@ -289,9 +289,9 @@
 
 <h2 id="2-我们的读写分离方案">2.  我们的读写分离方案</h2>
 
-<p>当Web应用服务出现性能瓶颈的时候，由于服务本身无状态（stateless），我们可以通过加机器的水平扩展方式来解决。 而数据库显然无法通过简单的添加机器来实现扩展，因此我们采取了MySQL主从同步和应用服务端读写分离的方案。</p>
+<p>当Web应用服务出现性能瓶颈的时候，由于服务本身无状态（stateless），我们可以通过加机器的水平扩展方式来解决。 而数据库显然无法通过简单的添加机器来实现扩展，<strong>因此我们采取了MySQL主从同步和应用服务端读写分离的方案。</strong></p>
 
-<p>MySQL支持主从同步，实时将主库的数据增量复制到从库，而且一个主库可以连接多个从库同步。</p>
+<p>MySQL支持主从同步，实时将主库的数据增量复制到从库，<strong>而且一个主库可以连接多个从库同步。</strong></p>
 
 <p><strong>利用MySQL的此特性，我们在应用服务端对每次请求做读写判断：</strong></p>
 
@@ -483,6 +483,14 @@
 
 <p><strong>如果用雪花算法进行创建ID的话，需要注意把数据库的分库标识也放入进去。</strong></p>
 
+<h1 id="主从同步和读写分离区别">主从同步和读写分离区别</h1>
+
+<p><strong>主从同步：</strong>MySQL主从同步，这个是针对数据库的自己的设置。</p>
+
+<p><strong>读写分离：</strong>应用服务端读写分离的方案，这个是针对服务端的选择。</p>
+
+<p>如果通过MyCat来进行处理的话， 通过配置文件达到读写分离的效果和主从同步处理。<a href="https://maizitoday.github.io/post/mycat入门/#undefined">mycat入门</a></p>
+
 <h1 id="总结">总结</h1>
 
 <p>创业是与时间赛跑的过程，前期为了快速满足业务需求，我们采用简单高效的方案，如使用云服务、应用服务直接访问单点DB。</p>
@@ -588,6 +596,7 @@
 <li><a href="#从架构上-我们将系统分为三层">从架构上，我们将系统分为三层</a></li>
 <li><a href="#数据访问层主要包含三部分">数据访问层主要包含三部分</a></li>
 <li><a href="#id生成器">ID生成器</a></li>
+<li><a href="#主从同步和读写分离区别">主从同步和读写分离区别</a></li>
 <li><a href="#总结">总结</a></li>
 </ul>
 </nav>
@@ -840,8 +849,6 @@
                         
                         
                         
-                        
-                        
                         <a href="/tags/maven" title="maven">
                             maven
                         </a>
@@ -914,8 +921,6 @@
                         
                         
                         
-                        
-                        
                         <a href="/tags/shell" title="shell">
                             shell
                         </a>
@@ -947,14 +952,6 @@
                         <a href="/tags/springboot%E7%B3%BB%E5%88%97" title="springboot系列">
                             springboot系列
                         </a>
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
                         
                         
                         
@@ -1185,8 +1182,6 @@
                         <a href="/tags/%E6%95%B0%E6%8D%AE%E7%BB%93%E6%9E%84" title="数据结构">
                             数据结构
                         </a>
-                        
-                        
                         
                         
                         
