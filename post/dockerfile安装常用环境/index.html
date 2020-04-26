@@ -22,9 +22,9 @@
     
 
     
-    <meta name="description" content="麦子，程序员, 开源爱好者，生活探险家 | 这里是 麦子 的博客，与你一起发现更大的世界。">
-    <meta property="og:description" content="麦子，程序员, 开源爱好者，生活探险家 | 这里是 麦子 的博客，与你一起发现更大的世界。" />
-    <meta property="twitter:description" content="麦子，程序员, 开源爱好者，生活探险家 | 这里是 麦子 的博客，与你一起发现更大的世界。" />
+    <meta name="description" content="Nginx,MySql，Oracle，Redis，MongoDB，ElasticSearch,Kibana,Logstash,RockerMQ,Centos7等环境安装">
+    <meta property="og:description" content="Nginx,MySql，Oracle，Redis，MongoDB，ElasticSearch,Kibana,Logstash,RockerMQ,Centos7等环境安装" />
+    <meta property="twitter:description" content="Nginx,MySql，Oracle，Redis，MongoDB，ElasticSearch,Kibana,Logstash,RockerMQ,Centos7等环境安装" />
     
 
     
@@ -246,7 +246,88 @@ docker tag  XX镜像id   XX新的名字
 
 </code></pre>
 
-<h1 id="nginx">nginx</h1>
+<h1 id="centos7">Centos7</h1>
+
+<p>安装Centos7，java，maven，SSH</p>
+
+<pre><code class="language-dockerfile">
+# install centos7
+FROM centos:7
+RUN yum -y install net-tools  
+
+#常用命令下载
+RUN yum -y install wget
+RUN yum install -y curl
+
+
+#配置ssh 
+RUN yum -y  install  openssh-server
+RUN sed -i 's/#PermitRootLogin yes/PermitRootLogin yes/g' /etc/ssh/sshd_config
+RUN sed -i 's/#PubkeyAuthentication yes/PubkeyAuthentication yes/g' /etc/ssh/sshd_config
+RUN cat /etc/ssh/sshd_config 
+
+
+#创建一个新用户
+RUN useradd  maizissh -d /home/maizissh
+RUN mkdir /home/maizissh/.ssh
+RUN chown -R maizissh. /home/maizissh/.ssh
+COPY id_rsa.pub /usr/local/macrsa/
+RUN cd /usr/local/macrsa/ &amp;&amp; ls -l 
+RUN cat /usr/local/macrsa/id_rsa.pub &gt;&gt; /home/maizissh/.ssh/authorized_keys
+RUN cat /home/maizissh/.ssh/authorized_keys
+RUN chmod 700 /home/maizissh/.ssh
+RUN chmod 600 /home/maizissh/.ssh/authorized_keys
+
+
+
+# install java
+COPY jdk-8u11-linux-x64.tar.gz /usr/local/java/
+RUN cd /usr/local/java/ &amp;&amp; ls &amp;&amp; tar -xvf jdk-8u11-linux-x64.tar.gz &amp;&amp; ls
+ENV JAVA_HOME /usr/local/java/jdk1.8.0_11
+ENV CLASSPATH $JAVA_HOME/lib;$JAVA_HOME/jre/lib
+ENV PATH $PATH:$JAVA_HOME/bin
+RUN java -version
+RUN echo &quot;java success&quot;
+
+
+# install maven
+RUN cd /usr/local/ &amp;&amp; mkdir maven
+RUN wget http://apache-mirror.rbc.ru/pub/apache/maven/maven-3/3.3.9/binaries/apache-maven-3.3.9-bin.tar.gz
+RUN mv apache-maven-3.3.9-bin.tar.gz  /usr/local/maven/  &amp;&amp; ls 
+RUN cd /usr/local/maven/ &amp;&amp; tar -xzvf apache-maven-3.3.9-bin.tar.gz &amp;&amp; ls
+ENV MAVEN_HOME /usr/local/maven/apache-maven-3.3.9
+ENV PATH $JAVA_HOME/bin:$MAVEN_HOME/bin:$PATH
+RUN mvn -version
+RUN echo &quot;maven success&quot;
+
+
+# COPY java_maven.sh /usr/bin/java_maven.sh
+# RUN  chmod +x  /usr/bin/java_maven.sh
+
+#安装java和maven环境
+# CMD [ &quot;java_maven.sh&quot; ]
+# CMD [&quot;/usr/sbin/init&quot;]
+
+ # 编译 
+ # docker build -t mycentos7 .
+ 
+ #启动
+ #docker run -itd --name mycentos7 -p 22:22 --privileged=true mycentos7 /usr/sbin/init
+</code></pre>
+
+<p>进入容器后，设置root密码</p>
+
+<pre><code>passwd  回车
+然后设置root密码
+</code></pre>
+
+<p>修改添加用户的密码</p>
+
+<pre><code>passwd   设置root密码
+passwd   maizissh  修改用户密码， 这个命令只适合用户。 
+</code></pre>
+
+<h1 id="nginx">Nginx</h1>
 
 <pre><code class="language-dockerfile">FROM nginx
 EXPOSE  8081
@@ -270,7 +351,7 @@ EXPOSE  8081
 
 </code></pre>
 
-<h1 id="mysql">mysql</h1>
+<h1 id="mysql">Mysql</h1>
 
 <pre><code class="language-dockerfile"> FROM mysql
  EXPOSE 3306
@@ -283,7 +364,7 @@ EXPOSE  8081
  
 </code></pre>
 
-<h1 id="oracle">oracle</h1>
+<h1 id="oracle">Oracle</h1>
 
 <pre><code class="language-dockerfile"> FROM absolutapps/oracle-12c-ee
  EXPOSE 1521 
@@ -299,7 +380,7 @@ EXPOSE  8081
  # 账号: SYSTEM   密码: oracle  SERVICE_NAME:ORCL 
 </code></pre>
 
-<h1 id="redis">redis</h1>
+<h1 id="redis">Redis</h1>
 
 <p><a href="https://hub.docker.com/_/redis">https://hub.docker.com/_/redis</a></p>
 
@@ -354,7 +435,7 @@ cd  /usr/local/bin
 root@369a39fe77bf:/usr/local/bin# redis-server /etc/redis/redis.conf
 </code></pre>
 
-<h1 id="mongodb">mongodb</h1>
+<h1 id="mongodb">MongoDB</h1>
 
 <pre><code class="language-yml">FROM mongo
 EXPOSE 27017
@@ -419,7 +500,7 @@ docker run -itd --name elasticsearch --net esk -p 9200:9200 -p 9300:9300 -e &quo
 
 </code></pre>
 
-<h2 id="kibana">kibana</h2>
+<h2 id="kibana">Kibana</h2>
 
 <pre><code class="language-yml">FROM kibana:6.8.3
 EXPOSE  5601
@@ -513,7 +594,7 @@ output {
 
 <p>我的ES和logstash, 一个是Networks：esk  一个是Networks：bridge，但是依然可以OK， 不知道为什么。 我的电脑是mac系统。 后期在来解答。</p>
 
-<h1 id="rocketmq">rocketmq</h1>
+<h1 id="rocketmq">Rocketmq</h1>
 
 <h2 id="单主机模式">单主机模式</h2>
 
@@ -681,19 +762,20 @@ DefaultCluster    broker-a                0     172.20.0.4 :10911      V4_4_0   
                     <nav id="TableOfContents">
 <ul>
 <li><a href="#修改容器-镜像名称">修改容器，镜像名称</a></li>
-<li><a href="#nginx">nginx</a></li>
-<li><a href="#mysql">mysql</a></li>
-<li><a href="#oracle">oracle</a></li>
-<li><a href="#redis">redis</a>
+<li><a href="#centos7">Centos7</a></li>
+<li><a href="#nginx">Nginx</a></li>
+<li><a href="#mysql">Mysql</a></li>
+<li><a href="#oracle">Oracle</a></li>
+<li><a href="#redis">Redis</a>
 <ul>
 <li><a href="#redis-conf">redis.conf</a></li>
 <li><a href="#服务启动和停止">服务启动和停止</a></li>
 </ul></li>
-<li><a href="#mongodb">mongodb</a></li>
+<li><a href="#mongodb">MongoDB</a></li>
 <li><a href="#elk">ELK</a>
 <ul>
 <li><a href="#elasticsearch">ElasticSearch</a></li>
-<li><a href="#kibana">kibana</a></li>
+<li><a href="#kibana">Kibana</a></li>
 <li><a href="#logstash">Logstash</a>
 <ul>
 <li><a href="#dockerfile">dockerfile</a></li>
@@ -704,7 +786,7 @@ DefaultCluster    broker-a                0     172.20.0.4 :10911      V4_4_0   
 <li><a href="#docker-network-create-somenetwork">$ docker network create somenetwork</a></li>
 <li><a href="#问题记录">问题记录</a></li>
 </ul></li>
-<li><a href="#rocketmq">rocketmq</a>
+<li><a href="#rocketmq">Rocketmq</a>
 <ul>
 <li><a href="#单主机模式">单主机模式</a>
 <ul>
@@ -851,8 +933,6 @@ DefaultCluster    broker-a                0     172.20.0.4 :10911      V4_4_0   
                         <a href="/tags/zookeeper" title="Zookeeper">
                             Zookeeper
                         </a>
-                        
-                        
                         
                         
                         
