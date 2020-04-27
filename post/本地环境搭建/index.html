@@ -312,7 +312,7 @@ RUN echo &quot;maven success&quot;
 # CMD [&quot;/usr/sbin/init&quot;]
 </code></pre>
 
-<p><strong>问题： 我本想用一个脚本来安装环境，但是发现，这个构建运行后，容器过一段是或者是马上就停止了，有可能是脚本执行完成后退出进程了，所以这里直接用dockerfile来设置环境。dockerfile还不熟悉，后续查看什么问题，先注释。</strong></p>
+<p><strong>注意 ：ENV命令只是用当前的，不会去修改/etc/profile的文件，用 echo &lsquo;MAVEN_HOME=/usr/local/maven/apache-maven-3.3.9&rsquo;&gt;&gt;/etc/profile 添加到配置文件中，就永远的生效了。 不然退出去后，在进来，环境配置就失效了</strong></p>
 
 <h1 id="ssh配置">SSH配置</h1>
 
@@ -407,9 +407,9 @@ echo &quot;install java maven 环境&quot;
 
 #安装java环境
 cd /usr/local/java/ &amp;&amp; ls &amp;&amp; tar -xvf jdk-8u11-linux-x64.tar.gz &amp;&amp; ls
-export JAVA_HOME=/usr/local/java/jdk1.8.0_11
-export CLASSPATH=$JAVA_HOME/lib/dt.jar:$JAVA_HOME/lib/tools.jar
-export PATH=$PATH:$JAVA_HOME/bin
+echo 'export JAVA_HOME=/usr/local/java/jdk1.8.0_11'&gt;&gt;/etc/profile
+echo 'export CLASSPATH=$JAVA_HOME/lib/dt.jar:$JAVA_HOME/lib/tools.jar'&gt;&gt;/etc/profile
+echo 'export PATH=$PATH:$JAVA_HOME/bin'&gt;&gt;/etc/profile
 source /etc/profile
 java -version
 echo &quot;java success&quot;
@@ -419,11 +419,13 @@ cd /usr/local/ &amp;&amp; mkdir maven
 wget http://apache-mirror.rbc.ru/pub/apache/maven/maven-3/3.3.9/binaries/apache-maven-3.3.9-bin.tar.gz
 mv apache-maven-3.3.9-bin.tar.gz /usr/local/maven/ &amp;&amp; ls
 cd /usr/local/maven/ &amp;&amp; tar -xzvf apache-maven-3.3.9-bin.tar.gz &amp;&amp; ls
-export MAVEN_HOME=/usr/local/maven/apache-maven-3.3.9
-export PATH=$JAVA_HOME/bin:$MAVEN_HOME/bin:$PATH
+echo 'export MAVEN_HOME=/usr/local/maven/apache-maven-3.3.9'&gt;&gt;/etc/profile
+echo 'export PATH=$JAVA_HOME/bin:$MAVEN_HOME/bin:$PATH'&gt;&gt;/etc/profile
 source /etc/profile
 mvn -version
 echo &quot;maven success&quot;
+
+source /etc/profile
 </code></pre>
 
 <p><strong>注意： source /etc/profile  #针对用户   source /etc/bashrc   #针对系统，所以我修改 /etc/bashrc文件， 加入export这些操作，在重新连接终端，可以有java和maven环境。</strong></p>

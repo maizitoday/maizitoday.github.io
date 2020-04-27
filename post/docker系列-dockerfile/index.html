@@ -264,6 +264,26 @@ CMD [&quot;param1&quot;,&quot;param2&quot;] 提供给 ENTRYPOINT 的默认参数
 如果用户启动容器时候指定了运行的命令，则会覆盖掉 CMD 指定的命令。
 </code></pre>
 
+<p>用法1：</p>
+
+<p>带有中括号的形式。这时，命令没有再任何shell终端环境下，如果我们要执行shell，必须把shell加入到中括号的参数中。这种用法就像一个c语言的exec函数，意思是我们要执行一个进程。如果采用非shell的方法，那么上面的例子要修改为：</p>
+
+<pre><code class="language-dockerfile">FROM centos
+ 
+CMD [&quot;/bin/bash&quot;, &quot;-c&quot;, &quot;echo 'hello cmd!'&quot;]
+</code></pre>
+
+<p>用法2：</p>
+
+<p>shell form，即没有中括号的形式。那么命令command默认是在“/bin/sh -c”下执行的。比如下面的dockerfile：</p>
+
+<pre><code class="language-dockerfile">FROM centos
+ 
+CMD echo &quot;hello cmd!&quot;
+</code></pre>
+
+<p><strong>注意：推荐第一种</strong></p>
+
 <h2 id="entrypoint">ENTRYPOINT</h2>
 
 <p>配置容器启动后执行的命令，并且不可被 docker run 提供的参数覆盖。每个 Dockerfile 中只能有一个 ENTRYPOINT，当指定多个时，只有最后一个起效。</p>

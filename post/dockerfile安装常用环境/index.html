@@ -250,8 +250,7 @@ docker tag  XX镜像id   XX新的名字
 
 <p>安装Centos7，java，maven，SSH</p>
 
-<pre><code class="language-dockerfile">
-# install centos7
+<pre><code class="language-dockerfile"># install centos7
 FROM centos:7
 RUN yum -y install net-tools  
 
@@ -279,15 +278,18 @@ RUN chmod 700 /home/maizissh/.ssh
 RUN chmod 600 /home/maizissh/.ssh/authorized_keys
 
 
-
 # install java
 COPY jdk-8u11-linux-x64.tar.gz /usr/local/java/
+COPY start.sh /usr/local/
 RUN cd /usr/local/java/ &amp;&amp; ls &amp;&amp; tar -xvf jdk-8u11-linux-x64.tar.gz &amp;&amp; ls
-ENV JAVA_HOME /usr/local/java/jdk1.8.0_11
-ENV CLASSPATH $JAVA_HOME/lib;$JAVA_HOME/jre/lib
-ENV PATH $PATH:$JAVA_HOME/bin
-RUN java -version
+RUN echo 'export JAVA_HOME=/usr/local/java/jdk1.8.0_11' &gt;&gt; /etc/profile
+RUN echo 'export CLASSPATH=$JAVA_HOME/lib/dt.jar:$JAVA_HOME/lib/tools.jar' &gt;&gt; /etc/profile
+RUN echo 'export PATH=$PATH:$JAVA_HOME/bin' &gt;&gt; /etc/profile
+
+RUN echo &quot;查看-----------------&quot;
+RUN cat /etc/profile
 RUN echo &quot;java success&quot;
+
 
 
 # install maven
@@ -295,24 +297,30 @@ RUN cd /usr/local/ &amp;&amp; mkdir maven
 RUN wget http://apache-mirror.rbc.ru/pub/apache/maven/maven-3/3.3.9/binaries/apache-maven-3.3.9-bin.tar.gz
 RUN mv apache-maven-3.3.9-bin.tar.gz  /usr/local/maven/  &amp;&amp; ls 
 RUN cd /usr/local/maven/ &amp;&amp; tar -xzvf apache-maven-3.3.9-bin.tar.gz &amp;&amp; ls
-ENV MAVEN_HOME /usr/local/maven/apache-maven-3.3.9
-ENV PATH $JAVA_HOME/bin:$MAVEN_HOME/bin:$PATH
-RUN mvn -version
+RUN echo 'export MAVEN_HOME=/usr/local/maven/apache-maven-3.3.9'&gt;&gt;/etc/profile
+RUN echo 'export PATH=$JAVA_HOME/bin:$MAVEN_HOME/bin:$PATH'&gt;&gt;/etc/profile
+
+RUN echo &quot;查看-----------------&quot;
+RUN cat /etc/profile
 RUN echo &quot;maven success&quot;
+
 
 
 # COPY java_maven.sh /usr/bin/java_maven.sh
 # RUN  chmod +x  /usr/bin/java_maven.sh
 
 #安装java和maven环境
-# CMD [ &quot;java_maven.sh&quot; ]
-# CMD [&quot;/usr/sbin/init&quot;]
+RUN chmod 777 /usr/local/start.sh
+ENTRYPOINT [ &quot;sh&quot;, &quot;-c&quot;, &quot;/usr/local/start.sh&quot; ]
+#CMD sh /usr/local/start.sh
 
- # 编译 
- # docker build -t mycentos7 .
+
+# 编译 
+# docker build -t mycentos7 .
+
+#启动
+#docker run -itd --name mycentos7 -p 6666:22 --privileged=true mycentos7 /usr/sbin/init
  
- #启动
- #docker run -itd --name mycentos7 -p 22:22 --privileged=true mycentos7 /usr/sbin/init
 </code></pre>
 
 <p>进入容器后，设置root密码</p>
@@ -326,6 +334,31 @@ RUN echo &quot;maven success&quot;
 <pre><code>passwd   设置root密码
 passwd   maizissh  修改用户密码， 这个命令只适合用户。 
 </code></pre>
+
+<p><strong>注意：这里需要通过 追加到 &gt;&gt; /etc/profile文件中，这样才会永久生效，不然只有这一次连接才有java和maven环境</strong></p>
+
+<h2 id="start-sh">start.sh</h2>
+
+<pre><code class="language-shell">
+#!/usr/bin/env bash
+ 
+#!/bin/bash
+
+echo &quot;开始执行容器启动脚本&quot;
+source /etc/profile
+cat /etc/profile
+
+#防止容器启动后退出
+tail -f /dev/null
+</code></pre>
+
+<h2 id="问题">问题</h2>
+
+<ol>
+<li><p>CMD无法执行这个脚本， 还不知道什么原因， 所以运行后，手动执行这个脚本，让 /etc/profile文件生效就好。</p></li>
+
+<li><p>改用ENTRYPOINT命令执行， 可以执行脚本， 但是  source  /etc/profile依然无法运行，所以还是要手动进行执行这个命令，同时怀疑是权限导致，后期设置root权限启动查看是否可以，在进行测试。</p></li>
+</ol>
 
 <h1 id="nginx">Nginx</h1>
 
@@ -762,7 +795,11 @@ DefaultCluster    broker-a                0     172.20.0.4 :10911      V4_4_0   
                     <nav id="TableOfContents">
 <ul>
 <li><a href="#修改容器-镜像名称">修改容器，镜像名称</a></li>
-<li><a href="#centos7">Centos7</a></li>
+<li><a href="#centos7">Centos7</a>
+<ul>
+<li><a href="#start-sh">start.sh</a></li>
+<li><a href="#问题">问题</a></li>
+</ul></li>
 <li><a href="#nginx">Nginx</a></li>
 <li><a href="#mysql">Mysql</a></li>
 <li><a href="#oracle">Oracle</a></li>
