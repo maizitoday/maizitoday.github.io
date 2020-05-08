@@ -259,9 +259,11 @@ bind_ip=127.0.0.1
 replSet=maizi  // 集群的名称
 </code></pre>
 
-<h1 id="集群">集群</h1>
+<h1 id="集群配置">集群配置</h1>
 
-<h2 id="docker-compose-yml">docker-compose.yml</h2>
+<p><strong>转载地址：<a href="http://bazingafeng.com/2017/06/19/create-mongodb-replset-cluster-using-docker/">http://bazingafeng.com/2017/06/19/create-mongodb-replset-cluster-using-docker/</a></strong></p>
+
+<h2 id="第一步-docker-compose-yml-安装容器">第一步：docker-compose.yml 安装容器</h2>
 
 <pre><code class="language-yml">version: '3'
 services:
@@ -298,10 +300,18 @@ docker-compose ps      查看
 docker-compose stop    停止
 </code></pre>
 
-<h2 id="查看容器ip">查看容器IP</h2>
+<h2 id="第二步-配置容器ip-修改host文件">第二步：配置容器IP，修改host文件</h2>
 
-<pre><code class="language-dockerfile">docker exec m1 cat /etc/hosts
+<p>查看每一个IP地址， 然后修改， 把其他的容器IP加入进来。<strong>也可以设置 network_mode: &ldquo;host&rdquo;</strong>，修改每一个容器的host文件，保证容器之间是可以进行ping的通的。</p>
 
+<pre><code class="language-shell">apt-get update
+apt-get install vim
+apt-get install inetutils-ping
+apt-get install net-tools
+</code></pre>
+
+<pre><code class="language-dockerfile">docker exec m1 
+vi /etc/hosts
 
 172.18.0.4   r3
 172.18.0.3   r2
@@ -310,13 +320,20 @@ docker-compose stop    停止
 
 <p><img src="/img/Xnip2019-09-17_02-34-19.png" alt="Xnip2019-09-17_02-34-19" /></p>
 
+<h2 id="第三步-集群配置-命令设置搭建">第三步：集群配置，命令设置搭建</h2>
+
+<p>进入其中一个mongodb的容器，通过mongo命令设置集群配置。</p>
+
+<pre><code class="language-dockerfile">docker exec -ti 2017mg mongo --port 27017
+</code></pre>
+
 <pre><code class="language-js">// 初始化集群
 rs.initiate()
 // 查看集群配置
 rs.conf()
 // 向集群中添加成员
+rs.add(&quot;172.18.0.2:27017&quot;)
 rs.add(&quot;172.18.0.3:27017&quot;)
-rs.add(&quot;172.18.0.4:27017&quot;)
 
 // 查看状态
 rs.status()
@@ -479,7 +496,7 @@ rs.status()
 </tbody>
 </table>
 
-<h2 id="验证同步">验证同步</h2>
+<h2 id="第四步-验证同步">第四步：验证同步</h2>
 
 <p><img src="/img/Xnip2019-09-17_03-02-13.png" alt="Xnip2019-09-17_03-02-13" /></p>
 
@@ -488,7 +505,7 @@ rs.status()
 <pre><code class="language-js">db.getMongo().setSlaveOk()
 </code></pre>
 
-<h2 id="故障转移">故障转移</h2>
+<h2 id="第五步-故障转移">第五步：故障转移</h2>
 
 <p>副本集模式下，如果Primary不可用，整个集群将会选举出新的Primary来继续对外提供读写服务</p>
 
@@ -697,12 +714,13 @@ rs.status()
                     <nav id="TableOfContents">
 <ul>
 <li><a href="#配置文件参数">配置文件参数</a></li>
-<li><a href="#集群">集群</a>
+<li><a href="#集群配置">集群配置</a>
 <ul>
-<li><a href="#docker-compose-yml">docker-compose.yml</a></li>
-<li><a href="#查看容器ip">查看容器IP</a></li>
-<li><a href="#验证同步">验证同步</a></li>
-<li><a href="#故障转移">故障转移</a></li>
+<li><a href="#第一步-docker-compose-yml-安装容器">第一步：docker-compose.yml 安装容器</a></li>
+<li><a href="#第二步-配置容器ip-修改host文件">第二步：配置容器IP，修改host文件</a></li>
+<li><a href="#第三步-集群配置-命令设置搭建">第三步：集群配置，命令设置搭建</a></li>
+<li><a href="#第四步-验证同步">第四步：验证同步</a></li>
+<li><a href="#第五步-故障转移">第五步：故障转移</a></li>
 <li><a href="#问题">问题</a></li>
 <li><a href="#注意">注意</a></li>
 </ul></li>
