@@ -22,9 +22,9 @@
     
 
     
-    <meta name="description" content="麦子，程序员, 开源爱好者，生活探险家 | 这里是 麦子 的博客，与你一起发现更大的世界。">
-    <meta property="og:description" content="麦子，程序员, 开源爱好者，生活探险家 | 这里是 麦子 的博客，与你一起发现更大的世界。" />
-    <meta property="twitter:description" content="麦子，程序员, 开源爱好者，生活探险家 | 这里是 麦子 的博客，与你一起发现更大的世界。" />
+    <meta name="description" content="队列的好处，缺点，集群搭建，事物消息，生产者和消费者，架构认识">
+    <meta property="og:description" content="队列的好处，缺点，集群搭建，事物消息，生产者和消费者，架构认识" />
+    <meta property="twitter:description" content="队列的好处，缺点，集群搭建，事物消息，生产者和消费者，架构认识" />
     
 
     
@@ -245,6 +245,8 @@
 <p>[TOC]</p>
 
 <p><strong>视频资料：<a href="https://www.bilibili.com/video/av59635085?from=search&amp;seid=15914016610413035041">https://www.bilibili.com/video/av59635085?from=search&amp;seid=15914016610413035041</a></strong></p>
+
+<p><strong>好的资料：<a href="http://www.tianshouzhi.com/api/tutorials/rocketmq/50">http://www.tianshouzhi.com/api/tutorials/rocketmq/50</a></strong></p>
 
 <h3 id="消息队列好处">消息队列好处</h3>
 
@@ -469,71 +471,6 @@ maxMessageSize=65536
 #pullMessageThreadPoolNums=128
 </code></pre>
 
-<h3 id="生产者">生产者</h3>
-
-<pre><code class="language-java">public class SyncProducer {
-
-    public static void main(String[] args) throws MQClientException, UnsupportedEncodingException, RemotingException,
-            MQBrokerException, InterruptedException {
-   
-        DefaultMQProducer producer = new DefaultMQProducer(&quot;maizi_007&quot;);
-        // Specify name server addresses.
-        producer.setNamesrvAddr(&quot;192.168.1.100:9876&quot;);
-        // Launch the instance.
-        producer.start();
-        for (int i = 0; i &lt; 10; i++) {
-            // Create a message instance, specifying topic, tag and message body.
-            Message msg = new Message(&quot;yb-007&quot; /* Topic */, &quot;TagA&quot; /* Tag */,
-                    (&quot;maizi_today, Hello RocketMQ &quot; + i).getBytes(RemotingHelper.DEFAULT_CHARSET) /* Message body */
-            );
-            // Call send message to deliver message to one of brokers.
-            SendResult sendResult = producer.send(msg);
-            System.out.printf(&quot;%s%n&quot;, sendResult);
-        }
-        // Shut down once the producer instance is not longer in use.
-        // 把这个隐掉后，才控制台才可以看到你的生产组
-        // producer.shutdown();
-    }
-
-}
-</code></pre>
-
-<h3 id="消费者">消费者</h3>
-
-<pre><code class="language-java">public class Consumer {
-
-    public static void main(String[] args) throws MQClientException {
-         // Instantiate with specified consumer group name.
-        DefaultMQPushConsumer consumer = new DefaultMQPushConsumer(&quot;myconsumer&quot;);
-         
-        // Specify name server addresses.
-        consumer.setNamesrvAddr(&quot;192.168.1.100:9876&quot;);
-        
-        // Subscribe one more more topics to consume.
-        consumer.subscribe(&quot;yb-007&quot;, &quot;*&quot;);
-        // Register callback to execute on arrival of messages fetched from brokers.
-        consumer.registerMessageListener(new MessageListenerConcurrently() {
-
-            @Override
-            public ConsumeConcurrentlyStatus consumeMessage(List&lt;MessageExt&gt; msgs,
-                ConsumeConcurrentlyContext context) {
-                msgs.forEach(item-&gt;System.out.println(new String(item.getBody())));
-
-                System.out.printf(&quot;--------------------------------&quot;);
-
-                // System.out.printf(&quot;%s Receive New Messages: %s %n&quot;, Thread.currentThread().getName(), msgs);
-                return ConsumeConcurrentlyStatus.CONSUME_SUCCESS;
-            }
-        });
-
-        //Launch the consumer instance.
-        consumer.start();
-
-        System.out.printf(&quot;Consumer Started.%n&quot;);
-     }
-}
-</code></pre>
-
 <h3 id="事务消息">事务消息</h3>
 
 <p><img src="/img/Xnip2019-09-30_00-42-26.png" alt="Xnip2019-09-30_00-42-26" /></p>
@@ -717,8 +654,6 @@ maxMessageSize=65536
 <li><a href="#broker-a-properties属性说明">broker-a.properties属性说明</a></li>
 </ul></li>
 </ul></li>
-<li><a href="#生产者">生产者</a></li>
-<li><a href="#消费者">消费者</a></li>
 <li><a href="#事务消息">事务消息</a></li>
 </ul></li>
 </ul></li>

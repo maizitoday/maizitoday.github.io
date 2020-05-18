@@ -16,15 +16,15 @@
     
 
     
-    <meta name="title" content="" />
-    <meta property="og:title" content="" />
-    <meta property="twitter:title" content="" />
+    <meta name="title" content="ElasticSearch-API-常用操作" />
+    <meta property="og:title" content="ElasticSearch-API-常用操作" />
+    <meta property="twitter:title" content="ElasticSearch-API-常用操作" />
     
 
     
-    <meta name="description" content="Nginx,MySql，Oracle，Redis，MongoDB，ElasticSearch,Kibana,Logstash,RockerMQ,Centos7等环境安装">
-    <meta property="og:description" content="Nginx,MySql，Oracle，Redis，MongoDB，ElasticSearch,Kibana,Logstash,RockerMQ,Centos7等环境安装" />
-    <meta property="twitter:description" content="Nginx,MySql，Oracle，Redis，MongoDB，ElasticSearch,Kibana,Logstash,RockerMQ,Centos7等环境安装" />
+    <meta name="description" content="ElasticSearch的常用增删查改">
+    <meta property="og:description" content="ElasticSearch的常用增删查改" />
+    <meta property="twitter:description" content="ElasticSearch的常用增删查改" />
     
 
     
@@ -35,9 +35,9 @@
     <meta name="keyword"  content="麦子, maizi, maizi, , 麦子的网络日志, 麦子的博客, maizi Blog, 博客, 个人网站, 互联网, Web, 云原生, PaaS, Istio, Kubernetes, 微服务, Microservice">
     <link rel="shortcut icon" href="/img/favicon.ico">
 
-    <title>麦子的博客</title>
+    <title>ElasticSearch-API-常用操作-麦子的博客</title>
 
-    <link rel="canonical" href="/post/dockerfile%E5%AE%89%E8%A3%85%E5%B8%B8%E7%94%A8%E7%8E%AF%E5%A2%83/">
+    <link rel="canonical" href="/post/elasticsearch-api-%E5%B8%B8%E7%94%A8%E6%93%8D%E4%BD%9C/">
 
     <link rel="stylesheet" href="/css/iDisqus.min.css"/>
 	
@@ -165,7 +165,7 @@
 
 <style type="text/css">
     header.intro-header {
-        background-image: url('https://c.pxhere.com/photos/50/b0/tree_road_archway_symmetry_and_black_white-99031.jpg!d')
+        background-image: url('https://img.zhaohuabing.com/in-post/istio-install_and_example/post-bg.jpg')
     }
 
     div.side-catalog nav ul li a {
@@ -187,24 +187,20 @@
                 <div class="post-heading">
                     <div class="tags">
                         
-                        <a class="tag" href="/tags/%E5%BC%80%E5%8F%91%E5%B7%A5%E5%85%B7" title="开发工具">
-                            开发工具
-                        </a>
-                        
-                        <a class="tag" href="/tags/dockerfile%E5%AE%89%E8%A3%85%E5%B8%B8%E7%94%A8%E7%8E%AF%E5%A2%83" title="Dockerfile安装常用环境">
-                            Dockerfile安装常用环境
+                        <a class="tag" href="/tags/elasticsearch" title="elasticSearch">
+                            elasticSearch
                         </a>
                         
                     </div>
-                    <h1></h1>
+                    <h1>ElasticSearch-API-常用操作</h1>
                     <h2 class="subheading"></h2>
                     <span class="meta">
                         Posted by
                         
-                             &#34;麦子&#34;
+                        麦子
                         
                         on
-                        Wednesday, 2019年08月21日
+                        Monday, 2020年05月18日
                         
                     </span>
                 </div>
@@ -236,484 +232,541 @@
 
 <p>[TOC]</p>
 
-<h1 id="修改容器-镜像名称">修改容器，镜像名称</h1>
+<p><strong>转载地址：<a href="https://juejin.im/post/5d9e79ac51882509701337c2">https://juejin.im/post/5d9e79ac51882509701337c2</a>         作者：虚无境</strong></p>
 
-<pre><code class="language-yaml"># 修改容器名称
-docker rename 0cf82999886a redis-5.0.5 
+<h1 id="elasticsearch-java-api">ElasticSearch JAVA API</h1>
 
-# 修改镜像名称
-docker tag  XX镜像id   XX新的名字
+<p>目前市面上有几种常见的ElasticSearch Java API架包，JestClient、SpringBoot整合的SpringData、Spring整合的ElasticsearchTemplate、Elasticsearch Bboss等一些开源架包，上述这些第三方整合的架包中，基本已经支持日常的使用，除了支持的ES版本会低一些而已。</p>
+
+<p>本文介绍的是ElasticSearch官方的<code>Java High Level REST Client</code>的使用，<code>Java High Level REST Client</code>是ElasticSearch官方目前推荐使用的，适用于6.x以上的版本，要求JDK在1.8以上，可以很好的在大版本中进行兼容，并且该架包自身也包含<code>Java Low Level REST Client</code>中的方法，可以应对一些特需的情况进行特殊的处理， 它对于一些常用的方法封装Restful风格，可以直接对应操作名调用使用即可，支持同步和异步(Async)调用。</p>
+
+<h1 id="pom-xml">pom.xml</h1>
+
+<pre><code class="language-java"> &lt;dependency&gt;
+      &lt;groupId&gt;org.elasticsearch.client&lt;/groupId&gt;
+      &lt;artifactId&gt;elasticsearch-rest-high-level-client&lt;/artifactId&gt;
+      &lt;version&gt;6.8.9&lt;/version&gt;
+ &lt;/dependency&gt;
+</code></pre>
+
+<h1 id="初始化连接">初始化连接</h1>
+
+<pre><code class="language-java">
+RestHighLevelClient client = new RestHighLevelClient(RestClient.builder(new HttpHost(&quot;127.0.0.1&quot;, 9200)));
+
+client.close(); //关闭
+</code></pre>
+
+<h1 id="crud操作">CRUD操作</h1>
+
+<h2 id="新增数据">新增数据</h2>
+
+<p>ElasticSearch可以直接新增数据，只要你指定了index(索引库名称)和type(类型)即可。在新增的时候你可以自己指定主键ID，也可以不指定，由 ElasticSearch自身生成。Elasticsearch <code>Java High Level REST Client</code>新增数据提供了三种方法，这里我们就来看一下这三种写法吧。</p>
+
+<h3 id="通过jsonstring进行创建">通过jsonString进行创建</h3>
+
+<pre><code class="language-java">  String index = &quot;test1&quot;;
+	String type = &quot;_doc&quot;;
+	// 唯一编号
+	String id = &quot;1&quot;;
+	IndexRequest request = new IndexRequest(index, type, id);
+
+	String jsonString = &quot;{&quot; + &quot;\&quot;uid\&quot;:\&quot;1234\&quot;,&quot;+ &quot;\&quot;phone\&quot;:\&quot;12345678909\&quot;,&quot;+ &quot;\&quot;msgcode\&quot;:\&quot;1\&quot;,&quot; + &quot;\&quot;sendtime\&quot;:\&quot;2019-03-14 01:57:04\&quot;,&quot;
+			+ &quot;\&quot;message\&quot;:\&quot;xuwujing study Elasticsearch\&quot;&quot; + &quot;}&quot;;
+	request.source(jsonString, XContentType.JSON);
+	IndexResponse indexResponse = client.index(request, RequestOptions.DEFAULT);
 
 </code></pre>
 
-<h1 id="centos7">Centos7</h1>
+<h3 id="通过map创建-会自动转换成json的数据">通过map创建,会自动转换成json的数据</h3>
 
-<p>安装Centos7，java，maven，SSH</p>
-
-<pre><code class="language-dockerfile"># install centos7
-FROM centos:7
-RUN yum -y install net-tools  
-
-#常用命令下载
-RUN yum -y install wget
-RUN yum install -y curl
-
-
-#配置ssh 
-RUN yum -y  install  openssh-server
-RUN sed -i 's/#PermitRootLogin yes/PermitRootLogin yes/g' /etc/ssh/sshd_config
-RUN sed -i 's/#PubkeyAuthentication yes/PubkeyAuthentication yes/g' /etc/ssh/sshd_config
-RUN cat /etc/ssh/sshd_config 
-
-
-#创建一个新用户
-RUN useradd  maizissh -d /home/maizissh
-RUN mkdir /home/maizissh/.ssh
-RUN chown -R maizissh. /home/maizissh/.ssh
-COPY id_rsa.pub /usr/local/macrsa/
-RUN cd /usr/local/macrsa/ &amp;&amp; ls -l 
-RUN cat /usr/local/macrsa/id_rsa.pub &gt;&gt; /home/maizissh/.ssh/authorized_keys
-RUN cat /home/maizissh/.ssh/authorized_keys
-RUN chmod 700 /home/maizissh/.ssh
-RUN chmod 600 /home/maizissh/.ssh/authorized_keys
-
-
-# install java
-COPY jdk-8u11-linux-x64.tar.gz /usr/local/java/
-COPY start.sh /usr/local/
-RUN cd /usr/local/java/ &amp;&amp; ls &amp;&amp; tar -xvf jdk-8u11-linux-x64.tar.gz &amp;&amp; ls
-RUN echo 'export JAVA_HOME=/usr/local/java/jdk1.8.0_11' &gt;&gt; /etc/profile
-RUN echo 'export CLASSPATH=$JAVA_HOME/lib/dt.jar:$JAVA_HOME/lib/tools.jar' &gt;&gt; /etc/profile
-RUN echo 'export PATH=$PATH:$JAVA_HOME/bin' &gt;&gt; /etc/profile
-
-RUN echo &quot;查看-----------------&quot;
-RUN cat /etc/profile
-RUN echo &quot;java success&quot;
-
-
-
-# install maven
-RUN cd /usr/local/ &amp;&amp; mkdir maven
-RUN wget http://apache-mirror.rbc.ru/pub/apache/maven/maven-3/3.3.9/binaries/apache-maven-3.3.9-bin.tar.gz
-RUN mv apache-maven-3.3.9-bin.tar.gz  /usr/local/maven/  &amp;&amp; ls 
-RUN cd /usr/local/maven/ &amp;&amp; tar -xzvf apache-maven-3.3.9-bin.tar.gz &amp;&amp; ls
-RUN echo 'export MAVEN_HOME=/usr/local/maven/apache-maven-3.3.9'&gt;&gt;/etc/profile
-RUN echo 'export PATH=$JAVA_HOME/bin:$MAVEN_HOME/bin:$PATH'&gt;&gt;/etc/profile
-
-RUN echo &quot;查看-----------------&quot;
-RUN cat /etc/profile
-RUN echo &quot;maven success&quot;
-
-
-
-# COPY java_maven.sh /usr/bin/java_maven.sh
-# RUN  chmod +x  /usr/bin/java_maven.sh
-
-#安装java和maven环境
-RUN chmod 777 /usr/local/start.sh
-ENTRYPOINT [ &quot;sh&quot;, &quot;-c&quot;, &quot;/usr/local/start.sh&quot; ]
-#CMD sh /usr/local/start.sh
-
-
-# 编译 
-# docker build -t mycentos7 .
-
-#启动
-#docker run -itd --name mycentos7 -p 6666:22 --privileged=true mycentos7 /usr/sbin/init
- 
+<pre><code class="language-java">String index = &quot;test1&quot;;
+String type = &quot;_doc&quot;;
+// 唯一编号
+String id = &quot;2&quot;;
+IndexRequest request = new IndexRequest(index, type, id);
+Map&lt;String, Object&gt; jsonMap = new HashMap&lt;&gt;();
+jsonMap.put(&quot;uid&quot;, 1234);
+jsonMap.put(&quot;phone&quot;, 12345678909L);
+jsonMap.put(&quot;msgcode&quot;, 1);
+jsonMap.put(&quot;sendtime&quot;, &quot;2019-03-14 01:57:04&quot;);
+jsonMap.put(&quot;message&quot;, &quot;xuwujing study Elasticsearch&quot;);
+request.source(jsonMap);
+IndexResponse indexResponse = client.index(request, RequestOptions.DEFAULT);
+System.out.println(indexResponse.toString());
 </code></pre>
 
-<p>进入容器后，设置root密码</p>
+<p><strong>推荐第二种，比较容易理解和使用。</strong></p>
+
+<h2 id="创建索引库">创建索引库</h2>
+
+<p>在上述示例中，我们通过直接通过创建数据从而创建了索引库，但是没有创建索引库而通过ES自身生成的这种并不友好，因为它会使用默认的配置，字段结构都是text(text的数据会分词，在存储的时候也会额外的占用空间)，分片和索引副本采用默认值，默认是5和1，ES的分片数在创建之后就不能修改，除非reindex，所以这里我们还是指定数据模板进行创建。 使用JAVA API 创建索引库的方法和上述中新增数据的一样，有三种方式，不过这里就只介绍一种。</p>
+
+<pre><code class="language-java">private static void createIndex(RestHighLevelClient client) throws IOException {
+        String type = &quot;_doc&quot;;
+        String index = &quot;maizi&quot;;
+        // setting 的值
+        Map&lt;String, Object&gt; setmapping = new HashMap&lt;&gt;();
+        // 分区数、副本数、缓存刷新时间
+        setmapping.put(&quot;number_of_shards&quot;, 10);
+        setmapping.put(&quot;number_of_replicas&quot;, 1);
+        setmapping.put(&quot;refresh_interval&quot;, &quot;5s&quot;);
+        Map&lt;String, Object&gt; keyword = new HashMap&lt;&gt;();
+        // 设置类型
+        keyword.put(&quot;type&quot;, &quot;keyword&quot;);
+        Map&lt;String, Object&gt; lon = new HashMap&lt;&gt;();
+        // 设置类型
+        lon.put(&quot;type&quot;, &quot;long&quot;);
+        Map&lt;String, Object&gt; date = new HashMap&lt;&gt;();
+        // 设置类型
+        date.put(&quot;type&quot;, &quot;date&quot;);
+        date.put(&quot;format&quot;, &quot;yyyy-MM-dd HH:mm:ss&quot;);
+
+        Map&lt;String, Object&gt; jsonMap2 = new HashMap&lt;&gt;();
+        Map&lt;String, Object&gt; properties = new HashMap&lt;&gt;();
+        // 设置字段message信息
+        properties.put(&quot;uid&quot;, lon);
+        properties.put(&quot;phone&quot;, lon);
+        properties.put(&quot;msgcode&quot;, lon);
+        properties.put(&quot;message&quot;, keyword);
+        properties.put(&quot;sendtime&quot;, date);
+        Map&lt;String, Object&gt; mapping = new HashMap&lt;&gt;();
+        mapping.put(&quot;properties&quot;, properties);
+        jsonMap2.put(type, mapping);
+
+        GetIndexRequest getRequest = new GetIndexRequest();
+        getRequest.indices(index);
+        getRequest.local(false);
+        getRequest.humanReadable(true);
+        boolean exists2 = client.indices().exists(getRequest, RequestOptions.DEFAULT);
+        // 如果存在就不创建了
+        if (exists2) {
+            System.out.println(index + &quot;索引库已经存在!&quot;);
+            return;
+        }
+        // 开始创建库
+        CreateIndexRequest request = new CreateIndexRequest(index);
+        try {
+            // 加载数据类型
+            request.settings(setmapping);
+            // 设置mapping参数
+            request.mapping(type, jsonMap2);
+            // 设置别名
+            request.alias(new Alias(&quot;pancm_alias&quot;));
+            CreateIndexResponse createIndexResponse = client.indices().create(request, RequestOptions.DEFAULT);
+            boolean falg = createIndexResponse.isAcknowledged();
+            if (falg) {
+                System.out.println(&quot;创建索引库:&quot; + index + &quot;成功！&quot;);
+            }
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
 
-<pre><code>passwd  回车
-然后设置root密码
-</code></pre>
-
-<p>修改添加用户的密码</p>
-
-<pre><code>passwd   设置root密码
-passwd   maizissh  修改用户密码， 这个命令只适合用户。 
-</code></pre>
-
-<p><strong>注意：这里需要通过 追加到 &gt;&gt; /etc/profile文件中，这样才会永久生效，不然只有这一次连接才有java和maven环境</strong></p>
-
-<h2 id="start-sh">start.sh</h2>
-
-<pre><code class="language-shell">
-#!/usr/bin/env bash
- 
-#!/bin/bash
-
-echo &quot;开始执行容器启动脚本&quot;
-source /etc/profile
-cat /etc/profile
-
-#防止容器启动后退出
-tail -f /dev/null
-</code></pre>
-
-<h2 id="问题">问题</h2>
-
-<ol>
-<li><p>CMD无法执行这个脚本， 还不知道什么原因， 所以运行后，手动执行这个脚本，让 /etc/profile文件生效就好。</p></li>
-
-<li><p>改用ENTRYPOINT命令执行， 可以执行脚本， 但是  source  /etc/profile依然无法运行，所以还是要手动进行执行这个命令，同时怀疑是权限导致，后期设置root权限启动查看是否可以，在进行测试。</p></li>
-</ol>
-
-<h1 id="nginx">Nginx</h1>
-
-<pre><code class="language-dockerfile">FROM nginx
-EXPOSE  8081
-
-# 编译 
-# docker build -f /vscode/docker-software-dockerfile/nginx/Dockerfile .
-
-
-#拷贝容器内 Nginx 默认配置文件到本地当前目录下的 conf 目录
-#docker run -itd -p 8081:80 -d nginx
-#docker cp fd2fb5879cd5:/etc/nginx/nginx.conf /vscode/docker-software-dockerfile/nginx/conf
-#docker cp fd2fb5879cd5:/etc/nginx/conf.d/default.conf /vscode/docker-software-#dockerfile/nginx/conf.d
-
-
-# 启动
-#docker run -itd  --name nginx  -p 8081:80  -v /vscode/docker-software-dockerfile/nginx/conf/nginx.conf:/etc/nginx/nginx.conf  -v /vscode/docker-software-dockerfile/nginx/defaultconf/default.conf:/etc/nginx/conf.d/default.conf  -v /vscode/docker-software-dockerfile/nginx/logs:/var/log/nginx    nginx
-
-# 注意  
-# 发现里面的/usr/share/nginx/html/index.html 无法替换。 $PWD如果不行就用绝对路径 -v 
-
-
-</code></pre>
-
-<h1 id="mysql">Mysql</h1>
-
-<pre><code class="language-dockerfile"> FROM mysql
- EXPOSE 3306
- 
- # 编译 
- # docker build -t mysql-master .
-
- # 启动
- # docker run -p 3306:3306  --name mysql-master -e MYSQL_ROOT_PASSWORD=root -itd mysql-master
- 
-</code></pre>
-
-<h1 id="oracle">Oracle</h1>
-
-<pre><code class="language-dockerfile"> FROM absolutapps/oracle-12c-ee
- EXPOSE 1521 
-
-
- # 编译 
- # docker build -t oracle12 .
-
- 
- # 启动
- # docker run -itd --name oracle12  --privileged  -p 8081:8080 -p 1521:1521 absolutapps/oracle-12c-ee
-
- # 账号: SYSTEM   密码: oracle  SERVICE_NAME:ORCL 
-</code></pre>
-
-<h1 id="redis">Redis</h1>
-
-<p><a href="https://hub.docker.com/_/redis">https://hub.docker.com/_/redis</a></p>
-
-<pre><code class="language-shell"># 安装客户端
-brew cask install another-redis-desktop-manager
-</code></pre>
-
-<pre><code class="language-yml"> FROM redis
- EXPOSE  6379
- 
-
- # 编译 
- # docker build -f /vscode/docker-software-dockerfile/redis/Dockerfile .
-
- 
- # 启动
- docker run -p 6379:6379 \
-          -v /vscode/docker-software-dockerfile/redis/6379/data:/data \
-          -v /vscode/docker-software-dockerfile/redis/6379/redis.conf:/etc/redis/redis.conf \
-            --privileged=true \
-            --name redis \
-            -itd redis  redis-server /etc/redis/redis.conf --appendonly yes
-</code></pre>
-
-<h2 id="redis-conf">redis.conf</h2>
-
-<pre><code class="language-shell">#获取原始的redis.conf
-wget http://download.redis.io/releases/redis-5.0.5.tar.gz
-
-#新版本可能需要修改为 
-bind 0.0.0.0
-
-#不想给redis配置密码，需要修改配置文件：
-protected-mode no
-
-</code></pre>
-
-<p>上面处理完成，本地客户端和docker容器可以进行连接了。</p>
-
-<h2 id="服务启动和停止">服务启动和停止</h2>
-
-<pre><code class="language-yml">apt-get update &amp;&amp; apt-get install procps 
-
-ps aux | grep redis
-
-#关闭 
-cd  /usr/local/bin 
-root@369a39fe77bf:/usr/local/bin# redis-cli -h 127.0.0.1 -p 6379 shutdown
-
-#启动
-cd  /usr/local/bin 
-root@369a39fe77bf:/usr/local/bin# redis-server /etc/redis/redis.conf
-</code></pre>
-
-<h1 id="mongodb">MongoDB</h1>
-
-<pre><code class="language-yml">FROM mongo
-EXPOSE 27017
- 
-#docker hub -- https://hub.docker.com/_/mongo 
-
-#编译 
-docker build -f /vscode/docker-software-dockerfile/mongodb/Dockerfile .
-
-#启动
-docker run -p 27017:27017 -v $PWD/db:/data/db -v $PWD/configdb:/data/configdb -d mongo
-
-#命令地址
-#/usr/bin/mongo  #手动启动客户端地址
-
- 
-#/usr/bin/  ./mongofiles -d records put /macfile/110.pdf  #GridFS操作
-
-
-#安装自己配置文件启动
-docker run -p 27000:27000 \
-              -v $PWD/27000/db:/data/db \
-              -v $PWD/27000/configdb:/data/configdb \
-              -itd mongo4.2.0 \
-              --config /data/configdb/27000_mongod.conf
-
-</code></pre>
-
-<p><strong>集群模式搭建请搜索查看《mongodb-集群和分片》文章，一般我们都是直接集群模式处理</strong></p>
-
-<h1 id="elk">ELK</h1>
-
-<h2 id="elasticsearch">ElasticSearch</h2>
-
-<pre><code class="language-yml">FROM elasticsearch:6.8.3
-EXPOSE  9300
-EXPOSE  9200
-
-# 编译 
-docker build -f /vscode/docker-software-dockerfile/ElasticSearch/Dockerfile .
-
-# 创建网段 
-docker network create esk
-
-# macOS with Docker for Mac  设置vm
-$ screen ~/Library/Containers/com.docker.docker/Data/vms/0/tty
-sysctl -w vm.max_map_count=262144
-
-# 启动
-docker run -itd --name elasticsearch --net esk -p 9200:9200 -p 9300:9300 -e &quot;discovery.type=single-node&quot; elasticsearch:6.8.3
-
-# 注意
-这个 --name 名字不能修改， 因为kibana默认的配置文件 kibana.yml 就是这个 elasticsearch.hosts: [ &quot;http://elasticsearch:9200&quot; ]
-
-# docker
-9300端口是使用tcp客户端连接使用的端口；
-9200端口是通过http协议连接es使用的端口；
-
-#单节点发现编辑  discovery.type 
-我们认识到某些用户需要将传输绑定到外部接口以测试其对传输客户端的使用。对于这种情况，我们提供发现类型single-node（通过设置discovery.type为来 配置single-node）；在这种情况下，节点将选举自己为主节点，并且不会与任何其他节点一起加入群集。
-
-#配置文件地址
-/usr/share/elasticsearch/config
-
-</code></pre>
-
-<h2 id="kibana">Kibana</h2>
-
-<pre><code class="language-yml">FROM kibana:6.8.3
-EXPOSE  5601
- 
-
-# 编译 
-docker build -f /vscode/docker-software-dockerfile/kibana/Dockerfile .
-
-
-# 启动
-docker run -d --name kibana6 --net esk -p 5601:5601 kibana:6.8.3
-
-#配置文件地址
-/usr/share/elasticsearch/config
-</code></pre>
-
-<h2 id="logstash">Logstash</h2>
-
-<h3 id="dockerfile">dockerfile</h3>
-
-<pre><code class="language-dockerfile">FROM logstash:6.8.3
-
-# 编译 
-# docker build -f /vscode/docker-software-dockerfile/Logstash/Dockerfile .
-
-# 启动   
-# docker run --name logstash -itd -p 6666:6666 -v  $PWD/config/logstash.yml:/usr/share/logstash/config/logstash.yml -v $PWD/config/pipelines.yml:/usr/share/logstash/config/pipelines.yml -v $PWD/config/logstash-sample.conf:/usr/share/logstash/config/logstash-sample.conf logstash:6.8.3 
-
-</code></pre>
-
-<h3 id="logstash-yml">logstash.yml</h3>
-
-<p>这个我直接给屏蔽了</p>
-
-<pre><code class="language-yml"># http.host: &quot;0.0.0.0&quot;
-# xpack.monitoring.elasticsearch.hosts: [ &quot;http://elasticsearch:9200&quot; ]
-</code></pre>
-
-<h3 id="pipelines-yml">pipelines.yml</h3>
-
-<pre><code class="language-yml">- pipeline.id: sample
-  path.config: &quot;/usr/share/logstash/config/logstash-sample.conf&quot;
-</code></pre>
-
-<h3 id="logstash-sample-conf">logstash-sample.conf</h3>
-
-<p>模拟用tcp插件来获取数据到ES中。</p>
-
-<pre><code class="language-json"># input{
-#     file{
-#         path =&gt; [&quot;/rmc.log&quot;]
-#         start_position =&gt; beginning
-#         sincedb_path =&gt; &quot;/dev/null&quot;
-#     }
-# }
-
-input{
-  tcp {
-        port =&gt; &quot;6666&quot;
-        mode =&gt; &quot;server&quot;
     }
+</code></pre>
+
+<p><strong>注：创建索引库的时候，一定要先判断索引库是否存在！！！</strong> 这里创建索引库的时候顺便也指定了别名（alias），这个别名是一个好东西，使用恰当可以提升查询性能，这里我们留着下次在讲。</p>
+
+<h2 id="修改数据">修改数据</h2>
+
+<p>ES提供修改API的时候，有两种方式，一种是直接修改，但是若数据不存在会抛出异常，另一种则是存在更新，不存着就插入。相比第一种，第二种会更加好用一些，不过在写入速度上是不如第一种的。</p>
+
+<pre><code class="language-java">private static void update(RestHighLevelClient client) throws IOException {
+        String type = &quot;_doc&quot;;
+        String index = &quot;test1&quot;;
+        // 唯一编号
+        String id = &quot;1&quot;;
+        UpdateRequest upateRequest = new UpdateRequest();
+        upateRequest.id(id);
+        upateRequest.index(index);
+        upateRequest.type(type);
+
+        // 依旧可以使用Map这种集合作为更新条件
+        Map&lt;String, Object&gt; jsonMap = new HashMap&lt;&gt;();
+        jsonMap.put(&quot;uid&quot;, 12345);
+        jsonMap.put(&quot;phone&quot;, 123456789019L);
+        jsonMap.put(&quot;msgcode&quot;, 2);
+        jsonMap.put(&quot;sendtime&quot;, &quot;2019-03-14 01:57:04&quot;);
+        jsonMap.put(&quot;message&quot;, &quot;xuwujing study Elasticsearch&quot;);
+        upateRequest.doc(jsonMap);
+        // upsert 方法表示如果数据不存在，那么就新增一条
+        upateRequest.docAsUpsert(true);
+        client.update(upateRequest, RequestOptions.DEFAULT);
+        System.out.println(&quot;更新成功！&quot;);
+
+    }
+</code></pre>
+
+<p><strong>注:  upsert 方法表示如果数据不存在，那么就新增一条，默认是false。</strong></p>
+
+<h2 id="查询数据">查询数据</h2>
+
+<p>几个常用的查询API这里就简单的介绍下用法，然后再直接给出所有的查询语句代码。</p>
+
+<h3 id="查询api">查询API</h3>
+
+<ul>
+<li>等值（term查询：QueryBuilders.termQuery(name,value);</li>
+<li>多值(terms)查询:QueryBuilders.termsQuery(name,value,value2,value3&hellip;);</li>
+<li>范围（range)查询：QueryBuilders.rangeQuery(name).gte(value).lte(value);</li>
+<li>存在(exists)查询:QueryBuilders.existsQuery(name);</li>
+<li>模糊(wildcard)查询:QueryBuilders.wildcardQuery(name,<em>+value+</em>);</li>
+<li>组合（bool）查询: BoolQueryBuilder boolQueryBuilder = new BoolQueryBuilder();</li>
+</ul>
+
+<h3 id="查询所有代码示例">查询所有代码示例</h3>
+
+<pre><code class="language-java"> private static void allSearch() throws IOException {
+    SearchRequest searchRequestAll = new SearchRequest();
+    SearchSourceBuilder searchSourceBuilder = new SearchSourceBuilder();
+    searchSourceBuilder.query(QueryBuilders.matchAllQuery());
+    searchRequestAll.source(searchSourceBuilder);
+    // 同步查询
+    SearchResponse searchResponseAll = client.search(searchRequestAll, RequestOptions.DEFAULT);
+    System.out.println(&quot;所有查询总数:&quot; + searchResponseAll.getHits().getTotalHits());
 }
 
-filter{
+</code></pre>
 
+<h3 id="一般查询代码示例">一般查询代码示例</h3>
+
+<p>其实就是等值查询，只不过在里面加入了分页、排序、超时、路由等等设置，并且在查询结果里面增加了一些处理。</p>
+
+<pre><code class="language-java">   private static void genSearch() throws IOException {
+    String type = &quot;_doc&quot;;
+    String index = &quot;test1&quot;;
+    // 查询指定的索引库
+    SearchRequest searchRequest = new SearchRequest(index);
+    searchRequest.types(type);
+    SearchSourceBuilder sourceBuilder = new SearchSourceBuilder();
+    // 设置查询条件
+    sourceBuilder.query(QueryBuilders.termQuery(&quot;uid&quot;, &quot;1234&quot;));
+    // 设置起止和结束
+    sourceBuilder.from(0);
+    sourceBuilder.size(5);
+    sourceBuilder.timeout(new TimeValue(60, TimeUnit.SECONDS));
+    // 设置路由
+//		searchRequest.routing(&quot;routing&quot;);
+    // 设置索引库表达式
+    searchRequest.indicesOptions(IndicesOptions.lenientExpandOpen());
+    // 查询选择本地分片，默认是集群分片
+    searchRequest.preference(&quot;_local&quot;);
+
+    // 排序
+    // 根据默认值进行降序排序
+//	sourceBuilder.sort(new ScoreSortBuilder().order(SortOrder.DESC));
+    // 根据字段进行升序排序
+//	sourceBuilder.sort(new FieldSortBuilder(&quot;id&quot;).order(SortOrder.ASC));
+
+    // 关闭suorce查询
+//	sourceBuilder.fetchSource(false);
+
+    String[] includeFields = new String[]{&quot;title&quot;, &quot;user&quot;, &quot;innerObject.*&quot;};
+    String[] excludeFields = new String[]{&quot;_type&quot;};
+    // 包含或排除字段
+//	sourceBuilder.fetchSource(includeFields, excludeFields);
+
+    searchRequest.source(sourceBuilder);
+	System.out.println(&quot;普通查询的DSL语句:&quot;+sourceBuilder.toString());
+    // 同步查询
+    SearchResponse searchResponse = client.search(searchRequest, RequestOptions.DEFAULT);
+
+    // HTTP状态代码、执行时间或请求是否提前终止或超时
+    RestStatus status = searchResponse.status();
+    TimeValue took = searchResponse.getTook();
+    Boolean terminatedEarly = searchResponse.isTerminatedEarly();
+    boolean timedOut = searchResponse.isTimedOut();
+
+    // 供关于受搜索影响的切分总数的统计信息，以及成功和失败的切分
+    int totalShards = searchResponse.getTotalShards();
+    int successfulShards = searchResponse.getSuccessfulShards();
+    int failedShards = searchResponse.getFailedShards();
+    // 失败的原因
+    for (ShardSearchFailure failure : searchResponse.getShardFailures()) {
+        // failures should be handled here
+    }
+    // 结果
+    searchResponse.getHits().forEach(hit -&gt; {
+        Map&lt;String, Object&gt; map = hit.getSourceAsMap();
+        System.out.println(&quot;普通查询的结果:&quot; + map);
+    });
+    System.out.println(&quot;\n=================\n&quot;);
+}
+
+</code></pre>
+
+<h3 id="或查询">或查询</h3>
+
+<p>其实这个或查询也是bool查询中的一种，这里的查询语句相当于SQL语句中的</p>
+
+<pre><code class="language-sql">SELECT * FROM test1 where (uid = 1 or uid =2) and phone = 12345678919
+</code></pre>
+
+<p>代码示例:</p>
+
+<pre><code class="language-java">private static void orSearch() throws IOException {
+    SearchRequest searchRequest = new SearchRequest();
+    searchRequest.indices(&quot;test1&quot;);
+    searchRequest.types(&quot;_doc&quot;);
+    SearchSourceBuilder searchSourceBuilder = new SearchSourceBuilder();
+    BoolQueryBuilder boolQueryBuilder = new BoolQueryBuilder();
+    BoolQueryBuilder boolQueryBuilder2 = new BoolQueryBuilder();
+ 
+      /**
+     *  SELECT * FROM test1 where (uid = 1234 or uid =12345)  and phone = 12345678909
+     * */
+    boolQueryBuilder2.should(QueryBuilders.termQuery(&quot;uid&quot;, 1234));
+    boolQueryBuilder2.should(QueryBuilders.termQuery(&quot;uid&quot;, 12345));
+    boolQueryBuilder.must(boolQueryBuilder2);
+    boolQueryBuilder.must(QueryBuilders.termQuery(&quot;phone&quot;, &quot;12345678909&quot;));
+    searchSourceBuilder.query(boolQueryBuilder);
+    System.out.println(&quot;或查询语句:&quot; + searchSourceBuilder.toString());
+    searchRequest.source(searchSourceBuilder);
+    // 同步查询
+    SearchResponse searchResponse = client.search(searchRequest, RequestOptions.DEFAULT);
+
+    searchResponse.getHits().forEach(documentFields -&gt; {
+
+        System.out.println(&quot;查询结果:&quot; + documentFields.getSourceAsMap());
+    });
 
 }
-  
-output {
-  elasticsearch {
-    hosts =&gt; [&quot;http://192.168.1.100:9200&quot;]
-    id =&gt; &quot;my_plugin_id&quot;
-    index =&gt; &quot;viewdata-%{+YYYY.MM.dd}&quot;
-    #user =&gt; &quot;elastic&quot;
-    #password =&gt; &quot;changeme&quot;
+
+</code></pre>
+
+<h3 id="模糊查询">模糊查询</h3>
+
+<p>相当于SQL语句中的like查询。</p>
+
+<pre><code class="language-java"> private static void likeSearch() throws IOException {
+        String type = &quot;_doc&quot;;
+        String index = &quot;test1&quot;;
+        SearchRequest searchRequest = new SearchRequest();
+        searchRequest.indices(index);
+        searchRequest.types(type);
+        SearchSourceBuilder searchSourceBuilder = new SearchSourceBuilder();
+        BoolQueryBuilder boolQueryBuilder = new BoolQueryBuilder();
+
+        /**
+         * SELECT * FROM p_test where message like '%xu%';
+         */
+        boolQueryBuilder.must(QueryBuilders.wildcardQuery(&quot;message&quot;, &quot;*xu*&quot;));
+        searchSourceBuilder.query(boolQueryBuilder);
+        System.out.println(&quot;模糊查询语句:&quot; + searchSourceBuilder.toString());
+        searchRequest.source(searchSourceBuilder);
+        // 同步查询
+        SearchResponse searchResponse = client.search(searchRequest, RequestOptions.DEFAULT);
+        searchResponse.getHits().forEach(documentFields -&gt; {
+            System.out.println(&quot;模糊查询结果:&quot; + documentFields.getSourceAsMap());
+        });
+        System.out.println(&quot;\n=================\n&quot;);
+    }
+</code></pre>
+
+<h3 id="多值查询">多值查询</h3>
+
+<p>也就是相当于SQL语句中的in查询。</p>
+
+<pre><code class="language-java"> 	 private static void inSearch() throws IOException {
+        String type = &quot;_doc&quot;;
+        String index = &quot;test1&quot;;
+        // 查询指定的索引库
+        SearchRequest searchRequest = new SearchRequest(index,type);
+        SearchSourceBuilder sourceBuilder = new SearchSourceBuilder();
+        /**
+         *  SELECT * FROM p_test where uid in (1,2)
+         * */
+        // 设置查询条件
+        sourceBuilder.query(QueryBuilders.termsQuery(&quot;uid&quot;, 1, 2));
+        searchRequest.source(sourceBuilder);
+  		System.out.println(&quot;in查询的DSL语句:&quot;+sourceBuilder.toString());
+        // 同步查询
+        SearchResponse searchResponse = client.search(searchRequest, RequestOptions.DEFAULT);
+        // 结果
+        searchResponse.getHits().forEach(hit -&gt; {
+            Map&lt;String, Object&gt; map = hit.getSourceAsMap();
+            String string = hit.getSourceAsString();
+            System.out.println(&quot;in查询的Map结果:&quot; + map);
+            System.out.println(&quot;in查询的String结果:&quot; + string);
+        });
+
+        System.out.println(&quot;\n=================\n&quot;);
+    }
+
+</code></pre>
+
+<h3 id="存在查询">存在查询</h3>
+
+<p>判断是否存在该字段，用法和SQL语句中的exist类似。</p>
+
+<pre><code class="language-java">  private static void existSearch() throws IOException {
+    String type = &quot;_doc&quot;;
+    String index = &quot;test1&quot;;
+    // 查询指定的索引库
+    SearchRequest searchRequest = new SearchRequest(index);
+    searchRequest.types(type);
+    SearchSourceBuilder sourceBuilder = new SearchSourceBuilder();
+
+    // 设置查询条件
+     sourceBuilder.query(QueryBuilders.existsQuery(&quot;msgcode&quot;));
+    searchRequest.source(sourceBuilder);
+    System.out.println(&quot;存在查询的DSL语句:&quot;+sourceBuilder.toString());
+    // 同步查询
+    SearchResponse searchResponse = client.search(searchRequest, RequestOptions.DEFAULT);
+    // 结果
+    searchResponse.getHits().forEach(hit -&gt; {
+        Map&lt;String, Object&gt; map = hit.getSourceAsMap();
+        String string = hit.getSourceAsString();
+        System.out.println(&quot;存在查询的Map结果:&quot; + map);
+        System.out.println(&quot;存在查询的String结果:&quot; + string);
+    });
+    System.out.println(&quot;\n=================\n&quot;);
+}
+
+</code></pre>
+
+<h3 id="范围查询">范围查询</h3>
+
+<p>和SQL语句中&lt;&gt;使用方法一样,其中gt是大于，lt是小于，gte是大于等于，lte是小于等于。</p>
+
+<pre><code class="language-java">private static void rangeSearch() throws IOException{
+    String type = &quot;_doc&quot;;
+    String index = &quot;test1&quot;;
+    SearchRequest searchRequest = new SearchRequest(index);
+    searchRequest.types(type);
+    SearchSourceBuilder sourceBuilder = new SearchSourceBuilder();
+
+    // 设置查询条件
+    sourceBuilder.query(QueryBuilders.rangeQuery(&quot;sendtime&quot;).gte(&quot;2019-01-01 00:00:00&quot;).lte(&quot;2019-12-31 23:59:59&quot;));
+    searchRequest.source(sourceBuilder);
+     System.out.println(&quot;范围查询的DSL语句:&quot;+sourceBuilder.toString());
+    // 同步查询
+    SearchResponse searchResponse = client.search(searchRequest, RequestOptions.DEFAULT);
+    // 结果
+    searchResponse.getHits().forEach(hit -&gt; {
+        String string = hit.getSourceAsString();
+        System.out.println(&quot;范围查询的String结果:&quot; + string);
+    });
+    System.out.println(&quot;\n=================\n&quot;);
+}
+
+</code></pre>
+
+<h3 id="正则查询">正则查询</h3>
+
+<p>ES可以使用正则进行查询，查询方式也非常的简单，代码示例如下：</p>
+
+<pre><code class="language-java"> private static void regexpSearch() throws IOException{
+    String type = &quot;_doc&quot;;
+    String index = &quot;test1&quot;;
+    // 查询指定的索引库
+    SearchRequest searchRequest = new SearchRequest(index);
+    searchRequest.types(type);
+    SearchSourceBuilder sourceBuilder = new SearchSourceBuilder();
+    // 设置查询条件
+    sourceBuilder.query(QueryBuilders.regexpQuery(&quot;message&quot;,&quot;xu[0-9]&quot;));
+    searchRequest.source(sourceBuilder);
+	 System.out.println(&quot;正则查询的DSL语句:&quot;+sourceBuilder.toString());
+    // 同步查询
+    SearchResponse searchResponse = client.search(searchRequest, RequestOptions.DEFAULT);
+    // 结果
+    searchResponse.getHits().forEach(hit -&gt; {
+        Map&lt;String, Object&gt; map = hit.getSourceAsMap();
+        String string = hit.getSourceAsString();
+        System.out.println(&quot;正则查询的Map结果:&quot; + map);
+        System.out.println(&quot;正则查询的String结果:&quot; + string);
+    });
+
+    System.out.println(&quot;\n=================\n&quot;);
+}
+
+</code></pre>
+
+<h2 id="删除数据">删除数据</h2>
+
+<pre><code class="language-java"> private static void delete(RestHighLevelClient client) throws IOException {
+        String type = &quot;_doc&quot;;
+        String index = &quot;test1&quot;;
+        // 唯一编号
+        String id = &quot;1&quot;;
+        DeleteRequest deleteRequest = new DeleteRequest();
+        deleteRequest.id(id);
+        deleteRequest.index(index);
+        deleteRequest.type(type);
+        // 设置超时时间
+        deleteRequest.timeout(TimeValue.timeValueMinutes(2));
+        // 设置刷新策略&quot;wait_for&quot;
+        // 保持此请求打开，直到刷新使此请求的内容可以搜索为止。此刷新策略与高索引和搜索吞吐量兼容，但它会导致请求等待响应，直到发生刷新
+        deleteRequest.setRefreshPolicy(WriteRequest.RefreshPolicy.WAIT_UNTIL);
+        // 同步删除
+        DeleteResponse deleteResponse = client.delete(deleteRequest, RequestOptions.DEFAULT);
+    }
+</code></pre>
+
+<p>ES根据条件进行删除：</p>
+
+<pre><code class="language-java">private static void deleteByQuery() throws IOException {
+	String type = &quot;_doc&quot;;
+	String index = &quot;test1&quot;;
+	DeleteByQueryRequest request = new DeleteByQueryRequest(index,type);
+	// 设置查询条件
+	request.setQuery(QueryBuilders.termsQuery(&quot;uid&quot;,1234));
+	// 同步执行
+	BulkByScrollResponse bulkResponse = client.deleteByQuery(request, RequestOptions.DEFAULT);
+}
+
+</code></pre>
+
+<h1 id="命令行显示数据格式">命令行显示数据格式</h1>
+
+<pre><code>GET  test1/_search
+</code></pre>
+
+<p>数据格式</p>
+
+<pre><code class="language-json">{
+  &quot;took&quot; : 5,
+  &quot;timed_out&quot; : false,
+  &quot;_shards&quot; : {
+    &quot;total&quot; : 5,
+    &quot;successful&quot; : 5,
+    &quot;skipped&quot; : 0,
+    &quot;failed&quot; : 0
+  },
+  &quot;hits&quot; : {
+    &quot;total&quot; : 2,
+    &quot;max_score&quot; : 1.0,
+    &quot;hits&quot; : [
+      {
+        &quot;_index&quot; : &quot;test1&quot;,
+        &quot;_type&quot; : &quot;_doc&quot;,
+        &quot;_id&quot; : &quot;2&quot;,
+        &quot;_score&quot; : 1.0,
+        &quot;_source&quot; : {
+          &quot;msgcode&quot; : 1,
+          &quot;uid&quot; : 1234,
+          &quot;phone&quot; : 12345678909,
+          &quot;sendtime&quot; : &quot;2019-03-14 01:57:04&quot;,
+          &quot;message&quot; : &quot;xuwujing study Elasticsearch&quot;
+        }
+      },
+      {
+        &quot;_index&quot; : &quot;test1&quot;,
+        &quot;_type&quot; : &quot;_doc&quot;,
+        &quot;_id&quot; : &quot;1&quot;,
+        &quot;_score&quot; : 1.0,
+        &quot;_source&quot; : {
+          &quot;msgcode&quot; : 2,
+          &quot;uid&quot; : 12345,
+          &quot;phone&quot; : 123456789019,
+          &quot;sendtime&quot; : &quot;2019-03-14 01:57:04&quot;,
+          &quot;message&quot; : &quot;xuwujing study Elasticsearch&quot;
+        }
+      }
+    ]
   }
-  stdout {
-        codec =&gt; rubydebug
-    }
 }
-##nc 192.168.1.100 6666 &lt; /var/log/nginx/access.log
-用nc命令来模拟tcp数据
-</code></pre>
 
-<h2 id="docker-network-create-somenetwork">$ docker network create somenetwork</h2>
-
-<p>默认网络docker0：网络中所有主机间只能用IP相互访问。通过&ndash;link选项创建的容器可以对链接的容器名(container-name)作为hostname进行直接访问。
-自定义网络(bridge)：网络中所有主机除ip访问外，还可以直接用容器名(container-name)作为hostname相互访问。</p>
-
-<h2 id="问题记录">问题记录</h2>
-
-<p>我的ES和logstash, 一个是Networks：esk  一个是Networks：bridge，但是依然可以OK， 不知道为什么。 我的电脑是mac系统。 后期在来解答。</p>
-
-<h1 id="rocketmq">Rocketmq</h1>
-
-<h2 id="单主机模式">单主机模式</h2>
-
-<h3 id="docker-compose-yml">docker-compose.yml</h3>
-
-<pre><code class="language-json">version: '2'
-services:
-  namesrv:
-    image: rocketmqinc/rocketmq 
-    container_name: rmqnamesrv
-    ports:
-      - 9876:9876 #namesrv只使用了一个9876端口。
-    volumes:
-      - $PWD/opt/rocketmq/logs:/home/rocketmq/logs
-      - $PWD/opt/rocketmq/store:/home/rocketmq/store
-    command: sh mqnamesrv
-  broker:
-    image: rocketmqinc/rocketmq
-    container_name: rmqbroker
-    ports:
-      - 10909:10909 #主要是fastRemotingServer服务使用
-      - 10911:10911 #这个主要是broker的服务端口号，作为对producer和consumer使用服务的端口号，默认为10911，可以通过配置文件中修改。
-      - 10912:10912 #slave连接使用
-    volumes:
-      - $PWD/opt/rocketmq/logs:/home/rocketmq/logs
-      - $PWD/opt/rocketmq/store:/home/rocketmq/store
-      - $PWD/opt/rocketmq/conf/broker.conf:/opt/rocketmq-4.4.0/conf/broker.conf
-    #command: sh mqbroker -n namesrv:9876
-    command: sh mqbroker -n namesrv:9876 -c ../conf/broker.conf
-    depends_on:
-      - namesrv
-    environment:
-      - JAVA_HOME=/usr/lib/jvm/jre
-  console:
-    image: styletang/rocketmq-console-ng
-    container_name: rocketmq-console-ng
-    ports:
-      - 8087:8080
-    depends_on:
-      - namesrv
-    environment:
-      - JAVA_OPTS= -Dlogging.level.root=info   -Drocketmq.namesrv.addr=rmqnamesrv:9876 
-      - Dcom.rocketmq.sendMessageWithVIPChannel=falseclear
-</code></pre>
-
-<h3 id="broker-conf">broker.conf</h3>
-
-<p>注意修改 brokerIP1这个地址，<strong>这个地址就是你的本机物理IP，也就是你当前宿主机的IP地址</strong></p>
-
-<pre><code class="language-properties"># 所属集群名字
-brokerClusterName = DefaultCluster
-# broker 名字，注意此处不同的配置文件填写的不一样，如果在 broker-a.properties 使用: broker-a,
-# 在 broker-b.properties 使用: broker-b
-brokerName = broker-a
-# 0 表示 Master，&gt; 0 表示 Slave
-brokerId = 0
-# 删除文件时间点，默认凌晨4点
-deleteWhen = 04
-# 文件保留时间，默认48小时
-fileReservedTime = 48
-# Broker 的角色
-# - ASYNC_MASTER 异步复制Master
-# - SYNC_MASTER 同步双写Master
-# - SLAVE
-brokerRole = ASYNC_MASTER
-# 刷盘方式
-# - ASYNC_FLUSH 异步刷盘
-# - SYNC_FLUSH 同步刷盘
-flushDiskType = ASYNC_FLUSH
-#set `brokerIP1` if you want to set physical IP as broker IP.
-brokerIP1=这样ip是你映射到主机的IP地址， 但是一定要放开上面的端口
-</code></pre>
-
-<h3 id="启动">启动</h3>
-
-<pre><code class="language-yaml">docker-compose up -d
-
-#在broker中，执行，
-sh mqadmin clusterList -n rmqnamesrv:9876 
-
-#出现如下数据，证明连接nameserver已经正常。
-OpenJDK 64-Bit Server VM warning: ignoring option MaxPermSize=128m; support was removed in 8.0
-#Cluster Name     #Broker Name            #BID  #Addr                  #Version                #InTPS(LOAD)       #OutTPS(LOAD) #PCWait(ms) #Hour #SPACE
-DefaultCluster    broker-a                0     172.20.0.4 :10911      V4_4_0                   0.00(0,0ms)         0.00(0,0ms)          0 436044.47 -1.0000
 </code></pre>
 
 
@@ -763,17 +816,11 @@ DefaultCluster    broker-a                0     172.20.0.4 :10911      V4_4_0   
                 <ul class="pager">
                     
                     <li class="previous">
-                        <a href="/post/mybatis%E7%B3%BB%E5%88%97-%E7%AE%80%E5%8D%95%E5%AE%9E%E7%8E%B0%E5%9F%BA%E6%9C%AC%E5%8E%9F%E7%90%86/" data-toggle="tooltip" data-placement="top"
-                            title="MyBatis系列-框架简单实现">&larr;
+                        <a href="/post/rocketmq-api-%E5%B8%B8%E7%94%A8%E6%93%8D%E4%BD%9C/" data-toggle="tooltip" data-placement="top"
+                            title="rocketmq-API-常用操作">&larr;
                             Previous Post</a>
                     </li>
                     
-                    
-                    <li class="next">
-                        <a href="/post/java%E7%9B%B8%E5%85%B3%E6%A6%82%E5%BF%B5-%E6%AD%A3%E5%90%91%E4%BB%A3%E7%90%86&#43;%E5%8F%8D%E5%90%91%E4%BB%A3%E7%90%86/" data-toggle="tooltip" data-placement="top"
-                            title="反向代理&#43;正向代理">Next
-                            Post &rarr;</a>
-                    </li>
                     
                 </ul>
 
@@ -823,44 +870,33 @@ DefaultCluster    broker-a                0     172.20.0.4 :10911      V4_4_0   
                     <ul class="catalog-body"></ul>
                     <nav id="TableOfContents">
 <ul>
-<li><a href="#修改容器-镜像名称">修改容器，镜像名称</a></li>
-<li><a href="#centos7">Centos7</a>
+<li><a href="#elasticsearch-java-api">ElasticSearch JAVA API</a></li>
+<li><a href="#pom-xml">pom.xml</a></li>
+<li><a href="#初始化连接">初始化连接</a></li>
+<li><a href="#crud操作">CRUD操作</a>
 <ul>
-<li><a href="#start-sh">start.sh</a></li>
-<li><a href="#问题">问题</a></li>
-</ul></li>
-<li><a href="#nginx">Nginx</a></li>
-<li><a href="#mysql">Mysql</a></li>
-<li><a href="#oracle">Oracle</a></li>
-<li><a href="#redis">Redis</a>
+<li><a href="#新增数据">新增数据</a>
 <ul>
-<li><a href="#redis-conf">redis.conf</a></li>
-<li><a href="#服务启动和停止">服务启动和停止</a></li>
+<li><a href="#通过jsonstring进行创建">通过jsonString进行创建</a></li>
+<li><a href="#通过map创建-会自动转换成json的数据">通过map创建,会自动转换成json的数据</a></li>
 </ul></li>
-<li><a href="#mongodb">MongoDB</a></li>
-<li><a href="#elk">ELK</a>
+<li><a href="#创建索引库">创建索引库</a></li>
+<li><a href="#修改数据">修改数据</a></li>
+<li><a href="#查询数据">查询数据</a>
 <ul>
-<li><a href="#elasticsearch">ElasticSearch</a></li>
-<li><a href="#kibana">Kibana</a></li>
-<li><a href="#logstash">Logstash</a>
-<ul>
-<li><a href="#dockerfile">dockerfile</a></li>
-<li><a href="#logstash-yml">logstash.yml</a></li>
-<li><a href="#pipelines-yml">pipelines.yml</a></li>
-<li><a href="#logstash-sample-conf">logstash-sample.conf</a></li>
+<li><a href="#查询api">查询API</a></li>
+<li><a href="#查询所有代码示例">查询所有代码示例</a></li>
+<li><a href="#一般查询代码示例">一般查询代码示例</a></li>
+<li><a href="#或查询">或查询</a></li>
+<li><a href="#模糊查询">模糊查询</a></li>
+<li><a href="#多值查询">多值查询</a></li>
+<li><a href="#存在查询">存在查询</a></li>
+<li><a href="#范围查询">范围查询</a></li>
+<li><a href="#正则查询">正则查询</a></li>
 </ul></li>
-<li><a href="#docker-network-create-somenetwork">$ docker network create somenetwork</a></li>
-<li><a href="#问题记录">问题记录</a></li>
+<li><a href="#删除数据">删除数据</a></li>
 </ul></li>
-<li><a href="#rocketmq">Rocketmq</a>
-<ul>
-<li><a href="#单主机模式">单主机模式</a>
-<ul>
-<li><a href="#docker-compose-yml">docker-compose.yml</a></li>
-<li><a href="#broker-conf">broker.conf</a></li>
-<li><a href="#启动">启动</a></li>
-</ul></li>
-</ul></li>
+<li><a href="#命令行显示数据格式">命令行显示数据格式</a></li>
 </ul>
 </nav>
                     <br>
