@@ -427,6 +427,26 @@
 <pre><code class="language-java"> -XX:LogFile=/data/log/hotspot.log
 </code></pre>
 
+<h1 id="执行指定的jdk版本运行jar">执行指定的JDK版本运行jar</h1>
+
+<pre><code>#!/bin/bash
+JAVA_HOME=/Library/Java/JavaVirtualMachines/jdk1.8.0_101.jdk/Contents/Home
+JAVA=$JAVA_HOME/bin/java
+nohup $JAVA -jar zookeeper-visualizer.jar -Djava.ext.dirs=$JAVA_HOME/lib &amp;
+</code></pre>
+
+<h1 id="d">-D</h1>
+
+<p><strong>原文链接：<a href="https://blog.csdn.net/cyony/article/details/74375251">https://blog.csdn.net/cyony/article/details/74375251</a></strong></p>
+
+<p>-D 是设置系统的属性</p>
+
+<h2 id="java-ext-dirs">java.ext.dirs</h2>
+
+<p>java命令引入jar时可以-cp参数，但时-cp不能用通配符(多个jar时什么烦要一个个写,不能*.jar)，面通常的jar都在同一目录，且多于1个。前些日子找到（发现）-Djava.ext.dirs太好。</p>
+
+<p>-Djava.ext.dirs会覆盖Java本身的ext设置，java.ext.dirs指定的目录由ExtClassLoader加载器加载，如果您的程序没有指定该系统属性，那么该加载器默认加载$JAVA_HOME/jre/lib/ext目录下的所有jar文件。但如果你手动指定系统属性且忘了把$JAVA_HOME/jre/lib/ext路径给加上，那么ExtClassLoader不会去加载$JAVA_HOME/lib/ext下面的jar文件，这意味着你将失去一些功能，例如java自带的加解密算法实现。</p>
+
 <h1 id="注意">注意</h1>
 
 <p>还有很多命令请查看这篇原文， 上面主要记录常用的命令。</p>
@@ -574,6 +594,11 @@
 <li><a href="#xx-errorfile-filename">-XX:ErrorFile=filename</a></li>
 <li><a href="#xx-logfile-path">-XX:LogFile=path</a></li>
 </ul></li>
+</ul></li>
+<li><a href="#执行指定的jdk版本运行jar">执行指定的JDK版本运行jar</a></li>
+<li><a href="#d">-D</a>
+<ul>
+<li><a href="#java-ext-dirs">java.ext.dirs</a></li>
 </ul></li>
 <li><a href="#注意">注意</a></li>
 </ul>
