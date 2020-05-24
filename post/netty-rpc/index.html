@@ -22,9 +22,9 @@
     
 
     
-    <meta name="description" content="麦子，程序员, 开源爱好者，生活探险家 | 这里是 麦子 的博客，与你一起发现更大的世界。">
-    <meta property="og:description" content="麦子，程序员, 开源爱好者，生活探险家 | 这里是 麦子 的博客，与你一起发现更大的世界。" />
-    <meta property="twitter:description" content="麦子，程序员, 开源爱好者，生活探险家 | 这里是 麦子 的博客，与你一起发现更大的世界。" />
+    <meta name="description" content="RPC概念，常用RPC框架，Netty自定义RPC框架">
+    <meta property="og:description" content="RPC概念，常用RPC框架，Netty自定义RPC框架" />
+    <meta property="twitter:description" content="RPC概念，常用RPC框架，Netty自定义RPC框架" />
     
 
     
@@ -200,7 +200,7 @@
                         麦子
                         
                         on
-                        Wednesday, 2020年05月20日
+                        Sunday, 2020年05月24日
                         
                     </span>
                 </div>
@@ -228,7 +228,446 @@
                 
                 
                 
-                <p>[TOC]</p>
+                
+
+<p>[TOC]</p>
+
+<h1 id="rpc基本介绍">RPC基本介绍</h1>
+
+<p>RPC（Remote Procedure Call）— 远程过程调用，是一个计算机通信协议。该协议允许运行于一台计算机的程序调用另一台计算机的子程序，而程序员无需额外地为这个交互作用编程</p>
+
+<p>两个或多个应用程序都分布在不同的服务器上，它们之间的调用都像是本地方法调用一样(如图)</p>
+
+<p><img src="/img/Xnip2020-05-24_09-42-21.png" alt="Xnip2020-05-24_09-42-21" /></p>
+
+<h1 id="常见的-rpc-框架有">常见的 RPC 框架有</h1>
+
+<p>比较知名的如阿里的Dubbo、google的gRPC、Go语言的rpcx、Apache的thrift， Spring 旗下的 Spring Cloud。</p>
+
+<h1 id="rpc调用流程">RPC调用流程</h1>
+
+<p><img src="/img/Xnip2020-05-24_09-43-46.png" alt="Xnip2020-05-24_09-43-46" /></p>
+
+<h2 id="调用流程说明">调用流程说明</h2>
+
+<ol>
+<li><strong>服务消费方(client)以本地调用方式调用服务</strong></li>
+<li>client stub 接收到调用后负责将方法、参数等封装成能够进行网络传输的消息体</li>
+<li>client stub 将消息进行编码并发送到服务端</li>
+<li>server stub 收到消息后进行解码</li>
+<li>server stub 根据解码结果调用本地的服务</li>
+<li>本地服务执行并将结果返回给 server stub</li>
+<li>server stub 将返回导入结果进行编码并发送至消费方</li>
+<li>client stub 接收到消息并进行解码</li>
+<li><strong>服务消费方(client)得到结果</strong></li>
+</ol>
+
+<p><strong>小结：RPC 的目标就是将 2-8 这些步骤都封装起来，用户无需关心这些细节，可以像调用本地方法一样即可完成远程服务调用。</strong></p>
+
+<h1 id="使用netty编写doubbo-rpc">使用Netty编写Doubbo RPC</h1>
+
+<h2 id="思路流程">思路流程</h2>
+
+<p><img src="/img/Xnip2020-05-21_09-48-57.png" alt="Xnip2020-05-21_09-48-57" /></p>
+
+<h2 id="具体代码如下">具体代码如下</h2>
+
+<h3 id="公共接口-也就是要消费和提供的接口">公共接口，也就是要消费和提供的接口</h3>
+
+<pre><code class="language-java">package com.maizi.rpc.publicinterface;
+
+//这个是接口，是服务提供方和 服务消费方都需要
+public interface HelloService {
+
+    String hello(String mes);
+}
+
+</code></pre>
+
+<h3 id="基础类封装">基础类封装</h3>
+
+<h4 id="nettyclient">NettyClient</h4>
+
+<pre><code class="language-java">package com.maizi.rpc.netty;
+
+import io.netty.bootstrap.Bootstrap;
+import io.netty.channel.ChannelInitializer;
+import io.netty.channel.ChannelOption;
+import io.netty.channel.ChannelPipeline;
+import io.netty.channel.nio.NioEventLoopGroup;
+import io.netty.channel.socket.SocketChannel;
+import io.netty.channel.socket.nio.NioSocketChannel;
+import io.netty.handler.codec.string.StringDecoder;
+import io.netty.handler.codec.string.StringEncoder;
+
+import java.lang.reflect.Proxy;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+
+public class NettyClient {
+
+    // 创建线程池
+    private static ExecutorService executor = Executors.newFixedThreadPool(Runtime.getRuntime().availableProcessors());
+
+    private static NettyClientHandler client;
+    private int count = 0;
+
+    // 编写方法使用代理模式，获取一个代理对象
+
+    public Object getBean(final Class&lt;?&gt; serivceClass, final String providerName) {
+
+        return Proxy.newProxyInstance(Thread.currentThread().getContextClassLoader(), new Class&lt;?&gt;[] { serivceClass },
+                (proxy, method, args) -&gt; {
+
+                    System.out.println(&quot;(proxy, method, args) 进入....&quot; + (++count) + &quot; 次&quot;);
+                    // {} 部分的代码，客户端每调用一次 hello, 就会进入到该代码
+                    if (client == null) {
+                        initClient();
+                    }
+
+                    // 设置要发给服务器端的信息
+                    // providerName 协议头 args[0] 就是客户端调用api hello(???), 参数
+                    client.setPara(providerName + args[0]);
+
+                    //
+                    return executor.submit(client).get();
+
+                });
+    }
+
+    // 初始化客户端
+    private static void initClient() {
+        client = new NettyClientHandler();
+        // 创建EventLoopGroup
+        NioEventLoopGroup group = new NioEventLoopGroup();
+        Bootstrap bootstrap = new Bootstrap();
+        bootstrap.group(group).channel(NioSocketChannel.class).option(ChannelOption.TCP_NODELAY, true)
+                .handler(new ChannelInitializer&lt;SocketChannel&gt;() {
+                    @Override
+                    protected void initChannel(SocketChannel ch) throws Exception {
+                        ChannelPipeline pipeline = ch.pipeline();
+                        pipeline.addLast(new StringDecoder());
+                        pipeline.addLast(new StringEncoder());
+                        pipeline.addLast(client);
+                    }
+                });
+
+        try {
+            bootstrap.connect(&quot;127.0.0.1&quot;, 7000).sync();
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
+}
+
+</code></pre>
+
+<h4 id="nettyclienthandler">NettyClientHandler</h4>
+
+<pre><code class="language-java">package com.maizi.rpc.netty;
+
+import io.netty.channel.ChannelHandlerContext;
+import io.netty.channel.ChannelInboundHandlerAdapter;
+
+import java.util.concurrent.Callable;
+
+public class NettyClientHandler extends ChannelInboundHandlerAdapter implements Callable {
+
+    private ChannelHandlerContext context;// 上下文
+    private String result; // 返回的结果
+    private String para; // 客户端调用方法时，传入的参数
+
+    // 与服务器的连接创建后，就会被调用, 这个方法是第一个被调用(1)
+    @Override
+    public void channelActive(ChannelHandlerContext ctx) throws Exception {
+        System.out.println(&quot; channelActive 被调用  &quot;);
+        context = ctx; // 因为我们在其它方法会使用到 ctx
+    }
+
+    // 收到服务器的数据后，调用方法 (4)
+    //
+    @Override
+    public synchronized void channelRead(ChannelHandlerContext ctx, Object msg) throws Exception {
+        System.out.println(&quot; channelRead 被调用  &quot;);
+        result = msg.toString();
+        notify(); // 唤醒等待的线程
+    }
+
+    @Override
+    public void exceptionCaught(ChannelHandlerContext ctx, Throwable cause) throws Exception {
+        ctx.close();
+    }
+
+    // 被代理对象调用, 发送数据给服务器，-&gt; wait -&gt; 等待被唤醒(channelRead) -&gt; 返回结果 (3)-》5
+    @Override
+    public synchronized Object call() throws Exception {
+        System.out.println(&quot; call1 被调用  &quot;);
+        context.writeAndFlush(para);
+        // 进行wait
+        wait(); // 等待channelRead 方法获取到服务器的结果后，唤醒
+        System.out.println(&quot; call2 被调用  &quot;);
+        return result; // 服务方返回的结果
+
+    }
+
+    // (2)
+    void setPara(String para) {
+        System.out.println(&quot; setPara  &quot;);
+        this.para = para;
+    }
+}
+
+</code></pre>
+
+<h4 id="nettyserver">NettyServer</h4>
+
+<pre><code class="language-java">package com.maizi.rpc.netty;
+
+import io.netty.bootstrap.ServerBootstrap;
+import io.netty.channel.ChannelFuture;
+import io.netty.channel.ChannelInitializer;
+import io.netty.channel.ChannelPipeline;
+import io.netty.channel.EventLoopGroup;
+import io.netty.channel.nio.NioEventLoopGroup;
+import io.netty.channel.socket.SocketChannel;
+import io.netty.channel.socket.nio.NioServerSocketChannel;
+import io.netty.handler.codec.string.StringDecoder;
+import io.netty.handler.codec.string.StringEncoder;
+
+public class NettyServer {
+
+    public static void startServer(String hostName, int port) {
+        startServer0(hostName, port);
+    }
+
+    // 编写一个方法，完成对NettyServer的初始化和启动
+
+    private static void startServer0(String hostname, int port) {
+
+        EventLoopGroup bossGroup = new NioEventLoopGroup(1);
+        EventLoopGroup workerGroup = new NioEventLoopGroup();
+
+        try {
+
+            ServerBootstrap serverBootstrap = new ServerBootstrap();
+
+            serverBootstrap.group(bossGroup, workerGroup).channel(NioServerSocketChannel.class)
+                    .childHandler(new ChannelInitializer&lt;SocketChannel&gt;() {
+                        @Override
+                        protected void initChannel(SocketChannel ch) throws Exception {
+                            ChannelPipeline pipeline = ch.pipeline();
+                            pipeline.addLast(new StringDecoder());
+                            pipeline.addLast(new StringEncoder());
+                            pipeline.addLast(new NettyServerHandler()); // 业务处理器
+
+                        }
+                    }
+
+                    );
+
+            ChannelFuture channelFuture = serverBootstrap.bind(hostname, port).sync();
+            System.out.println(&quot;服务提供方开始提供服务~~&quot;);
+            channelFuture.channel().closeFuture().sync();
+
+        } catch (Exception e) {
+            e.printStackTrace();
+        } finally {
+            bossGroup.shutdownGracefully();
+            workerGroup.shutdownGracefully();
+        }
+
+    }
+}
+
+</code></pre>
+
+<h4 id="nettyserverhandler">NettyServerHandler</h4>
+
+<pre><code class="language-java">package com.maizi.rpc.netty;
+
+import com.maizi.rpc.customer.ClientBootstrap;
+import com.maizi.rpc.provider.HelloServiceImpl;
+
+import io.netty.channel.ChannelHandlerContext;
+import io.netty.channel.ChannelInboundHandlerAdapter;
+
+//服务器这边handler比较简单
+public class NettyServerHandler extends ChannelInboundHandlerAdapter {
+
+    @Override
+    public void channelRead(ChannelHandlerContext ctx, Object msg) throws Exception {
+        // 获取客户端发送的消息，并调用服务
+        System.out.println(&quot;msg=&quot; + msg);
+        // 客户端在调用服务器的api 时，我们需要定义一个协议
+        // 比如我们要求 每次发消息是都必须以某个字符串开头 &quot;HelloService#hello#你好&quot;
+        if (msg.toString().startsWith(ClientBootstrap.providerName)) {
+
+            String result = new HelloServiceImpl().hello(msg.toString().substring(msg.toString().lastIndexOf(&quot;#&quot;) + 1));
+            ctx.writeAndFlush(result);
+        }
+    }
+
+    @Override
+    public void exceptionCaught(ChannelHandlerContext ctx, Throwable cause) throws Exception {
+        ctx.close();
+    }
+}
+
+</code></pre>
+
+<h3 id="消费接口类">消费接口类</h3>
+
+<pre><code class="language-java">package com.maizi.rpc.customer;
+
+import com.maizi.rpc.netty.NettyClient;
+import com.maizi.rpc.publicinterface.HelloService;
+
+public class ClientBootstrap {
+
+    // 这里定义协议头
+    public static final String providerName = &quot;HelloService#hello#&quot;;
+
+    public static void main(String[] args) throws Exception {
+
+        // 创建一个消费者
+        NettyClient customer = new NettyClient();
+
+        // 创建代理对象
+        HelloService service = (HelloService) customer.getBean(HelloService.class, providerName);
+
+        for (;;) {
+            Thread.sleep(2 * 1000);
+            // 通过代理对象调用服务提供者的方法(服务)
+            String res = service.hello(&quot;你好 dubbo~&quot;);
+            System.out.println(&quot;调用的结果 res= &quot; + res);
+        }
+    }
+}
+
+</code></pre>
+
+<h3 id="提供接口类">提供接口类</h3>
+
+<pre><code class="language-java">package com.maizi.rpc.provider;
+
+import com.maizi.rpc.publicinterface.HelloService;
+
+public class HelloServiceImpl implements HelloService {
+
+    private static int count;
+
+    // 当有消费方调用该方法时， 就返回一个结果
+    @Override
+    public synchronized String hello(String mes) {
+        System.out.println(&quot;收到客户端消息=&quot; + mes);
+        // 根据mes 返回不同的结果
+        if (mes != null) {
+            return &quot;你好客户端, 我已经收到你的消息 [&quot; + mes + &quot;] 第&quot; + (++count) + &quot; 次&quot;;
+        } else {
+            return &quot;你好客户端, 我已经收到你的消息 &quot;;
+        }
+    }
+}
+
+</code></pre>
+
+<pre><code class="language-java">package com.maizi.rpc.provider;
+
+import com.maizi.rpc.netty.NettyServer;
+
+//ServerBootstrap 会启动一个服务提供者，就是 NettyServer
+public class ServerBootstrap {
+    public static void main(String[] args) {
+
+        // 代码代填..
+        NettyServer.startServer(&quot;127.0.0.1&quot;, 7000);
+    }
+}
+
+</code></pre>
+
+<h3 id="运行结果">运行结果</h3>
+
+<pre><code class="language-java">服务提供方开始提供服务~~
+msg=HelloService#hello#你好 dubbo~
+收到客户端消息=你好 dubbo~
+msg=HelloService#hello#你好 dubbo~
+收到客户端消息=你好 dubbo~
+msg=HelloService#hello#你好 dubbo~
+收到客户端消息=你好 dubbo~
+msg=HelloService#hello#你好 dubbo~
+收到客户端消息=你好 dubbo~
+msg=HelloService#hello#你好 dubbo~
+</code></pre>
+
+<pre><code class="language-java">(proxy, method, args) 进入....1 次
+ channelActive 被调用  
+ setPara  
+ call1 被调用  
+ channelRead 被调用  
+ call2 被调用  
+调用的结果 res= 你好客户端, 我已经收到你的消息 [你好 dubbo~] 第1 次
+(proxy, method, args) 进入....2 次
+ setPara  
+ call1 被调用  
+ channelRead 被调用  
+ call2 被调用  
+调用的结果 res= 你好客户端, 我已经收到你的消息 [你好 dubbo~] 第2 次
+(proxy, method, args) 进入....3 次
+ setPara  
+ call1 被调用  
+ channelRead 被调用  
+ call2 被调用  
+调用的结果 res= 你好客户端, 我已经收到你的消息 [你好 dubbo~] 第3 次
+</code></pre>
+
+<h1 id="总结">总结</h1>
+
+<p>通过代理，执行公共接口的方法。</p>
+
+<pre><code class="language-java">
+    public Object getBean(final Class&lt;?&gt; serivceClass, final String providerName) {
+
+        return Proxy.newProxyInstance(Thread.currentThread().getContextClassLoader(), new Class&lt;?&gt;[] { serivceClass },
+                (proxy, method, args) -&gt; {
+
+                    System.out.println(&quot;(proxy, method, args) 进入....&quot; + (++count) + &quot; 次&quot;);
+                    // {} 部分的代码，客户端每调用一次 hello, 就会进入到该代码
+                    if (client == null) {
+                        initClient();
+                    }
+
+                    // 设置要发给服务器端的信息
+                    // providerName 协议头 args[0] 就是客户端调用api hello(???), 参数
+                    client.setPara(providerName + args[0]);
+
+                    //
+                    return executor.submit(client).get();
+
+                });
+    }
+</code></pre>
+
+<p>同时，实现Callable接口，</p>
+
+<pre><code class="language-java">public class NettyClientHandler extends ChannelInboundHandlerAdapter implements Callable {
+</code></pre>
+
+<p>回调下面的call方法。</p>
+
+<pre><code class="language-java"> // 被代理对象调用, 发送数据给服务器，-&gt; wait -&gt; 等待被唤醒(channelRead) -&gt; 返回结果 (3)-》5
+    @Override
+    public synchronized Object call() throws Exception {
+        System.out.println(&quot; call1 被调用  &quot;);
+        context.writeAndFlush(para);
+        // 进行wait
+        wait(); // 等待channelRead 方法获取到服务器的结果后，唤醒
+        System.out.println(&quot; call2 被调用  &quot;);
+        return result; // 服务方返回的结果
+
+    }
+
+</code></pre>
 
 
                 
@@ -329,7 +768,35 @@
                         <a class="catalog-toggle" href="index.html#">目录结构</a>
                     </h4>
                     <ul class="catalog-body"></ul>
-                    
+                    <nav id="TableOfContents">
+<ul>
+<li><a href="#rpc基本介绍">RPC基本介绍</a></li>
+<li><a href="#常见的-rpc-框架有">常见的 RPC 框架有</a></li>
+<li><a href="#rpc调用流程">RPC调用流程</a>
+<ul>
+<li><a href="#调用流程说明">调用流程说明</a></li>
+</ul></li>
+<li><a href="#使用netty编写doubbo-rpc">使用Netty编写Doubbo RPC</a>
+<ul>
+<li><a href="#思路流程">思路流程</a></li>
+<li><a href="#具体代码如下">具体代码如下</a>
+<ul>
+<li><a href="#公共接口-也就是要消费和提供的接口">公共接口，也就是要消费和提供的接口</a></li>
+<li><a href="#基础类封装">基础类封装</a>
+<ul>
+<li><a href="#nettyclient">NettyClient</a></li>
+<li><a href="#nettyclienthandler">NettyClientHandler</a></li>
+<li><a href="#nettyserver">NettyServer</a></li>
+<li><a href="#nettyserverhandler">NettyServerHandler</a></li>
+</ul></li>
+<li><a href="#消费接口类">消费接口类</a></li>
+<li><a href="#提供接口类">提供接口类</a></li>
+<li><a href="#运行结果">运行结果</a></li>
+</ul></li>
+</ul></li>
+<li><a href="#总结">总结</a></li>
+</ul>
+</nav>
                     <br>
                     <br>
                     <br>
