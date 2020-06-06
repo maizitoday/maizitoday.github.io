@@ -248,6 +248,14 @@
 
 <p>这样你就可以使用Constructor 创建新的对象，用get() 和set() 方法读取和修改与Field 对象关联的字段，用invoke() 方法调用与Method 对象关联的方法。另外，还可以调用getFields() getMethods() 和 getConstructors() 等很便利的方法，以返回表示字段，方法，以及构造器的对象的数组。这样匿名对象的信息就能在运行时被完全确定下来，而在编译时不需要知道任何事情。</p>
 
+<h1 id="java反射机制">Java反射机制</h1>
+
+<p>Java 反射机制是在运行状态中，对于任意一个类，都能够获得这个类的所有属性和方法，对于任意一个对象都能够 调用它的任意一个属性和方法。这种在运行时动态的获取信息以及动态调用对象的方法的功能称为 Java 的反射机 制。</p>
+
+<p>Class 类与 java.lang.reﬂect 类库一起对反射的概念进行了支持，该类库包含了 Field,Method,Constructor 类 (每 个类都实现了 Member 接口)。这些类型的对象时由 JVM 在运行时创建的，用以表示未知类里对应的成员。</p>
+
+<p>这样你就可以使用 Constructor 创建新的对象，用 get() 和 set() 方法读取和修改与 Field 对象关联的字段，用 invoke() 方法调用与 Method 对象关联的方法。另外，还可以调用 getFields() getMethods() 和 getConstructors() 等很便利的方法，以返回表示字段，方法，以及构造器的对象的数组。这样匿名对象的信息 就能在运行时被完全确定下来，而在编译时不需要知道任何事情。</p>
+
 <h1 id="为什么使用">为什么使用</h1>
 
 <p>我们为什么要使用反射，它的作用是什么，它在实际的编程中有什么应用。首先我们先明确两个概念，静态编译和动态编译。</p>
@@ -515,6 +523,38 @@ show 有参数方法被调用: 打印消息---&gt;执行中....
 
 <p>Spring 中的 IOC 的底层实现原理就是反射机制，Spring 的容器会帮我们创建实例，该容器中使用的方法就是反射，通过解析xml文件，获取到id属性和class属性里面的内容，利用反射原理创建配置文件里类的实例对象，存入到Spring的bean容器中。</p>
 
+<h1 id="获取反射的三种方法">获取反射的三种方法</h1>
+
+<ol>
+<li><p>通过new对象实现反射机制</p></li>
+
+<li><p>通过路径实现反射机制</p></li>
+
+<li><p>通过类名实现反射机制</p></li>
+</ol>
+
+<pre><code class="language-java"> public class Student {
+        private int id;
+        String name;
+        protected boolean sex;
+        public float score;
+    }
+    
+     public static void main(String[] args) {
+        // 方式一(通过建立对象)
+        Student stu = new Student();
+        Class classobj1 = stu.getClass();
+        System.out.println(classobj1.getName());
+        // 方式二（所在通过路径-相对路径）
+        Class classobj2 = Class.forName(&quot;fanshe.Student&quot;);
+        System.out.println(classobj2.getName());
+        // 方式三（通过类名）
+        Class classobj3 = Student.class;
+        System.out.println(classobj3.getName());
+    }
+    
+</code></pre>
+
 <h1 id="反射使用注意">反射使用注意</h1>
 
 <p>说了这么多，那么我们的开发中，为什么不全部都用反射那？一个原因，开销，它的开销是什么昂贵的，随意尽量在最需要的地方使用反射。</p>
@@ -627,6 +667,7 @@ show 有参数方法被调用: 打印消息---&gt;执行中....
                     <nav id="TableOfContents">
 <ul>
 <li><a href="#反射机制概述">反射机制概述</a></li>
+<li><a href="#java反射机制">Java反射机制</a></li>
 <li><a href="#为什么使用">为什么使用</a></li>
 <li><a href="#反射好处">反射好处</a>
 <ul>
@@ -646,6 +687,7 @@ show 有参数方法被调用: 打印消息---&gt;执行中....
 <li><a href="#常用创建对象通用方法">常用创建对象通用方法</a></li>
 </ul></li>
 <li><a href="#ioc">IOC</a></li>
+<li><a href="#获取反射的三种方法">获取反射的三种方法</a></li>
 <li><a href="#反射使用注意">反射使用注意</a></li>
 </ul>
 </nav>
