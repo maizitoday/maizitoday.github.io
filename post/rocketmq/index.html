@@ -22,9 +22,9 @@
     
 
     
-    <meta name="description" content="队列的好处，缺点，集群搭建，事物消息，生产者和消费者，架构认识">
-    <meta property="og:description" content="队列的好处，缺点，集群搭建，事物消息，生产者和消费者，架构认识" />
-    <meta property="twitter:description" content="队列的好处，缺点，集群搭建，事物消息，生产者和消费者，架构认识" />
+    <meta name="description" content="队列的好处，缺点，集群搭建，事物消息，生产者和消费者，架构认识, 幂等性">
+    <meta property="og:description" content="队列的好处，缺点，集群搭建，事物消息，生产者和消费者，架构认识, 幂等性" />
+    <meta property="twitter:description" content="队列的好处，缺点，集群搭建，事物消息，生产者和消费者，架构认识, 幂等性" />
     
 
     
@@ -471,6 +471,104 @@ maxMessageSize=65536
 #pullMessageThreadPoolNums=128
 </code></pre>
 
+<h2 id="rocketmq幂等性问题">RocketMQ幂等性问题</h2>
+
+<p>转载地址：<a href="https://www.cnblogs.com/wishsaber/p/12326154.html">https://www.cnblogs.com/wishsaber/p/12326154.html</a></p>
+
+<h3 id="什么是幂等性">什么是幂等性：</h3>
+
+<p>在编程中一个幂等操作的特点是其任意多次执行所产生的影响均与一次执行的影响相同。</p>
+
+<p>当出现消费者对某条消息重复消费的情况时，重复消费的结果与消费一次的结果是相同的，并且多次消费并未对业务系统产生任何负面影响，那么这整个过程就实现可消息幂等。</p>
+
+<p>例如，在支付场景下，消费者消费扣款消息，对一笔订单执行扣款操作，扣款金额为 100 元。</p>
+
+<p>如果因网络不稳定等原因导致扣款消息重复投递，消费者重复消费了该扣款消息，但最终的业务结果是只扣款一次，扣费 100 元，</p>
+
+<p>且用户的扣款记录中对应的订单只有一条扣款流水，不会多次扣除费用。那么这次扣款操作是符合要求的，整个消费过程实现了消费幂等。</p>
+
+<h3 id="实例">实例：</h3>
+
+<p>在RocketMQ中因为 Message ID 有可能出现冲突（重复）的情况，所以真正安全的幂等处理，不建议以 Message ID 作为处理依据。</p>
+
+<p>最好的方式是以业务唯一标识作为幂等处理的关键依据，而业务的唯一标识可以通过消息 Key 设置。</p>
+
+<p>下面模拟：</p>
+
+<h5 id="生产者">生产者</h5>
+
+<pre><code class="language-java">public class RetryProducer {
+    public static void main(String[] args) throws MQClientException {
+        DefaultMQProducer producer = new DefaultMQProducer(&quot;retry_rmq-group&quot;);
+        producer.setNamesrvAddr(&quot;192.168.152.55:9876;192.168.152.66:9876&quot;);
+        producer.setInstanceName(&quot;retry_producer&quot;);
+        producer.start();
+        try {
+            for (int i = 0; i &lt; 1; i++) {
+                Thread.sleep(1000); // 每秒发送一次MQ
+                Message msg = new Message(&quot;itmayiedu-topic&quot;, // topic 主题名称
+                        &quot;TagA&quot;, // tag 临时值
+                        (&quot;retry_itmayiedu-6&quot; + i).getBytes()// body 内容
+                );
+                msg.setKeys(System.currentTimeMillis() + &quot;&quot;);
+                SendResult sendResult = producer.send(msg);
+                System.out.println(sendResult.toString());
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        producer.shutdown();
+    }
+ 
+}
+</code></pre>
+
+<h5 id="消费者">消费者</h5>
+
+<pre><code class="language-java">public class RetryConsumer {
+    static private Map&lt;String, String&gt; logMap = new HashMap&lt;&gt;();
+ 
+    public static void main(String[] args) throws MQClientException {
+        DefaultMQPushConsumer consumer = new DefaultMQPushConsumer(&quot;retry_rmq-group&quot;);
+ 
+        consumer.setNamesrvAddr(&quot;192.168.152.55:9876;192.168.152.66:9876&quot;);
+        consumer.setInstanceName(&quot;retry_consumer&quot;);
+        consumer.subscribe(&quot;retry_itmayiedu-topic&quot;, &quot;TagA&quot;);
+ 
+        consumer.registerMessageListener(new MessageListenerConcurrently() {
+            @Override
+            public ConsumeConcurrentlyStatus consumeMessage(List&lt;MessageExt&gt; msgs, ConsumeConcurrentlyContext context) {
+                String key = null;
+                String msgId = null;
+                try {
+                    for (MessageExt msg : msgs) {
+                        key = msg.getKeys();
+                        if (logMap.containsKey(key)) {
+                            // 无需继续重试。
+                            System.out.println(&quot;key:&quot;+key+&quot;,无需重试...&quot;);
+                            return ConsumeConcurrentlyStatus.CONSUME_SUCCESS;
+                        }
+                        msgId = msg.getMsgId();
+                        System.out.println(&quot;key:&quot; + key + &quot;,msgid:&quot; + msgId + &quot;---&quot; + new String(msg.getBody()));
+                        int i = 1 / 0;
+                    }
+ 
+                } catch (Exception e) {
+                    e.printStackTrace();
+                    return ConsumeConcurrentlyStatus.RECONSUME_LATER;
+                } finally {
+                    logMap.put(key, msgId);
+                }
+                return ConsumeConcurrentlyStatus.CONSUME_SUCCESS;
+            }
+        });
+        consumer.start();
+        System.out.println(&quot;RetryConsumer Started.&quot;);
+    }
+}
+
+</code></pre>
+
 <h3 id="事务消息">事务消息</h3>
 
 <p><img src="/img/Xnip2019-09-30_00-42-26.png" alt="Xnip2019-09-30_00-42-26" /></p>
@@ -654,6 +752,18 @@ maxMessageSize=65536
 <li><a href="#broker-a-properties属性说明">broker-a.properties属性说明</a></li>
 </ul></li>
 </ul></li>
+</ul></li>
+<li><a href="#rocketmq幂等性问题">RocketMQ幂等性问题</a>
+<ul>
+<li><a href="#什么是幂等性">什么是幂等性：</a></li>
+<li><a href="#实例">实例：</a>
+<ul>
+<li>
+<ul>
+<li><a href="#生产者">生产者</a></li>
+<li><a href="#消费者">消费者</a></li>
+</ul></li>
+</ul></li>
 <li><a href="#事务消息">事务消息</a></li>
 </ul></li>
 </ul></li>
@@ -679,8 +789,6 @@ maxMessageSize=65536
                     <hr class="hidden-sm hidden-xs">
                     <h5><a href="/tags/">FEATURED TAGS</a></h5>
                     <div class="tags">
-                        
-                        
                         
                         
                         
@@ -1082,8 +1190,6 @@ maxMessageSize=65536
                         
                         
                         
-                        
-                        
                         <a href="/tags/%E5%88%86%E5%B8%83%E5%BC%8F%E7%B3%BB%E5%88%97" title="分布式系列">
                             分布式系列
                         </a>
@@ -1106,13 +1212,9 @@ maxMessageSize=65536
                         
                         
                         
-                        
-                        
                         <a href="/tags/%E5%8D%95%E7%82%B9%E7%99%BB%E5%BD%95" title="单点登录">
                             单点登录
                         </a>
-                        
-                        
                         
                         
                         
@@ -1346,15 +1448,9 @@ maxMessageSize=65536
                         
                         
                         
-                        
-                        
                         <a href="/tags/%E8%B4%9F%E8%BD%BD%E5%9D%87%E8%A1%A1" title="负载均衡">
                             负载均衡
                         </a>
-                        
-                        
-                        
-                        
                         
                         
                         

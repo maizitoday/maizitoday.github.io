@@ -22,9 +22,9 @@
     
 
     
-    <meta name="description" content="麦子，程序员, 开源爱好者，生活探险家 | 这里是 麦子 的博客，与你一起发现更大的世界。">
-    <meta property="og:description" content="麦子，程序员, 开源爱好者，生活探险家 | 这里是 麦子 的博客，与你一起发现更大的世界。" />
-    <meta property="twitter:description" content="麦子，程序员, 开源爱好者，生活探险家 | 这里是 麦子 的博客，与你一起发现更大的世界。" />
+    <meta name="description" content="重复请求处理，在线人员统计，集合类问题">
+    <meta property="og:description" content="重复请求处理，在线人员统计，集合类问题" />
+    <meta property="twitter:description" content="重复请求处理，在线人员统计，集合类问题" />
     
 
     
@@ -389,6 +389,57 @@ String[] cars = new String[4];//③
 
 <p><a href="/img/Spring知识导图笔记.xmind">Spring知识导图笔记.xmind</a></p>
 
+<h1 id="怎么统计在线人员">怎么统计在线人员</h1>
+
+<p><strong>转载：<a href="https://my.oschina.net/u/854926/blog/84375">https://my.oschina.net/u/854926/blog/84375</a></strong></p>
+
+<p>我们给出的代码是使用session的监听器，因为我们知道一连接一个用户，就会产生一个新的session。而断开一个用户则会销毁一个session。我们分别在产生和销毁时对在线用户数加1或是-1。这样的数据与当前用户数大致相同。说大致相同是因为session的销毁要在用户退出后的一段时间。所以会造成一定的偏差。</p>
+
+<pre><code class="language-java">public class OnlineCountListener implements HttpSessionListener {
+
+private static int sessionCount = 0;
+
+public void sessionCreated(HttpSessionEvent event) {
+        HttpSession session = event.getSession();
+        ServletContext application = session.getServletContext();
+        sessionCount++;
+        application.setAttribute(“onlineCount”, sessionCount);
+}
+
+public void sessionDestroyed(HttpSessionEvent event) {
+        HttpSession session = event.getSession();
+        ServletContext application = session.getServletContext();
+        if(sessionCount &gt;= 1){
+            sessionCount = sessionCount – 1;
+        }
+        application.setAttribute(“onlineCount”, sessionCount);
+
+    }
+}
+</code></pre>
+
+<h1 id="如何处理重复提交的问题">如何处理重复提交的问题</h1>
+
+<p>转载地址：<a href="https://my.oschina.net/u/2371923/blog/1921153">https://my.oschina.net/u/2371923/blog/1921153</a></p>
+
+<p>工作流程：</p>
+
+<ol>
+<li>用户访问表单添加页面-&gt;spring防重复token拦截器拦截请求url，判断url对应的controller方法是是否注解有生成防重复token的标识也就是有没有这个注解标识-&gt;</li>
+<li>生成防重复token保存到redis中RedisUtil.getRu().setex(&ldquo;formToken_&rdquo; + uuid, &ldquo;1&rdquo;, 60 * 60);同时将本次生成的防重复token放到session中-&gt;</li>
+<li>转到表单页面时从session中取出token放入表单-&gt;</li>
+<li>用户填写完信息提交表单-&gt;spring防重复token拦截器拦截请求url，判断提交的url对应controller方法是否注解有处理防重复提交token的标识-&gt;</li>
+<li>redis中formToken做原子减1操作RedisUtil.getRu().decr(&ldquo;formToken_&rdquo; + clinetToken);如果redis中formToken值做了减1操作后值不为0，则为重复提交，返回false。</li>
+</ol>
+
+<p><strong>防重复提交token生成流程图</strong></p>
+
+<p><img src="/img/a5d807e0fb2ce08800b83afd0647439974d.jpg.png" alt="a5d807e0fb2ce08800b83afd0647439974d.jpg" /></p>
+
+<p><strong>防重复表单提交处理流程图</strong></p>
+
+<p><img src="/img/2962cf5113610aa0ad01ac6623bd93a783b.jpg.png" alt="2962cf5113610aa0ad01ac6623bd93a783b.jpg" /></p>
+
 
                 
                 
@@ -511,6 +562,8 @@ String[] cars = new String[4];//③
 <li><a href="#linkedhashmap-的应用">LinkedHashMap 的应用</a></li>
 <li><a href="#数组在内存中如何分配">数组在内存中如何分配</a></li>
 <li><a href="#spring知识导图笔记">Spring知识导图笔记</a></li>
+<li><a href="#怎么统计在线人员">怎么统计在线人员</a></li>
+<li><a href="#如何处理重复提交的问题">如何处理重复提交的问题</a></li>
 </ul>
 </nav>
                     <br>
@@ -533,8 +586,6 @@ String[] cars = new String[4];//③
                     <hr class="hidden-sm hidden-xs">
                     <h5><a href="/tags/">FEATURED TAGS</a></h5>
                     <div class="tags">
-                        
-                        
                         
                         
                         
@@ -936,8 +987,6 @@ String[] cars = new String[4];//③
                         
                         
                         
-                        
-                        
                         <a href="/tags/%E5%88%86%E5%B8%83%E5%BC%8F%E7%B3%BB%E5%88%97" title="分布式系列">
                             分布式系列
                         </a>
@@ -960,13 +1009,9 @@ String[] cars = new String[4];//③
                         
                         
                         
-                        
-                        
                         <a href="/tags/%E5%8D%95%E7%82%B9%E7%99%BB%E5%BD%95" title="单点登录">
                             单点登录
                         </a>
-                        
-                        
                         
                         
                         
@@ -1200,15 +1245,9 @@ String[] cars = new String[4];//③
                         
                         
                         
-                        
-                        
                         <a href="/tags/%E8%B4%9F%E8%BD%BD%E5%9D%87%E8%A1%A1" title="负载均衡">
                             负载均衡
                         </a>
-                        
-                        
-                        
-                        
                         
                         
                         
