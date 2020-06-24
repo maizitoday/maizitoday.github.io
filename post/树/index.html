@@ -237,6 +237,8 @@
 
 <p><strong>好文推荐：<a href="https://www.cnblogs.com/skywang12345/p/3576328.html">https://www.cnblogs.com/skywang12345/p/3576328.html</a></strong></p>
 
+<p><strong>视频推荐：<a href="https://www.bilibili.com/video/BV1tE411f7tP?from=search&amp;seid=9664635478433438112">https://www.bilibili.com/video/BV1tE411f7tP?from=search&amp;seid=9664635478433438112</a></strong></p>
+
 <h1 id="概述">概述</h1>
 
 <p>之前我们一直谈的是一对一的线性结构，可现实中，还有很多一对多的情况需要处理，所以我们需要研究这种一对多的数据结构&mdash;-&ldquo;树&rdquo;。</p>
@@ -356,6 +358,8 @@
 <li>根结点只有右子树</li>
 <li>根结点既有左子树又有右子树</li>
 </ol>
+
+<p><strong>二叉树查询出来的结果的复杂度就是这个树的深度</strong></p>
 
 <h2 id="二叉树的性质">二叉树的性质</h2>
 
@@ -533,6 +537,8 @@
 
 <p><strong>好文推荐：<a href="https://segmentfault.com/a/1190000012728513">https://segmentfault.com/a/1190000012728513</a></strong></p>
 
+<p>一种高效的查找算法。</p>
+
 <p>nil 节点就是空节点，在红黑树的实现中，nil 节点代替二叉树中的 NULL：叶子节点的左节点和右节点指针都指向 nil 节点；只一个子树的节点，其另外一个子节点指针也指向 nil 节点；根节点的父节点也指向 nil 节点。nil节点的父节点和右节点都是自己，左节点为红黑树的根节点。如果红黑树为空（没有根节点），那么nil节点的左节点就也是自己。nil节点的存在大大方便了很多操作。</p>
 
 <h1 id="总结">总结</h1>
@@ -544,6 +550,199 @@
 <p><strong>2、不同的方式的磁盘空间利用</strong></p>
 
 <p>不同点是他们一个一个在演变的过程中通过IO从磁盘读取数据的原理进行一步步的演变，每一次演变都是为了让节点的空间更合理的运用起来，从而使树的层级减少达到快速查找数据的目的；</p>
+
+<h1 id="二叉查询法">二叉查询法</h1>
+
+<p>转载：<a href="https://blog.csdn.net/lcore/article/details/8889176">https://blog.csdn.net/lcore/article/details/8889176</a></p>
+
+<pre><code class="language-java">package com.kiritor;
+/**
+ * Java实现二叉查找树
+ * @author Kiritor
+ * @param &lt;T&gt;*/
+public class BinarySearchTree&lt;T extends Comparable&lt;? super T&gt;&gt; {
+  
+ /**结点数据结构*/
+ static class BinaryNode&lt;T&gt;
+	{
+		T data;
+		BinaryNode&lt;T&gt; left;
+		BinaryNode&lt;T&gt; right;
+		public BinaryNode(T data) {
+			this(data,null,null);
+		}
+		public BinaryNode( T data, BinaryNode&lt;T&gt; left, BinaryNode&lt;T&gt; right) {
+			this.data =data;
+			this.left = left;
+			this.right =right;
+		}
+		public BinaryNode()
+		{
+			data =null;
+			this.left = left;
+			this.right =right;
+		}
+	}
+   
+   private BinaryNode&lt;T&gt; rootTree;
+   /**构造一颗空的二叉查找树*/
+   public BinarySearchTree()
+   {
+	   rootTree = null;
+   }
+   /**清空二叉查找树*/
+   public void clear()
+   {
+	   rootTree = null;
+   }
+   /**判断是否为空*/
+   public boolean isEmpty()
+   {
+	   return rootTree == null;
+   }
+   /**查找指定的元素,默认从
+    * 根结点出开始查询*/
+   public boolean contains(T t)
+   {
+	  return contains(t, rootTree);
+	   
+   }
+   /**找到二叉查找树中的最小值*/
+   public T findMin()
+   {
+	  if(isEmpty())
+	  {
+		  System.out.println(&quot;二叉树为空&quot;);
+		  return null;
+	  }else
+	   return findMin(rootTree).data;
+	   
+   }
+   /**找到二叉查找树中的最大值*/
+   public T findMax()
+   {
+	   if(isEmpty())
+		  {
+			  System.out.println(&quot;二叉树为空&quot;);
+			  return null;
+		  }else
+		   return findMax(rootTree).data;
+   }
+   /**插入元素*/
+   public void insert(T t)
+   {
+	   rootTree = insert(t, rootTree);
+   }
+   /**删除元素*/
+   public void remove(T t)
+   {
+	   rootTree = remove(t,rootTree);
+   }
+   /**打印二叉查找树*/
+   public void printTree()
+   {
+	  
+   }
+   /**从某个结点出开始查找元素*/
+   public boolean contains(T t, BinaryNode&lt;T&gt; node)
+   {
+	  if(node==null)
+	    return false;
+	  int result = t.compareTo(node.data);
+	  if(result&gt;0)
+		  return contains(t,node.right);
+	  else if(result&lt;0)
+		  return contains(t, node.left);
+	  else
+		  return true;
+   }
+   /**查询出最小元素所在的结点*/
+   public BinaryNode&lt;T&gt; findMin(BinaryNode&lt;T&gt; node)
+   {
+	   if(node==null)
+		   return null;
+	   else if(node.left==null)
+		   return node;
+	   return findMin(node.left);//递归查找
+   }
+   /**查询出最大元素所在的结点*/
+   public BinaryNode&lt;T&gt; findMax(BinaryNode&lt;T&gt; node)
+   {
+	   if(node!=null)
+	   {
+		   while(node.right!=null)
+			   node=node.right;
+	   }
+	   return node;	   
+   }
+   /**在某个位置开始判断插入元素*/
+   public BinaryNode&lt;T&gt; insert(T t,BinaryNode&lt;T&gt; node)
+   {
+	   if(node==null)
+	   {
+		   //新构造一个二叉查找树
+		   return new BinaryNode&lt;T&gt;(t, null, null);
+	   }
+	   int result = t.compareTo(node.data);
+	   if(result&lt;0)
+		  node.left= insert(t,node.left);
+	   else if(result&gt;0)
+		  node.right= insert(t,node.right);
+	   else
+		   ;//doNothing
+	   return node;
+   }
+   /**在某个位置开始判断删除某个结点*/
+   public BinaryNode&lt;T&gt; remove(T t,BinaryNode&lt;T&gt; node)
+   {
+	   if(node == null)
+		   return node;//没有找到,doNothing
+	   int result = t.compareTo(node.data);
+	   if(result&gt;0)
+		   node.right = remove(t,node.right);
+	   else if(result&lt;0)
+	       node.left = remove(t,node.left);
+	   else if(node.left!=null&amp;&amp;node.right!=null)
+	   {
+		   node.data = findMin(node.right).data;
+		   node.right = remove(node.data,node.right);
+	   }
+	   else
+		   node = (node.left!=null)?node.left:node.right;
+	   return node;
+		   
+   }
+   public BinaryNode&lt;Integer&gt; init()
+   {
+	   BinaryNode&lt;Integer&gt; node3 = new BinaryNode&lt;Integer&gt;(3);
+	   BinaryNode&lt;Integer&gt; node1 = new BinaryNode&lt;Integer&gt;(1);
+	   BinaryNode&lt;Integer&gt; node4 = new BinaryNode&lt;Integer&gt;(4,node3,null);
+	   BinaryNode&lt;Integer&gt; node2 = new BinaryNode&lt;Integer&gt;(2,node1,node4);
+	   BinaryNode&lt;Integer&gt; node8 = new BinaryNode&lt;Integer&gt;(8);
+	   BinaryNode&lt;Integer&gt; root = new BinaryNode&lt;Integer&gt;(6,node2,node8);
+	   return root;
+   }
+	public void preOrder(BinaryNode node) {
+		if (node != null) {
+			System.out.print(node.data);
+			preOrder(node.left);
+			preOrder(node.right);
+		}
+	}
+      /*简单测试*/ 
+      public static void main(String[] args) {
+		BinarySearchTree  searchTree = new BinarySearchTree&lt;&gt;();
+		BinaryNode&lt;Integer&gt; node= searchTree.init();
+		searchTree.rootTree=node;
+		searchTree.preOrder(searchTree.rootTree);
+		searchTree.remove(4);
+		searchTree.preOrder(searchTree.rootTree);
+	}
+   
+}      
+
+
+</code></pre>
 
 
                 
@@ -697,6 +896,7 @@
 </ul></li>
 <li><a href="#红黑树">红黑树</a></li>
 <li><a href="#总结">总结</a></li>
+<li><a href="#二叉查询法">二叉查询法</a></li>
 </ul>
 </nav>
                     <br>

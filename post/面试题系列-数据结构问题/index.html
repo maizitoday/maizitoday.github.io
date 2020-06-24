@@ -22,9 +22,9 @@
     
 
     
-    <meta name="description" content="麦子，程序员, 开源爱好者，生活探险家 | 这里是 麦子 的博客，与你一起发现更大的世界。">
-    <meta property="og:description" content="麦子，程序员, 开源爱好者，生活探险家 | 这里是 麦子 的博客，与你一起发现更大的世界。" />
-    <meta property="twitter:description" content="麦子，程序员, 开源爱好者，生活探险家 | 这里是 麦子 的博客，与你一起发现更大的世界。" />
+    <meta name="description" content="hashmap原理，集合删除为什么使用Iterator">
+    <meta property="og:description" content="hashmap原理，集合删除为什么使用Iterator" />
+    <meta property="twitter:description" content="hashmap原理，集合删除为什么使用Iterator" />
     
 
     
@@ -205,7 +205,7 @@
                         麦子
                         
                         on
-                        Saturday, 2020年06月20日
+                        Wednesday, 2020年06月24日
                         
                     </span>
                 </div>
@@ -239,17 +239,57 @@
 
 <p><strong>说明：以下文字来源网络各相关面试题目收集</strong></p>
 
-<h1 id="hashmap1-8和以前的比较">HashMap1.8和以前的比较</h1>
+<h1 id="hashmap">HashMap</h1>
 
-<h1 id="hashmap如何存储一百万数据">HashMap如何存储一百万数据</h1>
+<p><strong>转载地址： <a href="https://zhuanlan.zhihu.com/p/43788113">https://zhuanlan.zhihu.com/p/43788113</a></strong></p>
 
-<p>任何数据结构的构造或初始化，都应指定大小，避免数据结构无限增长吃光内存。</p>
+<p><strong>好文：<a href="http://www.spring4all.com/article/16425">http://www.spring4all.com/article/16425</a></strong></p>
 
-<p>集合初始化时，指定集合初始值大小。为什么？</p>
+<p>众所周知 HashMap 底层是基于 <code>数组 + 链表</code> 组成的，不过在 jdk1.7 和 1.8 中具体实现稍有不同。</p>
 
-<h1 id="数据结构自动扩容问题">数据结构自动扩容问题</h1>
+<h2 id="base-1-7">Base 1.7</h2>
+
+<p><img src="/img/v2-13ba8b7d315270c587d1ca4f5e648ec9_720w.jpg" alt="v2-13ba8b7d315270c587d1ca4f5e648ec9_720w" /></p>
+
+<p>先来看看 1.7 中的实现。</p>
+
+<p><img src="/img/v2-ec3c5d9b443b238c04764c4eab31e1c7_720w.jpg" alt="v2-ec3c5d9b443b238c04764c4eab31e1c7_720w" /></p>
+
+<p>这是 HashMap 中比较核心的几个成员变量；看看分别是什么意思？</p>
+
+<ol>
+<li>初始化桶大小，因为底层是数组，所以这是数组默认的大小。</li>
+<li>桶最大值。</li>
+<li>默认的负载因子（0.75）</li>
+<li><code>table</code> 真正存放数据的数组。</li>
+<li><code>Map</code> 存放数量的大小。</li>
+<li>桶大小，可在初始化时显式指定。</li>
+</ol>
+
+<p><strong>重点解释下负载因子：</strong></p>
+
+<p>给定的默认容量为 16，负载因子为 0.75。Map 在使用过程中不断的往里面存放数据，当数量达到了 <code>16 * 0.75 = 12</code> 就需要将当前 16 的容量进行扩容，而扩容这个过程涉及到 rehash、复制数据等操作，所以非常消耗性能。</p>
+
+<p><strong>因此通常建议能提前预估 HashMap 的大小最好，尽量的减少扩容带来的性能损耗。</strong></p>
+
+<h2 id="base-1-8">Base 1.8</h2>
+
+<p>不知道 1.7 的实现大家看出需要优化的点没有？</p>
+
+<p>其实一个很明显的地方就是：</p>
+
+<pre><code>当 Hash 冲突严重时，在桶上形成的链表会变的越来越长，这样在查询时的效率就会越来越低；时间复杂度为 O(N)。
+</code></pre>
+
+<p>因此 1.8 中重点优化了这个查询效率。</p>
+
+<p>1.8 HashMap 结构图：</p>
+
+<p><img src="/img/v2-3dbc3866a37adf4ac810661d695192d7_720w.jpg" alt="v2-3dbc3866a37adf4ac810661d695192d7_720w" /></p>
 
 <h1 id="集合删除为什么使用iterator">集合删除为什么使用Iterator</h1>
+
+<p>转载地址：<a href="https://www.cnblogs.com/duanxz/p/4750345.html">https://www.cnblogs.com/duanxz/p/4750345.html</a></p>
 
 
                 
@@ -298,17 +338,11 @@
                 <ul class="pager">
                     
                     <li class="previous">
-                        <a href="/post/%E6%95%A3%E5%88%97%E8%A1%A8/" data-toggle="tooltip" data-placement="top"
-                            title="散列表">&larr;
+                        <a href="/post/%E5%9B%BE%E8%A7%A3java%E5%B8%B8%E7%94%A8%E6%95%B0%E6%8D%AE%E7%BB%93%E6%9E%84/" data-toggle="tooltip" data-placement="top"
+                            title="图解Java常用数据结构">&larr;
                             Previous Post</a>
                     </li>
                     
-                    
-                    <li class="next">
-                        <a href="/post/%E5%9B%BE%E8%A7%A3java%E5%B8%B8%E7%94%A8%E6%95%B0%E6%8D%AE%E7%BB%93%E6%9E%84/" data-toggle="tooltip" data-placement="top"
-                            title="图解Java常用数据结构">Next
-                            Post &rarr;</a>
-                    </li>
                     
                 </ul>
 
@@ -358,9 +392,11 @@
                     <ul class="catalog-body"></ul>
                     <nav id="TableOfContents">
 <ul>
-<li><a href="#hashmap1-8和以前的比较">HashMap1.8和以前的比较</a></li>
-<li><a href="#hashmap如何存储一百万数据">HashMap如何存储一百万数据</a></li>
-<li><a href="#数据结构自动扩容问题">数据结构自动扩容问题</a></li>
+<li><a href="#hashmap">HashMap</a>
+<ul>
+<li><a href="#base-1-7">Base 1.7</a></li>
+<li><a href="#base-1-8">Base 1.8</a></li>
+</ul></li>
 <li><a href="#集合删除为什么使用iterator">集合删除为什么使用Iterator</a></li>
 </ul>
 </nav>
