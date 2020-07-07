@@ -22,9 +22,9 @@
     
 
     
-    <meta name="description" content="麦子，程序员, 开源爱好者，生活探险家 | 这里是 麦子 的博客，与你一起发现更大的世界。">
-    <meta property="og:description" content="麦子，程序员, 开源爱好者，生活探险家 | 这里是 麦子 的博客，与你一起发现更大的世界。" />
-    <meta property="twitter:description" content="麦子，程序员, 开源爱好者，生活探险家 | 这里是 麦子 的博客，与你一起发现更大的世界。" />
+    <meta name="description" content="CAP, ACID, 分布式事务, base理论">
+    <meta property="og:description" content="CAP, ACID, 分布式事务, base理论" />
+    <meta property="twitter:description" content="CAP, ACID, 分布式事务, base理论" />
     
 
     
@@ -196,16 +196,8 @@
                             分布式系列
                         </a>
                         
-                        <a class="tag" href="/tags/acid" title="ACID">
-                            ACID
-                        </a>
-                        
-                        <a class="tag" href="/tags/cap" title="CAP">
-                            CAP
-                        </a>
-                        
-                        <a class="tag" href="/tags/%E5%88%86%E5%B8%83%E5%BC%8F%E4%BA%8B%E7%89%A9" title="分布式事物">
-                            分布式事物
+                        <a class="tag" href="/tags/%E4%BA%8B%E7%89%A9" title="事物">
+                            事物
                         </a>
                         
                     </div>
@@ -331,6 +323,36 @@
 
 <p><strong>CA 传统Oracle数据库</strong></p>
 
+<h1 id="base理论">BASE理论</h1>
+
+<p>转载：<a href="https://www.jianshu.com/p/f6157118e54b">https://www.jianshu.com/p/f6157118e54b</a></p>
+
+<p>BASE全称：<strong>Basically Available(基本可用)</strong>，<strong>Soft state（软状态）</strong>,和 <strong>Eventually consistent（最终一致性）</strong>。</p>
+
+<p>CAP 不可能同时满足，而分区容错是对于分布式系统而言又是必须的。</p>
+
+<p>Base 理论是对 CAP 中一致性和可用性权衡的结果，是基于 CAP 定理逐步演化而来的。其核心思想是：既是无法做到<strong>强一致性（Strong consistency）</strong>，但每个应用都可以根据自身的业务特点，采用适当的方式来使系统达到<strong>最终一致性（Eventual consistency）</strong>。</p>
+
+<h2 id="1-basically-available-基本可用">1. Basically Available(基本可用)</h2>
+
+<p>什么是基本可用呢？假设系统，出现了不可预知的故障，但还是能用，相比较正常的系统而言：</p>
+
+<p>响应时间上的损失：正常情况下的一个请求 0.5 秒即返回给用户结果，而基本可用的请求可以在 1 秒作用返回结果。</p>
+
+<p>功能上的损失：在一个电商网站上，正常情况下，用户可以顺利完成每一笔订单，但是到了大促期间，为了保护购物系统的稳定性，可以关闭一些不重要的功能或者部分消费者可能会被引导到一个降级页面。</p>
+
+<h2 id="2-soft-state-软状态">2. Soft state（软状态）</h2>
+
+<p>什么是软状态呢？相对于原子性而言，要求多个节点的数据副本都是一致的，这是一种 “硬状态”。</p>
+
+<p>软状态指的是：允许系统中的数据存在中间状态，并认为该状态不影响系统的整体可用性，即允许系统在多个不同节点的数据副本存在数据延时。</p>
+
+<h2 id="3-eventually-consistent-最终一致性">3. Eventually consistent（最终一致性）</h2>
+
+<p>系统能够保证在没有其他新的更新操作的情况下，数据最终一定能够达到一致的状态，因此所有客户端对系统的数据访问最终都能够获取到最新的值。</p>
+
+<p>上面说软状态，然后不可能一直是软状态，必须有个时间期限。在期限过后，应当保证所有副本保持数据一致性。从而达到数据的最终一致性。这个时间期限取决于网络延时，系统负载，数据复制方案设计等等因素。</p>
+
 <h1 id="分布式事物">分布式事物</h1>
 
 <h2 id="分布式事物的产生">分布式事物的产生</h2>
@@ -370,6 +392,8 @@
 <p>官网地址：<a href="https://www.txlcn.org/zh-cn/">https://www.txlcn.org/zh-cn/</a></p>
 
 <p>LCN分布式事务框架的核心功能是对本地事务的协调控制，框架本身并不创建事务，只是对本地事务做协调控制。因此该框架与其他第三方的框架兼容性强，支持所有的关系型数据库事务，支持多数据源，支持与第三方数据库框架一块使用（例如 sharding-jdbc），<strong>在使用框架的时候只需要添加分布式事务的注解即可</strong>，对业务的侵入性低。LCN框架主要是为微服务框架提供分布式事务的支持，在微服务框架上做了进一步的事务机制优化，在一些负载场景上LCN事务机制要比本地事务机制的性能更好。</p>
+
+<p>好文：<a href="https://blog.csdn.net/qq_28341873/article/details/79789054">https://blog.csdn.net/qq_28341873/article/details/79789054</a></p>
 
 
                 
@@ -418,8 +442,8 @@
                 <ul class="pager">
                     
                     <li class="previous">
-                        <a href="/post/%E5%88%86%E5%B8%83%E5%BC%8F%E7%B3%BB%E5%88%97-%E5%88%86%E5%B8%83%E5%BC%8F%E4%BA%8B%E7%89%A9/" data-toggle="tooltip" data-placement="top"
-                            title="TX-LCN分布式事务框架">&larr;
+                        <a href="/post/%E5%88%86%E5%B8%83%E5%BC%8F%E7%B3%BB%E5%88%97-%E5%88%86%E5%BA%93%E5%88%86%E8%A1%A8%E4%B9%8B%E5%90%8E%E5%A6%82%E4%BD%95%E4%BF%9D%E8%AF%81id%E5%85%A8%E5%B1%80%E5%94%AF%E4%B8%80%E6%80%A7/" data-toggle="tooltip" data-placement="top"
+                            title="分库分表之后如何保证ID全局唯一性,订单号唯一">&larr;
                             Previous Post</a>
                     </li>
                     
@@ -501,6 +525,12 @@
 <li><a href="#分区容错性-p-partition-tolerance">分区容错性（P:Partition Tolerance）</a></li>
 <li><a href="#cp和ap">CP和AP</a></li>
 </ul></li>
+<li><a href="#base理论">BASE理论</a>
+<ul>
+<li><a href="#1-basically-available-基本可用">1. Basically Available(基本可用)</a></li>
+<li><a href="#2-soft-state-软状态">2. Soft state（软状态）</a></li>
+<li><a href="#3-eventually-consistent-最终一致性">3. Eventually consistent（最终一致性）</a></li>
+</ul></li>
 <li><a href="#分布式事物">分布式事物</a>
 <ul>
 <li><a href="#分布式事物的产生">分布式事物的产生</a></li>
@@ -538,12 +568,6 @@
                     <hr class="hidden-sm hidden-xs">
                     <h5><a href="/tags/">FEATURED TAGS</a></h5>
                     <div class="tags">
-                        
-                        
-                        
-                        
-                        
-                        
                         
                         
                         
@@ -906,6 +930,10 @@
                         
                         
                         
+                        
+                        <a href="/tags/%E4%BA%8B%E7%89%A9" title="事物">
+                            事物
+                        </a>
                         
                         
                         
