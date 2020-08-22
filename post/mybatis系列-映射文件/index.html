@@ -468,6 +468,45 @@ resultType:   查出返回的数据类型，
 studentList=[Student(id=1, name=篮球, sex=男, age=8, addressBus=湖南-17路, play=null)])
 </code></pre>
 
+<h3 id="具体列子">具体列子</h3>
+
+<pre><code class="language-xml">&lt;resultMap id=&quot;locationDataMap&quot; type=&quot;com.example.mybatisconfig.mysql.bean.Play&quot;&gt;
+    &lt;id column=&quot;id&quot; property=&quot;id&quot; jdbcType=&quot;INTEGER&quot; /&gt;
+    &lt;result column=&quot;org_code&quot; property=&quot;orgCode&quot; jdbcType=&quot;VARCHAR&quot; /&gt;
+    &lt;result column=&quot;longitude&quot; property=&quot;longitude&quot; jdbcType=&quot;DECIMAL&quot; /&gt;
+    &lt;result column=&quot;latitude&quot; property=&quot;latitude&quot; jdbcType=&quot;DECIMAL&quot; /&gt;
+    &lt;result column=&quot;org_name&quot; property=&quot;orgName&quot; jdbcType=&quot;VARCHAR&quot; /&gt;
+    &lt;result column=&quot;org_address&quot; property=&quot;orgAddress&quot; jdbcType=&quot;VARCHAR&quot; /&gt;
+    &lt;collection property=&quot;attachmentList&quot; ofType=&quot;com.example.mybatisconfig.mysql.bean.Student&quot;            
+                column=&quot;id&quot; select=&quot;getAttachmentList&quot;&gt;
+    &lt;/collection&gt;
+&lt;/resultMap&gt;
+
+
+ &lt;select id=&quot;getAttachmentList&quot; parameterType=&quot;java.lang.Integer&quot; resultType=&quot;com.example.mybatisconfig.mysql.bean.Student&quot;&gt;
+          select 
+                 id as id,
+                 party_map_id as partyMapId, 
+                 cloud_path as cloudPath, 
+                 sort as sort, 
+                 created_time as createdTime
+                 from t_party_organization_location_attachment 
+                 where status = 1 and party_map_id = #{partyMapId} order by sort asc
+  &lt;/select&gt;
+  
+  &lt;!--列表--&gt;
+  &lt;select id=&quot;findList&quot; parameterType=&quot;java.util.Map&quot; resultMap=&quot;locationDataMap&quot;&gt;
+         select * from t_party_organization_location where org_name is not null order by id desc
+  &lt;/select&gt;
+
+需要注意：  resultMap  和  resultType， partyMapId 这个值和 父表id对应。 
+</code></pre>
+
+<h2 id="column说明">column说明</h2>
+
+<pre><code>column说明：数据库的列名或者列标签别名，column	数据库的列名或者列标签别名。与传递给resultSet.getString(columnName)的参数名称相同。注意： 在处理组合键时，您可以使用column=“{prop1=col1,prop2=col2}”这样的语法，设置多个列名传入到嵌套查询语句。这就会把prop1和prop2设置到目标嵌套选择语句的参数对象中。
+</code></pre>
+
 <h2 id="5-对于多表查询-可以进行分布查询">5.  对于多表查询，可以进行分布查询</h2>
 
 <p>相当于，多表查询，可以拆分为几次sql查询，还可以进行开启延迟加载模式，相当于用到的时候才去执行sql语句。 但是感觉这也增加了和数据库进行交互的次数。所以用的比较的少。</p>
@@ -607,7 +646,9 @@ studentList=[Student(id=1, name=篮球, sex=男, age=8, addressBus=湖南-17路,
 <ul>
 <li><a href="#一对一模式数据">一对一模式数据</a></li>
 <li><a href="#一对多模式数据">一对多模式数据</a></li>
+<li><a href="#具体列子">具体列子</a></li>
 </ul></li>
+<li><a href="#column说明">column说明</a></li>
 <li><a href="#5-对于多表查询-可以进行分布查询">5.  对于多表查询，可以进行分布查询</a></li>
 </ul></li>
 </ul>
