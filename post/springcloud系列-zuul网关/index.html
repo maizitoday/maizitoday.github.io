@@ -1,0 +1,1629 @@
+<!DOCTYPE html>
+<html lang="en-us">
+
+<head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+
+    
+    <meta property="og:site_name" content="">
+    <meta property="og:type" content="article">
+
+    
+    <meta property="og:image" content="http://maizitoday.github.io//img/home-bg-jeep.jpg">
+    <meta property="twitter:image" content="http://maizitoday.github.io//img/home-bg-jeep.jpg" />
+    
+
+    
+    <meta name="title" content="springCloud系列-zuul网关" />
+    <meta property="og:title" content="springCloud系列-zuul网关" />
+    <meta property="twitter:title" content="springCloud系列-zuul网关" />
+    
+
+    
+    <meta name="description" content="gateway,网关,zuul,默认路由规则,与GateWay对比,跨域问题">
+    <meta property="og:description" content="gateway,网关,zuul,默认路由规则,与GateWay对比,跨域问题" />
+    <meta property="twitter:description" content="gateway,网关,zuul,默认路由规则,与GateWay对比,跨域问题" />
+    
+
+    
+    <meta property="twitter:card" content="summary" />
+    
+    
+
+    <meta name="keyword"  content="麦子, maizi, maizi, , 麦子的网络日志, 麦子的博客, maizi Blog, 博客, 个人网站, 互联网, Web, 云原生, PaaS, Istio, Kubernetes, 微服务, Microservice">
+    <link rel="shortcut icon" href="/img/favicon.ico">
+
+    <title>springCloud系列-zuul网关-麦子的博客</title>
+
+    <link rel="canonical" href="/post/springcloud%E7%B3%BB%E5%88%97-zuul%E7%BD%91%E5%85%B3/">
+
+    <link rel="stylesheet" href="/css/iDisqus.min.css"/>
+	
+    
+    <link rel="stylesheet" href="/css/bootstrap.min.css">
+
+    
+    <link rel="stylesheet" href="/css/hux-blog.min.css">
+
+    
+    <link rel="stylesheet" href="/css/syntax.css">
+
+    
+    <link rel="stylesheet" href="/css/zanshang.css">
+
+    
+    <link href="//cdnjs.cloudflare.com/ajax/libs/font-awesome/4.6.3/css/font-awesome.min.css" rel="stylesheet" type="text/css">
+     
+    
+    
+    <script src="/js/jquery.min.js"></script>
+    
+    
+    <script src="/js/bootstrap.min.js"></script>
+    
+    
+    <script src="/js/hux-blog.min.js"></script>
+	
+    
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.13.1/styles/docco.min.css">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.13.1/highlight.min.js"></script>
+    <script>hljs.initHighlightingOnLoad();</script>
+</head>
+
+
+
+<nav class="navbar navbar-default navbar-custom navbar-fixed-top">
+    <div class="container-fluid">
+        
+        <div class="navbar-header page-scroll">
+            <button type="button" class="navbar-toggle">
+                <span class="sr-only">Toggle navigation</span>
+                <span class="icon-bar"></span>
+                <span class="icon-bar"></span>
+                <span class="icon-bar"></span>
+            </button>
+            <a class="navbar-brand" href="/"></a>
+        </div>
+
+        
+        
+        <div id="huxblog_navbar">
+            <div class="navbar-collapse">
+                <ul class="nav navbar-nav navbar-right">
+                    <li>
+                        <a href="/">Home</a>
+                    </li>
+                    
+                    <li>
+                        <a href="/categories/english">English</a>
+                    </li>
+                    
+                    <li>
+                        <a href="/categories/life">Life</a>
+                    </li>
+                    
+                    <li>
+                        <a href="/categories/tech">Tech</a>
+                    </li>
+                    
+
+                    
+                    <li><a href="/top/about/">ABOUT</a></li>
+                    
+
+
+                    
+                    <li>
+                        <a href="/archive">ARCHIVE</a>
+                    </li>
+                    
+
+
+                    
+                    <li>
+                        <a href="/search">SEARCH <img src="/img/search.png" height="15"
+                                style="cursor: pointer;" alt="Search"></a>
+                    </li>
+                    
+
+                </ul>
+            </div>
+        </div>
+        
+    </div>
+    
+</nav>
+<script>
+    
+    
+    
+    var $body = document.body;
+    var $toggle = document.querySelector('.navbar-toggle');
+    var $navbar = document.querySelector('#huxblog_navbar');
+    var $collapse = document.querySelector('.navbar-collapse');
+
+    $toggle.addEventListener('click', handleMagic)
+
+    function handleMagic(e) {
+        if ($navbar.className.indexOf('in') > 0) {
+            
+            $navbar.className = " ";
+            
+            setTimeout(function () {
+                
+                if ($navbar.className.indexOf('in') < 0) {
+                    $collapse.style.height = "0px"
+                }
+            }, 400)
+        } else {
+            
+            $collapse.style.height = "auto"
+            $navbar.className += " in";
+        }
+    }
+</script>
+
+
+
+<style type="text/css">
+    header.intro-header {
+        background-image: url('https://zhaohuabing.com/img/2018-12-27-the-obstacles-to-put-istio-into-production/background.jpg')
+    }
+
+
+    div.side-catalog nav ul li a {
+        display: inline-block;
+        vertical-align: middle;
+        height: 30px;
+        font-size: 17px;
+        line-height: 30px;
+        overflow: hidden;
+        text-decoration: none;
+        white-space: nowrap;
+        text-overflow: ellipsis;
+    }
+</style>
+<header class="intro-header">
+    <div class="container">
+        <div class="row">
+            <div class="col-lg-8 col-lg-offset-2 col-md-10 col-md-offset-1">
+                <div class="post-heading">
+                    <div class="tags">
+                        
+                        <a class="tag" href="/tags/springcloud" title="springCloud">
+                            springCloud
+                        </a>
+                        
+                    </div>
+                    <h1>springCloud系列-zuul网关</h1>
+                    <h2 class="subheading"></h2>
+                    <span class="meta">
+                        Posted by
+                        
+                        麦子
+                        
+                        on
+                        Monday, 2020年09月14日
+                        
+                    </span>
+                </div>
+            </div>
+        </div>
+    </div>
+</header>
+
+
+
+
+<article>
+    <div class="container">
+        <div class="row">
+
+            
+            <div class="
+                col-lg-8 col-lg-offset-0
+                col-md-10 col-md-offset-1
+                post-container">
+
+                
+                
+                
+                
+                
+                
+                
+
+<p>[TOC]</p>
+
+<p><strong>转载地址：[<a href="http://c.biancheng.net/view/5380.html">http://c.biancheng.net/view/5380.html</a></strong>](<a href="http://c.biancheng.net/view/5380.html">http://c.biancheng.net/view/5380.html</a>)</p>
+
+<p><strong>好文：<a href="https://cloud.tencent.com/developer/article/1009223">https://cloud.tencent.com/developer/article/1009223</a></strong></p>
+
+<h1 id="简介">简介</h1>
+
+<p>Zuul 是 Netflix OSS 中的一员，是一个基于 JVM 路由和服务端的负载均衡器。提供路由、监控、弹性、安全等方面的服务框架。Zuul 能够与 Eureka、Ribbon、Hystrix 等组件配合使用。</p>
+
+<p>Zuul 的核心是过滤器，通过这些过滤器我们可以扩展出很多功能，比如：</p>
+
+<p><strong>1）动态路由</strong></p>
+
+<p>动态地将客户端的请求路由到后端不同的服务，做一些逻辑处理，比如聚合多个服务的数据返回。</p>
+
+<p><strong>2）请求监控</strong></p>
+
+<p>可以对整个系统的请求进行监控，记录详细的请求响应日志，可以实时统计出当前系统的访问量以及监控状态。</p>
+
+<p><strong>3）认证鉴权</strong></p>
+
+<p>对每一个访问的请求做认证，拒绝非法请求，保护好后端的服务。</p>
+
+<p><strong>4）压力测试</strong></p>
+
+<p>压力测试是一项很重要的工作，像一些电商公司需要模拟更多真实的用户并发量来保证重大活动时系统的稳定。通过 Zuul 可以动态地将请求转发到后端服务的集群中，还可以识别测试流量和真实流量，从而做一些特殊处理。</p>
+
+<p><strong>5）灰度发布</strong></p>
+
+<p>灰度发布可以保证整体系统的稳定，在初始灰度的时候就可以发现、调整问题，以保证其影响度。</p>
+
+<h1 id="路由配置详解">路由配置详解</h1>
+
+<p>当 Zuul 集成 Eureka 之后，其实就可以为 Eureka 中所有的服务进行路由操作了，<strong>默认的转发规则就是“API 网关地址+访问的服务名称+接口 URI”。</strong></p>
+
+<h2 id="1-指定具体服务路由">1. 指定具体服务路由</h2>
+
+<p>我们可以为每一个服务都配置一个路由转发规则：</p>
+
+<pre><code class="language-java">zuul.routes.fsh-house.path=/api-house/**
+</code></pre>
+
+<p>上述代码将 fsh-house 服务的路由地址配置成了 api-house，也就是当需要访问 fsh-house 中的接口时，我们可以通过 api-house/house/hello 来进行。这其实就是将服务名称变成了我们自定义的名称。</p>
+
+<p>有的时候服务名称太长了，放在 URL 中不太友好，我们希望它变得更友好一点，就可以这么去配置。这里的 api-house/** 后面一定要配置两个星号，两个星号表示可以转发任意层级的 URL，比如“/api-house/house/1”。如果只配置一个星号，那么就只能转发一级，比如“/api-house/house”。</p>
+
+<h2 id="2-路由前缀">2. 路由前缀</h2>
+
+<p>有的时候我们会想在 API 前面配置一个统一的前缀，比如像 <a href="http://c.biancheng.net/user/login">http://c.biancheng.net/user/login</a> 这样登录接口，如果想将其变成 <a href="http://c.biancheng.net/rest/user/login，即在每个接口前面加一个">http://c.biancheng.net/rest/user/login，即在每个接口前面加一个</a> rest，此时我们就可以通过 Zuul 中的配置来实现：</p>
+
+<pre><code class="language-java">zuul.prefix=/rest
+</code></pre>
+
+<h2 id="3-本地跳转">3. 本地跳转</h2>
+
+<p>Zuul 的 API 路由还提供了本地跳转功能，通过 forward 就可以实现。</p>
+
+<pre><code class="language-java">zuul.routes.fsh-substitution.path=/api/**
+zuul.routes.fsh-substitution.url=forward:/local
+</code></pre>
+
+<p>当我们想在访问 api/1 的时候会路由到本地的 local/1 上去，就可以参照上述代码实现。local 是本地接口需要我们自行添加，因此我们要建一个 Controller，代码如下所示。</p>
+
+<pre><code class="language-java">@RestController
+public class LocalController {
+    @GetMapping(&quot;/local/{id}&quot;)
+    public String local(@PathVariable String id) {
+        return id;
+    }
+}
+</code></pre>
+
+<h1 id="过滤器">过滤器</h1>
+
+<p>Zuul 可以实现很多高级的功能，比如限流、认证等。想要实现这些功能，必须要基于 Zuul 给我们提供的核心组件“过滤器”。</p>
+
+<h2 id="过滤器类型">过滤器类型</h2>
+
+<p>Zuul 中的过滤器跟我们之前使用的 javax.servlet.Filter 不一样，javax.servlet.Filter 只有一种类型，可以通过配置 urlPatterns 来拦截对应的请求。而 Zuul 中的过滤器总共有 4 种类型，且每种类型都有对应的使用场景。</p>
+
+<h3 id="1-pre">1）pre</h3>
+
+<p>可以在请求被路由之前调用。适用于身份认证的场景，认证通过后再继续执行下面的流程。</p>
+
+<h3 id="2-route">2）route</h3>
+
+<p>在路由请求时被调用。适用于灰度发布场景，在将要路由的时候可以做一些自定义的逻辑。</p>
+
+<h3 id="3-post">3）post</h3>
+
+<p>在 route 和 error 过滤器之后被调用。这种过滤器将请求路由到达具体的服务之后执行。适用于需要添加响应头，记录响应日志等应用场景。</p>
+
+<h3 id="4-error">4）error</h3>
+
+<p>处理请求时发生错误时被调用。在执行过程中发送错误时会进入 error 过滤器，可以用来统一记录错误信息。</p>
+
+<h2 id="请求生命周期">请求生命周期</h2>
+
+<p><img src="/img/Xnip2020-09-10_15-07-10.png" alt="Xnip2020-09-10_15-07-10" /></p>
+
+<p>通过上面的图可以清楚地知道整个执行的顺序，请求发过来首先到 pre 过滤器，再到 routing 过滤器，最后到 post 过滤器，任何一个过滤器有异常都会进入 error 过滤器。</p>
+
+<p>通过 com.netflix.zuul.http.Zuul<a href="http://c.biancheng.net/servlet/">Servlet</a> 也可以看出完整执行顺序，ZuulServlet 类似 <a href="http://c.biancheng.net/spring/">Spring</a>-Mvc 的 DispatcherServlet，所有的 Request 都要经过 ZuulServlet 的处理。</p>
+
+<p>ZuulServlet 源码如下所示：</p>
+
+<pre><code class="language-java">@Override
+public void service(javax.servlet.ServletRequest servletRequest, javax.servlet.ServletResponse servletResponse)
+        throws ServletException, IOException {
+    try {
+        init((HttpServletRequest) servletRequest, (HttpServletResponse) servletResponse);
+        RequestContext context = RequestContext.getCurrentContext();
+        context.setZuulEngineRan();
+        try {
+            preRoute();
+        } catch (ZuulException e) {
+            error(e);
+            postRoute();
+            return;
+        }
+        try {
+            route();
+        } catch (ZuulException e) {
+            error(e);
+            postRoute();
+            return;
+        }
+        try {
+            postRoute();
+        } catch (ZuulException e) {
+            error(e);
+            return;
+        }
+    } catch (Throwable e) {
+        error(new ZuulException(e, 500, &quot;UNHANDLED_EXCEPTION_&quot; + e.getClass().getName()));
+    } finally {
+        RequestContext.getCurrentContext().unset();
+    }
+}
+</code></pre>
+
+<h2 id="使用过滤器">使用过滤器</h2>
+
+<p>我们创建一个 pre 过滤器，来实现 IP 黑名单的过滤操作，代码如下所示。</p>
+
+<pre><code class="language-java">public class IpFilter extends ZuulFilter {
+
+    // IP黑名单列表
+    private List&lt;String&gt; blackIpList = Arrays.asList(&quot;127.0.0.1&quot;);
+
+    public IpFilter() {
+        super();
+    }
+
+    @Override
+    public boolean shouldFilter() {
+        return true
+    }
+
+    @Override
+    public String filterType() {
+        return &quot;pre&quot;;
+    }
+
+    @Override
+    public int filterOrder() {
+        return 1;
+    }
+
+    @Override
+    public Object run() {
+        RequestContext ctx = RequestContext.getCurrentContext();
+        String ip = IpUtils.getIpAddr(ctx.getRequest());
+        // 在黑名单中禁用
+        if (StringUtils.isNotBlank(ip) &amp;&amp; blackIpList.contains(ip)) {
+
+            ctx.setSendZuulResponse(false);
+            ResponseData data = ResponseData.fail(&quot;非法请求 &quot;, ResponseCode.NO_AUTH_CODE.getCode());
+            ctx.setResponseBody(JsonUtils.toJson(data));
+            ctx.getResponse().setContentType(&quot;application/json; charset=utf-8&quot;);
+            return null;
+        }
+        return null;
+    }
+}
+</code></pre>
+
+<p>由代码可知，自定义过滤器需要继承 ZuulFilter，并且需要实现下面几个方法：</p>
+
+<h3 id="1-shouldfilte">1）shouldFilte</h3>
+
+<p>是否执行该过滤器，true 为执行，false 为不执行，这个也可以利用配置中心来实现，达到动态的开启和关闭过滤器。</p>
+
+<h3 id="2-filtertype">2）filterType</h3>
+
+<p>过滤器类型，可选值有 pre、route、post、error。</p>
+
+<h3 id="3-filterorder">3）filterOrder</h3>
+
+<p>过滤器的执行顺序，数值越小，优先级越高。</p>
+
+<h3 id="4-run">4）run</h3>
+
+<p>执行自己的业务逻辑，本段代码中是通过判断请求的 IP 是否在黑名单中，决定是否进行拦截。blackIpList 字段是 IP 的黑名单，判断条件成立之后，通过设置 ctx.setSendZuulResponse（false），告诉 Zuul 不需要将当前请求转发到后端的服务了。通过 setResponseBody 返回数据给客户端。</p>
+
+<h3 id="实例化">实例化</h3>
+
+<p>过滤器定义完成之后我们需要配置过滤器才能生效，IP 过滤器配置代码如下所示。</p>
+
+<pre><code class="language-java">@Configuration
+public class FilterConfig {
+
+    @Bean
+    public IpFilter ipFilter() {
+        return new IpFilter();
+    }
+}
+</code></pre>
+
+<h2 id="过滤器禁用">过滤器禁用</h2>
+
+<p>有的场景下，我们需要禁用过滤器，此时可以采取下面的两种方式来实现：</p>
+
+<ol>
+<li>利用 shouldFilter 方法中的 return false 让过滤器不再执行</li>
+<li>通过配置方式来禁用过滤器，格式为“zuul. 过滤器的类名.过滤器类型 .disable=true”。如果我们需要禁用“使用过滤器”部分中的 IpFilter，可以用下面的配置：</li>
+</ol>
+
+<pre><code class="language-properties">zuul.IpFilter.pre.disable=true
+</code></pre>
+
+<h2 id="过滤器中传递数据">过滤器中传递数据</h2>
+
+<p>项目中往往会存在很多的过滤器，执行的顺序是根据 filterOrder 决定的，那么肯定有一些过滤器是在后面执行的，如果你有这样的需求：第一个过滤器需要告诉第二个过滤器一些信息，这个时候就涉及在过滤器中怎么去传递数据给后面的过滤器。</p>
+
+<p>实现这种传值的方式笔者第一时间就想到了用 ThreadLocal，既然我们用了 Zuul，那么 Zuul 肯定有解决方案，比如可以通过 RequestContext 的 set 方法进行传递，RequestContext 的原理就是 ThreadLocal。</p>
+
+<pre><code class="language-java">RequestContext ctx = RequestContext.getCurrentContext();
+ctx.set(&quot;msg&quot;, &quot;你好吗&quot;);
+</code></pre>
+
+<p>后面的过滤就可以通过 RequestContext 的 get 方法来获取数据：</p>
+
+<pre><code class="language-java">RequestContext ctx = RequestContext.getCurrentContext();
+ctx.get(&quot;msg&quot;);
+</code></pre>
+
+<p>上面我们说到 RequestContext 的原理就是 ThreadLocal，这不是笔者自己随便说的，而是笔者看过源码得出来的结论，下面请看源码，代码如下所示。</p>
+
+<pre><code class="language-java">protected static final ThreadLocal&lt;? extends RequestContext&gt; threadLocal = new ThreadLocal&lt;RequestContext&gt;() {
+    @Override
+    protected RequestContext initialValue() {
+        try {
+            return contextClass.newInstance();
+        } catch (Throwable e) {
+            throw new RuntimeException(e);
+        }
+    }
+};
+
+public static RequestContext getCurrentContext() {
+    if (testContext != null)
+        return testContext;
+
+    RequestContext context = threadLocal.get();
+    return context;
+}
+</code></pre>
+
+<h2 id="过滤器拦截请求">过滤器拦截请求</h2>
+
+<p>如果有多个过滤器的话，就算第一个拒绝了，<strong>那么不会影响他往下传递</strong>，我们大致知道了为什么所有的过滤器都会执行，解决这个问题的办法就是通过 shouldFilter 来处理，即在拦截之后<strong>通过数据传递的方式</strong>告诉下一个过滤器是否要执行。</p>
+
+<p>增加一行数据传递的代码：</p>
+
+<pre><code class="language-java">ctx.set(&quot;isSuccess&quot;, false);
+</code></pre>
+
+<p>在 RequestContext 中设置一个值来标识是否成功，当为 true 的时候，后续的过滤器才执行，若为 false 则不执行。</p>
+
+<p>利用这种方法，在后面的过滤器就需要用到这个值来决定自己此时是否需要执行，此时只需要在 shouldFilter 方法中加上如下所示的代码即可。</p>
+
+<pre><code class="language-java">public boolean shouldFilter() {
+    RequestContext ctx = RequestContext.getCurrentContext();
+    Object success = ctx.get(&quot;isSuccess&quot;);
+    return success == null ? true : Boolean.parseBoolean(success.toString());
+}
+</code></pre>
+
+<h2 id="过滤器中异常处理">过滤器中异常处理</h2>
+
+<p>对于异常来说，无论在哪个地方都需要处理。过滤器中的异常主要发生在 run 方法中，可以用 try catch 来处理。Zuul 中也为我们提供了一个异常处理的过滤器，当过滤器在执行过程中发生异常，若没有被捕获到，就会进入 error 过滤器中。</p>
+
+<p>我们可以定义一个 error 过滤器来记录异常信息，代码如下所示。</p>
+
+<pre><code class="language-java">public class ErrorFilter extends ZuulFilter {
+
+    private Logger log = LoggerFactory.getLogger(ErrorFilter.class);
+
+    @Override
+    public String filterType() {
+        return &quot;error&quot;;
+    }
+
+    @Override
+    public int filterOrder() {
+        return 100;
+    }
+
+    @Override
+    public boolean shouldFilter() {
+        return true;
+    }
+
+    @Override
+    public Object run() {
+        RequestContext ctx = RequestContext.getCurrentContext();
+        Throwable throwable = ctx.getThrowable();
+        log.error(&quot;Filter Erroe : {}&quot;, throwable.getCause().getMessage());
+        return null;
+    }
+}
+</code></pre>
+
+<h1 id="与gateway对比">与GateWay对比</h1>
+
+<ol>
+<li>在微服务架构，如果使用了<a href="https://www.jianshu.com/p/d228d4a50a21">Spring Cloud生态的基础组件</a>，则Spring Cloud Gateway相比而言更加具备优势，单从<a href="https://www.jianshu.com/p/b3f2b518c1b7">流式编程</a>+支持异步上就足以让开发者选择它了，他可以单独脱离spring cloud 体系。</li>
+<li>对于小型微服务架构或是复杂架构（不仅包括微服务应用还有其他非Spring Cloud服务节点），zuul也是一个不错的选择。</li>
+</ol>
+
+<h1 id="设置转发请求的请求头信息">设置转发请求的请求头信息</h1>
+
+<p>系统和系统直接有时候需要传递 Token这样的数据</p>
+
+<pre><code class="language-java">@Component
+public class RequestHeaderFilter extends ZuulFilter {
+    @Override
+    public String filterType() {
+        return FilterConstants.PRE_TYPE;
+    }
+
+    @Override
+    public int filterOrder() {
+        return FilterConstants.PRE_DECORATION_FILTER_ORDER + 2;
+    }
+
+    @Override
+    public boolean shouldFilter() {
+        return true;
+    }
+
+    @Override
+    public Object run() {
+        RequestContext requestContext = RequestContext.getCurrentContext();
+        requestContext.addZuulRequestHeader(ServletConstants.HEADER_TRACE_ID, ServletContextHolder.fetchTraceId());
+        requestContext.addZuulRequestHeader(ServletConstants.HEADER_VERSION, ServletContextHolder.fetchVersion());
+        requestContext.addZuulRequestHeader(CommonConstants.TOKEN, ServletContextHolder.getRequest().getHeader(CommonConstants.TOKEN));
+        return null;
+    }
+}
+</code></pre>
+
+<p><strong>说明：ServletContextHolder 是对 RequestContextHolder 封装。</strong></p>
+
+<ol>
+<li><p>RequestContextHolder：持有上下文的Request容器。</p></li>
+
+<li><p>通过RequestContextHolder的静态方法可以随时随地取到当前请求的request对象。</p></li>
+</ol>
+
+
+                
+                
+<div class="entry-shang text-center">
+    
+	    <p>「真诚赞赏，手留余香」</p>
+	
+	<button class="zs show-zs btn btn-bred">赞赏支持</button>
+</div>
+<div class="zs-modal-bg"></div>
+<div class="zs-modal-box">
+	<div class="zs-modal-head">
+		<button type="button" class="close">×</button>
+		<span class="author"><a href="http://maizitoday.github.io/"><img src="/img/favicon.png" /></a></span>
+        
+	        <p class="tip"><i></i><span>真诚赞赏，手留余香</span></p>
+		
+ 
+	</div>
+	<div class="zs-modal-body">
+		<div class="zs-modal-btns">
+			<button class="btn btn-blink" data-num="2">2元</button>
+			<button class="btn btn-blink" data-num="5">5元</button>
+			<button class="btn btn-blink" data-num="10">10元</button>
+			<button class="btn btn-blink" data-num="50">50元</button>
+			<button class="btn btn-blink" data-num="100">100元</button>
+			<button class="btn btn-blink" data-num="1">任意金额</button>
+		</div>
+		<div class="zs-modal-pay">
+			<button class="btn btn-bred" id="pay-text">2元</button>
+			<p>使用<span id="pay-type">微信</span>扫描二维码完成支付</p>
+			<img src="/img/reward/wechat-2.png"  id="pay-image"/>
+		</div>
+	</div>
+	<div class="zs-modal-footer">
+		<label><input type="radio" name="zs-type" value="wechat" class="zs-type" checked="checked"><span ><span class="zs-wechat"><img src="/img/reward/wechat-btn.png"/></span></label>
+		<label><input type="radio" name="zs-type" value="alipay" class="zs-type" class="zs-alipay"><img src="/img/reward/alipay-btn.png"/></span></label>
+	</div>
+</div>
+<script type="text/javascript" src="/js/reward.js"></script>
+
+                
+
+                <hr>
+                <ul class="pager">
+                    
+                    <li class="previous">
+                        <a href="/post/settings.xml%E6%96%87%E4%BB%B6%E8%AF%A6%E8%A7%A3/" data-toggle="tooltip" data-placement="top"
+                            title="Settings.xml文件详解">&larr;
+                            Previous Post</a>
+                    </li>
+                    
+                    
+                </ul>
+
+                <br>
+                <br>
+                
+                <div class="post-comment">
+                    
+                    
+
+
+
+
+<div id="vcomments"></div>
+<script src="//cdn1.lncld.net/static/js/3.0.4/av-min.js"></script>
+<script src='//unpkg.com/valine/dist/Valine.min.js'></script>
+
+<script type="text/javascript">
+    new Valine({
+        el: '#vcomments',
+        appId: 'TOFo2eBmg8VaNWIaluOWCqTS-gzGzoHsz',
+        appKey: 'sLvSskmSoBDbCQsBJ8TUhF4k',
+        notify: 'false',
+        verify: 'false',
+        avatar: 'monsterid',
+        placeholder: '说点什么吧...',
+        visitor: 'true'
+    });
+</script>
+                </div>
+
+
+
+            </div>
+
+            
+            <div class="
+            col-lg-4 col-lg-offset-0
+                visible-lg-block
+                sidebar-container
+                catalog-container">
+                <div class="side-catalog">
+                    <hr class="hidden-sm hidden-xs">
+                    <h4>
+                        <a class="catalog-toggle" style="font-size: 24px;" href="index.html#">目录结构</a>
+                    </h4>
+                    <ul class="catalog-body"></ul>
+                    <nav id="TableOfContents">
+<ul>
+<li><a href="#简介">简介</a></li>
+<li><a href="#路由配置详解">路由配置详解</a>
+<ul>
+<li><a href="#1-指定具体服务路由">1. 指定具体服务路由</a></li>
+<li><a href="#2-路由前缀">2. 路由前缀</a></li>
+<li><a href="#3-本地跳转">3. 本地跳转</a></li>
+</ul></li>
+<li><a href="#过滤器">过滤器</a>
+<ul>
+<li><a href="#过滤器类型">过滤器类型</a>
+<ul>
+<li><a href="#1-pre">1）pre</a></li>
+<li><a href="#2-route">2）route</a></li>
+<li><a href="#3-post">3）post</a></li>
+<li><a href="#4-error">4）error</a></li>
+</ul></li>
+<li><a href="#请求生命周期">请求生命周期</a></li>
+<li><a href="#使用过滤器">使用过滤器</a>
+<ul>
+<li><a href="#1-shouldfilte">1）shouldFilte</a></li>
+<li><a href="#2-filtertype">2）filterType</a></li>
+<li><a href="#3-filterorder">3）filterOrder</a></li>
+<li><a href="#4-run">4）run</a></li>
+<li><a href="#实例化">实例化</a></li>
+</ul></li>
+<li><a href="#过滤器禁用">过滤器禁用</a></li>
+<li><a href="#过滤器中传递数据">过滤器中传递数据</a></li>
+<li><a href="#过滤器拦截请求">过滤器拦截请求</a></li>
+<li><a href="#过滤器中异常处理">过滤器中异常处理</a></li>
+</ul></li>
+<li><a href="#与gateway对比">与GateWay对比</a></li>
+<li><a href="#设置转发请求的请求头信息">设置转发请求的请求头信息</a></li>
+</ul>
+</nav>
+                    <br>
+                    <br>
+                    <br>
+                    <hr class="hidden-sm hidden-xs">
+                </div>
+            </div>
+
+
+            
+            <div class="
+                col-lg-10 col-lg-offset-0
+                col-md-10 col-md-offset-1
+                sidebar-container">
+
+                
+                
+                <section>
+                    <hr class="hidden-sm hidden-xs">
+                    <h5><a href="/tags/">FEATURED TAGS</a></h5>
+                    <div class="tags">
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        <a href="/tags/qt" title="QT">
+                            QT
+                        </a>
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        <a href="/tags/zookeeper" title="Zookeeper">
+                            Zookeeper
+                        </a>
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        <a href="/tags/docker" title="docker">
+                            docker
+                        </a>
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        <a href="/tags/elasticsearch" title="elasticSearch">
+                            elasticSearch
+                        </a>
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        <a href="/tags/golang" title="golang">
+                            golang
+                        </a>
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        <a href="/tags/java%E5%9F%BA%E7%A1%80" title="java基础">
+                            java基础
+                        </a>
+                        
+                        
+                        
+                        <a href="/tags/java%E7%9B%B8%E5%85%B3%E6%A6%82%E5%BF%B5" title="java相关概念">
+                            java相关概念
+                        </a>
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        <a href="/tags/jvm" title="jvm">
+                            jvm
+                        </a>
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        <a href="/tags/maven" title="maven">
+                            maven
+                        </a>
+                        
+                        
+                        
+                        <a href="/tags/mongodb" title="mongodb">
+                            mongodb
+                        </a>
+                        
+                        
+                        
+                        
+                        
+                        <a href="/tags/mybatis%E7%B3%BB%E5%88%97" title="mybatis系列">
+                            mybatis系列
+                        </a>
+                        
+                        
+                        
+                        <a href="/tags/mycat" title="mycat">
+                            mycat
+                        </a>
+                        
+                        
+                        
+                        <a href="/tags/mysql%E7%B3%BB%E5%88%97" title="mysql系列">
+                            mysql系列
+                        </a>
+                        
+                        
+                        
+                        
+                        
+                        <a href="/tags/nginx" title="nginx">
+                            nginx
+                        </a>
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        <a href="/tags/redis" title="redis">
+                            redis
+                        </a>
+                        
+                        
+                        
+                        <a href="/tags/rocketmq" title="rocketmq">
+                            rocketmq
+                        </a>
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        <a href="/tags/shell" title="shell">
+                            shell
+                        </a>
+                        
+                        
+                        
+                        <a href="/tags/shiro" title="shiro">
+                            shiro
+                        </a>
+                        
+                        
+                        
+                        
+                        
+                        <a href="/tags/springcloud" title="springCloud">
+                            springCloud
+                        </a>
+                        
+                        
+                        
+                        
+                        
+                        <a href="/tags/springboot" title="springboot">
+                            springboot
+                        </a>
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        <a href="/tags/springboot%E7%B3%BB%E5%88%97" title="springboot系列">
+                            springboot系列
+                        </a>
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        <a href="/tags/%E4%BA%8B%E7%89%A9" title="事物">
+                            事物
+                        </a>
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        <a href="/tags/%E5%88%86%E5%B8%83%E5%BC%8F%E7%B3%BB%E5%88%97" title="分布式系列">
+                            分布式系列
+                        </a>
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        <a href="/tags/%E5%8D%95%E7%82%B9%E7%99%BB%E5%BD%95" title="单点登录">
+                            单点登录
+                        </a>
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        <a href="/tags/%E5%A4%9A%E7%BA%BF%E7%A8%8B%E5%92%8C%E9%AB%98%E5%B9%B6%E5%8F%91" title="多线程和高并发">
+                            多线程和高并发
+                        </a>
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        <a href="/tags/%E5%BC%80%E5%8F%91%E5%B7%A5%E5%85%B7" title="开发工具">
+                            开发工具
+                        </a>
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        <a href="/tags/%E6%95%B0%E6%8D%AE%E5%BA%93" title="数据库">
+                            数据库
+                        </a>
+                        
+                        
+                        
+                        
+                        
+                        <a href="/tags/%E6%95%B0%E6%8D%AE%E7%BB%93%E6%9E%84" title="数据结构">
+                            数据结构
+                        </a>
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        <a href="/tags/%E7%BD%91%E7%BB%9C%E7%BC%96%E7%A8%8B" title="网络编程">
+                            网络编程
+                        </a>
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        <a href="/tags/%E8%AE%BE%E8%AE%A1%E6%A8%A1%E5%BC%8F" title="设计模式">
+                            设计模式
+                        </a>
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        <a href="/tags/%E8%B4%9F%E8%BD%BD%E5%9D%87%E8%A1%A1" title="负载均衡">
+                            负载均衡
+                        </a>
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        <a href="/tags/%E9%9D%A2%E8%AF%95%E9%A2%98%E7%B3%BB%E5%88%97" title="面试题系列">
+                            面试题系列
+                        </a>
+                        
+                        
+                    </div>
+                </section>
+                
+
+                
+                
+                <section>
+                    <hr>
+                    <h5>FRIENDS</h5>
+                    <ul class="list-inline">
+                        
+                        <li><a target="_blank" href="https://zhaohuabing.com">赵化冰博客</a></li>
+                        
+                        <li><a target="_blank" href="http://www.tianshouzhi.com">田守枝</a></li>
+                        
+                        <li><a target="_blank" href="http://www.ityouknow.com">纯洁的微笑</a></li>
+                        
+                        <li><a target="_blank" href="https://renchunxiao.com">任春晓</a></li>
+                        
+                        <li><a target="_blank" href="https://www.lihongkun.com">泛泛之辈</a></li>
+                        
+                        <li><a target="_blank" href="https://juejin.im/welcome/backend">后端服务论坛</a></li>
+                        
+                        <li><a target="_blank" href="https://www.javaboy.org">江南一点雨</a></li>
+                        
+                        <li><a target="_blank" href="https://blog.csdn.net/gwd1154978352">东天里的冬天</a></li>
+                        
+                        <li><a target="_blank" href="https://www.javazhiyin.com/">java知音</a></li>
+                        
+                        <li><a target="_blank" href="https://juejin.im/user/5b2cc5fee51d4553156be12f/posts">算法</a></li>
+                        
+                        <li><a target="_blank" href="https://www.zhihu.com/people/duan-pan-ykjym">勤劳的小手</a></li>
+                        
+                        <li><a target="_blank" href="https://cloud.tencent.com/developer/user/2728002">Java团长</a></li>
+                        
+                    </ul>
+                </section>
+                
+            </div>
+        </div>
+    </div>
+</article>
+
+
+
+<footer>
+    <div class="container">
+        <div class="row">
+            <div class="col-lg-8 col-lg-offset-2 col-md-10 col-md-offset-1">
+                <ul class="list-inline text-center">
+                   
+                   <li>
+                       <a href="" rel="alternate" type="application/rss+xml" title="" >
+                           <span class="fa-stack fa-lg">
+                               <i class="fa fa-circle fa-stack-2x"></i>
+                               <i class="fa fa-rss fa-stack-1x fa-inverse"></i>
+                           </span>
+                       </a>
+                   </li>
+                   
+                    
+                    <li>
+                        <a href="mailto:maiziybtoday@gmail.com">
+                            <span class="fa-stack fa-lg">
+                                <i class="fa fa-circle fa-stack-2x"></i>
+                                <i class="fa fa-envelope fa-stack-1x fa-inverse"></i>
+                            </span>
+                        </a>
+                    </li>
+		    
+                    
+                    
+                    
+                    
+
+                    
+
+		    
+                    
+                    <li>
+                        <a target="_blank" href="/your%20wechat%20qr%20code%20image">
+                            <span class="fa-stack fa-lg">
+                                <i class="fa fa-circle fa-stack-2x"></i>
+                                <i class="fa fa-wechat fa-stack-1x fa-inverse"></i>
+                            </span>
+                        </a>
+                    </li>
+		    
+                    
+                    
+                    <li>
+                        <a target="_blank" href="https://www.linkedin.com/in/yourlinkedinid">
+                            <span class="fa-stack fa-lg">
+                                <i class="fa fa-circle fa-stack-2x"></i>
+                                <i class="fa fa-linkedin fa-stack-1x fa-inverse"></i>
+                            </span>
+                        </a>
+                    </li>
+		    
+                    
+                </ul>
+		<p class="copyright text-muted">
+                    Copyright &copy;  2020
+                    <br>
+                    <a href="https://themes.gohugo.io/hugo-theme-cleanwhite">CleanWhite Hugo Theme</a> by <a href="https://zhaohuabing.com">Huabing</a> |
+                    <iframe
+                        style="margin-left: 2px; margin-bottom:-5px;"
+                        frameborder="0" scrolling="0" width="100px" height="20px"
+                        src="https://ghbtns.com/github-btn.html?user=zhaohuabing&repo=hugo-theme-cleanwhite&type=star&count=true" >
+                    </iframe>
+                </p>
+            </div>
+        </div>
+    </div>
+</footer>
+
+
+
+
+<script>
+    function async(u, c) {
+      var d = document, t = 'script',
+          o = d.createElement(t),
+          s = d.getElementsByTagName(t)[0];
+      o.src = u;
+      if (c) { o.addEventListener('load', function (e) { c(null, e); }, false); }
+      s.parentNode.insertBefore(o, s);
+    }
+</script>
+
+
+
+
+
+
+<script>
+    
+    if($('#tag_cloud').length !== 0){
+        async("/js/jquery.tagcloud.js",function(){
+            $.fn.tagcloud.defaults = {
+                
+                color: {start: '#bbbbee', end: '#0085a1'},
+            };
+            $('#tag_cloud a').tagcloud();
+        })
+    }
+</script>
+
+
+<script>
+    async("https://cdnjs.cloudflare.com/ajax/libs/fastclick/1.0.6/fastclick.js", function(){
+        var $nav = document.querySelector("nav");
+        if($nav) FastClick.attach($nav);
+    })
+</script>
+
+
+
+
+
+
+</body>
+</html>
