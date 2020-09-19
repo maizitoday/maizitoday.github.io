@@ -16,15 +16,15 @@
     
 
     
-    <meta name="title" content="mysql系列-非索引设计与单表查询优化" />
-    <meta property="og:title" content="mysql系列-非索引设计与单表查询优化" />
-    <meta property="twitter:title" content="mysql系列-非索引设计与单表查询优化" />
+    <meta name="title" content="mysql系列-如何分析sql语句执行慢" />
+    <meta property="og:title" content="mysql系列-如何分析sql语句执行慢" />
+    <meta property="twitter:title" content="mysql系列-如何分析sql语句执行慢" />
     
 
     
-    <meta name="description" content="mysql优化,慢查询,explain分析，单表查询优化">
-    <meta property="og:description" content="mysql优化,慢查询,explain分析，单表查询优化" />
-    <meta property="twitter:description" content="mysql优化,慢查询,explain分析，单表查询优化" />
+    <meta name="description" content="慢日志,explain执行任务，profiling查询分析">
+    <meta property="og:description" content="慢日志,explain执行任务，profiling查询分析" />
+    <meta property="twitter:description" content="慢日志,explain执行任务，profiling查询分析" />
     
 
     
@@ -35,7 +35,7 @@
     <meta name="keyword"  content="麦子, maizi, maizi, , 麦子的网络日志, 麦子的博客, maizi Blog, 博客, 个人网站, 互联网, Web, 云原生, PaaS, Istio, Kubernetes, 微服务, Microservice">
     <link rel="shortcut icon" href="/img/favicon.ico">
 
-    <title>mysql系列-非索引设计与单表查询优化-麦子的博客</title>
+    <title>mysql系列-如何分析sql语句执行慢-麦子的博客</title>
 
     <link rel="canonical" href="/post/mysql%E7%B3%BB%E5%88%97-%E6%9F%A5%E6%89%BE%E4%BC%98%E5%8C%96-%E9%9D%9E%E7%B4%A2%E5%BC%95%E8%AE%BE%E8%AE%A1/">
 
@@ -196,16 +196,12 @@
                             mysql系列
                         </a>
                         
-                        <a class="tag" href="/tags/%E5%BA%93%E4%B8%8E%E8%A1%A8%E5%9F%BA%E6%9C%AC%E6%93%8D%E4%BD%9C" title="库与表基本操作">
-                            库与表基本操作
-                        </a>
-                        
-                        <a class="tag" href="/tags/%E6%95%B0%E6%8D%AE%E5%A2%9E%E5%88%A0%E6%94%B9" title="数据增删改">
-                            数据增删改
+                        <a class="tag" href="/tags/%E6%85%A2%E6%97%A5%E5%BF%97explain%E6%89%A7%E8%A1%8C%E4%BB%BB%E5%8A%A1profiling%E6%9F%A5%E8%AF%A2%E5%88%86%E6%9E%90" title="慢日志,explain执行任务，profiling查询分析">
+                            慢日志,explain执行任务，profiling查询分析
                         </a>
                         
                     </div>
-                    <h1>mysql系列-非索引设计与单表查询优化</h1>
+                    <h1>mysql系列-如何分析sql语句执行慢</h1>
                     <h2 class="subheading"></h2>
                     <span class="meta">
                         Posted by
@@ -287,13 +283,7 @@
 
 <h2 id="查询的流程">查询的流程</h2>
 
-<ol>
-<li>客户端发送一条查询给服务器。</li>
-<li>服务器先检查查询缓存，如果命中了缓存，则立刻返回存储在缓存中的结果，否则进入下一阶段。</li>
-<li>服务器进行SQL解析，预处理，再由优化器生成对应的执行计划。</li>
-<li>mysql根据优化器生成的执行计划，调用存储引擎的API来执行查询。</li>
-<li>将结果返回给客户端。</li>
-</ol>
+<p><img src="/img/cb39a58ccf17cc1b96db94010b9cd47e955c83e4.png" alt="cb39a58ccf17cc1b96db94010b9cd47e955c83e4" /></p>
 
 <h1 id="优化查询前的几个工具">优化查询前的几个工具</h1>
 
@@ -801,42 +791,6 @@ select * from school.student where age = 5; // 写几条sql
 </tbody>
 </table>
 
-<h1 id="单表查询步步优化-暂不讨论索引">单表查询步步优化(暂不讨论索引)</h1>
-
-<h3 id="1-明确需要的字段-要多少就写多少字段">1.  明确需要的字段，要多少就写多少字段。</h3>
-
-<h3 id="2-使用分页语句优化">2.  使用分页语句优化</h3>
-
-<p>limit start , count 或者条件 where子句。有什么可限制的条件尽量加上，查一条就limit一条。做到不多拿不乱拿。对limit的使用再优化，利用自增主键，避免offset的使用（演示在积分表score，商品表设计得不太好），约是上面方法的1/3时间。</p>
-
-<pre><code class="language-sql">select * from school.student limit 0,1;  
-
-select * from school.student where id &gt; 1 limit 2; 
-</code></pre>
-
-<h3 id="3-如果是有序的查询-可使用order-by">3.  如果是有序的查询，可使用ORDER BY</h3>
-
-<pre><code class="language-sql">select *
-		from
-		score 
-		WHERE id&gt;0
-		ORDER BY score ASC
-		LIMIT 10000
-		;
-</code></pre>
-
-<h3 id="4-开启查询缓存">4. 开启查询缓存</h3>
-
-<p>大多数的MySQL服务器都开启了查询缓存。这是提高性最有效的方法之一。当有很多相同的查询被执行了多次的时候，这些查询结果会被放到一个缓存中，这样，后续的相同的查询就不用操作表而直接访问缓存结果了。</p>
-
-<h4 id="命中缓存条件">命中缓存条件</h4>
-
-<ol>
-<li>缓存存在一个hash表中,通过查询SQL,查询数据库,客户端协议等作为key.在判断是否命中前,MySQL不会解析SQL,而是直接使用SQL去查询缓存,<strong>SQL任何字符上的不同,如空格,注释,都会导致缓存不命中.</strong></li>
-<li>如果查询中有不确定数据,<strong>例如CURRENT_DATE()和NOW()函数,那么查询完毕后则不会被缓存</strong>.所以,包含不确定数据的查询是肯定不会找到可用缓存的
-<br /></li>
-</ol>
-
 
                 
                 
@@ -892,7 +846,7 @@ select * from school.student where id &gt; 1 limit 2;
                     
                     <li class="next">
                         <a href="/post/mysql%E7%B3%BB%E5%88%97-%E6%9F%A5%E6%89%BE%E4%BC%98%E5%8C%96-%E5%A4%96%E8%BF%9E%E6%8E%A5%E5%A4%9A%E8%A1%A8%E8%81%94%E5%90%88%E6%9F%A5%E8%AF%A2%E4%BB%A5%E5%8F%8A%E6%9F%A5%E8%AF%A2%E6%B3%A8%E6%84%8F%E7%82%B9/" data-toggle="tooltip" data-placement="top"
-                            title="mysql系列-查找优化、外连接、多表联合查询">Next
+                            title="mysql系列-多表连接方式">Next
                             Post &rarr;</a>
                     </li>
                     
@@ -1003,19 +957,6 @@ select * from school.student where id &gt; 1 limit 2;
 <li><a href="#profiling查询分析">profiling查询分析</a>
 <ul>
 <li><a href="#打开profiling查询分析">打开profiling查询分析</a></li>
-</ul></li>
-</ul></li>
-<li><a href="#单表查询步步优化-暂不讨论索引">单表查询步步优化(暂不讨论索引)</a>
-<ul>
-<li>
-<ul>
-<li><a href="#1-明确需要的字段-要多少就写多少字段">1.  明确需要的字段，要多少就写多少字段。</a></li>
-<li><a href="#2-使用分页语句优化">2.  使用分页语句优化</a></li>
-<li><a href="#3-如果是有序的查询-可使用order-by">3.  如果是有序的查询，可使用ORDER BY</a></li>
-<li><a href="#4-开启查询缓存">4. 开启查询缓存</a>
-<ul>
-<li><a href="#命中缓存条件">命中缓存条件</a></li>
-</ul></li>
 </ul></li>
 </ul></li>
 </ul>
@@ -1196,6 +1137,8 @@ select * from school.student where id &gt; 1 limit 2;
                         <a href="/tags/golang" title="golang">
                             golang
                         </a>
+                        
+                        
                         
                         
                         
@@ -1437,8 +1380,6 @@ select * from school.student where id &gt; 1 limit 2;
                         
                         
                         
-                        
-                        
                         <a href="/tags/%E5%88%86%E5%B8%83%E5%BC%8F%E7%B3%BB%E5%88%97" title="分布式系列">
                             分布式系列
                         </a>
@@ -1489,13 +1430,9 @@ select * from school.student where id &gt; 1 limit 2;
                         
                         
                         
-                        
-                        
                         <a href="/tags/%E5%A4%9A%E7%BA%BF%E7%A8%8B%E5%92%8C%E9%AB%98%E5%B9%B6%E5%8F%91" title="多线程和高并发">
                             多线程和高并发
                         </a>
-                        
-                        
                         
                         
                         
@@ -1649,15 +1586,9 @@ select * from school.student where id &gt; 1 limit 2;
                         
                         
                         
-                        
-                        
-                        
-                        
                         <a href="/tags/%E7%BD%91%E7%BB%9C%E7%BC%96%E7%A8%8B" title="网络编程">
                             网络编程
                         </a>
-                        
-                        
                         
                         
                         

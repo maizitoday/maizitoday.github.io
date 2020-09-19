@@ -16,15 +16,15 @@
     
 
     
-    <meta name="title" content="mysql系列-索引的使用、原理和设计优化" />
-    <meta property="og:title" content="mysql系列-索引的使用、原理和设计优化" />
-    <meta property="twitter:title" content="mysql系列-索引的使用、原理和设计优化" />
+    <meta name="title" content="mysql系列-索引的使用、原理和设计优化，如何保持sql走索引" />
+    <meta property="og:title" content="mysql系列-索引的使用、原理和设计优化，如何保持sql走索引" />
+    <meta property="twitter:title" content="mysql系列-索引的使用、原理和设计优化，如何保持sql走索引" />
     
 
     
-    <meta name="description" content="麦子，程序员, 开源爱好者，生活探险家 | 这里是 麦子 的博客，与你一起发现更大的世界。">
-    <meta property="og:description" content="麦子，程序员, 开源爱好者，生活探险家 | 这里是 麦子 的博客，与你一起发现更大的世界。" />
-    <meta property="twitter:description" content="麦子，程序员, 开源爱好者，生活探险家 | 这里是 麦子 的博客，与你一起发现更大的世界。" />
+    <meta name="description" content="索引的使用, 索引的设计优化, 索引的原理, 如何保持sql走索引">
+    <meta property="og:description" content="索引的使用, 索引的设计优化, 索引的原理, 如何保持sql走索引" />
+    <meta property="twitter:description" content="索引的使用, 索引的设计优化, 索引的原理, 如何保持sql走索引" />
     
 
     
@@ -35,7 +35,7 @@
     <meta name="keyword"  content="麦子, maizi, maizi, , 麦子的网络日志, 麦子的博客, maizi Blog, 博客, 个人网站, 互联网, Web, 云原生, PaaS, Istio, Kubernetes, 微服务, Microservice">
     <link rel="shortcut icon" href="/img/favicon.ico">
 
-    <title>mysql系列-索引的使用、原理和设计优化-麦子的博客</title>
+    <title>mysql系列-索引的使用、原理和设计优化，如何保持sql走索引-麦子的博客</title>
 
     <link rel="canonical" href="/post/mysql%E7%B3%BB%E5%88%97-%E7%B4%A2%E5%BC%95%E7%9A%84%E4%BD%BF%E7%94%A8%E5%8E%9F%E7%90%86%E5%92%8C%E8%AE%BE%E8%AE%A1%E4%BC%98%E5%8C%96/">
 
@@ -196,20 +196,12 @@
                             mysql系列
                         </a>
                         
-                        <a class="tag" href="/tags/%E7%B4%A2%E5%BC%95%E7%9A%84%E4%BD%BF%E7%94%A8" title="索引的使用">
-                            索引的使用
-                        </a>
-                        
-                        <a class="tag" href="/tags/%E7%B4%A2%E5%BC%95%E7%9A%84%E8%AE%BE%E8%AE%A1%E4%BC%98%E5%8C%96" title="索引的设计优化">
-                            索引的设计优化
-                        </a>
-                        
-                        <a class="tag" href="/tags/%E7%B4%A2%E5%BC%95%E7%9A%84%E5%8E%9F%E7%90%86" title="索引的原理">
-                            索引的原理
+                        <a class="tag" href="/tags/%E7%B4%A2%E5%BC%95%E7%9A%84%E4%BD%BF%E7%94%A8-%E7%B4%A2%E5%BC%95%E7%9A%84%E8%AE%BE%E8%AE%A1%E4%BC%98%E5%8C%96-%E7%B4%A2%E5%BC%95%E7%9A%84%E5%8E%9F%E7%90%86-%E5%A6%82%E4%BD%95%E4%BF%9D%E6%8C%81sql%E8%B5%B0%E7%B4%A2%E5%BC%95" title="索引的使用, 索引的设计优化, 索引的原理, 如何保持sql走索引">
+                            索引的使用, 索引的设计优化, 索引的原理, 如何保持sql走索引
                         </a>
                         
                     </div>
-                    <h1>mysql系列-索引的使用、原理和设计优化</h1>
+                    <h1>mysql系列-索引的使用、原理和设计优化，如何保持sql走索引</h1>
                     <h2 class="subheading"></h2>
                     <span class="meta">
                         Posted by
@@ -583,50 +575,50 @@ CREATE TABLE `table` (
 
 <h2 id="索引建立的几大原则">索引建立的几大原则</h2>
 
-<h3 id="1-最左前缀匹配原则">1. 最左前缀匹配原则</h3>
+<h4 id="1-最左前缀匹配原则">1. 最左前缀匹配原则</h4>
 
 <p>非常重要的原则，mysql会一直向右匹配直到遇到范围查询(&gt;、&lt;、between、like)就停止匹配，比如a = 1 and b = 2 and c &gt; 3 and d = 4 如果建立(a,b,c,d)顺序的索引，d是用不到索引的，如果建立(a,b,d,c)的索引则都可以用到，a,b,d的顺序可以任意调整。</p>
 
-<h3 id="2-尽量选择区分度高的列作为索引">2. 尽量选择区分度高的列作为索引</h3>
+<h4 id="2-尽量选择区分度高的列作为索引">2. 尽量选择区分度高的列作为索引</h4>
 
 <p>表示字段不重复的比例，比例越大我们扫描的记录数越少，唯一键的区分度是1，而一些状态、性别字段可能在大数据面前区分度就是0，那可能有人会问，这个比例有什么经验值吗？使用场景不同，这个值也很难确定，一般需要join的字段我们都要求是0.1以上，即平均1条扫描10条记录。</p>
 
-<h3 id="3-索引列不能参与计算-保持列-干净">3. 索引列不能参与计算，保持列“干净”</h3>
+<h4 id="3-索引列不能参与计算-保持列-干净">3. 索引列不能参与计算，保持列“干净”</h4>
 
 <p>比如from_unixtime(create_time) = ’2014-05-29’就不能使用到索引，原因很简单，<strong>b+树中存的都是数据表中的字段值</strong>，但进行检索时，需要把所有元素都应用函数才能比较，显然成本太大。所以语句应该写成create_time = unix_timestamp(’2014-05-29’);</p>
 
-<h3 id="4-尽量的扩展索引-不要新建索引">4. 尽量的扩展索引，不要新建索引。</h3>
+<h4 id="4-尽量的扩展索引-不要新建索引">4. 尽量的扩展索引，不要新建索引。</h4>
 
 <p>比如表中已经有a的索引，现在要加(a,b)的索引，那么只需要修改原来的索引即可。</p>
 
-<h3 id="5-定义有外键的数据列一定要建立索引">5. 定义有外键的数据列一定要建立索引。</h3>
+<h4 id="5-定义有外键的数据列一定要建立索引">5. 定义有外键的数据列一定要建立索引。</h4>
 
-<h3 id="6-对于那些查询中很少涉及的列-重复值比较多的列不要建立索引">6. 对于那些查询中很少涉及的列，重复值比较多的列不要建立索引。</h3>
+<h4 id="6-对于那些查询中很少涉及的列-重复值比较多的列不要建立索引">6. 对于那些查询中很少涉及的列，重复值比较多的列不要建立索引。</h4>
 
-<h3 id="7-对于定义为text-image和bit的数据类型的列不要建立索引">7. 对于定义为text、image和bit的数据类型的列不要建立索引。</h3>
+<h4 id="7-对于定义为text-image和bit的数据类型的列不要建立索引">7. 对于定义为text、image和bit的数据类型的列不要建立索引。</h4>
 
-<h3 id="8-对于经常存取的列避免建立索引">8. 对于经常存取的列避免建立索引。</h3>
+<h4 id="8-对于经常存取的列避免建立索引">8. 对于经常存取的列避免建立索引。</h4>
 
 <h2 id="索引使用的注意点">索引使用的注意点</h2>
 
-<h3 id="1-join-where判断和order-by排序的字段上建立索引">1.  JOIN,WHERE判断和ORDER BY排序的字段上建立索引</h3>
+<h4 id="1-join-where判断和order-by排序的字段上建立索引">1.  JOIN,WHERE判断和ORDER BY排序的字段上建立索引</h4>
 
 <p>一般说来，索引应建立在那些将用于JOIN,WHERE判断和ORDER BY排序的字段上。尽量不要对数据库中某个含有大量重复的值的字段建立索引。对于一个ENUM类型的字段来说，出现大量重复值是很有可能的情况。</p>
 
-<h3 id="2-避免在-where-子句中对字段进行-null-值判断">2.  避免在 where 子句中对字段进行 null 值判断</h3>
+<h4 id="2-避免在-where-子句中对字段进行-null-值判断">2.  避免在 where 子句中对字段进行 null 值判断</h4>
 
 <p>应尽量避免在 where 子句中对字段进行 null 值判断，否则将导致引擎放弃使用索引而进行<strong>全表扫描</strong>。如：</p>
 
 <pre><code class="language-sql">select id from t where num is null
 </code></pre>
 
-<h3 id="3-最好不要给数据库留null">3.  最好不要给数据库留NULL</h3>
+<h4 id="3-最好不要给数据库留null">3.  最好不要给数据库留NULL</h4>
 
 <p>最好不要给数据库留NULL，尽可能的使用 NOT NULL填充数据库.不要以为 NULL 不需要空间，比如：char(100) 型，在字段建立时，空间就固定了， 不管是否插入值（NULL也包含在内），都是占用 100个字符的空间的，<strong>如果是varchar这样的变长字段， null 不占用空间。</strong> 如上的SQL语句， 可以在num上设置默认值0，确保表中num列没有null值，然后这样查询。</p>
 
-<h3 id="4-应尽量避免在-where-子句中使用-或-操作符-否则将引擎放弃使用索引而进行全表扫描">4.  应尽量避免在 where 子句中使用 != 或 &lt;&gt; 操作符，否则将引擎放弃使用索引而进行全表扫描。</h3>
+<h4 id="4-应尽量避免在-where-子句中使用-或-操作符-否则将引擎放弃使用索引而进行全表扫描">4.  应尽量避免在 where 子句中使用 != 或 &lt;&gt; 操作符，否则将引擎放弃使用索引而进行全表扫描。</h4>
 
-<h3 id="5-应尽量避免在-where-子句中使用-or-来连接条件">5.  应尽量避免在 where 子句中使用 or 来连接条件</h3>
+<h4 id="5-应尽量避免在-where-子句中使用-or-来连接条件">5.  应尽量避免在 where 子句中使用 or 来连接条件</h4>
 
 <p>应尽量避免在 where 子句中使用 or 来连接条件，如果一个字段有索引，一个字段没有索引，将导致引擎放弃使用索引而进行全表扫描。如：</p>
 
@@ -640,7 +632,7 @@ union all
 select id from t where Name = 'fuzhu'
 </code></pre>
 
-<h3 id="6-in-和-not-in-也要慎用-否则会导致全表扫描">6.  in 和 not in 也要慎用，否则会导致全表扫描。</h3>
+<h4 id="6-in-和-not-in-也要慎用-否则会导致全表扫描">6.  in 和 not in 也要慎用，否则会导致全表扫描。</h4>
 
 <p>而且负向查询（not , not in, not like, &lt;&gt;, != ,!&gt;,!&lt; ） 不会使用索引</p>
 
@@ -657,7 +649,7 @@ select id from t where Name = 'fuzhu'
 <pre><code class="language-sql">select num from a where num in(select num from b)
 </code></pre>
 
-<h3 id="7-aaa-模糊查询也将导致全表扫描">7.  %aaa%”模糊查询也将导致全表扫描</h3>
+<h4 id="7-aaa-模糊查询也将导致全表扫描">7.  %aaa%”模糊查询也将导致全表扫描</h4>
 
 <pre><code class="language-sql">select id from t where name like ‘%abc%’
 </code></pre>
@@ -670,7 +662,7 @@ select id from t where Name = 'fuzhu'
 
 <h4 id="c-like-keyword-索引失效">c. like %keyword% 索引失效，</h4>
 
-<h3 id="8-如果在-where-子句中使用参数-也会导致全表扫描">8.  如果在 where 子句中使用参数，也会导致全表扫描。</h3>
+<h4 id="8-如果在-where-子句中使用参数-也会导致全表扫描">8.  如果在 where 子句中使用参数，也会导致全表扫描。</h4>
 
 <p>因为SQL只有在运行时才会解析局部变量，但优化程序不能将访问计划的选择推迟到运行时；它必须在编译时进行选择。然 而，如果在编译时建立访问计划，变量的值还是未知的，因而无法作为索引选择的输入项。如下面语句将进行全表扫描：</p>
 
@@ -682,7 +674,7 @@ select id from t where Name = 'fuzhu'
 <pre><code class="language-sql">select id from t where num = 100*2
 </code></pre>
 
-<h3 id="9-应尽量避免在where子句中对字段进行函数操作">9.  应尽量避免在where子句中对字段进行函数操作。</h3>
+<h4 id="9-应尽量避免在where子句中对字段进行函数操作">9.  应尽量避免在where子句中对字段进行函数操作。</h4>
 
 <p>这将导致引擎放弃使用索引而进行全表扫描</p>
 
@@ -697,19 +689,19 @@ select id from t where datediff(day,createdate,’2005-11-30′) = 0  -–‘200
 select id from t where createdate &gt;= '2005-11-30' and createdate &lt; '2005-12-1'
 </code></pre>
 
-<h3 id="10-where-子句中的-左边进行函数-算术运算或其他表达式运算无法正确使用索引">10.  where 子句中的“=”左边进行函数、算术运算或其他表达式运算无法正确使用索引。</h3>
+<h4 id="10-where-子句中的-左边进行函数-算术运算或其他表达式运算无法正确使用索引">10.  where 子句中的“=”左边进行函数、算术运算或其他表达式运算无法正确使用索引。</h4>
 
-<h3 id="11-索引字段作为条件时-如果该索引是多列索引-需要注意">11.  索引字段作为条件时，如果该索引是多列索引，需要注意</h3>
+<h4 id="11-索引字段作为条件时-如果该索引是多列索引-需要注意">11.  索引字段作为条件时，如果该索引是多列索引，需要注意</h4>
 
 <p>在使用索引字段作为条件时，如果该索引是复合索引（多列索引），那么必须使用到该索引中的第一个字段作为条件时才能保证系统使用该索引，否则该索引将不会被使用，并且应尽可能的让字段顺序与索引顺序相一致。</p>
 
-<h3 id="12-索引并不是越多越好">12.  索引并不是越多越好</h3>
+<h4 id="12-索引并不是越多越好">12.  索引并不是越多越好</h4>
 
 <p>索引固然可以提高相应的 select 的效率，但同时也降低了 insert 及 update 的效率，<strong>因为 insert 或 update 时有可能会重建索引</strong>，所以怎样建索引需要慎重考虑，视具体情况而定。<strong>一个表的索引数最好不要超过6个</strong>，若太多则应考虑一些不常使用到的列上建的索引是否有必要。</p>
 
-<h3 id="13-尽量避免向客户端返回大数据量-若数据量过大-应该考虑相应需求是否合理">13.  尽量避免向客户端返回大数据量，若数据量过大，应该考虑相应需求是否合理</h3>
+<h4 id="13-尽量避免向客户端返回大数据量-若数据量过大-应该考虑相应需求是否合理">13.  尽量避免向客户端返回大数据量，若数据量过大，应该考虑相应需求是否合理</h4>
 
-<h3 id="14-mysql查询只使用一个索引">14.  MySQL查询只使用一个索引</h3>
+<h4 id="14-mysql查询只使用一个索引">14.  MySQL查询只使用一个索引</h4>
 
 <p>MySQL查询只使用一个索引，因此如果where子句中已经使用了索引的话，那么order by中的列是不会使用索引的。</p>
 
@@ -762,8 +754,8 @@ select id from t where createdate &gt;= '2005-11-30' and createdate &lt; '2005-1
                 <ul class="pager">
                     
                     <li class="previous">
-                        <a href="/post/mysql%E7%B3%BB%E5%88%97-%E8%A1%A8%E7%9A%84%E8%AE%BE%E8%AE%A1%E4%B8%8E%E4%BC%98%E5%8C%96%E5%8D%95%E8%A1%A8%E5%A4%9A%E8%A1%A8/" data-toggle="tooltip" data-placement="top"
-                            title="mysql系列-表的设计与优化（单表、多表）">&larr;
+                        <a href="/post/mysql%E7%B3%BB%E5%88%97-%E8%A1%A8%E7%9A%84%E8%AE%BE%E8%AE%A1%E5%92%8C%E5%88%86%E5%8C%BA%E5%88%86%E8%A1%A8/" data-toggle="tooltip" data-placement="top"
+                            title="mysql系列-表的设计和分区分表">&larr;
                             Previous Post</a>
                     </li>
                     
@@ -898,6 +890,8 @@ select id from t where createdate &gt;= '2005-11-30' and createdate &lt; '2005-1
 <ul>
 <li><a href="#索引建立的几大原则">索引建立的几大原则</a>
 <ul>
+<li>
+<ul>
 <li><a href="#1-最左前缀匹配原则">1. 最左前缀匹配原则</a></li>
 <li><a href="#2-尽量选择区分度高的列作为索引">2. 尽量选择区分度高的列作为索引</a></li>
 <li><a href="#3-索引列不能参与计算-保持列-干净">3. 索引列不能参与计算，保持列“干净”</a></li>
@@ -907,7 +901,10 @@ select id from t where createdate &gt;= '2005-11-30' and createdate &lt; '2005-1
 <li><a href="#7-对于定义为text-image和bit的数据类型的列不要建立索引">7. 对于定义为text、image和bit的数据类型的列不要建立索引。</a></li>
 <li><a href="#8-对于经常存取的列避免建立索引">8. 对于经常存取的列避免建立索引。</a></li>
 </ul></li>
+</ul></li>
 <li><a href="#索引使用的注意点">索引使用的注意点</a>
+<ul>
+<li>
 <ul>
 <li><a href="#1-join-where判断和order-by排序的字段上建立索引">1.  JOIN,WHERE判断和ORDER BY排序的字段上建立索引</a></li>
 <li><a href="#2-避免在-where-子句中对字段进行-null-值判断">2.  避免在 where 子句中对字段进行 null 值判断</a></li>
@@ -915,12 +912,10 @@ select id from t where createdate &gt;= '2005-11-30' and createdate &lt; '2005-1
 <li><a href="#4-应尽量避免在-where-子句中使用-或-操作符-否则将引擎放弃使用索引而进行全表扫描">4.  应尽量避免在 where 子句中使用 != 或 &lt;&gt; 操作符，否则将引擎放弃使用索引而进行全表扫描。</a></li>
 <li><a href="#5-应尽量避免在-where-子句中使用-or-来连接条件">5.  应尽量避免在 where 子句中使用 or 来连接条件</a></li>
 <li><a href="#6-in-和-not-in-也要慎用-否则会导致全表扫描">6.  in 和 not in 也要慎用，否则会导致全表扫描。</a></li>
-<li><a href="#7-aaa-模糊查询也将导致全表扫描">7.  %aaa%”模糊查询也将导致全表扫描</a>
-<ul>
+<li><a href="#7-aaa-模糊查询也将导致全表扫描">7.  %aaa%”模糊查询也将导致全表扫描</a></li>
 <li><a href="#a-like-keyword-索引失效-使用全表扫描">a. like %keyword 索引失效，使用全表扫描。</a></li>
 <li><a href="#b-like-keyword-索引有效">b. like keyword% 索引有效。</a></li>
 <li><a href="#c-like-keyword-索引失效">c. like %keyword% 索引失效，</a></li>
-</ul></li>
 <li><a href="#8-如果在-where-子句中使用参数-也会导致全表扫描">8.  如果在 where 子句中使用参数，也会导致全表扫描。</a></li>
 <li><a href="#9-应尽量避免在where子句中对字段进行函数操作">9.  应尽量避免在where子句中对字段进行函数操作。</a></li>
 <li><a href="#10-where-子句中的-左边进行函数-算术运算或其他表达式运算无法正确使用索引">10.  where 子句中的“=”左边进行函数、算术运算或其他表达式运算无法正确使用索引。</a></li>
@@ -928,6 +923,7 @@ select id from t where createdate &gt;= '2005-11-30' and createdate &lt; '2005-1
 <li><a href="#12-索引并不是越多越好">12.  索引并不是越多越好</a></li>
 <li><a href="#13-尽量避免向客户端返回大数据量-若数据量过大-应该考虑相应需求是否合理">13.  尽量避免向客户端返回大数据量，若数据量过大，应该考虑相应需求是否合理</a></li>
 <li><a href="#14-mysql查询只使用一个索引">14.  MySQL查询只使用一个索引</a></li>
+</ul></li>
 </ul></li>
 </ul></li>
 </ul>
@@ -1108,6 +1104,8 @@ select id from t where createdate &gt;= '2005-11-30' and createdate &lt; '2005-1
                         <a href="/tags/golang" title="golang">
                             golang
                         </a>
+                        
+                        
                         
                         
                         
@@ -1349,8 +1347,6 @@ select id from t where createdate &gt;= '2005-11-30' and createdate &lt; '2005-1
                         
                         
                         
-                        
-                        
                         <a href="/tags/%E5%88%86%E5%B8%83%E5%BC%8F%E7%B3%BB%E5%88%97" title="分布式系列">
                             分布式系列
                         </a>
@@ -1401,13 +1397,9 @@ select id from t where createdate &gt;= '2005-11-30' and createdate &lt; '2005-1
                         
                         
                         
-                        
-                        
                         <a href="/tags/%E5%A4%9A%E7%BA%BF%E7%A8%8B%E5%92%8C%E9%AB%98%E5%B9%B6%E5%8F%91" title="多线程和高并发">
                             多线程和高并发
                         </a>
-                        
-                        
                         
                         
                         
@@ -1561,15 +1553,9 @@ select id from t where createdate &gt;= '2005-11-30' and createdate &lt; '2005-1
                         
                         
                         
-                        
-                        
-                        
-                        
                         <a href="/tags/%E7%BD%91%E7%BB%9C%E7%BC%96%E7%A8%8B" title="网络编程">
                             网络编程
                         </a>
-                        
-                        
                         
                         
                         

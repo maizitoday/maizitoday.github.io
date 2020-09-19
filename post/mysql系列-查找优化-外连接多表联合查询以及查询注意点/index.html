@@ -16,15 +16,15 @@
     
 
     
-    <meta name="title" content="mysql系列-查找优化、外连接、多表联合查询" />
-    <meta property="og:title" content="mysql系列-查找优化、外连接、多表联合查询" />
-    <meta property="twitter:title" content="mysql系列-查找优化、外连接、多表联合查询" />
+    <meta name="title" content="mysql系列-多表连接方式" />
+    <meta property="og:title" content="mysql系列-多表连接方式" />
+    <meta property="twitter:title" content="mysql系列-多表连接方式" />
     
 
     
-    <meta name="description" content="外连接,多表联合查询,查询注意点,查询小技巧">
-    <meta property="og:description" content="外连接,多表联合查询,查询注意点,查询小技巧" />
-    <meta property="twitter:description" content="外连接,多表联合查询,查询注意点,查询小技巧" />
+    <meta name="description" content="inner join,left join,left outer join,right join，right outer join，full join, cross join, 笛卡尔积，union用法">
+    <meta property="og:description" content="inner join,left join,left outer join,right join，right outer join，full join, cross join, 笛卡尔积，union用法" />
+    <meta property="twitter:description" content="inner join,left join,left outer join,right join，right outer join，full join, cross join, 笛卡尔积，union用法" />
     
 
     
@@ -35,7 +35,7 @@
     <meta name="keyword"  content="麦子, maizi, maizi, , 麦子的网络日志, 麦子的博客, maizi Blog, 博客, 个人网站, 互联网, Web, 云原生, PaaS, Istio, Kubernetes, 微服务, Microservice">
     <link rel="shortcut icon" href="/img/favicon.ico">
 
-    <title>mysql系列-查找优化、外连接、多表联合查询-麦子的博客</title>
+    <title>mysql系列-多表连接方式-麦子的博客</title>
 
     <link rel="canonical" href="/post/mysql%E7%B3%BB%E5%88%97-%E6%9F%A5%E6%89%BE%E4%BC%98%E5%8C%96-%E5%A4%96%E8%BF%9E%E6%8E%A5%E5%A4%9A%E8%A1%A8%E8%81%94%E5%90%88%E6%9F%A5%E8%AF%A2%E4%BB%A5%E5%8F%8A%E6%9F%A5%E8%AF%A2%E6%B3%A8%E6%84%8F%E7%82%B9/">
 
@@ -196,8 +196,12 @@
                             mysql系列
                         </a>
                         
+                        <a class="tag" href="/tags/inner-joinleft-joinleft-outer-joinright-joinright-outer-joinfull-join-cross-join-%E7%AC%9B%E5%8D%A1%E5%B0%94%E7%A7%AFunion%E7%94%A8%E6%B3%95" title="inner join,left join,left outer join,right join，right outer join，full join, cross join, 笛卡尔积，union用法">
+                            inner join,left join,left outer join,right join，right outer join，full join, cross join, 笛卡尔积，union用法
+                        </a>
+                        
                     </div>
-                    <h1>mysql系列-查找优化、外连接、多表联合查询</h1>
+                    <h1>mysql系列-多表连接方式</h1>
                     <h2 class="subheading"></h2>
                     <span class="meta">
                         Posted by
@@ -392,7 +396,7 @@
 
 <h1 id="基本连接方法">基本连接方法</h1>
 
-<h2 id="内连接">内连接</h2>
+<h2 id="内连接-inner-join">内连接（inner join）</h2>
 
 <p>用比较运算符根据每个表<strong>共有的列的值</strong>匹配两个表中的行（=或&gt;、&lt;）</p>
 
@@ -482,7 +486,13 @@
 
 <p><strong>很容器看出是两者都满足才查出，7 和 8 没有对应的所以没有出来。</strong></p>
 
-<h2 id="外连接之左连接">外连接之左连接</h2>
+<h3 id="概述">概述</h3>
+
+<p>也叫等值连接，<strong>得到的满足条件的A和B表内部的数据</strong>（必须两边都满足才查出）。如果不添加 ON条件约束的话，取得的是表的笛卡尔积。在添加了ON条件约束后，获取的是同时符合ON条件的 A表和B表数据。</p>
+
+<p><img src="/img/Xnip2020-09-19_16-30-12.png" alt="Xnip2020-09-19_16-30-12" /></p>
+
+<h2 id="外连接之左连接-left-join">外连接之左连接（left join）</h2>
 
 <p>首先是左表数据全部罗列，然后有满足条件的右表数据都会全部罗列出。<strong>若两条右表数据对左表一条数据，则会用对应好的左表数据补足作为一条记录。</strong></p>
 
@@ -582,7 +592,17 @@
 </tbody>
 </table>
 
-<h3 id="左连接升级">左连接升级</h3>
+<h3 id="概述-1">概述</h3>
+
+<p><strong>以左表为驱动表，取得左表全部的数据</strong>。然后右表满足条件的数据会对应在左表数据后面，作为添加的外部行列出。</p>
+
+<p>如果没有满足左表的数据，则会用NULL全部填充到外部行。</p>
+
+<p>如果有多条满足左表数据，那么会用左表对应的数据补足，按行逐条对应右表数据。（<strong>也就是左表数据重复生成</strong>，右表的每条记录都生成一行，然后对应同一个左表数据）</p>
+
+<p><img src="/img/Xnip2020-09-19_16-34-21.png" alt="Xnip2020-09-19_16-34-21" /></p>
+
+<h2 id="左连接升级-left-outer-join">左连接升级(left outer join)</h2>
 
 <p>**[left join 或者left outer join(等同于left join)] + [where B.column is null], 查出和两张表中没有关联的数据。</p>
 
@@ -623,7 +643,15 @@
 </tbody>
 </table>
 
-<h2 id="外连接之右连接">外连接之右连接</h2>
+<h3 id="概述-2">概述</h3>
+
+<p><strong>[left join 或者left outer join(等同于left join)] + [where B.column is null]</strong>
+查询出A表数据，但是排除掉A表和B表的关联数据。
+右连接升级同理。同时，也可以把左连接升级和右连接升级的结果 用 union 联合起来，就取到了A和B的消除重复项的集合。</p>
+
+<p><img src="/img/Xnip2020-09-19_16-37-08.png" alt="Xnip2020-09-19_16-37-08" /></p>
+
+<h2 id="外连接之右连接-right-join">外连接之右连接（right join）</h2>
 
 <p>与左连恰恰相反，首先是右表数据全部罗列，<strong>然后有满足条件的左表数据都会全部罗列出。若两条左表数据对右表一条数据，则会用对应好的右表数据补足作为一条记录。</strong></p>
 
@@ -735,7 +763,11 @@
 </tbody>
 </table>
 
-<h3 id="右连接升级">右连接升级</h3>
+<h3 id="概述-3">概述</h3>
+
+<p>跟左连接相反，会以右表为驱动表。</p>
+
+<h2 id="右连接升级-right-out-join">右连接升级（right out join）</h2>
 
 <p>查出和两张表中没有关联的数据。</p>
 
@@ -776,7 +808,11 @@
 </tbody>
 </table>
 
-<h2 id="外连接之全外连接">外连接之全外连接</h2>
+<h3 id="概述-4">概述</h3>
+
+<p>跟左外连接相反，会以右表为驱动表。</p>
+
+<h2 id="外连接之全外连接-full-outer-join">外连接之全外连接(full [outer] join )</h2>
 
 <p>full join （mysql不支持，但是可以用 left join union right join代替）</p>
 
@@ -905,6 +941,8 @@ select * from  school.student  stu
 </tbody>
 </table>
 
+<p><img src="/img/Xnip2020-09-19_16-49-22.png" alt="Xnip2020-09-19_16-49-22" /></p>
+
 <p>因为只要满足 union上面的sql或者下面的sql一种情况就ok了。 如下我们可以升级,查询出两种表中没有关系的数据：</p>
 
 <pre><code class="language-sql">select * from  school.student  stu
@@ -961,7 +999,9 @@ select * from  school.student  stu
 </tbody>
 </table>
 
-<h2 id="交叉连接">交叉连接</h2>
+<p><img src="/img/Xnip2020-09-19_16-50-00.png" alt="Xnip2020-09-19_16-50-00" /></p>
+
+<h2 id="交叉连接-cross-join">交叉连接(cross join)</h2>
 
 <p>交叉联接返回左表中的所有行，左表中的每一行与右表中的所有行组合。</p>
 
@@ -1635,23 +1675,21 @@ select * from  school.student  stu
 </tbody>
 </table>
 
-<h1 id="超大型数据优化">超大型数据优化</h1>
+<h2 id="union用法">UNION用法</h2>
 
-<h2 id="超大型数据尽可能尽力不要写子查询-使用连接-join-去替换它">超大型数据尽可能尽力不要写子查询，使用连接（JOIN）去替换它</h2>
-
-<h2 id="使用联合-union-来代替手动创建的临时表">使用联合(UNION)来代替手动创建的临时表</h2>
+<p>超大型数据尽可能尽力不要写子查询，使用连接（<strong>JOIN</strong>）去替换它，使用联合(UNION)来代替手动创建的临时表。</p>
 
 <p><strong>UNION是会把结果排序</strong>，union查询，它可以把需要使用临时表的两条或更多的select查询合并的一个查询中（即把两次或多次查询结果合并起来。）。在客户端的查询会话结束的时候，临时表会被自动删除，从而保证数据库整齐、高效。使用union来创建查询的时候，我们只需要用UNION作为关键字把多个select语句连接起来就可以了，要注意的是所有select语句中的字段数目要想同。</p>
 
-<h3 id="要求">要求</h3>
+<p><strong>要求</strong></p>
 
 <p>两次查询的列数必须一致</p>
 
-<h3 id="推荐">推荐</h3>
+<p><strong>推荐</strong></p>
 
 <p>列的类型可以不一样，但推荐查询的每一列，想对应的类型以一样</p>
 
-<h3 id="可以来自多张表的数据">可以来自多张表的数据</h3>
+<p><strong>可以来自多张表的数据</strong></p>
 
 <p>多次sql语句取出的列名可以不一致，此时以第一个sql语句的列名为准。</p>
 
@@ -1732,7 +1770,7 @@ select * from  school.student  stu
 
 <p>2、UNION 内部的 SELECT 语句必须拥有相同数量的列。列也必须拥有相似的数据类型。同时，每条 SELECT 语句中的列的顺序必须相同。</p>
 
-<h2 id="union-all的作用和语法">UNION ALL的作用和语法</h2>
+<h3 id="union-all的作用和语法">UNION ALL的作用和语法</h3>
 
 <p>默认地，UNION 操作符选取不同的值。如果允许重复的值，请使用 UNION ALL。当 ALL 随 UNION 一起使用时（即 UNION ALL），不消除重复行。</p>
 
@@ -1850,74 +1888,6 @@ select * from  school.student  stu
 </tbody>
 </table>
 
-<h1 id="查询编写的优化点">查询编写的优化点</h1>
-
-<h2 id="对查询进行优化-要尽量避免全表扫描">对查询进行优化，要尽量避免全表扫描</h2>
-
-<p>首先应考虑在 where 及 order by 涉及的列上建立索引。</p>
-
-<h2 id="应尽量避免在-where-子句中对字段进行-null-值判断">应尽量避免在 where 子句中对字段进行 null 值判断</h2>
-
-<p>否则将导致引擎放弃使用索引而进行全表扫描，如：</p>
-
-<pre><code class="language-sql">//最好不要给数据库留NULL，尽可能的使用 NOT NULL填充数据库.
-select id from t where num is null
-</code></pre>
-
-<p>不要以为 NULL 不需要空间，比如：char(100) 型，在字段建立时，空间就固定了， 不管是否插入值（NULL也包含在内），都是占用 100个字符的空间的，<strong>如果是varchar这样的变长字段， null 不占用空间。</strong>可以在num上设置默认值0，确保表中num列没有null值，然后这样查询：</p>
-
-<pre><code class="language-sql">select id from t where num = 0
-</code></pre>
-
-<h2 id="in-和-not-in-也要慎用-否则会导致全表扫描">in 和 not in 也要慎用，否则会导致全表扫描</h2>
-
-<pre><code class="language-sql">select id from t where num in(1,2,3)
-</code></pre>
-
-<p>对于连续的数值，能用 between 就不要用 in 了：</p>
-
-<pre><code class="language-sql">select id from t where num between 1 and 3		
-</code></pre>
-
-<p>很多时候用 exists 代替 in 是一个好的选择：</p>
-
-<pre><code class="language-sql">select num from a where num in(select num from b)
-//用这个去替换
-select num from a where exists(select 1 from b where num=a.num)
-</code></pre>
-
-<h2 id="like全表扫描">like全表扫描</h2>
-
-<pre><code class="language-sql">select id from t where name like ‘%abc%’
-</code></pre>
-
-<p><strong>上面这种查询也将导致全表扫描，若要提高效率，可以考虑全文检索。</strong></p>
-
-<h2 id="尽量使用数字型字段">尽量使用数字型字段</h2>
-
-<p>若只含数值信息的字段尽量不要设计为字符型，这会降低查询和连接的性能，并会增加存储开销。这是因为引擎在处理查询和连 接时会逐个比较字符串中每一个字符，而对于数字型而言只需要比较一次就够了。</p>
-
-<h2 id="select-from-t">select * from t</h2>
-
-<p>任何地方都不要使用 select * from t ，用具体的字段列表代替“*”，不要返回用不到的任何字段。</p>
-
-<h2 id="尽量使用表变量来代替临时表">尽量使用表变量来代替临时表。</h2>
-
-<p>如果表变量包含大量数据，请注意索引非常有限（只有主键索引）。</p>
-
-<h2 id="在join表的时候使用相当类型的例-并将其索引">在Join表的时候使用相当类型的例，并将其索引</h2>
-
-<p>如果你的应用程序有很多 JOIN 查询，你应该确认两个表中Join的字段是被建过索引的。这样，MySQL内部会启动为你优化Join的SQL语句的机制。</p>
-
-<p>而且，这些被用来Join的字段，应该是相同的类型的。例如：如果你要把 DECIMAL 字段和一个 INT 字段Join在一起，MySQL就无法使用它们的索引。对于那些STRING类型，还需要有相同的字符集才行。（两个表的字符集有可能不一样）</p>
-
-<pre><code class="language-sql">//在state中查找company
-SELECT company_name FROM users
-    LEFT JOIN companies ON (users.state = companies.state)
-    WHERE users.id = $user_id&quot;
-    //两个 state 字段应该是被建过索引的，而且应该是相当的类型，相同的字符集
-</code></pre>
-
 
                 
                 
@@ -1966,14 +1936,14 @@ SELECT company_name FROM users
                     
                     <li class="previous">
                         <a href="/post/mysql%E7%B3%BB%E5%88%97-%E6%9F%A5%E6%89%BE%E4%BC%98%E5%8C%96-%E9%9D%9E%E7%B4%A2%E5%BC%95%E8%AE%BE%E8%AE%A1/" data-toggle="tooltip" data-placement="top"
-                            title="mysql系列-非索引设计与单表查询优化">&larr;
+                            title="mysql系列-如何分析sql语句执行慢">&larr;
                             Previous Post</a>
                     </li>
                     
                     
                     <li class="next">
-                        <a href="/post/mysql%E7%B3%BB%E5%88%97-%E8%A1%A8%E7%9A%84%E8%AE%BE%E8%AE%A1%E4%B8%8E%E4%BC%98%E5%8C%96%E5%8D%95%E8%A1%A8%E5%A4%9A%E8%A1%A8/" data-toggle="tooltip" data-placement="top"
-                            title="mysql系列-表的设计与优化（单表、多表）">Next
+                        <a href="/post/mysql%E7%B3%BB%E5%88%97-%E8%A1%A8%E7%9A%84%E8%AE%BE%E8%AE%A1%E5%92%8C%E5%88%86%E5%8C%BA%E5%88%86%E8%A1%A8/" data-toggle="tooltip" data-placement="top"
+                            title="mysql系列-表的设计和分区分表">Next
                             Post &rarr;</a>
                     </li>
                     
@@ -2032,44 +2002,37 @@ SELECT company_name FROM users
 </ul></li>
 <li><a href="#基本连接方法">基本连接方法</a>
 <ul>
-<li><a href="#内连接">内连接</a></li>
-<li><a href="#外连接之左连接">外连接之左连接</a>
+<li><a href="#内连接-inner-join">内连接（inner join）</a>
 <ul>
-<li><a href="#左连接升级">左连接升级</a></li>
+<li><a href="#概述">概述</a></li>
 </ul></li>
-<li><a href="#外连接之右连接">外连接之右连接</a>
+<li><a href="#外连接之左连接-left-join">外连接之左连接（left join）</a>
 <ul>
-<li><a href="#右连接升级">右连接升级</a></li>
+<li><a href="#概述-1">概述</a></li>
 </ul></li>
-<li><a href="#外连接之全外连接">外连接之全外连接</a></li>
-<li><a href="#交叉连接">交叉连接</a>
+<li><a href="#左连接升级-left-outer-join">左连接升级(left outer join)</a>
+<ul>
+<li><a href="#概述-2">概述</a></li>
+</ul></li>
+<li><a href="#外连接之右连接-right-join">外连接之右连接（right join）</a>
+<ul>
+<li><a href="#概述-3">概述</a></li>
+</ul></li>
+<li><a href="#右连接升级-right-out-join">右连接升级（right out join）</a>
+<ul>
+<li><a href="#概述-4">概述</a></li>
+</ul></li>
+<li><a href="#外连接之全外连接-full-outer-join">外连接之全外连接(full [outer] join )</a></li>
+<li><a href="#交叉连接-cross-join">交叉连接(cross join)</a>
 <ul>
 <li><a href="#显式的交叉连接-a-b表记录的排列组合-即笛卡儿积">显式的交叉连接：A，B表记录的排列组合，即笛卡儿积。</a></li>
 <li><a href="#隐式的交叉连接-没有cross-join">隐式的交叉连接，没有CROSS JOIN</a></li>
 </ul></li>
-</ul></li>
-<li><a href="#超大型数据优化">超大型数据优化</a>
+<li><a href="#union用法">UNION用法</a>
 <ul>
-<li><a href="#超大型数据尽可能尽力不要写子查询-使用连接-join-去替换它">超大型数据尽可能尽力不要写子查询，使用连接（JOIN）去替换它</a></li>
-<li><a href="#使用联合-union-来代替手动创建的临时表">使用联合(UNION)来代替手动创建的临时表</a>
-<ul>
-<li><a href="#要求">要求</a></li>
-<li><a href="#推荐">推荐</a></li>
-<li><a href="#可以来自多张表的数据">可以来自多张表的数据</a></li>
 <li><a href="#注意">注意</a></li>
-</ul></li>
 <li><a href="#union-all的作用和语法">UNION ALL的作用和语法</a></li>
 </ul></li>
-<li><a href="#查询编写的优化点">查询编写的优化点</a>
-<ul>
-<li><a href="#对查询进行优化-要尽量避免全表扫描">对查询进行优化，要尽量避免全表扫描</a></li>
-<li><a href="#应尽量避免在-where-子句中对字段进行-null-值判断">应尽量避免在 where 子句中对字段进行 null 值判断</a></li>
-<li><a href="#in-和-not-in-也要慎用-否则会导致全表扫描">in 和 not in 也要慎用，否则会导致全表扫描</a></li>
-<li><a href="#like全表扫描">like全表扫描</a></li>
-<li><a href="#尽量使用数字型字段">尽量使用数字型字段</a></li>
-<li><a href="#select-from-t">select * from t</a></li>
-<li><a href="#尽量使用表变量来代替临时表">尽量使用表变量来代替临时表。</a></li>
-<li><a href="#在join表的时候使用相当类型的例-并将其索引">在Join表的时候使用相当类型的例，并将其索引</a></li>
 </ul></li>
 </ul>
 </nav>
@@ -2249,6 +2212,8 @@ SELECT company_name FROM users
                         <a href="/tags/golang" title="golang">
                             golang
                         </a>
+                        
+                        
                         
                         
                         
@@ -2490,8 +2455,6 @@ SELECT company_name FROM users
                         
                         
                         
-                        
-                        
                         <a href="/tags/%E5%88%86%E5%B8%83%E5%BC%8F%E7%B3%BB%E5%88%97" title="分布式系列">
                             分布式系列
                         </a>
@@ -2542,13 +2505,9 @@ SELECT company_name FROM users
                         
                         
                         
-                        
-                        
                         <a href="/tags/%E5%A4%9A%E7%BA%BF%E7%A8%8B%E5%92%8C%E9%AB%98%E5%B9%B6%E5%8F%91" title="多线程和高并发">
                             多线程和高并发
                         </a>
-                        
-                        
                         
                         
                         
@@ -2702,15 +2661,9 @@ SELECT company_name FROM users
                         
                         
                         
-                        
-                        
-                        
-                        
                         <a href="/tags/%E7%BD%91%E7%BB%9C%E7%BC%96%E7%A8%8B" title="网络编程">
                             网络编程
                         </a>
-                        
-                        
                         
                         
                         

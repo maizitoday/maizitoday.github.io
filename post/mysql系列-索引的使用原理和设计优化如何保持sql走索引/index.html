@@ -1,0 +1,1809 @@
+<!DOCTYPE html>
+<html lang="en-us">
+
+<head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+
+    
+    <meta property="og:site_name" content="">
+    <meta property="og:type" content="article">
+
+    
+    <meta property="og:image" content="http://maizitoday.github.io//img/home-bg-jeep.jpg">
+    <meta property="twitter:image" content="http://maizitoday.github.io//img/home-bg-jeep.jpg" />
+    
+
+    
+    <meta name="title" content="mysql系列-索引的使用、原理和设计优化，如何保持sql走索引" />
+    <meta property="og:title" content="mysql系列-索引的使用、原理和设计优化，如何保持sql走索引" />
+    <meta property="twitter:title" content="mysql系列-索引的使用、原理和设计优化，如何保持sql走索引" />
+    
+
+    
+    <meta name="description" content="索引的使用, 索引的设计优化, 索引的原理, 如何保持sql走索引">
+    <meta property="og:description" content="索引的使用, 索引的设计优化, 索引的原理, 如何保持sql走索引" />
+    <meta property="twitter:description" content="索引的使用, 索引的设计优化, 索引的原理, 如何保持sql走索引" />
+    
+
+    
+    <meta property="twitter:card" content="summary" />
+    
+    
+
+    <meta name="keyword"  content="麦子, maizi, maizi, , 麦子的网络日志, 麦子的博客, maizi Blog, 博客, 个人网站, 互联网, Web, 云原生, PaaS, Istio, Kubernetes, 微服务, Microservice">
+    <link rel="shortcut icon" href="/img/favicon.ico">
+
+    <title>mysql系列-索引的使用、原理和设计优化，如何保持sql走索引-麦子的博客</title>
+
+    <link rel="canonical" href="/post/mysql%E7%B3%BB%E5%88%97-%E7%B4%A2%E5%BC%95%E7%9A%84%E4%BD%BF%E7%94%A8%E5%8E%9F%E7%90%86%E5%92%8C%E8%AE%BE%E8%AE%A1%E4%BC%98%E5%8C%96%E5%A6%82%E4%BD%95%E4%BF%9D%E6%8C%81sql%E8%B5%B0%E7%B4%A2%E5%BC%95/">
+
+    <link rel="stylesheet" href="/css/iDisqus.min.css"/>
+	
+    
+    <link rel="stylesheet" href="/css/bootstrap.min.css">
+
+    
+    <link rel="stylesheet" href="/css/hux-blog.min.css">
+
+    
+    <link rel="stylesheet" href="/css/syntax.css">
+
+    
+    <link rel="stylesheet" href="/css/zanshang.css">
+
+    
+    <link href="//cdnjs.cloudflare.com/ajax/libs/font-awesome/4.6.3/css/font-awesome.min.css" rel="stylesheet" type="text/css">
+     
+    
+    
+    <script src="/js/jquery.min.js"></script>
+    
+    
+    <script src="/js/bootstrap.min.js"></script>
+    
+    
+    <script src="/js/hux-blog.min.js"></script>
+	
+    
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.13.1/styles/docco.min.css">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.13.1/highlight.min.js"></script>
+    <script>hljs.initHighlightingOnLoad();</script>
+</head>
+
+
+
+<nav class="navbar navbar-default navbar-custom navbar-fixed-top">
+    <div class="container-fluid">
+        
+        <div class="navbar-header page-scroll">
+            <button type="button" class="navbar-toggle">
+                <span class="sr-only">Toggle navigation</span>
+                <span class="icon-bar"></span>
+                <span class="icon-bar"></span>
+                <span class="icon-bar"></span>
+            </button>
+            <a class="navbar-brand" href="/"></a>
+        </div>
+
+        
+        
+        <div id="huxblog_navbar">
+            <div class="navbar-collapse">
+                <ul class="nav navbar-nav navbar-right">
+                    <li>
+                        <a href="/">Home</a>
+                    </li>
+                    
+                    <li>
+                        <a href="/categories/english">English</a>
+                    </li>
+                    
+                    <li>
+                        <a href="/categories/life">Life</a>
+                    </li>
+                    
+                    <li>
+                        <a href="/categories/tech">Tech</a>
+                    </li>
+                    
+
+                    
+                    <li><a href="/top/about/">ABOUT</a></li>
+                    
+
+
+                    
+                    <li>
+                        <a href="/archive">ARCHIVE</a>
+                    </li>
+                    
+
+
+                    
+                    <li>
+                        <a href="/search">SEARCH <img src="/img/search.png" height="15"
+                                style="cursor: pointer;" alt="Search"></a>
+                    </li>
+                    
+
+                </ul>
+            </div>
+        </div>
+        
+    </div>
+    
+</nav>
+<script>
+    
+    
+    
+    var $body = document.body;
+    var $toggle = document.querySelector('.navbar-toggle');
+    var $navbar = document.querySelector('#huxblog_navbar');
+    var $collapse = document.querySelector('.navbar-collapse');
+
+    $toggle.addEventListener('click', handleMagic)
+
+    function handleMagic(e) {
+        if ($navbar.className.indexOf('in') > 0) {
+            
+            $navbar.className = " ";
+            
+            setTimeout(function () {
+                
+                if ($navbar.className.indexOf('in') < 0) {
+                    $collapse.style.height = "0px"
+                }
+            }, 400)
+        } else {
+            
+            $collapse.style.height = "auto"
+            $navbar.className += " in";
+        }
+    }
+</script>
+
+
+
+<style type="text/css">
+    header.intro-header {
+        background-image: url('https://img.zhaohuabing.com/in-post/2018-04-16-using-helm-to-deploy-to-kubernetes/buffalo.jpg')
+    }
+
+
+    div.side-catalog nav ul li a {
+        display: inline-block;
+        vertical-align: middle;
+        height: 30px;
+        font-size: 17px;
+        line-height: 30px;
+        overflow: hidden;
+        text-decoration: none;
+        white-space: nowrap;
+        text-overflow: ellipsis;
+    }
+</style>
+<header class="intro-header">
+    <div class="container">
+        <div class="row">
+            <div class="col-lg-8 col-lg-offset-2 col-md-10 col-md-offset-1">
+                <div class="post-heading">
+                    <div class="tags">
+                        
+                        <a class="tag" href="/tags/mysql%E7%B3%BB%E5%88%97" title="mysql系列">
+                            mysql系列
+                        </a>
+                        
+                        <a class="tag" href="/tags/%E7%B4%A2%E5%BC%95%E7%9A%84%E4%BD%BF%E7%94%A8-%E7%B4%A2%E5%BC%95%E7%9A%84%E8%AE%BE%E8%AE%A1%E4%BC%98%E5%8C%96-%E7%B4%A2%E5%BC%95%E7%9A%84%E5%8E%9F%E7%90%86-%E5%A6%82%E4%BD%95%E4%BF%9D%E6%8C%81sql%E8%B5%B0%E7%B4%A2%E5%BC%95" title="索引的使用, 索引的设计优化, 索引的原理, 如何保持sql走索引">
+                            索引的使用, 索引的设计优化, 索引的原理, 如何保持sql走索引
+                        </a>
+                        
+                    </div>
+                    <h1>mysql系列-索引的使用、原理和设计优化，如何保持sql走索引</h1>
+                    <h2 class="subheading"></h2>
+                    <span class="meta">
+                        Posted by
+                        
+                             &#34;麦子&#34;
+                        
+                        on
+                        Wednesday, 2019年08月28日
+                        
+                    </span>
+                </div>
+            </div>
+        </div>
+    </div>
+</header>
+
+
+
+
+<article>
+    <div class="container">
+        <div class="row">
+
+            
+            <div class="
+                col-lg-8 col-lg-offset-0
+                col-md-10 col-md-offset-1
+                post-container">
+
+                
+                
+                
+                
+                
+                
+                
+
+<p>[TOC]</p>
+
+<p><strong>转载地址:&lt;<a href="https://blog.csdn.net/jack__frost/article/details/72571540">https://blog.csdn.net/jack__frost/article/details/72571540</a></strong>&gt;</p>
+
+<h1 id="索引的概述">索引的概述</h1>
+
+<h2 id="什么是索引">什么是索引</h2>
+
+<p><strong>索引是一种特殊的文件(InnoDB数据表上的索引是表空间的一个组成部分)，它们包含着对数据表里所有记录的引用指针。</strong>更通俗的说，数据库索引好比是一本书前面的目录，能加快数据库的查询速度。在没有索引的情况下，数据库会遍历全部数据后选择符合条件的；而有了相应的索引之后，数据库会直接在索引中查找符合条件的选项。</p>
+
+<p>索引是一种特殊的文件(InnoDB数据表上的索引是表空间的一个组成部分)，它们包含着对数据表里所有记录的引用指针。更通俗的说，数据库索引好比是一本书前面的目录，能加快数据库的查询速度。在没有索引的情况下，数据库会遍历全部数据后选择符合条件的；而有了相应的索引之后，数据库会直接在索引中查找符合条件的选项。</p>
+
+<h2 id="索引的性质分类">索引的性质分类</h2>
+
+<p>索引分为聚簇索引和非聚簇索引两种，聚簇索引是按照数据存放的物理位置为顺序的，而非聚簇索引就不一样了；聚簇索引能提高多行检索的速度，而非聚簇索引对于单行的检索很快。</p>
+
+<h2 id="索引的优点">索引的优点</h2>
+
+<ol>
+<li>通过创建唯一性索引，可以保证数据库表中每一行数据的唯一性。</li>
+<li>可以大大加快数据的检索速度，这也是创建索引的最主要的原因。</li>
+<li>可以加速表和表之间的连接，特别是在实现数据的参考完整性方面特别有意义。</li>
+<li>在使用分组和排序 子句进行数据检索时，同样可以显著减少查询中分组和排序的时间。</li>
+<li>通过使用索引，可以在查询的过程中，使用优化隐藏器，提高系统的性能。</li>
+</ol>
+
+<h2 id="索引的缺点">索引的缺点</h2>
+
+<ol>
+<li>创建索引和维护索引要耗费时间，这种时间随着数据量的增加而增加。</li>
+<li>索引需要占物理空间，除了数据表占数据空间之外，每一个索引还要占一定的物理空间，如果要建立聚簇索引，那么需要的空间就会更大。</li>
+<li>当对表中的数据进行增加、删除和修改的时候，索引也要动态的维护，这样就降低了数据的维护速度。</li>
+</ol>
+
+<h2 id="为什么需要索引">为什么需要索引</h2>
+
+<p>数据在磁盘上是以块的形式存储的。为确保对磁盘操作的原子性，访问数据的时候会一并访问所有数据块。磁盘上的这些数据块与链表类似，即它们都包含一个数据段和一个指针，指针指向下一个节点（数据块）的内存地址，而且它们都不需要连续存储（<strong>即逻辑上相邻的数据块在物理上可以相隔很远</strong>）。</p>
+
+<p>鉴于很多记录只能做到按一个字段排序，所以要查询某个未经排序的字段，就需要使用线性查找，即要访问N/2个数据块，其中N指的是一个表所涵盖的所有数据块。如果该字段是非键字段（也就是说，不包含唯一值），那么就要搜索整个表空间，即要访问全部N个数据块。（在某些情况下，索引可以避免排序操作。）</p>
+
+<p>然而，对于经过排序的字段，可以使用二分查找，因此只要访问log2 N个数据块。<strong>同样，对于已经排过序的非键字段，只要找到更大的值，也就不用再搜索表中的其他数据块了。这样一来，性能就会有实质性的提升。</strong></p>
+
+<h1 id="索引的使用">索引的使用</h1>
+
+<h2 id="创建索引">创建索引</h2>
+
+<h3 id="create-table-时创建索引">CREATE TABLE 时创建索引</h3>
+
+<pre><code class="language-sql">CREATE TABLE black_list (
+	id int NOT NULL auto_increment ,
+	black_user_id varchar(20) NULL DEFAULT NULL,
+	user_id int DEFAULT 0,
+	PRIMARY KEY (id),
+  INDEX indexName (black_user_id(2))
+);
+</code></pre>
+
+<h3 id="使用alter-table命令去增加索引">使用ALTER TABLE命令去增加索引</h3>
+
+<p>ALTER TABLE用来创建普通索引、UNIQUE索引或PRIMARY KEY索引。</p>
+
+<pre><code class="language-sql">//标准语句：
+ALTER TABLE table_name ADD INDEX index_name (column_list)//添加普通索引，索引值可出现多次。 
+ALTER TABLE table_name ADD UNIQUE (column_list)//这条语句创建的索引的值必须是唯一的(除了NULL外，NULL可能会出现多次)。 
+ALTER TABLE table_name ADD PRIMARY KEY (column_list)//该语句添加一个主键，这意味着索引值必须是唯一的，且不能为NULL。
+ALTER TABLE table_name ADD FULLTEXT index_name(olumu_name);该语句指定了索引为FULLTEXT，用于全文索引。
+</code></pre>
+
+<p>其中table_name是要增加索引的表名，<strong>column_list指出对哪些列进行索引，多列时各列之间用逗号分隔</strong>。索引名index_name可自己命名，缺省时，MySQL将根据第一个索引列赋一个名称。另外，<strong>ALTER TABLE允许在单个语句中更改多个表，因此可以在同时创建多个索引。</strong></p>
+
+<h3 id="使用create-index命令创建">使用CREATE INDEX命令创建</h3>
+
+<p>CREATE INDEX可对表增加普通索引或UNIQUE索引。</p>
+
+<pre><code class="language-sql">//标准语句：
+CREATE INDEX index_name ON table_name (column_list)
+CREATE UNIQUE INDEX index_name ON table_name (column_list)
+//针对上述数据库：
+CREATE INDEX classify_index  ON commodity_list (Classify_Description)
+</code></pre>
+
+<p><strong>注意：不能用CREATE INDEX语句创建PRIMARY KEY索引。</strong></p>
+
+<h2 id="删除索引">删除索引</h2>
+
+<p>删除索引可以使用ALTER TABLE或DROP INDEX语句来实现。DROP INDEX可以在ALTER TABLE内部作为一条语句处理，其格式如下：</p>
+
+<pre><code class="language-sql">DROP INDEX [indexName] ON [table_name];
+alter table [table_name] drop index [index_name] ;
+alter table [table_name] drop primary key ;
+
+//针对上述数据库
+drop index classify_index on commodity_list ;
+</code></pre>
+
+<p>其中，在前面的两条语句中，都删除了table_name中的索引index_name。而在最后一条语句中，只在删除PRIMARY KEY索引中使用，<strong>因为一个表只可能有一个PRIMARY KEY索引，因此不需要指定索引名。如果没有创建PRIMARY KEY索引，但表具有一个或多个UNIQUE索引，则MySQL将删除第一个UNIQUE索引。</strong></p>
+
+<p>如果从表中删除某列，则索引会受影响。对于多列组合的索引，如果删除其中的某列，则该列也会从索引中删除。如果删除组成索引的所有列，则整个索引将被删除。</p>
+
+<h2 id="查看索引">查看索引</h2>
+
+<pre><code class="language-sql">SHOW INDEX FROM [table_name];
+show keys from [table_name];
+</code></pre>
+
+<p><img src="/img/Xnip2019-08-28_12-36-40.png" alt="Xnip2019-08-28_12-36-40" /></p>
+
+<ol>
+<li><p>Table：表的名称。</p></li>
+
+<li><p>Non_unique：如果索引不能包括重复词，则为0。如果可以，则为1。</p></li>
+
+<li><p>Key_name：索引的名称。</p></li>
+
+<li><p>Seq_in_index：索引中的列序列号，从1开始。</p></li>
+
+<li><p>Column_name：列名称。</p></li>
+
+<li><p>Collation：列以什么方式存储在索引中。在MySQL中，有值‘A’（升序）或NULL（无分类）。</p></li>
+
+<li><p>Sub_part：如果列只是被部分地编入索引，则为被编入索引的字符的数目。如果整列被编入索引，则为NULL</p></li>
+
+<li><p>Packed：指示关键字如何被压缩。如果没有被压缩，则为NULL。</p></li>
+
+<li><p>Null：如果列含有NULL，则含有YES。如果没有，则该列含有NO。</p></li>
+
+<li><p>Index_type：用过的索引方法（BTREE, FULLTEXT, HASH, RTREE）</p></li>
+
+<li><p>Comment：注释</p></li>
+
+<li><p>Cardinality</p>
+
+<p>索引中唯一值的数目的估计值。通过运行ANALYZE TABLE或myisamchk -a可以更新。基数根据被存储为整数的统计数据来计数，所以即使对于小型表，该值也没有必要是精确的。基数越大，当进行联合时，MySQL使用该索引的机会就越大。</p></li>
+</ol>
+
+<h2 id="单列索引与多列索引">单列索引与多列索引</h2>
+
+<h3 id="单列索引">单列索引</h3>
+
+<p>就是平常的只索引一个一个的字段的方式。</p>
+
+<pre><code class="language-sql">//例子为name列的头10个字符创建一个索引：
+CREATE TABLE test (
+       name CHAR(200) NOT NULL,
+       KEY index_name (name(10))
+);
+</code></pre>
+
+<h3 id="多列索引-也叫组合索引">多列索引（也叫组合索引）</h3>
+
+<p>MySQL能在多个列上创建索引。一个索引可以由最多15个列组成。</p>
+
+<p>多个单列索引与单个多列索引的查询效果不同，因为执行查询时，<strong>MySQL只能使用一个索引</strong>，会从多个单列索引中选择一个限制最为严格（获得结果集记录数最少）的索引。</p>
+
+<h4 id="组合索引-多列索引-的原则">组合索引（多列索引）的原则</h4>
+
+<p>最左前缀：顾名思义，就是最左优先。在创建多列索引时，要根据业务需求，where子句中使用最频繁的一列放在最左边。</p>
+
+<h1 id="索引的基本原理">索引的基本原理</h1>
+
+<h2 id="举例解析基本原理">举例解析基本原理</h2>
+
+<p>除了词典，生活中随处可见索引的例子，如火车站的车次表、图书的目录等。它们的原理都是一样的，通过不断的缩小想要获得数据的范围来筛选出最终想要的结果，同时把随机的事件变成顺序的事件，也就是我们总是通过同一种查找方式来锁定数据。</p>
+
+<h2 id="sql的应用场景会使用索引">SQL的应用场景会使用索引</h2>
+
+<p>数据库也是一样，但显然要复杂许多，因为不仅面临着等值查询，还有范围查询(&gt;、&lt;、between、in)、模糊查询(like)、并集查询(or)等等。数据库应该选择怎么样的方式来应对所有的问题呢？我们回想字典的例子，能不能把数据分成段，然后分段查询呢？最简单的如果1000条数据，1到100分成第一段，101到200分成第二段，201到300分成第三段…这样查第250条数据，只要找第三段就可以了，一下子去除了90%的无效数据。</p>
+
+<h2 id="b-树搜索基本流程">B+树搜索基本流程</h2>
+
+<p><strong>转载地址:<a href="https://www.jianshu.com/p/43e6a7ac89c7">https://www.jianshu.com/p/43e6a7ac89c7</a></strong></p>
+
+<p>有一种数据结构就是考虑了上述种种需求，利用了种种原理设计出来的，就是<code>mysql</code>的索引所使用的数据结构: <code>B+</code>树。</p>
+
+<p><img src="/img/Xnip2019-08-28_12-51-53.png" alt="Xnip2019-08-28_12-51-53" /></p>
+
+<p>浅蓝色的块就是一个磁盘快，其中包含数据项和指针，如磁盘块1中包含数据项<code>17</code>和<code>35</code>,和指针 <code>P1,P2,P3</code>, <code>P1</code>指向所有小于17的数据所在的磁盘块，<code>P2</code>指向17和35之间的数据所在的磁盘快，<code>P3</code>指向大于35的磁盘块。真实的数据只存储在叶子节点中，非叶子节点只存储指引搜索方向的数据项和指针，不存储真实数据。如果要查询90，那么首先将磁盘快1加载到内存中，根据磁盘块1的数据项和指针确定90应该在磁盘块4中查找，于是从把磁盘快4加在到内存中，再次将搜索范围缩小至磁盘快11，此时返现磁盘快11已经是叶子节点，因此对磁盘块11中的数据做二分查找，最终返回查找结果，总计发生三次<code>IO</code>。实际上数据库实现时会把靠近树根的几层节点常驻内存，不需要发生<code>IO</code>操作，之后的三层<code>B+</code>树可以表示上百万的数据，如果上百万的数据查询只需要三次IO操作，性能提高将是巨大的。</p>
+
+<h1 id="索引分类">索引分类</h1>
+
+<h2 id="索引概念分类">索引概念分类</h2>
+
+<h3 id="聚集索引">聚集索引</h3>
+
+<h4 id="定义">定义</h4>
+
+<p>该索引中键值的逻辑顺序决定了表中相应行的物理顺序。</p>
+
+<p>聚集索引确定表中数据的物理顺序。聚集索引类似于电话簿，后者按姓氏排列数据。由于聚集索引规定数据在表中的物理存储顺序，因此一个表只能包含一个聚集索引。但该索引可以包含多个列（组合索引），就像电话簿按姓氏和名字进行组织一样。</p>
+
+<h4 id="注意事项">注意事项</h4>
+
+<p>定义聚集索引键时使用的列越少越好。</p>
+
+<h3 id="非聚集索引">非聚集索引</h3>
+
+<h4 id="定义-1">定义</h4>
+
+<p>数据存储在一个地方，索引存储在另一个地方，索引带有指针指向数据的存储位置。</p>
+
+<p>非聚集索引中的项目按索引键值的顺序存储，而表中的信息按另一种顺序存储（这可以由聚集索引规定）。对于非聚集索引，可以为在表非聚集索引中查找数据时常用的每个列创建一个非聚集索引。有些书籍包含多个索引。例如，一本介绍园艺的书可能会包含一个植物通俗名称索引，和一个植物学名索引，因为这是读者查找信息的两种最常用的方法。</p>
+
+<h3 id="关于聚集索引以及非聚集索引的几个问题">关于聚集索引以及非聚集索引的几个问题</h3>
+
+<ol>
+<li><p><strong>聚集索引的约束是唯一性，是否要求字段也是唯一的呢？</strong></p>
+
+<p>一般我们指定一个表的主键，如果这个表之前没有聚集索引，同时建立主键时候没有强制指定使用非聚集索引，<strong>SQL会默认在此字段上创建一个聚集索引，</strong>而主键都是唯一的，所以理所当然的认为创建聚集索引的字段也需要唯一。</p></li>
+
+<li><p><strong>主键就是聚集索引？？？</strong></p></li>
+</ol>
+
+<p>这样有时会对聚集索引的一种浪费。Innodb将通过主键聚集数据，如果没有定义主键，Innodb会选择第一个非空的唯一索引代替，如果没有非空唯一索引，Innodb会隐式定义一个6字节的rowid主键来作为聚集索引。innodb只聚集在同一个页面中的记录，包含相邻键值的页面可能会相距甚远。</p>
+
+<p>因为每个表中只能有一个聚集索引的规则，这使得聚集索引变得更加珍贵。</p>
+
+<ol>
+<li><strong>是不是聚集索引就一定要比非聚集索引性能优呢？？？</strong></li>
+</ol>
+
+<p>如果想查询学分在60-90之间的学生的学分以及姓名，在学分上创建聚集索引是否是最优的呢？</p>
+
+<p>答：否。既然只输出两列，我们可以在学分以及学生姓名上创建联合非聚集索引（也就是多列索引），<strong>此时的索引就形成了覆盖索引，即索引所存储的内容就是最终输出的数据，这两项限制直接可以定位出数据</strong>，这种索引在比以学分为聚集索引做查询性能更好。</p>
+
+<ol>
+<li><strong>在数据库中通过什么描述聚集索引与非聚集索引的？</strong></li>
+</ol>
+
+<p>索引是通过二叉树的形式进行描述的，我们可以这样区分聚集与非聚集索引的区别：聚集索引的叶节点就是最终的数据节点，而非聚集索引的叶节仍然是索引节点，但它有一个指向最终数据的指针。</p>
+
+<ol>
+<li><strong>在主键是创建聚集索引的表在数据插入上为什么比主键上创建非聚集索引表速度要慢？</strong></li>
+</ol>
+
+<p>在有主键的表中插入数据行，由于有主键唯一性的约束，所以需要保证插入的数据没有重复。我们来比较下主键为聚集索引和非聚集索引的查找情况：聚集索引由于索引叶节点就是数据页，所以如果想检查主键的唯一性，需要遍历所有数据节点才行，但非聚集索引不同，由于非聚集索引上已经包含了主键值，所以查找主键唯一性，只需要遍历所有的索引页就行，这比遍历所有数据行减少了不少IO消耗。这就是为什么主键上创建非聚集索引比主键上创建聚集索引在插入数据时要快的真正原因。</p>
+
+<h2 id="索引具体分类">索引具体分类</h2>
+
+<h3 id="普通索引">普通索引</h3>
+
+<p>基本的索引，它没有任何限制。</p>
+
+<h4 id="创建方式">创建方式</h4>
+
+<pre><code class="language-sql">//标准语句：
+ALTER TABLE table_name ADD INDEX index_name (column_list)
+CREATE INDEX index_name ON table_name (column_list); 
+
+//还有建表的时候创建亦可
+CREATE TABLE table_name ( 
+             ID INT NOT NULL, 
+             column_listVARCHAR(16) NOT NULL,
+             INDEX [index_name ] (column_list(length))
+);  
+
+</code></pre>
+
+<p>如果是CHAR，VARCHAR类型，<strong>length可以小于字段实际长度；如果是BLOB和TEXT类型，必须指定 length。</strong></p>
+
+<p>例子：假如length为10，也就是索引这个字段的记录的前10个字符。</p>
+
+<h3 id="唯一索引">唯一索引</h3>
+
+<p>与前面的普通索引类似，不同的就是：MySQL数据库索引列的值必须唯一，但允许有空值。如果是组合索引，则列值的组合必须唯一。</p>
+
+<h4 id="创建方式-1">创建方式</h4>
+
+<pre><code class="language-sql">ALTER TABLE table_name ADD UNIQUE (column_list)
+CREATE UNIQUE INDEX index_name ON table_name (column_list)
+
+//还有建表时创建
+CREATE TABLE table_name (
+             ID INT NOT NULL, 
+             column_list VARCHAR(16) NOT NULL, 
+             UNIQUE [index_name ] (column_list(length)) 
+ );  
+</code></pre>
+
+<h3 id="主键索引">主键索引</h3>
+
+<p>它是一种特殊的唯一索引，不允许有空值。一般是在建表的时候同时创建主键索引：</p>
+
+<h4 id="创建方式-2">创建方式</h4>
+
+<pre><code class="language-sql">CREATE TABLE table_name ( 
+             ID INT NOT NULL,
+             [column] VARCHAR(16) NOT NULL,
+             PRIMARY KEY(ID)  
+ );  
+
+</code></pre>
+
+<h3 id="全文索引-fulltext">全文索引：（FULLTEXT）</h3>
+
+<h4 id="定义-2">定义</h4>
+
+<p>全文检索是对大数据文本进行索引，在建立的索引中对要查找的单词进行进行搜索，定位哪些文本数据包括要搜索的单词。因此，<strong>全文检索的全部工作就是建立索引和在索引中搜索定位，所有的工作都是围绕这两个来进行的。</strong></p>
+
+<h4 id="此索引关键">此索引关键</h4>
+
+<p>建立全文索引中有两项非常重要，一个是如何对文本进行分词，一是建立索引的数据结构。分词的方法基本上是二元分词法、最大匹配法和统计方法。索引的数据结构基本上采用倒排索引的结构。分词的好坏关系到查询的准确程度和生成的索引的大小。</p>
+
+<h4 id="应用">应用</h4>
+
+<p>FULLTEXT索引仅可用于 MyISAM 表；他们可以从CHAR、VARCHAR或TEXT列中作为CREATE TABLE语句的一部分被创建，或是随后使用ALTER TABLE 或CREATE INDEX被添加。</p>
+
+<p>但是要注意：对于较大的数据集，将你的资料输入一个没有FULLTEXT索引的表中，然后创建索引，其速度比把资料输入现有FULLTEXT索引的速度更为快。不过切记对于大容量的数据表，生成全文索引是一个非常消耗时间非常消耗硬盘空间的做法。因为！！插入修改删除表的同时也要针对索引做一系列的处理。</p>
+
+<h4 id="创建方式-3">创建方式</h4>
+
+<pre><code class="language-sql">//针对content做了全文索引：
+CREATE TABLE `table` (
+              `id` int(11) NOT NULL AUTO_INCREMENT ,
+               `title` char(255) CHARACTER SET utf8 COLLATE utf8_general_ci NOT NULL ,
+               `content` text CHARACTER SET utf8 COLLATE utf8_general_ci NULL ,
+                PRIMARY KEY (`id`),
+                FULLTEXT (content)
+);
+
+</code></pre>
+
+<p><strong>注意：SQL使用全文索引的方法：首先必须是MyISAM的数据库引擎的数据表。（没有测试不知道其他引擎是否支持）</strong></p>
+
+<pre><code class="language-sql">SELECT * FROM article WHERE MATCH( content) AGAINST('想查询的字符串')
+</code></pre>
+
+<h4 id="注意">注意</h4>
+
+<p>目前，使用MySQL自带的全文索引时，如果查询字符串的长度过短将无法得到期望的搜索结果。MySQL全文索引所能找到的词的默认最小长度为<strong>4个字符</strong>。另外，如果查询的字符串包含停止词，那么该停止词将会被忽略。</p>
+
+<p>如果可能，请尽量先创建表并插入所有数据后再创建全文索引，而不要在创建表时就直接创建全文索引，因为前者比后者的全文索引效率要高。</p>
+
+<h1 id="索引设计优化">索引设计优化</h1>
+
+<h2 id="索引建立的几大原则">索引建立的几大原则</h2>
+
+<h4 id="1-最左前缀匹配原则">1. 最左前缀匹配原则</h4>
+
+<p>非常重要的原则，mysql会一直向右匹配直到遇到范围查询(&gt;、&lt;、between、like)就停止匹配，比如a = 1 and b = 2 and c &gt; 3 and d = 4 如果建立(a,b,c,d)顺序的索引，d是用不到索引的，如果建立(a,b,d,c)的索引则都可以用到，a,b,d的顺序可以任意调整。</p>
+
+<h4 id="2-尽量选择区分度高的列作为索引">2. 尽量选择区分度高的列作为索引</h4>
+
+<p>表示字段不重复的比例，比例越大我们扫描的记录数越少，唯一键的区分度是1，而一些状态、性别字段可能在大数据面前区分度就是0，那可能有人会问，这个比例有什么经验值吗？使用场景不同，这个值也很难确定，一般需要join的字段我们都要求是0.1以上，即平均1条扫描10条记录。</p>
+
+<h4 id="3-索引列不能参与计算-保持列-干净">3. 索引列不能参与计算，保持列“干净”</h4>
+
+<p>比如from_unixtime(create_time) = ’2014-05-29’就不能使用到索引，原因很简单，<strong>b+树中存的都是数据表中的字段值</strong>，但进行检索时，需要把所有元素都应用函数才能比较，显然成本太大。所以语句应该写成create_time = unix_timestamp(’2014-05-29’);</p>
+
+<h4 id="4-尽量的扩展索引-不要新建索引">4. 尽量的扩展索引，不要新建索引。</h4>
+
+<p>比如表中已经有a的索引，现在要加(a,b)的索引，那么只需要修改原来的索引即可。</p>
+
+<h4 id="5-定义有外键的数据列一定要建立索引">5. 定义有外键的数据列一定要建立索引。</h4>
+
+<h4 id="6-对于那些查询中很少涉及的列-重复值比较多的列不要建立索引">6. 对于那些查询中很少涉及的列，重复值比较多的列不要建立索引。</h4>
+
+<h4 id="7-对于定义为text-image和bit的数据类型的列不要建立索引">7. 对于定义为text、image和bit的数据类型的列不要建立索引。</h4>
+
+<h4 id="8-对于经常存取的列避免建立索引">8. 对于经常存取的列避免建立索引。</h4>
+
+<h2 id="索引使用的注意点">索引使用的注意点</h2>
+
+<h4 id="1-join-where判断和order-by排序的字段上建立索引">1.  JOIN,WHERE判断和ORDER BY排序的字段上建立索引</h4>
+
+<p>一般说来，索引应建立在那些将用于JOIN,WHERE判断和ORDER BY排序的字段上。尽量不要对数据库中某个含有大量重复的值的字段建立索引。对于一个ENUM类型的字段来说，出现大量重复值是很有可能的情况。</p>
+
+<h4 id="2-避免在-where-子句中对字段进行-null-值判断">2.  避免在 where 子句中对字段进行 null 值判断</h4>
+
+<p>应尽量避免在 where 子句中对字段进行 null 值判断，否则将导致引擎放弃使用索引而进行<strong>全表扫描</strong>。如：</p>
+
+<pre><code class="language-sql">select id from t where num is null
+</code></pre>
+
+<h4 id="3-最好不要给数据库留null">3.  最好不要给数据库留NULL</h4>
+
+<p>最好不要给数据库留NULL，尽可能的使用 NOT NULL填充数据库.不要以为 NULL 不需要空间，比如：char(100) 型，在字段建立时，空间就固定了， 不管是否插入值（NULL也包含在内），都是占用 100个字符的空间的，<strong>如果是varchar这样的变长字段， null 不占用空间。</strong> 如上的SQL语句， 可以在num上设置默认值0，确保表中num列没有null值，然后这样查询。</p>
+
+<h4 id="4-应尽量避免在-where-子句中使用-或-操作符-否则将引擎放弃使用索引而进行全表扫描">4.  应尽量避免在 where 子句中使用 != 或 &lt;&gt; 操作符，否则将引擎放弃使用索引而进行全表扫描。</h4>
+
+<h4 id="5-应尽量避免在-where-子句中使用-or-来连接条件">5.  应尽量避免在 where 子句中使用 or 来连接条件</h4>
+
+<p>应尽量避免在 where 子句中使用 or 来连接条件，如果一个字段有索引，一个字段没有索引，将导致引擎放弃使用索引而进行全表扫描。如：</p>
+
+<pre><code class="language-sql">select id from t where num=10 or Name = 'fuzhu'	
+</code></pre>
+
+<p>可以这样查询，充分利用索引：</p>
+
+<pre><code class="language-sql">select id from t where num = 10
+union all
+select id from t where Name = 'fuzhu'
+</code></pre>
+
+<h4 id="6-in-和-not-in-也要慎用-否则会导致全表扫描">6.  in 和 not in 也要慎用，否则会导致全表扫描。</h4>
+
+<p>而且负向查询（not , not in, not like, &lt;&gt;, != ,!&gt;,!&lt; ） 不会使用索引</p>
+
+<pre><code class="language-sql">select id from t where num in(1,2,3)
+</code></pre>
+
+<p>对于连续的数值，能用 between 就不要用 in 了：</p>
+
+<pre><code class="language-sql">select id from t where num between 1 and 3
+</code></pre>
+
+<p>很多时候用 exists 代替 in 是一个好的选择，<strong>当然exists也不跑索引</strong>。</p>
+
+<pre><code class="language-sql">select num from a where num in(select num from b)
+</code></pre>
+
+<h4 id="7-aaa-模糊查询也将导致全表扫描">7.  %aaa%”模糊查询也将导致全表扫描</h4>
+
+<pre><code class="language-sql">select id from t where name like ‘%abc%’
+</code></pre>
+
+<p>一般情况下不鼓励使用like操作，如果非使用不可，如何使用也是一个问题。like “%aaa%” 不会使用索引，而like “aaa%”可以使用索引。<strong>若要提高效率，可以考虑全文检索。</strong></p>
+
+<h4 id="a-like-keyword-索引失效-使用全表扫描">a. like %keyword 索引失效，使用全表扫描。</h4>
+
+<h4 id="b-like-keyword-索引有效">b. like keyword% 索引有效。</h4>
+
+<h4 id="c-like-keyword-索引失效">c. like %keyword% 索引失效，</h4>
+
+<h4 id="8-如果在-where-子句中使用参数-也会导致全表扫描">8.  如果在 where 子句中使用参数，也会导致全表扫描。</h4>
+
+<p>因为SQL只有在运行时才会解析局部变量，但优化程序不能将访问计划的选择推迟到运行时；它必须在编译时进行选择。然 而，如果在编译时建立访问计划，变量的值还是未知的，因而无法作为索引选择的输入项。如下面语句将进行全表扫描：</p>
+
+<pre><code class="language-sql">select id from t where num/2 = 100
+</code></pre>
+
+<p><strong>正上面的应改为：</strong></p>
+
+<pre><code class="language-sql">select id from t where num = 100*2
+</code></pre>
+
+<h4 id="9-应尽量避免在where子句中对字段进行函数操作">9.  应尽量避免在where子句中对字段进行函数操作。</h4>
+
+<p>这将导致引擎放弃使用索引而进行全表扫描</p>
+
+<pre><code class="language-sql">select id from t where substring(name,1,3) = ’abc’       //name以abc开头的id
+select id from t where datediff(day,createdate,’2005-11-30′) = 0  -–‘2005-11-30’    //生成的id
+
+</code></pre>
+
+<p><strong>应改为:</strong></p>
+
+<pre><code class="language-sql">select id from t where name like 'abc%'
+select id from t where createdate &gt;= '2005-11-30' and createdate &lt; '2005-12-1'
+</code></pre>
+
+<h4 id="10-where-子句中的-左边进行函数-算术运算或其他表达式运算无法正确使用索引">10.  where 子句中的“=”左边进行函数、算术运算或其他表达式运算无法正确使用索引。</h4>
+
+<h4 id="11-索引字段作为条件时-如果该索引是多列索引-需要注意">11.  索引字段作为条件时，如果该索引是多列索引，需要注意</h4>
+
+<p>在使用索引字段作为条件时，如果该索引是复合索引（多列索引），那么必须使用到该索引中的第一个字段作为条件时才能保证系统使用该索引，否则该索引将不会被使用，并且应尽可能的让字段顺序与索引顺序相一致。</p>
+
+<h4 id="12-索引并不是越多越好">12.  索引并不是越多越好</h4>
+
+<p>索引固然可以提高相应的 select 的效率，但同时也降低了 insert 及 update 的效率，<strong>因为 insert 或 update 时有可能会重建索引</strong>，所以怎样建索引需要慎重考虑，视具体情况而定。<strong>一个表的索引数最好不要超过6个</strong>，若太多则应考虑一些不常使用到的列上建的索引是否有必要。</p>
+
+<h4 id="13-尽量避免向客户端返回大数据量-若数据量过大-应该考虑相应需求是否合理">13.  尽量避免向客户端返回大数据量，若数据量过大，应该考虑相应需求是否合理</h4>
+
+<h4 id="14-mysql查询只使用一个索引">14.  MySQL查询只使用一个索引</h4>
+
+<p>MySQL查询只使用一个索引，因此如果where子句中已经使用了索引的话，那么order by中的列是不会使用索引的。</p>
+
+<p>因此数据库默认排序可以符合要求的情况下不要使用排序操作；尽量不要包含多个列的排序，如果需要最好给这些列创建复合索引。</p>
+
+
+                
+                
+<div class="entry-shang text-center">
+    
+	    <p>「真诚赞赏，手留余香」</p>
+	
+	<button class="zs show-zs btn btn-bred">赞赏支持</button>
+</div>
+<div class="zs-modal-bg"></div>
+<div class="zs-modal-box">
+	<div class="zs-modal-head">
+		<button type="button" class="close">×</button>
+		<span class="author"><a href="http://maizitoday.github.io/"><img src="/img/favicon.png" /></a></span>
+        
+	        <p class="tip"><i></i><span>真诚赞赏，手留余香</span></p>
+		
+ 
+	</div>
+	<div class="zs-modal-body">
+		<div class="zs-modal-btns">
+			<button class="btn btn-blink" data-num="2">2元</button>
+			<button class="btn btn-blink" data-num="5">5元</button>
+			<button class="btn btn-blink" data-num="10">10元</button>
+			<button class="btn btn-blink" data-num="50">50元</button>
+			<button class="btn btn-blink" data-num="100">100元</button>
+			<button class="btn btn-blink" data-num="1">任意金额</button>
+		</div>
+		<div class="zs-modal-pay">
+			<button class="btn btn-bred" id="pay-text">2元</button>
+			<p>使用<span id="pay-type">微信</span>扫描二维码完成支付</p>
+			<img src="/img/reward/wechat-2.png"  id="pay-image"/>
+		</div>
+	</div>
+	<div class="zs-modal-footer">
+		<label><input type="radio" name="zs-type" value="wechat" class="zs-type" checked="checked"><span ><span class="zs-wechat"><img src="/img/reward/wechat-btn.png"/></span></label>
+		<label><input type="radio" name="zs-type" value="alipay" class="zs-type" class="zs-alipay"><img src="/img/reward/alipay-btn.png"/></span></label>
+	</div>
+</div>
+<script type="text/javascript" src="/js/reward.js"></script>
+
+                
+
+                <hr>
+                <ul class="pager">
+                    
+                    <li class="previous">
+                        <a href="/post/mysql%E7%B3%BB%E5%88%97-%E8%A1%A8%E7%9A%84%E8%AE%BE%E8%AE%A1%E5%92%8C%E5%88%86%E5%8C%BA%E5%88%86%E8%A1%A8/" data-toggle="tooltip" data-placement="top"
+                            title="mysql系列-表的设计和分区分表">&larr;
+                            Previous Post</a>
+                    </li>
+                    
+                    
+                    <li class="next">
+                        <a href="/post/mysql%E7%B3%BB%E5%88%97-%E6%95%B0%E6%8D%AE%E5%BA%93%E5%AD%98%E5%82%A8%E5%BC%95%E6%93%8E/" data-toggle="tooltip" data-placement="top"
+                            title="mysql系列-数据库存储引擎">Next
+                            Post &rarr;</a>
+                    </li>
+                    
+                </ul>
+
+                <br>
+                <br>
+                
+                <div class="post-comment">
+                    
+                    
+
+
+
+
+<div id="vcomments"></div>
+<script src="//cdn1.lncld.net/static/js/3.0.4/av-min.js"></script>
+<script src='//unpkg.com/valine/dist/Valine.min.js'></script>
+
+<script type="text/javascript">
+    new Valine({
+        el: '#vcomments',
+        appId: 'TOFo2eBmg8VaNWIaluOWCqTS-gzGzoHsz',
+        appKey: 'sLvSskmSoBDbCQsBJ8TUhF4k',
+        notify: 'false',
+        verify: 'false',
+        avatar: 'monsterid',
+        placeholder: '说点什么吧...',
+        visitor: 'true'
+    });
+</script>
+                </div>
+
+
+
+            </div>
+
+            
+            <div class="
+            col-lg-4 col-lg-offset-0
+                visible-lg-block
+                sidebar-container
+                catalog-container">
+                <div class="side-catalog">
+                    <hr class="hidden-sm hidden-xs">
+                    <h4>
+                        <a class="catalog-toggle" style="font-size: 24px;" href="index.html#">目录结构</a>
+                    </h4>
+                    <ul class="catalog-body"></ul>
+                    <nav id="TableOfContents">
+<ul>
+<li><a href="#索引的概述">索引的概述</a>
+<ul>
+<li><a href="#什么是索引">什么是索引</a></li>
+<li><a href="#索引的性质分类">索引的性质分类</a></li>
+<li><a href="#索引的优点">索引的优点</a></li>
+<li><a href="#索引的缺点">索引的缺点</a></li>
+<li><a href="#为什么需要索引">为什么需要索引</a></li>
+</ul></li>
+<li><a href="#索引的使用">索引的使用</a>
+<ul>
+<li><a href="#创建索引">创建索引</a>
+<ul>
+<li><a href="#create-table-时创建索引">CREATE TABLE 时创建索引</a></li>
+<li><a href="#使用alter-table命令去增加索引">使用ALTER TABLE命令去增加索引</a></li>
+<li><a href="#使用create-index命令创建">使用CREATE INDEX命令创建</a></li>
+</ul></li>
+<li><a href="#删除索引">删除索引</a></li>
+<li><a href="#查看索引">查看索引</a></li>
+<li><a href="#单列索引与多列索引">单列索引与多列索引</a>
+<ul>
+<li><a href="#单列索引">单列索引</a></li>
+<li><a href="#多列索引-也叫组合索引">多列索引（也叫组合索引）</a>
+<ul>
+<li><a href="#组合索引-多列索引-的原则">组合索引（多列索引）的原则</a></li>
+</ul></li>
+</ul></li>
+</ul></li>
+<li><a href="#索引的基本原理">索引的基本原理</a>
+<ul>
+<li><a href="#举例解析基本原理">举例解析基本原理</a></li>
+<li><a href="#sql的应用场景会使用索引">SQL的应用场景会使用索引</a></li>
+<li><a href="#b-树搜索基本流程">B+树搜索基本流程</a></li>
+</ul></li>
+<li><a href="#索引分类">索引分类</a>
+<ul>
+<li><a href="#索引概念分类">索引概念分类</a>
+<ul>
+<li><a href="#聚集索引">聚集索引</a>
+<ul>
+<li><a href="#定义">定义</a></li>
+<li><a href="#注意事项">注意事项</a></li>
+</ul></li>
+<li><a href="#非聚集索引">非聚集索引</a>
+<ul>
+<li><a href="#定义-1">定义</a></li>
+</ul></li>
+<li><a href="#关于聚集索引以及非聚集索引的几个问题">关于聚集索引以及非聚集索引的几个问题</a></li>
+</ul></li>
+<li><a href="#索引具体分类">索引具体分类</a>
+<ul>
+<li><a href="#普通索引">普通索引</a>
+<ul>
+<li><a href="#创建方式">创建方式</a></li>
+</ul></li>
+<li><a href="#唯一索引">唯一索引</a>
+<ul>
+<li><a href="#创建方式-1">创建方式</a></li>
+</ul></li>
+<li><a href="#主键索引">主键索引</a>
+<ul>
+<li><a href="#创建方式-2">创建方式</a></li>
+</ul></li>
+<li><a href="#全文索引-fulltext">全文索引：（FULLTEXT）</a>
+<ul>
+<li><a href="#定义-2">定义</a></li>
+<li><a href="#此索引关键">此索引关键</a></li>
+<li><a href="#应用">应用</a></li>
+<li><a href="#创建方式-3">创建方式</a></li>
+<li><a href="#注意">注意</a></li>
+</ul></li>
+</ul></li>
+</ul></li>
+<li><a href="#索引设计优化">索引设计优化</a>
+<ul>
+<li><a href="#索引建立的几大原则">索引建立的几大原则</a>
+<ul>
+<li>
+<ul>
+<li><a href="#1-最左前缀匹配原则">1. 最左前缀匹配原则</a></li>
+<li><a href="#2-尽量选择区分度高的列作为索引">2. 尽量选择区分度高的列作为索引</a></li>
+<li><a href="#3-索引列不能参与计算-保持列-干净">3. 索引列不能参与计算，保持列“干净”</a></li>
+<li><a href="#4-尽量的扩展索引-不要新建索引">4. 尽量的扩展索引，不要新建索引。</a></li>
+<li><a href="#5-定义有外键的数据列一定要建立索引">5. 定义有外键的数据列一定要建立索引。</a></li>
+<li><a href="#6-对于那些查询中很少涉及的列-重复值比较多的列不要建立索引">6. 对于那些查询中很少涉及的列，重复值比较多的列不要建立索引。</a></li>
+<li><a href="#7-对于定义为text-image和bit的数据类型的列不要建立索引">7. 对于定义为text、image和bit的数据类型的列不要建立索引。</a></li>
+<li><a href="#8-对于经常存取的列避免建立索引">8. 对于经常存取的列避免建立索引。</a></li>
+</ul></li>
+</ul></li>
+<li><a href="#索引使用的注意点">索引使用的注意点</a>
+<ul>
+<li>
+<ul>
+<li><a href="#1-join-where判断和order-by排序的字段上建立索引">1.  JOIN,WHERE判断和ORDER BY排序的字段上建立索引</a></li>
+<li><a href="#2-避免在-where-子句中对字段进行-null-值判断">2.  避免在 where 子句中对字段进行 null 值判断</a></li>
+<li><a href="#3-最好不要给数据库留null">3.  最好不要给数据库留NULL</a></li>
+<li><a href="#4-应尽量避免在-where-子句中使用-或-操作符-否则将引擎放弃使用索引而进行全表扫描">4.  应尽量避免在 where 子句中使用 != 或 &lt;&gt; 操作符，否则将引擎放弃使用索引而进行全表扫描。</a></li>
+<li><a href="#5-应尽量避免在-where-子句中使用-or-来连接条件">5.  应尽量避免在 where 子句中使用 or 来连接条件</a></li>
+<li><a href="#6-in-和-not-in-也要慎用-否则会导致全表扫描">6.  in 和 not in 也要慎用，否则会导致全表扫描。</a></li>
+<li><a href="#7-aaa-模糊查询也将导致全表扫描">7.  %aaa%”模糊查询也将导致全表扫描</a></li>
+<li><a href="#a-like-keyword-索引失效-使用全表扫描">a. like %keyword 索引失效，使用全表扫描。</a></li>
+<li><a href="#b-like-keyword-索引有效">b. like keyword% 索引有效。</a></li>
+<li><a href="#c-like-keyword-索引失效">c. like %keyword% 索引失效，</a></li>
+<li><a href="#8-如果在-where-子句中使用参数-也会导致全表扫描">8.  如果在 where 子句中使用参数，也会导致全表扫描。</a></li>
+<li><a href="#9-应尽量避免在where子句中对字段进行函数操作">9.  应尽量避免在where子句中对字段进行函数操作。</a></li>
+<li><a href="#10-where-子句中的-左边进行函数-算术运算或其他表达式运算无法正确使用索引">10.  where 子句中的“=”左边进行函数、算术运算或其他表达式运算无法正确使用索引。</a></li>
+<li><a href="#11-索引字段作为条件时-如果该索引是多列索引-需要注意">11.  索引字段作为条件时，如果该索引是多列索引，需要注意</a></li>
+<li><a href="#12-索引并不是越多越好">12.  索引并不是越多越好</a></li>
+<li><a href="#13-尽量避免向客户端返回大数据量-若数据量过大-应该考虑相应需求是否合理">13.  尽量避免向客户端返回大数据量，若数据量过大，应该考虑相应需求是否合理</a></li>
+<li><a href="#14-mysql查询只使用一个索引">14.  MySQL查询只使用一个索引</a></li>
+</ul></li>
+</ul></li>
+</ul></li>
+</ul>
+</nav>
+                    <br>
+                    <br>
+                    <br>
+                    <hr class="hidden-sm hidden-xs">
+                </div>
+            </div>
+
+
+            
+            <div class="
+                col-lg-10 col-lg-offset-0
+                col-md-10 col-md-offset-1
+                sidebar-container">
+
+                
+                
+                <section>
+                    <hr class="hidden-sm hidden-xs">
+                    <h5><a href="/tags/">FEATURED TAGS</a></h5>
+                    <div class="tags">
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        <a href="/tags/qt" title="QT">
+                            QT
+                        </a>
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        <a href="/tags/zookeeper" title="Zookeeper">
+                            Zookeeper
+                        </a>
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        <a href="/tags/docker" title="docker">
+                            docker
+                        </a>
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        <a href="/tags/elasticsearch" title="elasticSearch">
+                            elasticSearch
+                        </a>
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        <a href="/tags/golang" title="golang">
+                            golang
+                        </a>
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        <a href="/tags/java%E5%9F%BA%E7%A1%80" title="java基础">
+                            java基础
+                        </a>
+                        
+                        
+                        
+                        <a href="/tags/java%E7%9B%B8%E5%85%B3%E6%A6%82%E5%BF%B5" title="java相关概念">
+                            java相关概念
+                        </a>
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        <a href="/tags/jvm" title="jvm">
+                            jvm
+                        </a>
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        <a href="/tags/maven" title="maven">
+                            maven
+                        </a>
+                        
+                        
+                        
+                        <a href="/tags/mongodb" title="mongodb">
+                            mongodb
+                        </a>
+                        
+                        
+                        
+                        
+                        
+                        <a href="/tags/mybatis%E7%B3%BB%E5%88%97" title="mybatis系列">
+                            mybatis系列
+                        </a>
+                        
+                        
+                        
+                        <a href="/tags/mycat" title="mycat">
+                            mycat
+                        </a>
+                        
+                        
+                        
+                        
+                        
+                        <a href="/tags/mysql%E7%B3%BB%E5%88%97" title="mysql系列">
+                            mysql系列
+                        </a>
+                        
+                        
+                        
+                        
+                        
+                        <a href="/tags/nginx" title="nginx">
+                            nginx
+                        </a>
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        <a href="/tags/redis" title="redis">
+                            redis
+                        </a>
+                        
+                        
+                        
+                        <a href="/tags/rocketmq" title="rocketmq">
+                            rocketmq
+                        </a>
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        <a href="/tags/shell" title="shell">
+                            shell
+                        </a>
+                        
+                        
+                        
+                        <a href="/tags/shiro" title="shiro">
+                            shiro
+                        </a>
+                        
+                        
+                        
+                        
+                        
+                        <a href="/tags/springcloud" title="springCloud">
+                            springCloud
+                        </a>
+                        
+                        
+                        
+                        
+                        
+                        <a href="/tags/springboot" title="springboot">
+                            springboot
+                        </a>
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        <a href="/tags/springboot%E7%B3%BB%E5%88%97" title="springboot系列">
+                            springboot系列
+                        </a>
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        <a href="/tags/%E4%BA%8B%E7%89%A9" title="事物">
+                            事物
+                        </a>
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        <a href="/tags/%E5%88%86%E5%B8%83%E5%BC%8F%E7%B3%BB%E5%88%97" title="分布式系列">
+                            分布式系列
+                        </a>
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        <a href="/tags/%E5%8D%95%E7%82%B9%E7%99%BB%E5%BD%95" title="单点登录">
+                            单点登录
+                        </a>
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        <a href="/tags/%E5%A4%9A%E7%BA%BF%E7%A8%8B%E5%92%8C%E9%AB%98%E5%B9%B6%E5%8F%91" title="多线程和高并发">
+                            多线程和高并发
+                        </a>
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        <a href="/tags/%E5%BC%80%E5%8F%91%E5%B7%A5%E5%85%B7" title="开发工具">
+                            开发工具
+                        </a>
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        <a href="/tags/%E6%95%B0%E6%8D%AE%E5%BA%93" title="数据库">
+                            数据库
+                        </a>
+                        
+                        
+                        
+                        
+                        
+                        <a href="/tags/%E6%95%B0%E6%8D%AE%E7%BB%93%E6%9E%84" title="数据结构">
+                            数据结构
+                        </a>
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        <a href="/tags/%E7%BD%91%E7%BB%9C%E7%BC%96%E7%A8%8B" title="网络编程">
+                            网络编程
+                        </a>
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        <a href="/tags/%E8%AE%BE%E8%AE%A1%E6%A8%A1%E5%BC%8F" title="设计模式">
+                            设计模式
+                        </a>
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        <a href="/tags/%E8%B4%9F%E8%BD%BD%E5%9D%87%E8%A1%A1" title="负载均衡">
+                            负载均衡
+                        </a>
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        <a href="/tags/%E9%9D%A2%E8%AF%95%E9%A2%98%E7%B3%BB%E5%88%97" title="面试题系列">
+                            面试题系列
+                        </a>
+                        
+                        
+                    </div>
+                </section>
+                
+
+                
+                
+                <section>
+                    <hr>
+                    <h5>FRIENDS</h5>
+                    <ul class="list-inline">
+                        
+                        <li><a target="_blank" href="https://zhaohuabing.com">赵化冰博客</a></li>
+                        
+                        <li><a target="_blank" href="http://www.tianshouzhi.com">田守枝</a></li>
+                        
+                        <li><a target="_blank" href="http://www.ityouknow.com">纯洁的微笑</a></li>
+                        
+                        <li><a target="_blank" href="https://renchunxiao.com">任春晓</a></li>
+                        
+                        <li><a target="_blank" href="https://www.lihongkun.com">泛泛之辈</a></li>
+                        
+                        <li><a target="_blank" href="https://juejin.im/welcome/backend">后端服务论坛</a></li>
+                        
+                        <li><a target="_blank" href="https://www.javaboy.org">江南一点雨</a></li>
+                        
+                        <li><a target="_blank" href="https://blog.csdn.net/gwd1154978352">东天里的冬天</a></li>
+                        
+                        <li><a target="_blank" href="https://www.javazhiyin.com/">java知音</a></li>
+                        
+                        <li><a target="_blank" href="https://juejin.im/user/5b2cc5fee51d4553156be12f/posts">算法</a></li>
+                        
+                        <li><a target="_blank" href="https://www.zhihu.com/people/duan-pan-ykjym">勤劳的小手</a></li>
+                        
+                        <li><a target="_blank" href="https://cloud.tencent.com/developer/user/2728002">Java团长</a></li>
+                        
+                    </ul>
+                </section>
+                
+            </div>
+        </div>
+    </div>
+</article>
+
+
+
+<footer>
+    <div class="container">
+        <div class="row">
+            <div class="col-lg-8 col-lg-offset-2 col-md-10 col-md-offset-1">
+                <ul class="list-inline text-center">
+                   
+                   <li>
+                       <a href="" rel="alternate" type="application/rss+xml" title="" >
+                           <span class="fa-stack fa-lg">
+                               <i class="fa fa-circle fa-stack-2x"></i>
+                               <i class="fa fa-rss fa-stack-1x fa-inverse"></i>
+                           </span>
+                       </a>
+                   </li>
+                   
+                    
+                    <li>
+                        <a href="mailto:maiziybtoday@gmail.com">
+                            <span class="fa-stack fa-lg">
+                                <i class="fa fa-circle fa-stack-2x"></i>
+                                <i class="fa fa-envelope fa-stack-1x fa-inverse"></i>
+                            </span>
+                        </a>
+                    </li>
+		    
+                    
+                    
+                    
+                    
+
+                    
+
+		    
+                    
+                    <li>
+                        <a target="_blank" href="/your%20wechat%20qr%20code%20image">
+                            <span class="fa-stack fa-lg">
+                                <i class="fa fa-circle fa-stack-2x"></i>
+                                <i class="fa fa-wechat fa-stack-1x fa-inverse"></i>
+                            </span>
+                        </a>
+                    </li>
+		    
+                    
+                    
+                    <li>
+                        <a target="_blank" href="https://www.linkedin.com/in/yourlinkedinid">
+                            <span class="fa-stack fa-lg">
+                                <i class="fa fa-circle fa-stack-2x"></i>
+                                <i class="fa fa-linkedin fa-stack-1x fa-inverse"></i>
+                            </span>
+                        </a>
+                    </li>
+		    
+                    
+                </ul>
+		<p class="copyright text-muted">
+                    Copyright &copy;  2020
+                    <br>
+                    <a href="https://themes.gohugo.io/hugo-theme-cleanwhite">CleanWhite Hugo Theme</a> by <a href="https://zhaohuabing.com">Huabing</a> |
+                    <iframe
+                        style="margin-left: 2px; margin-bottom:-5px;"
+                        frameborder="0" scrolling="0" width="100px" height="20px"
+                        src="https://ghbtns.com/github-btn.html?user=zhaohuabing&repo=hugo-theme-cleanwhite&type=star&count=true" >
+                    </iframe>
+                </p>
+            </div>
+        </div>
+    </div>
+</footer>
+
+
+
+
+<script>
+    function async(u, c) {
+      var d = document, t = 'script',
+          o = d.createElement(t),
+          s = d.getElementsByTagName(t)[0];
+      o.src = u;
+      if (c) { o.addEventListener('load', function (e) { c(null, e); }, false); }
+      s.parentNode.insertBefore(o, s);
+    }
+</script>
+
+
+
+
+
+
+<script>
+    
+    if($('#tag_cloud').length !== 0){
+        async("/js/jquery.tagcloud.js",function(){
+            $.fn.tagcloud.defaults = {
+                
+                color: {start: '#bbbbee', end: '#0085a1'},
+            };
+            $('#tag_cloud a').tagcloud();
+        })
+    }
+</script>
+
+
+<script>
+    async("https://cdnjs.cloudflare.com/ajax/libs/fastclick/1.0.6/fastclick.js", function(){
+        var $nav = document.querySelector("nav");
+        if($nav) FastClick.attach($nav);
+    })
+</script>
+
+
+
+
+
+
+</body>
+</html>
