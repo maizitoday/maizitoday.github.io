@@ -328,6 +328,79 @@
 
 <p>当我们修改github本地文件的时候，需要在浏览器端，马上可以看到最新的数据，需要Spring Cloud Bus 加上 MQ 来实现，然后在github上面需要设置一个钩子， 加入相关指令代码， 然后就可以了 。 后期在加上这一块的知识实现。</p>
 
+<pre><code>AutowiredAnnotationBeanPostProcessor   inject  
+</code></pre>
+
+<p>上面类里面的方法就是最终把数据源赋值给实体的。</p>
+
+<p>基本思路：</p>
+
+<ol>
+<li><p>重写数据源EnvironmentRepository，获取mongdb里面的数据。</p></li>
+
+<li><p>其他的微服务通过Http的请求，获取到mongdb里面的数据， 然后放到各自的数据源中。</p></li>
+
+<li><p>各自的微服务启动的时候， 扫描所有的@value的注解， 然后找到</p></li>
+
+<li><pre><code class="language-java">@Value(&quot;${xxl.job.admin.addresses}&quot;)
+   private String adminAddresses;
+</code></pre></li>
+</ol>
+
+<p>找到${xxl.job.admin.addresses} 值， 然后去掉{} 变成</p>
+
+<pre><code class="language-java">   xxl.job.admin.addresses
+</code></pre>
+
+<p>如此， 就和你的配置文件一样了。</p>
+
+<pre><code class="language-properties">   xxl.job.admin.addresses=${xxl-job-admin-addresses}
+   
+   ### xxl-job executor address
+   xxl.job.executor.appname=${spring.application.name}
+   xxl.job.executor.ip=
+   xxl.job.executor.port=${xxl-job-executor-port}
+</code></pre>
+
+<p>同时这个时候可以获取到</p>
+
+<pre><code class="language-java">${xxl-job-admin-addresses} 
+</code></pre>
+
+<p>这个值。</p>
+
+<ol>
+<li><p>查看mongdb的数据源数据</p></li>
+
+<li><pre><code class="language-json">{
+        &quot;key&quot; : &quot;task&quot;,
+        &quot;value&quot; : {
+            &quot;xxl-job-executor-port&quot; : &quot;8209&quot;,
+            &quot;xxl-job-executor-logpath&quot; : &quot;/home/XX&quot;,
+            &quot;xxl-job-accessToken&quot; : &quot;&quot;,
+            &quot;xxl-job-admin-addresses&quot; : &quot;http://XX&quot;
+        }
+    }
+</code></pre></li>
+</ol>
+
+<p>如此可以看到和这边的</p>
+
+<pre><code>   xxl-job-admin-addresses
+</code></pre>
+
+<p>对应起来，如此就获取到了值。 注意这里和 key是没有关系的， 加载配置文件的时候，都是加载</p>
+
+<pre><code>   application_dev.yml
+   application_dataSource.yml
+</code></pre>
+
+<p>这样来加载的。</p>
+
+<ol>
+<li>如此获取到了值， 然后在bean类的时候， 因为在扫描所有的@Value的注解的时候，就可以获取到bean类， 所以进行反射机制 ，这个配置文件的值就填充到了这个实体类了。</li>
+</ol>
+
 
                 
                 
@@ -871,8 +944,6 @@
                         
                         
                         
-                        
-                        
                         <a href="/tags/%E5%88%86%E5%B8%83%E5%BC%8F%E7%B3%BB%E5%88%97" title="分布式系列">
                             分布式系列
                         </a>
@@ -925,13 +996,9 @@
                         
                         
                         
-                        
-                        
                         <a href="/tags/%E5%A4%9A%E7%BA%BF%E7%A8%8B%E5%92%8C%E9%AB%98%E5%B9%B6%E5%8F%91" title="多线程和高并发">
                             多线程和高并发
                         </a>
-                        
-                        
                         
                         
                         
@@ -1016,10 +1083,6 @@
                         <a href="/tags/%E6%95%B0%E6%8D%AE%E7%BB%93%E6%9E%84" title="数据结构">
                             数据结构
                         </a>
-                        
-                        
-                        
-                        
                         
                         
                         
