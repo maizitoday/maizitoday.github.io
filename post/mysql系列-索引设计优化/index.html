@@ -387,6 +387,93 @@ select id from t where createdate &gt;= '2005-11-30' and createdate &lt; '2005-1
 
 <p>因此数据库默认排序可以符合要求的情况下不要使用排序操作；尽量不要包含多个列的排序，如果需要最好给这些列创建复合索引。</p>
 
+<h2 id="联合索引问题优化">联合索引问题优化</h2>
+
+<p><strong>转载地址：<a href="https://zhuanlan.zhihu.com/p/143464808">https://zhuanlan.zhihu.com/p/143464808</a></strong></p>
+
+<p>联合索引其实有两个作用：</p>
+
+<h4 id="1-充分利用where条件-缩小范围">1.充分利用where条件，缩小范围</h4>
+
+<p>例如我们需要查询以下语句：</p>
+
+<pre><code class="language-sql">SELECT * FROM test WHERE a = 1 AND b = 2
+</code></pre>
+
+<p>如果对字段a建立单列索引，对b建立单列索引，那么在查询时，只能选择走索引a，查询所有a=1的主键id，然后进行回表，在回表的过程中，在聚集索引中读取每一行数据，然后过滤出b = 2结果集，或者走索引b，也是这样的过程。 如果对a，b建立了联合索引(a,b),那么在查询时，直接在联合索引中先查到a=1的节点，然后根据b=2继续往下查，查出符合条件的结果集，进行回表。</p>
+
+<h4 id="2-避免回表-此时也叫覆盖索引">2.避免回表(此时也叫覆盖索引)</h4>
+
+<p>这种情况就是假如我们只查询某几个常用字段，例如查询a和b如下：</p>
+
+<pre><code class="language-sql">SELECT a,b FROM test WHERE a = 1 AND b = 2
+</code></pre>
+
+<p>对字段a建立单列索引，对b建立单列索引就需要像上面所说的，查到符合条件的主键id集合后需要去聚集索引下回表查询，但是如果我们要查询的字段本身在联合索引中就都包含了，那么就不用回表了。</p>
+
+<h4 id="3-减少需要回表的数据的行数">3.减少需要回表的数据的行数</h4>
+
+<p>这种情况就是假如我们需要查询a&gt;1并且b=2的数据</p>
+
+<pre><code class="language-sql">SELECT * FROM test WHERE a &gt; 1 AND b = 2
+</code></pre>
+
+<p>如果建立的是单列索引a，那么在查询时会在单列索引a中把a&gt;1的主键id全部查找出来然后进行回表。 如果建立的是联合索引(a,b),基于最左前缀匹配原则，因为a的查询条件是一个范围查找(=或者in之外的查询条件都是范围查找)，这样虽然在联合索引中查询时只能命中索引a的部分，b的部分命中不了，只能根据a&gt;1进行查询，但是由于联合索引中每个叶子节点包含b的信息，在查询出所有a&gt;1的主键id时，也会对b=2进行筛选，这样需要回表的主键id就只有a&gt;1并且b=2这部分了，所以回表的数据量会变小。</p>
+
+<h4 id="示例">示例</h4>
+
+<p>我们业务中碰到的就是第3种情况，我们的业务SQL本来更加复杂，还会join其他表，但是由于优化的瓶颈在于建立联合索引，所以进行了一些简化，下面是简化后的SQL：</p>
+
+<pre><code class="language-sql">SELECT
+  a.id as article_id ,
+  a.title as title ,
+  a.author_id as author_id 
+from
+  article a
+where
+  a.create_time between '2020-03-29 03:00:00.003'
+and '2020-04-29 03:00:00.003'
+and a.status = 1
+</code></pre>
+
+<p>我们的需求其实就是从article表中查询出最近一个月，status为1的文章，我们本来就是针对create_time建了单列索引，结果在慢查询日志中发现了这条语句，查询时间需要0.91s左右，所以开始尝试着进行优化。</p>
+
+<p>为了便于测试，我们在表中分别对create_time建立了单列索引create_time，对(create_time,status)建立联合索引idx_createTime_status。</p>
+
+<p>强制使用idx_createTime进行查询</p>
+
+<pre><code class="language-sql">SELECT
+  a.id as article_id ,
+  a.title as title ,
+  a.author_id as author_id 
+from
+  article a  FORCE INDEX(idx_createTime)
+where
+  a.create_time between '2020-03-22 03:00:00.003'
+and '2020-04-22 03:00:00.003'
+and a.status = 1
+</code></pre>
+
+<p>强制使用idx_createTime_status进行查询（即使不强制也是会选择这个索引）</p>
+
+<pre><code class="language-sql">SELECT
+  a.id as article_id ,
+  a.title as title ,
+  a.author_id as author_id 
+from
+  article a  FORCE INDEX(idx_createTime_status)
+where
+  a.create_time between '2020-03-22 03:00:00.003'
+and '2020-04-22 03:00:00.003'
+and a.status = 1
+</code></pre>
+
+<p><strong>优化结果：</strong></p>
+
+<p>优化前使用idx_createTime单列索引，查询时间为0.91s</p>
+
+<p>优化前使用idx_createTime_status联合索引，查询时间为0.21s</p>
+
 
                 
                 
@@ -531,6 +618,16 @@ select id from t where createdate &gt;= '2005-11-30' and createdate &lt; '2005-1
 <li><a href="#12-索引并不是越多越好">12.  索引并不是越多越好</a></li>
 <li><a href="#13-尽量避免向客户端返回大数据量-若数据量过大-应该考虑相应需求是否合理">13.  尽量避免向客户端返回大数据量，若数据量过大，应该考虑相应需求是否合理</a></li>
 <li><a href="#14-mysql查询只使用一个索引">14.  MySQL查询只使用一个索引</a></li>
+</ul></li>
+</ul></li>
+<li><a href="#联合索引问题优化">联合索引问题优化</a>
+<ul>
+<li>
+<ul>
+<li><a href="#1-充分利用where条件-缩小范围">1.充分利用where条件，缩小范围</a></li>
+<li><a href="#2-避免回表-此时也叫覆盖索引">2.避免回表(此时也叫覆盖索引)</a></li>
+<li><a href="#3-减少需要回表的数据的行数">3.减少需要回表的数据的行数</a></li>
+<li><a href="#示例">示例</a></li>
 </ul></li>
 </ul></li>
 </ul></li>
@@ -806,6 +903,8 @@ select id from t where createdate &gt;= '2005-11-30' and createdate &lt; '2005-1
                         <a href="/tags/nginx" title="nginx">
                             nginx
                         </a>
+                        
+                        
                         
                         
                         

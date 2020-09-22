@@ -22,9 +22,9 @@
     
 
     
-    <meta name="description" content="SQL优化总结">
-    <meta property="og:description" content="SQL优化总结" />
-    <meta property="twitter:description" content="SQL优化总结" />
+    <meta name="description" content="SQL优化总结，SQL优化总结，更新优化，插入优化，查询优化,批量插入示例">
+    <meta property="og:description" content="SQL优化总结，SQL优化总结，更新优化，插入优化，查询优化,批量插入示例" />
+    <meta property="twitter:description" content="SQL优化总结，SQL优化总结，更新优化，插入优化，查询优化,批量插入示例" />
     
 
     
@@ -196,8 +196,8 @@
                             mysql系列
                         </a>
                         
-                        <a class="tag" href="/tags/sql%E4%BC%98%E5%8C%96%E6%80%BB%E7%BB%93" title="SQL优化总结">
-                            SQL优化总结
+                        <a class="tag" href="/tags/sql%E4%BC%98%E5%8C%96%E6%80%BB%E7%BB%93%E6%9B%B4%E6%96%B0%E4%BC%98%E5%8C%96%E6%8F%92%E5%85%A5%E4%BC%98%E5%8C%96%E6%9F%A5%E8%AF%A2%E4%BC%98%E5%8C%96%E6%89%B9%E9%87%8F%E6%8F%92%E5%85%A5%E7%A4%BA%E4%BE%8B" title="SQL优化总结，更新优化，插入优化，查询优化,批量插入示例">
+                            SQL优化总结，更新优化，插入优化，查询优化,批量插入示例
                         </a>
                         
                     </div>
@@ -375,15 +375,84 @@ inner join second s on s.main_id = m.id
 
 <p>由上面1可以看出， 在被驱动表建立索引可以加快速度。</p>
 
-<h2 id="join优化">Join优化</h2>
+<h2 id="查询和索引优化">查询和索引优化</h2>
 
 <ol>
 <li>用小结果集驱动大结果集，尽量减少 join 语句中的Nested Loop循环总次数。</li>
 <li>优先优化 Nested Loop 内层循环，因为内层循环是循环中执行次数最多的，每次循环提升很小的性能都能在整个循环中提升很大的性能。</li>
 <li><strong>对被驱动表的 join 字段上建立索引</strong>，并且Join ON 条件的字段应该是<strong>相同类型</strong>的。</li>
 <li>当被驱动表的 join 字段上无法建立索引的时候，设置足够的 Join Buffer Size。</li>
-<li></li>
 </ol>
+
+<p><strong>说明：跟多相关看博客《mysql系列-索引设计和查询优化》</strong></p>
+
+<h1 id="更新优化">更新优化</h1>
+
+<ol>
+<li>如果只更改1、2个字段，不要Update全部字段，否则频繁调用会引起明显的性能消耗，同时带来大量日志；</li>
+<li>对于多张大数据量（这里几百条就算大了）的表JOIN，要先分页再JOIN，否则逻辑读会很高，性能很差。</li>
+<li>应尽可能的避免更新 clustered 索引数据列，因为 clustered 索引数据列的顺序就是表记录的物理存储顺序，一旦该列值改变将导致整个表记录的顺序的调整，会耗费相当大的资源。若应用系统需要频繁更新 clustered 索引数据列，
+那么需要考虑是否应将该索引建为 clustered 索引；</li>
+</ol>
+
+<h1 id="插入优化">插入优化</h1>
+
+<ol>
+<li>在新建临时表时，如果一次性插入数据量很大，那么可以使用 select into 代替 create table，避免造成大量 log，</li>
+</ol>
+
+<p>以提高速度；如果数据量不大，为了缓和系统表的资源，应先create table，然后insert。</p>
+
+<ol>
+<li>拆分大的 DELETE 或INSERT 语句，批量提交SQL语句。</li>
+</ol>
+
+<p>如果你需要在一个在线的网站上去执行一个大的 DELETE 或 INSERT 查询，你需要非常小心，要避免你的操作让你的整个网站停止相应。</p>
+
+<p>因为这两个操作是会锁表的，表一锁住了，别的操作都进不来了。Apache 会有很多的子进程或线程。所以，其工作起来相当有效率，而我们的服务器也不希望有太多的子进程，线程和数据库链接，这是极大的占服务器资源的事情，尤其是内存。</p>
+
+<p>如果你把你的表锁上一段时间，比如30秒钟，那么对于一个有很高访问量的站点来说，这30秒所积累的访问进程/线程，数据库链接，打开的文件数，可能不仅仅会让你的WEB服务崩溃，还可能会让你的整台服务器马上挂了。
+   所以，如果你有一个大的处理，你一定把其拆分，使用 LIMIT oracle(rownum),sqlserver(top)条件是一个好的方法。</p>
+
+<ol>
+<li>创建适当的索引，每当为一个表添加一个索引，select会更快，可insert和delete却大大变慢，因为创建了维护索引需要许多额外的工作。</li>
+</ol>
+
+<p>1）采用函数处理的字段不能利用索引
+   2）条件内包括了多个本表的字段运算时不能进行索引</p>
+
+<h2 id="批量插入示例">批量插入示例</h2>
+
+<pre><code class="language-sql">UPDATE
+    party_communitya_ssociation_member
+SET
+	job = CASE 
+	WHEN ID = ? THEN ? 
+	WHEN ID = ? THEN ? 
+	WHEN ID = ? THEN ? END,
+	
+	
+	NAME = CASE 
+	WHEN ID = ? THEN ? 
+	WHEN ID = ? THEN ? 
+	WHEN ID = ? THEN ? 
+	END,
+	
+	
+	phoneNumber = CASE 
+	WHEN ID = ? THEN ? 
+	WHEN ID = ? THEN ?
+	WHEN ID = ? THEN ? 
+	END,
+	
+	identityCard = CASE 
+	WHEN ID = ? THEN ? 
+	WHEN ID = ? THEN ? 
+	WHEN ID = ? THEN ? 
+	END
+WHERE
+	ID IN (?, ?, ?)
+</code></pre>
 
 
                 
@@ -437,6 +506,12 @@ inner join second s on s.main_id = m.id
                             Previous Post</a>
                     </li>
                     
+                    
+                    <li class="next">
+                        <a href="/post/mysql%E7%B3%BB%E5%88%97-%E6%90%9E%E6%87%82%E5%88%86%E5%8C%BA/" data-toggle="tooltip" data-placement="top"
+                            title="mysql系列-搞懂分区">Next
+                            Post &rarr;</a>
+                    </li>
                     
                 </ul>
 
@@ -505,7 +580,12 @@ inner join second s on s.main_id = m.id
 <li><a href="#驱动表">驱动表</a></li>
 <li><a href="#示例">示例</a></li>
 </ul></li>
-<li><a href="#join优化">Join优化</a></li>
+<li><a href="#查询和索引优化">查询和索引优化</a></li>
+</ul></li>
+<li><a href="#更新优化">更新优化</a></li>
+<li><a href="#插入优化">插入优化</a>
+<ul>
+<li><a href="#批量插入示例">批量插入示例</a></li>
 </ul></li>
 </ul>
 </nav>
@@ -794,6 +874,8 @@ inner join second s on s.main_id = m.id
                         
                         
                         
+                        
+                        
                         <a href="/tags/redis" title="redis">
                             redis
                         </a>
@@ -932,6 +1014,8 @@ inner join second s on s.main_id = m.id
                         
                         
                         
+                        
+                        
                         <a href="/tags/%E5%88%86%E5%B8%83%E5%BC%8F%E7%B3%BB%E5%88%97" title="分布式系列">
                             分布式系列
                         </a>
@@ -957,6 +1041,8 @@ inner join second s on s.main_id = m.id
                         <a href="/tags/%E5%8D%95%E7%82%B9%E7%99%BB%E5%BD%95" title="单点登录">
                             单点登录
                         </a>
+                        
+                        
                         
                         
                         
@@ -1031,8 +1117,6 @@ inner join second s on s.main_id = m.id
                         <a href="/tags/%E5%BC%80%E5%8F%91%E5%B7%A5%E5%85%B7" title="开发工具">
                             开发工具
                         </a>
-                        
-                        
                         
                         
                         
