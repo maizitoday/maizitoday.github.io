@@ -1,0 +1,1484 @@
+<!DOCTYPE html>
+<html lang="en-us">
+
+<head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+
+    
+    <meta property="og:site_name" content="">
+    <meta property="og:type" content="article">
+
+    
+    <meta property="og:image" content="http://maizitoday.github.io//img/home-bg-jeep.jpg">
+    <meta property="twitter:image" content="http://maizitoday.github.io//img/home-bg-jeep.jpg" />
+    
+
+    
+    <meta name="title" content="springboot系列-WebMvcConfigurer理解" />
+    <meta property="og:title" content="springboot系列-WebMvcConfigurer理解" />
+    <meta property="twitter:title" content="springboot系列-WebMvcConfigurer理解" />
+    
+
+    
+    <meta name="description" content="拦截器，视图解析器，原来的spring的xml写法，跨域">
+    <meta property="og:description" content="拦截器，视图解析器，原来的spring的xml写法，跨域" />
+    <meta property="twitter:description" content="拦截器，视图解析器，原来的spring的xml写法，跨域" />
+    
+
+    
+    <meta property="twitter:card" content="summary" />
+    
+    
+
+    <meta name="keyword"  content="麦子, maizi, maizi, , 麦子的网络日志, 麦子的博客, maizi Blog, 博客, 个人网站, 互联网, Web, 云原生, PaaS, Istio, Kubernetes, 微服务, Microservice">
+    <link rel="shortcut icon" href="/img/favicon.ico">
+
+    <title>springboot系列-WebMvcConfigurer理解-麦子的博客</title>
+
+    <link rel="canonical" href="/post/springboot%E7%B3%BB%E5%88%97-webmvcconfigurer/">
+
+    <link rel="stylesheet" href="/css/iDisqus.min.css"/>
+	
+    
+    <link rel="stylesheet" href="/css/bootstrap.min.css">
+
+    
+    <link rel="stylesheet" href="/css/hux-blog.min.css">
+
+    
+    <link rel="stylesheet" href="/css/syntax.css">
+
+    
+    <link rel="stylesheet" href="/css/zanshang.css">
+
+    
+    <link href="//cdnjs.cloudflare.com/ajax/libs/font-awesome/4.6.3/css/font-awesome.min.css" rel="stylesheet" type="text/css">
+     
+    
+    
+    <script src="/js/jquery.min.js"></script>
+    
+    
+    <script src="/js/bootstrap.min.js"></script>
+    
+    
+    <script src="/js/hux-blog.min.js"></script>
+	
+    
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.13.1/styles/docco.min.css">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.13.1/highlight.min.js"></script>
+    <script>hljs.initHighlightingOnLoad();</script>
+</head>
+
+
+
+<nav class="navbar navbar-default navbar-custom navbar-fixed-top">
+    <div class="container-fluid">
+        
+        <div class="navbar-header page-scroll">
+            <button type="button" class="navbar-toggle">
+                <span class="sr-only">Toggle navigation</span>
+                <span class="icon-bar"></span>
+                <span class="icon-bar"></span>
+                <span class="icon-bar"></span>
+            </button>
+            <a class="navbar-brand" href="/"></a>
+        </div>
+
+        
+        
+        <div id="huxblog_navbar">
+            <div class="navbar-collapse">
+                <ul class="nav navbar-nav navbar-right">
+                    <li>
+                        <a href="/">Home</a>
+                    </li>
+                    
+                    <li>
+                        <a href="/categories/english">English</a>
+                    </li>
+                    
+                    <li>
+                        <a href="/categories/life">Life</a>
+                    </li>
+                    
+                    <li>
+                        <a href="/categories/tech">Tech</a>
+                    </li>
+                    
+
+                    
+                    <li><a href="/top/about/">ABOUT</a></li>
+                    
+
+
+                    
+                    <li>
+                        <a href="/archive">ARCHIVE</a>
+                    </li>
+                    
+
+
+                    
+                    <li>
+                        <a href="/search">SEARCH <img src="/img/search.png" height="15"
+                                style="cursor: pointer;" alt="Search"></a>
+                    </li>
+                    
+
+                </ul>
+            </div>
+        </div>
+        
+    </div>
+    
+</nav>
+<script>
+    
+    
+    
+    var $body = document.body;
+    var $toggle = document.querySelector('.navbar-toggle');
+    var $navbar = document.querySelector('#huxblog_navbar');
+    var $collapse = document.querySelector('.navbar-collapse');
+
+    $toggle.addEventListener('click', handleMagic)
+
+    function handleMagic(e) {
+        if ($navbar.className.indexOf('in') > 0) {
+            
+            $navbar.className = " ";
+            
+            setTimeout(function () {
+                
+                if ($navbar.className.indexOf('in') < 0) {
+                    $collapse.style.height = "0px"
+                }
+            }, 400)
+        } else {
+            
+            $collapse.style.height = "auto"
+            $navbar.className += " in";
+        }
+    }
+</script>
+
+
+
+<style type="text/css">
+    header.intro-header {
+        background-image: url('https://zhaohuabing.com//img/post-bg-unix-linux.jpg')
+    }
+
+
+    div.side-catalog nav ul li a {
+        display: inline-block;
+        vertical-align: middle;
+        height: 30px;
+        font-size: 17px;
+        line-height: 30px;
+        overflow: hidden;
+        text-decoration: none;
+        white-space: nowrap;
+        text-overflow: ellipsis;
+    }
+</style>
+<header class="intro-header">
+    <div class="container">
+        <div class="row">
+            <div class="col-lg-8 col-lg-offset-2 col-md-10 col-md-offset-1">
+                <div class="post-heading">
+                    <div class="tags">
+                        
+                        <a class="tag" href="/tags/springboot%E7%B3%BB%E5%88%97" title="springboot系列">
+                            springboot系列
+                        </a>
+                        
+                        <a class="tag" href="/tags/" title="">
+                            
+                        </a>
+                        
+                    </div>
+                    <h1>springboot系列-WebMvcConfigurer理解</h1>
+                    <h2 class="subheading"></h2>
+                    <span class="meta">
+                        Posted by
+                        
+                        麦子
+                        
+                        on
+                        Sunday, 2020年11月01日
+                        
+                    </span>
+                </div>
+            </div>
+        </div>
+    </div>
+</header>
+
+
+
+
+<article>
+    <div class="container">
+        <div class="row">
+
+            
+            <div class="
+                col-lg-8 col-lg-offset-0
+                col-md-10 col-md-offset-1
+                post-container">
+
+                
+                
+                
+                
+                
+                
+                
+
+<p>[TOC]</p>
+
+<p><strong>转载地址：<a href="https://blog.csdn.net/zhangpower1993/article/details/89016503">https://blog.csdn.net/zhangpower1993/article/details/89016503</a></strong></p>
+
+<h1 id="简介">简介</h1>
+
+<p>WebMvcConfigurer配置类其实是<code>Spring</code>内部的一种配置方式，采用<code>JavaBean</code>的形式来代替传统的<code>xml</code>配置文件形式进行针对框架个性化定制，可以自定义一些Handler，Interceptor，ViewResolver，MessageConverter。基于java-based方式的spring mvc配置，需要创建一个<strong>配置</strong>类并实现<strong>WebMvcConfigurer</strong> 接口；</p>
+
+<p>在Spring Boot 1.5版本都是靠重写<strong>WebMvcConfigurerAdapter</strong>的方法来添加自定义拦截器，消息转换器等。SpringBoot 2.0 后，该类被标记为@Deprecated（弃用）。官方推荐直接实现WebMvcConfigurer或者直接继承WebMvcConfigurationSupport，方式一实现WebMvcConfigurer接口（推荐），方式二继承WebMvcConfigurationSupport类，具体实现可看这篇文章。<a href="https://blog.csdn.net/fmwind/article/details/82832758">https://blog.csdn.net/fmwind/article/details/82832758</a></p>
+
+<h1 id="webmvcconfigurer接口">WebMvcConfigurer接口</h1>
+
+<pre><code class="language-java">public interface WebMvcConfigurer {
+    void configurePathMatch(PathMatchConfigurer var1);
+ 
+    void configureContentNegotiation(ContentNegotiationConfigurer var1);
+ 
+    void configureAsyncSupport(AsyncSupportConfigurer var1);
+ 
+    void configureDefaultServletHandling(DefaultServletHandlerConfigurer var1);
+ 
+    void addFormatters(FormatterRegistry var1);
+ 
+    void addInterceptors(InterceptorRegistry var1);
+ 
+    void addResourceHandlers(ResourceHandlerRegistry var1);
+ 
+    void addCorsMappings(CorsRegistry var1);
+ 
+    void addViewControllers(ViewControllerRegistry var1);
+ 
+    void configureViewResolvers(ViewResolverRegistry var1);
+ 
+    void addArgumentResolvers(List&lt;HandlerMethodArgumentResolver&gt; var1);
+ 
+    void addReturnValueHandlers(List&lt;HandlerMethodReturnValueHandler&gt; var1);
+ 
+    void configureMessageConverters(List&lt;HttpMessageConverter&lt;?&gt;&gt; var1);
+ 
+    void extendMessageConverters(List&lt;HttpMessageConverter&lt;?&gt;&gt; var1);
+ 
+    void configureHandlerExceptionResolvers(List&lt;HandlerExceptionResolver&gt; var1);
+ 
+    void extendHandlerExceptionResolvers(List&lt;HandlerExceptionResolver&gt; var1);
+ 
+    Validator getValidator();
+ 
+    MessageCodesResolver getMessageCodesResolver();
+}
+</code></pre>
+
+<p><strong>常用的方法</strong></p>
+
+<pre><code class="language-java"> /* 拦截器配置 */
+void addInterceptors(InterceptorRegistry var1);
+/* 视图跳转控制器 */
+void addViewControllers(ViewControllerRegistry registry);
+/**
+     *静态资源处理
+**/
+void addResourceHandlers(ResourceHandlerRegistry registry);
+/* 默认静态资源处理器 */
+void configureDefaultServletHandling(DefaultServletHandlerConfigurer configurer);
+/**
+     * 这里配置视图解析器
+ **/
+void configureViewResolvers(ViewResolverRegistry registry);
+/* 配置内容裁决的一些选项*/
+void configureContentNegotiation(ContentNegotiationConfigurer configurer);
+/** 解决跨域问题 **/
+public void addCorsMappings(CorsRegistry registry) ;
+</code></pre>
+
+<h3 id="addinterceptors-拦截器">addInterceptors：拦截器</h3>
+
+<ul>
+<li>addInterceptor：需要一个实现HandlerInterceptor接口的拦截器实例</li>
+<li>addPathPatterns：用于设置拦截器的过滤路径规则；<code>addPathPatterns(&quot;/**&quot;)</code>对所有请求都拦截</li>
+<li>excludePathPatterns：用于设置不需要拦截的过滤规则</li>
+<li>拦截器主要用途：进行用户登录状态的拦截，日志的拦截等。</li>
+</ul>
+
+<pre><code class="language-java">@Override
+public void addInterceptors(InterceptorRegistry registry) {
+    super.addInterceptors(registry);
+    registry.addInterceptor(new TestInterceptor()).addPathPatterns(&quot;/**&quot;).excludePathPatterns(&quot;/emp/toLogin&quot;,&quot;/emp/login&quot;,&quot;/js/**&quot;,&quot;/css/**&quot;,&quot;/images/**&quot;);
+}
+</code></pre>
+
+<h3 id="addviewcontrollers-页面跳转">addViewControllers：页面跳转</h3>
+
+<p>以前写SpringMVC的时候，如果需要访问一个页面，必须要写Controller类，然后再写一个方法跳转到页面，感觉好麻烦，其实重写WebMvcConfigurer中的addViewControllers方法即可达到效果了</p>
+
+<pre><code class="language-java">    @Override
+    public void addViewControllers(ViewControllerRegistry registry) {
+        registry.addViewController(&quot;/toLogin&quot;).setViewName(&quot;login&quot;);
+    }
+</code></pre>
+
+<p>值的指出的是，在这里重写addViewControllers方法，并不会覆盖<strong>WebMvcAutoConfiguration</strong>（Springboot自动配置）中的addViewControllers（在此方法中，Spring Boot将“/”映射至index.html），这也就意味着自己的配置和Spring Boot的自动配置同时有效，这也是我们推荐添加自己的MVC配置的方式。</p>
+
+<h3 id="addresourcehandlers-静态资源">addResourceHandlers：静态资源</h3>
+
+<p>比如，我们想自定义静态资源映射目录的话，只需重写addResourceHandlers方法即可。</p>
+
+<p>注：如果继承WebMvcConfigurationSupport类实现配置时必须要重写该方法，具体见其它文章</p>
+
+<pre><code class="language-java">@Configuration
+public class MyWebMvcConfigurerAdapter implements WebMvcConfigurer {
+    /**
+     * 配置静态访问资源
+     * @param registry
+     */
+    @Override
+    public void addResourceHandlers(ResourceHandlerRegistry registry) {
+        registry.addResourceHandler(&quot;/my/**&quot;).addResourceLocations(&quot;classpath:/my/&quot;);
+    }
+}
+</code></pre>
+
+<ul>
+<li>addResoureHandler：指的是对外暴露的访问路径</li>
+<li>addResourceLocations：指的是内部文件放置的目录</li>
+</ul>
+
+<h3 id="configuredefaultservlethandling-默认静态资源处理器">configureDefaultServletHandling：默认静态资源处理器</h3>
+
+<pre><code class="language-java">@Override
+public void configureDefaultServletHandling(DefaultServletHandlerConfigurer configurer) {
+        configurer.enable();
+        configurer.enable(&quot;defaultServletName&quot;);
+}
+</code></pre>
+
+<p>此时会注册一个默认的Handler：DefaultServletHttpRequestHandler，这个Handler也是用来处理静态文件的，它会尝试映射/。当DispatcherServelt映射/时（/ 和/ 是有区别的），并且没有找到合适的Handler来处理请求时，就会交给DefaultServletHttpRequestHandler 来处理。注意：这里的静态资源是放置在web根目录下，而非WEB-INF 下。</p>
+
+<p>　　可能这里的描述有点不好懂（我自己也这么觉得），所以简单举个例子，例如：在webroot目录下有一个图片：1.png 我们知道Servelt规范中web根目录（webroot）下的文件可以直接访问的，但是由于DispatcherServlet配置了映射路径是：/ ，它几乎把所有的请求都拦截了，从而导致1.png 访问不到，这时注册一个DefaultServletHttpRequestHandler 就可以解决这个问题。其实可以理解为DispatcherServlet破坏了Servlet的一个特性（根目录下的文件可以直接访问），DefaultServletHttpRequestHandler是帮助回归这个特性的</p>
+
+<h3 id="configureviewresolvers-视图解析器">configureViewResolvers：视图解析器</h3>
+
+<p>这个方法是用来配置视图解析器的，该方法的参数ViewResolverRegistry 是一个注册器，用来注册你想自定义的视图解析器等。ViewResolverRegistry 常用的几个方法：<a href="https://blog.csdn.net/fmwind/article/details/81235401">https://blog.csdn.net/fmwind/article/details/81235401</a></p>
+
+<pre><code class="language-java">/**
+ * 配置请求视图映射
+ * @return
+ */
+@Bean
+public InternalResourceViewResolver resourceViewResolver()
+{
+	InternalResourceViewResolver internalResourceViewResolver = new InternalResourceViewResolver();
+	//请求视图文件的前缀地址
+	internalResourceViewResolver.setPrefix(&quot;/WEB-INF/jsp/&quot;);
+	//请求视图文件的后缀
+	internalResourceViewResolver.setSuffix(&quot;.jsp&quot;);
+	return internalResourceViewResolver;
+}
+ 
+/**
+ * 视图配置
+ * @param registry
+ */
+@Override
+public void configureViewResolvers(ViewResolverRegistry registry) {
+	super.configureViewResolvers(registry);
+	registry.viewResolver(resourceViewResolver());
+	/*registry.jsp(&quot;/WEB-INF/jsp/&quot;,&quot;.jsp&quot;);*/
+}
+</code></pre>
+
+<h3 id="configurecontentnegotiation-配置内容裁决的一些参数">configureContentNegotiation：配置内容裁决的一些参数</h3>
+
+<h3 id="addcorsmappings-跨域">addCorsMappings：跨域</h3>
+
+<pre><code class="language-java">@Override
+public void addCorsMappings(CorsRegistry registry) {
+    super.addCorsMappings(registry);
+    registry.addMapping(&quot;/cors/**&quot;)
+            .allowedHeaders(&quot;*&quot;)
+            .allowedMethods(&quot;POST&quot;,&quot;GET&quot;)
+            .allowedOrigins(&quot;*&quot;);
+}
+</code></pre>
+
+<h3 id="configuremessageconverters-信息转换器">configureMessageConverters：信息转换器</h3>
+
+<pre><code class="language-java"> 
+/**
+* 消息内容转换配置
+ * 配置fastJson返回json转换
+ * @param converters
+ */
+@Override
+public void configureMessageConverters(List&lt;HttpMessageConverter&lt;?&gt;&gt; converters) {
+    //调用父类的配置
+    super.configureMessageConverters(converters);
+    //创建fastJson消息转换器
+    FastJsonHttpMessageConverter fastConverter = new FastJsonHttpMessageConverter();
+    //创建配置类
+    FastJsonConfig fastJsonConfig = new FastJsonConfig();
+    //修改配置返回内容的过滤
+    fastJsonConfig.setSerializerFeatures(
+            SerializerFeature.DisableCircularReferenceDetect,
+            SerializerFeature.WriteMapNullValue,
+            SerializerFeature.WriteNullStringAsEmpty
+    );
+    fastConverter.setFastJsonConfig(fastJsonConfig);
+    //将fastjson添加到视图消息转换器列表内
+    converters.add(fastConverter);
+ 
+}
+</code></pre>
+
+
+                
+                
+<div class="entry-shang text-center">
+    
+	    <p>「真诚赞赏，手留余香」</p>
+	
+	<button class="zs show-zs btn btn-bred">赞赏支持</button>
+</div>
+<div class="zs-modal-bg"></div>
+<div class="zs-modal-box">
+	<div class="zs-modal-head">
+		<button type="button" class="close">×</button>
+		<span class="author"><a href="http://maizitoday.github.io/"><img src="/img/favicon.png" /></a></span>
+        
+	        <p class="tip"><i></i><span>真诚赞赏，手留余香</span></p>
+		
+ 
+	</div>
+	<div class="zs-modal-body">
+		<div class="zs-modal-btns">
+			<button class="btn btn-blink" data-num="2">2元</button>
+			<button class="btn btn-blink" data-num="5">5元</button>
+			<button class="btn btn-blink" data-num="10">10元</button>
+			<button class="btn btn-blink" data-num="50">50元</button>
+			<button class="btn btn-blink" data-num="100">100元</button>
+			<button class="btn btn-blink" data-num="1">任意金额</button>
+		</div>
+		<div class="zs-modal-pay">
+			<button class="btn btn-bred" id="pay-text">2元</button>
+			<p>使用<span id="pay-type">微信</span>扫描二维码完成支付</p>
+			<img src="/img/reward/wechat-2.png"  id="pay-image"/>
+		</div>
+	</div>
+	<div class="zs-modal-footer">
+		<label><input type="radio" name="zs-type" value="wechat" class="zs-type" checked="checked"><span ><span class="zs-wechat"><img src="/img/reward/wechat-btn.png"/></span></label>
+		<label><input type="radio" name="zs-type" value="alipay" class="zs-type" class="zs-alipay"><img src="/img/reward/alipay-btn.png"/></span></label>
+	</div>
+</div>
+<script type="text/javascript" src="/js/reward.js"></script>
+
+                
+
+                <hr>
+                <ul class="pager">
+                    
+                    <li class="previous">
+                        <a href="/post/springboot%E7%B3%BB%E5%88%97-%E9%A1%B9%E7%9B%AE%E5%90%AF%E5%8A%A8%E8%87%AA%E5%8A%A8%E6%89%A7%E8%A1%8C/" data-toggle="tooltip" data-placement="top"
+                            title="springboot系列-项目启动自动执行">&larr;
+                            Previous Post</a>
+                    </li>
+                    
+                    
+                    <li class="next">
+                        <a href="/post/springboot%E7%B3%BB%E5%88%97-spring%E4%B8%AD%E8%8E%B7%E5%8F%96request%E7%9A%84%E5%87%A0%E7%A7%8D%E6%96%B9%E6%B3%95%E5%8F%8A%E5%85%B6%E7%BA%BF%E7%A8%8B%E5%AE%89%E5%85%A8%E6%80%A7%E5%88%86%E6%9E%90/" data-toggle="tooltip" data-placement="top"
+                            title="springboot系列-Spring中获取request的几种方法，及其线程安全性分析">Next
+                            Post &rarr;</a>
+                    </li>
+                    
+                </ul>
+
+                <br>
+                <br>
+                
+                <div class="post-comment">
+                    
+                    
+
+
+
+
+<div id="vcomments"></div>
+<script src="//cdn1.lncld.net/static/js/3.0.4/av-min.js"></script>
+<script src='//unpkg.com/valine/dist/Valine.min.js'></script>
+
+<script type="text/javascript">
+    new Valine({
+        el: '#vcomments',
+        appId: 'TOFo2eBmg8VaNWIaluOWCqTS-gzGzoHsz',
+        appKey: 'sLvSskmSoBDbCQsBJ8TUhF4k',
+        notify: 'false',
+        verify: 'false',
+        avatar: 'monsterid',
+        placeholder: '说点什么吧...',
+        visitor: 'true'
+    });
+</script>
+                </div>
+
+
+
+            </div>
+
+            
+            <div class="
+            col-lg-4 col-lg-offset-0
+                visible-lg-block
+                sidebar-container
+                catalog-container">
+                <div class="side-catalog">
+                    <hr class="hidden-sm hidden-xs">
+                    <h4>
+                        <a class="catalog-toggle" style="font-size: 24px;" href="index.html#">目录结构</a>
+                    </h4>
+                    <ul class="catalog-body"></ul>
+                    <nav id="TableOfContents">
+<ul>
+<li><a href="#简介">简介</a></li>
+<li><a href="#webmvcconfigurer接口">WebMvcConfigurer接口</a>
+<ul>
+<li>
+<ul>
+<li><a href="#addinterceptors-拦截器">addInterceptors：拦截器</a></li>
+<li><a href="#addviewcontrollers-页面跳转">addViewControllers：页面跳转</a></li>
+<li><a href="#addresourcehandlers-静态资源">addResourceHandlers：静态资源</a></li>
+<li><a href="#configuredefaultservlethandling-默认静态资源处理器">configureDefaultServletHandling：默认静态资源处理器</a></li>
+<li><a href="#configureviewresolvers-视图解析器">configureViewResolvers：视图解析器</a></li>
+<li><a href="#configurecontentnegotiation-配置内容裁决的一些参数">configureContentNegotiation：配置内容裁决的一些参数</a></li>
+<li><a href="#addcorsmappings-跨域">addCorsMappings：跨域</a></li>
+<li><a href="#configuremessageconverters-信息转换器">configureMessageConverters：信息转换器</a></li>
+</ul></li>
+</ul></li>
+</ul>
+</nav>
+                    <br>
+                    <br>
+                    <br>
+                    <hr class="hidden-sm hidden-xs">
+                </div>
+            </div>
+
+
+            
+            <div class="
+                col-lg-10 col-lg-offset-0
+                col-md-10 col-md-offset-1
+                sidebar-container">
+
+                
+                
+                <section>
+                    <hr class="hidden-sm hidden-xs">
+                    <h5><a href="/tags/">FEATURED TAGS</a></h5>
+                    <div class="tags">
+                        
+                        
+                        
+                        <a href="/tags/" title="">
+                            
+                        </a>
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        <a href="/tags/qt" title="QT">
+                            QT
+                        </a>
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        <a href="/tags/zookeeper" title="Zookeeper">
+                            Zookeeper
+                        </a>
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        <a href="/tags/docker" title="docker">
+                            docker
+                        </a>
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        <a href="/tags/elasticsearch" title="elasticSearch">
+                            elasticSearch
+                        </a>
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        <a href="/tags/golang" title="golang">
+                            golang
+                        </a>
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        <a href="/tags/java%E5%9F%BA%E7%A1%80" title="java基础">
+                            java基础
+                        </a>
+                        
+                        
+                        
+                        <a href="/tags/java%E7%9B%B8%E5%85%B3%E6%A6%82%E5%BF%B5" title="java相关概念">
+                            java相关概念
+                        </a>
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        <a href="/tags/jvm" title="jvm">
+                            jvm
+                        </a>
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        <a href="/tags/maven" title="maven">
+                            maven
+                        </a>
+                        
+                        
+                        
+                        <a href="/tags/mongodb" title="mongodb">
+                            mongodb
+                        </a>
+                        
+                        
+                        
+                        
+                        
+                        <a href="/tags/mybatis%E7%B3%BB%E5%88%97" title="mybatis系列">
+                            mybatis系列
+                        </a>
+                        
+                        
+                        
+                        <a href="/tags/mycat" title="mycat">
+                            mycat
+                        </a>
+                        
+                        
+                        
+                        
+                        
+                        <a href="/tags/mysql%E7%B3%BB%E5%88%97" title="mysql系列">
+                            mysql系列
+                        </a>
+                        
+                        
+                        
+                        
+                        
+                        <a href="/tags/nginx" title="nginx">
+                            nginx
+                        </a>
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        <a href="/tags/redis" title="redis">
+                            redis
+                        </a>
+                        
+                        
+                        
+                        <a href="/tags/rocketmq" title="rocketmq">
+                            rocketmq
+                        </a>
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        <a href="/tags/shell" title="shell">
+                            shell
+                        </a>
+                        
+                        
+                        
+                        <a href="/tags/shiro" title="shiro">
+                            shiro
+                        </a>
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        <a href="/tags/springcloud" title="springCloud">
+                            springCloud
+                        </a>
+                        
+                        
+                        
+                        
+                        
+                        <a href="/tags/springboot" title="springboot">
+                            springboot
+                        </a>
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        <a href="/tags/springboot%E7%B3%BB%E5%88%97" title="springboot系列">
+                            springboot系列
+                        </a>
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        <a href="/tags/%E4%BA%8B%E7%89%A9" title="事物">
+                            事物
+                        </a>
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        <a href="/tags/%E5%88%86%E5%B8%83%E5%BC%8F%E7%B3%BB%E5%88%97" title="分布式系列">
+                            分布式系列
+                        </a>
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        <a href="/tags/%E5%8D%95%E7%82%B9%E7%99%BB%E5%BD%95" title="单点登录">
+                            单点登录
+                        </a>
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        <a href="/tags/%E5%A4%9A%E7%BA%BF%E7%A8%8B%E5%92%8C%E9%AB%98%E5%B9%B6%E5%8F%91" title="多线程和高并发">
+                            多线程和高并发
+                        </a>
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        <a href="/tags/%E5%BC%80%E5%8F%91%E5%B7%A5%E5%85%B7" title="开发工具">
+                            开发工具
+                        </a>
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        <a href="/tags/%E6%95%B0%E6%8D%AE%E5%BA%93" title="数据库">
+                            数据库
+                        </a>
+                        
+                        
+                        
+                        
+                        
+                        <a href="/tags/%E6%95%B0%E6%8D%AE%E7%BB%93%E6%9E%84" title="数据结构">
+                            数据结构
+                        </a>
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        <a href="/tags/%E7%BD%91%E7%BB%9C%E7%BC%96%E7%A8%8B" title="网络编程">
+                            网络编程
+                        </a>
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        <a href="/tags/%E8%AE%BE%E8%AE%A1%E6%A8%A1%E5%BC%8F" title="设计模式">
+                            设计模式
+                        </a>
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        <a href="/tags/%E8%B4%9F%E8%BD%BD%E5%9D%87%E8%A1%A1" title="负载均衡">
+                            负载均衡
+                        </a>
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        <a href="/tags/%E9%9D%A2%E8%AF%95%E9%A2%98%E7%B3%BB%E5%88%97" title="面试题系列">
+                            面试题系列
+                        </a>
+                        
+                        
+                    </div>
+                </section>
+                
+
+                
+                
+                <section>
+                    <hr>
+                    <h5>FRIENDS</h5>
+                    <ul class="list-inline">
+                        
+                        <li><a target="_blank" href="https://zhaohuabing.com">赵化冰博客</a></li>
+                        
+                        <li><a target="_blank" href="http://www.tianshouzhi.com">田守枝</a></li>
+                        
+                        <li><a target="_blank" href="http://www.ityouknow.com">纯洁的微笑</a></li>
+                        
+                        <li><a target="_blank" href="https://renchunxiao.com">任春晓</a></li>
+                        
+                        <li><a target="_blank" href="https://www.lihongkun.com">泛泛之辈</a></li>
+                        
+                        <li><a target="_blank" href="https://juejin.im/welcome/backend">后端服务论坛</a></li>
+                        
+                        <li><a target="_blank" href="https://www.javaboy.org">江南一点雨</a></li>
+                        
+                        <li><a target="_blank" href="https://blog.csdn.net/gwd1154978352">东天里的冬天</a></li>
+                        
+                        <li><a target="_blank" href="https://www.javazhiyin.com/">java知音</a></li>
+                        
+                        <li><a target="_blank" href="https://juejin.im/user/5b2cc5fee51d4553156be12f/posts">算法</a></li>
+                        
+                        <li><a target="_blank" href="https://www.zhihu.com/people/duan-pan-ykjym">勤劳的小手</a></li>
+                        
+                        <li><a target="_blank" href="https://cloud.tencent.com/developer/user/2728002">Java团长</a></li>
+                        
+                        <li><a target="_blank" href="https://blog.csdn.net/ityouknow/article/details/107171666">微笑很纯洁</a></li>
+                        
+                        <li><a target="_blank" href="https://hollischuang.github.io/toBeTopJavaer/#/basics/java-basic/linux-io">Java工程师成神之路</a></li>
+                        
+                    </ul>
+                </section>
+                
+            </div>
+        </div>
+    </div>
+</article>
+
+
+
+<footer>
+    <div class="container">
+        <div class="row">
+            <div class="col-lg-8 col-lg-offset-2 col-md-10 col-md-offset-1">
+                <ul class="list-inline text-center">
+                   
+                   <li>
+                       <a href="" rel="alternate" type="application/rss+xml" title="" >
+                           <span class="fa-stack fa-lg">
+                               <i class="fa fa-circle fa-stack-2x"></i>
+                               <i class="fa fa-rss fa-stack-1x fa-inverse"></i>
+                           </span>
+                       </a>
+                   </li>
+                   
+                    
+                    <li>
+                        <a href="mailto:maiziybtoday@gmail.com">
+                            <span class="fa-stack fa-lg">
+                                <i class="fa fa-circle fa-stack-2x"></i>
+                                <i class="fa fa-envelope fa-stack-1x fa-inverse"></i>
+                            </span>
+                        </a>
+                    </li>
+		    
+                    
+                    
+                    
+                    
+
+                    
+
+		    
+                    
+                    <li>
+                        <a target="_blank" href="/your%20wechat%20qr%20code%20image">
+                            <span class="fa-stack fa-lg">
+                                <i class="fa fa-circle fa-stack-2x"></i>
+                                <i class="fa fa-wechat fa-stack-1x fa-inverse"></i>
+                            </span>
+                        </a>
+                    </li>
+		    
+                    
+                    
+                    <li>
+                        <a target="_blank" href="https://www.linkedin.com/in/yourlinkedinid">
+                            <span class="fa-stack fa-lg">
+                                <i class="fa fa-circle fa-stack-2x"></i>
+                                <i class="fa fa-linkedin fa-stack-1x fa-inverse"></i>
+                            </span>
+                        </a>
+                    </li>
+		    
+                    
+                </ul>
+		<p class="copyright text-muted">
+                    Copyright &copy;  2020
+                    <br>
+                    <a href="https://themes.gohugo.io/hugo-theme-cleanwhite">CleanWhite Hugo Theme</a> by <a href="https://zhaohuabing.com">Huabing</a> |
+                    <iframe
+                        style="margin-left: 2px; margin-bottom:-5px;"
+                        frameborder="0" scrolling="0" width="100px" height="20px"
+                        src="https://ghbtns.com/github-btn.html?user=zhaohuabing&repo=hugo-theme-cleanwhite&type=star&count=true" >
+                    </iframe>
+                </p>
+            </div>
+        </div>
+    </div>
+</footer>
+
+
+
+
+<script>
+    function async(u, c) {
+      var d = document, t = 'script',
+          o = d.createElement(t),
+          s = d.getElementsByTagName(t)[0];
+      o.src = u;
+      if (c) { o.addEventListener('load', function (e) { c(null, e); }, false); }
+      s.parentNode.insertBefore(o, s);
+    }
+</script>
+
+
+
+
+
+
+<script>
+    
+    if($('#tag_cloud').length !== 0){
+        async("/js/jquery.tagcloud.js",function(){
+            $.fn.tagcloud.defaults = {
+                
+                color: {start: '#bbbbee', end: '#0085a1'},
+            };
+            $('#tag_cloud a').tagcloud();
+        })
+    }
+</script>
+
+
+<script>
+    async("https://cdnjs.cloudflare.com/ajax/libs/fastclick/1.0.6/fastclick.js", function(){
+        var $nav = document.querySelector("nav");
+        if($nav) FastClick.attach($nav);
+    })
+</script>
+
+
+
+
+
+
+</body>
+</html>
