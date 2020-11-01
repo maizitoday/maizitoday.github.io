@@ -310,6 +310,27 @@ System.out.println(c1 == c2);
 指定泛型的范围必须是 T 的父类。
 </code></pre>
 
+<h1 id="泛型如何实现实例化">泛型如何实现实例化</h1>
+
+<pre><code class="language-java">public abstract class BaseServiceImpl&lt;M extends MyBaseMapper&lt;T&gt;, T extends BaseEntity, D extends T&gt;
+        extends ServiceImpl&lt;M, T&gt; {
+</code></pre>
+
+<p>观察可以看到，  我们实例化的是  D 这个实例对象， 他属于 2 的位置处理。</p>
+
+<pre><code class="language-java">  private D newDTOclass() {
+        D dto = null;
+        try {
+            ParameterizedType ptype = (ParameterizedType) this.getClass().getGenericSuperclass();
+            Class&lt;D&gt; clazz = (Class&lt;D&gt;) ptype.getActualTypeArguments()[2];
+            dto = (D) clazz.newInstance();
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        return dto;
+    }
+</code></pre>
+
 
                 
                 
@@ -424,6 +445,7 @@ System.out.println(c1 == c2);
 <li><a href="#泛型方法">泛型方法</a></li>
 <li><a href="#上界通配符-extends-t">上界通配符&lt;? extends T&gt;</a></li>
 <li><a href="#下界通配符-super-t">下界通配符&lt;? super T&gt;</a></li>
+<li><a href="#泛型如何实现实例化">泛型如何实现实例化</a></li>
 </ul>
 </nav>
                     <br>
@@ -448,6 +470,10 @@ System.out.println(c1 == c2);
                     <div class="tags">
                         
                         
+                        
+                        <a href="/tags/" title="">
+                            
+                        </a>
                         
                         
                         
@@ -744,6 +770,8 @@ System.out.println(c1 == c2);
                         <a href="/tags/shiro" title="shiro">
                             shiro
                         </a>
+                        
+                        
                         
                         
                         
@@ -1078,6 +1106,8 @@ System.out.println(c1 == c2);
                         <a href="/tags/%E7%BD%91%E7%BB%9C%E7%BC%96%E7%A8%8B" title="网络编程">
                             网络编程
                         </a>
+                        
+                        
                         
                         
                         
