@@ -97,15 +97,15 @@
                     </li>
                     
                     <li>
-                        <a href="/categories/english">English</a>
+                        <a href="/categories/english">english</a>
                     </li>
                     
                     <li>
-                        <a href="/categories/life">Life</a>
+                        <a href="/categories/life">life</a>
                     </li>
                     
                     <li>
-                        <a href="/categories/tech">Tech</a>
+                        <a href="/categories/tech">tech</a>
                     </li>
                     
 
@@ -233,221 +233,144 @@
                 
                 
                 
-                
-
-<p>[TOC]</p>
-
-<p>好文：<a href="https://blog.fundebug.com/2017/05/15/write-excellent-dockerfile/">https://blog.fundebug.com/2017/05/15/write-excellent-dockerfile/</a></p>
-
+                <p>[TOC]</p>
+<p>好文：https://blog.fundebug.com/2017/05/15/write-excellent-dockerfile/</p>
 <h1 id="dockerfile作用">DockerFile作用</h1>
-
 <p>Dockerfile是由一系列命令和参数构成的脚本，这些命令应用于基础镜像并最终创建一个新的镜像。比用命令更加的灵活。</p>
-
 <h1 id="dockerfile-语法">Dockerfile 语法</h1>
-
 <p>转载地址： <a href="https://www.cnblogs.com/boshen-hzb/p/6400272.html">https://www.cnblogs.com/boshen-hzb/p/6400272.html</a></p>
-
 <h2 id="add">ADD</h2>
-
 <p>ADD命令有两个参数，源和目标。它的基本作用是从源系统的文件系统上复制文件到目标容器的文件系统。如果源是一个URL，那该URL的内容将被下载并复制到容器中。</p>
-
-<pre><code class="language-yaml">#Usage: ADD [source directory or URL] [destination directory]
-#ADD /my_app_folder /my_app_folder` 
-</code></pre>
-
-<h2 id="cmd">CMD</h2>
-
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-yaml" data-lang="yaml"><span style="color:#75715e">#Usage: ADD [source directory or URL] [destination directory]</span>
+<span style="color:#75715e">#ADD /my_app_folder /my_app_folder` </span>
+</code></pre></div><h2 id="cmd">CMD</h2>
 <p>和RUN命令相似，CMD可以用于执行特定的命令。和RUN不同的是，这些命令不是在镜像构建的过程中执行的，而是在用镜像构建容器后被调用。</p>
-
 <p>CMD的作用是作为执行container时候的默认行为（容器默认的启动命令）,当运行container的时候声明了command，则不再用image中的CMD默认所定义的命令, 一个Dockerfile中只能有一个有效的CMD，当定义多个CMD的时候，只有最后一个才会起作用.</p>
-
-<pre><code class="language-yaml">支持三种格式
-CMD [&quot;executable&quot;,&quot;param1&quot;,&quot;param2&quot;] 使用 exec 执行，推荐方式；
-CMD command param1 param2 在 /bin/sh 中执行，提供给需要交互的应用；
-CMD [&quot;param1&quot;,&quot;param2&quot;] 提供给 ENTRYPOINT 的默认参数；
-指定启动容器时执行的命令，每个 Dockerfile 只能有一条 CMD 命令。如果指定了多条命令，只有最后一条会被执行。
-如果用户启动容器时候指定了运行的命令，则会覆盖掉 CMD 指定的命令。
-</code></pre>
-
-<p>用法1：</p>
-
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-yaml" data-lang="yaml"><span style="color:#ae81ff">支持三种格式</span>
+<span style="color:#ae81ff">CMD [&#34;executable&#34;,&#34;param1&#34;,&#34;param2&#34;] 使用 exec 执行，推荐方式；</span>
+<span style="color:#ae81ff">CMD command param1 param2 在 /bin/sh 中执行，提供给需要交互的应用；</span>
+<span style="color:#ae81ff">CMD [&#34;param1&#34;,&#34;param2&#34;] 提供给 ENTRYPOINT 的默认参数；</span>
+<span style="color:#ae81ff">指定启动容器时执行的命令，每个 Dockerfile 只能有一条 CMD 命令。如果指定了多条命令，只有最后一条会被执行。</span>
+<span style="color:#ae81ff">如果用户启动容器时候指定了运行的命令，则会覆盖掉 CMD 指定的命令。</span>
+</code></pre></div><p>用法1：</p>
 <p>带有中括号的形式。这时，命令没有再任何shell终端环境下，如果我们要执行shell，必须把shell加入到中括号的参数中。这种用法就像一个c语言的exec函数，意思是我们要执行一个进程。如果采用非shell的方法，那么上面的例子要修改为：</p>
-
-<pre><code class="language-dockerfile">FROM centos
- 
-CMD [&quot;/bin/bash&quot;, &quot;-c&quot;, &quot;echo 'hello cmd!'&quot;]
-</code></pre>
-
-<p>用法2：</p>
-
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-dockerfile" data-lang="dockerfile"><span style="color:#66d9ef">FROM</span><span style="color:#e6db74"> centos</span><span style="color:#960050;background-color:#1e0010">
+</span><span style="color:#960050;background-color:#1e0010"></span> <span style="color:#960050;background-color:#1e0010">
+</span><span style="color:#960050;background-color:#1e0010"></span><span style="color:#66d9ef">CMD</span> [<span style="color:#e6db74">&#34;/bin/bash&#34;</span>, <span style="color:#e6db74">&#34;-c&#34;</span>, <span style="color:#e6db74">&#34;echo &#39;hello cmd!&#39;&#34;</span>]<span style="color:#960050;background-color:#1e0010">
+</span></code></pre></div><p>用法2：</p>
 <p>shell form，即没有中括号的形式。那么命令command默认是在“/bin/sh -c”下执行的。比如下面的dockerfile：</p>
-
-<pre><code class="language-dockerfile">FROM centos
- 
-CMD echo &quot;hello cmd!&quot;
-</code></pre>
-
-<p><strong>注意：推荐第一种</strong></p>
-
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-dockerfile" data-lang="dockerfile"><span style="color:#66d9ef">FROM</span><span style="color:#e6db74"> centos</span><span style="color:#960050;background-color:#1e0010">
+</span><span style="color:#960050;background-color:#1e0010"></span> <span style="color:#960050;background-color:#1e0010">
+</span><span style="color:#960050;background-color:#1e0010"></span><span style="color:#66d9ef">CMD</span> echo <span style="color:#e6db74">&#34;hello cmd!&#34;</span><span style="color:#960050;background-color:#1e0010">
+</span></code></pre></div><p><strong>注意：推荐第一种</strong></p>
 <h2 id="entrypoint">ENTRYPOINT</h2>
-
 <p>配置容器启动后执行的命令，并且不可被 docker run 提供的参数覆盖。每个 Dockerfile 中只能有一个 ENTRYPOINT，当指定多个时，只有最后一个起效。</p>
-
-<pre><code class="language-yaml">两种格式：
-ENTRYPOINT [&quot;executable&quot;, &quot;param1&quot;, &quot;param2&quot;]
-ENTRYPOINT command param1 param2（shell中执行）。
-</code></pre>
-
-<h2 id="copy">COPY</h2>
-
-<p>格式为 COPY <src> <dest>,复制本地主机的 <src>（为 Dockerfile 所在目录的相对路径）到容器中的 <dest>。当使用本地目录为源目录时，推荐使用 COPY。</p>
-
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-yaml" data-lang="yaml"><span style="color:#ae81ff">两种格式：</span>
+<span style="color:#ae81ff">ENTRYPOINT [&#34;executable&#34;, &#34;param1&#34;, &#34;param2&#34;]</span>
+<span style="color:#ae81ff">ENTRYPOINT command param1 param2（shell中执行）。</span>
+</code></pre></div><h2 id="copy">COPY</h2>
+<p>格式为 COPY <!-- raw HTML omitted --> <!-- raw HTML omitted -->,复制本地主机的 <!-- raw HTML omitted -->（为 Dockerfile 所在目录的相对路径）到容器中的 <!-- raw HTML omitted -->。当使用本地目录为源目录时，推荐使用 COPY。</p>
 <h2 id="env">ENV</h2>
-
 <p>ENV命令用于设置环境变量。这些变量以”key=value”的形式存在，并可以在容器内被脚本或者程序调用。这个机制给在容器中运行应用带来了极大的便利。</p>
-
-<pre><code class="language-yaml"># Usage: ENV key value
-ENV JAVA_HOME /usr/local/jdk1.7.0_80
-ENV CLASSPATH ${JAVA_HOME}/lib/dt.jar:$JAVA_HOME/lib/tools.jar
-ENV PATH $PATH:${JAVA_HOME}/bin
-</code></pre>
-
-<h2 id="expose">EXPOSE</h2>
-
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-yaml" data-lang="yaml"><span style="color:#75715e"># Usage: ENV key value</span>
+<span style="color:#ae81ff">ENV JAVA_HOME /usr/local/jdk1.7.0_80</span>
+<span style="color:#ae81ff">ENV CLASSPATH ${JAVA_HOME}/lib/dt.jar:$JAVA_HOME/lib/tools.jar</span>
+<span style="color:#ae81ff">ENV PATH $PATH:${JAVA_HOME}/bin</span>
+</code></pre></div><h2 id="expose">EXPOSE</h2>
 <p>EXPOSE用来指定端口，使容器内的应用可以通过端口和外界交互。</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-yaml" data-lang="yaml"><span style="color:#75715e"># Usage: EXPOSE [port]</span>
+<span style="color:#ae81ff">EXPOSE 8080</span>
+<span style="color:#75715e"># EXPOSE命令只是声明了容器应该打开的端口并没有实际上将它打开!</span>
+<span style="color:#75715e"># docker run -P 只有运行的时候，才会打开这个端口映射 </span>
 
-<pre><code class="language-yaml"># Usage: EXPOSE [port]
-EXPOSE 8080
-# EXPOSE命令只是声明了容器应该打开的端口并没有实际上将它打开!
-# docker run -P 只有运行的时候，才会打开这个端口映射 
-
-</code></pre>
-
-<h2 id="from">FROM</h2>
-
+</code></pre></div><h2 id="from">FROM</h2>
 <p>FROM命令可能是最重要的Dockerfile命令。改命令定义了使用哪个基础镜像启动构建流程。基础镜像可以为任意镜 像。如果基础镜像没有被发现，Docker将试图从Docker image index来查找该镜像。FROM命令必须是Dockerfile的首个命令。</p>
-
-<pre><code class="language-yaml"># Usage: FROM [image name]
-FROM ubuntu 
-</code></pre>
-
-<h2 id="maintainer">MAINTAINER</h2>
-
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-yaml" data-lang="yaml"><span style="color:#75715e"># Usage: FROM [image name]</span>
+<span style="color:#ae81ff">FROM ubuntu </span>
+</code></pre></div><h2 id="maintainer">MAINTAINER</h2>
 <p>我建议这个命令放在Dockerfile的起始部分，虽然理论上它可以放置于Dockerfile的任意位置。这个命令用于声明作者，并应该放在FROM的后面。</p>
-
-<pre><code class="language-yaml"># Usage: MAINTAINER [name]
-MAINTAINER authors_name 
-</code></pre>
-
-<h2 id="run">RUN</h2>
-
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-yaml" data-lang="yaml"><span style="color:#75715e"># Usage: MAINTAINER [name]</span>
+<span style="color:#ae81ff">MAINTAINER authors_name </span>
+</code></pre></div><h2 id="run">RUN</h2>
 <p>每一个RUN指令都会是在一个新的container里面运行,并提交为一个image作为下一个RUN的base</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-yaml" data-lang="yaml"><span style="color:#ae81ff">RUN命令有两种格式</span>
 
-<pre><code class="language-yaml">RUN命令有两种格式
+<span style="color:#ae81ff">1</span><span style="color:#ae81ff">. RUN &lt;command&gt;</span>
+<span style="color:#ae81ff">2</span><span style="color:#ae81ff">. RUN [&#34;executable&#34;, &#34;param1&#34;, &#34;param2&#34;]</span>
+<span style="color:#ae81ff">第一种后边直接跟shell命令</span>
 
-1. RUN &lt;command&gt;
-2. RUN [&quot;executable&quot;, &quot;param1&quot;, &quot;param2&quot;]
-第一种后边直接跟shell命令
+<span style="color:#75715e"># 如果-c 选项存在，命令就从字符串中读取。如果字符串后有参数，他们将会被分配到参数的位置上，从$0开始。</span>
+<span style="color:#ae81ff">在linux操作系统上默认 /bin/sh -c </span>
 
-# 如果-c 选项存在，命令就从字符串中读取。如果字符串后有参数，他们将会被分配到参数的位置上，从$0开始。
-在linux操作系统上默认 /bin/sh -c 
+<span style="color:#ae81ff">在windows操作系统上默认 cmd /S /C</span>
 
-在windows操作系统上默认 cmd /S /C
+<span style="color:#ae81ff">第二种是类似于函数调用。</span>
 
-第二种是类似于函数调用。
-
-可将executable理解成为可执行文件，后面就是两个参数。
-</code></pre>
-
-<h2 id="user">USER</h2>
-
+<span style="color:#ae81ff">可将executable理解成为可执行文件，后面就是两个参数。</span>
+</code></pre></div><h2 id="user">USER</h2>
 <p>USER命令用于设置运行容器的UID。</p>
-
-<pre><code class="language-yaml"># Usage: USER [UID]
-USER 751
-</code></pre>
-
-<h2 id="volume">VOLUME</h2>
-
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-yaml" data-lang="yaml"><span style="color:#75715e"># Usage: USER [UID]</span>
+<span style="color:#ae81ff">USER 751</span>
+</code></pre></div><h2 id="volume">VOLUME</h2>
 <p>通过dockerfile的 VOLUME 指令可以在镜像中创建挂载点，这样只要通过该镜像创建的容器都有了挂载点。还有一个区别是，通过 VOLUME 指令创建的挂载点，无法指定主机上对应的目录，是自动生成的。</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-yaml" data-lang="yaml"><span style="color:#75715e">#多种写法</span>
+<span style="color:#ae81ff">VOLUME [&#34;/data&#34;]</span>
+<span style="color:#ae81ff">VOLUME /var/log</span>
+<span style="color:#ae81ff">VOLUME /var/log /var/db</span>
 
-<pre><code class="language-yaml">#多种写法
-VOLUME [&quot;/data&quot;]
-VOLUME /var/log
-VOLUME /var/log /var/db
-
-我们通过docker inspect 查看通过该dockerfile创建的镜像生成的容器，可以看到映射到本地的一个地址
-</code></pre>
-
-<h2 id="workdir">WORKDIR</h2>
-
+<span style="color:#ae81ff">我们通过docker inspect 查看通过该dockerfile创建的镜像生成的容器，可以看到映射到本地的一个地址</span>
+</code></pre></div><h2 id="workdir">WORKDIR</h2>
 <p>设置工作目录,为后续的RUN、CMD、ENTRYPOINT指令配置工作目录。可以使用多个WORKDIR指令，后续命令如果参数时相对路径，则会基于之前命令指定的路径.</p>
-
 <h1 id="如何使用dockerfiles">如何使用Dockerfiles</h1>
-
 <p>使用Dockerfiles和手工使用Docker Daemon运行命令一样简单。脚本运行后输出为新的镜像ID。</p>
-
-<pre><code class="language-yaml"># Build an image using the Dockerfile at current location
-# Example: sudo docker build -t [name] .
-sudo docker build -t my_mongodb . 
-</code></pre>
-
-<h2 id="dockerfile-run-cmd-entrypoint命令区别">Dockerfile RUN，CMD，ENTRYPOINT命令区别</h2>
-
-<p>转载地址：<a href="https://www.jianshu.com/p/f0a0f6a43907">https://www.jianshu.com/p/f0a0f6a43907</a></p>
-
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-yaml" data-lang="yaml"><span style="color:#75715e"># Build an image using the Dockerfile at current location</span>
+<span style="color:#75715e"># Example: sudo docker build -t [name] .</span>
+<span style="color:#ae81ff">sudo docker build -t my_mongodb . </span>
+</code></pre></div><h2 id="dockerfile-runcmdentrypoint命令区别">Dockerfile RUN，CMD，ENTRYPOINT命令区别</h2>
+<p>转载地址：https://www.jianshu.com/p/f0a0f6a43907</p>
 <p>Dockerfile中RUN，CMD和ENTRYPOINT都能够用于执行命令，下面是三者的主要用途：</p>
-
 <ul>
 <li>RUN命令执行命令并创建新的镜像层，通常用于安装软件包</li>
 <li>CMD命令设置容器启动后默认执行的命令及其参数，但CMD设置的命令能够被<code>docker run</code>命令后面的命令行参数替换</li>
 <li>ENTRYPOINT配置容器启动时的执行命令（不会被忽略，一定会被执行，即使运行 <code>docker run</code>时指定了其他命令）</li>
 </ul>
-
 <h2 id="dockerfile构建mycat">DockerFile构建mycat</h2>
-
 <p>转载地址： <a href="https://hub.docker.com/r/longhronshens/mycat-docker/dockerfile">https://hub.docker.com/r/longhronshens/mycat-docker/dockerfile</a></p>
-
 <p>创建Dockerfile文件(文件名称要大写)</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-yaml" data-lang="yaml"><span style="color:#ae81ff">FROM centos</span>
+<span style="color:#ae81ff">RUN echo &#34;root:root&#34; | chpasswd</span>
+<span style="color:#ae81ff">RUN yum -y install net-tools</span>
 
-<pre><code class="language-yaml">FROM centos
-RUN echo &quot;root:root&quot; | chpasswd
-RUN yum -y install net-tools
+<span style="color:#75715e"># install java</span>
+<span style="color:#ae81ff">ADD http://mirrors.linuxeye.com/jdk/jdk-7u80-linux-x64.tar.gz /usr/local/</span>
+<span style="color:#ae81ff">RUN cd /usr/local &amp;&amp; tar -zxvf jdk-7u80-linux-x64.tar.gz &amp;&amp; ls -lna</span>
 
-# install java
-ADD http://mirrors.linuxeye.com/jdk/jdk-7u80-linux-x64.tar.gz /usr/local/
-RUN cd /usr/local &amp;&amp; tar -zxvf jdk-7u80-linux-x64.tar.gz &amp;&amp; ls -lna
+<span style="color:#ae81ff">ENV JAVA_HOME /usr/local/jdk1.7.0_80</span>
+<span style="color:#ae81ff">ENV CLASSPATH ${JAVA_HOME}/lib/dt.jar:$JAVA_HOME/lib/tools.jar</span>
+<span style="color:#ae81ff">ENV PATH $PATH:${JAVA_HOME}/bin</span>
 
-ENV JAVA_HOME /usr/local/jdk1.7.0_80
-ENV CLASSPATH ${JAVA_HOME}/lib/dt.jar:$JAVA_HOME/lib/tools.jar
-ENV PATH $PATH:${JAVA_HOME}/bin
+<span style="color:#75715e">#install mycat</span>
+<span style="color:#ae81ff">ADD http://dl.mycat.io/1.6-RELEASE/Mycat-server-1.6-RELEASE-20161028204710-linux.tar.gz /usr/local</span>
+<span style="color:#ae81ff">RUN cd /usr/local &amp;&amp; tar -zxvf Mycat-server-1.6-RELEASE-20161028204710-linux.tar.gz &amp;&amp; ls -lna</span>
 
-#install mycat
-ADD http://dl.mycat.io/1.6-RELEASE/Mycat-server-1.6-RELEASE-20161028204710-linux.tar.gz /usr/local
-RUN cd /usr/local &amp;&amp; tar -zxvf Mycat-server-1.6-RELEASE-20161028204710-linux.tar.gz &amp;&amp; ls -lna
+<span style="color:#ae81ff">VOLUME /usr/local/mycat/conf</span>
 
-VOLUME /usr/local/mycat/conf
+<span style="color:#ae81ff">EXPOSE 8066 9066</span>
+<span style="color:#75715e">#EXPOSE 7066</span>
 
-EXPOSE 8066 9066
-#EXPOSE 7066
+<span style="color:#ae81ff">CMD /usr/local/mycat/bin/mycat console</span>
+</code></pre></div><p>切换到这个文件的目录执行</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-yaml" data-lang="yaml"><span style="color:#75715e">#编译</span>
+<span style="color:#ae81ff">docker build -t mycat .</span>
 
-CMD /usr/local/mycat/bin/mycat console
-</code></pre>
+<span style="color:#75715e">#build --tag, -t:** 镜像的名字及标签，</span>
+<span style="color:#75715e">#通常 name:tag 或者 name 格式；可以在一次构建中为一个镜像设置多个标签</span>
 
-<p>切换到这个文件的目录执行</p>
-
-<pre><code class="language-yaml">#编译
-docker build -t mycat .
-
-#build --tag, -t:** 镜像的名字及标签，
-#通常 name:tag 或者 name 格式；可以在一次构建中为一个镜像设置多个标签
-
-#运行
-docker run -P     #-p 大写， 会默认有一个为容器的对应端口出来
+<span style="color:#75715e">#运行</span>
+<span style="color:#ae81ff">docker run -P    </span> <span style="color:#75715e">#-p 大写， 会默认有一个为容器的对应端口出来</span>
 
 
-</code></pre>
-
+</code></pre></div>
 
                 
                 
@@ -554,29 +477,25 @@ docker run -P     #-p 大写， 会默认有一个为容器的对应端口出来
                     </h4>
                     <ul class="catalog-body"></ul>
                     <nav id="TableOfContents">
-<ul>
-<li><a href="#dockerfile作用">DockerFile作用</a></li>
-<li><a href="#dockerfile-语法">Dockerfile 语法</a>
-<ul>
-<li><a href="#add">ADD</a></li>
-<li><a href="#cmd">CMD</a></li>
-<li><a href="#entrypoint">ENTRYPOINT</a></li>
-<li><a href="#copy">COPY</a></li>
-<li><a href="#env">ENV</a></li>
-<li><a href="#expose">EXPOSE</a></li>
-<li><a href="#from">FROM</a></li>
-<li><a href="#maintainer">MAINTAINER</a></li>
-<li><a href="#run">RUN</a></li>
-<li><a href="#user">USER</a></li>
-<li><a href="#volume">VOLUME</a></li>
-<li><a href="#workdir">WORKDIR</a></li>
-</ul></li>
-<li><a href="#如何使用dockerfiles">如何使用Dockerfiles</a>
-<ul>
-<li><a href="#dockerfile-run-cmd-entrypoint命令区别">Dockerfile RUN，CMD，ENTRYPOINT命令区别</a></li>
-<li><a href="#dockerfile构建mycat">DockerFile构建mycat</a></li>
-</ul></li>
-</ul>
+  <ul>
+    <li><a href="#add">ADD</a></li>
+    <li><a href="#cmd">CMD</a></li>
+    <li><a href="#entrypoint">ENTRYPOINT</a></li>
+    <li><a href="#copy">COPY</a></li>
+    <li><a href="#env">ENV</a></li>
+    <li><a href="#expose">EXPOSE</a></li>
+    <li><a href="#from">FROM</a></li>
+    <li><a href="#maintainer">MAINTAINER</a></li>
+    <li><a href="#run">RUN</a></li>
+    <li><a href="#user">USER</a></li>
+    <li><a href="#volume">VOLUME</a></li>
+    <li><a href="#workdir">WORKDIR</a></li>
+  </ul>
+
+  <ul>
+    <li><a href="#dockerfile-runcmdentrypoint命令区别">Dockerfile RUN，CMD，ENTRYPOINT命令区别</a></li>
+    <li><a href="#dockerfile构建mycat">DockerFile构建mycat</a></li>
+  </ul>
 </nav>
                     <br>
                     <br>
@@ -601,9 +520,6 @@ docker run -P     #-p 大写， 会默认有一个为容器的对应端口出来
                         
                         
                         
-                        <a href="/tags/" title="">
-                            
-                        </a>
                         
                         
                         
@@ -613,101 +529,6 @@ docker run -P     #-p 大写， 会默认有一个为容器的对应端口出来
                         
                         
                         
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        <a href="/tags/qt" title="QT">
-                            QT
-                        </a>
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        <a href="/tags/zookeeper" title="Zookeeper">
-                            Zookeeper
-                        </a>
                         
                         
                         
@@ -747,8 +568,10 @@ docker run -P     #-p 大写， 会默认有一个为容器的对应端口出来
                         
                         
                         
-                        <a href="/tags/elasticsearch" title="elasticSearch">
-                            elasticSearch
+                        
+                        
+                        <a href="/tags/elasticsearch" title="elasticsearch">
+                            elasticsearch
                         </a>
                         
                         
@@ -759,9 +582,27 @@ docker run -P     #-p 大写， 会默认有一个为容器的对应端口出来
                         
                         
                         
-                        <a href="/tags/golang" title="golang">
-                            golang
-                        </a>
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
                         
                         
                         
@@ -799,9 +640,21 @@ docker run -P     #-p 大写， 会默认有一个为容器的对应端口出来
                         
                         
                         
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
                         <a href="/tags/jvm" title="jvm">
                             jvm
                         </a>
+                        
+                        
+                        
+                        
                         
                         
                         
@@ -825,9 +678,19 @@ docker run -P     #-p 大写， 会默认有一个为容器的对应端口出来
                         
                         
                         
+                        
+                        
+                        
+                        
+                        
+                        
                         <a href="/tags/mongodb" title="mongodb">
                             mongodb
                         </a>
+                        
+                        
+                        
+                        
                         
                         
                         
@@ -838,10 +701,6 @@ docker run -P     #-p 大写， 会默认有一个为容器的对应端口出来
                         </a>
                         
                         
-                        
-                        <a href="/tags/mycat" title="mycat">
-                            mycat
-                        </a>
                         
                         
                         
@@ -855,9 +714,17 @@ docker run -P     #-p 大写， 会默认有一个为容器的对应端口出来
                         
                         
                         
-                        <a href="/tags/nginx" title="nginx">
-                            nginx
-                        </a>
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
                         
                         
                         
@@ -881,8 +748,22 @@ docker run -P     #-p 大写， 会默认有一个为容器的对应端口出来
                         
                         
                         
+                        
+                        
                         <a href="/tags/rocketmq" title="rocketmq">
                             rocketmq
+                        </a>
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        <a href="/tags/security%E6%A1%86%E6%9E%B6%E5%AD%A6%E4%B9%A0" title="security框架学习">
+                            security框架学习
                         </a>
                         
                         
@@ -909,17 +790,11 @@ docker run -P     #-p 大写， 会默认有一个为容器的对应端口出来
                         
                         
                         
-                        <a href="/tags/springcloud" title="springCloud">
-                            springCloud
-                        </a>
-                        
-                        
-                        
-                        
-                        
                         <a href="/tags/springboot" title="springboot">
                             springboot
                         </a>
+                        
+                        
                         
                         
                         
@@ -933,6 +808,9 @@ docker run -P     #-p 大写， 会默认有一个为容器的对应端口出来
                         
                         
                         
+                        <a href="/tags/springcloud" title="springcloud">
+                            springcloud
+                        </a>
                         
                         
                         
@@ -958,6 +836,33 @@ docker run -P     #-p 大写， 会默认有一个为容器的对应端口出来
                         
                         
                         
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        <a href="/tags/zookeeper" title="zookeeper">
+                            zookeeper
+                        </a>
                         
                         
                         
@@ -1017,6 +922,8 @@ docker run -P     #-p 大写， 会默认有一个为容器的对应端口出来
                         
                         
                         
+                        
+                        
                         <a href="/tags/%E5%88%86%E5%B8%83%E5%BC%8F%E7%B3%BB%E5%88%97" title="分布式系列">
                             分布式系列
                         </a>
@@ -1036,6 +943,10 @@ docker run -P     #-p 大写， 会默认有一个为容器的对应端口出来
                         
                         
                         
+                        
+                        <a href="/tags/%E5%8D%8F%E8%AE%AE%E6%A0%88" title="协议栈">
+                            协议栈
+                        </a>
                         
                         
                         
@@ -1235,6 +1146,12 @@ docker run -P     #-p 大写， 会默认有一个为容器的对应端口出来
                         
                         
                         
+                        
+                        
+                        
+                        
+                        
+                        
                         <a href="/tags/%E7%BD%91%E7%BB%9C%E7%BC%96%E7%A8%8B" title="网络编程">
                             网络编程
                         </a>
@@ -1258,6 +1175,10 @@ docker run -P     #-p 大写， 会默认有一个为容器的对应端口出来
                         
                         
                         
+                        
+                        <a href="/tags/%E8%AE%A4%E8%AF%81%E5%92%8C%E6%8E%88%E6%9D%83" title="认证和授权">
+                            认证和授权
+                        </a>
                         
                         
                         
@@ -1428,7 +1349,7 @@ docker run -P     #-p 大写， 会默认有一个为容器的对应端口出来
                     
                 </ul>
 		<p class="copyright text-muted">
-                    Copyright &copy;  2020
+                    Copyright &copy;  2021
                     <br>
                     <a href="https://themes.gohugo.io/hugo-theme-cleanwhite">CleanWhite Hugo Theme</a> by <a href="https://zhaohuabing.com">Huabing</a> |
                     <iframe

@@ -97,15 +97,15 @@
                     </li>
                     
                     <li>
-                        <a href="/categories/english">English</a>
+                        <a href="/categories/english">english</a>
                     </li>
                     
                     <li>
-                        <a href="/categories/life">Life</a>
+                        <a href="/categories/life">life</a>
                     </li>
                     
                     <li>
-                        <a href="/categories/tech">Tech</a>
+                        <a href="/categories/tech">tech</a>
                     </li>
                     
 
@@ -237,176 +237,128 @@
                 
                 
                 
-                
-
-<p>[TOC]</p>
-
+                <p>[TOC]</p>
 <p><strong>说明： 本学习主要对尚硅谷大数据研发部《zookeeper视频》记录，一下文字来源这个视频PPT</strong></p>
-
 <p><strong>注意：</strong> <strong>Zookeeper 版本 3.4</strong></p>
-
 <h1 id="zookeeper入门">Zookeeper入门</h1>
-
 <p>zookeeper是一个开源的分布式的，为分布式应用<strong>提供协调服务</strong>的项目。</p>
-
 <h2 id="工作机制">工作机制</h2>
-
-<p><img src="/img/4-26-1.png" alt="4-26-1" /></p>
-
+<p><img src="/img/4-26-1.png" alt="4-26-1"></p>
 <h2 id="特点">特点</h2>
-
-<p><img src="/img/4-26-2.png" alt="4-26-2" /></p>
-
+<p><img src="/img/4-26-2.png" alt="4-26-2"></p>
 <h2 id="数据结构">数据结构</h2>
-
-<p><img src="/img/4-26-3.png" alt="4-26-3" /></p>
-
+<p><img src="/img/4-26-3.png" alt="4-26-3"></p>
 <h2 id="应用场景">应用场景</h2>
-
 <h3 id="统一命名服务">统一命名服务</h3>
-
-<p><img src="/img/4-26-4.png" alt="4-26-4" /></p>
-
+<p><img src="/img/4-26-4.png" alt="4-26-4"></p>
 <h3 id="统一配置管理">统一配置管理</h3>
-
-<p><img src="/img/4-26-5.png" alt="4-26-5" /></p>
-
+<p><img src="/img/4-26-5.png" alt="4-26-5"></p>
 <h3 id="统一集群管理">统一集群管理</h3>
-
-<p><img src="/img/4-26-6.png" alt="4-26-6" /></p>
-
+<p><img src="/img/4-26-6.png" alt="4-26-6"></p>
 <h3 id="服务器动态上下线">服务器动态上下线</h3>
-
-<p><img src="/img/4-26-7.png" alt="4-26-7" /></p>
-
+<p><img src="/img/4-26-7.png" alt="4-26-7"></p>
 <h3 id="软负载均衡">软负载均衡</h3>
-
-<p><img src="/img/4-26-8.png" alt="4-26-8" /></p>
-
+<p><img src="/img/4-26-8.png" alt="4-26-8"></p>
 <h1 id="zookeeper集群安装">Zookeeper集群安装</h1>
+<h2 id="创建docker-composeyml">创建docker-compose.yml</h2>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-yaml" data-lang="yaml"><span style="color:#f92672">version</span>: <span style="color:#e6db74">&#39;3.4&#39;</span>
 
-<h2 id="创建docker-compose-yml">创建docker-compose.yml</h2>
+<span style="color:#f92672">services</span>:
+  <span style="color:#f92672">zoo1</span>:
+    <span style="color:#f92672">image</span>: <span style="color:#ae81ff">zookeeper</span>
+    <span style="color:#f92672">restart</span>: <span style="color:#ae81ff">always</span>
+    <span style="color:#f92672">hostname</span>: <span style="color:#ae81ff">zoo1</span>
+    <span style="color:#f92672">ports</span>:
+      - <span style="color:#ae81ff">2181</span>:<span style="color:#ae81ff">2181</span>
+    <span style="color:#f92672">environment</span>:
+      <span style="color:#f92672">ZOO_MY_ID</span>: <span style="color:#ae81ff">1</span>
+      <span style="color:#f92672">ZOO_SERVERS</span>: <span style="color:#ae81ff">server.1=0.0.0.0:2888:3888 server.2=zoo2:2888:3888 server.3=zoo3:2888:3888</span>
 
-<pre><code class="language-yaml">version: '3.4'
+  <span style="color:#f92672">zoo2</span>:
+    <span style="color:#f92672">image</span>: <span style="color:#ae81ff">zookeeper</span>
+    <span style="color:#f92672">restart</span>: <span style="color:#ae81ff">always</span>
+    <span style="color:#f92672">hostname</span>: <span style="color:#ae81ff">zoo2</span>
+    <span style="color:#f92672">ports</span>:
+      - <span style="color:#ae81ff">2182</span>:<span style="color:#ae81ff">2181</span>
+    <span style="color:#f92672">environment</span>:
+      <span style="color:#f92672">ZOO_MY_ID</span>: <span style="color:#ae81ff">2</span>
+      <span style="color:#f92672">ZOO_SERVERS</span>: <span style="color:#ae81ff">server.1=zoo1:2888:3888 server.2=0.0.0.0:2888:3888 server.3=zoo3:2888:3888</span>
 
-services:
-  zoo1:
-    image: zookeeper
-    restart: always
-    hostname: zoo1
-    ports:
-      - 2181:2181
-    environment:
-      ZOO_MY_ID: 1
-      ZOO_SERVERS: server.1=0.0.0.0:2888:3888 server.2=zoo2:2888:3888 server.3=zoo3:2888:3888
+  <span style="color:#f92672">zoo3</span>:
+    <span style="color:#f92672">image</span>: <span style="color:#ae81ff">zookeeper</span>
+    <span style="color:#f92672">restart</span>: <span style="color:#ae81ff">always</span>
+    <span style="color:#f92672">hostname</span>: <span style="color:#ae81ff">zoo3</span>
+    <span style="color:#f92672">ports</span>:
+      - <span style="color:#ae81ff">2183</span>:<span style="color:#ae81ff">2181</span>
+    <span style="color:#f92672">environment</span>:
+      <span style="color:#f92672">ZOO_MY_ID</span>: <span style="color:#ae81ff">3</span>
+      <span style="color:#f92672">ZOO_SERVERS</span>: <span style="color:#ae81ff">server.1=zoo1:2888:3888 server.2=zoo2:2888:3888 server.3=0.0.0.0:2888:3888</span>
+</code></pre></div><h2 id="运行查看服务">运行查看服务</h2>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-yaml" data-lang="yaml"><span style="color:#75715e">#运行</span>
+<span style="color:#ae81ff">docker-compose up -d</span>
 
-  zoo2:
-    image: zookeeper
-    restart: always
-    hostname: zoo2
-    ports:
-      - 2182:2181
-    environment:
-      ZOO_MY_ID: 2
-      ZOO_SERVERS: server.1=zoo1:2888:3888 server.2=0.0.0.0:2888:3888 server.3=zoo3:2888:3888
+<span style="color:#75715e">#查看运行服务 </span>
+<span style="color:#ae81ff">docker-compose ps </span>
 
-  zoo3:
-    image: zookeeper
-    restart: always
-    hostname: zoo3
-    ports:
-      - 2183:2181
-    environment:
-      ZOO_MY_ID: 3
-      ZOO_SERVERS: server.1=zoo1:2888:3888 server.2=zoo2:2888:3888 server.3=0.0.0.0:2888:3888
-</code></pre>
-
-<h2 id="运行查看服务">运行查看服务</h2>
-
-<pre><code class="language-yaml">#运行
-docker-compose up -d
-
-#查看运行服务 
-docker-compose ps 
-
-#如下：
-➜  zookeeper docker-compose ps
-      Name                    Command               State                     Ports
+<span style="color:#75715e">#如下：</span>
+<span style="color:#ae81ff">➜  zookeeper docker-compose ps</span>
+      <span style="color:#ae81ff">Name                    Command               State                     Ports</span>
 ------------------------------------------------------------------------------------------------------
-zookeeper_zoo1_1   /docker-entrypoint.sh zkSe ...   Up      0.0.0.0:2181-&gt;2181/tcp, 2888/tcp, 3888/tcp
-zookeeper_zoo2_1   /docker-entrypoint.sh zkSe ...   Up      0.0.0.0:2182-&gt;2181/tcp, 2888/tcp, 3888/tcp
-zookeeper_zoo3_1   /docker-entrypoint.sh zkSe ...   Up      0.0.0.0:2183-&gt;2181/tcp, 2888/tcp, 3888/tcp
+<span style="color:#ae81ff">zookeeper_zoo1_1   /docker-entrypoint.sh zkSe ...   Up      0.0.0.0:2181-&gt;2181/tcp, 2888/tcp, 3888/tcp</span>
+<span style="color:#ae81ff">zookeeper_zoo2_1   /docker-entrypoint.sh zkSe ...   Up      0.0.0.0:2182-&gt;2181/tcp, 2888/tcp, 3888/tcp</span>
+<span style="color:#ae81ff">zookeeper_zoo3_1   /docker-entrypoint.sh zkSe ...   Up      0.0.0.0:2183-&gt;2181/tcp, 2888/tcp, 3888/tcp</span>
 
-#进入其中一个容器
-➜  zookeeper docker-compose exec zoo1 /bin/bash
-</code></pre>
-
-<h2 id="集群搭建修改">集群搭建修改</h2>
-
+<span style="color:#75715e">#进入其中一个容器</span>
+<span style="color:#ae81ff">➜  zookeeper docker-compose exec zoo1 /bin/bash</span>
+</code></pre></div><h2 id="集群搭建修改">集群搭建修改</h2>
 <p>用docker-compose进行集群搭建可以看出， 主要是下面这个地方的修改，</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-yaml" data-lang="yaml"> <span style="color:#f92672">environment</span>:
+      <span style="color:#f92672">ZOO_MY_ID</span>: <span style="color:#ae81ff">2</span>
+      <span style="color:#f92672">ZOO_SERVERS</span>: <span style="color:#ae81ff">server.1=zoo1:2888:3888 server.2=0.0.0.0:2888:3888 server.3=zoo3:2888:3888</span>
+</code></pre></div><p>进入容器中查看：</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-yaml" data-lang="yaml"><span style="color:#75715e">#myid 位置和值 </span>
+<span style="color:#ae81ff">bash-4.4# pwd</span>
+<span style="color:#ae81ff">/data</span>
+<span style="color:#ae81ff">bash-4.4# ls</span>
+<span style="color:#ae81ff">myid       version-2</span>
+<span style="color:#ae81ff">bash-4.4# cat myid</span>
+<span style="color:#ae81ff">2</span>
+<span style="color:#ae81ff">bash-4.4#</span>
 
-<pre><code class="language-yaml"> environment:
-      ZOO_MY_ID: 2
-      ZOO_SERVERS: server.1=zoo1:2888:3888 server.2=0.0.0.0:2888:3888 server.3=zoo3:2888:3888
-</code></pre>
-
-<p>进入容器中查看：</p>
-
-<pre><code class="language-yaml">#myid 位置和值 
-bash-4.4# pwd
-/data
-bash-4.4# ls
-myid       version-2
-bash-4.4# cat myid
-2
-bash-4.4#
-
-#zoo.cfg中配置了server服务组
-bash-4.4# cat zoo.cfg
-clientPort=2181
-dataDir=/data
-dataLogDir=/datalog
-tickTime=2000
-initLimit=5
-syncLimit=2
-autopurge.snapRetainCount=3
-autopurge.purgeInterval=0
-maxClientCnxns=60
-server.1=zoo1:2888:3888
-server.2=0.0.0.0:2888:3888
-server.3=zoo3:2888:3888
-bash-4.4#
-</code></pre>
-
-<p>如果是Linux中配置，也只需要修改这两个地方。</p>
-
+<span style="color:#75715e">#zoo.cfg中配置了server服务组</span>
+<span style="color:#ae81ff">bash-4.4# cat zoo.cfg</span>
+<span style="color:#ae81ff">clientPort=2181</span>
+<span style="color:#ae81ff">dataDir=/data</span>
+<span style="color:#ae81ff">dataLogDir=/datalog</span>
+<span style="color:#ae81ff">tickTime=2000</span>
+<span style="color:#ae81ff">initLimit=5</span>
+<span style="color:#ae81ff">syncLimit=2</span>
+<span style="color:#ae81ff">autopurge.snapRetainCount=3</span>
+<span style="color:#ae81ff">autopurge.purgeInterval=0</span>
+<span style="color:#ae81ff">maxClientCnxns=60</span>
+<span style="color:#ae81ff">server.1=zoo1:2888:3888</span>
+<span style="color:#ae81ff">server.2=0.0.0.0:2888:3888</span>
+<span style="color:#ae81ff">server.3=zoo3:2888:3888</span>
+<span style="color:#ae81ff">bash-4.4#</span>
+</code></pre></div><p>如果是Linux中配置，也只需要修改这两个地方。</p>
 <p>其中zoo.cfg的修改就在下载的Zookeeper包，解压里面的conf里面的<strong>zoo.cfg</strong>直接修改。<strong>myid</strong>创建在zoo.cfg配置文件中  dataDir=/data ， 这个路径下。</p>
-
 <h2 id="查看服务启动状态">查看服务启动状态</h2>
-
-<pre><code class="language-shell">#查看服务状态 
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-shell" data-lang="shell"><span style="color:#75715e">#查看服务状态 </span>
 bash-4.4# pwd
 /zookeeper-3.4.14/bin
 bash-4.4# ./zkServer.sh status
 ZooKeeper JMX enabled by default
 Using config: /conf/zoo.cfg
-Mode: follower  #这里是follower角色
+Mode: follower  <span style="color:#75715e">#这里是follower角色</span>
 
-#启动客户端
+<span style="color:#75715e">#启动客户端</span>
 bash-4.4# ./zkCli.sh
-</code></pre>
-
-<h2 id="工具连接zookeeper">工具连接Zookeeper</h2>
-
-<p>zookeeper-visualizer这个工具很好用，下载地址：<a href="https://github.com/xin497668869/zookeeper-visualizer，效果图如下：">https://github.com/xin497668869/zookeeper-visualizer，效果图如下：</a></p>
-
-<p><img src="/img/4-26-9.png" alt="4-26-9" /></p>
-
-<h2 id="zoo-cfg配置文件">zoo.cfg配置文件</h2>
-
-<p>转载地址：<a href="https://blog.csdn.net/lan12334321234/article/details/70049945">https://blog.csdn.net/lan12334321234/article/details/70049945</a></p>
-
-<pre><code class="language-properties">clientPort=2181
+</code></pre></div><h2 id="工具连接zookeeper">工具连接Zookeeper</h2>
+<p>zookeeper-visualizer这个工具很好用，下载地址：https://github.com/xin497668869/zookeeper-visualizer，效果图如下：</p>
+<p><img src="/img/4-26-9.png" alt="4-26-9"></p>
+<h2 id="zoocfg配置文件">zoo.cfg配置文件</h2>
+<p>转载地址：https://blog.csdn.net/lan12334321234/article/details/70049945</p>
+<pre tabindex="0"><code class="language-properties" data-lang="properties">clientPort=2181
 dataDir=/data
 dataLogDir=/datalog
 tickTime=2000
@@ -422,85 +374,45 @@ server.3=zoo3:2888:3888
  #2181：对cline端提供服务
  #2888：集群内机器通讯使用（Leader监听此端口），副本数据同步端口。
  #3888：选举leader使用
-</code></pre>
-
-<h3 id="clientport">clientPort</h3>
-
+</code></pre><h3 id="clientport">clientPort</h3>
 <p>客户端连接的接口，客户端连接zookeeper服务器的端口，zookeeper会监听这个端口，接收客户端的请求访问！这个端口默认是2181。</p>
-
 <h3 id="datadir">dataDir</h3>
-
 <p>该属性对应的目录是用来存放myid信息跟一些版本，日志，跟服务器唯一的ID信息等。</p>
-
 <h3 id="datalogdir">dataLogDir</h3>
-
 <p>是事务日志目录</p>
-
 <h3 id="ticktime">tickTime</h3>
-
 <p>客户端与服务器或者服务器与服务器之间维持心跳，也就是每个tickTime时间就会发送一次心跳。通过心跳不仅能够用来监听机器的工作状态，还可以通过心跳来控制Flower跟Leader的通信时间，默认情况下FL的会话时常是心跳间隔的两倍。</p>
-
 <h3 id="initlimit">initLimit</h3>
-
 <p>集群中的follower服务器(F)与leader服务器(L)之间<strong>初始连接</strong>时能容忍的最多心跳数（tickTime的数量）</p>
-
 <h3 id="synclimit">syncLimit</h3>
-
 <p>集群中flower服务器（F）跟leader（L）服务器之间的请求和答应最多能容忍的心跳数。</p>
-
-<h3 id="autopurge-purgeinterval">autopurge.purgeInterval</h3>
-
+<h3 id="autopurgepurgeinterval">autopurge.purgeInterval</h3>
 <p>在上文中已经提到，3.4.0及之后版本，ZK提供了自动清理事务日志和快照文件的功能，这个参数指定了清理频率，单位是小时，需要配置一个1或更大的整数，默认是0，表示不开启自动清理功能。</p>
-
-<h3 id="autopurge-snapretaincount">autopurge.snapRetainCount</h3>
-
+<h3 id="autopurgesnapretaincount">autopurge.snapRetainCount</h3>
 <p>这个参数和上面的参数搭配使用，这个参数指定了需要保留的文件数目。默认是保留3个。</p>
-
 <h3 id="maxclientcnxns">maxClientCnxns</h3>
-
 <p>单个客户端与单台服务器之间的连接数的限制，是ip级别的，默认是60，如果设置为0，那么表明不作任何限制。请注意这个限制的使用范围，<strong>仅仅是单台客户端机器与单台ZK服务器之间的连接数限制</strong>，不是针对指定客户端IP，也不是ZK集群的连接数限制，也不是单台ZK对所有客户端的连接数限制。</p>
-
-<h3 id="server-a-b-c-d">server.A=B：C：D：</h3>
-
+<h3 id="serverabcd">server.A=B：C：D：</h3>
 <p>server.A=B：C：D：其中 A 是一个数字，表示这个是第几号服务器；<strong>B 是这个服务器的 ip 地址</strong>；C 表示的是这个服务器与集群中的 Leader 服务器交换信息的端口；D 表示的是万一集群中的 Leader 服务器挂了，需要一个端口来重新进行选举，选出一个新的 Leader，而这个端口就是用来执行选举时服务器相互通信的端口。如果是伪集群的配置方式，由于 B 都是一样，所以不同的 Zookeeper 实例通信端口号不能一样，所以要给它们分配不同的端口号。<strong>Zookeeper 启动时会读取dataDir里面的myid文件，拿到里面的数据与 zoo.cfg 里面的配置信息比较从而判断到底是那个 server。</strong></p>
-
 <h1 id="zookeeper内部原理">Zookeeper内部原理</h1>
-
 <h2 id="选举机制">选举机制</h2>
-
-<p><img src="/img/4-26-10.png" alt="4-26-10" /></p>
-
+<p><img src="/img/4-26-10.png" alt="4-26-10"></p>
 <h3 id="全新集群选举">全新集群选举</h3>
-
 <p>也就是服务依次启动的时候，刚开始启动。</p>
-
-<p><img src="/img/4-26-11.png" alt="4-26-11" /></p>
-
+<p><img src="/img/4-26-11.png" alt="4-26-11"></p>
 <p>其中需要注意， 当1号机器，收到3号机器发送过来的信息后，他会把投2号的一票，去投3号，2号的也会把自己的一票投3号机器， 相当于一个投票池子里面， 每一台机器只能投一票，当发现比自己myid大的时候，就把投给自己唯一个票投给比他大的myid。</p>
-
 <p><strong>注意：在初始启动时候， myid的值越大，机会就大，其他机器认为你比他要牛。</strong></p>
-
 <h3 id="非全新集群选举">非全新集群选举</h3>
-
-<p><img src="/img/4-26-12.png" alt="4-26-12" /></p>
-
-<h3 id="脑裂是什么-zookeeper是如何解决的">脑裂是什么？Zookeeper是如何解决的？</h3>
-
-<p>转载地址：<a href="https://juejin.im/post/5d36c2f25188257f6a209d37">https://juejin.im/post/5d36c2f25188257f6a209d37</a></p>
-
+<p><img src="/img/4-26-12.png" alt="4-26-12"></p>
+<h3 id="脑裂是什么zookeeper是如何解决的">脑裂是什么？Zookeeper是如何解决的？</h3>
+<p>转载地址：https://juejin.im/post/5d36c2f25188257f6a209d37</p>
 <p>也就是过半机制的选举Leader。</p>
-
 <h2 id="节点类型">节点类型</h2>
-
-<p><img src="/img/4-26-13.png" alt="4-26-13" /></p>
-
+<p><img src="/img/4-26-13.png" alt="4-26-13"></p>
 <h2 id="监听器的原理">监听器的原理</h2>
-
-<p><img src="/img/4-26-16.png" alt="4-26-16" /></p>
-
+<p><img src="/img/4-26-16.png" alt="4-26-16"></p>
 <h2 id="写数据流程">写数据流程</h2>
-
-<p><img src="/img/4-26-17.png" alt="4-26-17" /></p>
+<p><img src="/img/4-26-17.png" alt="4-26-17"></p>
 
 
                 
@@ -608,55 +520,55 @@ server.3=zoo3:2888:3888
                     </h4>
                     <ul class="catalog-body"></ul>
                     <nav id="TableOfContents">
-<ul>
-<li><a href="#zookeeper入门">Zookeeper入门</a>
-<ul>
-<li><a href="#工作机制">工作机制</a></li>
-<li><a href="#特点">特点</a></li>
-<li><a href="#数据结构">数据结构</a></li>
-<li><a href="#应用场景">应用场景</a>
-<ul>
-<li><a href="#统一命名服务">统一命名服务</a></li>
-<li><a href="#统一配置管理">统一配置管理</a></li>
-<li><a href="#统一集群管理">统一集群管理</a></li>
-<li><a href="#服务器动态上下线">服务器动态上下线</a></li>
-<li><a href="#软负载均衡">软负载均衡</a></li>
-</ul></li>
-</ul></li>
-<li><a href="#zookeeper集群安装">Zookeeper集群安装</a>
-<ul>
-<li><a href="#创建docker-compose-yml">创建docker-compose.yml</a></li>
-<li><a href="#运行查看服务">运行查看服务</a></li>
-<li><a href="#集群搭建修改">集群搭建修改</a></li>
-<li><a href="#查看服务启动状态">查看服务启动状态</a></li>
-<li><a href="#工具连接zookeeper">工具连接Zookeeper</a></li>
-<li><a href="#zoo-cfg配置文件">zoo.cfg配置文件</a>
-<ul>
-<li><a href="#clientport">clientPort</a></li>
-<li><a href="#datadir">dataDir</a></li>
-<li><a href="#datalogdir">dataLogDir</a></li>
-<li><a href="#ticktime">tickTime</a></li>
-<li><a href="#initlimit">initLimit</a></li>
-<li><a href="#synclimit">syncLimit</a></li>
-<li><a href="#autopurge-purgeinterval">autopurge.purgeInterval</a></li>
-<li><a href="#autopurge-snapretaincount">autopurge.snapRetainCount</a></li>
-<li><a href="#maxclientcnxns">maxClientCnxns</a></li>
-<li><a href="#server-a-b-c-d">server.A=B：C：D：</a></li>
-</ul></li>
-</ul></li>
-<li><a href="#zookeeper内部原理">Zookeeper内部原理</a>
-<ul>
-<li><a href="#选举机制">选举机制</a>
-<ul>
-<li><a href="#全新集群选举">全新集群选举</a></li>
-<li><a href="#非全新集群选举">非全新集群选举</a></li>
-<li><a href="#脑裂是什么-zookeeper是如何解决的">脑裂是什么？Zookeeper是如何解决的？</a></li>
-</ul></li>
-<li><a href="#节点类型">节点类型</a></li>
-<li><a href="#监听器的原理">监听器的原理</a></li>
-<li><a href="#写数据流程">写数据流程</a></li>
-</ul></li>
-</ul>
+  <ul>
+    <li><a href="#工作机制">工作机制</a></li>
+    <li><a href="#特点">特点</a></li>
+    <li><a href="#数据结构">数据结构</a></li>
+    <li><a href="#应用场景">应用场景</a>
+      <ul>
+        <li><a href="#统一命名服务">统一命名服务</a></li>
+        <li><a href="#统一配置管理">统一配置管理</a></li>
+        <li><a href="#统一集群管理">统一集群管理</a></li>
+        <li><a href="#服务器动态上下线">服务器动态上下线</a></li>
+        <li><a href="#软负载均衡">软负载均衡</a></li>
+      </ul>
+    </li>
+  </ul>
+
+  <ul>
+    <li><a href="#创建docker-composeyml">创建docker-compose.yml</a></li>
+    <li><a href="#运行查看服务">运行查看服务</a></li>
+    <li><a href="#集群搭建修改">集群搭建修改</a></li>
+    <li><a href="#查看服务启动状态">查看服务启动状态</a></li>
+    <li><a href="#工具连接zookeeper">工具连接Zookeeper</a></li>
+    <li><a href="#zoocfg配置文件">zoo.cfg配置文件</a>
+      <ul>
+        <li><a href="#clientport">clientPort</a></li>
+        <li><a href="#datadir">dataDir</a></li>
+        <li><a href="#datalogdir">dataLogDir</a></li>
+        <li><a href="#ticktime">tickTime</a></li>
+        <li><a href="#initlimit">initLimit</a></li>
+        <li><a href="#synclimit">syncLimit</a></li>
+        <li><a href="#autopurgepurgeinterval">autopurge.purgeInterval</a></li>
+        <li><a href="#autopurgesnapretaincount">autopurge.snapRetainCount</a></li>
+        <li><a href="#maxclientcnxns">maxClientCnxns</a></li>
+        <li><a href="#serverabcd">server.A=B：C：D：</a></li>
+      </ul>
+    </li>
+  </ul>
+
+  <ul>
+    <li><a href="#选举机制">选举机制</a>
+      <ul>
+        <li><a href="#全新集群选举">全新集群选举</a></li>
+        <li><a href="#非全新集群选举">非全新集群选举</a></li>
+        <li><a href="#脑裂是什么zookeeper是如何解决的">脑裂是什么？Zookeeper是如何解决的？</a></li>
+      </ul>
+    </li>
+    <li><a href="#节点类型">节点类型</a></li>
+    <li><a href="#监听器的原理">监听器的原理</a></li>
+    <li><a href="#写数据流程">写数据流程</a></li>
+  </ul>
 </nav>
                     <br>
                     <br>
@@ -681,9 +593,6 @@ server.3=zoo3:2888:3888
                         
                         
                         
-                        <a href="/tags/" title="">
-                            
-                        </a>
                         
                         
                         
@@ -693,101 +602,6 @@ server.3=zoo3:2888:3888
                         
                         
                         
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        <a href="/tags/qt" title="QT">
-                            QT
-                        </a>
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        <a href="/tags/zookeeper" title="Zookeeper">
-                            Zookeeper
-                        </a>
                         
                         
                         
@@ -827,8 +641,10 @@ server.3=zoo3:2888:3888
                         
                         
                         
-                        <a href="/tags/elasticsearch" title="elasticSearch">
-                            elasticSearch
+                        
+                        
+                        <a href="/tags/elasticsearch" title="elasticsearch">
+                            elasticsearch
                         </a>
                         
                         
@@ -839,9 +655,27 @@ server.3=zoo3:2888:3888
                         
                         
                         
-                        <a href="/tags/golang" title="golang">
-                            golang
-                        </a>
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
                         
                         
                         
@@ -879,9 +713,21 @@ server.3=zoo3:2888:3888
                         
                         
                         
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
                         <a href="/tags/jvm" title="jvm">
                             jvm
                         </a>
+                        
+                        
+                        
+                        
                         
                         
                         
@@ -905,9 +751,19 @@ server.3=zoo3:2888:3888
                         
                         
                         
+                        
+                        
+                        
+                        
+                        
+                        
                         <a href="/tags/mongodb" title="mongodb">
                             mongodb
                         </a>
+                        
+                        
+                        
+                        
                         
                         
                         
@@ -918,10 +774,6 @@ server.3=zoo3:2888:3888
                         </a>
                         
                         
-                        
-                        <a href="/tags/mycat" title="mycat">
-                            mycat
-                        </a>
                         
                         
                         
@@ -935,9 +787,17 @@ server.3=zoo3:2888:3888
                         
                         
                         
-                        <a href="/tags/nginx" title="nginx">
-                            nginx
-                        </a>
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
                         
                         
                         
@@ -961,8 +821,22 @@ server.3=zoo3:2888:3888
                         
                         
                         
+                        
+                        
                         <a href="/tags/rocketmq" title="rocketmq">
                             rocketmq
+                        </a>
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        <a href="/tags/security%E6%A1%86%E6%9E%B6%E5%AD%A6%E4%B9%A0" title="security框架学习">
+                            security框架学习
                         </a>
                         
                         
@@ -989,17 +863,11 @@ server.3=zoo3:2888:3888
                         
                         
                         
-                        <a href="/tags/springcloud" title="springCloud">
-                            springCloud
-                        </a>
-                        
-                        
-                        
-                        
-                        
                         <a href="/tags/springboot" title="springboot">
                             springboot
                         </a>
+                        
+                        
                         
                         
                         
@@ -1013,6 +881,9 @@ server.3=zoo3:2888:3888
                         
                         
                         
+                        <a href="/tags/springcloud" title="springcloud">
+                            springcloud
+                        </a>
                         
                         
                         
@@ -1038,6 +909,33 @@ server.3=zoo3:2888:3888
                         
                         
                         
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        <a href="/tags/zookeeper" title="zookeeper">
+                            zookeeper
+                        </a>
                         
                         
                         
@@ -1097,6 +995,8 @@ server.3=zoo3:2888:3888
                         
                         
                         
+                        
+                        
                         <a href="/tags/%E5%88%86%E5%B8%83%E5%BC%8F%E7%B3%BB%E5%88%97" title="分布式系列">
                             分布式系列
                         </a>
@@ -1116,6 +1016,10 @@ server.3=zoo3:2888:3888
                         
                         
                         
+                        
+                        <a href="/tags/%E5%8D%8F%E8%AE%AE%E6%A0%88" title="协议栈">
+                            协议栈
+                        </a>
                         
                         
                         
@@ -1315,6 +1219,12 @@ server.3=zoo3:2888:3888
                         
                         
                         
+                        
+                        
+                        
+                        
+                        
+                        
                         <a href="/tags/%E7%BD%91%E7%BB%9C%E7%BC%96%E7%A8%8B" title="网络编程">
                             网络编程
                         </a>
@@ -1338,6 +1248,10 @@ server.3=zoo3:2888:3888
                         
                         
                         
+                        
+                        <a href="/tags/%E8%AE%A4%E8%AF%81%E5%92%8C%E6%8E%88%E6%9D%83" title="认证和授权">
+                            认证和授权
+                        </a>
                         
                         
                         
@@ -1508,7 +1422,7 @@ server.3=zoo3:2888:3888
                     
                 </ul>
 		<p class="copyright text-muted">
-                    Copyright &copy;  2020
+                    Copyright &copy;  2021
                     <br>
                     <a href="https://themes.gohugo.io/hugo-theme-cleanwhite">CleanWhite Hugo Theme</a> by <a href="https://zhaohuabing.com">Huabing</a> |
                     <iframe

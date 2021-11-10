@@ -97,15 +97,15 @@
                     </li>
                     
                     <li>
-                        <a href="/categories/english">English</a>
+                        <a href="/categories/english">english</a>
                     </li>
                     
                     <li>
-                        <a href="/categories/life">Life</a>
+                        <a href="/categories/life">life</a>
                     </li>
                     
                     <li>
-                        <a href="/categories/tech">Tech</a>
+                        <a href="/categories/tech">tech</a>
                     </li>
                     
 
@@ -237,73 +237,42 @@
                 
                 
                 
-                
-
-<p>[TOC]</p>
-
-<p><strong>转载地址：<a href="https://www.cnblogs.com/jamaler/p/12222176.html">https://www.cnblogs.com/jamaler/p/12222176.html</a></strong></p>
-
+                <p>[TOC]</p>
+<p><strong>转载地址：https://www.cnblogs.com/jamaler/p/12222176.html</strong></p>
 <h1 id="innodb-引擎中的索引类型">InnoDB 引擎中的索引类型</h1>
-
 <p>索引对数据库有多重要，我想大家都已经知道了吧，关于索引可能大家会对它多少有一些误解，<strong>首先索引是一种数据结构，并且索引不是越多越好</strong>。合理的索引可以提高存储引擎对数据的查询效率。</p>
-
 <p>形象一点来说呢，索引跟书本的目录一样，能否快速的查找到你需要的信息，取决于你设计的目录是否合理。</p>
-
 <p>MySQL 数据库有很多种索引，每种存储引擎的索引都不太一样，这篇文章就介绍一下 InnoDB 引擎种的索引，在 InnoDB 引擎中有三种索引：</p>
-
 <ul>
 <li>B-Tree 索引</li>
 <li>哈希索引</li>
 <li>全文索引</li>
 </ul>
-
 <h1 id="b-tree-索引">B-Tree 索引</h1>
-
 <p>B-Tree 索引是 InnoDB 引擎的默认索引，如果我们没有特别指定索引，那么说的就是 B-Tree 索引。在 InnoDB 引擎中使用 B+树来实现 B-Tree 索引，关于 B+树的知识就百度吧，我也讲不清楚。</p>
-
 <p>在 B-Tree 索引中又有<strong>主键索引和普通索引</strong>之分，分别来了解一下：</p>
-
-<h2 id="1-主键索引">1、主键索引</h2>
-
+<h2 id="1主键索引">1、主键索引</h2>
 <p>主键索引也叫聚集索引，<strong>是按照主键构建得一棵 B+树，只要建立了主键就会自动加上索引</strong>，主键索引得特点是：<strong>叶子节点上存放着整张表得行记录数据，所以叶子节点也叫数据页</strong>。</p>
-
 <p>正是因为这个特点，对于主键的排序查找和范围查找速度非常快，因为索引上就有用户需要查询的数据，所以不会要回表查询，这样就加快了查询速度，关于什么是回表，普通索引的时候再聊一聊。</p>
-
-<h2 id="2-普通索引">2、普通索引</h2>
-
+<h2 id="2普通索引">2、普通索引</h2>
 <p>普通索引也叫二级索引，跟主键索引的主要区别在于叶子结点没有存放行记录的全部数据，只包含了需要的键值，还有一个标签，用来告诉存储引擎在哪里可以找到这行数据。</p>
-
 <p>举个例子，让我们刚好的理解普通索引，如下面这张表：</p>
-
-<pre><code class="language-sql">mysql&gt; create table T(
-id int primary key, 
-k int not null, 
-name varchar(16),
-index (k)) engine=InnoDB;
-</code></pre>
-
-<p>K 索引就是普通索引，除了主键之外的索引都是普通索引。</p>
-
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-sql" data-lang="sql">mysql<span style="color:#f92672">&gt;</span> <span style="color:#66d9ef">create</span> <span style="color:#66d9ef">table</span> T(
+id int <span style="color:#66d9ef">primary</span> <span style="color:#66d9ef">key</span>, 
+k int <span style="color:#66d9ef">not</span> <span style="color:#66d9ef">null</span>, 
+name varchar(<span style="color:#ae81ff">16</span>),
+<span style="color:#66d9ef">index</span> (k)) engine<span style="color:#f92672">=</span>InnoDB;
+</code></pre></div><p>K 索引就是普通索引，除了主键之外的索引都是普通索引。</p>
 <p>普通索引因为行记录里没有数据的全部信息，<strong>在使用普通索引查询时，需要现在普通索引树上搜索一遍，再回到主键索引树上查询到需要的信息，这个过程也叫回表</strong>。</p>
-
 <p>可能回表不太好理解，我引用极客时间《MySQL实战45讲》里面的例子，先看下面这张图：</p>
-
-<p><img src="/img/16fc729b60a85e96.png" alt="16fc729b60a85e96" /></p>
-
+<p><img src="/img/16fc729b60a85e96.png" alt="16fc729b60a85e96"></p>
 <p>左边的是主键索引树，右边的是 K 索引树，假设我们现在要执行<code>select * from T where k=5</code> 语句，即普通索引查询方式，则需要先搜索 k 索引树，得到 K=5 对应的 ID 值为 500，再到 ID 索引树搜索一次，这个过程称为回表。</p>
-
 <h1 id="哈希索引">哈希索引</h1>
-
 <p>哈希索引在 InnoDB 引擎中叫作<strong>自适应哈希索引</strong>，它是由数据库自身根据你的使用情况创建的，并不能认为的干预，所以叫作自适应哈希索引，采用的是哈希表数据结构，所以对于字典类型查询就非常的快，但是对于范围查询就无能为力啦。</p>
-
 <h1 id="全文索引">全文索引</h1>
-
 <p>在 B-Tree索引中，当我们执行 <code>select * from blog where content like %xxxx%</code> 语句时，索引会失效。全文索引可以有效的解决这种语句查询。</p>
-
 <p>全文索引是一种比较特殊的索引，一般都是基于倒排索引来实现的，es 也是使用倒排索引。倒排索引跟 B-Tree 索引一样也是一种数据结构，在辅助表中存储了单词与单词自身在一个或多个文档中所在位置的映射。</p>
-
 <p>现在有很多专门做全文索引的软件，例如 solr、elasticsearch等，MySQL 中的全文索引实现原理跟这些差不多。</p>
-
 <p>以上就是关于 InnoDB 引擎中的索引类型，感谢您的阅读，希望这篇文章对您的学习或者工作有所帮助。</p>
 
 
@@ -412,16 +381,10 @@ index (k)) engine=InnoDB;
                     </h4>
                     <ul class="catalog-body"></ul>
                     <nav id="TableOfContents">
-<ul>
-<li><a href="#innodb-引擎中的索引类型">InnoDB 引擎中的索引类型</a></li>
-<li><a href="#b-tree-索引">B-Tree 索引</a>
-<ul>
-<li><a href="#1-主键索引">1、主键索引</a></li>
-<li><a href="#2-普通索引">2、普通索引</a></li>
-</ul></li>
-<li><a href="#哈希索引">哈希索引</a></li>
-<li><a href="#全文索引">全文索引</a></li>
-</ul>
+  <ul>
+    <li><a href="#1主键索引">1、主键索引</a></li>
+    <li><a href="#2普通索引">2、普通索引</a></li>
+  </ul>
 </nav>
                     <br>
                     <br>
@@ -446,9 +409,6 @@ index (k)) engine=InnoDB;
                         
                         
                         
-                        <a href="/tags/" title="">
-                            
-                        </a>
                         
                         
                         
@@ -458,101 +418,6 @@ index (k)) engine=InnoDB;
                         
                         
                         
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        <a href="/tags/qt" title="QT">
-                            QT
-                        </a>
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        <a href="/tags/zookeeper" title="Zookeeper">
-                            Zookeeper
-                        </a>
                         
                         
                         
@@ -592,8 +457,10 @@ index (k)) engine=InnoDB;
                         
                         
                         
-                        <a href="/tags/elasticsearch" title="elasticSearch">
-                            elasticSearch
+                        
+                        
+                        <a href="/tags/elasticsearch" title="elasticsearch">
+                            elasticsearch
                         </a>
                         
                         
@@ -604,9 +471,27 @@ index (k)) engine=InnoDB;
                         
                         
                         
-                        <a href="/tags/golang" title="golang">
-                            golang
-                        </a>
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
                         
                         
                         
@@ -644,9 +529,21 @@ index (k)) engine=InnoDB;
                         
                         
                         
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
                         <a href="/tags/jvm" title="jvm">
                             jvm
                         </a>
+                        
+                        
+                        
+                        
                         
                         
                         
@@ -670,9 +567,19 @@ index (k)) engine=InnoDB;
                         
                         
                         
+                        
+                        
+                        
+                        
+                        
+                        
                         <a href="/tags/mongodb" title="mongodb">
                             mongodb
                         </a>
+                        
+                        
+                        
+                        
                         
                         
                         
@@ -683,10 +590,6 @@ index (k)) engine=InnoDB;
                         </a>
                         
                         
-                        
-                        <a href="/tags/mycat" title="mycat">
-                            mycat
-                        </a>
                         
                         
                         
@@ -700,9 +603,17 @@ index (k)) engine=InnoDB;
                         
                         
                         
-                        <a href="/tags/nginx" title="nginx">
-                            nginx
-                        </a>
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
                         
                         
                         
@@ -726,8 +637,22 @@ index (k)) engine=InnoDB;
                         
                         
                         
+                        
+                        
                         <a href="/tags/rocketmq" title="rocketmq">
                             rocketmq
+                        </a>
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        <a href="/tags/security%E6%A1%86%E6%9E%B6%E5%AD%A6%E4%B9%A0" title="security框架学习">
+                            security框架学习
                         </a>
                         
                         
@@ -754,17 +679,11 @@ index (k)) engine=InnoDB;
                         
                         
                         
-                        <a href="/tags/springcloud" title="springCloud">
-                            springCloud
-                        </a>
-                        
-                        
-                        
-                        
-                        
                         <a href="/tags/springboot" title="springboot">
                             springboot
                         </a>
+                        
+                        
                         
                         
                         
@@ -778,6 +697,9 @@ index (k)) engine=InnoDB;
                         
                         
                         
+                        <a href="/tags/springcloud" title="springcloud">
+                            springcloud
+                        </a>
                         
                         
                         
@@ -803,6 +725,33 @@ index (k)) engine=InnoDB;
                         
                         
                         
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        <a href="/tags/zookeeper" title="zookeeper">
+                            zookeeper
+                        </a>
                         
                         
                         
@@ -862,6 +811,8 @@ index (k)) engine=InnoDB;
                         
                         
                         
+                        
+                        
                         <a href="/tags/%E5%88%86%E5%B8%83%E5%BC%8F%E7%B3%BB%E5%88%97" title="分布式系列">
                             分布式系列
                         </a>
@@ -881,6 +832,10 @@ index (k)) engine=InnoDB;
                         
                         
                         
+                        
+                        <a href="/tags/%E5%8D%8F%E8%AE%AE%E6%A0%88" title="协议栈">
+                            协议栈
+                        </a>
                         
                         
                         
@@ -1080,6 +1035,12 @@ index (k)) engine=InnoDB;
                         
                         
                         
+                        
+                        
+                        
+                        
+                        
+                        
                         <a href="/tags/%E7%BD%91%E7%BB%9C%E7%BC%96%E7%A8%8B" title="网络编程">
                             网络编程
                         </a>
@@ -1103,6 +1064,10 @@ index (k)) engine=InnoDB;
                         
                         
                         
+                        
+                        <a href="/tags/%E8%AE%A4%E8%AF%81%E5%92%8C%E6%8E%88%E6%9D%83" title="认证和授权">
+                            认证和授权
+                        </a>
                         
                         
                         
@@ -1273,7 +1238,7 @@ index (k)) engine=InnoDB;
                     
                 </ul>
 		<p class="copyright text-muted">
-                    Copyright &copy;  2020
+                    Copyright &copy;  2021
                     <br>
                     <a href="https://themes.gohugo.io/hugo-theme-cleanwhite">CleanWhite Hugo Theme</a> by <a href="https://zhaohuabing.com">Huabing</a> |
                     <iframe

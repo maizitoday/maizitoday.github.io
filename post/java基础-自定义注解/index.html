@@ -97,15 +97,15 @@
                     </li>
                     
                     <li>
-                        <a href="/categories/english">English</a>
+                        <a href="/categories/english">english</a>
                     </li>
                     
                     <li>
-                        <a href="/categories/life">Life</a>
+                        <a href="/categories/life">life</a>
                     </li>
                     
                     <li>
-                        <a href="/categories/tech">Tech</a>
+                        <a href="/categories/tech">tech</a>
                     </li>
                     
 
@@ -237,90 +237,69 @@
                 
                 
                 
-                
-
-<p>[TOC]</p>
-
+                <p>[TOC]</p>
 <h1 id="注解定义">注解定义</h1>
-
-<p><strong>转载地址：<a href="https://www.cnblogs.com/longshiyVip/p/4707519.html">https://www.cnblogs.com/longshiyVip/p/4707519.html</a></strong></p>
-
+<p><strong>转载地址：https://www.cnblogs.com/longshiyVip/p/4707519.html</strong></p>
 <p>注解相当于一种标记，在程序中加了注解就等于为程序打上了某种标记，没加，则等于没有某种标记，以后，javac编译器，开发工具和其他程序可以用反射来了解你的类及各种元素上有无何种标记，看你有什么标记，就去干相应的事。标记可以加在包，类，字段，方法，方法的参数以及局部变量上。<strong>在常用的框架中的@controller @service等这样的注解就是通过定义后，然后反射获取对象，然后实例化bean对象的。</strong></p>
-
 <h1 id="java中提供了四种元注解">Java中提供了四种元注解</h1>
-
-<p><strong>转载地址:<a href="https://blog.csdn.net/u013700502/article/details/79729882">https://blog.csdn.net/u013700502/article/details/79729882</a></strong></p>
-
+<p><strong>转载地址:https://blog.csdn.net/u013700502/article/details/79729882</strong></p>
 <h2 id="target">@Target</h2>
-
 <p>表示注解作用在什么地方，CONSTRUCTOR 声明在构造器、FIELD 域声明、METHOD 方法声明、PACKAGE 包声明、TYPE 类、接口或者enum声明、PARAMETER参数声明、LOCAL_VALABLE局部变量声明</p>
-
 <h2 id="retention">@Retention</h2>
-
 <p>表示在什么级别保存注解信息，SOURCE注解在编译器编译时丢弃、CLASS注解在编译之后的class文件中存在，但会被VM丢弃、RUNTIME VM将在运行期也保留注解，因此可以用反射读取注解的信息</p>
-
 <h2 id="documented">@Documented</h2>
-
 <p>将此注解包含在JavaDoc中</p>
-
 <h2 id="inherited">@Inherited</h2>
-
 <p>允许子类继承父类中的注解</p>
-
 <h1 id="具体代码实现">具体代码实现</h1>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-java" data-lang="java"><span style="color:#f92672">import</span> java.lang.annotation.ElementType<span style="color:#f92672">;</span>
+<span style="color:#f92672">import</span> java.lang.annotation.Retention<span style="color:#f92672">;</span>
+<span style="color:#f92672">import</span> java.lang.annotation.RetentionPolicy<span style="color:#f92672">;</span>
+<span style="color:#f92672">import</span> java.lang.annotation.Target<span style="color:#f92672">;</span>
 
-<pre><code class="language-java">import java.lang.annotation.ElementType;
-import java.lang.annotation.Retention;
-import java.lang.annotation.RetentionPolicy;
-import java.lang.annotation.Target;
+<span style="color:#a6e22e">@Target</span><span style="color:#f92672">(</span>ElementType<span style="color:#f92672">.</span><span style="color:#a6e22e">METHOD</span><span style="color:#f92672">)</span>
+<span style="color:#a6e22e">@Retention</span><span style="color:#f92672">(</span>RetentionPolicy<span style="color:#f92672">.</span><span style="color:#a6e22e">RUNTIME</span><span style="color:#f92672">)</span>
+<span style="color:#66d9ef">public</span> <span style="color:#a6e22e">@interface</span> MyAnnotation <span style="color:#f92672">{</span>
+     String <span style="color:#a6e22e">requestMethod</span><span style="color:#f92672">();</span>
+     String <span style="color:#a6e22e">requestAction</span><span style="color:#f92672">();</span>
+<span style="color:#f92672">}</span>
+</code></pre></div><div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-java" data-lang="java"><span style="color:#f92672">import</span> java.lang.reflect.Method<span style="color:#f92672">;</span>
 
-@Target(ElementType.METHOD)
-@Retention(RetentionPolicy.RUNTIME)
-public @interface MyAnnotation {
-     String requestMethod();
-     String requestAction();
-}
-</code></pre>
+<span style="color:#66d9ef">public</span> <span style="color:#66d9ef">class</span> <span style="color:#a6e22e">AnnotationDemo</span> <span style="color:#f92672">{</span>
 
-<pre><code class="language-java">import java.lang.reflect.Method;
+    <span style="color:#a6e22e">@MyAnnotation</span><span style="color:#f92672">(</span>requestMethod <span style="color:#f92672">=</span> <span style="color:#e6db74">&#34;get&#34;</span><span style="color:#f92672">,</span> requestAction <span style="color:#f92672">=</span> <span style="color:#e6db74">&#34;/getData&#34;</span><span style="color:#f92672">)</span>
+    <span style="color:#66d9ef">public</span> <span style="color:#66d9ef">void</span> <span style="color:#a6e22e">test</span><span style="color:#f92672">()</span> <span style="color:#f92672">{</span>
 
-public class AnnotationDemo {
+    <span style="color:#f92672">}</span>
 
-    @MyAnnotation(requestMethod = &quot;get&quot;, requestAction = &quot;/getData&quot;)
-    public void test() {
+    <span style="color:#66d9ef">public</span> <span style="color:#66d9ef">static</span> <span style="color:#66d9ef">void</span> <span style="color:#a6e22e">main</span><span style="color:#f92672">(</span>String<span style="color:#f92672">[]</span> args<span style="color:#f92672">)</span> <span style="color:#f92672">{</span>
+        <span style="color:#66d9ef">try</span> <span style="color:#f92672">{</span>
+            Class<span style="color:#f92672">&lt;?&gt;</span> cls <span style="color:#f92672">=</span> Class<span style="color:#f92672">.</span><span style="color:#a6e22e">forName</span><span style="color:#f92672">(</span><span style="color:#e6db74">&#34;com.example.basedemo.annotationdemo.AnnotationDemo&#34;</span><span style="color:#f92672">);</span>
+            System<span style="color:#f92672">.</span><span style="color:#a6e22e">out</span><span style="color:#f92672">.</span><span style="color:#a6e22e">println</span><span style="color:#f92672">(</span><span style="color:#e6db74">&#34;处理的对象--&gt;&#34;</span><span style="color:#f92672">+</span>cls<span style="color:#f92672">);</span>
 
-    }
+            Method<span style="color:#f92672">[]</span> methods <span style="color:#f92672">=</span> cls<span style="color:#f92672">.</span><span style="color:#a6e22e">getDeclaredMethods</span><span style="color:#f92672">();</span>
+            <span style="color:#66d9ef">for</span> <span style="color:#f92672">(</span>Method method <span style="color:#f92672">:</span> methods<span style="color:#f92672">)</span> <span style="color:#f92672">{</span>
+                <span style="color:#75715e">//过滤不含自定义注解AnnotationInfo的方法
+</span><span style="color:#75715e"></span>                <span style="color:#66d9ef">boolean</span> isHasAnnotation <span style="color:#f92672">=</span> method<span style="color:#f92672">.</span><span style="color:#a6e22e">isAnnotationPresent</span><span style="color:#f92672">(</span>MyAnnotation<span style="color:#f92672">.</span><span style="color:#a6e22e">class</span><span style="color:#f92672">);</span>
+                <span style="color:#66d9ef">if</span> <span style="color:#f92672">(</span>isHasAnnotation<span style="color:#f92672">)</span> <span style="color:#f92672">{</span>
+                    method<span style="color:#f92672">.</span><span style="color:#a6e22e">setAccessible</span><span style="color:#f92672">(</span><span style="color:#66d9ef">true</span><span style="color:#f92672">);</span>
+                    <span style="color:#75715e">//获取方法上的注解
+</span><span style="color:#75715e"></span>                    MyAnnotation aInfo <span style="color:#f92672">=</span> method<span style="color:#f92672">.</span><span style="color:#a6e22e">getAnnotation</span><span style="color:#f92672">(</span>MyAnnotation<span style="color:#f92672">.</span><span style="color:#a6e22e">class</span><span style="color:#f92672">);</span>
+                    <span style="color:#66d9ef">if</span> <span style="color:#f92672">(</span>aInfo <span style="color:#f92672">==</span> <span style="color:#66d9ef">null</span><span style="color:#f92672">)</span> <span style="color:#66d9ef">return</span><span style="color:#f92672">;</span>
+                    <span style="color:#75715e">//解析注解上对应的信息
+</span><span style="color:#75715e"></span>                    String requestMethod <span style="color:#f92672">=</span> aInfo<span style="color:#f92672">.</span><span style="color:#a6e22e">requestMethod</span><span style="color:#f92672">();</span>
+                    System<span style="color:#f92672">.</span><span style="color:#a6e22e">out</span><span style="color:#f92672">.</span><span style="color:#a6e22e">println</span><span style="color:#f92672">(</span><span style="color:#e6db74">&#34;requestMethod: &#34;</span> <span style="color:#f92672">+</span> requestMethod<span style="color:#f92672">);</span>
 
-    public static void main(String[] args) {
-        try {
-            Class&lt;?&gt; cls = Class.forName(&quot;com.example.basedemo.annotationdemo.AnnotationDemo&quot;);
-            System.out.println(&quot;处理的对象--&gt;&quot;+cls);
-
-            Method[] methods = cls.getDeclaredMethods();
-            for (Method method : methods) {
-                //过滤不含自定义注解AnnotationInfo的方法
-                boolean isHasAnnotation = method.isAnnotationPresent(MyAnnotation.class);
-                if (isHasAnnotation) {
-                    method.setAccessible(true);
-                    //获取方法上的注解
-                    MyAnnotation aInfo = method.getAnnotation(MyAnnotation.class);
-                    if (aInfo == null) return;
-                    //解析注解上对应的信息
-                    String requestMethod = aInfo.requestMethod();
-                    System.out.println(&quot;requestMethod: &quot; + requestMethod);
-
-                    String requestAction = aInfo.requestAction();
-                    System.out.println(&quot;requestAction: &quot; + requestAction);
-                }
-            }
-        } catch (ClassNotFoundException e) {
-            e.printStackTrace();
-        }
-    }
-}
-</code></pre>
-
-<p><strong>从上面的列子可以猜测， 我们平常在使用一个请求怎么来对应到一个controller中的方法中， 我们在spring运行的时候，会把所有的请求的url和类里面的方法作为一个键值对，我们在浏览器端请求url的时候，就会去找这个url对应的方法，这样就到具体的方法里面了。</strong></p>
+                    String requestAction <span style="color:#f92672">=</span> aInfo<span style="color:#f92672">.</span><span style="color:#a6e22e">requestAction</span><span style="color:#f92672">();</span>
+                    System<span style="color:#f92672">.</span><span style="color:#a6e22e">out</span><span style="color:#f92672">.</span><span style="color:#a6e22e">println</span><span style="color:#f92672">(</span><span style="color:#e6db74">&#34;requestAction: &#34;</span> <span style="color:#f92672">+</span> requestAction<span style="color:#f92672">);</span>
+                <span style="color:#f92672">}</span>
+            <span style="color:#f92672">}</span>
+        <span style="color:#f92672">}</span> <span style="color:#66d9ef">catch</span> <span style="color:#f92672">(</span>ClassNotFoundException e<span style="color:#f92672">)</span> <span style="color:#f92672">{</span>
+            e<span style="color:#f92672">.</span><span style="color:#a6e22e">printStackTrace</span><span style="color:#f92672">();</span>
+        <span style="color:#f92672">}</span>
+    <span style="color:#f92672">}</span>
+<span style="color:#f92672">}</span>
+</code></pre></div><p><strong>从上面的列子可以猜测， 我们平常在使用一个请求怎么来对应到一个controller中的方法中， 我们在spring运行的时候，会把所有的请求的url和类里面的方法作为一个键值对，我们在浏览器端请求url的时候，就会去找这个url对应的方法，这样就到具体的方法里面了。</strong></p>
 
 
                 
@@ -428,17 +407,12 @@ public class AnnotationDemo {
                     </h4>
                     <ul class="catalog-body"></ul>
                     <nav id="TableOfContents">
-<ul>
-<li><a href="#注解定义">注解定义</a></li>
-<li><a href="#java中提供了四种元注解">Java中提供了四种元注解</a>
-<ul>
-<li><a href="#target">@Target</a></li>
-<li><a href="#retention">@Retention</a></li>
-<li><a href="#documented">@Documented</a></li>
-<li><a href="#inherited">@Inherited</a></li>
-</ul></li>
-<li><a href="#具体代码实现">具体代码实现</a></li>
-</ul>
+  <ul>
+    <li><a href="#target">@Target</a></li>
+    <li><a href="#retention">@Retention</a></li>
+    <li><a href="#documented">@Documented</a></li>
+    <li><a href="#inherited">@Inherited</a></li>
+  </ul>
 </nav>
                     <br>
                     <br>
@@ -463,9 +437,6 @@ public class AnnotationDemo {
                         
                         
                         
-                        <a href="/tags/" title="">
-                            
-                        </a>
                         
                         
                         
@@ -475,101 +446,6 @@ public class AnnotationDemo {
                         
                         
                         
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        <a href="/tags/qt" title="QT">
-                            QT
-                        </a>
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        <a href="/tags/zookeeper" title="Zookeeper">
-                            Zookeeper
-                        </a>
                         
                         
                         
@@ -609,8 +485,10 @@ public class AnnotationDemo {
                         
                         
                         
-                        <a href="/tags/elasticsearch" title="elasticSearch">
-                            elasticSearch
+                        
+                        
+                        <a href="/tags/elasticsearch" title="elasticsearch">
+                            elasticsearch
                         </a>
                         
                         
@@ -621,9 +499,27 @@ public class AnnotationDemo {
                         
                         
                         
-                        <a href="/tags/golang" title="golang">
-                            golang
-                        </a>
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
                         
                         
                         
@@ -661,9 +557,21 @@ public class AnnotationDemo {
                         
                         
                         
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
                         <a href="/tags/jvm" title="jvm">
                             jvm
                         </a>
+                        
+                        
+                        
+                        
                         
                         
                         
@@ -687,9 +595,19 @@ public class AnnotationDemo {
                         
                         
                         
+                        
+                        
+                        
+                        
+                        
+                        
                         <a href="/tags/mongodb" title="mongodb">
                             mongodb
                         </a>
+                        
+                        
+                        
+                        
                         
                         
                         
@@ -700,10 +618,6 @@ public class AnnotationDemo {
                         </a>
                         
                         
-                        
-                        <a href="/tags/mycat" title="mycat">
-                            mycat
-                        </a>
                         
                         
                         
@@ -717,9 +631,17 @@ public class AnnotationDemo {
                         
                         
                         
-                        <a href="/tags/nginx" title="nginx">
-                            nginx
-                        </a>
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
                         
                         
                         
@@ -743,8 +665,22 @@ public class AnnotationDemo {
                         
                         
                         
+                        
+                        
                         <a href="/tags/rocketmq" title="rocketmq">
                             rocketmq
+                        </a>
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        <a href="/tags/security%E6%A1%86%E6%9E%B6%E5%AD%A6%E4%B9%A0" title="security框架学习">
+                            security框架学习
                         </a>
                         
                         
@@ -771,17 +707,11 @@ public class AnnotationDemo {
                         
                         
                         
-                        <a href="/tags/springcloud" title="springCloud">
-                            springCloud
-                        </a>
-                        
-                        
-                        
-                        
-                        
                         <a href="/tags/springboot" title="springboot">
                             springboot
                         </a>
+                        
+                        
                         
                         
                         
@@ -795,6 +725,9 @@ public class AnnotationDemo {
                         
                         
                         
+                        <a href="/tags/springcloud" title="springcloud">
+                            springcloud
+                        </a>
                         
                         
                         
@@ -820,6 +753,33 @@ public class AnnotationDemo {
                         
                         
                         
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        <a href="/tags/zookeeper" title="zookeeper">
+                            zookeeper
+                        </a>
                         
                         
                         
@@ -879,6 +839,8 @@ public class AnnotationDemo {
                         
                         
                         
+                        
+                        
                         <a href="/tags/%E5%88%86%E5%B8%83%E5%BC%8F%E7%B3%BB%E5%88%97" title="分布式系列">
                             分布式系列
                         </a>
@@ -898,6 +860,10 @@ public class AnnotationDemo {
                         
                         
                         
+                        
+                        <a href="/tags/%E5%8D%8F%E8%AE%AE%E6%A0%88" title="协议栈">
+                            协议栈
+                        </a>
                         
                         
                         
@@ -1097,6 +1063,12 @@ public class AnnotationDemo {
                         
                         
                         
+                        
+                        
+                        
+                        
+                        
+                        
                         <a href="/tags/%E7%BD%91%E7%BB%9C%E7%BC%96%E7%A8%8B" title="网络编程">
                             网络编程
                         </a>
@@ -1120,6 +1092,10 @@ public class AnnotationDemo {
                         
                         
                         
+                        
+                        <a href="/tags/%E8%AE%A4%E8%AF%81%E5%92%8C%E6%8E%88%E6%9D%83" title="认证和授权">
+                            认证和授权
+                        </a>
                         
                         
                         
@@ -1290,7 +1266,7 @@ public class AnnotationDemo {
                     
                 </ul>
 		<p class="copyright text-muted">
-                    Copyright &copy;  2020
+                    Copyright &copy;  2021
                     <br>
                     <a href="https://themes.gohugo.io/hugo-theme-cleanwhite">CleanWhite Hugo Theme</a> by <a href="https://zhaohuabing.com">Huabing</a> |
                     <iframe

@@ -97,15 +97,15 @@
                     </li>
                     
                     <li>
-                        <a href="/categories/english">English</a>
+                        <a href="/categories/english">english</a>
                     </li>
                     
                     <li>
-                        <a href="/categories/life">Life</a>
+                        <a href="/categories/life">life</a>
                     </li>
                     
                     <li>
-                        <a href="/categories/tech">Tech</a>
+                        <a href="/categories/tech">tech</a>
                     </li>
                     
 
@@ -245,242 +245,181 @@
                 
                 
                 
-                
-
-<p>[TOC]</p>
-
-<h1 id="tomcat-与-nginx-apache-的区别是什么">tomcat** 与 <strong>nginx</strong>，<strong>apache</strong>的区别是什么？</h1>
-
+                <p>[TOC]</p>
+<h1 id="tomcat-与-nginxapache的区别是什么">tomcat** 与 <strong>nginx</strong>，<strong>apache</strong>的区别是什么？</h1>
 <p>虽然Tomcat也可以认为是HTTP服务器，但通常它仍然会和Nginx配合在一起使用：</p>
-
 <ul>
 <li>动静态资源分离——运用Nginx的反向代理功能分发请求：所有动态资源的请求交给Tomcat，而静态资源的请求（例如图片、视频、CSS、JavaScript文件等）则直接由Nginx返回到浏览器，这样能大大减轻Tomcat的压力。</li>
 <li>负载均衡，当业务压力增大时，可能一个Tomcat的实例不足以处理，那么这时可以启动多个Tomcat实例进行水平扩展，而Nginx的负载均衡功能可以把请求通过算法分发到各个不同的实例进行处理</li>
 </ul>
-
 <p>apache用的越来越少了，大体上和nginx功能重合的更多。</p>
-
 <p>严格的来说，<strong>Apache/Nginx</strong> 应该叫做「<strong>HTTP Server</strong>」；而 <strong>Tomcat</strong> 则是一个「<strong>Application Server</strong>」，或者更准确的来说，是一个「<strong>Servlet/JSP</strong>」应用的容器（<strong>Ruby/Python</strong> 等其他语言开发的应用也无法直接运行在 <strong>Tomcat</strong> 上）。</p>
-
 <p>一个 HTTP Server 关心的是 HTTP 协议层面的传输和访问控制，所以在 Apache/Nginx 上你可以看到代理、负载均衡等功能。客户端通过 HTTP Server 访问服务器上存储的资源（HTML 文件、图片文件等等）。通过 CGI 技术，也可以将处理过的内容通过 HTTP Server 分发，但是一个 HTTP Server 始终只是把服务器上的文件如实的通过 HTTP 协议传输给客户端。</p>
-
 <p>而应用服务器，则是一个应用执行的容器。它首先需要支持开发语言的 Runtime（对于 Tomcat 来说，就是 Java），保证应用能够在应用服务器上正常运行。其次，需要支持应用相关的规范，例如类库、安全方面的特性。对于 Tomcat 来说，就是需要提供 JSP/Sevlet 运行需要的标准类库、Interface 等。为了方便，应用服务器往往也会集成 HTTP Server 的功能，但是不如专业的 HTTP Server 那么强大，所以应用服务器往往是运行在 HTTP Server 的背后，执行应用，将动态的内容转化为静态的内容之后，通过 HTTP Server 分发到客户端。</p>
-
 <h1 id="什么是host文件">什么是HOST文件</h1>
-
 <p>Hosts是一个没有扩展名的系统文件，其基本作用就是将一些常用的网址域名与其对应的IP地址建立一个关联“数据库”，当用户在浏览器中输入一个需要登录的网址时，系统会首先自动从Hosts文件中寻找对应的IP地址，一旦找到，系统会立即打开对应网页，如果没有找到，
 则系统再会将网址提交DNS
 域名解析服务器进行IP地址的解析，如果发现是被屏蔽的IP或域名，就会禁止打开此网页！
 在我们开发中，我们可以设置一个好记住的名字， 有力于开发。</p>
-
 <h1 id="nginx多进程工作模式">nginx多进程工作模式￼</h1>
-
 <p>master主进程控制多个work进程。work进程处理业务逻辑。</p>
-
 <p>Nginx的高效得益于它的事件驱动机制，当完成后就告诉socker，这个时候socker就进行处理。 其中在等待的时候， sokcer可以接收其他的请求。</p>
-
 <p>Master 进程：读取及评估配置和维持</p>
-
 <p>Worker 进程：处理请求</p>
+<h1 id="nginx配置文件分析---nginxconf">Nginx配置文件分析   nginx.conf</h1>
+<hr>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-nginx" data-lang="nginx"><span style="color:#66d9ef">user</span>  <span style="color:#e6db74">nginx</span>;    <span style="color:#75715e"># 当前用户  
+</span><span style="color:#75715e"></span>
+<span style="color:#66d9ef">worker_processes</span>  <span style="color:#ae81ff">1</span>;   <span style="color:#75715e">#  CPU数，或者是2倍CPU数量
+</span><span style="color:#75715e"></span>
+<span style="color:#66d9ef">error_log</span>  <span style="color:#e6db74">/var/log/nginx/error.log</span> <span style="color:#e6db74">warn</span>;   <span style="color:#75715e">#错误日志 
+</span><span style="color:#75715e"></span>
+<span style="color:#66d9ef">pid</span>        <span style="color:#e6db74">/var/run/nginx.pid</span>;  <span style="color:#75715e"># 当前nginx的进程id 
+</span><span style="color:#75715e"></span>
+<span style="color:#66d9ef">events</span> {
+    <span style="color:#f92672">worker_connections</span>  <span style="color:#ae81ff">1024</span>;  <span style="color:#75715e"># 每一台进程数就是  work_processes*work_connections 
+</span><span style="color:#75715e"></span>}
 
-<h1 id="nginx配置文件分析-nginx-conf">Nginx配置文件分析   nginx.conf</h1>
-
-<hr />
-
-<pre><code class="language-nginx">user  nginx;    # 当前用户  
-
-worker_processes  1;   #  CPU数，或者是2倍CPU数量
-
-error_log  /var/log/nginx/error.log warn;   #错误日志 
-
-pid        /var/run/nginx.pid;  # 当前nginx的进程id 
-
-events {
-    worker_connections  1024;  # 每一台进程数就是  work_processes*work_connections 
-}
-
-http {
-    include       /etc/nginx/mime.types;  # 互联网媒体类型的标准
-    default_type  application/octet-stream; # 默认的接受数据类型任意的二进制数据格式 
-    log_format  main   '$remote_addr - $remote_user [$time_local] &quot;$request&quot; '  #日志格式类型 
-                       '$status $body_bytes_sent &quot;$http_referer&quot; '
-                       '&quot;$http_user_agent&quot; &quot;$http_x_forwarded_for&quot;';
-    access_log  /var/log/nginx/access.log  main;  #访问日志 
-    sendfile    on;  # 指定是否调用sendfile来输出文件，对于普通应用，必须设为on，如果用来进行下载等应用磁盘IO负载应用，可设置为off，以平衡磁盘与网络IO处理速度，降低系统uptime
-                       
-   #tcp_nopush  on;  # 在nginx中，tcp_nopush配置与tcp_nodelay“互斥”。它可以配置一次发送数据包的大小。也就是说，数据包累积到一定大小后就发送。在nginx中tcp_nopush必须和sendfile配合使用
-    
-   keepalive_timeout  65;  # 连接超时时间为75s 
-   #gzip  on;   #经过gzip压缩后页面大小可以变为原来的30%甚至更小，这样，用户浏览页面的时候速度会块得多。
-   include /etc/nginx/conf.d/*.conf; #这个地方用来写入虚拟主机文件，对应的某一个域名访问的日志都在这个里面的。
-</code></pre>
-
-<h1 id="什么是虚拟主机">什么是虚拟主机</h1>
-
+<span style="color:#66d9ef">http</span> {
+    <span style="color:#f92672">include</span>       <span style="color:#e6db74">/etc/nginx/mime.types</span>;  <span style="color:#75715e"># 互联网媒体类型的标准
+</span><span style="color:#75715e"></span>    <span style="color:#f92672">default_type</span>  <span style="color:#e6db74">application/octet-stream</span>; <span style="color:#75715e"># 默认的接受数据类型任意的二进制数据格式 
+</span><span style="color:#75715e"></span>    <span style="color:#f92672">log_format</span>  <span style="color:#e6db74">main</span>   <span style="color:#e6db74">&#39;</span>$remote_addr <span style="color:#e6db74">-</span> $remote_user <span style="color:#e6db74">[</span>$time_local] <span style="color:#e6db74">&#34;</span>$request&#34; <span style="color:#e6db74">&#39;</span>  <span style="color:#75715e">#日志格式类型 
+</span><span style="color:#75715e"></span>                       <span style="color:#e6db74">&#39;</span>$status $body_bytes_sent <span style="color:#e6db74">&#34;</span>$http_referer&#34; <span style="color:#e6db74">&#39;</span>
+                       <span style="color:#e6db74">&#39;&#34;</span>$http_user_agent&#34; <span style="color:#e6db74">&#34;</span>$http_x_forwarded_for&#34;&#39;;
+    <span style="color:#f92672">access_log</span>  <span style="color:#e6db74">/var/log/nginx/access.log</span>  <span style="color:#e6db74">main</span>;  <span style="color:#75715e">#访问日志 
+</span><span style="color:#75715e"></span>    <span style="color:#f92672">sendfile</span>    <span style="color:#66d9ef">on</span>;  <span style="color:#75715e"># 指定是否调用sendfile来输出文件，对于普通应用，必须设为on，如果用来进行下载等应用磁盘IO负载应用，可设置为off，以平衡磁盘与网络IO处理速度，降低系统uptime
+</span><span style="color:#75715e"></span>                       
+   <span style="color:#75715e">#tcp_nopush  on;  # 在nginx中，tcp_nopush配置与tcp_nodelay“互斥”。它可以配置一次发送数据包的大小。也就是说，数据包累积到一定大小后就发送。在nginx中tcp_nopush必须和sendfile配合使用
+</span><span style="color:#75715e"></span>    
+   <span style="color:#f92672">keepalive_timeout</span>  <span style="color:#ae81ff">65</span>;  <span style="color:#75715e"># 连接超时时间为75s 
+</span><span style="color:#75715e"></span>   <span style="color:#75715e">#gzip  on;   #经过gzip压缩后页面大小可以变为原来的30%甚至更小，这样，用户浏览页面的时候速度会块得多。
+</span><span style="color:#75715e"></span>   <span style="color:#f92672">include</span> <span style="color:#e6db74">/etc/nginx/conf.d/*.conf</span>; <span style="color:#75715e">#这个地方用来写入虚拟主机文件，对应的某一个域名访问的日志都在这个里面的。
+</span></code></pre></div><h1 id="什么是虚拟主机">什么是虚拟主机</h1>
 <p>虚拟主机，就是把一台物理服务器划分为多个“虚拟”服务器， 每一个虚拟主机都可以有独立的域名和独立的目录。
 阿里云就是做的虚拟主机。 nginx中一个server就是一个虚拟主机。</p>
+<h1 id="defaultconf---具体虚拟主机配置">default.conf   具体虚拟主机配置</h1>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-nginx" data-lang="nginx"><span style="color:#66d9ef">server</span> {
+    <span style="color:#f92672">listen</span>       <span style="color:#ae81ff">80</span>;  <span style="color:#75715e">#监听端口 
+</span><span style="color:#75715e"></span>    <span style="color:#f92672">server_name</span>  <span style="color:#e6db74">localhost</span>;  <span style="color:#75715e">#服务地址 
+</span><span style="color:#75715e"></span>    <span style="color:#75715e">#charset koi8-r;
+</span><span style="color:#75715e"></span>    <span style="color:#f92672">access_log</span>  <span style="color:#e6db74">/var/log/nginx/host.access.log</span>  <span style="color:#e6db74">main</span>;  <span style="color:#75715e">#这个虚拟主机的访问日志 
+</span></code></pre></div><div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-nginx" data-lang="nginx"><span style="color:#75715e">#-------location-------------#
+</span><span style="color:#75715e"></span>
+  <span style="color:#66d9ef">语法规则：</span> <span style="color:#e6db74">location[=|~|~*|^~]/uri/</span>{<span style="color:#f92672">...}</span>
 
-<h1 id="default-conf-具体虚拟主机配置">default.conf   具体虚拟主机配置</h1>
+ = <span style="color:#e6db74">开头表示精确匹配</span> 
 
-<pre><code class="language-nginx">server {
-    listen       80;  #监听端口 
-    server_name  localhost;  #服务地址 
-    #charset koi8-r;
-    access_log  /var/log/nginx/host.access.log  main;  #这个虚拟主机的访问日志 
-</code></pre>
+ <span style="color:#e6db74">^~</span> <span style="color:#e6db74">开头表示uri以某个常规字符串开头，理解为匹配url路径即可。</span>
 
-<pre><code class="language-nginx">#-------location-------------#
+ ~ <span style="color:#e6db74">开头表示区分大小写的正则匹配</span> 
 
-  语法规则： location[=|~|~*|^~]/uri/{...}
+ ~<span style="color:#e6db74">*</span> <span style="color:#e6db74">开头表示不区分大小写的正则匹配</span>
 
- = 开头表示精确匹配 
+ <span style="color:#e6db74">/</span> <span style="color:#e6db74">通用匹配，任何请求都会匹配到。</span>
 
- ^~ 开头表示uri以某个常规字符串开头，理解为匹配url路径即可。
-
- ~ 开头表示区分大小写的正则匹配 
-
- ~* 开头表示不区分大小写的正则匹配
-
- / 通用匹配，任何请求都会匹配到。
-
-#-------location-------------#
-location / {
-    root   /usr/share/nginx/html;
-    index  index.html index.htm;
+<span style="color:#75715e">#-------location-------------#
+</span><span style="color:#75715e"></span><span style="color:#e6db74">location</span> <span style="color:#e6db74">/</span> {
+    <span style="color:#f92672">root</span>   <span style="color:#e6db74">/usr/share/nginx/html</span>;
+    <span style="color:#f92672">index</span>  <span style="color:#e6db74">index.html</span> <span style="color:#e6db74">index.htm</span>;
 }
 
-#http://localhost:9090/index.html，表示, 到/usr/share/nginx/html 这个下面去找
+<span style="color:#75715e">#http://localhost:9090/index.html，表示, 到/usr/share/nginx/html 这个下面去找
+</span><span style="color:#75715e"></span>
+<span style="color:#f92672">error_page</span>   <span style="color:#ae81ff">500</span> <span style="color:#ae81ff">502</span> <span style="color:#ae81ff">503</span> <span style="color:#ae81ff">504</span>  <span style="color:#e6db74">/50x.html</span>;
 
-error_page   500 502 503 504  /50x.html;
-
-location = /50x.html {
-    root   /usr/share/nginx/html;
+<span style="color:#f92672">location</span> = <span style="color:#e6db74">/50x.html</span> {
+    <span style="color:#f92672">root</span>   <span style="color:#e6db74">/usr/share/nginx/html</span>;
 }
-</code></pre>
-
-<h1 id="location-中root地址分析-如下">location 中root地址分析， 如下：</h1>
-
-<pre><code class="language-nginx">   location ^~  /images/  {
-           root   /tmp/;
+</code></pre></div><h1 id="location-中root地址分析-如下">location 中root地址分析， 如下：</h1>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-nginx" data-lang="nginx">   <span style="color:#66d9ef">location</span> <span style="color:#e6db74">^~</span>  <span style="color:#e6db74">/images/</span>  {
+           <span style="color:#f92672">root</span>   <span style="color:#e6db74">/tmp/</span>;
       }
-</code></pre>
-
-<p><a href="http://localhost:9090/images/3.jpg">http://localhost:9090/images/3.jpg</a>  这个会到这里， 然后在去找 /tmp/ 然后是这个下面的images目录下面的3.jpg这个文件。</p>
-
+</code></pre></div><p>http://localhost:9090/images/3.jpg  这个会到这里， 然后在去找 /tmp/ 然后是这个下面的images目录下面的3.jpg这个文件。</p>
 <h1 id="nginx命令参数">nginx命令参数</h1>
-
-<pre><code class="language-nginx"># nginx -t 测试配置是否正确 
-
-# nginx -s reload 作用加载最新配置 ，也相当于重启Nginx服务
-
-# nginx -s stop 立刻停止
-
-# nginx -s quit 优雅停止 
-
-# nginx -s reopen 重新打开日志
-
-# nginx -c xxx.conf  指定配置文件启动
-
-</code></pre>
-
-<h1 id="反向代理和正向代理">反向代理和正向代理</h1>
-
-<p>正向代理简单地打个租房的比方<strong>:</strong></p>
-
-<p>A<strong>(客户端)想租</strong>C<strong>(服务端)的房子,但是</strong>A<strong>(客户端)并不认识</strong>C**(服务端)租不到。</p>
-
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-nginx" data-lang="nginx"><span style="color:#75715e"># nginx -t 测试配置是否正确 
+</span><span style="color:#75715e"></span>
+<span style="color:#75715e"># nginx -s reload 作用加载最新配置 ，也相当于重启Nginx服务
+</span><span style="color:#75715e"></span>
+<span style="color:#75715e"># nginx -s stop 立刻停止
+</span><span style="color:#75715e"></span>
+<span style="color:#75715e"># nginx -s quit 优雅停止 
+</span><span style="color:#75715e"></span>
+<span style="color:#75715e"># nginx -s reopen 重新打开日志
+</span><span style="color:#75715e"></span>
+<span style="color:#75715e"># nginx -c xxx.conf  指定配置文件启动
+</span><span style="color:#75715e"></span>
+</code></pre></div><h1 id="反向代理和正向代理">反向代理和正向代理</h1>
+<p>正向代理简单地打个租房的比方**:**</p>
+<p>A**(客户端)想租<strong>C</strong>(服务端)的房子,但是<strong>A</strong>(客户端)并不认识<strong>C</strong>(服务端)租不到。</p>
 <p><strong>B</strong>(代理)认识<strong>C</strong>(服务端)能租这个房子所以你找了<strong>B</strong>(代理)帮忙租到了这个房子。</p>
-
 <p>这个过程中<strong>C</strong>(服务端)不认识<strong>A</strong>(客户端)只认识<strong>B</strong>(代理)</p>
-
 <p><strong>C</strong>(服务端)并不知道<strong>A</strong>(客户端)租了房子，只知道房子租给了<strong>B</strong>(代理)。</p>
-
 <p>作用：</p>
-
 <ol>
 <li>访问原来无法访问的资源，翻墙。</li>
 <li>可以做缓存，加速资源的访问。</li>
 <li>对客户端上网进行认证授权。</li>
 <li>上网行为管理，记录用户访问记录。</li>
 </ol>
-
-<p>反向代理<strong>:</strong>客户端 一<strong>&gt;</strong>代理 <strong>&lt;</strong>一<strong>&gt;</strong> 服务端</p>
-
-<p>反向代理也用一个租房的例子<strong>:</strong></p>
-
-<p>A<strong>(客户端)想租一个房子,</strong>B**(代理)就把这个房子租给了他。</p>
-
+<p>反向代理**:<strong>客户端 一</strong>&gt;**代理 <strong>&lt;<strong>一</strong>&gt;</strong> 服务端</p>
+<p>反向代理也用一个租房的例子**:**</p>
+<p>A**(客户端)想租一个房子,<strong>B</strong>(代理)就把这个房子租给了他。</p>
 <p>这时候实际上<strong>C</strong>(服务端)才是房东。</p>
-
 <p><strong>B</strong>(代理)是中介把这个房子租给了<strong>A</strong>(客户端)。</p>
-
 <p>这个过程中<strong>A</strong>(客户端)并不知道这个房子到底谁才是房东</p>
-
 <p>他都有可能认为这个房子就是<strong>B</strong>(代理)的</p>
-
 <p>作用：</p>
-
 <ol>
 <li>负载均衡，提高处理和响应速度。</li>
 <li>保证内网安全，隐藏服务器信息，防止web攻击。</li>
 </ol>
-
 <h1 id="负载均衡">负载均衡</h1>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-nginx" data-lang="nginx"><span style="color:#66d9ef">nginx.conf</span>  <span style="color:#e6db74">在这个地方设置</span>
 
-<pre><code class="language-nginx">nginx.conf  在这个地方设置
-
-upstream tomcat { #集群名称 
-        #ip_hash;
-        server 127.0.0.1:9092 weight=5;  // weight 这个是权重，谁大几率就访问大一些
-        server 127.0.0.1:9093 weight=5;
+<span style="color:#e6db74">upstream</span> <span style="color:#e6db74">tomcat</span> { <span style="color:#75715e">#集群名称 
+</span><span style="color:#75715e"></span>        <span style="color:#75715e">#ip_hash;
+</span><span style="color:#75715e"></span>        <span style="color:#f92672">server</span> 127.0.0.1:<span style="color:#ae81ff">9092</span> <span style="color:#e6db74">weight=5</span>;  <span style="color:#f92672">//</span> <span style="color:#e6db74">weight</span> <span style="color:#e6db74">这个是权重，谁大几率就访问大一些</span>
+        <span style="color:#e6db74">server</span> 127.0.0.1:<span style="color:#ae81ff">9093</span> <span style="color:#e6db74">weight=5</span>;
      }
 
-同时在 具体的虚拟主机中设置如下
+<span style="color:#66d9ef">同时在</span> <span style="color:#e6db74">具体的虚拟主机中设置如下</span>
 
-server {
-      listen       80;
-      server_name  localhost; # 这边对外的访问都是 localhost:80
-      location / {
-          root   /usr/share/nginx/html;
-          index  index.html index.htm;
-          proxy_pass http://tomcat; #直接转发到这个集群里面去了，这里对应了2个服务器
-          proxy_redirect default;
+<span style="color:#e6db74">server</span> {
+      <span style="color:#f92672">listen</span>       <span style="color:#ae81ff">80</span>;
+      <span style="color:#f92672">server_name</span>  <span style="color:#e6db74">localhost</span>; <span style="color:#75715e"># 这边对外的访问都是 localhost:80
+</span><span style="color:#75715e"></span>      <span style="color:#f92672">location</span> <span style="color:#e6db74">/</span> {
+          <span style="color:#f92672">root</span>   <span style="color:#e6db74">/usr/share/nginx/html</span>;
+          <span style="color:#f92672">index</span>  <span style="color:#e6db74">index.html</span> <span style="color:#e6db74">index.htm</span>;
+          <span style="color:#f92672">proxy_pass</span> <span style="color:#e6db74">http://tomcat</span>; <span style="color:#75715e">#直接转发到这个集群里面去了，这里对应了2个服务器
+</span><span style="color:#75715e"></span>          <span style="color:#f92672">proxy_redirect</span> <span style="color:#e6db74">default</span>;
      }
 
-这样就实现了一个简单的负载均衡了。
-</code></pre>
-
-<p>负载均衡几种策略方式</p>
-
+<span style="color:#f92672">这样就实现了一个简单的负载均衡了。</span>
+</code></pre></div><p>负载均衡几种策略方式</p>
 <ol>
 <li>weight                     权重方式</li>
 <li>ip_hash                   依据ip分配方式</li>
 <li>least_conn               最少连接方式</li>
 <li>fair（第三方）           响应时间方式</li>
-<li>url_hash（第三方）  依据URL分配方式<br /></li>
+<li>url_hash（第三方）  依据URL分配方式</li>
 </ol>
-
 <h1 id="动静分离">动静分离</h1>
-
-<pre><code class="language-nginx">location ~* \.(gif|jpg|jpeg|png|css|js|ico)$ { //包含这些后缀，请求被转发到静态池，否则转发到动态池
-        root /tmp/images/;
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-nginx" data-lang="nginx"><span style="color:#66d9ef">location</span> ~<span style="color:#e6db74">*</span> <span style="color:#e6db74">\.(gif|jpg|jpeg|png|css|js|ico)</span>$ { <span style="color:#f92672">//包含这些后缀，请求被转发到静态池，否则转发到动态池</span>
+        <span style="color:#e6db74">root</span> <span style="color:#e6db74">/tmp/images/</span>;
    }
 
-或者
+<span style="color:#66d9ef">或者</span>
 
-upstream static_pools {
-    server 192.168.1.106:8080;
+<span style="color:#e6db74">upstream</span> <span style="color:#e6db74">static_pools</span> {
+    <span style="color:#f92672">server</span> 192.168.1.106:<span style="color:#ae81ff">8080</span>;
 }
 
-location ~ .*.(gif|jpg|jpeg|png|bmp|swf|css|js)$ { 
-            proxy_pass http://static_pools;
+<span style="color:#66d9ef">location</span> ~ <span style="color:#e6db74">.*.(gif|jpg|jpeg|png|bmp|swf|css|js)$</span> { 
+            <span style="color:#f92672">proxy_pass</span> <span style="color:#e6db74">http://static_pools</span>;
         }
 
 
-</code></pre>
-
-<h1 id="高并发策略">高并发策略</h1>
-
+</code></pre></div><h1 id="高并发策略">高并发策略</h1>
 <ol>
 <li>负载均衡： 集群</li>
 <li>动静分离：使用Nginx，CDN（用第三方的一些js，不放到自己的服务器上）</li>
@@ -488,98 +427,61 @@ location ~ .*.(gif|jpg|jpeg|png|bmp|swf|css|js)$ {
 <li>限流：流量控制</li>
 <li>降级：服务降载，就是把不是核心的业务关掉。 比如不需要的日志业务给关掉。</li>
 </ol>
-
 <h1 id="安装ftp">安装ftp</h1>
-
 <p>yum  install  vsftpd</p>
-
 <p>配置文件：/etc/vsftpd.conf</p>
-
 <p>service  vsftpd restart   (注意他的端口也还是SSH的默认端口)</p>
-
 <h1 id="ssh服务安装">SSH服务安装</h1>
-
 <p>yum install openssh-server</p>
-
 <p>vi /etc/ssh/sshd_config</p>
-
 <p>Port 22</p>
-
 <p>Protocol 2</p>
-
 <p>PermitRootLogin yes    最后一个重要！因为它是允许root用户直接使用sshd服务登录服务器的！</p>
-
 <p>service sshd restart</p>
-
 <h1 id="开机自启动sshd服务">开机自启动sshd服务</h1>
-
-<pre><code class="language-shell">$ systemctl enable sshd.service     
-# 开机自启sshd$ systemctl disable sshd.service    
-# 开机关闭自启sshd$ systemctl start sshd.service     
-# 启动sshd$ systemctl restart sshd.service    
-# 重启$ systemctl stop sshd.service       
-# 停止$ systemctl reload sshd.service    
-# 重新加载$ systemctl status sshd.service    
-# 查看启动状态`
-</code></pre>
-
-<h1 id="集群中的session">集群中的session</h1>
-
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-shell" data-lang="shell">$ systemctl enable sshd.service     
+<span style="color:#75715e"># 开机自启sshd$ systemctl disable sshd.service    </span>
+<span style="color:#75715e"># 开机关闭自启sshd$ systemctl start sshd.service     </span>
+<span style="color:#75715e"># 启动sshd$ systemctl restart sshd.service    </span>
+<span style="color:#75715e"># 重启$ systemctl stop sshd.service       </span>
+<span style="color:#75715e"># 停止$ systemctl reload sshd.service    </span>
+<span style="color:#75715e"># 重新加载$ systemctl status sshd.service    </span>
+<span style="color:#75715e"># 查看启动状态`</span>
+</code></pre></div><h1 id="集群中的session">集群中的session</h1>
 <ol>
 <li>Session 保持</li>
 </ol>
-
 <p>​      对于Nginx可以选用Session保持的方法实行负载均衡，nginx的upstream目前支持5种方式的分配方式，其中有两种比    较通用的Session解决方法，ip_hash和url_hash。注意：后者不是官方模块，需要额外安装。</p>
-
 <p>​       ip_hash</p>
-
 <p>​      每个请求按访问ip的hash结果分配，这样每个访客固定访问一个后端服务器，达到了Session保持的方法。</p>
-
-<ol>
+<ol start="2">
 <li>Session 复制</li>
 </ol>
-
 <p>​      既然，我们的目标是所有服务器上都要保持用户的Session，那么将每个应用服务器中的Session信息复制到其它服务 器节点上是不是就可以呢？这就是Session的第二中处理办法：会话复制。</p>
-
-<ol>
-<li>Session 共享</li>
-</ol>
-
+<ol start="2">
+<li>
+<p>Session 共享</p>
 <p>既然会话保持和会话复制都不完美，那么我们为什么不把Session放在一个统一的地方呢，这样集群中的所有节点都  在一个地方进行Session的存取就可以解决问题。对于Session来说，肯定是频繁使用的，虽然你可以把它存放在数据库中，但是真正生产环境中我更推荐存放在性能更快的分布式KV数据中，例如：Memcached和Redis。</p>
-
-<h1 id="springboot运行后-查看解压后的文件-负载均衡中-我这边直接使用springboot服务">springboot运行后，查看解压后的文件（负载均衡中，我这边直接使用springboot服务）</h1>
-
-<pre><code class="language-java">jar uvf test.jar com\lovedata\bigdata\jar\NeedReplace.class
-</code></pre>
-
-<p>通过上面的命令，直接替换class文件。 如果是持续集成的话，就不要管了， 同时还可以在IDEA已经通过SSH替换了class后，我们在写一个shell命令， 进行再次打包。</p>
-
+</li>
+</ol>
+<h1 id="springboot运行后查看解压后的文件负载均衡中我这边直接使用springboot服务">springboot运行后，查看解压后的文件（负载均衡中，我这边直接使用springboot服务）</h1>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-java" data-lang="java">jar uvf test<span style="color:#f92672">.</span><span style="color:#a6e22e">jar</span> com<span style="color:#960050;background-color:#1e0010">\</span>lovedata<span style="color:#960050;background-color:#1e0010">\</span>bigdata<span style="color:#960050;background-color:#1e0010">\</span>jar<span style="color:#960050;background-color:#1e0010">\</span>NeedReplace<span style="color:#f92672">.</span><span style="color:#a6e22e">class</span>
+</code></pre></div><p>通过上面的命令，直接替换class文件。 如果是持续集成的话，就不要管了， 同时还可以在IDEA已经通过SSH替换了class后，我们在写一个shell命令， 进行再次打包。</p>
 <h1 id="nginx缓存的开启和禁用">nginx缓存的开启和禁用</h1>
-
 <p>原文：<strong><a href="https://blog.csdn.net/weixin_36185028/article/details/80740142">https://blog.csdn.net/weixin_36185028/article/details/80740142</a></strong></p>
-
 <p>在网站程序调试的时候，经常会遇到浏览器的缓存问题导致修改过的前端代码无效果。每次通过Ctrl+F5强制刷新后才能清掉缓存。这时如果禁用掉nginx缓存，可以减少一些小麻烦，让浏览器每次到服务器去请求文件，而不是在浏览器中读取缓存文件。</p>
-
 <p>当程序调试好上线后，可以开启nginx缓存，<strong>节省服务器的带宽流量，减少一些请求，降低服务器的压力。</strong></p>
-
-<h2 id="1-启用缓存">1.启用缓存</h2>
-
-<pre><code class="language-ruby">location ~ .*\.(gif|jpg|jpeg|png|bmp|swf|js|css)$ {
-  #设置缓存上面定义的后缀文件缓存到浏览器的生存时间
-  expires   3d;
+<h2 id="1启用缓存">1.启用缓存</h2>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-ruby" data-lang="ruby">location <span style="color:#f92672">~</span> <span style="color:#f92672">.</span>*\<span style="color:#f92672">.</span>(gif<span style="color:#f92672">|</span>jpg<span style="color:#f92672">|</span>jpeg<span style="color:#f92672">|</span>png<span style="color:#f92672">|</span>bmp<span style="color:#f92672">|</span>swf<span style="color:#f92672">|</span>js<span style="color:#f92672">|</span>css)<span style="color:#960050;background-color:#1e0010">$</span> {
+  <span style="color:#75715e">#设置缓存上面定义的后缀文件缓存到浏览器的生存时间</span>
+  expires   <span style="color:#ae81ff">3</span>d;
 }
-</code></pre>
-
-<h2 id="2-禁用缓存">2.禁用缓存</h2>
-
-<pre><code class="language-ruby">location ~ .*\.(gif|jpg|jpeg|png|bmp|swf|js|css)$ {
- #禁止缓存，每次都从服务器请求
-  add_header Cache-Control no-store;
+</code></pre></div><h2 id="2禁用缓存">2.禁用缓存</h2>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-ruby" data-lang="ruby">location <span style="color:#f92672">~</span> <span style="color:#f92672">.</span>*\<span style="color:#f92672">.</span>(gif<span style="color:#f92672">|</span>jpg<span style="color:#f92672">|</span>jpeg<span style="color:#f92672">|</span>png<span style="color:#f92672">|</span>bmp<span style="color:#f92672">|</span>swf<span style="color:#f92672">|</span>js<span style="color:#f92672">|</span>css)<span style="color:#960050;background-color:#1e0010">$</span> {
+ <span style="color:#75715e">#禁止缓存，每次都从服务器请求</span>
+  add_header <span style="color:#66d9ef">Cache</span><span style="color:#f92672">-</span><span style="color:#66d9ef">Control</span> no<span style="color:#f92672">-</span>store;
 }
-</code></pre>
-
-<h1 id="nginx并发">nginx并发</h1>
-
+</code></pre></div><h1 id="nginx并发">nginx并发</h1>
 <p>优化后可以达到20W， 对于一般的网站完全可以处理。</p>
 
 
@@ -688,31 +590,10 @@ location ~ .*.(gif|jpg|jpeg|png|bmp|swf|css|js)$ {
                     </h4>
                     <ul class="catalog-body"></ul>
                     <nav id="TableOfContents">
-<ul>
-<li><a href="#tomcat-与-nginx-apache-的区别是什么">tomcat** 与 <strong>nginx</strong>，<strong>apache</strong>的区别是什么？</a></li>
-<li><a href="#什么是host文件">什么是HOST文件</a></li>
-<li><a href="#nginx多进程工作模式">nginx多进程工作模式￼</a></li>
-<li><a href="#nginx配置文件分析-nginx-conf">Nginx配置文件分析   nginx.conf</a></li>
-<li><a href="#什么是虚拟主机">什么是虚拟主机</a></li>
-<li><a href="#default-conf-具体虚拟主机配置">default.conf   具体虚拟主机配置</a></li>
-<li><a href="#location-中root地址分析-如下">location 中root地址分析， 如下：</a></li>
-<li><a href="#nginx命令参数">nginx命令参数</a></li>
-<li><a href="#反向代理和正向代理">反向代理和正向代理</a></li>
-<li><a href="#负载均衡">负载均衡</a></li>
-<li><a href="#动静分离">动静分离</a></li>
-<li><a href="#高并发策略">高并发策略</a></li>
-<li><a href="#安装ftp">安装ftp</a></li>
-<li><a href="#ssh服务安装">SSH服务安装</a></li>
-<li><a href="#开机自启动sshd服务">开机自启动sshd服务</a></li>
-<li><a href="#集群中的session">集群中的session</a></li>
-<li><a href="#springboot运行后-查看解压后的文件-负载均衡中-我这边直接使用springboot服务">springboot运行后，查看解压后的文件（负载均衡中，我这边直接使用springboot服务）</a></li>
-<li><a href="#nginx缓存的开启和禁用">nginx缓存的开启和禁用</a>
-<ul>
-<li><a href="#1-启用缓存">1.启用缓存</a></li>
-<li><a href="#2-禁用缓存">2.禁用缓存</a></li>
-</ul></li>
-<li><a href="#nginx并发">nginx并发</a></li>
-</ul>
+  <ul>
+    <li><a href="#1启用缓存">1.启用缓存</a></li>
+    <li><a href="#2禁用缓存">2.禁用缓存</a></li>
+  </ul>
 </nav>
                     <br>
                     <br>
@@ -737,9 +618,6 @@ location ~ .*.(gif|jpg|jpeg|png|bmp|swf|css|js)$ {
                         
                         
                         
-                        <a href="/tags/" title="">
-                            
-                        </a>
                         
                         
                         
@@ -749,101 +627,6 @@ location ~ .*.(gif|jpg|jpeg|png|bmp|swf|css|js)$ {
                         
                         
                         
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        <a href="/tags/qt" title="QT">
-                            QT
-                        </a>
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        <a href="/tags/zookeeper" title="Zookeeper">
-                            Zookeeper
-                        </a>
                         
                         
                         
@@ -883,8 +666,10 @@ location ~ .*.(gif|jpg|jpeg|png|bmp|swf|css|js)$ {
                         
                         
                         
-                        <a href="/tags/elasticsearch" title="elasticSearch">
-                            elasticSearch
+                        
+                        
+                        <a href="/tags/elasticsearch" title="elasticsearch">
+                            elasticsearch
                         </a>
                         
                         
@@ -895,9 +680,27 @@ location ~ .*.(gif|jpg|jpeg|png|bmp|swf|css|js)$ {
                         
                         
                         
-                        <a href="/tags/golang" title="golang">
-                            golang
-                        </a>
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
                         
                         
                         
@@ -935,9 +738,21 @@ location ~ .*.(gif|jpg|jpeg|png|bmp|swf|css|js)$ {
                         
                         
                         
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
                         <a href="/tags/jvm" title="jvm">
                             jvm
                         </a>
+                        
+                        
+                        
+                        
                         
                         
                         
@@ -961,9 +776,19 @@ location ~ .*.(gif|jpg|jpeg|png|bmp|swf|css|js)$ {
                         
                         
                         
+                        
+                        
+                        
+                        
+                        
+                        
                         <a href="/tags/mongodb" title="mongodb">
                             mongodb
                         </a>
+                        
+                        
+                        
+                        
                         
                         
                         
@@ -974,10 +799,6 @@ location ~ .*.(gif|jpg|jpeg|png|bmp|swf|css|js)$ {
                         </a>
                         
                         
-                        
-                        <a href="/tags/mycat" title="mycat">
-                            mycat
-                        </a>
                         
                         
                         
@@ -991,9 +812,17 @@ location ~ .*.(gif|jpg|jpeg|png|bmp|swf|css|js)$ {
                         
                         
                         
-                        <a href="/tags/nginx" title="nginx">
-                            nginx
-                        </a>
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
                         
                         
                         
@@ -1017,8 +846,22 @@ location ~ .*.(gif|jpg|jpeg|png|bmp|swf|css|js)$ {
                         
                         
                         
+                        
+                        
                         <a href="/tags/rocketmq" title="rocketmq">
                             rocketmq
+                        </a>
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        <a href="/tags/security%E6%A1%86%E6%9E%B6%E5%AD%A6%E4%B9%A0" title="security框架学习">
+                            security框架学习
                         </a>
                         
                         
@@ -1045,17 +888,11 @@ location ~ .*.(gif|jpg|jpeg|png|bmp|swf|css|js)$ {
                         
                         
                         
-                        <a href="/tags/springcloud" title="springCloud">
-                            springCloud
-                        </a>
-                        
-                        
-                        
-                        
-                        
                         <a href="/tags/springboot" title="springboot">
                             springboot
                         </a>
+                        
+                        
                         
                         
                         
@@ -1069,6 +906,9 @@ location ~ .*.(gif|jpg|jpeg|png|bmp|swf|css|js)$ {
                         
                         
                         
+                        <a href="/tags/springcloud" title="springcloud">
+                            springcloud
+                        </a>
                         
                         
                         
@@ -1094,6 +934,33 @@ location ~ .*.(gif|jpg|jpeg|png|bmp|swf|css|js)$ {
                         
                         
                         
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        <a href="/tags/zookeeper" title="zookeeper">
+                            zookeeper
+                        </a>
                         
                         
                         
@@ -1153,6 +1020,8 @@ location ~ .*.(gif|jpg|jpeg|png|bmp|swf|css|js)$ {
                         
                         
                         
+                        
+                        
                         <a href="/tags/%E5%88%86%E5%B8%83%E5%BC%8F%E7%B3%BB%E5%88%97" title="分布式系列">
                             分布式系列
                         </a>
@@ -1172,6 +1041,10 @@ location ~ .*.(gif|jpg|jpeg|png|bmp|swf|css|js)$ {
                         
                         
                         
+                        
+                        <a href="/tags/%E5%8D%8F%E8%AE%AE%E6%A0%88" title="协议栈">
+                            协议栈
+                        </a>
                         
                         
                         
@@ -1371,6 +1244,12 @@ location ~ .*.(gif|jpg|jpeg|png|bmp|swf|css|js)$ {
                         
                         
                         
+                        
+                        
+                        
+                        
+                        
+                        
                         <a href="/tags/%E7%BD%91%E7%BB%9C%E7%BC%96%E7%A8%8B" title="网络编程">
                             网络编程
                         </a>
@@ -1394,6 +1273,10 @@ location ~ .*.(gif|jpg|jpeg|png|bmp|swf|css|js)$ {
                         
                         
                         
+                        
+                        <a href="/tags/%E8%AE%A4%E8%AF%81%E5%92%8C%E6%8E%88%E6%9D%83" title="认证和授权">
+                            认证和授权
+                        </a>
                         
                         
                         
@@ -1564,7 +1447,7 @@ location ~ .*.(gif|jpg|jpeg|png|bmp|swf|css|js)$ {
                     
                 </ul>
 		<p class="copyright text-muted">
-                    Copyright &copy;  2020
+                    Copyright &copy;  2021
                     <br>
                     <a href="https://themes.gohugo.io/hugo-theme-cleanwhite">CleanWhite Hugo Theme</a> by <a href="https://zhaohuabing.com">Huabing</a> |
                     <iframe

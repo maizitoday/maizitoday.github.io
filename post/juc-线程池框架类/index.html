@@ -97,15 +97,15 @@
                     </li>
                     
                     <li>
-                        <a href="/categories/english">English</a>
+                        <a href="/categories/english">english</a>
                     </li>
                     
                     <li>
-                        <a href="/categories/life">Life</a>
+                        <a href="/categories/life">life</a>
                     </li>
                     
                     <li>
-                        <a href="/categories/tech">Tech</a>
+                        <a href="/categories/tech">tech</a>
                     </li>
                     
 
@@ -237,586 +237,424 @@
                 
                 
                 
-                
-
-<p>[TOC]</p>
-
+                <p>[TOC]</p>
 <h1 id="executor框架">Executor框架</h1>
-
-<p>转载地址：<a href="https://blog.csdn.net/tongdanping/article/details/79604637">https://blog.csdn.net/tongdanping/article/details/79604637</a></p>
-
+<p>转载地址：https://blog.csdn.net/tongdanping/article/details/79604637</p>
 <h2 id="概述">概述</h2>
-
 <p>我们知道线程池就是线程的集合，线程池集中管理线程，以实现线程的重用，降低资源消耗，提高响应速度等。线程用于执行异步任务，单个的线程既是工作单元也是执行机制，从JDK1.5开始，为了把工作单元与执行机制分离开，Executor框架诞生了，他是一个用于统一创建与运行的接口。Executor框架实现的就是线程池的功能。</p>
-
 <h2 id="好处">好处</h2>
-
 <p>也就是说，每次我们需要使用线程的时候，可以通过ExecutorService获得线程。它可以有效控制最大并发线程数，提高系统资源的使用率，同时避免过多资源竞争，避免堵塞，同时提供定时执行、定期执行、单线程、并发数控制等功能，也不用使用TimerTask了。</p>
-
 <h2 id="框架结构图解">框架结构图解</h2>
-
 <p>Executor框架包括3大部分</p>
-
 <p>1）任务。也就是工作单元，包括被执行任务需要实现的接口：Runnable接口或者Callable接口；</p>
-
 <p>2）任务的执行。也就是把任务分派给多个线程的执行机制，包括Executor接口及继承自Executor接口的ExecutorService接口。</p>
-
 <p>3）异步计算的结果。包括Future接口及实现了Future接口的FutureTask类。(这是一种设计模式，前面这个设计模式)</p>
-
 <h2 id="框架的成员关系图">框架的成员关系图</h2>
-
-<p><img src="/img/20180319221031756.jpeg" alt="20180319221031756" /></p>
-
-<pre><code class="language-java">java.util.concurrent.Executor 负责线程的使用和调度的根接口
-		|--ExecutorService 子接口： 线程池的主要接口
-				|--ThreadPoolExecutor 线程池的实现类
-				|--ScheduledExceutorService 子接口： 负责线程的调度
-					|--ScheduledThreadPoolExecutor : 继承ThreadPoolExecutor，实现了ScheduledExecutorService
-</code></pre>
-
-<h2 id="框架的使用示意图">框架的使用示意图</h2>
-
-<p><img src="/img/20180319222418739.jpeg" alt="20180319222418739" /></p>
-
+<p><img src="/img/20180319221031756.jpeg" alt="20180319221031756"></p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-java" data-lang="java">java<span style="color:#f92672">.</span><span style="color:#a6e22e">util</span><span style="color:#f92672">.</span><span style="color:#a6e22e">concurrent</span><span style="color:#f92672">.</span><span style="color:#a6e22e">Executor</span> 负责线程的使用和调度的根接口
+		<span style="color:#f92672">|--</span>ExecutorService 子接口<span style="color:#960050;background-color:#1e0010">：</span> 线程池的主要接口
+				<span style="color:#f92672">|--</span>ThreadPoolExecutor 线程池的实现类
+				<span style="color:#f92672">|--</span>ScheduledExceutorService 子接口<span style="color:#960050;background-color:#1e0010">：</span> 负责线程的调度
+					<span style="color:#f92672">|--</span>ScheduledThreadPoolExecutor <span style="color:#f92672">:</span> 继承ThreadPoolExecutor<span style="color:#960050;background-color:#1e0010">，</span>实现了ScheduledExecutorService
+</code></pre></div><h2 id="框架的使用示意图">框架的使用示意图</h2>
+<p><img src="/img/20180319222418739.jpeg" alt="20180319222418739"></p>
 <ol>
 <li>创建Runnable并重写run（）方法或者Callable对象并重写call（）方法：</li>
 <li>创建Executor接口的实现类ThreadPoolExecutor类或者ScheduledThreadPoolExecutor类的对象，然后调用其execute（）方法或者submit（）方法把工作任务添加到线程中，如果有返回值则返回Future对象。其中Callable对象有返回值，因此使用submit（）方法；而Runnable可以使用execute（）方法，此外还可以使用submit（）方法，只要使用callable（Runnable task）或者callable(Runnable task,  Object result)方法把Runnable对象包装起来就可以，使用callable（Runnable task）方法返回的null，使用callable(Runnable task,  Object result)方法返回result。</li>
 </ol>
-
 <h2 id="框架成员">框架成员</h2>
-
 <p>ThreadPoolExecutor实现类、ScheduledThreadPoolExecutor实现类、Future接口、Runnable和Callable接口、Executors工厂类</p>
-
-<p><img src="/img/20180318215737261.jpeg" alt="20180318215737261" /></p>
-
+<p><img src="/img/20180318215737261.jpeg" alt="20180318215737261"></p>
 <h3 id="executorservice">ExecutorService</h3>
-
-<p>转载地址：<a href="https://blog.csdn.net/fwt336/article/details/81530581">https://blog.csdn.net/fwt336/article/details/81530581</a></p>
-
+<p>转载地址：https://blog.csdn.net/fwt336/article/details/81530581</p>
 <p>ExecutorService是一个接口，提供了管理终止的方法，以及可为跟踪一个或多个异步任务执行状况而生成Future 的方法。</p>
-
 <h4 id="创建方式">创建方式</h4>
-
 <p>所有线程池最终都是通过这个方法来创建的。</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-java" data-lang="java"><span style="color:#66d9ef">public</span> <span style="color:#a6e22e">ThreadPoolExecutor</span><span style="color:#f92672">(</span><span style="color:#66d9ef">int</span> corePoolSize<span style="color:#f92672">,</span>
+                              <span style="color:#66d9ef">int</span> maximumPoolSize<span style="color:#f92672">,</span>
+                              <span style="color:#66d9ef">long</span> keepAliveTime<span style="color:#f92672">,</span>
+                              TimeUnit unit<span style="color:#f92672">,</span>
+                              BlockingQueue<span style="color:#f92672">&lt;</span>Runnable<span style="color:#f92672">&gt;</span> workQueue<span style="color:#f92672">,</span>
+                              ThreadFactory threadFactory<span style="color:#f92672">,</span>
+                              RejectedExecutionHandler handler<span style="color:#f92672">)</span>
 
-<pre><code class="language-java">public ThreadPoolExecutor(int corePoolSize,
-                              int maximumPoolSize,
-                              long keepAliveTime,
-                              TimeUnit unit,
-                              BlockingQueue&lt;Runnable&gt; workQueue,
-                              ThreadFactory threadFactory,
-                              RejectedExecutionHandler handler)
 
-
-</code></pre>
-
-<h5 id="corepoolsize">corePoolSize</h5>
-
+</code></pre></div><h5 id="corepoolsize">corePoolSize</h5>
 <p>核心线程数，一旦创建将不会再释放。如果创建的线程数还没有达到指定的核心线程数量，将会继续创建新的核心线程，直到达到最大核心线程数后，核心线程数将不在增加；如果没有空闲的核心线程，同时又未达到最大线程数，则将继续创建非核心线程；如果核心线程数等于最大线程数，则当核心线程都处于激活状态时，任务将被挂起，等待空闲线程来执行。</p>
-
 <h5 id="maximumpoolsize">maximumPoolSize</h5>
-
 <p>最大线程数，允许创建的最大线程数量。如果最大线程数等于核心线程数，则无法创建非核心线程；如果非核心线程处于空闲时，超过设置的空闲时间，则将被回收，释放占用的资源。</p>
-
 <h5 id="keepalivetime">keepAliveTime</h5>
-
 <p>也就是当线程空闲时，所允许保存的最大时间，超过这个时间，线程将被释放销毁，但只针对于非核心线程。</p>
-
 <h5 id="unit">unit</h5>
-
 <p>时间单位，TimeUnit.SECONDS等。</p>
-
 <h5 id="workqueue">workQueue</h5>
-
 <p>任务队列，存储暂时无法执行的任务，等待空闲线程来执行任务。</p>
-
 <h5 id="threadfactory">threadFactory</h5>
-
 <p>线程工程，用于创建线程。</p>
-
 <h5 id="handler">handler</h5>
-
 <p>当线程边界和队列容量已经达到最大时，用于处理阻塞时的程序。</p>
-
 <h4 id="线程池的类型">线程池的类型</h4>
-
 <h5 id="1-可缓存线程池">1. 可缓存线程池</h5>
-
-<pre><code class="language-java">ExecutorService cachePool = Executors.newCachedThreadPool();
-</code></pre>
-
-<p><strong>应用场景</strong>：该线程池比较适合没有固定大小并且比较快速就能完成的小任务，它将为每个任务创建一个线程。那这样子它与直接创建线程对象（new Thread()）有什么区别呢？看到它的第三个参数60L和第四个参数TimeUnit.SECONDS了吗？好处就在于60秒内能够重用已创建的线程。<strong>线程池为无限大</strong>，当执行第二个任务时第一个任务已经完成，会复用执行第一个任务的线程，而不用每次新建线程。</p>
-
-<pre><code class="language-java">public static ExecutorService newCachedThreadPool() {
-        return new ThreadPoolExecutor(0, Integer.MAX_VALUE,
-                                      60L, TimeUnit.SECONDS,
-                                      new SynchronousQueue&lt;Runnable&gt;());
-    }
-</code></pre>
-
-<p>通过它的创建方式可以知道，创建的都是非核心线程，而且最大线程数为Interge的最大值，空闲线程存活时间是1分钟。如果有大量耗时的任务，则不适该创建方式。它只适用于生命周期短的任务。</p>
-
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-java" data-lang="java">ExecutorService cachePool <span style="color:#f92672">=</span> Executors<span style="color:#f92672">.</span><span style="color:#a6e22e">newCachedThreadPool</span><span style="color:#f92672">();</span>
+</code></pre></div><p><strong>应用场景</strong>：该线程池比较适合没有固定大小并且比较快速就能完成的小任务，它将为每个任务创建一个线程。那这样子它与直接创建线程对象（new Thread()）有什么区别呢？看到它的第三个参数60L和第四个参数TimeUnit.SECONDS了吗？好处就在于60秒内能够重用已创建的线程。<strong>线程池为无限大</strong>，当执行第二个任务时第一个任务已经完成，会复用执行第一个任务的线程，而不用每次新建线程。</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-java" data-lang="java"><span style="color:#66d9ef">public</span> <span style="color:#66d9ef">static</span> ExecutorService <span style="color:#a6e22e">newCachedThreadPool</span><span style="color:#f92672">()</span> <span style="color:#f92672">{</span>
+        <span style="color:#66d9ef">return</span> <span style="color:#66d9ef">new</span> ThreadPoolExecutor<span style="color:#f92672">(</span>0<span style="color:#f92672">,</span> Integer<span style="color:#f92672">.</span><span style="color:#a6e22e">MAX_VALUE</span><span style="color:#f92672">,</span>
+                                      60L<span style="color:#f92672">,</span> TimeUnit<span style="color:#f92672">.</span><span style="color:#a6e22e">SECONDS</span><span style="color:#f92672">,</span>
+                                      <span style="color:#66d9ef">new</span> SynchronousQueue<span style="color:#f92672">&lt;</span>Runnable<span style="color:#f92672">&gt;());</span>
+    <span style="color:#f92672">}</span>
+</code></pre></div><p>通过它的创建方式可以知道，创建的都是非核心线程，而且最大线程数为Interge的最大值，空闲线程存活时间是1分钟。如果有大量耗时的任务，则不适该创建方式。它只适用于生命周期短的任务。</p>
 <h5 id="2-单线程池">2. 单线程池</h5>
-
-<pre><code class="language-java">ExecutorService singlePool = Executors.newSingleThreadExecutor();
-</code></pre>
-
-<p>顾名思义，也就是创建一个核心线程：</p>
-
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-java" data-lang="java">ExecutorService singlePool <span style="color:#f92672">=</span> Executors<span style="color:#f92672">.</span><span style="color:#a6e22e">newSingleThreadExecutor</span><span style="color:#f92672">();</span>
+</code></pre></div><p>顾名思义，也就是创建一个核心线程：</p>
 <p>应用场景：SingleThreadExecutor是只有一个线程的线程池，常用于需要让线程顺序执行，并且在任意时间，只能有一个任务被执行，而不能有多个线程同时执行的场景。</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-java" data-lang="java"><span style="color:#66d9ef">public</span> <span style="color:#66d9ef">static</span> ExecutorService <span style="color:#a6e22e">newSingleThreadExecutor</span><span style="color:#f92672">()</span> <span style="color:#f92672">{</span>
+        <span style="color:#66d9ef">return</span> <span style="color:#66d9ef">new</span> FinalizableDelegatedExecutorService
+            <span style="color:#f92672">(</span><span style="color:#66d9ef">new</span> ThreadPoolExecutor<span style="color:#f92672">(</span>1<span style="color:#f92672">,</span> 1<span style="color:#f92672">,</span>
+                                    0L<span style="color:#f92672">,</span> TimeUnit<span style="color:#f92672">.</span><span style="color:#a6e22e">MILLISECONDS</span><span style="color:#f92672">,</span>
+                                    <span style="color:#66d9ef">new</span> LinkedBlockingQueue<span style="color:#f92672">&lt;</span>Runnable<span style="color:#f92672">&gt;()));</span>
+    <span style="color:#f92672">}</span>
 
-<pre><code class="language-java">public static ExecutorService newSingleThreadExecutor() {
-        return new FinalizableDelegatedExecutorService
-            (new ThreadPoolExecutor(1, 1,
-                                    0L, TimeUnit.MILLISECONDS,
-                                    new LinkedBlockingQueue&lt;Runnable&gt;()));
-    }
 
-
-</code></pre>
-
-<p>只用一个线程来执行任务，保证任务按FIFO顺序一个个执行。</p>
-
+</code></pre></div><p>只用一个线程来执行任务，保证任务按FIFO顺序一个个执行。</p>
 <h5 id="3-固定线程数线程池">3. 固定线程数线程池</h5>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-java" data-lang="java">Executors<span style="color:#f92672">.</span><span style="color:#a6e22e">newFixedThreadPool</span><span style="color:#f92672">(</span>3<span style="color:#f92672">);</span>		
+</code></pre></div><p><strong>应用场景</strong>：适用于为了满足资源管理的需求，而需要适当限制当前线程数量的情景，适用于负载比较重的服务器。</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-java" data-lang="java"><span style="color:#66d9ef">public</span> <span style="color:#66d9ef">static</span> ExecutorService <span style="color:#a6e22e">newFixedThreadPool</span><span style="color:#f92672">(</span><span style="color:#66d9ef">int</span> nThreads<span style="color:#f92672">)</span> <span style="color:#f92672">{</span>
+        <span style="color:#66d9ef">return</span> <span style="color:#66d9ef">new</span> ThreadPoolExecutor<span style="color:#f92672">(</span>nThreads<span style="color:#f92672">,</span> nThreads<span style="color:#f92672">,</span>
+                                      0L<span style="color:#f92672">,</span> TimeUnit<span style="color:#f92672">.</span><span style="color:#a6e22e">MILLISECONDS</span><span style="color:#f92672">,</span>
+                                      <span style="color:#66d9ef">new</span> LinkedBlockingQueue<span style="color:#f92672">&lt;</span>Runnable<span style="color:#f92672">&gt;());</span>
+    <span style="color:#f92672">}</span>
 
-<pre><code class="language-java">Executors.newFixedThreadPool(3);		
-</code></pre>
+</code></pre></div><p>也就是创建固定数量的可复用的线程数，来执行任务。当线程数达到最大核心线程数，则加入队列等待有空闲线程时再执行。</p>
+<h5 id="4-固定线程数支持定时和周期性任务">4. 固定线程数，支持定时和周期性任务</h5>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-java" data-lang="java">ExecutorService scheduledPool <span style="color:#f92672">=</span> Executors<span style="color:#f92672">.</span><span style="color:#a6e22e">newScheduledThreadPool</span><span style="color:#f92672">(</span>5<span style="color:#f92672">);</span>
+</code></pre></div><div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-java" data-lang="java"><span style="color:#66d9ef">public</span> <span style="color:#a6e22e">ScheduledThreadPoolExecutor</span><span style="color:#f92672">(</span><span style="color:#66d9ef">int</span> corePoolSize<span style="color:#f92672">)</span> <span style="color:#f92672">{</span>
+    <span style="color:#66d9ef">super</span><span style="color:#f92672">(</span>corePoolSize<span style="color:#f92672">,</span> Integer<span style="color:#f92672">.</span><span style="color:#a6e22e">MAX_VALUE</span><span style="color:#f92672">,</span>
+          DEFAULT_KEEPALIVE_MILLIS<span style="color:#f92672">,</span> MILLISECONDS<span style="color:#f92672">,</span>
+          <span style="color:#66d9ef">new</span> DelayedWorkQueue<span style="color:#f92672">());</span>
+<span style="color:#f92672">}</span>
+</code></pre></div><p>可用于替代handler.postDelay和Timer定时器等延时和周期性任务。</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-java" data-lang="java"><span style="color:#66d9ef">public</span> ScheduledFuture<span style="color:#f92672">&lt;?&gt;</span> schedule<span style="color:#f92672">(</span>Runnable command<span style="color:#f92672">,</span>
+                                       <span style="color:#66d9ef">long</span> delay<span style="color:#f92672">,</span> TimeUnit unit<span style="color:#f92672">);</span>
 
-<p><strong>应用场景</strong>：适用于为了满足资源管理的需求，而需要适当限制当前线程数量的情景，适用于负载比较重的服务器。</p>
-
-<pre><code class="language-java">public static ExecutorService newFixedThreadPool(int nThreads) {
-        return new ThreadPoolExecutor(nThreads, nThreads,
-                                      0L, TimeUnit.MILLISECONDS,
-                                      new LinkedBlockingQueue&lt;Runnable&gt;());
-    }
-
-</code></pre>
-
-<p>也就是创建固定数量的可复用的线程数，来执行任务。当线程数达到最大核心线程数，则加入队列等待有空闲线程时再执行。</p>
-
-<h5 id="4-固定线程数-支持定时和周期性任务">4. 固定线程数，支持定时和周期性任务</h5>
-
-<pre><code class="language-java">ExecutorService scheduledPool = Executors.newScheduledThreadPool(5);
-</code></pre>
-
-<pre><code class="language-java">public ScheduledThreadPoolExecutor(int corePoolSize) {
-    super(corePoolSize, Integer.MAX_VALUE,
-          DEFAULT_KEEPALIVE_MILLIS, MILLISECONDS,
-          new DelayedWorkQueue());
-}
-</code></pre>
-
-<p>可用于替代handler.postDelay和Timer定时器等延时和周期性任务。</p>
-
-<pre><code class="language-java">public ScheduledFuture&lt;?&gt; schedule(Runnable command,
-                                       long delay, TimeUnit unit);
-
-</code></pre>
-
-<pre><code class="language-java">public ScheduledFuture&lt;?&gt; scheduleAtFixedRate(Runnable command,
-                                                  long initialDelay,
-                                                  long period,
-                                                  TimeUnit unit);
-</code></pre>
-
-<pre><code class="language-java">public ScheduledFuture&lt;?&gt; scheduleWithFixedDelay(Runnable command,
-                                                     long initialDelay,
-                                                     long delay,
-                                                     TimeUnit unit);
-</code></pre>
-
-<p>scheduleAtFixedRate和sheduleWithFixedDelay有什么不同呢？</p>
-
+</code></pre></div><div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-java" data-lang="java"><span style="color:#66d9ef">public</span> ScheduledFuture<span style="color:#f92672">&lt;?&gt;</span> scheduleAtFixedRate<span style="color:#f92672">(</span>Runnable command<span style="color:#f92672">,</span>
+                                                  <span style="color:#66d9ef">long</span> initialDelay<span style="color:#f92672">,</span>
+                                                  <span style="color:#66d9ef">long</span> period<span style="color:#f92672">,</span>
+                                                  TimeUnit unit<span style="color:#f92672">);</span>
+</code></pre></div><div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-java" data-lang="java"><span style="color:#66d9ef">public</span> ScheduledFuture<span style="color:#f92672">&lt;?&gt;</span> scheduleWithFixedDelay<span style="color:#f92672">(</span>Runnable command<span style="color:#f92672">,</span>
+                                                     <span style="color:#66d9ef">long</span> initialDelay<span style="color:#f92672">,</span>
+                                                     <span style="color:#66d9ef">long</span> delay<span style="color:#f92672">,</span>
+                                                     TimeUnit unit<span style="color:#f92672">);</span>
+</code></pre></div><p>scheduleAtFixedRate和sheduleWithFixedDelay有什么不同呢？</p>
 <p>scheduleAtFixedRate：是以固定频率来执行线程任务，固定频率的含义就是可能设定的固定时间不足以完成线程任务，但是它不管，达到设定的延迟时间了就要执行下一次了。</p>
-
 <p>scheduleWithFixedDelay: 从字面意义上可以理解为就是以固定延迟（时间）来执行线程任务，它实际上是不管线程任务的执行时间的，每次都要把任务执行完成后再延迟固定时间后再执行下一次。</p>
-
 <h5 id="5-手动创建线程池">5. 手动创建线程池</h5>
-
-<pre><code class="language-java">private ExecutorService pool = new ThreadPoolExecutor(3, 10,
-            10L, TimeUnit.SECONDS,
-            new LinkedBlockingQueue&lt;Runnable&gt;(512), Executors.defaultThreadFactory(),
-            new ThreadPoolExecutor.AbortPolicy());
-</code></pre>
-
-<p>可以根据自己的需求创建指定的核心线程数和总线程数。</p>
-
-<h5 id="6-newworkstealingpool-jdk1-8新增">6. newWorkStealingPool：jdk1.8新增</h5>
-
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-java" data-lang="java"><span style="color:#66d9ef">private</span> ExecutorService pool <span style="color:#f92672">=</span> <span style="color:#66d9ef">new</span> ThreadPoolExecutor<span style="color:#f92672">(</span>3<span style="color:#f92672">,</span> 10<span style="color:#f92672">,</span>
+            10L<span style="color:#f92672">,</span> TimeUnit<span style="color:#f92672">.</span><span style="color:#a6e22e">SECONDS</span><span style="color:#f92672">,</span>
+            <span style="color:#66d9ef">new</span> LinkedBlockingQueue<span style="color:#f92672">&lt;</span>Runnable<span style="color:#f92672">&gt;(</span>512<span style="color:#f92672">),</span> Executors<span style="color:#f92672">.</span><span style="color:#a6e22e">defaultThreadFactory</span><span style="color:#f92672">(),</span>
+            <span style="color:#66d9ef">new</span> ThreadPoolExecutor<span style="color:#f92672">.</span><span style="color:#a6e22e">AbortPolicy</span><span style="color:#f92672">());</span>
+</code></pre></div><p>可以根据自己的需求创建指定的核心线程数和总线程数。</p>
+<h5 id="6-newworkstealingpooljdk18新增">6. newWorkStealingPool：jdk1.8新增</h5>
 <p>创建持有足够线程的线程池来支持给定的并行级别，并通过使用多个队列，减少竞争，它需要穿一个并行级别的参数，如果不传，则被设定为默认的CPU数量。</p>
-
-<p><strong>应用场景：</strong>newWorkStealingPool适合使用在很耗时的操作，但是newWorkStealingPool不是ThreadPoolExecutor的扩展，它是新的线程池类ForkJoinPool的扩展，但是都是在统一的一个Executors类中实现，由于能够合理的使用CPU进行对任务操作（并行操作），所以适合使用在很耗时的任务中：</p>
-
+<p>**应用场景：**newWorkStealingPool适合使用在很耗时的操作，但是newWorkStealingPool不是ThreadPoolExecutor的扩展，它是新的线程池类ForkJoinPool的扩展，但是都是在统一的一个Executors类中实现，由于能够合理的使用CPU进行对任务操作（并行操作），所以适合使用在很耗时的任务中：</p>
 <h5 id="7-总结">7. 总结</h5>
-
 <p>他们里面的适用场景， 主要是针对他们里面实现的时候， 用了不同的数据队列结构。</p>
-
 <h3 id="threadpoolexecutor">ThreadPoolExecutor</h3>
-
 <h4 id="常用子类">常用子类</h4>
-
 <ol>
-<li><p>FixedThreadPool：固定线程池</p></li>
-
-<li><p>SingleThreadExecutor：单线程池</p></li>
-
-<li><p>CachedThreadPool：缓存线程池</p></li>
+<li>
+<p>FixedThreadPool：固定线程池</p>
+</li>
+<li>
+<p>SingleThreadExecutor：单线程池</p>
+</li>
+<li>
+<p>CachedThreadPool：缓存线程池</p>
+</li>
 </ol>
-
 <h3 id="scheduledthreadpoolexecutor">ScheduledThreadPoolExecutor</h3>
-
 <p>转载地址： <a href="https://blog.csdn.net/tongdanping/article/details/79627491">https://blog.csdn.net/tongdanping/article/details/79627491</a></p>
-
 <h4 id="源码">源码</h4>
-
 <p>通过查看源码，可以发现ScheduledThreadPoolExecutor的实现主要是通过把任务封装为ScheduledFutureTask来实现。ScheduledThreadPoolExecutor通过它的scheduledAtFixedTime（）方法或者scheduledWithFixedDelay（）方法向阻塞队列添加一个实现了RunnableScheduledFutureTask接口的ScheduledFutureTask类对象。</p>
-
 <h4 id="常用子类-1">常用子类</h4>
-
 <ol>
 <li>ScheduledThreadPoolExecutor</li>
 </ol>
-
 <p>适用于若干个（固定）线程延时或者定期执行任务，同时为了满足资源管理的需求而需要限制后台线程数量的场景。</p>
-
-<pre><code class="language-java">ScheduledExecutorService stp = Executors.newScheduledThreadPool(int threadNums);
-ScheduledExecutorService stp = Executors.newScheduledThreadPool(int threadNums, ThreadFactory threadFactory);
-</code></pre>
-
-<ol>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-java" data-lang="java">ScheduledExecutorService stp <span style="color:#f92672">=</span> Executors<span style="color:#f92672">.</span><span style="color:#a6e22e">newScheduledThreadPool</span><span style="color:#f92672">(</span><span style="color:#66d9ef">int</span> threadNums<span style="color:#f92672">);</span>
+ScheduledExecutorService stp <span style="color:#f92672">=</span> Executors<span style="color:#f92672">.</span><span style="color:#a6e22e">newScheduledThreadPool</span><span style="color:#f92672">(</span><span style="color:#66d9ef">int</span> threadNums<span style="color:#f92672">,</span> ThreadFactory threadFactory<span style="color:#f92672">);</span>
+</code></pre></div><ol start="2">
 <li>SingleThreadScheduledExecutor</li>
 </ol>
-
 <p>适用于需要单个线程延时或者定期的执行任务，同时需要保证各个任务顺序执行的应用场景。</p>
-
-<pre><code class="language-java">ScheduledExecutorService stse = Executors.newSingleThreadScheduledExecutor(int threadNums);
-ScheduledExecutorService stp = Executors.newSingleThreadScheduledExecutor(int threadNums, ThreadFactory threadFactory);
-</code></pre>
-
-<h3 id="future-futuretask">Future/FutureTask</h3>
-
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-java" data-lang="java">ScheduledExecutorService stse <span style="color:#f92672">=</span> Executors<span style="color:#f92672">.</span><span style="color:#a6e22e">newSingleThreadScheduledExecutor</span><span style="color:#f92672">(</span><span style="color:#66d9ef">int</span> threadNums<span style="color:#f92672">);</span>
+ScheduledExecutorService stp <span style="color:#f92672">=</span> Executors<span style="color:#f92672">.</span><span style="color:#a6e22e">newSingleThreadScheduledExecutor</span><span style="color:#f92672">(</span><span style="color:#66d9ef">int</span> threadNums<span style="color:#f92672">,</span> ThreadFactory threadFactory<span style="color:#f92672">);</span>
+</code></pre></div><h3 id="futurefuturetask">Future/FutureTask</h3>
 <p>转载地址： <a href="https://blog.csdn.net/tongdanping/article/details/79630637">https://blog.csdn.net/tongdanping/article/details/79630637</a></p>
-
 <p>线程运行时候， 返回结果，采用的事Future的一种设计模式， 回调结果。 具体查看博客 [线程基础]</p>
-
 <h3 id="runnable和callable接口">Runnable和Callable接口</h3>
-
 <h4 id="概述-1">概述</h4>
-
 <p>用于实现线程要执行的工作单元。</p>
-
 <h4 id="区别">区别</h4>
-
 <p>转载地址： <a href="https://www.cnblogs.com/baichunyu/p/11150762.html">https://www.cnblogs.com/baichunyu/p/11150762.html</a></p>
-
 <p>Runnable接口中的run()方法的返回值是void，它做的事情只是纯粹地去执行run()方法中的代码而已；Callable接口中的call()方法是有返回值的，是一个泛型，和Future、FutureTask配合可以用来获取异步执行的结果。</p>
-
 <p>这其实是很有用的一个特性，因为多线程相比单线程更难、更复杂的一个重要原因就是因为多线程充满着未知性，某条线程是否执行了？某条线程执行了多久？某条线程执行的时候我们期望的数据是否已经赋值完毕？无法得知，我们能做的只是等待这条多线程的任务执行完毕而已。而Callable+Future/FutureTask却可以获取多线程运行的结果，可以在等待时间太长没获取到需要的数据的情况下取消该线程的任务，真的是非常有用。</p>
-
 <h3 id="executors工厂类">Executors工厂类</h3>
-
 <p>转载地址： <a href="https://www.jianshu.com/p/4a3dc492e123">https://www.jianshu.com/p/4a3dc492e123</a></p>
-
-<p>转载地址：<a href="https://my.oschina.net/u/1054538/blog/1619619">https://my.oschina.net/u/1054538/blog/1619619</a></p>
-
+<p>转载地址：https://my.oschina.net/u/1054538/blog/1619619</p>
 <p>提供了常见配置线程池的方法，因为ThreadPoolExecutor的参数众多且意义重大，为了避免配置出错，才有了Executors工厂类。</p>
-
 <p>Executors为Executor，ExecutorService，ScheduledExecutorService，ThreadFactory和Callable类提供了一些工具方法，类似于集合中的Collections类的功能。</p>
-
 <h4 id="常用方法">常用方法</h4>
-
-<p><img src="/img/2962875-5317a86bc6fc9cb8.png" alt="2962875-5317a86bc6fc9cb8" /></p>
-
+<p><img src="/img/2962875-5317a86bc6fc9cb8.png" alt="2962875-5317a86bc6fc9cb8"></p>
 <h4 id="代码示例">代码示例</h4>
-
 <h5 id="缓存线程池">缓存线程池</h5>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-java" data-lang="java"><span style="color:#66d9ef">public</span> <span style="color:#66d9ef">class</span> <span style="color:#a6e22e">executorsTest</span> <span style="color:#f92672">{</span>
+    <span style="color:#66d9ef">public</span> <span style="color:#66d9ef">static</span> <span style="color:#66d9ef">void</span> <span style="color:#a6e22e">main</span><span style="color:#f92672">(</span>String<span style="color:#f92672">[]</span> args<span style="color:#f92672">)</span> <span style="color:#f92672">{</span>
+        <span style="color:#75715e">// 这个地方下面代码进行替换。
+</span><span style="color:#75715e"></span>        ExecutorService cachedThreadPool <span style="color:#f92672">=</span> Executors<span style="color:#f92672">.</span><span style="color:#a6e22e">newCachedThreadPool</span><span style="color:#f92672">();</span>
+        List<span style="color:#f92672">&lt;</span>Work<span style="color:#f92672">&gt;</span> workList <span style="color:#f92672">=</span> Work<span style="color:#f92672">.</span><span style="color:#a6e22e">buildData</span><span style="color:#f92672">();</span>
 
-<pre><code class="language-java">public class executorsTest {
-    public static void main(String[] args) {
-        // 这个地方下面代码进行替换。
-        ExecutorService cachedThreadPool = Executors.newCachedThreadPool();
-        List&lt;Work&gt; workList = Work.buildData();
+        <span style="color:#66d9ef">for</span> <span style="color:#f92672">(</span><span style="color:#66d9ef">int</span> i <span style="color:#f92672">=</span> 0<span style="color:#f92672">;</span> i <span style="color:#f92672">&lt;</span> workList<span style="color:#f92672">.</span><span style="color:#a6e22e">size</span><span style="color:#f92672">();</span> i<span style="color:#f92672">++)</span> <span style="color:#f92672">{</span>
+            <span style="color:#66d9ef">final</span> <span style="color:#66d9ef">int</span> index <span style="color:#f92672">=</span> i<span style="color:#f92672">;</span> 
+            cachedThreadPool<span style="color:#f92672">.</span><span style="color:#a6e22e">execute</span><span style="color:#f92672">(</span><span style="color:#66d9ef">new</span> Runnable<span style="color:#f92672">()</span> <span style="color:#f92672">{</span>
+                <span style="color:#a6e22e">@Override</span>
+                <span style="color:#66d9ef">public</span> <span style="color:#66d9ef">void</span> <span style="color:#a6e22e">run</span><span style="color:#f92672">()</span> <span style="color:#f92672">{</span>
+                    System<span style="color:#f92672">.</span><span style="color:#a6e22e">out</span><span style="color:#f92672">.</span><span style="color:#a6e22e">println</span><span style="color:#f92672">(</span><span style="color:#e6db74">&#34; currentThread name is &#34;</span> <span style="color:#f92672">+</span> Thread<span style="color:#f92672">.</span><span style="color:#a6e22e">currentThread</span><span style="color:#f92672">().</span><span style="color:#a6e22e">getName</span><span style="color:#f92672">()+</span><span style="color:#e6db74">&#34;---&#34;</span><span style="color:#f92672">+</span>workList<span style="color:#f92672">.</span><span style="color:#a6e22e">get</span><span style="color:#f92672">(</span>index<span style="color:#f92672">).</span><span style="color:#a6e22e">name</span><span style="color:#f92672">+</span><span style="color:#e6db74">&#34;开始工作&#34;</span><span style="color:#f92672">);</span>
+                <span style="color:#f92672">}</span>
+            <span style="color:#f92672">});</span>
+        <span style="color:#f92672">}</span>
 
-        for (int i = 0; i &lt; workList.size(); i++) {
-            final int index = i; 
-            cachedThreadPool.execute(new Runnable() {
-                @Override
-                public void run() {
-                    System.out.println(&quot; currentThread name is &quot; + Thread.currentThread().getName()+&quot;---&quot;+workList.get(index).name+&quot;开始工作&quot;);
-                }
-            });
-        }
+        cachedThreadPool<span style="color:#f92672">.</span><span style="color:#a6e22e">shutdown</span><span style="color:#f92672">();</span>
+    <span style="color:#f92672">}</span>
 
-        cachedThreadPool.shutdown();
-    }
+<span style="color:#f92672">}</span>
 
-}
+<span style="color:#66d9ef">class</span> <span style="color:#a6e22e">Work</span> <span style="color:#f92672">{</span>
 
-class Work {
+    <span style="color:#66d9ef">public</span> String name<span style="color:#f92672">;</span>
 
-    public String name;
+    <span style="color:#66d9ef">public</span> <span style="color:#a6e22e">Work</span><span style="color:#f92672">(</span>String name<span style="color:#f92672">)</span> <span style="color:#f92672">{</span>
+        <span style="color:#66d9ef">this</span><span style="color:#f92672">.</span><span style="color:#a6e22e">name</span> <span style="color:#f92672">=</span> name<span style="color:#f92672">;</span>
+    <span style="color:#f92672">}</span>
 
-    public Work(String name) {
-        this.name = name;
-    }
+    <span style="color:#66d9ef">public</span> <span style="color:#66d9ef">void</span> <span style="color:#a6e22e">doWork</span><span style="color:#f92672">()</span> <span style="color:#f92672">{</span>
+        System<span style="color:#f92672">.</span><span style="color:#a6e22e">out</span><span style="color:#f92672">.</span><span style="color:#a6e22e">println</span><span style="color:#f92672">(</span><span style="color:#66d9ef">this</span><span style="color:#f92672">.</span><span style="color:#a6e22e">name</span> <span style="color:#f92672">+</span> <span style="color:#e6db74">&#34; 开始工作 &#34;</span><span style="color:#f92672">);</span>
+    <span style="color:#f92672">}</span>
 
-    public void doWork() {
-        System.out.println(this.name + &quot; 开始工作 &quot;);
-    }
+    <span style="color:#66d9ef">public</span> <span style="color:#66d9ef">static</span> List<span style="color:#f92672">&lt;</span>Work<span style="color:#f92672">&gt;</span> <span style="color:#a6e22e">buildData</span><span style="color:#f92672">()</span> <span style="color:#f92672">{</span>
+        List<span style="color:#f92672">&lt;</span>Work<span style="color:#f92672">&gt;</span> data <span style="color:#f92672">=</span> <span style="color:#66d9ef">new</span> ArrayList<span style="color:#f92672">&lt;</span>Work<span style="color:#f92672">&gt;();</span>
+        <span style="color:#66d9ef">for</span> <span style="color:#f92672">(</span><span style="color:#66d9ef">int</span> i <span style="color:#f92672">=</span> 0<span style="color:#f92672">;</span> i <span style="color:#f92672">&lt;</span> 10<span style="color:#f92672">;</span> i<span style="color:#f92672">++)</span> <span style="color:#f92672">{</span>
+            data<span style="color:#f92672">.</span><span style="color:#a6e22e">add</span><span style="color:#f92672">(</span><span style="color:#66d9ef">new</span> Work<span style="color:#f92672">(</span><span style="color:#e6db74">&#34;小明&#34;</span> <span style="color:#f92672">+</span> i<span style="color:#f92672">));</span>
+        <span style="color:#f92672">}</span>
+        <span style="color:#66d9ef">return</span> data<span style="color:#f92672">;</span>
+    <span style="color:#f92672">}</span>
 
-    public static List&lt;Work&gt; buildData() {
-        List&lt;Work&gt; data = new ArrayList&lt;Work&gt;();
-        for (int i = 0; i &lt; 10; i++) {
-            data.add(new Work(&quot;小明&quot; + i));
-        }
-        return data;
-    }
-
-}
-</code></pre>
-
-<p>运行结果</p>
-
-<pre><code class="language-java">currentThread name is pool-1-thread-1---小明0开始工作
- currentThread name is pool-1-thread-2---小明1开始工作
- currentThread name is pool-1-thread-4---小明3开始工作
- currentThread name is pool-1-thread-3---小明2开始工作
- currentThread name is pool-1-thread-5---小明4开始工作
- currentThread name is pool-1-thread-2---小明5开始工作
- currentThread name is pool-1-thread-3---小明8开始工作
- currentThread name is pool-1-thread-5---小明6开始工作
- currentThread name is pool-1-thread-2---小明7开始工作
- currentThread name is pool-1-thread-4---小明9开始工作
-</code></pre>
-
-<p>可以看到执行一些耗时不是很长的线程， 可以发现有重复的线程来执行了。 线程池为无限大，当执行第二个任务时第一个任务已经完成，会复用执行第一个任务的线程，而不用每次新建线程。</p>
-
+<span style="color:#f92672">}</span>
+</code></pre></div><p>运行结果</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-java" data-lang="java">currentThread name is pool<span style="color:#f92672">-</span>1<span style="color:#f92672">-</span>thread<span style="color:#f92672">-</span>1<span style="color:#f92672">---</span>小明0开始工作
+ currentThread name is pool<span style="color:#f92672">-</span>1<span style="color:#f92672">-</span>thread<span style="color:#f92672">-</span>2<span style="color:#f92672">---</span>小明1开始工作
+ currentThread name is pool<span style="color:#f92672">-</span>1<span style="color:#f92672">-</span>thread<span style="color:#f92672">-</span>4<span style="color:#f92672">---</span>小明3开始工作
+ currentThread name is pool<span style="color:#f92672">-</span>1<span style="color:#f92672">-</span>thread<span style="color:#f92672">-</span>3<span style="color:#f92672">---</span>小明2开始工作
+ currentThread name is pool<span style="color:#f92672">-</span>1<span style="color:#f92672">-</span>thread<span style="color:#f92672">-</span>5<span style="color:#f92672">---</span>小明4开始工作
+ currentThread name is pool<span style="color:#f92672">-</span>1<span style="color:#f92672">-</span>thread<span style="color:#f92672">-</span>2<span style="color:#f92672">---</span>小明5开始工作
+ currentThread name is pool<span style="color:#f92672">-</span>1<span style="color:#f92672">-</span>thread<span style="color:#f92672">-</span>3<span style="color:#f92672">---</span>小明8开始工作
+ currentThread name is pool<span style="color:#f92672">-</span>1<span style="color:#f92672">-</span>thread<span style="color:#f92672">-</span>5<span style="color:#f92672">---</span>小明6开始工作
+ currentThread name is pool<span style="color:#f92672">-</span>1<span style="color:#f92672">-</span>thread<span style="color:#f92672">-</span>2<span style="color:#f92672">---</span>小明7开始工作
+ currentThread name is pool<span style="color:#f92672">-</span>1<span style="color:#f92672">-</span>thread<span style="color:#f92672">-</span>4<span style="color:#f92672">---</span>小明9开始工作
+</code></pre></div><p>可以看到执行一些耗时不是很长的线程， 可以发现有重复的线程来执行了。 线程池为无限大，当执行第二个任务时第一个任务已经完成，会复用执行第一个任务的线程，而不用每次新建线程。</p>
 <h5 id="固定线程池">固定线程池</h5>
-
 <p>使用的Thread对象的数量是有限的,如果提交的任务数量大于限制的最大线程数，那么这些任务讲排队，然后当有一个线程的任务结束之后，将会根据调度策略继续等待执行下一个任务。</p>
-
-<pre><code class="language-java"> ExecutorService cachedThreadPool = Executors.newFixedThreadPool(2);
-</code></pre>
-
-<p>运行结果</p>
-
-<pre><code class="language-java">currentThread name is pool-1-thread-1---小明0开始工作
- currentThread name is pool-1-thread-2---小明1开始工作
- currentThread name is pool-1-thread-2---小明3开始工作
- currentThread name is pool-1-thread-1---小明2开始工作
- currentThread name is pool-1-thread-1---小明5开始工作
- currentThread name is pool-1-thread-2---小明4开始工作
- currentThread name is pool-1-thread-1---小明6开始工作
- currentThread name is pool-1-thread-2---小明7开始工作
- currentThread name is pool-1-thread-1---小明8开始工作
- currentThread name is pool-1-thread-2---小明9开始工作
-</code></pre>
-
-<h5 id="单线程池">单线程池</h5>
-
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-java" data-lang="java"> ExecutorService cachedThreadPool <span style="color:#f92672">=</span> Executors<span style="color:#f92672">.</span><span style="color:#a6e22e">newFixedThreadPool</span><span style="color:#f92672">(</span>2<span style="color:#f92672">);</span>
+</code></pre></div><p>运行结果</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-java" data-lang="java">currentThread name is pool<span style="color:#f92672">-</span>1<span style="color:#f92672">-</span>thread<span style="color:#f92672">-</span>1<span style="color:#f92672">---</span>小明0开始工作
+ currentThread name is pool<span style="color:#f92672">-</span>1<span style="color:#f92672">-</span>thread<span style="color:#f92672">-</span>2<span style="color:#f92672">---</span>小明1开始工作
+ currentThread name is pool<span style="color:#f92672">-</span>1<span style="color:#f92672">-</span>thread<span style="color:#f92672">-</span>2<span style="color:#f92672">---</span>小明3开始工作
+ currentThread name is pool<span style="color:#f92672">-</span>1<span style="color:#f92672">-</span>thread<span style="color:#f92672">-</span>1<span style="color:#f92672">---</span>小明2开始工作
+ currentThread name is pool<span style="color:#f92672">-</span>1<span style="color:#f92672">-</span>thread<span style="color:#f92672">-</span>1<span style="color:#f92672">---</span>小明5开始工作
+ currentThread name is pool<span style="color:#f92672">-</span>1<span style="color:#f92672">-</span>thread<span style="color:#f92672">-</span>2<span style="color:#f92672">---</span>小明4开始工作
+ currentThread name is pool<span style="color:#f92672">-</span>1<span style="color:#f92672">-</span>thread<span style="color:#f92672">-</span>1<span style="color:#f92672">---</span>小明6开始工作
+ currentThread name is pool<span style="color:#f92672">-</span>1<span style="color:#f92672">-</span>thread<span style="color:#f92672">-</span>2<span style="color:#f92672">---</span>小明7开始工作
+ currentThread name is pool<span style="color:#f92672">-</span>1<span style="color:#f92672">-</span>thread<span style="color:#f92672">-</span>1<span style="color:#f92672">---</span>小明8开始工作
+ currentThread name is pool<span style="color:#f92672">-</span>1<span style="color:#f92672">-</span>thread<span style="color:#f92672">-</span>2<span style="color:#f92672">---</span>小明9开始工作
+</code></pre></div><h5 id="单线程池">单线程池</h5>
 <p>创建一个单线程的线程池。这个线程池只有一个核心线程在工作，也就是相当于单线程串行执行所有任务。如果这个唯一的线程因为异常结束，那么会有一个新的线程来替代它。此线程池保证所有任务的执行顺序按照任务的提交顺序执行。</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-java" data-lang="java">ExecutorService cachedThreadPool <span style="color:#f92672">=</span> Executors<span style="color:#f92672">.</span><span style="color:#a6e22e">newSingleThreadExecutor</span><span style="color:#f92672">();</span>   
+</code></pre></div><p>运行结果</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-java" data-lang="java">currentThread name is pool<span style="color:#f92672">-</span>1<span style="color:#f92672">-</span>thread<span style="color:#f92672">-</span>1<span style="color:#f92672">---</span>小明0开始工作
+ currentThread name is pool<span style="color:#f92672">-</span>1<span style="color:#f92672">-</span>thread<span style="color:#f92672">-</span>1<span style="color:#f92672">---</span>小明1开始工作
+ currentThread name is pool<span style="color:#f92672">-</span>1<span style="color:#f92672">-</span>thread<span style="color:#f92672">-</span>1<span style="color:#f92672">---</span>小明2开始工作
+ currentThread name is pool<span style="color:#f92672">-</span>1<span style="color:#f92672">-</span>thread<span style="color:#f92672">-</span>1<span style="color:#f92672">---</span>小明3开始工作
+ currentThread name is pool<span style="color:#f92672">-</span>1<span style="color:#f92672">-</span>thread<span style="color:#f92672">-</span>1<span style="color:#f92672">---</span>小明4开始工作
+ currentThread name is pool<span style="color:#f92672">-</span>1<span style="color:#f92672">-</span>thread<span style="color:#f92672">-</span>1<span style="color:#f92672">---</span>小明5开始工作
+ currentThread name is pool<span style="color:#f92672">-</span>1<span style="color:#f92672">-</span>thread<span style="color:#f92672">-</span>1<span style="color:#f92672">---</span>小明6开始工作
+ currentThread name is pool<span style="color:#f92672">-</span>1<span style="color:#f92672">-</span>thread<span style="color:#f92672">-</span>1<span style="color:#f92672">---</span>小明7开始工作
+ currentThread name is pool<span style="color:#f92672">-</span>1<span style="color:#f92672">-</span>thread<span style="color:#f92672">-</span>1<span style="color:#f92672">---</span>小明8开始工作
+ currentThread name is pool<span style="color:#f92672">-</span>1<span style="color:#f92672">-</span>thread<span style="color:#f92672">-</span>1<span style="color:#f92672">---</span>小明9开始工作
+</code></pre></div><h5 id="固定线程定时周期任务">固定线程，定时，周期任务</h5>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-java" data-lang="java"><span style="color:#75715e">// 线程启动后， 延迟3秒在进行 
+</span><span style="color:#75715e"></span><span style="color:#66d9ef">public</span> <span style="color:#66d9ef">class</span> <span style="color:#a6e22e">executorsTest</span> <span style="color:#f92672">{</span>
+    <span style="color:#66d9ef">public</span> <span style="color:#66d9ef">static</span> <span style="color:#66d9ef">void</span> <span style="color:#a6e22e">main</span><span style="color:#f92672">(</span>String<span style="color:#f92672">[]</span> args<span style="color:#f92672">)</span> <span style="color:#f92672">{</span>
+        ScheduledExecutorService service <span style="color:#f92672">=</span> Executors<span style="color:#f92672">.</span><span style="color:#a6e22e">newScheduledThreadPool</span><span style="color:#f92672">(</span>5<span style="color:#f92672">);</span>
+        service<span style="color:#f92672">.</span><span style="color:#a6e22e">schedule</span><span style="color:#f92672">(</span><span style="color:#66d9ef">new</span> Runnable<span style="color:#f92672">()</span> <span style="color:#f92672">{</span>
+            <span style="color:#a6e22e">@Override</span>
+            <span style="color:#66d9ef">public</span> <span style="color:#66d9ef">void</span> <span style="color:#a6e22e">run</span><span style="color:#f92672">()</span> <span style="color:#f92672">{</span>
+                 System<span style="color:#f92672">.</span><span style="color:#a6e22e">out</span><span style="color:#f92672">.</span><span style="color:#a6e22e">println</span><span style="color:#f92672">(</span><span style="color:#e6db74">&#34;thread name is &#34;</span><span style="color:#f92672">+</span>Thread<span style="color:#f92672">.</span><span style="color:#a6e22e">currentThread</span><span style="color:#f92672">().</span><span style="color:#a6e22e">getName</span><span style="color:#f92672">());</span>
+            <span style="color:#f92672">}</span>
+        <span style="color:#f92672">},</span> 3<span style="color:#f92672">,</span> TimeUnit<span style="color:#f92672">.</span><span style="color:#a6e22e">SECONDS</span><span style="color:#f92672">);</span>
+    <span style="color:#f92672">}</span>
+<span style="color:#f92672">}</span>
+</code></pre></div><div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-java" data-lang="java"><span style="color:#66d9ef">public</span> <span style="color:#66d9ef">class</span> <span style="color:#a6e22e">executorsTest</span> <span style="color:#f92672">{</span>
+    <span style="color:#66d9ef">public</span> <span style="color:#66d9ef">static</span> <span style="color:#66d9ef">void</span> <span style="color:#a6e22e">main</span><span style="color:#f92672">(</span>String<span style="color:#f92672">[]</span> args<span style="color:#f92672">)</span> <span style="color:#f92672">{</span>
+        ScheduledExecutorService service <span style="color:#f92672">=</span> Executors<span style="color:#f92672">.</span><span style="color:#a6e22e">newScheduledThreadPool</span><span style="color:#f92672">(</span>5<span style="color:#f92672">);</span>
+        service<span style="color:#f92672">.</span><span style="color:#a6e22e">scheduleAtFixedRate</span><span style="color:#f92672">(</span><span style="color:#66d9ef">new</span> Runnable<span style="color:#f92672">()</span> <span style="color:#f92672">{</span>
+            <span style="color:#66d9ef">public</span> <span style="color:#66d9ef">void</span> <span style="color:#a6e22e">run</span><span style="color:#f92672">()</span> <span style="color:#f92672">{</span>
+                System<span style="color:#f92672">.</span><span style="color:#a6e22e">out</span><span style="color:#f92672">.</span><span style="color:#a6e22e">println</span><span style="color:#f92672">(</span><span style="color:#e6db74">&#34;不管你现在这个线程是否执行,我从线程延迟启动1秒后， 每3秒就执行一次&#34;</span><span style="color:#f92672">);</span>
+            <span style="color:#f92672">}</span>
+        <span style="color:#f92672">},</span> 1<span style="color:#f92672">,</span> 3<span style="color:#f92672">,</span> TimeUnit<span style="color:#f92672">.</span><span style="color:#a6e22e">SECONDS</span><span style="color:#f92672">);</span>
+    <span style="color:#f92672">}</span>
+<span style="color:#f92672">}</span>
 
-<pre><code class="language-java">ExecutorService cachedThreadPool = Executors.newSingleThreadExecutor();   
-</code></pre>
+pool<span style="color:#f92672">-</span>1<span style="color:#f92672">-</span>thread<span style="color:#f92672">-</span>1不管你现在这个线程是否执行<span style="color:#f92672">,</span>我从线程延迟启动1秒后<span style="color:#960050;background-color:#1e0010">，</span> 每3秒就执行一次
+pool<span style="color:#f92672">-</span>1<span style="color:#f92672">-</span>thread<span style="color:#f92672">-</span>1不管你现在这个线程是否执行<span style="color:#f92672">,</span>我从线程延迟启动1秒后<span style="color:#960050;background-color:#1e0010">，</span> 每3秒就执行一次
+pool<span style="color:#f92672">-</span>1<span style="color:#f92672">-</span>thread<span style="color:#f92672">-</span>2不管你现在这个线程是否执行<span style="color:#f92672">,</span>我从线程延迟启动1秒后<span style="color:#960050;background-color:#1e0010">，</span> 每3秒就执行一次
+pool<span style="color:#f92672">-</span>1<span style="color:#f92672">-</span>thread<span style="color:#f92672">-</span>1不管你现在这个线程是否执行<span style="color:#f92672">,</span>我从线程延迟启动1秒后<span style="color:#960050;background-color:#1e0010">，</span> 每3秒就执行一次
+pool<span style="color:#f92672">-</span>1<span style="color:#f92672">-</span>thread<span style="color:#f92672">-</span>3不管你现在这个线程是否执行<span style="color:#f92672">,</span>我从线程延迟启动1秒后<span style="color:#960050;background-color:#1e0010">，</span> 每3秒就执行一次
+</code></pre></div><div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-java" data-lang="java"><span style="color:#66d9ef">public</span> <span style="color:#66d9ef">class</span> <span style="color:#a6e22e">executorsTest</span> <span style="color:#f92672">{</span>
+    <span style="color:#66d9ef">public</span> <span style="color:#66d9ef">static</span> <span style="color:#66d9ef">void</span> <span style="color:#a6e22e">main</span><span style="color:#f92672">(</span>String<span style="color:#f92672">[]</span> args<span style="color:#f92672">)</span> <span style="color:#f92672">{</span>
+        ScheduledExecutorService service <span style="color:#f92672">=</span> Executors<span style="color:#f92672">.</span><span style="color:#a6e22e">newScheduledThreadPool</span><span style="color:#f92672">(</span>5<span style="color:#f92672">);</span>
+        service<span style="color:#f92672">.</span><span style="color:#a6e22e">scheduleWithFixedDelay</span><span style="color:#f92672">(</span><span style="color:#66d9ef">new</span> Runnable<span style="color:#f92672">()</span> <span style="color:#f92672">{</span>
+            <span style="color:#a6e22e">@Override</span>
+            <span style="color:#66d9ef">public</span> <span style="color:#66d9ef">void</span> <span style="color:#a6e22e">run</span><span style="color:#f92672">()</span> <span style="color:#f92672">{</span>
+                <span style="color:#66d9ef">try</span> <span style="color:#f92672">{</span>
+                    Thread<span style="color:#f92672">.</span><span style="color:#a6e22e">sleep</span><span style="color:#f92672">(</span>3_000<span style="color:#f92672">);</span>
+                <span style="color:#f92672">}</span> <span style="color:#66d9ef">catch</span> <span style="color:#f92672">(</span>InterruptedException e<span style="color:#f92672">)</span> <span style="color:#f92672">{</span>
+                    e<span style="color:#f92672">.</span><span style="color:#a6e22e">printStackTrace</span><span style="color:#f92672">();</span>
+                <span style="color:#f92672">}</span>
+                System<span style="color:#f92672">.</span><span style="color:#a6e22e">out</span><span style="color:#f92672">.</span><span style="color:#a6e22e">println</span><span style="color:#f92672">(</span>Thread<span style="color:#f92672">.</span><span style="color:#a6e22e">currentThread</span><span style="color:#f92672">().</span><span style="color:#a6e22e">getName</span><span style="color:#f92672">()</span> <span style="color:#f92672">+</span> <span style="color:#e6db74">&#34; 我从线程延迟启动1秒后， 等上一个线程执行完了， 我在过3秒来执行&#34;</span><span style="color:#f92672">);</span>
+            <span style="color:#f92672">}</span>
+        <span style="color:#f92672">},</span> 1<span style="color:#f92672">,</span> 3<span style="color:#f92672">,</span> TimeUnit<span style="color:#f92672">.</span><span style="color:#a6e22e">SECONDS</span><span style="color:#f92672">);</span>
+    <span style="color:#f92672">}</span>
+<span style="color:#f92672">}</span>
 
-<p>运行结果</p>
-
-<pre><code class="language-java">currentThread name is pool-1-thread-1---小明0开始工作
- currentThread name is pool-1-thread-1---小明1开始工作
- currentThread name is pool-1-thread-1---小明2开始工作
- currentThread name is pool-1-thread-1---小明3开始工作
- currentThread name is pool-1-thread-1---小明4开始工作
- currentThread name is pool-1-thread-1---小明5开始工作
- currentThread name is pool-1-thread-1---小明6开始工作
- currentThread name is pool-1-thread-1---小明7开始工作
- currentThread name is pool-1-thread-1---小明8开始工作
- currentThread name is pool-1-thread-1---小明9开始工作
-</code></pre>
-
-<h5 id="固定线程-定时-周期任务">固定线程，定时，周期任务</h5>
-
-<pre><code class="language-java">// 线程启动后， 延迟3秒在进行 
-public class executorsTest {
-    public static void main(String[] args) {
-        ScheduledExecutorService service = Executors.newScheduledThreadPool(5);
-        service.schedule(new Runnable() {
-            @Override
-            public void run() {
-                 System.out.println(&quot;thread name is &quot;+Thread.currentThread().getName());
-            }
-        }, 3, TimeUnit.SECONDS);
-    }
-}
-</code></pre>
-
-<pre><code class="language-java">public class executorsTest {
-    public static void main(String[] args) {
-        ScheduledExecutorService service = Executors.newScheduledThreadPool(5);
-        service.scheduleAtFixedRate(new Runnable() {
-            public void run() {
-                System.out.println(&quot;不管你现在这个线程是否执行,我从线程延迟启动1秒后， 每3秒就执行一次&quot;);
-            }
-        }, 1, 3, TimeUnit.SECONDS);
-    }
-}
-
-pool-1-thread-1不管你现在这个线程是否执行,我从线程延迟启动1秒后， 每3秒就执行一次
-pool-1-thread-1不管你现在这个线程是否执行,我从线程延迟启动1秒后， 每3秒就执行一次
-pool-1-thread-2不管你现在这个线程是否执行,我从线程延迟启动1秒后， 每3秒就执行一次
-pool-1-thread-1不管你现在这个线程是否执行,我从线程延迟启动1秒后， 每3秒就执行一次
-pool-1-thread-3不管你现在这个线程是否执行,我从线程延迟启动1秒后， 每3秒就执行一次
-</code></pre>
-
-<pre><code class="language-java">public class executorsTest {
-    public static void main(String[] args) {
-        ScheduledExecutorService service = Executors.newScheduledThreadPool(5);
-        service.scheduleWithFixedDelay(new Runnable() {
-            @Override
-            public void run() {
-                try {
-                    Thread.sleep(3_000);
-                } catch (InterruptedException e) {
-                    e.printStackTrace();
-                }
-                System.out.println(Thread.currentThread().getName() + &quot; 我从线程延迟启动1秒后， 等上一个线程执行完了， 我在过3秒来执行&quot;);
-            }
-        }, 1, 3, TimeUnit.SECONDS);
-    }
-}
-
-pool-1-thread-1 我从线程延迟启动1秒后， 等上一个线程执行完了， 我在过3秒来执行
-pool-1-thread-1 我从线程延迟启动1秒后， 等上一个线程执行完了， 我在过3秒来执行
-pool-1-thread-2 我从线程延迟启动1秒后， 等上一个线程执行完了， 我在过3秒来执行
-</code></pre>
-
-<h5 id="newworkstealingpool">newWorkStealingPool</h5>
-
-<pre><code class="language-java">public class executorsTest {
-    public static void main(String[] args) {
-        ExecutorService executorService = Executors.newWorkStealingPool();
-        for (int i = 0; i &lt; 3; i++) {
-            executorService.execute(new Runnable() {
-                @Override
-                public void run() {
-                    System.out.println(Thread.currentThread().getName());
-                }
-            });
-        }
-    }
-}
-ForkJoinPool-1-worker-2
-ForkJoinPool-1-worker-2
-ForkJoinPool-1-worker-1
-</code></pre>
-
-<h4 id="线程返回结果示例">线程返回结果示例</h4>
-
+pool<span style="color:#f92672">-</span>1<span style="color:#f92672">-</span>thread<span style="color:#f92672">-</span>1 我从线程延迟启动1秒后<span style="color:#960050;background-color:#1e0010">，</span> 等上一个线程执行完了<span style="color:#960050;background-color:#1e0010">，</span> 我在过3秒来执行
+pool<span style="color:#f92672">-</span>1<span style="color:#f92672">-</span>thread<span style="color:#f92672">-</span>1 我从线程延迟启动1秒后<span style="color:#960050;background-color:#1e0010">，</span> 等上一个线程执行完了<span style="color:#960050;background-color:#1e0010">，</span> 我在过3秒来执行
+pool<span style="color:#f92672">-</span>1<span style="color:#f92672">-</span>thread<span style="color:#f92672">-</span>2 我从线程延迟启动1秒后<span style="color:#960050;background-color:#1e0010">，</span> 等上一个线程执行完了<span style="color:#960050;background-color:#1e0010">，</span> 我在过3秒来执行
+</code></pre></div><h5 id="newworkstealingpool">newWorkStealingPool</h5>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-java" data-lang="java"><span style="color:#66d9ef">public</span> <span style="color:#66d9ef">class</span> <span style="color:#a6e22e">executorsTest</span> <span style="color:#f92672">{</span>
+    <span style="color:#66d9ef">public</span> <span style="color:#66d9ef">static</span> <span style="color:#66d9ef">void</span> <span style="color:#a6e22e">main</span><span style="color:#f92672">(</span>String<span style="color:#f92672">[]</span> args<span style="color:#f92672">)</span> <span style="color:#f92672">{</span>
+        ExecutorService executorService <span style="color:#f92672">=</span> Executors<span style="color:#f92672">.</span><span style="color:#a6e22e">newWorkStealingPool</span><span style="color:#f92672">();</span>
+        <span style="color:#66d9ef">for</span> <span style="color:#f92672">(</span><span style="color:#66d9ef">int</span> i <span style="color:#f92672">=</span> 0<span style="color:#f92672">;</span> i <span style="color:#f92672">&lt;</span> 3<span style="color:#f92672">;</span> i<span style="color:#f92672">++)</span> <span style="color:#f92672">{</span>
+            executorService<span style="color:#f92672">.</span><span style="color:#a6e22e">execute</span><span style="color:#f92672">(</span><span style="color:#66d9ef">new</span> Runnable<span style="color:#f92672">()</span> <span style="color:#f92672">{</span>
+                <span style="color:#a6e22e">@Override</span>
+                <span style="color:#66d9ef">public</span> <span style="color:#66d9ef">void</span> <span style="color:#a6e22e">run</span><span style="color:#f92672">()</span> <span style="color:#f92672">{</span>
+                    System<span style="color:#f92672">.</span><span style="color:#a6e22e">out</span><span style="color:#f92672">.</span><span style="color:#a6e22e">println</span><span style="color:#f92672">(</span>Thread<span style="color:#f92672">.</span><span style="color:#a6e22e">currentThread</span><span style="color:#f92672">().</span><span style="color:#a6e22e">getName</span><span style="color:#f92672">());</span>
+                <span style="color:#f92672">}</span>
+            <span style="color:#f92672">});</span>
+        <span style="color:#f92672">}</span>
+    <span style="color:#f92672">}</span>
+<span style="color:#f92672">}</span>
+ForkJoinPool<span style="color:#f92672">-</span>1<span style="color:#f92672">-</span>worker<span style="color:#f92672">-</span>2
+ForkJoinPool<span style="color:#f92672">-</span>1<span style="color:#f92672">-</span>worker<span style="color:#f92672">-</span>2
+ForkJoinPool<span style="color:#f92672">-</span>1<span style="color:#f92672">-</span>worker<span style="color:#f92672">-</span>1
+</code></pre></div><h4 id="线程返回结果示例">线程返回结果示例</h4>
 <h5 id="runnable模式">Runnable模式</h5>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-java" data-lang="java"><span style="color:#66d9ef">public</span> <span style="color:#66d9ef">class</span> <span style="color:#a6e22e">executorsTest</span> <span style="color:#f92672">{</span>
+    <span style="color:#66d9ef">public</span> <span style="color:#66d9ef">static</span> <span style="color:#66d9ef">void</span> <span style="color:#a6e22e">main</span><span style="color:#f92672">(</span><span style="color:#66d9ef">final</span> String<span style="color:#f92672">[]</span> args<span style="color:#f92672">)</span> <span style="color:#66d9ef">throws</span> InterruptedException<span style="color:#f92672">,</span> ExecutionException <span style="color:#f92672">{</span>
+        <span style="color:#66d9ef">final</span> ExecutorService service <span style="color:#f92672">=</span> Executors<span style="color:#f92672">.</span><span style="color:#a6e22e">newFixedThreadPool</span><span style="color:#f92672">(</span>5<span style="color:#f92672">);</span>
+        FutureTask<span style="color:#f92672">&lt;</span>String<span style="color:#f92672">&gt;</span> task <span style="color:#f92672">=</span> <span style="color:#f92672">(</span>FutureTask<span style="color:#f92672">&lt;</span>String<span style="color:#f92672">&gt;)</span> service<span style="color:#f92672">.</span><span style="color:#a6e22e">submit</span><span style="color:#f92672">(</span><span style="color:#66d9ef">new</span> Runnable<span style="color:#f92672">()</span> <span style="color:#f92672">{</span>
+            <span style="color:#a6e22e">@Override</span>
+            <span style="color:#66d9ef">public</span> <span style="color:#66d9ef">void</span> <span style="color:#a6e22e">run</span><span style="color:#f92672">()</span> <span style="color:#f92672">{</span>
+                <span style="color:#66d9ef">try</span> <span style="color:#f92672">{</span>
+                    Thread<span style="color:#f92672">.</span><span style="color:#a6e22e">sleep</span><span style="color:#f92672">(</span>3_000<span style="color:#f92672">);</span>
+                <span style="color:#f92672">}</span> <span style="color:#66d9ef">catch</span> <span style="color:#f92672">(</span>InterruptedException e<span style="color:#f92672">)</span> <span style="color:#f92672">{</span>
+                    e<span style="color:#f92672">.</span><span style="color:#a6e22e">printStackTrace</span><span style="color:#f92672">();</span>
+                <span style="color:#f92672">}</span>
+                System<span style="color:#f92672">.</span><span style="color:#a6e22e">out</span><span style="color:#f92672">.</span><span style="color:#a6e22e">println</span><span style="color:#f92672">(</span>Thread<span style="color:#f92672">.</span><span style="color:#a6e22e">currentThread</span><span style="color:#f92672">().</span><span style="color:#a6e22e">getName</span><span style="color:#f92672">());</span>
+            <span style="color:#f92672">}</span>
+        <span style="color:#f92672">},</span> <span style="color:#e6db74">&#34;线程已经完成&#34;</span><span style="color:#f92672">);</span>
+        System<span style="color:#f92672">.</span><span style="color:#a6e22e">out</span><span style="color:#f92672">.</span><span style="color:#a6e22e">println</span><span style="color:#f92672">(</span>task<span style="color:#f92672">.</span><span style="color:#a6e22e">get</span><span style="color:#f92672">());</span>
+        service<span style="color:#f92672">.</span><span style="color:#a6e22e">shutdown</span><span style="color:#f92672">();</span>
+    <span style="color:#f92672">}</span>
+<span style="color:#f92672">}</span>
 
-<pre><code class="language-java">public class executorsTest {
-    public static void main(final String[] args) throws InterruptedException, ExecutionException {
-        final ExecutorService service = Executors.newFixedThreadPool(5);
-        FutureTask&lt;String&gt; task = (FutureTask&lt;String&gt;) service.submit(new Runnable() {
-            @Override
-            public void run() {
-                try {
-                    Thread.sleep(3_000);
-                } catch (InterruptedException e) {
-                    e.printStackTrace();
-                }
-                System.out.println(Thread.currentThread().getName());
-            }
-        }, &quot;线程已经完成&quot;);
-        System.out.println(task.get());
-        service.shutdown();
-    }
-}
-
-pool-1-thread-1
+pool<span style="color:#f92672">-</span>1<span style="color:#f92672">-</span>thread<span style="color:#f92672">-</span>1
 线程已经完成
-</code></pre>
+</code></pre></div><h5 id="futuretask模式">FutureTask模式</h5>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-java" data-lang="java"><span style="color:#66d9ef">public</span> <span style="color:#66d9ef">class</span> <span style="color:#a6e22e">executorsTest</span> <span style="color:#f92672">{</span>
+    <span style="color:#66d9ef">public</span> <span style="color:#66d9ef">static</span> <span style="color:#66d9ef">void</span> <span style="color:#a6e22e">main</span><span style="color:#f92672">(</span><span style="color:#66d9ef">final</span> String<span style="color:#f92672">[]</span> args<span style="color:#f92672">)</span> <span style="color:#66d9ef">throws</span> InterruptedException<span style="color:#f92672">,</span> ExecutionException <span style="color:#f92672">{</span>
+        ExecutorService service <span style="color:#f92672">=</span> Executors<span style="color:#f92672">.</span><span style="color:#a6e22e">newFixedThreadPool</span><span style="color:#f92672">(</span>5<span style="color:#f92672">);</span>
 
-<h5 id="futuretask模式">FutureTask模式</h5>
-
-<pre><code class="language-java">public class executorsTest {
-    public static void main(final String[] args) throws InterruptedException, ExecutionException {
-        ExecutorService service = Executors.newFixedThreadPool(5);
-
-        List&lt;Work&gt; workers = Work.buildData();
-        List&lt;FutureTask&lt;String&gt;&gt; tasks = new ArrayList&lt;&gt;();
-        for (Work worker : workers){
-            FutureTask&lt;String&gt; task = new FutureTask&lt;String&gt;(worker);
-            service.submit(task);
-            tasks.add(task);
-        }
+        List<span style="color:#f92672">&lt;</span>Work<span style="color:#f92672">&gt;</span> workers <span style="color:#f92672">=</span> Work<span style="color:#f92672">.</span><span style="color:#a6e22e">buildData</span><span style="color:#f92672">();</span>
+        List<span style="color:#f92672">&lt;</span>FutureTask<span style="color:#f92672">&lt;</span>String<span style="color:#f92672">&gt;&gt;</span> tasks <span style="color:#f92672">=</span> <span style="color:#66d9ef">new</span> ArrayList<span style="color:#f92672">&lt;&gt;();</span>
+        <span style="color:#66d9ef">for</span> <span style="color:#f92672">(</span>Work worker <span style="color:#f92672">:</span> workers<span style="color:#f92672">){</span>
+            FutureTask<span style="color:#f92672">&lt;</span>String<span style="color:#f92672">&gt;</span> task <span style="color:#f92672">=</span> <span style="color:#66d9ef">new</span> FutureTask<span style="color:#f92672">&lt;</span>String<span style="color:#f92672">&gt;(</span>worker<span style="color:#f92672">);</span>
+            service<span style="color:#f92672">.</span><span style="color:#a6e22e">submit</span><span style="color:#f92672">(</span>task<span style="color:#f92672">);</span>
+            tasks<span style="color:#f92672">.</span><span style="color:#a6e22e">add</span><span style="color:#f92672">(</span>task<span style="color:#f92672">);</span>
+        <span style="color:#f92672">}</span>
         
-        for (FutureTask&lt;String&gt; task : tasks){
-             System.out.println(task.get());
-        }
-        service.shutdown();
-    }
-}
+        <span style="color:#66d9ef">for</span> <span style="color:#f92672">(</span>FutureTask<span style="color:#f92672">&lt;</span>String<span style="color:#f92672">&gt;</span> task <span style="color:#f92672">:</span> tasks<span style="color:#f92672">){</span>
+             System<span style="color:#f92672">.</span><span style="color:#a6e22e">out</span><span style="color:#f92672">.</span><span style="color:#a6e22e">println</span><span style="color:#f92672">(</span>task<span style="color:#f92672">.</span><span style="color:#a6e22e">get</span><span style="color:#f92672">());</span>
+        <span style="color:#f92672">}</span>
+        service<span style="color:#f92672">.</span><span style="color:#a6e22e">shutdown</span><span style="color:#f92672">();</span>
+    <span style="color:#f92672">}</span>
+<span style="color:#f92672">}</span>
 
-class Work implements Callable&lt;String&gt; {
+<span style="color:#66d9ef">class</span> <span style="color:#a6e22e">Work</span> <span style="color:#66d9ef">implements</span> Callable<span style="color:#f92672">&lt;</span>String<span style="color:#f92672">&gt;</span> <span style="color:#f92672">{</span>
 
-    public String name;
+    <span style="color:#66d9ef">public</span> String name<span style="color:#f92672">;</span>
 
-    public Work(final String name) {
-        this.name = name;
-    }
+    <span style="color:#66d9ef">public</span> <span style="color:#a6e22e">Work</span><span style="color:#f92672">(</span><span style="color:#66d9ef">final</span> String name<span style="color:#f92672">)</span> <span style="color:#f92672">{</span>
+        <span style="color:#66d9ef">this</span><span style="color:#f92672">.</span><span style="color:#a6e22e">name</span> <span style="color:#f92672">=</span> name<span style="color:#f92672">;</span>
+    <span style="color:#f92672">}</span>
 
-    public Work() {
-    }
+    <span style="color:#66d9ef">public</span> <span style="color:#a6e22e">Work</span><span style="color:#f92672">()</span> <span style="color:#f92672">{</span>
+    <span style="color:#f92672">}</span>
 
-    public void doWork() {
-        System.out.println(this.name + &quot; 开始工作 &quot;);
-    }
+    <span style="color:#66d9ef">public</span> <span style="color:#66d9ef">void</span> <span style="color:#a6e22e">doWork</span><span style="color:#f92672">()</span> <span style="color:#f92672">{</span>
+        System<span style="color:#f92672">.</span><span style="color:#a6e22e">out</span><span style="color:#f92672">.</span><span style="color:#a6e22e">println</span><span style="color:#f92672">(</span><span style="color:#66d9ef">this</span><span style="color:#f92672">.</span><span style="color:#a6e22e">name</span> <span style="color:#f92672">+</span> <span style="color:#e6db74">&#34; 开始工作 &#34;</span><span style="color:#f92672">);</span>
+    <span style="color:#f92672">}</span>
 
-    public static List&lt;Work&gt; buildData() {
-        final List&lt;Work&gt; data = new ArrayList&lt;Work&gt;();
-        for (int i = 0; i &lt; 10; i++) {
-            data.add(new Work(&quot;小明&quot; + i));
-        }
-        return data;
-    }
+    <span style="color:#66d9ef">public</span> <span style="color:#66d9ef">static</span> List<span style="color:#f92672">&lt;</span>Work<span style="color:#f92672">&gt;</span> <span style="color:#a6e22e">buildData</span><span style="color:#f92672">()</span> <span style="color:#f92672">{</span>
+        <span style="color:#66d9ef">final</span> List<span style="color:#f92672">&lt;</span>Work<span style="color:#f92672">&gt;</span> data <span style="color:#f92672">=</span> <span style="color:#66d9ef">new</span> ArrayList<span style="color:#f92672">&lt;</span>Work<span style="color:#f92672">&gt;();</span>
+        <span style="color:#66d9ef">for</span> <span style="color:#f92672">(</span><span style="color:#66d9ef">int</span> i <span style="color:#f92672">=</span> 0<span style="color:#f92672">;</span> i <span style="color:#f92672">&lt;</span> 10<span style="color:#f92672">;</span> i<span style="color:#f92672">++)</span> <span style="color:#f92672">{</span>
+            data<span style="color:#f92672">.</span><span style="color:#a6e22e">add</span><span style="color:#f92672">(</span><span style="color:#66d9ef">new</span> Work<span style="color:#f92672">(</span><span style="color:#e6db74">&#34;小明&#34;</span> <span style="color:#f92672">+</span> i<span style="color:#f92672">));</span>
+        <span style="color:#f92672">}</span>
+        <span style="color:#66d9ef">return</span> data<span style="color:#f92672">;</span>
+    <span style="color:#f92672">}</span>
 
-    public static void name() {
+    <span style="color:#66d9ef">public</span> <span style="color:#66d9ef">static</span> <span style="color:#66d9ef">void</span> <span style="color:#a6e22e">name</span><span style="color:#f92672">()</span> <span style="color:#f92672">{</span>
         
-    }
+    <span style="color:#f92672">}</span>
 
-    @Override
-    public String call() throws Exception {
-         System.out.println(Thread.currentThread().getName()+&quot;---&quot;+this.name);
-        return this.name+&quot;: 任务已经完成&quot;;
-    }
+    <span style="color:#a6e22e">@Override</span>
+    <span style="color:#66d9ef">public</span> String <span style="color:#a6e22e">call</span><span style="color:#f92672">()</span> <span style="color:#66d9ef">throws</span> Exception <span style="color:#f92672">{</span>
+         System<span style="color:#f92672">.</span><span style="color:#a6e22e">out</span><span style="color:#f92672">.</span><span style="color:#a6e22e">println</span><span style="color:#f92672">(</span>Thread<span style="color:#f92672">.</span><span style="color:#a6e22e">currentThread</span><span style="color:#f92672">().</span><span style="color:#a6e22e">getName</span><span style="color:#f92672">()+</span><span style="color:#e6db74">&#34;---&#34;</span><span style="color:#f92672">+</span><span style="color:#66d9ef">this</span><span style="color:#f92672">.</span><span style="color:#a6e22e">name</span><span style="color:#f92672">);</span>
+        <span style="color:#66d9ef">return</span> <span style="color:#66d9ef">this</span><span style="color:#f92672">.</span><span style="color:#a6e22e">name</span><span style="color:#f92672">+</span><span style="color:#e6db74">&#34;: 任务已经完成&#34;</span><span style="color:#f92672">;</span>
+    <span style="color:#f92672">}</span>
 
-}
-</code></pre>
-
-<p>运行结果</p>
-
-<pre><code class="language-java">pool-1-thread-1---小明0
-pool-1-thread-4---小明3
-pool-1-thread-3---小明2
-pool-1-thread-2---小明1
-pool-1-thread-5---小明4
+<span style="color:#f92672">}</span>
+</code></pre></div><p>运行结果</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-java" data-lang="java">pool<span style="color:#f92672">-</span>1<span style="color:#f92672">-</span>thread<span style="color:#f92672">-</span>1<span style="color:#f92672">---</span>小明0
+pool<span style="color:#f92672">-</span>1<span style="color:#f92672">-</span>thread<span style="color:#f92672">-</span>4<span style="color:#f92672">---</span>小明3
+pool<span style="color:#f92672">-</span>1<span style="color:#f92672">-</span>thread<span style="color:#f92672">-</span>3<span style="color:#f92672">---</span>小明2
+pool<span style="color:#f92672">-</span>1<span style="color:#f92672">-</span>thread<span style="color:#f92672">-</span>2<span style="color:#f92672">---</span>小明1
+pool<span style="color:#f92672">-</span>1<span style="color:#f92672">-</span>thread<span style="color:#f92672">-</span>5<span style="color:#f92672">---</span>小明4
 小明0: 任务已经完成
 小明1: 任务已经完成
-pool-1-thread-5---小明9
-pool-1-thread-3---小明6
+pool<span style="color:#f92672">-</span>1<span style="color:#f92672">-</span>thread<span style="color:#f92672">-</span>5<span style="color:#f92672">---</span>小明9
+pool<span style="color:#f92672">-</span>1<span style="color:#f92672">-</span>thread<span style="color:#f92672">-</span>3<span style="color:#f92672">---</span>小明6
 小明2: 任务已经完成
 小明3: 任务已经完成
 小明4: 任务已经完成
-pool-1-thread-1---小明8
-pool-1-thread-2---小明7
-pool-1-thread-4---小明5
+pool<span style="color:#f92672">-</span>1<span style="color:#f92672">-</span>thread<span style="color:#f92672">-</span>1<span style="color:#f92672">---</span>小明8
+pool<span style="color:#f92672">-</span>1<span style="color:#f92672">-</span>thread<span style="color:#f92672">-</span>2<span style="color:#f92672">---</span>小明7
+pool<span style="color:#f92672">-</span>1<span style="color:#f92672">-</span>thread<span style="color:#f92672">-</span>4<span style="color:#f92672">---</span>小明5
 小明5: 任务已经完成
 小明6: 任务已经完成
 小明7: 任务已经完成
 小明8: 任务已经完成
 小明9: 任务已经完成
-</code></pre>
-
+</code></pre></div>
 
                 
                 
@@ -923,74 +761,23 @@ pool-1-thread-4---小明5
                     </h4>
                     <ul class="catalog-body"></ul>
                     <nav id="TableOfContents">
-<ul>
-<li><a href="#executor框架">Executor框架</a>
-<ul>
-<li><a href="#概述">概述</a></li>
-<li><a href="#好处">好处</a></li>
-<li><a href="#框架结构图解">框架结构图解</a></li>
-<li><a href="#框架的成员关系图">框架的成员关系图</a></li>
-<li><a href="#框架的使用示意图">框架的使用示意图</a></li>
-<li><a href="#框架成员">框架成员</a>
-<ul>
-<li><a href="#executorservice">ExecutorService</a>
-<ul>
-<li><a href="#创建方式">创建方式</a>
-<ul>
-<li><a href="#corepoolsize">corePoolSize</a></li>
-<li><a href="#maximumpoolsize">maximumPoolSize</a></li>
-<li><a href="#keepalivetime">keepAliveTime</a></li>
-<li><a href="#unit">unit</a></li>
-<li><a href="#workqueue">workQueue</a></li>
-<li><a href="#threadfactory">threadFactory</a></li>
-<li><a href="#handler">handler</a></li>
-</ul></li>
-<li><a href="#线程池的类型">线程池的类型</a>
-<ul>
-<li><a href="#1-可缓存线程池">1. 可缓存线程池</a></li>
-<li><a href="#2-单线程池">2. 单线程池</a></li>
-<li><a href="#3-固定线程数线程池">3. 固定线程数线程池</a></li>
-<li><a href="#4-固定线程数-支持定时和周期性任务">4. 固定线程数，支持定时和周期性任务</a></li>
-<li><a href="#5-手动创建线程池">5. 手动创建线程池</a></li>
-<li><a href="#6-newworkstealingpool-jdk1-8新增">6. newWorkStealingPool：jdk1.8新增</a></li>
-<li><a href="#7-总结">7. 总结</a></li>
-</ul></li>
-</ul></li>
-<li><a href="#threadpoolexecutor">ThreadPoolExecutor</a>
-<ul>
-<li><a href="#常用子类">常用子类</a></li>
-</ul></li>
-<li><a href="#scheduledthreadpoolexecutor">ScheduledThreadPoolExecutor</a>
-<ul>
-<li><a href="#源码">源码</a></li>
-<li><a href="#常用子类-1">常用子类</a></li>
-</ul></li>
-<li><a href="#future-futuretask">Future/FutureTask</a></li>
-<li><a href="#runnable和callable接口">Runnable和Callable接口</a>
-<ul>
-<li><a href="#概述-1">概述</a></li>
-<li><a href="#区别">区别</a></li>
-</ul></li>
-<li><a href="#executors工厂类">Executors工厂类</a>
-<ul>
-<li><a href="#常用方法">常用方法</a></li>
-<li><a href="#代码示例">代码示例</a>
-<ul>
-<li><a href="#缓存线程池">缓存线程池</a></li>
-<li><a href="#固定线程池">固定线程池</a></li>
-<li><a href="#单线程池">单线程池</a></li>
-<li><a href="#固定线程-定时-周期任务">固定线程，定时，周期任务</a></li>
-<li><a href="#newworkstealingpool">newWorkStealingPool</a></li>
-</ul></li>
-<li><a href="#线程返回结果示例">线程返回结果示例</a>
-<ul>
-<li><a href="#runnable模式">Runnable模式</a></li>
-<li><a href="#futuretask模式">FutureTask模式</a></li>
-</ul></li>
-</ul></li>
-</ul></li>
-</ul></li>
-</ul>
+  <ul>
+    <li><a href="#概述">概述</a></li>
+    <li><a href="#好处">好处</a></li>
+    <li><a href="#框架结构图解">框架结构图解</a></li>
+    <li><a href="#框架的成员关系图">框架的成员关系图</a></li>
+    <li><a href="#框架的使用示意图">框架的使用示意图</a></li>
+    <li><a href="#框架成员">框架成员</a>
+      <ul>
+        <li><a href="#executorservice">ExecutorService</a></li>
+        <li><a href="#threadpoolexecutor">ThreadPoolExecutor</a></li>
+        <li><a href="#scheduledthreadpoolexecutor">ScheduledThreadPoolExecutor</a></li>
+        <li><a href="#futurefuturetask">Future/FutureTask</a></li>
+        <li><a href="#runnable和callable接口">Runnable和Callable接口</a></li>
+        <li><a href="#executors工厂类">Executors工厂类</a></li>
+      </ul>
+    </li>
+  </ul>
 </nav>
                     <br>
                     <br>
@@ -1015,9 +802,6 @@ pool-1-thread-4---小明5
                         
                         
                         
-                        <a href="/tags/" title="">
-                            
-                        </a>
                         
                         
                         
@@ -1027,101 +811,6 @@ pool-1-thread-4---小明5
                         
                         
                         
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        <a href="/tags/qt" title="QT">
-                            QT
-                        </a>
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        <a href="/tags/zookeeper" title="Zookeeper">
-                            Zookeeper
-                        </a>
                         
                         
                         
@@ -1161,8 +850,10 @@ pool-1-thread-4---小明5
                         
                         
                         
-                        <a href="/tags/elasticsearch" title="elasticSearch">
-                            elasticSearch
+                        
+                        
+                        <a href="/tags/elasticsearch" title="elasticsearch">
+                            elasticsearch
                         </a>
                         
                         
@@ -1173,9 +864,27 @@ pool-1-thread-4---小明5
                         
                         
                         
-                        <a href="/tags/golang" title="golang">
-                            golang
-                        </a>
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
                         
                         
                         
@@ -1213,9 +922,21 @@ pool-1-thread-4---小明5
                         
                         
                         
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
                         <a href="/tags/jvm" title="jvm">
                             jvm
                         </a>
+                        
+                        
+                        
+                        
                         
                         
                         
@@ -1239,9 +960,19 @@ pool-1-thread-4---小明5
                         
                         
                         
+                        
+                        
+                        
+                        
+                        
+                        
                         <a href="/tags/mongodb" title="mongodb">
                             mongodb
                         </a>
+                        
+                        
+                        
+                        
                         
                         
                         
@@ -1252,10 +983,6 @@ pool-1-thread-4---小明5
                         </a>
                         
                         
-                        
-                        <a href="/tags/mycat" title="mycat">
-                            mycat
-                        </a>
                         
                         
                         
@@ -1269,9 +996,17 @@ pool-1-thread-4---小明5
                         
                         
                         
-                        <a href="/tags/nginx" title="nginx">
-                            nginx
-                        </a>
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
                         
                         
                         
@@ -1295,8 +1030,22 @@ pool-1-thread-4---小明5
                         
                         
                         
+                        
+                        
                         <a href="/tags/rocketmq" title="rocketmq">
                             rocketmq
+                        </a>
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        <a href="/tags/security%E6%A1%86%E6%9E%B6%E5%AD%A6%E4%B9%A0" title="security框架学习">
+                            security框架学习
                         </a>
                         
                         
@@ -1323,17 +1072,11 @@ pool-1-thread-4---小明5
                         
                         
                         
-                        <a href="/tags/springcloud" title="springCloud">
-                            springCloud
-                        </a>
-                        
-                        
-                        
-                        
-                        
                         <a href="/tags/springboot" title="springboot">
                             springboot
                         </a>
+                        
+                        
                         
                         
                         
@@ -1347,6 +1090,9 @@ pool-1-thread-4---小明5
                         
                         
                         
+                        <a href="/tags/springcloud" title="springcloud">
+                            springcloud
+                        </a>
                         
                         
                         
@@ -1372,6 +1118,33 @@ pool-1-thread-4---小明5
                         
                         
                         
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        <a href="/tags/zookeeper" title="zookeeper">
+                            zookeeper
+                        </a>
                         
                         
                         
@@ -1431,6 +1204,8 @@ pool-1-thread-4---小明5
                         
                         
                         
+                        
+                        
                         <a href="/tags/%E5%88%86%E5%B8%83%E5%BC%8F%E7%B3%BB%E5%88%97" title="分布式系列">
                             分布式系列
                         </a>
@@ -1450,6 +1225,10 @@ pool-1-thread-4---小明5
                         
                         
                         
+                        
+                        <a href="/tags/%E5%8D%8F%E8%AE%AE%E6%A0%88" title="协议栈">
+                            协议栈
+                        </a>
                         
                         
                         
@@ -1649,6 +1428,12 @@ pool-1-thread-4---小明5
                         
                         
                         
+                        
+                        
+                        
+                        
+                        
+                        
                         <a href="/tags/%E7%BD%91%E7%BB%9C%E7%BC%96%E7%A8%8B" title="网络编程">
                             网络编程
                         </a>
@@ -1672,6 +1457,10 @@ pool-1-thread-4---小明5
                         
                         
                         
+                        
+                        <a href="/tags/%E8%AE%A4%E8%AF%81%E5%92%8C%E6%8E%88%E6%9D%83" title="认证和授权">
+                            认证和授权
+                        </a>
                         
                         
                         
@@ -1842,7 +1631,7 @@ pool-1-thread-4---小明5
                     
                 </ul>
 		<p class="copyright text-muted">
-                    Copyright &copy;  2020
+                    Copyright &copy;  2021
                     <br>
                     <a href="https://themes.gohugo.io/hugo-theme-cleanwhite">CleanWhite Hugo Theme</a> by <a href="https://zhaohuabing.com">Huabing</a> |
                     <iframe

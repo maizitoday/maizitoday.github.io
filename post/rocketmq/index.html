@@ -97,15 +97,15 @@
                     </li>
                     
                     <li>
-                        <a href="/categories/english">English</a>
+                        <a href="/categories/english">english</a>
                     </li>
                     
                     <li>
-                        <a href="/categories/life">Life</a>
+                        <a href="/categories/life">life</a>
                     </li>
                     
                     <li>
-                        <a href="/categories/tech">Tech</a>
+                        <a href="/categories/tech">tech</a>
                     </li>
                     
 
@@ -245,163 +245,87 @@
                 
                 
                 
-                
-
-<p>[TOC]</p>
-
-<p><strong>视频资料：<a href="https://www.bilibili.com/video/av59635085?from=search&amp;seid=15914016610413035041">https://www.bilibili.com/video/av59635085?from=search&amp;seid=15914016610413035041</a></strong></p>
-
-<p><strong>好的资料：<a href="http://www.tianshouzhi.com/api/tutorials/rocketmq/50">http://www.tianshouzhi.com/api/tutorials/rocketmq/50</a></strong></p>
-
+                <p>[TOC]</p>
+<p><strong>视频资料：https://www.bilibili.com/video/av59635085?from=search&amp;seid=15914016610413035041</strong></p>
+<p><strong>好的资料：http://www.tianshouzhi.com/api/tutorials/rocketmq/50</strong></p>
 <h3 id="消息队列好处">消息队列好处</h3>
-
 <h5 id="1-解耦">1. 解耦:</h5>
-
 <p>​      系统和系统之间，通过一个中间层的来进行协调，其他系统的调用就只要订阅这个MQ就可以进行业务处理。如果需要进行加入其他业务，只要订阅这个消息就可以了。 对于上游的业务层，根本不需要修改，他只和MQ对接，这样的话，和其他的业务系统进行了解耦。</p>
-
 <h5 id="2-异步">2. 异步</h5>
-
 <p>​      对于我们以前的业务处理， 一些不重要的，不影响核心业务的处理也都是串行处理的，如果我们用MQ的话，对于一些不核心的业务可以订阅MQ，异步来出来，节省响应时间。</p>
-
-<h5 id="3-削峰-限流">3. 削峰（限流）</h5>
-
+<h5 id="3-削峰限流">3. 削峰（限流）</h5>
 <p>​    对于一些高峰期的大量用户进入的时候，我们系统可能支持不住，如果我们在前面用MQ把这些大量的请求放入队列中，等高峰期过去了， 然后我们在从队列中慢慢的处理堆积在MQ的请求，这样网站不至于崩溃了。</p>
-
 <h3 id="tps">TPS</h3>
-
 <p>TPS包括一条消息入和一条消息出，加上一次用户数据库访问。（业务TPS = CAPS × 每个呼叫平均TPS）</p>
-
 <p>TPS是软件测试结果的测量单位。一个事务是指一个<a href="https://www.baidu.com/s?wd=%E5%AE%A2%E6%88%B7%E6%9C%BA&amp;tn=24004469_oem_dg&amp;rsv_dl=gh_pl_sl_csd">客户机</a>向服务器发送请求然后服务器做出反应的过程。客户机在发送请求时开始计时，收到服务器响应后结束计时，以此来计算使用的时间和完成的事务个数。</p>
-
 <h3 id="qps">QPS</h3>
-
 <p>QPS：每秒查询率QPS是对一个特定的查询服务器在规定时间内所处理流量多少的衡量标准，在因特网上，作为域名系统服务器的机器的性能经常用每秒查询率来衡量。对应fetches/sec，即每秒的响应请求数，也即是最大吞吐能力。</p>
-
 <h3 id="消息队列缺点">消息队列缺点</h3>
-
 <h5 id="1-系统可用性降低">1. 系统可用性降低</h5>
-
 <p>系统引入的外部依赖越多，越容易挂掉。本来你就是 A 系统调用 BCD 三个系统的接口就好了，人 ABCD 四个系统好好的，没啥问题，你偏加个 MQ 进来，万一 MQ 挂了咋整，MQ 一挂，整套系统崩溃的，你不就完了？如何保证消息队列的高可用。</p>
-
 <h5 id="2-系统复杂度提高">2. 系统复杂度提高</h5>
-
 <p>硬生生加个 MQ 进来，你怎么[保证消息没有重复消费]？怎么[处理消息丢失的情况]？怎么保证消息传递的顺序性？头大头大，问题一大堆，痛苦不已。</p>
-
 <h5 id="3-一致性问题">3. 一致性问题</h5>
-
 <p>A 系统处理完了直接返回成功了，人都以为你这个请求就成功了；但是问题是，要是 BCD 三个系统那里，BD 两个系统写库成功了，结果 C 系统写库失败了，咋整？你这数据就不一致了。</p>
-
 <h3 id="rocketmq">RocketMQ</h3>
-
 <h5 id="1-介绍">1. 介绍</h5>
-
 <p>​    它是纯Java开发，具有高吞吐量、高可用性、适合大规模分布式系统应用的特点。 RocketMQ目前在阿里集团被广泛应用于交易、充值、流计算、消息推送、日志流式处理、binglog分发等场景。</p>
-
 <h5 id="2-优势">2. 优势</h5>
-
 <p>​      a.   面向分布式系统的MQ</p>
-
 <p>​      b.   强调集群无单点，可扩展，任意一点高可用，水平扩展</p>
-
 <p>​      c.   海量消息堆积能力，消息堆积后，写入低延迟</p>
-
 <p>​     d.    支持上万队列</p>
-
 <p>​     e.    消息失败重试机制</p>
-
 <p>​     f.     消息可查询</p>
-
 <p>​</p>
-
 <h4 id="专业术语">专业术语</h4>
-
 <h5 id="producer">Producer</h5>
-
 <p>​      消息生产者，负责产生消息，一般由业务系统负责产生消息。</p>
-
 <h5 id="consumer">Consumer</h5>
-
 <p>​     消息消费者，负责消费消息，一般是后台系统负责异步消费。</p>
-
-<h5 id="push-consumer-我们一般用这种">Push Consumer（我们一般用这种）</h5>
-
+<h5 id="push-consumer我们一般用这种">Push Consumer（我们一般用这种）</h5>
 <p>​     Consumer 的一种，应用通常吐 Consumer 对象注册一个 Listener 接口，一旦收到消息，Consumer 对象立 刻回调 Listener 接口方法。</p>
-
-<h5 id="producer-group">Producer  Group</h5>
-
+<h5 id="producer--group">Producer  Group</h5>
 <p>​    一类 Producer 的集合名称，返类 Producer 通常収送一类消息，丏収送逡辑一致。</p>
-
 <h5 id="consumer-group">Consumer Group</h5>
-
 <p>一类 Consumer 的集合名称，返类 Consumer 通常消费一类消息，丏消费逡辑一致。</p>
-
 <h5 id="broker">Broker</h5>
-
 <p>消息中转角色，负责存储消息，转収消息，一般也称为 Server。在 JMS 规范中称为 Provider。</p>
-
 <h5 id="广播消费">广播消费</h5>
-
 <p>一条消息被多个 Consumer 消费，即使返些 Consumer 属亍同一个 Consumer Group，消息也会被 Consumer Group 中的每个 Consumer 都消费一次，广播消费中的 Consumer Group 概念可以讣为在消息划分方面无意 丿。</p>
-
 <h5 id="集群消费">集群消费</h5>
-
 <p>一个 Consumer Group 中的 Consumer 实例平均分摊消费消息。例如某个 Topic 有 9 条消息，其中一个 Consumer Group 有 3 个实例（可能是 3 个迕程，戒者 3 台机器），那举每个实例只消费其中的 3 条消息。</p>
-
 <h5 id="rocketmq消息是已文件记录形式持久化的">RocketMQ消息是已文件记录形式持久化的。</h5>
-
 <h5 id="队列集合称为topic">队列集合称为Topic</h5>
-
-<h4 id="rocketmq-producer集群物理部署结构">RocketMQ  Producer集群物理部署结构</h4>
-
-<p><img src="/img/4-9-6.png" alt="屏幕快照 2019-03-13 上午12.23.17" /></p>
-
-<h4 id="屏幕快照-2019-03-13-上午12-24-44-img-4-9-7-png"><img src="/img/4-9-7.png" alt="屏幕快照 2019-03-13 上午12.24.44" /></h4>
-
+<h4 id="rocketmq--producer集群物理部署结构">RocketMQ  Producer集群物理部署结构</h4>
+<p><img src="/img/4-9-6.png" alt="屏幕快照 2019-03-13 上午12.23.17"></p>
+<h4 id="屏幕快照-2019-03-13-上午122444img4-9-7png"><img src="/img/4-9-7.png" alt="屏幕快照 2019-03-13 上午12.24.44"></h4>
 <p>Topic可以理解为在rocketMq体系当中作为一个逻辑消息组织形式，一般情况下一类业务消息会申请一个topic来实现业务之间隔离。</p>
-
 <p>Topic是一个逻辑上的概念，实际上在每个broker上以queue的形式保存，也就是说每个topic在broker上会划分成几个逻辑队列，每个逻辑队列保存一部分消息数据，但是保存的消息数据实际上不是真正的消息数据，而是指向commit log的消息索引。</p>
-
 <h4 id="broker集群搭建">Broker集群搭建</h4>
-
 <p>推荐的几种 Broker 集群部署方式，返里的 Slave 不可写，但可读，类似亍 Mysql 主备方式。下面是常用的推荐模式</p>
-
-<h5 id="多master多slave模式-异步复制">多Master多Slave模式，异步复制</h5>
-
+<h5 id="多master多slave模式异步复制">多Master多Slave模式，异步复制</h5>
 <p>​                主从节点数据同步方式为：异步复制 ，相当于，发送消息过来了，先到master，然后马上返回给客户端，同时，这个时候起一条线程，把数据复制到slave中。 这样，这种模式就是有可能在复制到slave的时候，消息丢失了。</p>
-
-<h5 id="多master多slave模式-同步双写">多Master多Slave模式，同步双写</h5>
-
+<h5 id="多master多slave模式同步双写">多Master多Slave模式，同步双写</h5>
 <p>​               主从节点数据同步方式为：异步复制 ，相当于，发送消息过来了，先到master，然后数据复制到slave中，最后在返回给producer，这样的话，消息不会丢失，但是性能会有减少。</p>
-
 <p>以上 Broker 不 Slave 配对是通过挃定相同的 brokerName 参数来配对，Master 的 BrokerId 必须是 0，Slave 的 BrokerId 必须是大亍 0 的数。另外一个 Master 下面可以挂载多个 Slave，同一 Master 下的多个 Slave 通过挃 定丌同的 BrokerId 来区分。</p>
-
 <h4 id="搭建单master模式">搭建单Master模式</h4>
-
-<p>需要注意的是默认的name server 启动是内存4G， broker是默认8G，我们需要修改runserver.sh和runbroker.sh中的JAVA_OPT，修改小一点如：JAVA_OPT=&ldquo;${JAVA_OPT} -server -Xms256m -Xmx256m -Xmn128m&rdquo;，然后就可以启动成功了， 不然启动后电脑太卡。</p>
-
+<p>需要注意的是默认的name server 启动是内存4G， broker是默认8G，我们需要修改runserver.sh和runbroker.sh中的JAVA_OPT，修改小一点如：JAVA_OPT=&quot;${JAVA_OPT} -server -Xms256m -Xmx256m -Xmn128m&quot;，然后就可以启动成功了， 不然启动后电脑太卡。</p>
 <h5 id="停止name-server-和-broker">停止name server 和 broker</h5>
-
-<pre><code class="language-shell">&gt; sh bin/mqshutdown broker
-The mqbroker(36695) is running...
-Send shutdown request to mqbroker(36695) OK
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-shell" data-lang="shell">&gt; sh bin/mqshutdown broker
+The mqbroker<span style="color:#f92672">(</span>36695<span style="color:#f92672">)</span> is running...
+Send shutdown request to mqbroker<span style="color:#f92672">(</span>36695<span style="color:#f92672">)</span> OK
 
 &gt; sh bin/mqshutdown namesrv
-The mqnamesrv(36664) is running...
-Send shutdown request to mqnamesrv(36664) OK
-</code></pre>
-
-<h5 id="启动name-server-修改默认端口9876">启动name server，修改默认端口9876</h5>
-
+The mqnamesrv<span style="color:#f92672">(</span>36664<span style="color:#f92672">)</span> is running...
+Send shutdown request to mqnamesrv<span style="color:#f92672">(</span>36664<span style="color:#f92672">)</span> OK
+</code></pre></div><h5 id="启动name-server修改默认端口9876">启动name server，修改默认端口9876</h5>
 <p>在/opt/rocketmq/rocketmq-all-4.4.0-bin-release/conf中创建namesrv.properties文件， 加入listenPort=8876，然后下面直接-c 指定这个配置文件启动，启动后，server的端口就是你设置的，如：8876</p>
-
-<pre><code class="language-shell">nohup sh  bin/mqnamesrv  -c  conf/namesrv.properties &gt; ~/logs/rocketmqlogs/namesrv.log 2&gt;&amp;1
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-shell" data-lang="shell">nohup sh  bin/mqnamesrv  -c  conf/namesrv.properties &gt; ~/logs/rocketmqlogs/namesrv.log 2&gt;&amp;<span style="color:#ae81ff">1</span>
 
 nohup sh  bin/mqnamesrv  -c  conf/namesrv.properties &amp;
-</code></pre>
-
-<h5 id="broker-a-properties属性说明">broker-a.properties属性说明</h5>
-
-<pre><code class="language-properties"># 所属集群名字
+</code></pre></div><h5 id="broker-aproperties属性说明">broker-a.properties属性说明</h5>
+<pre tabindex="0"><code class="language-properties" data-lang="properties"># 所属集群名字
 brokerClusterName=rocketmq-cluster
 # 连接外网地址， 如果不设置，会默认用你虚拟机或者本地机子ip 
 brokerIP1=192.168.70.102
@@ -474,132 +398,99 @@ maxMessageSize=65536
 #sendMessageThreadPoolNums=128
 #拉消息线程池数量
 #pullMessageThreadPoolNums=128
-</code></pre>
-
-<h2 id="rocketmq幂等性问题">RocketMQ幂等性问题</h2>
-
-<p>转载地址：<a href="https://www.cnblogs.com/wishsaber/p/12326154.html">https://www.cnblogs.com/wishsaber/p/12326154.html</a></p>
-
+</code></pre><h2 id="rocketmq幂等性问题">RocketMQ幂等性问题</h2>
+<p>转载地址：https://www.cnblogs.com/wishsaber/p/12326154.html</p>
 <h3 id="什么是幂等性">什么是幂等性：</h3>
-
 <p>在编程中一个幂等操作的特点是其任意多次执行所产生的影响均与一次执行的影响相同。</p>
-
 <p>当出现消费者对某条消息重复消费的情况时，重复消费的结果与消费一次的结果是相同的，并且多次消费并未对业务系统产生任何负面影响，那么这整个过程就实现可消息幂等。</p>
-
 <p>例如，在支付场景下，消费者消费扣款消息，对一笔订单执行扣款操作，扣款金额为 100 元。</p>
-
 <p>如果因网络不稳定等原因导致扣款消息重复投递，消费者重复消费了该扣款消息，但最终的业务结果是只扣款一次，扣费 100 元，</p>
-
 <p>且用户的扣款记录中对应的订单只有一条扣款流水，不会多次扣除费用。那么这次扣款操作是符合要求的，整个消费过程实现了消费幂等。</p>
-
 <h3 id="实例">实例：</h3>
-
 <p>在RocketMQ中因为 Message ID 有可能出现冲突（重复）的情况，所以真正安全的幂等处理，不建议以 Message ID 作为处理依据。</p>
-
 <p>最好的方式是以业务唯一标识作为幂等处理的关键依据，而业务的唯一标识可以通过消息 Key 设置。</p>
-
 <p>下面模拟：</p>
-
 <h5 id="生产者">生产者</h5>
-
-<pre><code class="language-java">public class RetryProducer {
-    public static void main(String[] args) throws MQClientException {
-        DefaultMQProducer producer = new DefaultMQProducer(&quot;retry_rmq-group&quot;);
-        producer.setNamesrvAddr(&quot;192.168.152.55:9876;192.168.152.66:9876&quot;);
-        producer.setInstanceName(&quot;retry_producer&quot;);
-        producer.start();
-        try {
-            for (int i = 0; i &lt; 1; i++) {
-                Thread.sleep(1000); // 每秒发送一次MQ
-                Message msg = new Message(&quot;itmayiedu-topic&quot;, // topic 主题名称
-                        &quot;TagA&quot;, // tag 临时值
-                        (&quot;retry_itmayiedu-6&quot; + i).getBytes()// body 内容
-                );
-                msg.setKeys(System.currentTimeMillis() + &quot;&quot;);
-                SendResult sendResult = producer.send(msg);
-                System.out.println(sendResult.toString());
-            }
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
-        producer.shutdown();
-    }
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-java" data-lang="java"><span style="color:#66d9ef">public</span> <span style="color:#66d9ef">class</span> <span style="color:#a6e22e">RetryProducer</span> <span style="color:#f92672">{</span>
+    <span style="color:#66d9ef">public</span> <span style="color:#66d9ef">static</span> <span style="color:#66d9ef">void</span> <span style="color:#a6e22e">main</span><span style="color:#f92672">(</span>String<span style="color:#f92672">[]</span> args<span style="color:#f92672">)</span> <span style="color:#66d9ef">throws</span> MQClientException <span style="color:#f92672">{</span>
+        DefaultMQProducer producer <span style="color:#f92672">=</span> <span style="color:#66d9ef">new</span> DefaultMQProducer<span style="color:#f92672">(</span><span style="color:#e6db74">&#34;retry_rmq-group&#34;</span><span style="color:#f92672">);</span>
+        producer<span style="color:#f92672">.</span><span style="color:#a6e22e">setNamesrvAddr</span><span style="color:#f92672">(</span><span style="color:#e6db74">&#34;192.168.152.55:9876;192.168.152.66:9876&#34;</span><span style="color:#f92672">);</span>
+        producer<span style="color:#f92672">.</span><span style="color:#a6e22e">setInstanceName</span><span style="color:#f92672">(</span><span style="color:#e6db74">&#34;retry_producer&#34;</span><span style="color:#f92672">);</span>
+        producer<span style="color:#f92672">.</span><span style="color:#a6e22e">start</span><span style="color:#f92672">();</span>
+        <span style="color:#66d9ef">try</span> <span style="color:#f92672">{</span>
+            <span style="color:#66d9ef">for</span> <span style="color:#f92672">(</span><span style="color:#66d9ef">int</span> i <span style="color:#f92672">=</span> 0<span style="color:#f92672">;</span> i <span style="color:#f92672">&lt;</span> 1<span style="color:#f92672">;</span> i<span style="color:#f92672">++)</span> <span style="color:#f92672">{</span>
+                Thread<span style="color:#f92672">.</span><span style="color:#a6e22e">sleep</span><span style="color:#f92672">(</span>1000<span style="color:#f92672">);</span> <span style="color:#75715e">// 每秒发送一次MQ
+</span><span style="color:#75715e"></span>                Message msg <span style="color:#f92672">=</span> <span style="color:#66d9ef">new</span> Message<span style="color:#f92672">(</span><span style="color:#e6db74">&#34;itmayiedu-topic&#34;</span><span style="color:#f92672">,</span> <span style="color:#75715e">// topic 主题名称
+</span><span style="color:#75715e"></span>                        <span style="color:#e6db74">&#34;TagA&#34;</span><span style="color:#f92672">,</span> <span style="color:#75715e">// tag 临时值
+</span><span style="color:#75715e"></span>                        <span style="color:#f92672">(</span><span style="color:#e6db74">&#34;retry_itmayiedu-6&#34;</span> <span style="color:#f92672">+</span> i<span style="color:#f92672">).</span><span style="color:#a6e22e">getBytes</span><span style="color:#f92672">()</span><span style="color:#75715e">// body 内容
+</span><span style="color:#75715e"></span>                <span style="color:#f92672">);</span>
+                msg<span style="color:#f92672">.</span><span style="color:#a6e22e">setKeys</span><span style="color:#f92672">(</span>System<span style="color:#f92672">.</span><span style="color:#a6e22e">currentTimeMillis</span><span style="color:#f92672">()</span> <span style="color:#f92672">+</span> <span style="color:#e6db74">&#34;&#34;</span><span style="color:#f92672">);</span>
+                SendResult sendResult <span style="color:#f92672">=</span> producer<span style="color:#f92672">.</span><span style="color:#a6e22e">send</span><span style="color:#f92672">(</span>msg<span style="color:#f92672">);</span>
+                System<span style="color:#f92672">.</span><span style="color:#a6e22e">out</span><span style="color:#f92672">.</span><span style="color:#a6e22e">println</span><span style="color:#f92672">(</span>sendResult<span style="color:#f92672">.</span><span style="color:#a6e22e">toString</span><span style="color:#f92672">());</span>
+            <span style="color:#f92672">}</span>
+        <span style="color:#f92672">}</span> <span style="color:#66d9ef">catch</span> <span style="color:#f92672">(</span>Exception e<span style="color:#f92672">)</span> <span style="color:#f92672">{</span>
+            e<span style="color:#f92672">.</span><span style="color:#a6e22e">printStackTrace</span><span style="color:#f92672">();</span>
+        <span style="color:#f92672">}</span>
+        producer<span style="color:#f92672">.</span><span style="color:#a6e22e">shutdown</span><span style="color:#f92672">();</span>
+    <span style="color:#f92672">}</span>
  
-}
-</code></pre>
-
-<h5 id="消费者">消费者</h5>
-
-<pre><code class="language-java">public class RetryConsumer {
-    static private Map&lt;String, String&gt; logMap = new HashMap&lt;&gt;();
+<span style="color:#f92672">}</span>
+</code></pre></div><h5 id="消费者">消费者</h5>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-java" data-lang="java"><span style="color:#66d9ef">public</span> <span style="color:#66d9ef">class</span> <span style="color:#a6e22e">RetryConsumer</span> <span style="color:#f92672">{</span>
+    <span style="color:#66d9ef">static</span> <span style="color:#66d9ef">private</span> Map<span style="color:#f92672">&lt;</span>String<span style="color:#f92672">,</span> String<span style="color:#f92672">&gt;</span> logMap <span style="color:#f92672">=</span> <span style="color:#66d9ef">new</span> HashMap<span style="color:#f92672">&lt;&gt;();</span>
  
-    public static void main(String[] args) throws MQClientException {
-        DefaultMQPushConsumer consumer = new DefaultMQPushConsumer(&quot;retry_rmq-group&quot;);
+    <span style="color:#66d9ef">public</span> <span style="color:#66d9ef">static</span> <span style="color:#66d9ef">void</span> <span style="color:#a6e22e">main</span><span style="color:#f92672">(</span>String<span style="color:#f92672">[]</span> args<span style="color:#f92672">)</span> <span style="color:#66d9ef">throws</span> MQClientException <span style="color:#f92672">{</span>
+        DefaultMQPushConsumer consumer <span style="color:#f92672">=</span> <span style="color:#66d9ef">new</span> DefaultMQPushConsumer<span style="color:#f92672">(</span><span style="color:#e6db74">&#34;retry_rmq-group&#34;</span><span style="color:#f92672">);</span>
  
-        consumer.setNamesrvAddr(&quot;192.168.152.55:9876;192.168.152.66:9876&quot;);
-        consumer.setInstanceName(&quot;retry_consumer&quot;);
-        consumer.subscribe(&quot;retry_itmayiedu-topic&quot;, &quot;TagA&quot;);
+        consumer<span style="color:#f92672">.</span><span style="color:#a6e22e">setNamesrvAddr</span><span style="color:#f92672">(</span><span style="color:#e6db74">&#34;192.168.152.55:9876;192.168.152.66:9876&#34;</span><span style="color:#f92672">);</span>
+        consumer<span style="color:#f92672">.</span><span style="color:#a6e22e">setInstanceName</span><span style="color:#f92672">(</span><span style="color:#e6db74">&#34;retry_consumer&#34;</span><span style="color:#f92672">);</span>
+        consumer<span style="color:#f92672">.</span><span style="color:#a6e22e">subscribe</span><span style="color:#f92672">(</span><span style="color:#e6db74">&#34;retry_itmayiedu-topic&#34;</span><span style="color:#f92672">,</span> <span style="color:#e6db74">&#34;TagA&#34;</span><span style="color:#f92672">);</span>
  
-        consumer.registerMessageListener(new MessageListenerConcurrently() {
-            @Override
-            public ConsumeConcurrentlyStatus consumeMessage(List&lt;MessageExt&gt; msgs, ConsumeConcurrentlyContext context) {
-                String key = null;
-                String msgId = null;
-                try {
-                    for (MessageExt msg : msgs) {
-                        key = msg.getKeys();
-                        if (logMap.containsKey(key)) {
-                            // 无需继续重试。
-                            System.out.println(&quot;key:&quot;+key+&quot;,无需重试...&quot;);
-                            return ConsumeConcurrentlyStatus.CONSUME_SUCCESS;
-                        }
-                        msgId = msg.getMsgId();
-                        System.out.println(&quot;key:&quot; + key + &quot;,msgid:&quot; + msgId + &quot;---&quot; + new String(msg.getBody()));
-                        int i = 1 / 0;
-                    }
+        consumer<span style="color:#f92672">.</span><span style="color:#a6e22e">registerMessageListener</span><span style="color:#f92672">(</span><span style="color:#66d9ef">new</span> MessageListenerConcurrently<span style="color:#f92672">()</span> <span style="color:#f92672">{</span>
+            <span style="color:#a6e22e">@Override</span>
+            <span style="color:#66d9ef">public</span> ConsumeConcurrentlyStatus <span style="color:#a6e22e">consumeMessage</span><span style="color:#f92672">(</span>List<span style="color:#f92672">&lt;</span>MessageExt<span style="color:#f92672">&gt;</span> msgs<span style="color:#f92672">,</span> ConsumeConcurrentlyContext context<span style="color:#f92672">)</span> <span style="color:#f92672">{</span>
+                String key <span style="color:#f92672">=</span> <span style="color:#66d9ef">null</span><span style="color:#f92672">;</span>
+                String msgId <span style="color:#f92672">=</span> <span style="color:#66d9ef">null</span><span style="color:#f92672">;</span>
+                <span style="color:#66d9ef">try</span> <span style="color:#f92672">{</span>
+                    <span style="color:#66d9ef">for</span> <span style="color:#f92672">(</span>MessageExt msg <span style="color:#f92672">:</span> msgs<span style="color:#f92672">)</span> <span style="color:#f92672">{</span>
+                        key <span style="color:#f92672">=</span> msg<span style="color:#f92672">.</span><span style="color:#a6e22e">getKeys</span><span style="color:#f92672">();</span>
+                        <span style="color:#66d9ef">if</span> <span style="color:#f92672">(</span>logMap<span style="color:#f92672">.</span><span style="color:#a6e22e">containsKey</span><span style="color:#f92672">(</span>key<span style="color:#f92672">))</span> <span style="color:#f92672">{</span>
+                            <span style="color:#75715e">// 无需继续重试。
+</span><span style="color:#75715e"></span>                            System<span style="color:#f92672">.</span><span style="color:#a6e22e">out</span><span style="color:#f92672">.</span><span style="color:#a6e22e">println</span><span style="color:#f92672">(</span><span style="color:#e6db74">&#34;key:&#34;</span><span style="color:#f92672">+</span>key<span style="color:#f92672">+</span><span style="color:#e6db74">&#34;,无需重试...&#34;</span><span style="color:#f92672">);</span>
+                            <span style="color:#66d9ef">return</span> ConsumeConcurrentlyStatus<span style="color:#f92672">.</span><span style="color:#a6e22e">CONSUME_SUCCESS</span><span style="color:#f92672">;</span>
+                        <span style="color:#f92672">}</span>
+                        msgId <span style="color:#f92672">=</span> msg<span style="color:#f92672">.</span><span style="color:#a6e22e">getMsgId</span><span style="color:#f92672">();</span>
+                        System<span style="color:#f92672">.</span><span style="color:#a6e22e">out</span><span style="color:#f92672">.</span><span style="color:#a6e22e">println</span><span style="color:#f92672">(</span><span style="color:#e6db74">&#34;key:&#34;</span> <span style="color:#f92672">+</span> key <span style="color:#f92672">+</span> <span style="color:#e6db74">&#34;,msgid:&#34;</span> <span style="color:#f92672">+</span> msgId <span style="color:#f92672">+</span> <span style="color:#e6db74">&#34;---&#34;</span> <span style="color:#f92672">+</span> <span style="color:#66d9ef">new</span> String<span style="color:#f92672">(</span>msg<span style="color:#f92672">.</span><span style="color:#a6e22e">getBody</span><span style="color:#f92672">()));</span>
+                        <span style="color:#66d9ef">int</span> i <span style="color:#f92672">=</span> 1 <span style="color:#f92672">/</span> 0<span style="color:#f92672">;</span>
+                    <span style="color:#f92672">}</span>
  
-                } catch (Exception e) {
-                    e.printStackTrace();
-                    return ConsumeConcurrentlyStatus.RECONSUME_LATER;
-                } finally {
-                    logMap.put(key, msgId);
-                }
-                return ConsumeConcurrentlyStatus.CONSUME_SUCCESS;
-            }
-        });
-        consumer.start();
-        System.out.println(&quot;RetryConsumer Started.&quot;);
-    }
-}
+                <span style="color:#f92672">}</span> <span style="color:#66d9ef">catch</span> <span style="color:#f92672">(</span>Exception e<span style="color:#f92672">)</span> <span style="color:#f92672">{</span>
+                    e<span style="color:#f92672">.</span><span style="color:#a6e22e">printStackTrace</span><span style="color:#f92672">();</span>
+                    <span style="color:#66d9ef">return</span> ConsumeConcurrentlyStatus<span style="color:#f92672">.</span><span style="color:#a6e22e">RECONSUME_LATER</span><span style="color:#f92672">;</span>
+                <span style="color:#f92672">}</span> <span style="color:#66d9ef">finally</span> <span style="color:#f92672">{</span>
+                    logMap<span style="color:#f92672">.</span><span style="color:#a6e22e">put</span><span style="color:#f92672">(</span>key<span style="color:#f92672">,</span> msgId<span style="color:#f92672">);</span>
+                <span style="color:#f92672">}</span>
+                <span style="color:#66d9ef">return</span> ConsumeConcurrentlyStatus<span style="color:#f92672">.</span><span style="color:#a6e22e">CONSUME_SUCCESS</span><span style="color:#f92672">;</span>
+            <span style="color:#f92672">}</span>
+        <span style="color:#f92672">});</span>
+        consumer<span style="color:#f92672">.</span><span style="color:#a6e22e">start</span><span style="color:#f92672">();</span>
+        System<span style="color:#f92672">.</span><span style="color:#a6e22e">out</span><span style="color:#f92672">.</span><span style="color:#a6e22e">println</span><span style="color:#f92672">(</span><span style="color:#e6db74">&#34;RetryConsumer Started.&#34;</span><span style="color:#f92672">);</span>
+    <span style="color:#f92672">}</span>
+<span style="color:#f92672">}</span>
 
-</code></pre>
-
-<h3 id="事务消息">事务消息</h3>
-
-<p><img src="/img/Xnip2019-09-30_00-42-26.png" alt="Xnip2019-09-30_00-42-26" /></p>
-
+</code></pre></div><h3 id="事务消息">事务消息</h3>
+<p><img src="/img/Xnip2019-09-30_00-42-26.png" alt="Xnip2019-09-30_00-42-26"></p>
 <p><strong>注意</strong>：如果本地事务， 也就是我们的service层，执行时间过长，会执行会查本地事务状态，根据状态来对这个消息进行撤销或者继续进行让消费端进行可见。</p>
-
 <p>大致可以理解， 如果你需要做有关事物的操作的时候， 先进行你的本地事务操作， 只有在本地事务操作成功的时候，你的这个消息才可以被其他的消费者接受到。 他只会保证生产者这边的事务是OK的， 同时也保证这个消息是一定会发给消费端的。 但是消费端那边的事务是否正确他不能保证，如果出错的话， 需要手工进行干预处理。</p>
-
-<p><a href="http://silence.work/2018/08/22/RocketMQ-4-3事务使用与分析/">http://silence.work/2018/08/22/RocketMQ-4-3%E4%BA%8B%E5%8A%A1%E4%BD%BF%E7%94%A8%E4%B8%8E%E5%88%86%E6%9E%90/</a></p>
-
-<p><a href="http://silence.work/2019/05/04/RocketMQ Reliablity/">http://silence.work/2019/05/04/RocketMQ%20Reliablity/</a></p>
-
+<p><a href="http://silence.work/2018/08/22/RocketMQ-4-3%E4%BA%8B%E5%8A%A1%E4%BD%BF%E7%94%A8%E4%B8%8E%E5%88%86%E6%9E%90/">http://silence.work/2018/08/22/RocketMQ-4-3%E4%BA%8B%E5%8A%A1%E4%BD%BF%E7%94%A8%E4%B8%8E%E5%88%86%E6%9E%90/</a></p>
+<p>[http://silence.work/2019/05/04/RocketMQ%20Reliablity/](<a href="http://silence.work/2019/05/04/RocketMQ">http://silence.work/2019/05/04/RocketMQ</a> Reliablity/)</p>
 <p><a href="https://www.infoq.cn/article/2018/08/rocketmq-4.3-release">https://www.infoq.cn/article/2018/08/rocketmq-4.3-release</a></p>
-
 <p><a href="https://www.cnblogs.com/hzmark/p/rocket_txn.html">https://www.cnblogs.com/hzmark/p/rocket_txn.html</a></p>
-
 <p><a href="https://www.cnblogs.com/hzmark/p/rocket_txn.html">https://www.cnblogs.com/hzmark/p/rocket_txn.html</a></p>
-
 <h1 id="rocketmq如何做到消息不丢失">RocketMQ如何做到消息不丢失</h1>
-
-<p>好文：<a href="https://www.cnblogs.com/goodAndyxublog/p/12563813.html">https://www.cnblogs.com/goodAndyxublog/p/12563813.html</a></p>
-
+<p>好文：https://www.cnblogs.com/goodAndyxublog/p/12563813.html</p>
 <h1 id="跟我学rocketmq之消息幂等">跟我学RocketMQ之消息幂等</h1>
-
-<p>转载：<a href="https://cloud.tencent.com/developer/article/1483781">https://cloud.tencent.com/developer/article/1483781</a></p>
-
+<p>转载：https://cloud.tencent.com/developer/article/1483781</p>
 <p>好文， 写的很透彻。</p>
 
 
@@ -708,83 +599,24 @@ maxMessageSize=65536
                     </h4>
                     <ul class="catalog-body"></ul>
                     <nav id="TableOfContents">
-<ul>
-<li>
-<ul>
-<li>
-<ul>
-<li><a href="#消息队列好处">消息队列好处</a>
-<ul>
-<li>
-<ul>
-<li><a href="#1-解耦">1. 解耦:</a></li>
-<li><a href="#2-异步">2. 异步</a></li>
-<li><a href="#3-削峰-限流">3. 削峰（限流）</a></li>
-</ul></li>
-</ul></li>
-<li><a href="#tps">TPS</a></li>
-<li><a href="#qps">QPS</a></li>
-<li><a href="#消息队列缺点">消息队列缺点</a>
-<ul>
-<li>
-<ul>
-<li><a href="#1-系统可用性降低">1. 系统可用性降低</a></li>
-<li><a href="#2-系统复杂度提高">2. 系统复杂度提高</a></li>
-<li><a href="#3-一致性问题">3. 一致性问题</a></li>
-</ul></li>
-</ul></li>
-<li><a href="#rocketmq">RocketMQ</a>
-<ul>
-<li>
-<ul>
-<li><a href="#1-介绍">1. 介绍</a></li>
-<li><a href="#2-优势">2. 优势</a></li>
-</ul></li>
-<li><a href="#专业术语">专业术语</a>
-<ul>
-<li><a href="#producer">Producer</a></li>
-<li><a href="#consumer">Consumer</a></li>
-<li><a href="#push-consumer-我们一般用这种">Push Consumer（我们一般用这种）</a></li>
-<li><a href="#producer-group">Producer  Group</a></li>
-<li><a href="#consumer-group">Consumer Group</a></li>
-<li><a href="#broker">Broker</a></li>
-<li><a href="#广播消费">广播消费</a></li>
-<li><a href="#集群消费">集群消费</a></li>
-<li><a href="#rocketmq消息是已文件记录形式持久化的">RocketMQ消息是已文件记录形式持久化的。</a></li>
-<li><a href="#队列集合称为topic">队列集合称为Topic</a></li>
-</ul></li>
-<li><a href="#rocketmq-producer集群物理部署结构">RocketMQ  Producer集群物理部署结构</a></li>
-<li><a href="#屏幕快照-2019-03-13-上午12-24-44-img-4-9-7-png"><img src="/img/4-9-7.png" alt="屏幕快照 2019-03-13 上午12.24.44" /></a></li>
-<li><a href="#broker集群搭建">Broker集群搭建</a>
-<ul>
-<li><a href="#多master多slave模式-异步复制">多Master多Slave模式，异步复制</a></li>
-<li><a href="#多master多slave模式-同步双写">多Master多Slave模式，同步双写</a></li>
-</ul></li>
-<li><a href="#搭建单master模式">搭建单Master模式</a>
-<ul>
-<li><a href="#停止name-server-和-broker">停止name server 和 broker</a></li>
-<li><a href="#启动name-server-修改默认端口9876">启动name server，修改默认端口9876</a></li>
-<li><a href="#broker-a-properties属性说明">broker-a.properties属性说明</a></li>
-</ul></li>
-</ul></li>
-</ul></li>
-<li><a href="#rocketmq幂等性问题">RocketMQ幂等性问题</a>
-<ul>
-<li><a href="#什么是幂等性">什么是幂等性：</a></li>
-<li><a href="#实例">实例：</a>
-<ul>
-<li>
-<ul>
-<li><a href="#生产者">生产者</a></li>
-<li><a href="#消费者">消费者</a></li>
-</ul></li>
-</ul></li>
-<li><a href="#事务消息">事务消息</a></li>
-</ul></li>
-</ul></li>
-<li><a href="#rocketmq如何做到消息不丢失">RocketMQ如何做到消息不丢失</a></li>
-<li><a href="#跟我学rocketmq之消息幂等">跟我学RocketMQ之消息幂等</a></li>
-</ul>
+  <ul>
+    <li>
+      <ul>
+        <li><a href="#消息队列好处">消息队列好处</a></li>
+        <li><a href="#tps">TPS</a></li>
+        <li><a href="#qps">QPS</a></li>
+        <li><a href="#消息队列缺点">消息队列缺点</a></li>
+        <li><a href="#rocketmq">RocketMQ</a></li>
+      </ul>
+    </li>
+    <li><a href="#rocketmq幂等性问题">RocketMQ幂等性问题</a>
+      <ul>
+        <li><a href="#什么是幂等性">什么是幂等性：</a></li>
+        <li><a href="#实例">实例：</a></li>
+        <li><a href="#事务消息">事务消息</a></li>
+      </ul>
+    </li>
+  </ul>
 </nav>
                     <br>
                     <br>
@@ -809,9 +641,6 @@ maxMessageSize=65536
                         
                         
                         
-                        <a href="/tags/" title="">
-                            
-                        </a>
                         
                         
                         
@@ -821,101 +650,6 @@ maxMessageSize=65536
                         
                         
                         
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        <a href="/tags/qt" title="QT">
-                            QT
-                        </a>
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        <a href="/tags/zookeeper" title="Zookeeper">
-                            Zookeeper
-                        </a>
                         
                         
                         
@@ -955,8 +689,10 @@ maxMessageSize=65536
                         
                         
                         
-                        <a href="/tags/elasticsearch" title="elasticSearch">
-                            elasticSearch
+                        
+                        
+                        <a href="/tags/elasticsearch" title="elasticsearch">
+                            elasticsearch
                         </a>
                         
                         
@@ -967,9 +703,27 @@ maxMessageSize=65536
                         
                         
                         
-                        <a href="/tags/golang" title="golang">
-                            golang
-                        </a>
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
                         
                         
                         
@@ -1007,9 +761,21 @@ maxMessageSize=65536
                         
                         
                         
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
                         <a href="/tags/jvm" title="jvm">
                             jvm
                         </a>
+                        
+                        
+                        
+                        
                         
                         
                         
@@ -1033,9 +799,19 @@ maxMessageSize=65536
                         
                         
                         
+                        
+                        
+                        
+                        
+                        
+                        
                         <a href="/tags/mongodb" title="mongodb">
                             mongodb
                         </a>
+                        
+                        
+                        
+                        
                         
                         
                         
@@ -1046,10 +822,6 @@ maxMessageSize=65536
                         </a>
                         
                         
-                        
-                        <a href="/tags/mycat" title="mycat">
-                            mycat
-                        </a>
                         
                         
                         
@@ -1063,9 +835,17 @@ maxMessageSize=65536
                         
                         
                         
-                        <a href="/tags/nginx" title="nginx">
-                            nginx
-                        </a>
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
                         
                         
                         
@@ -1089,8 +869,22 @@ maxMessageSize=65536
                         
                         
                         
+                        
+                        
                         <a href="/tags/rocketmq" title="rocketmq">
                             rocketmq
+                        </a>
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        <a href="/tags/security%E6%A1%86%E6%9E%B6%E5%AD%A6%E4%B9%A0" title="security框架学习">
+                            security框架学习
                         </a>
                         
                         
@@ -1117,17 +911,11 @@ maxMessageSize=65536
                         
                         
                         
-                        <a href="/tags/springcloud" title="springCloud">
-                            springCloud
-                        </a>
-                        
-                        
-                        
-                        
-                        
                         <a href="/tags/springboot" title="springboot">
                             springboot
                         </a>
+                        
+                        
                         
                         
                         
@@ -1141,6 +929,9 @@ maxMessageSize=65536
                         
                         
                         
+                        <a href="/tags/springcloud" title="springcloud">
+                            springcloud
+                        </a>
                         
                         
                         
@@ -1166,6 +957,33 @@ maxMessageSize=65536
                         
                         
                         
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        <a href="/tags/zookeeper" title="zookeeper">
+                            zookeeper
+                        </a>
                         
                         
                         
@@ -1225,6 +1043,8 @@ maxMessageSize=65536
                         
                         
                         
+                        
+                        
                         <a href="/tags/%E5%88%86%E5%B8%83%E5%BC%8F%E7%B3%BB%E5%88%97" title="分布式系列">
                             分布式系列
                         </a>
@@ -1244,6 +1064,10 @@ maxMessageSize=65536
                         
                         
                         
+                        
+                        <a href="/tags/%E5%8D%8F%E8%AE%AE%E6%A0%88" title="协议栈">
+                            协议栈
+                        </a>
                         
                         
                         
@@ -1443,6 +1267,12 @@ maxMessageSize=65536
                         
                         
                         
+                        
+                        
+                        
+                        
+                        
+                        
                         <a href="/tags/%E7%BD%91%E7%BB%9C%E7%BC%96%E7%A8%8B" title="网络编程">
                             网络编程
                         </a>
@@ -1466,6 +1296,10 @@ maxMessageSize=65536
                         
                         
                         
+                        
+                        <a href="/tags/%E8%AE%A4%E8%AF%81%E5%92%8C%E6%8E%88%E6%9D%83" title="认证和授权">
+                            认证和授权
+                        </a>
                         
                         
                         
@@ -1636,7 +1470,7 @@ maxMessageSize=65536
                     
                 </ul>
 		<p class="copyright text-muted">
-                    Copyright &copy;  2020
+                    Copyright &copy;  2021
                     <br>
                     <a href="https://themes.gohugo.io/hugo-theme-cleanwhite">CleanWhite Hugo Theme</a> by <a href="https://zhaohuabing.com">Huabing</a> |
                     <iframe

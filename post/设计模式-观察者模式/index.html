@@ -97,15 +97,15 @@
                     </li>
                     
                     <li>
-                        <a href="/categories/english">English</a>
+                        <a href="/categories/english">english</a>
                     </li>
                     
                     <li>
-                        <a href="/categories/life">Life</a>
+                        <a href="/categories/life">life</a>
                     </li>
                     
                     <li>
-                        <a href="/categories/tech">Tech</a>
+                        <a href="/categories/tech">tech</a>
                     </li>
                     
 
@@ -237,128 +237,94 @@
                 
                 
                 
-                
-
-<p>[TOC]</p>
-
+                <p>[TOC]</p>
 <p><strong>一下文字来源：秦小波  《设计模式之禅》，这本设计模式书是太经典。</strong></p>
-
 <h1 id="原理">原理</h1>
-
 <p>相当于把观察者写入到了被观察者的那个类中。 然后在被观察者类里面调用观察者的接口就好了。</p>
-
 <h2 id="subject被观察者">Subject被观察者</h2>
-
 <p>定义被观察者必须实现的职责，它必须能够动态地增加、取消观察者。它一般是抽象类 或者是实现类，仅仅完成作为被观察者必须实现的职责：<strong>管理观察者并通知观察者</strong>。</p>
-
 <h2 id="observer观察者">Observer观察者</h2>
-
 <p>观察者接收到消息后，即进行update（更新方法）操作，对接收到的信息进行处理。</p>
-
 <h2 id="concretesubject具体的被观察者">ConcreteSubject具体的被观察者</h2>
-
 <p>定义被观察者自己的业务逻辑，同时定义对哪些事件进行通知。</p>
-
 <h2 id="concreteobserver具体的观察者">ConcreteObserver具体的观察者</h2>
-
 <p>每个观察在接收到消息后的处理反应是不同，各个观察者有自己的处理逻辑。</p>
-
 <h1 id="观察者模式通用模式">观察者模式通用模式</h1>
-
 <h2 id="被观察者">被观察者</h2>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-java" data-lang="java"><span style="color:#f92672">import</span> java.util.Vector<span style="color:#f92672">;</span>
 
-<pre><code class="language-java">import java.util.Vector;
-
-/**
- * 被观察者的职责非常简单，就是定义谁能够观察，谁不能观察
- */
-public abstract class Subject {
-    private Vector&lt;Observer&gt; observers = new Vector&lt;Observer&gt;();
+<span style="color:#75715e">/**
+</span><span style="color:#75715e"> * 被观察者的职责非常简单，就是定义谁能够观察，谁不能观察
+</span><span style="color:#75715e"> */</span>
+<span style="color:#66d9ef">public</span> <span style="color:#66d9ef">abstract</span> <span style="color:#66d9ef">class</span> <span style="color:#a6e22e">Subject</span> <span style="color:#f92672">{</span>
+    <span style="color:#66d9ef">private</span> Vector<span style="color:#f92672">&lt;</span>Observer<span style="color:#f92672">&gt;</span> observers <span style="color:#f92672">=</span> <span style="color:#66d9ef">new</span> Vector<span style="color:#f92672">&lt;</span>Observer<span style="color:#f92672">&gt;();</span>
     
-    /**
-     * 添加一个观察者
-     * @param o
-     */
-    public void addObserver(Observer o) {
-         observers.add(o);
-    }
+    <span style="color:#75715e">/**
+</span><span style="color:#75715e">     * 添加一个观察者
+</span><span style="color:#75715e">     * @param o
+</span><span style="color:#75715e">     */</span>
+    <span style="color:#66d9ef">public</span> <span style="color:#66d9ef">void</span> <span style="color:#a6e22e">addObserver</span><span style="color:#f92672">(</span>Observer o<span style="color:#f92672">)</span> <span style="color:#f92672">{</span>
+         observers<span style="color:#f92672">.</span><span style="color:#a6e22e">add</span><span style="color:#f92672">(</span>o<span style="color:#f92672">);</span>
+    <span style="color:#f92672">}</span>
 
-    /**
-     * 删除一个观察者
-     * @param o
-     */
-    public void delObserver(Observer o) {
-        observers.remove(o);
-    }
+    <span style="color:#75715e">/**
+</span><span style="color:#75715e">     * 删除一个观察者
+</span><span style="color:#75715e">     * @param o
+</span><span style="color:#75715e">     */</span>
+    <span style="color:#66d9ef">public</span> <span style="color:#66d9ef">void</span> <span style="color:#a6e22e">delObserver</span><span style="color:#f92672">(</span>Observer o<span style="color:#f92672">)</span> <span style="color:#f92672">{</span>
+        observers<span style="color:#f92672">.</span><span style="color:#a6e22e">remove</span><span style="color:#f92672">(</span>o<span style="color:#f92672">);</span>
+    <span style="color:#f92672">}</span>
 
-    /**
-     * 通知所有观察者
-     */
-    public void notifyObservers() {
-        for (Observer o : this.observers) {
-              o.updateMessage();
-        }
-    }
+    <span style="color:#75715e">/**
+</span><span style="color:#75715e">     * 通知所有观察者
+</span><span style="color:#75715e">     */</span>
+    <span style="color:#66d9ef">public</span> <span style="color:#66d9ef">void</span> <span style="color:#a6e22e">notifyObservers</span><span style="color:#f92672">()</span> <span style="color:#f92672">{</span>
+        <span style="color:#66d9ef">for</span> <span style="color:#f92672">(</span>Observer o <span style="color:#f92672">:</span> <span style="color:#66d9ef">this</span><span style="color:#f92672">.</span><span style="color:#a6e22e">observers</span><span style="color:#f92672">)</span> <span style="color:#f92672">{</span>
+              o<span style="color:#f92672">.</span><span style="color:#a6e22e">updateMessage</span><span style="color:#f92672">();</span>
+        <span style="color:#f92672">}</span>
+    <span style="color:#f92672">}</span>
 
 
-}
-</code></pre>
+<span style="color:#f92672">}</span>
+</code></pre></div><h2 id="具体被观察者">具体被观察者</h2>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-java" data-lang="java"><span style="color:#66d9ef">public</span> <span style="color:#66d9ef">class</span> <span style="color:#a6e22e">ConcreteSubject</span>  <span style="color:#66d9ef">extends</span> Subject<span style="color:#f92672">{</span>
 
-<h2 id="具体被观察者">具体被观察者</h2>
-
-<pre><code class="language-java">public class ConcreteSubject  extends Subject{
-
-    public void doSomeThing() {
-        System.out.println(&quot;被观察者：处理自己特有的业务&quot;);
-        super.notifyObservers();
-    }
+    <span style="color:#66d9ef">public</span> <span style="color:#66d9ef">void</span> <span style="color:#a6e22e">doSomeThing</span><span style="color:#f92672">()</span> <span style="color:#f92672">{</span>
+        System<span style="color:#f92672">.</span><span style="color:#a6e22e">out</span><span style="color:#f92672">.</span><span style="color:#a6e22e">println</span><span style="color:#f92672">(</span><span style="color:#e6db74">&#34;被观察者：处理自己特有的业务&#34;</span><span style="color:#f92672">);</span>
+        <span style="color:#66d9ef">super</span><span style="color:#f92672">.</span><span style="color:#a6e22e">notifyObservers</span><span style="color:#f92672">();</span>
+    <span style="color:#f92672">}</span>
     
-}
-</code></pre>
-
-<h2 id="观察者">观察者</h2>
-
-<pre><code class="language-java">public interface Observer {
+<span style="color:#f92672">}</span>
+</code></pre></div><h2 id="观察者">观察者</h2>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-java" data-lang="java"><span style="color:#66d9ef">public</span> <span style="color:#66d9ef">interface</span> <span style="color:#a6e22e">Observer</span> <span style="color:#f92672">{</span>
     
-    public void  updateMessage();
+    <span style="color:#66d9ef">public</span> <span style="color:#66d9ef">void</span>  <span style="color:#a6e22e">updateMessage</span><span style="color:#f92672">();</span>
 
-}
-</code></pre>
-
+<span style="color:#f92672">}</span>
+</code></pre></div><h2 id="heading"></h2>
 <h2 id="具体观察者">具体观察者</h2>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-java" data-lang="java"><span style="color:#66d9ef">public</span> <span style="color:#66d9ef">class</span> <span style="color:#a6e22e">ConcreteObserver</span> <span style="color:#66d9ef">implements</span> Observer <span style="color:#f92672">{</span>
 
-<pre><code class="language-java">public class ConcreteObserver implements Observer {
-
-    @Override
-    public void updateMessage() {
-        System.out.println(&quot;观察者：接受消息，并进行处理&quot;);
-    }
-}
-</code></pre>
-
-<h2 id="测试代码">测试代码</h2>
-
-<pre><code class="language-java">public class Client {
+    <span style="color:#a6e22e">@Override</span>
+    <span style="color:#66d9ef">public</span> <span style="color:#66d9ef">void</span> <span style="color:#a6e22e">updateMessage</span><span style="color:#f92672">()</span> <span style="color:#f92672">{</span>
+        System<span style="color:#f92672">.</span><span style="color:#a6e22e">out</span><span style="color:#f92672">.</span><span style="color:#a6e22e">println</span><span style="color:#f92672">(</span><span style="color:#e6db74">&#34;观察者：接受消息，并进行处理&#34;</span><span style="color:#f92672">);</span>
+    <span style="color:#f92672">}</span>
+<span style="color:#f92672">}</span>
+</code></pre></div><h2 id="测试代码">测试代码</h2>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-java" data-lang="java"><span style="color:#66d9ef">public</span> <span style="color:#66d9ef">class</span> <span style="color:#a6e22e">Client</span> <span style="color:#f92672">{</span>
     
-    public static void main(String[] args) {
-        ConcreteSubject  subject = new ConcreteSubject();
-        ConcreteObserver  observer = new ConcreteObserver();
-        subject.addObserver(observer);
-        subject.doSomeThing();
-    }
-}
-</code></pre>
-
-<h2 id="运行结果">运行结果</h2>
-
-<pre><code class="language-java">被观察者：处理自己特有的业务
-观察者：接受消息，并进行处理
-</code></pre>
-
-<h1 id="注意">注意</h1>
-
+    <span style="color:#66d9ef">public</span> <span style="color:#66d9ef">static</span> <span style="color:#66d9ef">void</span> <span style="color:#a6e22e">main</span><span style="color:#f92672">(</span>String<span style="color:#f92672">[]</span> args<span style="color:#f92672">)</span> <span style="color:#f92672">{</span>
+        ConcreteSubject  subject <span style="color:#f92672">=</span> <span style="color:#66d9ef">new</span> ConcreteSubject<span style="color:#f92672">();</span>
+        ConcreteObserver  observer <span style="color:#f92672">=</span> <span style="color:#66d9ef">new</span> ConcreteObserver<span style="color:#f92672">();</span>
+        subject<span style="color:#f92672">.</span><span style="color:#a6e22e">addObserver</span><span style="color:#f92672">(</span>observer<span style="color:#f92672">);</span>
+        subject<span style="color:#f92672">.</span><span style="color:#a6e22e">doSomeThing</span><span style="color:#f92672">();</span>
+    <span style="color:#f92672">}</span>
+<span style="color:#f92672">}</span>
+</code></pre></div><h2 id="运行结果">运行结果</h2>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-java" data-lang="java">被观察者<span style="color:#960050;background-color:#1e0010">：</span>处理自己特有的业务
+观察者<span style="color:#960050;background-color:#1e0010">：</span>接受消息<span style="color:#960050;background-color:#1e0010">，</span>并进行处理
+</code></pre></div><h1 id="注意">注意</h1>
 <p>其中如果多个观察者在处理各自业务的时候，出现了阻塞的话，或者其中一个出现了错误，怎么办？ 对于这种我们一般采用异步处理各自的业务代码，或者提前做好缓存的处理，防止消息链条的问题。</p>
-
 <p><strong>也可以理解这是一种 事件驱动模型</strong></p>
 
 
@@ -467,25 +433,22 @@ public abstract class Subject {
                     </h4>
                     <ul class="catalog-body"></ul>
                     <nav id="TableOfContents">
-<ul>
-<li><a href="#原理">原理</a>
-<ul>
-<li><a href="#subject被观察者">Subject被观察者</a></li>
-<li><a href="#observer观察者">Observer观察者</a></li>
-<li><a href="#concretesubject具体的被观察者">ConcreteSubject具体的被观察者</a></li>
-<li><a href="#concreteobserver具体的观察者">ConcreteObserver具体的观察者</a></li>
-</ul></li>
-<li><a href="#观察者模式通用模式">观察者模式通用模式</a>
-<ul>
-<li><a href="#被观察者">被观察者</a></li>
-<li><a href="#具体被观察者">具体被观察者</a></li>
-<li><a href="#观察者">观察者</a></li>
-<li><a href="#具体观察者">具体观察者</a></li>
-<li><a href="#测试代码">测试代码</a></li>
-<li><a href="#运行结果">运行结果</a></li>
-</ul></li>
-<li><a href="#注意">注意</a></li>
-</ul>
+  <ul>
+    <li><a href="#subject被观察者">Subject被观察者</a></li>
+    <li><a href="#observer观察者">Observer观察者</a></li>
+    <li><a href="#concretesubject具体的被观察者">ConcreteSubject具体的被观察者</a></li>
+    <li><a href="#concreteobserver具体的观察者">ConcreteObserver具体的观察者</a></li>
+  </ul>
+
+  <ul>
+    <li><a href="#被观察者">被观察者</a></li>
+    <li><a href="#具体被观察者">具体被观察者</a></li>
+    <li><a href="#观察者">观察者</a></li>
+    <li><a href="#heading"></a></li>
+    <li><a href="#具体观察者">具体观察者</a></li>
+    <li><a href="#测试代码">测试代码</a></li>
+    <li><a href="#运行结果">运行结果</a></li>
+  </ul>
 </nav>
                     <br>
                     <br>
@@ -510,9 +473,6 @@ public abstract class Subject {
                         
                         
                         
-                        <a href="/tags/" title="">
-                            
-                        </a>
                         
                         
                         
@@ -522,101 +482,6 @@ public abstract class Subject {
                         
                         
                         
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        <a href="/tags/qt" title="QT">
-                            QT
-                        </a>
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        <a href="/tags/zookeeper" title="Zookeeper">
-                            Zookeeper
-                        </a>
                         
                         
                         
@@ -656,8 +521,10 @@ public abstract class Subject {
                         
                         
                         
-                        <a href="/tags/elasticsearch" title="elasticSearch">
-                            elasticSearch
+                        
+                        
+                        <a href="/tags/elasticsearch" title="elasticsearch">
+                            elasticsearch
                         </a>
                         
                         
@@ -668,9 +535,27 @@ public abstract class Subject {
                         
                         
                         
-                        <a href="/tags/golang" title="golang">
-                            golang
-                        </a>
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
                         
                         
                         
@@ -708,9 +593,21 @@ public abstract class Subject {
                         
                         
                         
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
                         <a href="/tags/jvm" title="jvm">
                             jvm
                         </a>
+                        
+                        
+                        
+                        
                         
                         
                         
@@ -734,9 +631,19 @@ public abstract class Subject {
                         
                         
                         
+                        
+                        
+                        
+                        
+                        
+                        
                         <a href="/tags/mongodb" title="mongodb">
                             mongodb
                         </a>
+                        
+                        
+                        
+                        
                         
                         
                         
@@ -747,10 +654,6 @@ public abstract class Subject {
                         </a>
                         
                         
-                        
-                        <a href="/tags/mycat" title="mycat">
-                            mycat
-                        </a>
                         
                         
                         
@@ -764,9 +667,17 @@ public abstract class Subject {
                         
                         
                         
-                        <a href="/tags/nginx" title="nginx">
-                            nginx
-                        </a>
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
                         
                         
                         
@@ -790,8 +701,22 @@ public abstract class Subject {
                         
                         
                         
+                        
+                        
                         <a href="/tags/rocketmq" title="rocketmq">
                             rocketmq
+                        </a>
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        <a href="/tags/security%E6%A1%86%E6%9E%B6%E5%AD%A6%E4%B9%A0" title="security框架学习">
+                            security框架学习
                         </a>
                         
                         
@@ -818,17 +743,11 @@ public abstract class Subject {
                         
                         
                         
-                        <a href="/tags/springcloud" title="springCloud">
-                            springCloud
-                        </a>
-                        
-                        
-                        
-                        
-                        
                         <a href="/tags/springboot" title="springboot">
                             springboot
                         </a>
+                        
+                        
                         
                         
                         
@@ -842,6 +761,9 @@ public abstract class Subject {
                         
                         
                         
+                        <a href="/tags/springcloud" title="springcloud">
+                            springcloud
+                        </a>
                         
                         
                         
@@ -867,6 +789,33 @@ public abstract class Subject {
                         
                         
                         
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        <a href="/tags/zookeeper" title="zookeeper">
+                            zookeeper
+                        </a>
                         
                         
                         
@@ -926,6 +875,8 @@ public abstract class Subject {
                         
                         
                         
+                        
+                        
                         <a href="/tags/%E5%88%86%E5%B8%83%E5%BC%8F%E7%B3%BB%E5%88%97" title="分布式系列">
                             分布式系列
                         </a>
@@ -945,6 +896,10 @@ public abstract class Subject {
                         
                         
                         
+                        
+                        <a href="/tags/%E5%8D%8F%E8%AE%AE%E6%A0%88" title="协议栈">
+                            协议栈
+                        </a>
                         
                         
                         
@@ -1144,6 +1099,12 @@ public abstract class Subject {
                         
                         
                         
+                        
+                        
+                        
+                        
+                        
+                        
                         <a href="/tags/%E7%BD%91%E7%BB%9C%E7%BC%96%E7%A8%8B" title="网络编程">
                             网络编程
                         </a>
@@ -1167,6 +1128,10 @@ public abstract class Subject {
                         
                         
                         
+                        
+                        <a href="/tags/%E8%AE%A4%E8%AF%81%E5%92%8C%E6%8E%88%E6%9D%83" title="认证和授权">
+                            认证和授权
+                        </a>
                         
                         
                         
@@ -1337,7 +1302,7 @@ public abstract class Subject {
                     
                 </ul>
 		<p class="copyright text-muted">
-                    Copyright &copy;  2020
+                    Copyright &copy;  2021
                     <br>
                     <a href="https://themes.gohugo.io/hugo-theme-cleanwhite">CleanWhite Hugo Theme</a> by <a href="https://zhaohuabing.com">Huabing</a> |
                     <iframe

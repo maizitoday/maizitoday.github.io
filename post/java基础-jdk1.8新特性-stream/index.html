@@ -97,15 +97,15 @@
                     </li>
                     
                     <li>
-                        <a href="/categories/english">English</a>
+                        <a href="/categories/english">english</a>
                     </li>
                     
                     <li>
-                        <a href="/categories/life">Life</a>
+                        <a href="/categories/life">life</a>
                     </li>
                     
                     <li>
-                        <a href="/categories/tech">Tech</a>
+                        <a href="/categories/tech">tech</a>
                     </li>
                     
 
@@ -237,376 +237,310 @@
                 
                 
                 
-                
-
-<p>[TOC]</p>
-
-<p><strong>转载地址：<a href="https://blog.csdn.net/Young4Dream/article/details/76794659">https://blog.csdn.net/Young4Dream/article/details/76794659</a></strong></p>
-
-<p><strong>转载地址：<a href="https://blog.csdn.net/chenhao_c_h/article/details/80691284">https://blog.csdn.net/chenhao_c_h/article/details/80691284</a></strong></p>
-
+                <p>[TOC]</p>
+<p><strong>转载地址：https://blog.csdn.net/Young4Dream/article/details/76794659</strong></p>
+<p><strong>转载地址：https://blog.csdn.net/chenhao_c_h/article/details/80691284</strong></p>
 <p><strong>转载地址:  <a href="https://blog.csdn.net/Keith003/article/details/80252553">https://blog.csdn.net/Keith003/article/details/80252553</a></strong></p>
-
 <h1 id="为什么需要-stream">为什么需要 Stream</h1>
-
 <p>它专注于对集合对象进行各种非常便利、高效的聚合操作（aggregate operation），或者大批量数据操作 (bulk data operation)。Stream API 借助于同样新出现的 Lambda 表达式，极大的提高编程效率和程序可读性。同时它提供串行和并行两种模式进行汇聚操作，并发模式能够充分利用多核处理器的优势，使用 fork/join 并行方式来拆分任务和加速处理过程。通常编写并行代码很难而且容易出错, 但使用 Stream API 无需编写一行多线程的代码，就可以很方便地写出高性能的并发程序。所以说，Java 8 中首次出现的 java.util.stream 是一个函数式语言+多核时代综合影响的产物。</p>
-
 <p><strong>Stream 不是集合元素，它不是数据结构并不保存数据，它是有关算法和计算的，它更像一个高级版本的 Iterator。</strong></p>
-
 <p>Stream 就如同一个迭代器（Iterator），单向，不可往复，数据只能遍历一次，遍历过一次后即用尽了，就好比流水从面前流过，一去不复返。</p>
-
 <p>而和迭代器又不同的是，Stream 可以并行化操作，迭代器只能命令式地、串行化操作。顾名思义，当使用串行方式去遍历时，每个 item 读完后再读下一个 item。而使用并行去遍历时，数据会被分成多个段，其中每一个都在不同的线程中处理，然后将结果一起输出。</p>
-
 <p><strong>Stream 的另外一大特点是，数据源本身可以是无限的。</strong></p>
-
 <h1 id="构造流的几种常见方法">构造流的几种常见方法</h1>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-java" data-lang="java"><span style="color:#75715e">// 字符 
+</span><span style="color:#75715e"></span>Stream stream <span style="color:#f92672">=</span> Stream<span style="color:#f92672">.</span><span style="color:#a6e22e">of</span><span style="color:#f92672">(</span><span style="color:#e6db74">&#34;a&#34;</span><span style="color:#f92672">,</span> <span style="color:#e6db74">&#34;b&#34;</span><span style="color:#f92672">,</span> <span style="color:#e6db74">&#34;c&#34;</span><span style="color:#f92672">);</span>
 
-<pre><code class="language-java">// 字符 
-Stream stream = Stream.of(&quot;a&quot;, &quot;b&quot;, &quot;c&quot;);
+<span style="color:#75715e">// 数组
+</span><span style="color:#75715e"></span>String <span style="color:#f92672">[]</span> strArray <span style="color:#f92672">=</span> <span style="color:#66d9ef">new</span> String<span style="color:#f92672">[]</span> <span style="color:#f92672">{</span><span style="color:#e6db74">&#34;a&#34;</span><span style="color:#f92672">,</span> <span style="color:#e6db74">&#34;b&#34;</span><span style="color:#f92672">,</span> <span style="color:#e6db74">&#34;c&#34;</span><span style="color:#f92672">};</span>
+stream <span style="color:#f92672">=</span> Stream<span style="color:#f92672">.</span><span style="color:#a6e22e">of</span><span style="color:#f92672">(</span>strArray<span style="color:#f92672">);</span>
+stream <span style="color:#f92672">=</span> Arrays<span style="color:#f92672">.</span><span style="color:#a6e22e">stream</span><span style="color:#f92672">(</span>strArray<span style="color:#f92672">);</span>
 
-// 数组
-String [] strArray = new String[] {&quot;a&quot;, &quot;b&quot;, &quot;c&quot;};
-stream = Stream.of(strArray);
-stream = Arrays.stream(strArray);
+<span style="color:#75715e">// 集合
+</span><span style="color:#75715e"></span>List<span style="color:#f92672">&lt;</span>String<span style="color:#f92672">&gt;</span> list <span style="color:#f92672">=</span> Arrays<span style="color:#f92672">.</span><span style="color:#a6e22e">asList</span><span style="color:#f92672">(</span>strArray<span style="color:#f92672">);</span>
+stream <span style="color:#f92672">=</span> list<span style="color:#f92672">.</span><span style="color:#a6e22e">stream</span><span style="color:#f92672">();</span>
+</code></pre></div><h2 id="数值流的构造">数值流的构造</h2>
+<p>需要注意的是，对于基本数值型，目前有三种对应的包装类型 Stream：IntStream、LongStream、DoubleStream<code>。当然我们也可以用 </code>Stream<!-- raw HTML omitted -->、Stream<!-- raw HTML omitted --> &gt;、Stream<!-- raw HTML omitted -->`，</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-java" data-lang="java">IntStream<span style="color:#f92672">.</span><span style="color:#a6e22e">of</span><span style="color:#f92672">(</span><span style="color:#66d9ef">new</span> <span style="color:#66d9ef">int</span><span style="color:#f92672">[]{</span>1<span style="color:#f92672">,</span> 2<span style="color:#f92672">,</span> 3<span style="color:#f92672">}).</span><span style="color:#a6e22e">forEach</span><span style="color:#f92672">(</span>System<span style="color:#f92672">.</span><span style="color:#a6e22e">out</span><span style="color:#f92672">::</span>println<span style="color:#f92672">);</span>
+IntStream<span style="color:#f92672">.</span><span style="color:#a6e22e">range</span><span style="color:#f92672">(</span>1<span style="color:#f92672">,</span> 3<span style="color:#f92672">).</span><span style="color:#a6e22e">forEach</span><span style="color:#f92672">(</span>System<span style="color:#f92672">.</span><span style="color:#a6e22e">out</span><span style="color:#f92672">::</span>println<span style="color:#f92672">);</span>
+IntStream<span style="color:#f92672">.</span><span style="color:#a6e22e">rangeClosed</span><span style="color:#f92672">(</span>1<span style="color:#f92672">,</span> 3<span style="color:#f92672">).</span><span style="color:#a6e22e">forEach</span><span style="color:#f92672">(</span>System<span style="color:#f92672">.</span><span style="color:#a6e22e">out</span><span style="color:#f92672">::</span>println<span style="color:#f92672">);</span>
+</code></pre></div><h1 id="流转换为其它数据结构">流转换为其它数据结构</h1>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-java" data-lang="java"><span style="color:#75715e">// 1. Array
+</span><span style="color:#75715e"></span>String<span style="color:#f92672">[]</span> strArray1 <span style="color:#f92672">=</span> stream<span style="color:#f92672">.</span><span style="color:#a6e22e">toArray</span><span style="color:#f92672">(</span>String<span style="color:#f92672">[]::</span><span style="color:#66d9ef">new</span><span style="color:#f92672">);</span>
 
-// 集合
-List&lt;String&gt; list = Arrays.asList(strArray);
-stream = list.stream();
-</code></pre>
+<span style="color:#75715e">// list
+</span><span style="color:#75715e"></span>List<span style="color:#f92672">&lt;</span>String<span style="color:#f92672">&gt;</span> list1 <span style="color:#f92672">=</span> stream<span style="color:#f92672">.</span><span style="color:#a6e22e">collect</span><span style="color:#f92672">(</span>Collectors<span style="color:#f92672">.</span><span style="color:#a6e22e">toList</span><span style="color:#f92672">());</span>
+List<span style="color:#f92672">&lt;</span>String<span style="color:#f92672">&gt;</span> list2 <span style="color:#f92672">=</span> stream<span style="color:#f92672">.</span><span style="color:#a6e22e">collect</span><span style="color:#f92672">(</span>Collectors<span style="color:#f92672">.</span><span style="color:#a6e22e">toCollection</span><span style="color:#f92672">(</span>ArrayList<span style="color:#f92672">::</span><span style="color:#66d9ef">new</span><span style="color:#f92672">));</span>
 
-<h2 id="数值流的构造">数值流的构造</h2>
+<span style="color:#75715e">// Set
+</span><span style="color:#75715e"></span>Set set1 <span style="color:#f92672">=</span> stream<span style="color:#f92672">.</span><span style="color:#a6e22e">collect</span><span style="color:#f92672">(</span>Collectors<span style="color:#f92672">.</span><span style="color:#a6e22e">toSet</span><span style="color:#f92672">());</span>
+Stack stack1 <span style="color:#f92672">=</span> stream<span style="color:#f92672">.</span><span style="color:#a6e22e">collect</span><span style="color:#f92672">(</span>Collectors<span style="color:#f92672">.</span><span style="color:#a6e22e">toCollection</span><span style="color:#f92672">(</span>Stack<span style="color:#f92672">::</span><span style="color:#66d9ef">new</span><span style="color:#f92672">));</span>
 
-<p>需要注意的是，对于基本数值型，目前有三种对应的包装类型 Stream：IntStream、LongStream、DoubleStream<code>。当然我们也可以用</code>Stream<Integer>、Stream<Long> &gt;、Stream<Double>`，</p>
-
-<pre><code class="language-java">IntStream.of(new int[]{1, 2, 3}).forEach(System.out::println);
-IntStream.range(1, 3).forEach(System.out::println);
-IntStream.rangeClosed(1, 3).forEach(System.out::println);
-</code></pre>
-
-<h1 id="流转换为其它数据结构">流转换为其它数据结构</h1>
-
-<pre><code class="language-java">// 1. Array
-String[] strArray1 = stream.toArray(String[]::new);
-
-// list
-List&lt;String&gt; list1 = stream.collect(Collectors.toList());
-List&lt;String&gt; list2 = stream.collect(Collectors.toCollection(ArrayList::new));
-
-// Set
-Set set1 = stream.collect(Collectors.toSet());
-Stack stack1 = stream.collect(Collectors.toCollection(Stack::new));
-
-// 3. String
-String str = stream.collect(Collectors.joining()).toString();
-</code></pre>
-
-<h1 id="流的操作">流的操作</h1>
-
-<h2 id="intermediate-中间操作">Intermediate(中间操作)</h2>
-
+<span style="color:#75715e">// 3. String
+</span><span style="color:#75715e"></span>String str <span style="color:#f92672">=</span> stream<span style="color:#f92672">.</span><span style="color:#a6e22e">collect</span><span style="color:#f92672">(</span>Collectors<span style="color:#f92672">.</span><span style="color:#a6e22e">joining</span><span style="color:#f92672">()).</span><span style="color:#a6e22e">toString</span><span style="color:#f92672">();</span>
+</code></pre></div><h1 id="流的操作">流的操作</h1>
+<h2 id="intermediate中间操作">Intermediate(中间操作)</h2>
 <p>一个流可以后面跟随零个或多个 intermediate 操作。其目的主要是打开流，做出某种程度的数据映射/过滤，然后返回一个新的流，交给下一个操作使用。<strong>这类操作都是惰性化的（lazy），就是说，仅仅调用到这类方法，并没有真正开始流的遍历。</strong></p>
-
 <p>多个中间操作可以连接起来形成一个流水线，除非流水线上触发终止操作，否则中间操作不会执行任何的处理！而在终止操作时一次性全部处理，<strong>称为“惰性求值”。</strong></p>
-
 <h3 id="常用方法">常用方法</h3>
-
 <p>map (mapToInt, flatMap 等)、 filter、 distinct、 sorted、 peek、 limit、 skip、 parallel、 sequential、 unordered</p>
-
 <h4 id="筛选与切片">筛选与切片</h4>
-
-<p><img src="/img/20180509140419898.png" alt="20180509140419898" /></p>
-
+<p><img src="/img/20180509140419898.png" alt="20180509140419898"></p>
 <h4 id="映射">映射</h4>
-
-<p><img src="/img/20180509140353794.png" alt="20180509140353794" /></p>
-
+<p><img src="/img/20180509140353794.png" alt="20180509140353794"></p>
 <h4 id="排序">排序</h4>
-
-<p><img src="/img/20180509140320474.png" alt="20180509140320474" /></p>
-
-<h2 id="terminal-最终操作">Terminal(最终操作)</h2>
-
+<p><img src="/img/20180509140320474.png" alt="20180509140320474"></p>
+<h2 id="terminal最终操作">Terminal(最终操作)</h2>
 <p>一个流只能有一个 terminal 操作，当这个操作执行后，流就被使用“光”了，无法再被操作。所以这必定是流的最后一个操作。Terminal 操作的执行，才会真正开始流的遍历，并且会生成一个结果，或者一个 side effect。</p>
-
 <h3 id="常用方法-1">常用方法</h3>
-
 <p>forEach、 forEachOrdered、 toArray、 reduce、 collect、 min、 max、 count、 anyMatch、 allMatch、 noneMatch、 findFirst、 findAny、 iterator</p>
-
 <h4 id="查找与匹配">查找与匹配</h4>
-
-<p><img src="/img/20180509140624786.png" alt="20180509140624786" /></p>
-
-<p><img src="/img/20180509140651964.png" alt="20180509140651964" /></p>
-
+<p><img src="/img/20180509140624786.png" alt="20180509140624786"></p>
+<p><img src="/img/20180509140651964.png" alt="20180509140651964"></p>
 <h4 id="归约">归约</h4>
-
-<p><img src="/img/20180509140732558.png" alt="20180509140732558" /></p>
-
+<p><img src="/img/20180509140732558.png" alt="20180509140732558"></p>
 <p><strong>注：map 和 reduce 的连接通常称为map-reduce 模式，因 Google 用它来进行网络搜索而出名</strong></p>
-
 <h4 id="收集">收集</h4>
-
-<p><img src="/img/20180509140941161.png" alt="20180509140941161" /></p>
-
+<p><img src="/img/20180509140941161.png" alt="20180509140941161"></p>
 <p>Collector 接口中方法的实现决定了如何对流执行收集操作(如收集到List、Set、Map)。但是Collectors 实用类提供了很多静态方法，可以方便地创建常见收集器实例，具体方法与实例如下表：</p>
-
-<p><img src="/img/20180509141507583.png" alt="20180509141507583" /></p>
-
-<h2 id="short-circuiting-环形">short-circuiting(环形)</h2>
-
+<p><img src="/img/20180509141507583.png" alt="20180509141507583"></p>
+<h2 id="short-circuiting环形">short-circuiting(环形)</h2>
 <ul>
 <li>对于一个<strong>intermediate</strong> 操作，如果它接受的是一个无限大（infinite/unbounded）的<strong>Stream</strong>，但返回一个有限的新<strong>Stream</strong>。</li>
 <li>对于一个 <strong>terminal</strong> 操作，如果它接受的是一个无限大的 <strong>Stream</strong>，但能在有限的时间计算出结果。</li>
 </ul>
-
 <p>当操作一个无限大的 <strong>Stream</strong>，而又希望在有限时间内完成操作，则在管道内拥有一个 short-circuiting 操作是必要非充分条件。</p>
-
 <h3 id="常用方法-2">常用方法</h3>
-
 <p>anyMatch、 allMatch、 noneMatch、 findFirst、 findAny、 limit</p>
-
 <h1 id="常用实例代码">常用实例代码</h1>
+<h2 id="intermediate中间操作-1">Intermediate(中间操作)</h2>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-java" data-lang="java">   <span style="color:#75715e">/**
+</span><span style="color:#75715e">    对每个元素执行mapper指定的操作，并用所有mapper返回的Stream中的元素组成一个新的Stream作为最终返回结果，通俗易懂就是将原来的stream中的所有元素都展开组成一个新的stream, map 只能对应一维数据， flatMap主要对应的事二维数据，可以看出返回的对象是一个流， 所以可以在对流进行数据处理。
+</span><span style="color:#75715e">   */</span> 
+    <span style="color:#66d9ef">public</span> <span style="color:#66d9ef">static</span> <span style="color:#66d9ef">void</span> <span style="color:#a6e22e">flatMapTest</span><span style="color:#f92672">()</span> <span style="color:#f92672">{</span>
+        List<span style="color:#f92672">&lt;</span>School<span style="color:#f92672">&gt;</span> childs1 <span style="color:#f92672">=</span> <span style="color:#66d9ef">new</span> ArrayList<span style="color:#f92672">&lt;</span>School<span style="color:#f92672">&gt;();</span>
+        childs1<span style="color:#f92672">.</span><span style="color:#a6e22e">add</span><span style="color:#f92672">(</span><span style="color:#66d9ef">new</span> School<span style="color:#f92672">(</span>10<span style="color:#f92672">,</span> <span style="color:#e6db74">&#34;10号&#34;</span><span style="color:#f92672">,</span> <span style="color:#e6db74">&#34;深圳&#34;</span><span style="color:#f92672">,</span> <span style="color:#e6db74">&#34;开放&#34;</span><span style="color:#f92672">));</span>
+        childs1<span style="color:#f92672">.</span><span style="color:#a6e22e">add</span><span style="color:#f92672">(</span><span style="color:#66d9ef">new</span> School<span style="color:#f92672">(</span>11<span style="color:#f92672">,</span> <span style="color:#e6db74">&#34;11号&#34;</span><span style="color:#f92672">,</span> <span style="color:#e6db74">&#34;湖南&#34;</span><span style="color:#f92672">,</span> <span style="color:#e6db74">&#34;建设中&#34;</span><span style="color:#f92672">));</span>
 
-<h2 id="intermediate-中间操作-1">Intermediate(中间操作)</h2>
+        List<span style="color:#f92672">&lt;</span>School<span style="color:#f92672">&gt;</span> childs2 <span style="color:#f92672">=</span> <span style="color:#66d9ef">new</span> ArrayList<span style="color:#f92672">&lt;</span>School<span style="color:#f92672">&gt;();</span>
+        childs2<span style="color:#f92672">.</span><span style="color:#a6e22e">add</span><span style="color:#f92672">(</span><span style="color:#66d9ef">new</span> School<span style="color:#f92672">(</span>12<span style="color:#f92672">,</span> <span style="color:#e6db74">&#34;12号&#34;</span><span style="color:#f92672">,</span> <span style="color:#e6db74">&#34;邵阳&#34;</span><span style="color:#f92672">,</span> <span style="color:#e6db74">&#34;倒闭&#34;</span><span style="color:#f92672">));</span>
+        childs2<span style="color:#f92672">.</span><span style="color:#a6e22e">add</span><span style="color:#f92672">(</span><span style="color:#66d9ef">new</span> School<span style="color:#f92672">(</span>13<span style="color:#f92672">,</span> <span style="color:#e6db74">&#34;13号&#34;</span><span style="color:#f92672">,</span> <span style="color:#e6db74">&#34;西乡&#34;</span><span style="color:#f92672">,</span> <span style="color:#e6db74">&#34;倒闭&#34;</span><span style="color:#f92672">));</span>
 
-<pre><code class="language-java">   /**
-    对每个元素执行mapper指定的操作，并用所有mapper返回的Stream中的元素组成一个新的Stream作为最终返回结果，通俗易懂就是将原来的stream中的所有元素都展开组成一个新的stream, map 只能对应一维数据， flatMap主要对应的事二维数据，可以看出返回的对象是一个流， 所以可以在对流进行数据处理。
-   */ 
-    public static void flatMapTest() {
-        List&lt;School&gt; childs1 = new ArrayList&lt;School&gt;();
-        childs1.add(new School(10, &quot;10号&quot;, &quot;深圳&quot;, &quot;开放&quot;));
-        childs1.add(new School(11, &quot;11号&quot;, &quot;湖南&quot;, &quot;建设中&quot;));
+        List<span style="color:#f92672">&lt;</span>School<span style="color:#f92672">&gt;</span> childs3 <span style="color:#f92672">=</span> <span style="color:#66d9ef">new</span> ArrayList<span style="color:#f92672">&lt;</span>School<span style="color:#f92672">&gt;();</span>
+        childs3<span style="color:#f92672">.</span><span style="color:#a6e22e">add</span><span style="color:#f92672">(</span><span style="color:#66d9ef">new</span> School<span style="color:#f92672">(</span>14<span style="color:#f92672">,</span> <span style="color:#e6db74">&#34;14号&#34;</span><span style="color:#f92672">,</span> <span style="color:#e6db74">&#34;保安&#34;</span><span style="color:#f92672">,</span> <span style="color:#e6db74">&#34;建设中&#34;</span><span style="color:#f92672">));</span>
 
-        List&lt;School&gt; childs2 = new ArrayList&lt;School&gt;();
-        childs2.add(new School(12, &quot;12号&quot;, &quot;邵阳&quot;, &quot;倒闭&quot;));
-        childs2.add(new School(13, &quot;13号&quot;, &quot;西乡&quot;, &quot;倒闭&quot;));
+        List<span style="color:#f92672">&lt;</span>List<span style="color:#f92672">&lt;</span>School<span style="color:#f92672">&gt;&gt;</span> data <span style="color:#f92672">=</span> <span style="color:#66d9ef">new</span> ArrayList<span style="color:#f92672">&lt;&gt;();</span>
+        data<span style="color:#f92672">.</span><span style="color:#a6e22e">add</span><span style="color:#f92672">(</span>childs1<span style="color:#f92672">);</span>
+        data<span style="color:#f92672">.</span><span style="color:#a6e22e">add</span><span style="color:#f92672">(</span>childs2<span style="color:#f92672">);</span>
+        data<span style="color:#f92672">.</span><span style="color:#a6e22e">add</span><span style="color:#f92672">(</span>childs3<span style="color:#f92672">);</span>
 
-        List&lt;School&gt; childs3 = new ArrayList&lt;School&gt;();
-        childs3.add(new School(14, &quot;14号&quot;, &quot;保安&quot;, &quot;建设中&quot;));
+        data<span style="color:#f92672">.</span><span style="color:#a6e22e">stream</span><span style="color:#f92672">().</span><span style="color:#a6e22e">flatMap</span><span style="color:#f92672">(</span>temp <span style="color:#f92672">-&gt;</span> temp<span style="color:#f92672">.</span><span style="color:#a6e22e">stream</span><span style="color:#f92672">().</span><span style="color:#a6e22e">filter</span><span style="color:#f92672">(</span>entity <span style="color:#f92672">-&gt;</span> entity<span style="color:#f92672">.</span><span style="color:#a6e22e">getId</span><span style="color:#f92672">()</span> <span style="color:#f92672">&gt;</span> 12<span style="color:#f92672">)).</span><span style="color:#a6e22e">forEach</span><span style="color:#f92672">(</span>System<span style="color:#f92672">.</span><span style="color:#a6e22e">out</span><span style="color:#f92672">::</span>println<span style="color:#f92672">);</span>
+        <span style="color:#f92672">;</span>
 
-        List&lt;List&lt;School&gt;&gt; data = new ArrayList&lt;&gt;();
-        data.add(childs1);
-        data.add(childs2);
-        data.add(childs3);
+        <span style="color:#75715e">// 执行结果如下
+</span><span style="color:#75715e"></span>        <span style="color:#75715e">// School(id=13, name=13号, address=西乡)
+</span><span style="color:#75715e"></span>        <span style="color:#75715e">// School(id=14, name=14号, address=保安)
+</span><span style="color:#75715e"></span>    <span style="color:#f92672">}</span>
 
-        data.stream().flatMap(temp -&gt; temp.stream().filter(entity -&gt; entity.getId() &gt; 12)).forEach(System.out::println);
-        ;
+    <span style="color:#75715e">// findFirst 获取第一个
+</span><span style="color:#75715e"></span>    <span style="color:#66d9ef">public</span> <span style="color:#66d9ef">static</span> <span style="color:#66d9ef">void</span> <span style="color:#a6e22e">findFirstTest</span><span style="color:#f92672">(</span>List<span style="color:#f92672">&lt;</span>School<span style="color:#f92672">&gt;</span> schoolList<span style="color:#f92672">)</span> <span style="color:#f92672">{</span>
+        School school <span style="color:#f92672">=</span> schoolList<span style="color:#f92672">.</span><span style="color:#a6e22e">stream</span><span style="color:#f92672">().</span><span style="color:#a6e22e">findFirst</span><span style="color:#f92672">().</span><span style="color:#a6e22e">get</span><span style="color:#f92672">();</span>
+        System<span style="color:#f92672">.</span><span style="color:#a6e22e">out</span><span style="color:#f92672">.</span><span style="color:#a6e22e">println</span><span style="color:#f92672">(</span>school<span style="color:#f92672">);</span>
+    <span style="color:#f92672">}</span>
 
-        // 执行结果如下
-        // School(id=13, name=13号, address=西乡)
-        // School(id=14, name=14号, address=保安)
-    }
+    <span style="color:#75715e">// 接收一个方法作为参数，该函数会被应用到每个元素上，并将其映射成一个新的元素
+</span><span style="color:#75715e"></span>    <span style="color:#66d9ef">public</span> <span style="color:#66d9ef">static</span> <span style="color:#66d9ef">void</span> <span style="color:#a6e22e">mapTest</span><span style="color:#f92672">(</span>List<span style="color:#f92672">&lt;</span>School<span style="color:#f92672">&gt;</span> schoolList<span style="color:#f92672">)</span> <span style="color:#f92672">{</span>
+        Function<span style="color:#f92672">&lt;</span>School<span style="color:#f92672">,</span> School<span style="color:#f92672">&gt;</span> fun <span style="color:#f92672">=</span> <span style="color:#f92672">(</span>school<span style="color:#f92672">)</span> <span style="color:#f92672">-&gt;</span> <span style="color:#f92672">{</span>
+            String name <span style="color:#f92672">=</span> school<span style="color:#f92672">.</span><span style="color:#a6e22e">getName</span><span style="color:#f92672">();</span>
+            school<span style="color:#f92672">.</span><span style="color:#a6e22e">setName</span><span style="color:#f92672">(</span>name <span style="color:#f92672">+</span> <span style="color:#e6db74">&#34;---&#34;</span> <span style="color:#f92672">+</span> school<span style="color:#f92672">.</span><span style="color:#a6e22e">getId</span><span style="color:#f92672">());</span>
+            <span style="color:#66d9ef">return</span> school<span style="color:#f92672">;</span>
+        <span style="color:#f92672">};</span>
+        schoolList<span style="color:#f92672">.</span><span style="color:#a6e22e">stream</span><span style="color:#f92672">().</span><span style="color:#a6e22e">map</span><span style="color:#f92672">(</span>fun<span style="color:#f92672">).</span><span style="color:#a6e22e">forEach</span><span style="color:#f92672">(</span>System<span style="color:#f92672">.</span><span style="color:#a6e22e">out</span><span style="color:#f92672">::</span>println<span style="color:#f92672">);</span>
+    <span style="color:#f92672">}</span>
 
-    // findFirst 获取第一个
-    public static void findFirstTest(List&lt;School&gt; schoolList) {
-        School school = schoolList.stream().findFirst().get();
-        System.out.println(school);
-    }
+    <span style="color:#75715e">// distinct 去重
+</span><span style="color:#75715e"></span>    <span style="color:#66d9ef">public</span> <span style="color:#66d9ef">static</span> <span style="color:#66d9ef">void</span> <span style="color:#a6e22e">distinctTst</span><span style="color:#f92672">(</span>List<span style="color:#f92672">&lt;</span>School<span style="color:#f92672">&gt;</span> schoolList<span style="color:#f92672">)</span> <span style="color:#f92672">{</span>
+        schoolList<span style="color:#f92672">.</span><span style="color:#a6e22e">stream</span><span style="color:#f92672">().</span><span style="color:#a6e22e">distinct</span><span style="color:#f92672">().</span><span style="color:#a6e22e">sorted</span><span style="color:#f92672">((</span>o1<span style="color:#f92672">,</span> o2<span style="color:#f92672">)</span> <span style="color:#f92672">-&gt;</span> o1<span style="color:#f92672">.</span><span style="color:#a6e22e">getId</span><span style="color:#f92672">()</span> <span style="color:#f92672">-</span> o2<span style="color:#f92672">.</span><span style="color:#a6e22e">getId</span><span style="color:#f92672">()).</span><span style="color:#a6e22e">forEach</span><span style="color:#f92672">(</span>System<span style="color:#f92672">.</span><span style="color:#a6e22e">out</span><span style="color:#f92672">::</span>println<span style="color:#f92672">);</span>
+    <span style="color:#f92672">}</span>
 
-    // 接收一个方法作为参数，该函数会被应用到每个元素上，并将其映射成一个新的元素
-    public static void mapTest(List&lt;School&gt; schoolList) {
-        Function&lt;School, School&gt; fun = (school) -&gt; {
-            String name = school.getName();
-            school.setName(name + &quot;---&quot; + school.getId());
-            return school;
-        };
-        schoolList.stream().map(fun).forEach(System.out::println);
-    }
+    <span style="color:#75715e">// skip 和 limit是互斥的， skip是跳过前面几个， limit是截断， 顺序都是从前面作为起点。
+</span><span style="color:#75715e"></span>    <span style="color:#66d9ef">public</span> <span style="color:#66d9ef">static</span> <span style="color:#66d9ef">void</span> <span style="color:#a6e22e">skipTest</span><span style="color:#f92672">(</span>List<span style="color:#f92672">&lt;</span>School<span style="color:#f92672">&gt;</span> schoolList<span style="color:#f92672">)</span> <span style="color:#f92672">{</span>
+        schoolList<span style="color:#f92672">.</span><span style="color:#a6e22e">stream</span><span style="color:#f92672">().</span><span style="color:#a6e22e">skip</span><span style="color:#f92672">(</span>2<span style="color:#f92672">).</span><span style="color:#a6e22e">forEach</span><span style="color:#f92672">(</span>System<span style="color:#f92672">.</span><span style="color:#a6e22e">out</span><span style="color:#f92672">::</span>println<span style="color:#f92672">);</span>
+    <span style="color:#f92672">}</span>
 
-    // distinct 去重
-    public static void distinctTst(List&lt;School&gt; schoolList) {
-        schoolList.stream().distinct().sorted((o1, o2) -&gt; o1.getId() - o2.getId()).forEach(System.out::println);
-    }
+    <span style="color:#75715e">// 排序
+</span><span style="color:#75715e"></span>    <span style="color:#66d9ef">public</span> <span style="color:#66d9ef">static</span> <span style="color:#66d9ef">void</span> <span style="color:#a6e22e">sortedTest</span><span style="color:#f92672">(</span>List<span style="color:#f92672">&lt;</span>School<span style="color:#f92672">&gt;</span> schoolList<span style="color:#f92672">)</span> <span style="color:#f92672">{</span>
+        schoolList<span style="color:#f92672">.</span><span style="color:#a6e22e">stream</span><span style="color:#f92672">().</span><span style="color:#a6e22e">sorted</span><span style="color:#f92672">((</span>o1<span style="color:#f92672">,</span> o2<span style="color:#f92672">)</span> <span style="color:#f92672">-&gt;</span> o1<span style="color:#f92672">.</span><span style="color:#a6e22e">getId</span><span style="color:#f92672">()</span> <span style="color:#f92672">-</span> o2<span style="color:#f92672">.</span><span style="color:#a6e22e">getId</span><span style="color:#f92672">()).</span><span style="color:#a6e22e">forEach</span><span style="color:#f92672">(</span>System<span style="color:#f92672">.</span><span style="color:#a6e22e">out</span><span style="color:#f92672">::</span>println<span style="color:#f92672">);</span>
+    <span style="color:#f92672">}</span>
 
-    // skip 和 limit是互斥的， skip是跳过前面几个， limit是截断， 顺序都是从前面作为起点。
-    public static void skipTest(List&lt;School&gt; schoolList) {
-        schoolList.stream().skip(2).forEach(System.out::println);
-    }
+    <span style="color:#75715e">// filter
+</span><span style="color:#75715e"></span>    <span style="color:#66d9ef">public</span> <span style="color:#66d9ef">static</span> <span style="color:#66d9ef">void</span> <span style="color:#a6e22e">filterTest</span><span style="color:#f92672">(</span>List<span style="color:#f92672">&lt;</span>School<span style="color:#f92672">&gt;</span> schoolList<span style="color:#f92672">)</span> <span style="color:#f92672">{</span>
+        schoolList<span style="color:#f92672">.</span><span style="color:#a6e22e">stream</span><span style="color:#f92672">().</span><span style="color:#a6e22e">filter</span><span style="color:#f92672">(</span>school <span style="color:#f92672">-&gt;</span> school<span style="color:#f92672">.</span><span style="color:#a6e22e">getId</span><span style="color:#f92672">()</span> <span style="color:#f92672">&gt;</span> 3<span style="color:#f92672">).</span><span style="color:#a6e22e">forEach</span><span style="color:#f92672">(</span>System<span style="color:#f92672">.</span><span style="color:#a6e22e">out</span><span style="color:#f92672">::</span>println<span style="color:#f92672">);</span>
 
-    // 排序
-    public static void sortedTest(List&lt;School&gt; schoolList) {
-        schoolList.stream().sorted((o1, o2) -&gt; o1.getId() - o2.getId()).forEach(System.out::println);
-    }
+    <span style="color:#f92672">}</span>
 
-    // filter
-    public static void filterTest(List&lt;School&gt; schoolList) {
-        schoolList.stream().filter(school -&gt; school.getId() &gt; 3).forEach(System.out::println);
-
-    }
-
-    // limit
-    public static void limitTest(List&lt;School&gt; schoolList) {
-        schoolList.stream().limit(2).forEach(System.out::println);
-    }
+    <span style="color:#75715e">// limit
+</span><span style="color:#75715e"></span>    <span style="color:#66d9ef">public</span> <span style="color:#66d9ef">static</span> <span style="color:#66d9ef">void</span> <span style="color:#a6e22e">limitTest</span><span style="color:#f92672">(</span>List<span style="color:#f92672">&lt;</span>School<span style="color:#f92672">&gt;</span> schoolList<span style="color:#f92672">)</span> <span style="color:#f92672">{</span>
+        schoolList<span style="color:#f92672">.</span><span style="color:#a6e22e">stream</span><span style="color:#f92672">().</span><span style="color:#a6e22e">limit</span><span style="color:#f92672">(</span>2<span style="color:#f92672">).</span><span style="color:#a6e22e">forEach</span><span style="color:#f92672">(</span>System<span style="color:#f92672">.</span><span style="color:#a6e22e">out</span><span style="color:#f92672">::</span>println<span style="color:#f92672">);</span>
+    <span style="color:#f92672">}</span>
 
 
-    // max，min，count,sum，avg，
-    public static void sqlTest(List&lt;School&gt; schoolList) {
-        Optional&lt;School&gt; opt = schoolList.stream().max((o1, o2) -&gt; o1.getId() - o2.getId());
-        School school = opt.get();
-        System.out.println(school);
+    <span style="color:#75715e">// max，min，count,sum，avg，
+</span><span style="color:#75715e"></span>    <span style="color:#66d9ef">public</span> <span style="color:#66d9ef">static</span> <span style="color:#66d9ef">void</span> <span style="color:#a6e22e">sqlTest</span><span style="color:#f92672">(</span>List<span style="color:#f92672">&lt;</span>School<span style="color:#f92672">&gt;</span> schoolList<span style="color:#f92672">)</span> <span style="color:#f92672">{</span>
+        Optional<span style="color:#f92672">&lt;</span>School<span style="color:#f92672">&gt;</span> opt <span style="color:#f92672">=</span> schoolList<span style="color:#f92672">.</span><span style="color:#a6e22e">stream</span><span style="color:#f92672">().</span><span style="color:#a6e22e">max</span><span style="color:#f92672">((</span>o1<span style="color:#f92672">,</span> o2<span style="color:#f92672">)</span> <span style="color:#f92672">-&gt;</span> o1<span style="color:#f92672">.</span><span style="color:#a6e22e">getId</span><span style="color:#f92672">()</span> <span style="color:#f92672">-</span> o2<span style="color:#f92672">.</span><span style="color:#a6e22e">getId</span><span style="color:#f92672">());</span>
+        School school <span style="color:#f92672">=</span> opt<span style="color:#f92672">.</span><span style="color:#a6e22e">get</span><span style="color:#f92672">();</span>
+        System<span style="color:#f92672">.</span><span style="color:#a6e22e">out</span><span style="color:#f92672">.</span><span style="color:#a6e22e">println</span><span style="color:#f92672">(</span>school<span style="color:#f92672">);</span>
 
-        opt = schoolList.stream().min((o1, o2) -&gt; o1.getId() - o2.getId());
-        school = opt.get();
-        System.out.println(school);
+        opt <span style="color:#f92672">=</span> schoolList<span style="color:#f92672">.</span><span style="color:#a6e22e">stream</span><span style="color:#f92672">().</span><span style="color:#a6e22e">min</span><span style="color:#f92672">((</span>o1<span style="color:#f92672">,</span> o2<span style="color:#f92672">)</span> <span style="color:#f92672">-&gt;</span> o1<span style="color:#f92672">.</span><span style="color:#a6e22e">getId</span><span style="color:#f92672">()</span> <span style="color:#f92672">-</span> o2<span style="color:#f92672">.</span><span style="color:#a6e22e">getId</span><span style="color:#f92672">());</span>
+        school <span style="color:#f92672">=</span> opt<span style="color:#f92672">.</span><span style="color:#a6e22e">get</span><span style="color:#f92672">();</span>
+        System<span style="color:#f92672">.</span><span style="color:#a6e22e">out</span><span style="color:#f92672">.</span><span style="color:#a6e22e">println</span><span style="color:#f92672">(</span>school<span style="color:#f92672">);</span>
 
-        long count = schoolList.stream().count();
-        System.out.println(count);
+        <span style="color:#66d9ef">long</span> count <span style="color:#f92672">=</span> schoolList<span style="color:#f92672">.</span><span style="color:#a6e22e">stream</span><span style="color:#f92672">().</span><span style="color:#a6e22e">count</span><span style="color:#f92672">();</span>
+        System<span style="color:#f92672">.</span><span style="color:#a6e22e">out</span><span style="color:#f92672">.</span><span style="color:#a6e22e">println</span><span style="color:#f92672">(</span>count<span style="color:#f92672">);</span>
 
-        double avg = schoolList.stream().collect(Collectors.averagingInt(x -&gt; x.getId()));
-        System.out.println(avg);
+        <span style="color:#66d9ef">double</span> avg <span style="color:#f92672">=</span> schoolList<span style="color:#f92672">.</span><span style="color:#a6e22e">stream</span><span style="color:#f92672">().</span><span style="color:#a6e22e">collect</span><span style="color:#f92672">(</span>Collectors<span style="color:#f92672">.</span><span style="color:#a6e22e">averagingInt</span><span style="color:#f92672">(</span>x <span style="color:#f92672">-&gt;</span> x<span style="color:#f92672">.</span><span style="color:#a6e22e">getId</span><span style="color:#f92672">()));</span>
+        System<span style="color:#f92672">.</span><span style="color:#a6e22e">out</span><span style="color:#f92672">.</span><span style="color:#a6e22e">println</span><span style="color:#f92672">(</span>avg<span style="color:#f92672">);</span>
 
-        double sum = schoolList.stream().collect(Collectors.summingInt(x -&gt; x.getId()));
-        System.out.println(sum);
-    }
-</code></pre>
+        <span style="color:#66d9ef">double</span> sum <span style="color:#f92672">=</span> schoolList<span style="color:#f92672">.</span><span style="color:#a6e22e">stream</span><span style="color:#f92672">().</span><span style="color:#a6e22e">collect</span><span style="color:#f92672">(</span>Collectors<span style="color:#f92672">.</span><span style="color:#a6e22e">summingInt</span><span style="color:#f92672">(</span>x <span style="color:#f92672">-&gt;</span> x<span style="color:#f92672">.</span><span style="color:#a6e22e">getId</span><span style="color:#f92672">()));</span>
+        System<span style="color:#f92672">.</span><span style="color:#a6e22e">out</span><span style="color:#f92672">.</span><span style="color:#a6e22e">println</span><span style="color:#f92672">(</span>sum<span style="color:#f92672">);</span>
+    <span style="color:#f92672">}</span>
+</code></pre></div><h2 id="terminal最终操作-1">Terminal(最终操作)</h2>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-java" data-lang="java">    <span style="color:#75715e">// 归约---可以将流中元素反复结合起来，得到一个值
+</span><span style="color:#75715e"></span>    <span style="color:#75715e">// map 和 reduce 的连接通常称为map-reduce 模式，因 Google 用它来进行网络搜索而出名
+</span><span style="color:#75715e"></span>    <span style="color:#66d9ef">public</span> <span style="color:#66d9ef">static</span> <span style="color:#66d9ef">void</span> <span style="color:#a6e22e">reduceTest</span><span style="color:#f92672">(</span>List<span style="color:#f92672">&lt;</span>School<span style="color:#f92672">&gt;</span> schoolList<span style="color:#f92672">)</span> <span style="color:#f92672">{</span>
 
-<h2 id="terminal-最终操作-1">Terminal(最终操作)</h2>
+        schoolList<span style="color:#f92672">.</span><span style="color:#a6e22e">stream</span><span style="color:#f92672">().</span><span style="color:#a6e22e">map</span><span style="color:#f92672">(</span>x <span style="color:#f92672">-&gt;</span> x<span style="color:#f92672">.</span><span style="color:#a6e22e">getId</span><span style="color:#f92672">()).</span><span style="color:#a6e22e">forEach</span><span style="color:#f92672">(</span>System<span style="color:#f92672">.</span><span style="color:#a6e22e">out</span><span style="color:#f92672">::</span>println<span style="color:#f92672">);</span>
 
-<pre><code class="language-java">    // 归约---可以将流中元素反复结合起来，得到一个值
-    // map 和 reduce 的连接通常称为map-reduce 模式，因 Google 用它来进行网络搜索而出名
-    public static void reduceTest(List&lt;School&gt; schoolList) {
+        Optional<span style="color:#f92672">&lt;</span>Integer<span style="color:#f92672">&gt;</span> op <span style="color:#f92672">=</span> schoolList<span style="color:#f92672">.</span><span style="color:#a6e22e">stream</span><span style="color:#f92672">().</span><span style="color:#a6e22e">map</span><span style="color:#f92672">(</span>x <span style="color:#f92672">-&gt;</span> x<span style="color:#f92672">.</span><span style="color:#a6e22e">getId</span><span style="color:#f92672">()).</span><span style="color:#a6e22e">reduce</span><span style="color:#f92672">((</span>x<span style="color:#f92672">,</span> y<span style="color:#f92672">)</span> <span style="color:#f92672">-&gt;</span> x <span style="color:#f92672">+</span> y<span style="color:#f92672">);</span>
+        System<span style="color:#f92672">.</span><span style="color:#a6e22e">out</span><span style="color:#f92672">.</span><span style="color:#a6e22e">println</span><span style="color:#f92672">(</span>op<span style="color:#f92672">.</span><span style="color:#a6e22e">get</span><span style="color:#f92672">());</span>
 
-        schoolList.stream().map(x -&gt; x.getId()).forEach(System.out::println);
+        <span style="color:#75715e">// 相对于一个参数的方法来说，它多了一个T类型的参数；实际上就相当于需要计算的值在Stream的基础上多了一个初始化的值。
+</span><span style="color:#75715e"></span>        <span style="color:#66d9ef">int</span> count <span style="color:#f92672">=</span> schoolList<span style="color:#f92672">.</span><span style="color:#a6e22e">stream</span><span style="color:#f92672">().</span><span style="color:#a6e22e">map</span><span style="color:#f92672">(</span>x <span style="color:#f92672">-&gt;</span> x<span style="color:#f92672">.</span><span style="color:#a6e22e">getId</span><span style="color:#f92672">()).</span><span style="color:#a6e22e">reduce</span><span style="color:#f92672">(</span>2<span style="color:#f92672">,</span> <span style="color:#f92672">(</span>x<span style="color:#f92672">,</span> y<span style="color:#f92672">)</span> <span style="color:#f92672">-&gt;</span> x <span style="color:#f92672">+</span> y<span style="color:#f92672">);</span>
+        System<span style="color:#f92672">.</span><span style="color:#a6e22e">out</span><span style="color:#f92672">.</span><span style="color:#a6e22e">println</span><span style="color:#f92672">(</span>count<span style="color:#f92672">);</span>
+    <span style="color:#f92672">}</span>
+</code></pre></div><h3 id="集合常用方法">集合常用方法</h3>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-java" data-lang="java">
+        <span style="color:#75715e">// 一次性获取 avg， sum 等操作
+</span><span style="color:#75715e"></span>        DoubleSummaryStatistics doubleSummaryStatistics <span style="color:#f92672">=</span> schoolList<span style="color:#f92672">.</span><span style="color:#a6e22e">stream</span><span style="color:#f92672">()</span>
+                <span style="color:#f92672">.</span><span style="color:#a6e22e">collect</span><span style="color:#f92672">(</span>Collectors<span style="color:#f92672">.</span><span style="color:#a6e22e">summarizingDouble</span><span style="color:#f92672">(</span>School<span style="color:#f92672">::</span>getId<span style="color:#f92672">));</span>
+        System<span style="color:#f92672">.</span><span style="color:#a6e22e">out</span><span style="color:#f92672">.</span><span style="color:#a6e22e">println</span><span style="color:#f92672">(</span>doubleSummaryStatistics<span style="color:#f92672">.</span><span style="color:#a6e22e">getSum</span><span style="color:#f92672">());</span>
+        System<span style="color:#f92672">.</span><span style="color:#a6e22e">out</span><span style="color:#f92672">.</span><span style="color:#a6e22e">println</span><span style="color:#f92672">(</span>doubleSummaryStatistics<span style="color:#f92672">.</span><span style="color:#a6e22e">getAverage</span><span style="color:#f92672">());</span>
+        System<span style="color:#f92672">.</span><span style="color:#a6e22e">out</span><span style="color:#f92672">.</span><span style="color:#a6e22e">println</span><span style="color:#f92672">(</span>doubleSummaryStatistics<span style="color:#f92672">.</span><span style="color:#a6e22e">getMax</span><span style="color:#f92672">());</span>
+        System<span style="color:#f92672">.</span><span style="color:#a6e22e">out</span><span style="color:#f92672">.</span><span style="color:#a6e22e">println</span><span style="color:#f92672">(</span>doubleSummaryStatistics<span style="color:#f92672">.</span><span style="color:#a6e22e">getMin</span><span style="color:#f92672">());</span>
+        System<span style="color:#f92672">.</span><span style="color:#a6e22e">out</span><span style="color:#f92672">.</span><span style="color:#a6e22e">println</span><span style="color:#f92672">(</span>doubleSummaryStatistics<span style="color:#f92672">.</span><span style="color:#a6e22e">getCount</span><span style="color:#f92672">());</span>
 
-        Optional&lt;Integer&gt; op = schoolList.stream().map(x -&gt; x.getId()).reduce((x, y) -&gt; x + y);
-        System.out.println(op.get());
+        <span style="color:#75715e">// 连接
+</span><span style="color:#75715e"></span>        String str <span style="color:#f92672">=</span> schoolList<span style="color:#f92672">.</span><span style="color:#a6e22e">stream</span><span style="color:#f92672">().</span><span style="color:#a6e22e">map</span><span style="color:#f92672">(</span>School<span style="color:#f92672">::</span>getName<span style="color:#f92672">).</span><span style="color:#a6e22e">collect</span><span style="color:#f92672">(</span>Collectors<span style="color:#f92672">.</span><span style="color:#a6e22e">joining</span><span style="color:#f92672">(</span><span style="color:#e6db74">&#34;,&#34;</span><span style="color:#f92672">,</span> <span style="color:#e6db74">&#34;$$$&#34;</span><span style="color:#f92672">,</span> <span style="color:#e6db74">&#34;###&#34;</span><span style="color:#f92672">));</span>
+        System<span style="color:#f92672">.</span><span style="color:#a6e22e">out</span><span style="color:#f92672">.</span><span style="color:#a6e22e">println</span><span style="color:#f92672">(</span>str<span style="color:#f92672">);</span>
 
-        // 相对于一个参数的方法来说，它多了一个T类型的参数；实际上就相当于需要计算的值在Stream的基础上多了一个初始化的值。
-        int count = schoolList.stream().map(x -&gt; x.getId()).reduce(2, (x, y) -&gt; x + y);
-        System.out.println(count);
-    }
-</code></pre>
+        List<span style="color:#f92672">&lt;</span>String<span style="color:#f92672">&gt;</span> dataIdList <span style="color:#f92672">=</span> schoolList<span style="color:#f92672">.</span><span style="color:#a6e22e">stream</span><span style="color:#f92672">().</span><span style="color:#a6e22e">map</span><span style="color:#f92672">(</span>School<span style="color:#f92672">::</span>getName<span style="color:#f92672">).</span><span style="color:#a6e22e">collect</span><span style="color:#f92672">(</span>Collectors<span style="color:#f92672">.</span><span style="color:#a6e22e">toList</span><span style="color:#f92672">());</span>
+        dataIdList<span style="color:#f92672">.</span><span style="color:#a6e22e">forEach</span><span style="color:#f92672">(</span>System<span style="color:#f92672">.</span><span style="color:#a6e22e">out</span><span style="color:#f92672">::</span>println<span style="color:#f92672">);</span>
+        System<span style="color:#f92672">.</span><span style="color:#a6e22e">out</span><span style="color:#f92672">.</span><span style="color:#a6e22e">println</span><span style="color:#f92672">(</span><span style="color:#e6db74">&#34;-----------------&#34;</span><span style="color:#f92672">);</span>
 
-<h3 id="集合常用方法">集合常用方法</h3>
+        Set<span style="color:#f92672">&lt;</span>String<span style="color:#f92672">&gt;</span> dataSet <span style="color:#f92672">=</span> schoolList<span style="color:#f92672">.</span><span style="color:#a6e22e">stream</span><span style="color:#f92672">().</span><span style="color:#a6e22e">map</span><span style="color:#f92672">(</span>School<span style="color:#f92672">::</span>getName<span style="color:#f92672">).</span><span style="color:#a6e22e">collect</span><span style="color:#f92672">(</span>Collectors<span style="color:#f92672">.</span><span style="color:#a6e22e">toSet</span><span style="color:#f92672">());</span>
+        dataSet<span style="color:#f92672">.</span><span style="color:#a6e22e">forEach</span><span style="color:#f92672">(</span>System<span style="color:#f92672">.</span><span style="color:#a6e22e">out</span><span style="color:#f92672">::</span>println<span style="color:#f92672">);</span>
+        System<span style="color:#f92672">.</span><span style="color:#a6e22e">out</span><span style="color:#f92672">.</span><span style="color:#a6e22e">println</span><span style="color:#f92672">(</span><span style="color:#e6db74">&#34;-----------------&#34;</span><span style="color:#f92672">);</span>
 
-<pre><code class="language-java">
-        // 一次性获取 avg， sum 等操作
-        DoubleSummaryStatistics doubleSummaryStatistics = schoolList.stream()
-                .collect(Collectors.summarizingDouble(School::getId));
-        System.out.println(doubleSummaryStatistics.getSum());
-        System.out.println(doubleSummaryStatistics.getAverage());
-        System.out.println(doubleSummaryStatistics.getMax());
-        System.out.println(doubleSummaryStatistics.getMin());
-        System.out.println(doubleSummaryStatistics.getCount());
+        <span style="color:#75715e">// 这里转换成其他数据结构
+</span><span style="color:#75715e"></span>        HashSet<span style="color:#f92672">&lt;</span>String<span style="color:#f92672">&gt;</span> hashSet <span style="color:#f92672">=</span> schoolList<span style="color:#f92672">.</span><span style="color:#a6e22e">stream</span><span style="color:#f92672">().</span><span style="color:#a6e22e">map</span><span style="color:#f92672">(</span>School<span style="color:#f92672">::</span>getName<span style="color:#f92672">)</span>
+                <span style="color:#f92672">.</span><span style="color:#a6e22e">collect</span><span style="color:#f92672">(</span>Collectors<span style="color:#f92672">.</span><span style="color:#a6e22e">toCollection</span><span style="color:#f92672">(</span>HashSet<span style="color:#f92672">::</span><span style="color:#66d9ef">new</span><span style="color:#f92672">));</span>
+        hashSet<span style="color:#f92672">.</span><span style="color:#a6e22e">forEach</span><span style="color:#f92672">(</span>System<span style="color:#f92672">.</span><span style="color:#a6e22e">out</span><span style="color:#f92672">::</span>println<span style="color:#f92672">);</span>
 
-        // 连接
-        String str = schoolList.stream().map(School::getName).collect(Collectors.joining(&quot;,&quot;, &quot;$$$&quot;, &quot;###&quot;));
-        System.out.println(str);
+        <span style="color:#75715e">// 总数
+</span><span style="color:#75715e"></span>        Long count <span style="color:#f92672">=</span> schoolList<span style="color:#f92672">.</span><span style="color:#a6e22e">stream</span><span style="color:#f92672">().</span><span style="color:#a6e22e">collect</span><span style="color:#f92672">(</span>Collectors<span style="color:#f92672">.</span><span style="color:#a6e22e">counting</span><span style="color:#f92672">());</span>
+        System<span style="color:#f92672">.</span><span style="color:#a6e22e">out</span><span style="color:#f92672">.</span><span style="color:#a6e22e">println</span><span style="color:#f92672">(</span><span style="color:#e6db74">&#34;总数:&#34;</span> <span style="color:#f92672">+</span> count<span style="color:#f92672">);</span>
 
-        List&lt;String&gt; dataIdList = schoolList.stream().map(School::getName).collect(Collectors.toList());
-        dataIdList.forEach(System.out::println);
-        System.out.println(&quot;-----------------&quot;);
+        <span style="color:#75715e">// 平均值
+</span><span style="color:#75715e"></span>        Double avg <span style="color:#f92672">=</span> schoolList<span style="color:#f92672">.</span><span style="color:#a6e22e">stream</span><span style="color:#f92672">().</span><span style="color:#a6e22e">collect</span><span style="color:#f92672">(</span>Collectors<span style="color:#f92672">.</span><span style="color:#a6e22e">averagingDouble</span><span style="color:#f92672">(</span>School<span style="color:#f92672">::</span>getId<span style="color:#f92672">));</span>
+        System<span style="color:#f92672">.</span><span style="color:#a6e22e">out</span><span style="color:#f92672">.</span><span style="color:#a6e22e">println</span><span style="color:#f92672">(</span><span style="color:#e6db74">&#34;平均值:&#34;</span> <span style="color:#f92672">+</span> avg<span style="color:#f92672">);</span>
 
-        Set&lt;String&gt; dataSet = schoolList.stream().map(School::getName).collect(Collectors.toSet());
-        dataSet.forEach(System.out::println);
-        System.out.println(&quot;-----------------&quot;);
+        <span style="color:#75715e">// 总和
+</span><span style="color:#75715e"></span>        Double sum <span style="color:#f92672">=</span> schoolList<span style="color:#f92672">.</span><span style="color:#a6e22e">stream</span><span style="color:#f92672">().</span><span style="color:#a6e22e">collect</span><span style="color:#f92672">(</span>Collectors<span style="color:#f92672">.</span><span style="color:#a6e22e">summingDouble</span><span style="color:#f92672">(</span>School<span style="color:#f92672">::</span>getId<span style="color:#f92672">));</span>
+        System<span style="color:#f92672">.</span><span style="color:#a6e22e">out</span><span style="color:#f92672">.</span><span style="color:#a6e22e">println</span><span style="color:#f92672">(</span><span style="color:#e6db74">&#34;总和:&#34;</span> <span style="color:#f92672">+</span> sum<span style="color:#f92672">);</span>
 
-        // 这里转换成其他数据结构
-        HashSet&lt;String&gt; hashSet = schoolList.stream().map(School::getName)
-                .collect(Collectors.toCollection(HashSet::new));
-        hashSet.forEach(System.out::println);
+        <span style="color:#75715e">// 最大值
+</span><span style="color:#75715e"></span>        Optional<span style="color:#f92672">&lt;</span>School<span style="color:#f92672">&gt;</span> max <span style="color:#f92672">=</span> schoolList<span style="color:#f92672">.</span><span style="color:#a6e22e">stream</span><span style="color:#f92672">()</span>
+                <span style="color:#f92672">.</span><span style="color:#a6e22e">collect</span><span style="color:#f92672">(</span>Collectors<span style="color:#f92672">.</span><span style="color:#a6e22e">maxBy</span><span style="color:#f92672">((</span>x<span style="color:#f92672">,</span> y<span style="color:#f92672">)</span> <span style="color:#f92672">-&gt;</span> Double<span style="color:#f92672">.</span><span style="color:#a6e22e">compare</span><span style="color:#f92672">(</span>x<span style="color:#f92672">.</span><span style="color:#a6e22e">getId</span><span style="color:#f92672">(),</span> y<span style="color:#f92672">.</span><span style="color:#a6e22e">getId</span><span style="color:#f92672">())));</span>
+        System<span style="color:#f92672">.</span><span style="color:#a6e22e">out</span><span style="color:#f92672">.</span><span style="color:#a6e22e">println</span><span style="color:#f92672">(</span><span style="color:#e6db74">&#34;最大值&#34;</span> <span style="color:#f92672">+</span> max<span style="color:#f92672">.</span><span style="color:#a6e22e">get</span><span style="color:#f92672">());</span>
 
-        // 总数
-        Long count = schoolList.stream().collect(Collectors.counting());
-        System.out.println(&quot;总数:&quot; + count);
+        <span style="color:#75715e">// 最小值
+</span><span style="color:#75715e"></span>        Optional<span style="color:#f92672">&lt;</span>School<span style="color:#f92672">&gt;</span> min <span style="color:#f92672">=</span> schoolList<span style="color:#f92672">.</span><span style="color:#a6e22e">stream</span><span style="color:#f92672">()</span>
+                <span style="color:#f92672">.</span><span style="color:#a6e22e">collect</span><span style="color:#f92672">(</span>Collectors<span style="color:#f92672">.</span><span style="color:#a6e22e">minBy</span><span style="color:#f92672">((</span>x<span style="color:#f92672">,</span> y<span style="color:#f92672">)</span> <span style="color:#f92672">-&gt;</span> Double<span style="color:#f92672">.</span><span style="color:#a6e22e">compare</span><span style="color:#f92672">(</span>x<span style="color:#f92672">.</span><span style="color:#a6e22e">getId</span><span style="color:#f92672">(),</span> y<span style="color:#f92672">.</span><span style="color:#a6e22e">getId</span><span style="color:#f92672">())));</span>
+        System<span style="color:#f92672">.</span><span style="color:#a6e22e">out</span><span style="color:#f92672">.</span><span style="color:#a6e22e">println</span><span style="color:#f92672">(</span><span style="color:#e6db74">&#34;最小值&#34;</span> <span style="color:#f92672">+</span> min<span style="color:#f92672">.</span><span style="color:#a6e22e">get</span><span style="color:#f92672">());</span>
 
-        // 平均值
-        Double avg = schoolList.stream().collect(Collectors.averagingDouble(School::getId));
-        System.out.println(&quot;平均值:&quot; + avg);
+        <span style="color:#75715e">// 分组
+</span><span style="color:#75715e"></span>        Map<span style="color:#f92672">&lt;</span>String<span style="color:#f92672">,</span> List<span style="color:#f92672">&lt;</span>School<span style="color:#f92672">&gt;&gt;</span> groupData <span style="color:#f92672">=</span> schoolList<span style="color:#f92672">.</span><span style="color:#a6e22e">stream</span><span style="color:#f92672">().</span><span style="color:#a6e22e">collect</span><span style="color:#f92672">(</span>Collectors<span style="color:#f92672">.</span><span style="color:#a6e22e">groupingBy</span><span style="color:#f92672">(</span>x <span style="color:#f92672">-&gt;</span> x<span style="color:#f92672">.</span><span style="color:#a6e22e">getStatus</span><span style="color:#f92672">()));</span>
+        System<span style="color:#f92672">.</span><span style="color:#a6e22e">out</span><span style="color:#f92672">.</span><span style="color:#a6e22e">println</span><span style="color:#f92672">(</span><span style="color:#e6db74">&#34;分组:&#34;</span> <span style="color:#f92672">+</span> groupData<span style="color:#f92672">);</span>
+        <span style="color:#75715e">/***
+</span><span style="color:#75715e">         * 
+</span><span style="color:#75715e">         * 
+</span><span style="color:#75715e">         * 分组:{
+</span><span style="color:#75715e">         * 
+</span><span style="color:#75715e">         * 倒闭=[School(id=3, name=3号, address=邵阳, status=倒闭), School(id=2, name=2号,
+</span><span style="color:#75715e">         * address=西乡, status=倒闭)],
+</span><span style="color:#75715e">         * 
+</span><span style="color:#75715e">         * 开放=[School(id=0, name=5号, address=深圳, status=开放), School(id=4, name=4号,
+</span><span style="color:#75715e">         * address=保安, status=开放), School(id=50, name=5号, address=深圳, status=开放)],
+</span><span style="color:#75715e">         * 
+</span><span style="color:#75715e">         * 建设中=[School(id=1, name=1号, address=湖南, status=建设中)]
+</span><span style="color:#75715e">         * 
+</span><span style="color:#75715e">         * }
+</span><span style="color:#75715e">         * 
+</span><span style="color:#75715e">         * 
+</span><span style="color:#75715e">         * 
+</span><span style="color:#75715e">         */</span>
 
-        // 总和
-        Double sum = schoolList.stream().collect(Collectors.summingDouble(School::getId));
-        System.out.println(&quot;总和:&quot; + sum);
+        <span style="color:#75715e">// 多级分组 先按状态分组，在按id分组, 这种分组可以无限分组
+</span><span style="color:#75715e"></span>        Map<span style="color:#f92672">&lt;</span>String<span style="color:#f92672">,</span> Map<span style="color:#f92672">&lt;</span>String<span style="color:#f92672">,</span> List<span style="color:#f92672">&lt;</span>School<span style="color:#f92672">&gt;&gt;&gt;</span> data <span style="color:#f92672">=</span> schoolList<span style="color:#f92672">.</span><span style="color:#a6e22e">stream</span><span style="color:#f92672">()</span>
+                <span style="color:#f92672">.</span><span style="color:#a6e22e">collect</span><span style="color:#f92672">(</span>Collectors<span style="color:#f92672">.</span><span style="color:#a6e22e">groupingBy</span><span style="color:#f92672">(</span>School<span style="color:#f92672">::</span>getStatus<span style="color:#f92672">,</span> Collectors<span style="color:#f92672">.</span><span style="color:#a6e22e">groupingBy</span><span style="color:#f92672">((</span>x<span style="color:#f92672">)</span> <span style="color:#f92672">-&gt;</span> <span style="color:#f92672">{</span>
+                    School currentSchool <span style="color:#f92672">=</span> <span style="color:#f92672">(</span>School<span style="color:#f92672">)</span> x<span style="color:#f92672">;</span>
+                    <span style="color:#66d9ef">if</span> <span style="color:#f92672">(</span>currentSchool<span style="color:#f92672">.</span><span style="color:#a6e22e">getId</span><span style="color:#f92672">()</span> <span style="color:#f92672">&gt;</span> 3<span style="color:#f92672">)</span> <span style="color:#f92672">{</span>
+                        <span style="color:#66d9ef">return</span> <span style="color:#e6db74">&#34;幸运号码&#34;</span><span style="color:#f92672">;</span>
+                    <span style="color:#f92672">}</span> <span style="color:#66d9ef">else</span> <span style="color:#f92672">{</span>
+                        <span style="color:#66d9ef">return</span> <span style="color:#e6db74">&#34;通吃号码&#34;</span><span style="color:#f92672">;</span>
+                    <span style="color:#f92672">}</span>
 
-        // 最大值
-        Optional&lt;School&gt; max = schoolList.stream()
-                .collect(Collectors.maxBy((x, y) -&gt; Double.compare(x.getId(), y.getId())));
-        System.out.println(&quot;最大值&quot; + max.get());
+                <span style="color:#f92672">})));</span>
+        System<span style="color:#f92672">.</span><span style="color:#a6e22e">out</span><span style="color:#f92672">.</span><span style="color:#a6e22e">println</span><span style="color:#f92672">(</span><span style="color:#e6db74">&#34;多级分组:&#34;</span> <span style="color:#f92672">+</span> data<span style="color:#f92672">);</span>
+        <span style="color:#75715e">/***
+</span><span style="color:#75715e">         * 
+</span><span style="color:#75715e">         * {
+</span><span style="color:#75715e">         * 
+</span><span style="color:#75715e">         * 倒闭={通吃号码=[School(id=3, name=3号, address=邵阳, status=倒闭), School(id=2, name=2号,
+</span><span style="color:#75715e">         * address=西乡, status=倒闭)]},
+</span><span style="color:#75715e">         * 
+</span><span style="color:#75715e">         * 开放={通吃号码=[School(id=0, name=5号, address=深圳, status=开放)], 幸运号码=[School(id=4,
+</span><span style="color:#75715e">         * name=4号, address=保安, status=开放), School(id=50, name=5号, address=深圳,
+</span><span style="color:#75715e">         * status=开放)]},
+</span><span style="color:#75715e">         * 
+</span><span style="color:#75715e">         * 建设中={通吃号码=[School(id=1, name=1号, address=湖南, status=建设中)]}
+</span><span style="color:#75715e">         * 
+</span><span style="color:#75715e">         * }
+</span><span style="color:#75715e">         * 
+</span><span style="color:#75715e">         */</span>
 
-        // 最小值
-        Optional&lt;School&gt; min = schoolList.stream()
-                .collect(Collectors.minBy((x, y) -&gt; Double.compare(x.getId(), y.getId())));
-        System.out.println(&quot;最小值&quot; + min.get());
+        <span style="color:#75715e">// 分区
+</span><span style="color:#75715e"></span>        System<span style="color:#f92672">.</span><span style="color:#a6e22e">out</span><span style="color:#f92672">.</span><span style="color:#a6e22e">println</span><span style="color:#f92672">(</span><span style="color:#e6db74">&#34;分区----------------------------&#34;</span><span style="color:#f92672">);</span>
+        Map<span style="color:#f92672">&lt;</span>Boolean<span style="color:#f92672">,</span> List<span style="color:#f92672">&lt;</span>School<span style="color:#f92672">&gt;&gt;</span> map <span style="color:#f92672">=</span> schoolList<span style="color:#f92672">.</span><span style="color:#a6e22e">stream</span><span style="color:#f92672">().</span><span style="color:#a6e22e">collect</span><span style="color:#f92672">(</span>Collectors<span style="color:#f92672">.</span><span style="color:#a6e22e">partitioningBy</span><span style="color:#f92672">((</span>x<span style="color:#f92672">)</span> <span style="color:#f92672">-&gt;</span> x<span style="color:#f92672">.</span><span style="color:#a6e22e">getId</span><span style="color:#f92672">()</span> <span style="color:#f92672">&gt;</span> 4<span style="color:#f92672">));</span>
+        System<span style="color:#f92672">.</span><span style="color:#a6e22e">out</span><span style="color:#f92672">.</span><span style="color:#a6e22e">println</span><span style="color:#f92672">(</span>map<span style="color:#f92672">);</span>
+        <span style="color:#75715e">/**
+</span><span style="color:#75715e">         * 
+</span><span style="color:#75715e">         * 
+</span><span style="color:#75715e">         * {
+</span><span style="color:#75715e">         * 
+</span><span style="color:#75715e">         * false=[School(id=0, name=5号, address=深圳, status=开放), School(id=1, name=1号,
+</span><span style="color:#75715e">         * address=湖南, status=建设中), School(id=3, name=3号, address=邵阳, status=倒闭),
+</span><span style="color:#75715e">         * School(id=2, name=2号, address=西乡, status=倒闭), School(id=4, name=4号,
+</span><span style="color:#75715e">         * address=保安, status=开放)],
+</span><span style="color:#75715e">         * 
+</span><span style="color:#75715e">         * true=[School(id=50, name=5号, address=深圳, status=开放)] }
+</span><span style="color:#75715e">         * 
+</span><span style="color:#75715e">         */</span>
 
-        // 分组
-        Map&lt;String, List&lt;School&gt;&gt; groupData = schoolList.stream().collect(Collectors.groupingBy(x -&gt; x.getStatus()));
-        System.out.println(&quot;分组:&quot; + groupData);
-        /***
-         * 
-         * 
-         * 分组:{
-         * 
-         * 倒闭=[School(id=3, name=3号, address=邵阳, status=倒闭), School(id=2, name=2号,
-         * address=西乡, status=倒闭)],
-         * 
-         * 开放=[School(id=0, name=5号, address=深圳, status=开放), School(id=4, name=4号,
-         * address=保安, status=开放), School(id=50, name=5号, address=深圳, status=开放)],
-         * 
-         * 建设中=[School(id=1, name=1号, address=湖南, status=建设中)]
-         * 
-         * }
-         * 
-         * 
-         * 
-         */
-
-        // 多级分组 先按状态分组，在按id分组, 这种分组可以无限分组
-        Map&lt;String, Map&lt;String, List&lt;School&gt;&gt;&gt; data = schoolList.stream()
-                .collect(Collectors.groupingBy(School::getStatus, Collectors.groupingBy((x) -&gt; {
-                    School currentSchool = (School) x;
-                    if (currentSchool.getId() &gt; 3) {
-                        return &quot;幸运号码&quot;;
-                    } else {
-                        return &quot;通吃号码&quot;;
-                    }
-
-                })));
-        System.out.println(&quot;多级分组:&quot; + data);
-        /***
-         * 
-         * {
-         * 
-         * 倒闭={通吃号码=[School(id=3, name=3号, address=邵阳, status=倒闭), School(id=2, name=2号,
-         * address=西乡, status=倒闭)]},
-         * 
-         * 开放={通吃号码=[School(id=0, name=5号, address=深圳, status=开放)], 幸运号码=[School(id=4,
-         * name=4号, address=保安, status=开放), School(id=50, name=5号, address=深圳,
-         * status=开放)]},
-         * 
-         * 建设中={通吃号码=[School(id=1, name=1号, address=湖南, status=建设中)]}
-         * 
-         * }
-         * 
-         */
-
-        // 分区
-        System.out.println(&quot;分区----------------------------&quot;);
-        Map&lt;Boolean, List&lt;School&gt;&gt; map = schoolList.stream().collect(Collectors.partitioningBy((x) -&gt; x.getId() &gt; 4));
-        System.out.println(map);
-        /**
-         * 
-         * 
-         * {
-         * 
-         * false=[School(id=0, name=5号, address=深圳, status=开放), School(id=1, name=1号,
-         * address=湖南, status=建设中), School(id=3, name=3号, address=邵阳, status=倒闭),
-         * School(id=2, name=2号, address=西乡, status=倒闭), School(id=4, name=4号,
-         * address=保安, status=开放)],
-         * 
-         * true=[School(id=50, name=5号, address=深圳, status=开放)] }
-         * 
-         */
-
-    }
-</code></pre>
-
-<h1 id="注意">注意</h1>
-
+    <span style="color:#f92672">}</span>
+</code></pre></div><h1 id="注意">注意</h1>
 <p>在对于一个 Stream 进行多次转换操作 (Intermediate 操作)，每次都对 Stream 的每个元素进行转换，而且是执行多次，这样时间复杂度就是 N（转换次数）个 for 循环里把所有操作都做掉的总和吗？其实不是这样的，转换操作都是 lazy 的，多个转换操作只会在 Terminal 操作的时候融合起来，一次循环完成。我们可以这样简单的理解，Stream 里有个操作函数的集合，每次转换操作就是把转换函数放入这个集合中，在 Terminal 操作的时候循环 Stream 对应的集合，然后对每个元素执行所有的函数。</p>
-
 <h1 id="stream-的特性可以归纳">Stream 的特性可以归纳</h1>
-
 <ul>
 <li>不是数据结构</li>
 <li>它没有内部存储，它只是用操作管道从 source（数据结构、数组、generator function、IO channel）抓取数据。</li>
@@ -668,15 +602,15 @@ String str = stream.collect(Collectors.joining()).toString();
                 <ul class="pager">
                     
                     <li class="previous">
-                        <a href="/post/java%E5%9F%BA%E7%A1%80-java%E8%99%9A%E6%8B%9F%E6%9C%BA%E5%88%B0%E5%BA%95%E6%98%AF%E4%BB%80%E4%B9%88/" data-toggle="tooltip" data-placement="top"
-                            title="Java虚拟机到底是什么">&larr;
+                        <a href="/post/java%E5%9F%BA%E7%A1%80-jdk1.8%E6%96%B0%E7%89%B9%E6%80%A7-%E5%86%85%E7%BD%AE%E5%87%BD%E6%95%B0%E5%BC%8F%E6%8E%A5%E5%8F%A3/" data-toggle="tooltip" data-placement="top"
+                            title="Jdk1.8新特性-内置函数式接口">&larr;
                             Previous Post</a>
                     </li>
                     
                     
                     <li class="next">
-                        <a href="/post/java%E5%9F%BA%E7%A1%80-jdk1.8%E6%96%B0%E7%89%B9%E6%80%A7-%E6%96%B9%E6%B3%95%E5%BC%95%E7%94%A8/" data-toggle="tooltip" data-placement="top"
-                            title="Jdk1.8新特性-方法引用">Next
+                        <a href="/post/java%E5%9F%BA%E7%A1%80-jdk1.8%E6%96%B0%E7%89%B9%E6%80%A7-lambda%E8%A1%A8%E8%BE%BE%E5%BC%8F/" data-toggle="tooltip" data-placement="top"
+                            title="Jdk1.8新特性-Lambda表达式">Next
                             Post &rarr;</a>
                     </li>
                     
@@ -727,49 +661,36 @@ String str = stream.collect(Collectors.joining()).toString();
                     </h4>
                     <ul class="catalog-body"></ul>
                     <nav id="TableOfContents">
-<ul>
-<li><a href="#为什么需要-stream">为什么需要 Stream</a></li>
-<li><a href="#构造流的几种常见方法">构造流的几种常见方法</a>
-<ul>
-<li><a href="#数值流的构造">数值流的构造</a></li>
-</ul></li>
-<li><a href="#流转换为其它数据结构">流转换为其它数据结构</a></li>
-<li><a href="#流的操作">流的操作</a>
-<ul>
-<li><a href="#intermediate-中间操作">Intermediate(中间操作)</a>
-<ul>
-<li><a href="#常用方法">常用方法</a>
-<ul>
-<li><a href="#筛选与切片">筛选与切片</a></li>
-<li><a href="#映射">映射</a></li>
-<li><a href="#排序">排序</a></li>
-</ul></li>
-</ul></li>
-<li><a href="#terminal-最终操作">Terminal(最终操作)</a>
-<ul>
-<li><a href="#常用方法-1">常用方法</a>
-<ul>
-<li><a href="#查找与匹配">查找与匹配</a></li>
-<li><a href="#归约">归约</a></li>
-<li><a href="#收集">收集</a></li>
-</ul></li>
-</ul></li>
-<li><a href="#short-circuiting-环形">short-circuiting(环形)</a>
-<ul>
-<li><a href="#常用方法-2">常用方法</a></li>
-</ul></li>
-</ul></li>
-<li><a href="#常用实例代码">常用实例代码</a>
-<ul>
-<li><a href="#intermediate-中间操作-1">Intermediate(中间操作)</a></li>
-<li><a href="#terminal-最终操作-1">Terminal(最终操作)</a>
-<ul>
-<li><a href="#集合常用方法">集合常用方法</a></li>
-</ul></li>
-</ul></li>
-<li><a href="#注意">注意</a></li>
-<li><a href="#stream-的特性可以归纳">Stream 的特性可以归纳</a></li>
-</ul>
+  <ul>
+    <li><a href="#数值流的构造">数值流的构造</a></li>
+  </ul>
+
+  <ul>
+    <li><a href="#intermediate中间操作">Intermediate(中间操作)</a>
+      <ul>
+        <li><a href="#常用方法">常用方法</a></li>
+      </ul>
+    </li>
+    <li><a href="#terminal最终操作">Terminal(最终操作)</a>
+      <ul>
+        <li><a href="#常用方法-1">常用方法</a></li>
+      </ul>
+    </li>
+    <li><a href="#short-circuiting环形">short-circuiting(环形)</a>
+      <ul>
+        <li><a href="#常用方法-2">常用方法</a></li>
+      </ul>
+    </li>
+  </ul>
+
+  <ul>
+    <li><a href="#intermediate中间操作-1">Intermediate(中间操作)</a></li>
+    <li><a href="#terminal最终操作-1">Terminal(最终操作)</a>
+      <ul>
+        <li><a href="#集合常用方法">集合常用方法</a></li>
+      </ul>
+    </li>
+  </ul>
 </nav>
                     <br>
                     <br>
@@ -794,9 +715,6 @@ String str = stream.collect(Collectors.joining()).toString();
                         
                         
                         
-                        <a href="/tags/" title="">
-                            
-                        </a>
                         
                         
                         
@@ -806,101 +724,6 @@ String str = stream.collect(Collectors.joining()).toString();
                         
                         
                         
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        <a href="/tags/qt" title="QT">
-                            QT
-                        </a>
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        <a href="/tags/zookeeper" title="Zookeeper">
-                            Zookeeper
-                        </a>
                         
                         
                         
@@ -940,8 +763,10 @@ String str = stream.collect(Collectors.joining()).toString();
                         
                         
                         
-                        <a href="/tags/elasticsearch" title="elasticSearch">
-                            elasticSearch
+                        
+                        
+                        <a href="/tags/elasticsearch" title="elasticsearch">
+                            elasticsearch
                         </a>
                         
                         
@@ -952,9 +777,27 @@ String str = stream.collect(Collectors.joining()).toString();
                         
                         
                         
-                        <a href="/tags/golang" title="golang">
-                            golang
-                        </a>
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
                         
                         
                         
@@ -992,9 +835,21 @@ String str = stream.collect(Collectors.joining()).toString();
                         
                         
                         
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
                         <a href="/tags/jvm" title="jvm">
                             jvm
                         </a>
+                        
+                        
+                        
+                        
                         
                         
                         
@@ -1018,9 +873,19 @@ String str = stream.collect(Collectors.joining()).toString();
                         
                         
                         
+                        
+                        
+                        
+                        
+                        
+                        
                         <a href="/tags/mongodb" title="mongodb">
                             mongodb
                         </a>
+                        
+                        
+                        
+                        
                         
                         
                         
@@ -1031,10 +896,6 @@ String str = stream.collect(Collectors.joining()).toString();
                         </a>
                         
                         
-                        
-                        <a href="/tags/mycat" title="mycat">
-                            mycat
-                        </a>
                         
                         
                         
@@ -1048,9 +909,17 @@ String str = stream.collect(Collectors.joining()).toString();
                         
                         
                         
-                        <a href="/tags/nginx" title="nginx">
-                            nginx
-                        </a>
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
                         
                         
                         
@@ -1074,8 +943,22 @@ String str = stream.collect(Collectors.joining()).toString();
                         
                         
                         
+                        
+                        
                         <a href="/tags/rocketmq" title="rocketmq">
                             rocketmq
+                        </a>
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        <a href="/tags/security%E6%A1%86%E6%9E%B6%E5%AD%A6%E4%B9%A0" title="security框架学习">
+                            security框架学习
                         </a>
                         
                         
@@ -1102,17 +985,11 @@ String str = stream.collect(Collectors.joining()).toString();
                         
                         
                         
-                        <a href="/tags/springcloud" title="springCloud">
-                            springCloud
-                        </a>
-                        
-                        
-                        
-                        
-                        
                         <a href="/tags/springboot" title="springboot">
                             springboot
                         </a>
+                        
+                        
                         
                         
                         
@@ -1126,6 +1003,9 @@ String str = stream.collect(Collectors.joining()).toString();
                         
                         
                         
+                        <a href="/tags/springcloud" title="springcloud">
+                            springcloud
+                        </a>
                         
                         
                         
@@ -1151,6 +1031,33 @@ String str = stream.collect(Collectors.joining()).toString();
                         
                         
                         
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        <a href="/tags/zookeeper" title="zookeeper">
+                            zookeeper
+                        </a>
                         
                         
                         
@@ -1210,6 +1117,8 @@ String str = stream.collect(Collectors.joining()).toString();
                         
                         
                         
+                        
+                        
                         <a href="/tags/%E5%88%86%E5%B8%83%E5%BC%8F%E7%B3%BB%E5%88%97" title="分布式系列">
                             分布式系列
                         </a>
@@ -1229,6 +1138,10 @@ String str = stream.collect(Collectors.joining()).toString();
                         
                         
                         
+                        
+                        <a href="/tags/%E5%8D%8F%E8%AE%AE%E6%A0%88" title="协议栈">
+                            协议栈
+                        </a>
                         
                         
                         
@@ -1428,6 +1341,12 @@ String str = stream.collect(Collectors.joining()).toString();
                         
                         
                         
+                        
+                        
+                        
+                        
+                        
+                        
                         <a href="/tags/%E7%BD%91%E7%BB%9C%E7%BC%96%E7%A8%8B" title="网络编程">
                             网络编程
                         </a>
@@ -1451,6 +1370,10 @@ String str = stream.collect(Collectors.joining()).toString();
                         
                         
                         
+                        
+                        <a href="/tags/%E8%AE%A4%E8%AF%81%E5%92%8C%E6%8E%88%E6%9D%83" title="认证和授权">
+                            认证和授权
+                        </a>
                         
                         
                         
@@ -1621,7 +1544,7 @@ String str = stream.collect(Collectors.joining()).toString();
                     
                 </ul>
 		<p class="copyright text-muted">
-                    Copyright &copy;  2020
+                    Copyright &copy;  2021
                     <br>
                     <a href="https://themes.gohugo.io/hugo-theme-cleanwhite">CleanWhite Hugo Theme</a> by <a href="https://zhaohuabing.com">Huabing</a> |
                     <iframe

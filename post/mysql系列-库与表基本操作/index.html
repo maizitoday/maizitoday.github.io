@@ -97,15 +97,15 @@
                     </li>
                     
                     <li>
-                        <a href="/categories/english">English</a>
+                        <a href="/categories/english">english</a>
                     </li>
                     
                     <li>
-                        <a href="/categories/life">Life</a>
+                        <a href="/categories/life">life</a>
                     </li>
                     
                     <li>
-                        <a href="/categories/tech">Tech</a>
+                        <a href="/categories/tech">tech</a>
                     </li>
                     
 
@@ -237,117 +237,75 @@
                 
                 
                 
-                
-
-<p>[TOC]</p>
-
-<p><strong>转载地址：&lt;<a href="https://blog.csdn.net/jack__frost/article/details/71194208">https://blog.csdn.net/jack__frost/article/details/71194208</a></strong>&gt;</p>
-
+                <p>[TOC]</p>
+<p>**转载地址：<a href="https://blog.csdn.net/jack__frost/article/details/71194208**">https://blog.csdn.net/jack__frost/article/details/71194208**</a></p>
 <h1 id="操作数据操作语句优化认识">操作数据操作语句优化认识</h1>
-
 <p>通常情况下，当访问某张表的时候，读取者首先必须获取该表的锁，如果有写入操作到达，那么写入者一直等待读取者完成操作（查询开始之后就不能中断，因此允许读取者完成操作）。当读取者完成对表的操作的时候，锁就会被解除。如果写入者正在等待的时候，另一个读取操作到达了，该读取操作也会被阻塞（block），因为默认的调度策略是写入者优先于读取者。当第一个读取者完成操作并解放锁后，写入者开始操作，并且直到该写入者完成操作，第二个读取者才开始操作。</p>
-
 <p>通过LOCK TABLES和UNLOCK TABLES语句可以显式地获取或释放锁，但是在通常情况下，服务器的锁管理器会自动地在需要的时候获取锁，在不再需要的时候释放锁。获取的锁的类型依赖于客户端是写入还是读取操作。</p>
-
 <p><strong>因为读取操作不会改变数据，因此没有理由让某个读取者阻止其它的读取者访问这张表。故读取锁可允许其它的客户端在同一时刻读取这张表。</strong></p>
-
 <p>虽然通过锁机制，可以实现多线程同时对某个表进行操作，但当某个线程作更新操作时，首先要获得独占的访问权。在更新的过程中，所有其它想要访问这个表的线程必须要等到其更新完成为止。此时就会导致锁竞争的问题，从而导致用户等待时间的延长。<strong>这也就是NOSQL出现的原因，在高并发的情况下， 读取数据MySQL太慢。</strong></p>
-
 <p><strong>因此：要提高MySQL的更新/插入效率，应首先考虑降低锁的竞争，减少写操作的等待时间。</strong></p>
-
 <h1 id="表增删查改">表增删查改</h1>
-
 <h2 id="insert语句">INSERT语句</h2>
-
 <h3 id="用法">用法</h3>
-
-<pre><code class="language-sql">INSERT [INTO] 表名 [(字段列表)] VALUES (值列表)[, (值列表), …]
-</code></pre>
-
-<p>如果要插入的值列表包含所有字段并且顺序一致，则可以省略字段列表。</p>
-
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-sql" data-lang="sql"><span style="color:#66d9ef">INSERT</span> [<span style="color:#66d9ef">INTO</span>] <span style="color:#960050;background-color:#1e0010">表名</span> [(<span style="color:#960050;background-color:#1e0010">字段列表</span>)] <span style="color:#66d9ef">VALUES</span> (<span style="color:#960050;background-color:#1e0010">值列表</span>)[, (<span style="color:#960050;background-color:#1e0010">值列表</span>), <span style="color:#960050;background-color:#1e0010">…</span>]
+</code></pre></div><p>如果要插入的值列表包含所有字段并且顺序一致，则可以省略字段列表。</p>
 <p>可同时插入多条数据记录！</p>
-
-<pre><code class="language-sql">INSERT INTO score (change_type,score,user_id) VALUES ('吃饭',10,1),('喝茶',10,1),('喝茶',10,1);   
-</code></pre>
-
-<h3 id="优化">优化</h3>
-
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-sql" data-lang="sql"><span style="color:#66d9ef">INSERT</span> <span style="color:#66d9ef">INTO</span> score (change_type,score,user_id) <span style="color:#66d9ef">VALUES</span> (<span style="color:#e6db74">&#39;吃饭&#39;</span>,<span style="color:#ae81ff">10</span>,<span style="color:#ae81ff">1</span>),(<span style="color:#e6db74">&#39;喝茶&#39;</span>,<span style="color:#ae81ff">10</span>,<span style="color:#ae81ff">1</span>),(<span style="color:#e6db74">&#39;喝茶&#39;</span>,<span style="color:#ae81ff">10</span>,<span style="color:#ae81ff">1</span>);   
+</code></pre></div><h3 id="优化">优化</h3>
 <h4 id="批量插入">批量插入</h4>
-
 <p>例如说，如果有需要插入100000条数据，那么就需要有100000条insert语句，每一句都需要提交到关系引擎那里去解析，优化，然后才能够到达存储引擎做真的插入工作。上述所说的同时插入多条就是一种优化。（经测试，大概10条同时插入是最高效的）</p>
-
 <h4 id="顺序主键策略">顺序主键策略</h4>
-
 <p>采用顺序主键策略（例如自增主键，或者修改业务逻辑，让插入的记录尽可能顺序主键）</p>
-
 <h4 id="replace-语句代替insert">replace 语句代替insert</h4>
-
 <p>考虑使用replace 语句代替insert语句</p>
-
 <h2 id="delete语句">DELETE语句</h2>
-
 <h3 id="用法-1">用法</h3>
-
-<pre><code class="language-sql">DELETE FROM 表名[ 删除条件子句]
-</code></pre>
-
-<h3 id="truncate-table和delete语句">truncate table和delete语句</h3>
-
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-sql" data-lang="sql"><span style="color:#66d9ef">DELETE</span> <span style="color:#66d9ef">FROM</span> <span style="color:#960050;background-color:#1e0010">表名</span>[ <span style="color:#960050;background-color:#1e0010">删除条件子句</span>]
+</code></pre></div><h3 id="truncate-table和delete语句">truncate table和delete语句</h3>
 <ol>
-<li><p>truncate table速度要更快一些，但truncate删除后不记录mysql日志，不可以恢复数据。</p></li>
-
-<li><p>如果没有外键关联，innodb执行truncate是先drop table(原始表),再创建一个跟原始表一样空表,速度要远远快于delete逐条删除行记录。</p></li>
-
-<li><p>truncate table 能重新利用释放的硬盘空间。truncate table 能重新利用释放的硬盘空间,在InnoDB Plugin中，truncate table为自动回收，如果不是用InnoDB Plugin（存储引擎）,那么需要使用optimize table来优化表，释放空间。<strong>truncate table删除表后，optimize table尤其重要，特别是大数据数据库，表空间可以得到释放！</strong></p></li>
-
-<li><p>表有外键关联，truncate table删除表数据为逐行删除</p></li>
+<li>
+<p>truncate table速度要更快一些，但truncate删除后不记录mysql日志，不可以恢复数据。</p>
+</li>
+<li>
+<p>如果没有外键关联，innodb执行truncate是先drop table(原始表),再创建一个跟原始表一样空表,速度要远远快于delete逐条删除行记录。</p>
+</li>
+<li>
+<p>truncate table 能重新利用释放的硬盘空间。truncate table 能重新利用释放的硬盘空间,在InnoDB Plugin中，truncate table为自动回收，如果不是用InnoDB Plugin（存储引擎）,那么需要使用optimize table来优化表，释放空间。<strong>truncate table删除表后，optimize table尤其重要，特别是大数据数据库，表空间可以得到释放！</strong></p>
+</li>
+<li>
+<p>表有外键关联，truncate table删除表数据为逐行删除</p>
+</li>
 </ol>
-
 <h3 id="注意">注意</h3>
-
 <p>一个大的 DELETE 或 INSERT 操作，要非常小心，因为这两个操作是会锁表的，表一锁住，其他操作就进不来了。因此，我们要交给DBA去拆分，重整数据库策略，比如限制处理1000条。</p>
-
 <p><strong>MySQL官方手 册得知删除数据的速度和创建的索引数量是成正比的</strong>。所以在超大型数据库中，删除时处理好索引关系非常重要。推荐的折中方法：在删除数据之前删除这那几个索引，然后删除其中无用 数据，删除完成后重新创建索引。</p>
-
 <h2 id="update语句">UPDATE语句</h2>
-
 <h3 id="用法-2">用法</h3>
-
-<pre><code>UPDATE 表名 SET 字段名=新值[, 字段名=新值] [更新条件]
-</code></pre>
-
-<h3 id="优化-1">优化</h3>
-
+<pre tabindex="0"><code>UPDATE 表名 SET 字段名=新值[, 字段名=新值] [更新条件]
+</code></pre><h3 id="优化-1">优化</h3>
 <h4 id="更新多条记录">更新多条记录</h4>
-
-<pre><code class="language-sql">Update score  
-  SET change_type = CASE id  
-    WHEN 1 THEN 'value1'  
-    WHEN 2 THEN 'value2'  
-    WHEN 3 THEN 'value3'  
-  END  
-WHERE id IN (1,2,3)  
-</code></pre>
-
-<h4 id="更新多条记录的多个值">更新多条记录的多个值</h4>
-
-<pre><code class="language-sql">Update score  
-  SET change_type = CASE id  
-    WHEN 1 THEN 'value1'  
-    WHEN 2 THEN 'value2'  
-    WHEN 3 THEN 'value3'  
-  END , 
-    score = CASE id
-  	 WHEN 1 THEN 1
-    WHEN 2 THEN 2
-    WHEN 3 THEN 3
-  END
-WHERE id IN (1,2,3)  
-</code></pre>
-
-<h4 id="其他优化">其他优化</h4>
-
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-sql" data-lang="sql"><span style="color:#66d9ef">Update</span> score  
+  <span style="color:#66d9ef">SET</span> change_type <span style="color:#f92672">=</span> <span style="color:#66d9ef">CASE</span> id  
+    <span style="color:#66d9ef">WHEN</span> <span style="color:#ae81ff">1</span> <span style="color:#66d9ef">THEN</span> <span style="color:#e6db74">&#39;value1&#39;</span>  
+    <span style="color:#66d9ef">WHEN</span> <span style="color:#ae81ff">2</span> <span style="color:#66d9ef">THEN</span> <span style="color:#e6db74">&#39;value2&#39;</span>  
+    <span style="color:#66d9ef">WHEN</span> <span style="color:#ae81ff">3</span> <span style="color:#66d9ef">THEN</span> <span style="color:#e6db74">&#39;value3&#39;</span>  
+  <span style="color:#66d9ef">END</span>  
+<span style="color:#66d9ef">WHERE</span> id <span style="color:#66d9ef">IN</span> (<span style="color:#ae81ff">1</span>,<span style="color:#ae81ff">2</span>,<span style="color:#ae81ff">3</span>)  
+</code></pre></div><h4 id="更新多条记录的多个值">更新多条记录的多个值</h4>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-sql" data-lang="sql"><span style="color:#66d9ef">Update</span> score  
+  <span style="color:#66d9ef">SET</span> change_type <span style="color:#f92672">=</span> <span style="color:#66d9ef">CASE</span> id  
+    <span style="color:#66d9ef">WHEN</span> <span style="color:#ae81ff">1</span> <span style="color:#66d9ef">THEN</span> <span style="color:#e6db74">&#39;value1&#39;</span>  
+    <span style="color:#66d9ef">WHEN</span> <span style="color:#ae81ff">2</span> <span style="color:#66d9ef">THEN</span> <span style="color:#e6db74">&#39;value2&#39;</span>  
+    <span style="color:#66d9ef">WHEN</span> <span style="color:#ae81ff">3</span> <span style="color:#66d9ef">THEN</span> <span style="color:#e6db74">&#39;value3&#39;</span>  
+  <span style="color:#66d9ef">END</span> , 
+    score <span style="color:#f92672">=</span> <span style="color:#66d9ef">CASE</span> id
+  	 <span style="color:#66d9ef">WHEN</span> <span style="color:#ae81ff">1</span> <span style="color:#66d9ef">THEN</span> <span style="color:#ae81ff">1</span>
+    <span style="color:#66d9ef">WHEN</span> <span style="color:#ae81ff">2</span> <span style="color:#66d9ef">THEN</span> <span style="color:#ae81ff">2</span>
+    <span style="color:#66d9ef">WHEN</span> <span style="color:#ae81ff">3</span> <span style="color:#66d9ef">THEN</span> <span style="color:#ae81ff">3</span>
+  <span style="color:#66d9ef">END</span>
+<span style="color:#66d9ef">WHERE</span> id <span style="color:#66d9ef">IN</span> (<span style="color:#ae81ff">1</span>,<span style="color:#ae81ff">2</span>,<span style="color:#ae81ff">3</span>)  
+</code></pre></div><h4 id="其他优化">其他优化</h4>
 <ol>
 <li>尽量不要修改主键字段。</li>
 <li>当修改VARCHAR型字段时，尽量使用相同长度内容的值代替。</li>
@@ -356,201 +314,106 @@ WHERE id IN (1,2,3)
 <li>避免UPDATE建有很多索引的列。</li>
 <li>避免UPDATE在WHERE子句条件中的列。</li>
 </ol>
-
+<h3 id="heading"></h3>
 <h2 id="replace语句">REPLACE语句</h2>
-
 <p>例如：如果一个表在一个字段上建立了唯一索引，当向这个表中使用已经存在的键值插入一条记录，将会抛出一个主键冲突的错误。如果我们想用新记录的值来覆盖原来的记录值时，就可以使用REPLACE语句。</p>
-
 <p>使用REPLACE插入记录时，如果记录不重复（或往表里插新记录），REPLACE功能与INSERT一样，如果存在重复记录，REPLACE就使用新记录的值来替换原来的记录值。使用REPLACE的最大好处就是可以将DELETE和INSERT合二为一，形成一个原子操作。这样就可以不必考虑同时使用DELETE和INSERT时添加事务等复杂操作了。</p>
-
 <p>在使用REPLACE时，表中必须有唯一有一个PRIMARY KEY或UNIQUE索引，否则，使用一个REPLACE语句没有意义。</p>
-
 <h3 id="用法-3">用法</h3>
-
 <p>此语句的作用是向表table中插入3条记录。如果主键id为1或2不存在就相当于插入语句。</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-sql" data-lang="sql"><span style="color:#f92672">//</span><span style="color:#960050;background-color:#1e0010">含义一：与普通</span>INSERT一样功能
+<span style="color:#66d9ef">REPLACE</span> <span style="color:#66d9ef">INTO</span> score (change_type,score,user_id) <span style="color:#66d9ef">VALUES</span> (<span style="color:#e6db74">&#39;吃饭&#39;</span>,<span style="color:#ae81ff">10</span>,<span style="color:#ae81ff">1</span>),(<span style="color:#e6db74">&#39;喝茶&#39;</span>,<span style="color:#ae81ff">10</span>,<span style="color:#ae81ff">1</span>),(<span style="color:#e6db74">&#39;喝茶&#39;</span>,<span style="color:#ae81ff">10</span>,<span style="color:#ae81ff">1</span>);  
+<span style="color:#f92672">//</span><span style="color:#960050;background-color:#1e0010">含义二：找到第一条记录，用后面的值进行替换</span>
+<span style="color:#66d9ef">REPLACE</span> <span style="color:#66d9ef">INTO</span> score (id,change_type,score,user_id) <span style="color:#66d9ef">VALUES</span> (<span style="color:#ae81ff">1</span>,<span style="color:#e6db74">&#39;吃饭&#39;</span>,<span style="color:#ae81ff">10</span>,<span style="color:#ae81ff">1</span>)
 
-<pre><code class="language-sql">//含义一：与普通INSERT一样功能
-REPLACE INTO score (change_type,score,user_id) VALUES ('吃饭',10,1),('喝茶',10,1),('喝茶',10,1);  
-//含义二：找到第一条记录，用后面的值进行替换
-REPLACE INTO score (id,change_type,score,user_id) VALUES (1,'吃饭',10,1)
-
-</code></pre>
-
-<h4 id="replace-object-search-replace">replace(object, search, replace)</h4>
-
+</code></pre></div><h4 id="replaceobject-search-replace">replace(object, search, replace)</h4>
 <p>把object中出现search的全部替换为replace。</p>
-
-<pre><code class="language-sql">//用法一：并不是修改数据，而只是单纯做局部替换数据返还而已。
-SELECT REPLACE('喝茶','茶','喝')
-//结果：  喝喝
-</code></pre>
-
-<h4 id="修改表数据">修改表数据</h4>
-
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-sql" data-lang="sql"><span style="color:#f92672">//</span><span style="color:#960050;background-color:#1e0010">用法一：并不是修改数据，而只是单纯做局部替换数据返还而已。</span>
+<span style="color:#66d9ef">SELECT</span> <span style="color:#66d9ef">REPLACE</span>(<span style="color:#e6db74">&#39;喝茶&#39;</span>,<span style="color:#e6db74">&#39;茶&#39;</span>,<span style="color:#e6db74">&#39;喝&#39;</span>)
+<span style="color:#f92672">//</span><span style="color:#960050;background-color:#1e0010">结果：</span>  <span style="color:#960050;background-color:#1e0010">喝喝</span>
+</code></pre></div><h4 id="修改表数据">修改表数据</h4>
 <p>修改表数据啦，对应下面就是，根据change_type字段找到做任务的数据，用bb来替换，</p>
-
-<pre><code class="language-sql">UPDATE score SET change_type=REPLACE(change_type,'做任务','bb')
-</code></pre>
-
-<h3 id="update和replace的区别">UPDATE和REPLACE的区别</h3>
-
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-sql" data-lang="sql"><span style="color:#66d9ef">UPDATE</span> score <span style="color:#66d9ef">SET</span> change_type<span style="color:#f92672">=</span><span style="color:#66d9ef">REPLACE</span>(change_type,<span style="color:#e6db74">&#39;做任务&#39;</span>,<span style="color:#e6db74">&#39;bb&#39;</span>)
+</code></pre></div><h3 id="update和replace的区别">UPDATE和REPLACE的区别</h3>
 <ol>
 <li>UPDATE在没有匹配记录时什么都不做，而REPLACE在有重复记录时更新，在没有重复记录时插入。</li>
 <li>UPDATE可以选择性地更新记录的一部分字段。而REPLACE在发现有重复记录时就将这条记录彻底删除，再插入新的记录。也就是说，将所有的字段都更新了</li>
 </ol>
-
 <h1 id="库的基本操作">库的基本操作</h1>
-
 <h2 id="查看所有数据库以及使用数据库">查看所有数据库以及使用数据库</h2>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-sql" data-lang="sql"><span style="color:#66d9ef">show</span> databases;
 
-<pre><code class="language-sql">show databases;
-
-use table;
-</code></pre>
-
-<h2 id="查看当前数据库">查看当前数据库</h2>
-
-<pre><code class="language-sql"> select database();
-</code></pre>
-
-<h2 id="显示当前时间-用户名-数据库版本">显示当前时间、用户名、数据库版本</h2>
-
-<pre><code class="language-sql">select now(), user(), version();
-</code></pre>
-
-<h2 id="创建库">创建库</h2>
-
-<pre><code class="language-sql">create database[ if not exists] 数据库名 数据库选项
-    数据库选项：
-        CHARACTER SET charset_name
-        COLLATE collation_name		
-</code></pre>
-
-<h2 id="查看当前库信息">查看当前库信息</h2>
-
-<pre><code class="language-mysql">show create database 数据库名	
-</code></pre>
-
-<h2 id="修改库的选项信息">修改库的选项信息</h2>
-
-<pre><code class="language-sql">alter database 库名 选项信息
-</code></pre>
-
-<h2 id="删除库">删除库</h2>
-
-<pre><code class="language-sql">drop database[ if exists] 数据库名
-        同时删除该数据库相关的目录及其目录内容
-</code></pre>
-
-<h1 id="表的基本操作">表的基本操作</h1>
-
+use <span style="color:#66d9ef">table</span>;
+</code></pre></div><h2 id="查看当前数据库">查看当前数据库</h2>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-sql" data-lang="sql"> <span style="color:#66d9ef">select</span> <span style="color:#66d9ef">database</span>();
+</code></pre></div><h2 id="显示当前时间用户名数据库版本">显示当前时间、用户名、数据库版本</h2>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-sql" data-lang="sql"><span style="color:#66d9ef">select</span> now(), <span style="color:#66d9ef">user</span>(), <span style="color:#66d9ef">version</span>();
+</code></pre></div><h2 id="创建库">创建库</h2>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-sql" data-lang="sql"><span style="color:#66d9ef">create</span> <span style="color:#66d9ef">database</span>[ <span style="color:#66d9ef">if</span> <span style="color:#66d9ef">not</span> <span style="color:#66d9ef">exists</span>] <span style="color:#960050;background-color:#1e0010">数据库名</span> <span style="color:#960050;background-color:#1e0010">数据库选项</span>
+    <span style="color:#960050;background-color:#1e0010">数据库选项：</span>
+        CHARACTER <span style="color:#66d9ef">SET</span> charset_name
+        <span style="color:#66d9ef">COLLATE</span> <span style="color:#66d9ef">collation_name</span>		
+</code></pre></div><h2 id="查看当前库信息">查看当前库信息</h2>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-mysql" data-lang="mysql"><span style="color:#66d9ef">show</span> <span style="color:#66d9ef">create</span> <span style="color:#66d9ef">database</span> <span style="color:#960050;background-color:#1e0010">数据库名</span>	
+</code></pre></div><h2 id="修改库的选项信息">修改库的选项信息</h2>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-sql" data-lang="sql"><span style="color:#66d9ef">alter</span> <span style="color:#66d9ef">database</span> <span style="color:#960050;background-color:#1e0010">库名</span> <span style="color:#960050;background-color:#1e0010">选项信息</span>
+</code></pre></div><h2 id="删除库">删除库</h2>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-sql" data-lang="sql"><span style="color:#66d9ef">drop</span> <span style="color:#66d9ef">database</span>[ <span style="color:#66d9ef">if</span> <span style="color:#66d9ef">exists</span>] <span style="color:#960050;background-color:#1e0010">数据库名</span>
+        <span style="color:#960050;background-color:#1e0010">同时删除该数据库相关的目录及其目录内容</span>
+</code></pre></div><h1 id="表的基本操作">表的基本操作</h1>
 <h2 id="创建表">创建表</h2>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-sql" data-lang="sql"> <span style="color:#66d9ef">create</span> [<span style="color:#66d9ef">temporary</span>] <span style="color:#66d9ef">table</span>[ <span style="color:#66d9ef">if</span> <span style="color:#66d9ef">not</span> <span style="color:#66d9ef">exists</span>] [<span style="color:#960050;background-color:#1e0010">库名</span>.]<span style="color:#960050;background-color:#1e0010">表名</span> ( <span style="color:#960050;background-color:#1e0010">表的结构定义</span> )[ <span style="color:#960050;background-color:#1e0010">表选项</span>]
+        <span style="color:#960050;background-color:#1e0010">每个字段必须有数据类型</span>
+        <span style="color:#960050;background-color:#1e0010">最后一个字段后不能有逗号</span>
+        <span style="color:#66d9ef">temporary</span> <span style="color:#960050;background-color:#1e0010">临时表，会话结束时表自动消失</span>
+        <span style="color:#960050;background-color:#1e0010">对于字段的定义：</span>
+            <span style="color:#960050;background-color:#1e0010">字段名</span> <span style="color:#960050;background-color:#1e0010">数据类型</span> [<span style="color:#66d9ef">NOT</span> <span style="color:#66d9ef">NULL</span> <span style="color:#f92672">|</span> <span style="color:#66d9ef">NULL</span>] [<span style="color:#66d9ef">DEFAULT</span> default_value] [AUTO_INCREMENT] [<span style="color:#66d9ef">UNIQUE</span> [<span style="color:#66d9ef">KEY</span>] <span style="color:#f92672">|</span> [<span style="color:#66d9ef">PRIMARY</span>] <span style="color:#66d9ef">KEY</span>] [<span style="color:#66d9ef">COMMENT</span> <span style="color:#e6db74">&#39;string&#39;</span>]
 
-<pre><code class="language-sql"> create [temporary] table[ if not exists] [库名.]表名 ( 表的结构定义 )[ 表选项]
-        每个字段必须有数据类型
-        最后一个字段后不能有逗号
-        temporary 临时表，会话结束时表自动消失
-        对于字段的定义：
-            字段名 数据类型 [NOT NULL | NULL] [DEFAULT default_value] [AUTO_INCREMENT] [UNIQUE [KEY] | [PRIMARY] KEY] [COMMENT 'string']
-
-</code></pre>
-
-<h2 id="表的选项">表的选项</h2>
-
+</code></pre></div><h2 id="表的选项">表的选项</h2>
 <h3 id="删除列">删除列</h3>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-sql" data-lang="sql"><span style="color:#66d9ef">ALTER</span> <span style="color:#66d9ef">TABLE</span> <span style="color:#960050;background-color:#1e0010">【表名字】</span> <span style="color:#66d9ef">DROP</span> <span style="color:#960050;background-color:#1e0010">【列名称】</span>
 
-<pre><code class="language-sql">ALTER TABLE 【表名字】 DROP 【列名称】
+</code></pre></div><h3 id="增加列">增加列</h3>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-sql" data-lang="sql"><span style="color:#66d9ef">ALTER</span> <span style="color:#66d9ef">TABLE</span> <span style="color:#960050;background-color:#1e0010">【表名字】</span> <span style="color:#66d9ef">ADD</span> <span style="color:#960050;background-color:#1e0010">【列名称】</span> INT <span style="color:#66d9ef">NOT</span> <span style="color:#66d9ef">NULL</span> <span style="color:#66d9ef">COMMENT</span> <span style="color:#960050;background-color:#1e0010">‘注释说明’</span>
 
-</code></pre>
+</code></pre></div><h3 id="修改列的类型信息">修改列的类型信息</h3>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-sql" data-lang="sql"><span style="color:#66d9ef">ALTER</span> <span style="color:#66d9ef">TABLE</span> <span style="color:#960050;background-color:#1e0010">【表名字】</span> CHANGE <span style="color:#960050;background-color:#1e0010">【列名称】【新列名称（这里可以用和原来列同名即可）】</span> BIGINT <span style="color:#66d9ef">NOT</span> <span style="color:#66d9ef">NULL</span> <span style="color:#66d9ef">COMMENT</span> <span style="color:#960050;background-color:#1e0010">‘注释说明’</span>
+</code></pre></div><h3 id="重命名列">重命名列</h3>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-sql" data-lang="sql"><span style="color:#66d9ef">ALTER</span> <span style="color:#66d9ef">TABLE</span> <span style="color:#960050;background-color:#1e0010">【表名字】</span> CHANGE <span style="color:#960050;background-color:#1e0010">【列名称】【新列名称】</span> BIGINT <span style="color:#66d9ef">NOT</span> <span style="color:#66d9ef">NULL</span> <span style="color:#66d9ef">COMMENT</span> <span style="color:#960050;background-color:#1e0010">‘注释说明’</span>
+</code></pre></div><h3 id="重命名表">重命名表</h3>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-sql" data-lang="sql"><span style="color:#66d9ef">ALTER</span> <span style="color:#66d9ef">TABLE</span> <span style="color:#960050;background-color:#1e0010">【表名字】</span> <span style="color:#66d9ef">RENAME</span> <span style="color:#960050;background-color:#1e0010">【表新名字】</span>
+</code></pre></div><h3 id="删除表中主键">删除表中主键</h3>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-sql" data-lang="sql"><span style="color:#66d9ef">Alter</span> <span style="color:#66d9ef">TABLE</span> <span style="color:#960050;background-color:#1e0010">【表名字】</span> <span style="color:#66d9ef">drop</span> <span style="color:#66d9ef">primary</span> <span style="color:#66d9ef">key</span>
+</code></pre></div><h3 id="添加主键">添加主键</h3>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-sql" data-lang="sql"><span style="color:#66d9ef">ALTER</span> <span style="color:#66d9ef">TABLE</span> sj_resource_charges <span style="color:#66d9ef">ADD</span> <span style="color:#66d9ef">CONSTRAINT</span> PK_SJ_RESOURCE_CHARGES <span style="color:#66d9ef">PRIMARY</span> <span style="color:#66d9ef">KEY</span> (resid,resfromid)
+</code></pre></div><h3 id="添加索引">添加索引</h3>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-sql" data-lang="sql"><span style="color:#66d9ef">ALTER</span> <span style="color:#66d9ef">TABLE</span> sj_resource_charges <span style="color:#66d9ef">add</span> <span style="color:#66d9ef">index</span> INDEX_NAME (name);
+</code></pre></div><h3 id="添加唯一限制条件索引">添加唯一限制条件索引</h3>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-sql" data-lang="sql"><span style="color:#66d9ef">ALTER</span> <span style="color:#66d9ef">TABLE</span> sj_resource_charges <span style="color:#66d9ef">add</span> <span style="color:#66d9ef">unique</span> emp_name2(cardnumber);
+</code></pre></div><h3 id="删除索引">删除索引</h3>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-sql" data-lang="sql"><span style="color:#66d9ef">Alter</span> <span style="color:#66d9ef">table</span> tablename <span style="color:#66d9ef">drop</span> <span style="color:#66d9ef">index</span> emp_name;
+</code></pre></div><h2 id="查看所有表">查看所有表</h2>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-sql" data-lang="sql"><span style="color:#66d9ef">SHOW</span> TABLES<span style="color:#960050;background-color:#1e0010">；</span>
 
-<h3 id="增加列">增加列</h3>
-
-<pre><code class="language-sql">ALTER TABLE 【表名字】 ADD 【列名称】 INT NOT NULL COMMENT ‘注释说明’
-
-</code></pre>
-
-<h3 id="修改列的类型信息">修改列的类型信息</h3>
-
-<pre><code class="language-sql">ALTER TABLE 【表名字】 CHANGE 【列名称】【新列名称（这里可以用和原来列同名即可）】 BIGINT NOT NULL COMMENT ‘注释说明’
-</code></pre>
-
-<h3 id="重命名列">重命名列</h3>
-
-<pre><code class="language-sql">ALTER TABLE 【表名字】 CHANGE 【列名称】【新列名称】 BIGINT NOT NULL COMMENT ‘注释说明’
-</code></pre>
-
-<h3 id="重命名表">重命名表</h3>
-
-<pre><code class="language-sql">ALTER TABLE 【表名字】 RENAME 【表新名字】
-</code></pre>
-
-<h3 id="删除表中主键">删除表中主键</h3>
-
-<pre><code class="language-sql">Alter TABLE 【表名字】 drop primary key
-</code></pre>
-
-<h3 id="添加主键">添加主键</h3>
-
-<pre><code class="language-sql">ALTER TABLE sj_resource_charges ADD CONSTRAINT PK_SJ_RESOURCE_CHARGES PRIMARY KEY (resid,resfromid)
-</code></pre>
-
-<h3 id="添加索引">添加索引</h3>
-
-<pre><code class="language-sql">ALTER TABLE sj_resource_charges add index INDEX_NAME (name);
-</code></pre>
-
-<h3 id="添加唯一限制条件索引">添加唯一限制条件索引</h3>
-
-<pre><code class="language-sql">ALTER TABLE sj_resource_charges add unique emp_name2(cardnumber);
-</code></pre>
-
-<h3 id="删除索引">删除索引</h3>
-
-<pre><code class="language-sql">Alter table tablename drop index emp_name;
-</code></pre>
-
-<h2 id="查看所有表">查看所有表</h2>
-
-<pre><code class="language-sql">SHOW TABLES；
-
-</code></pre>
-
-<h2 id="查看表机构">查看表机构</h2>
-
-<pre><code class="language-sql"> SHOW CREATE TABLE 表名    （信息更详细）
-    DESC 表名 / DESCRIBE 表名 / EXPLAIN 表名 / SHOW COLUMNS FROM 表名 [LIKE 'PATTERN']
-    SHOW TABLE STATUS [FROM db_name] [LIKE 'pattern']
+</code></pre></div><h2 id="查看表机构">查看表机构</h2>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-sql" data-lang="sql"> <span style="color:#66d9ef">SHOW</span> <span style="color:#66d9ef">CREATE</span> <span style="color:#66d9ef">TABLE</span> <span style="color:#960050;background-color:#1e0010">表名</span>    <span style="color:#960050;background-color:#1e0010">（信息更详细）</span>
+    <span style="color:#66d9ef">DESC</span> <span style="color:#960050;background-color:#1e0010">表名</span> <span style="color:#f92672">/</span> <span style="color:#66d9ef">DESCRIBE</span> <span style="color:#960050;background-color:#1e0010">表名</span> <span style="color:#f92672">/</span> <span style="color:#66d9ef">EXPLAIN</span> <span style="color:#960050;background-color:#1e0010">表名</span> <span style="color:#f92672">/</span> <span style="color:#66d9ef">SHOW</span> COLUMNS <span style="color:#66d9ef">FROM</span> <span style="color:#960050;background-color:#1e0010">表名</span> [<span style="color:#66d9ef">LIKE</span> <span style="color:#e6db74">&#39;PATTERN&#39;</span>]
+    <span style="color:#66d9ef">SHOW</span> <span style="color:#66d9ef">TABLE</span> STATUS [<span style="color:#66d9ef">FROM</span> db_name] [<span style="color:#66d9ef">LIKE</span> <span style="color:#e6db74">&#39;pattern&#39;</span>]
 
 
-</code></pre>
-
-<h2 id="修改表-对表进行重命名">修改表：对表进行重命名</h2>
-
-<pre><code class="language-sql">RENAME TABLE 原表名 TO 新表名
-        RENAME TABLE 原表名 TO 库名.表名    （可将表移动到另一个数据库）
-        -- RENAME可以交换两个表名
-</code></pre>
-
-<h2 id="删除表">删除表</h2>
-
-<pre><code class="language-sql">DROP TABLE[ IF EXISTS] 表名
-</code></pre>
-
-<h2 id="清空表数据">清空表数据</h2>
-
-<pre><code class="language-sql">TRUNCATE [TABLE] 表名
-</code></pre>
-
-<h2 id="复制表结构">复制表结构</h2>
-
-<pre><code class="language-sql">CREATE TABLE 表名 [AS] SELECT * FROM 要复制的表名
-</code></pre>
-
-<h2 id="添加自增长">添加自增长</h2>
-
-<pre><code class="language-sql">alter table tablename modify id int(11)  auto_increment;
-</code></pre>
-
+</code></pre></div><h2 id="修改表对表进行重命名">修改表：对表进行重命名</h2>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-sql" data-lang="sql"><span style="color:#66d9ef">RENAME</span> <span style="color:#66d9ef">TABLE</span> <span style="color:#960050;background-color:#1e0010">原表名</span> <span style="color:#66d9ef">TO</span> <span style="color:#960050;background-color:#1e0010">新表名</span>
+        <span style="color:#66d9ef">RENAME</span> <span style="color:#66d9ef">TABLE</span> <span style="color:#960050;background-color:#1e0010">原表名</span> <span style="color:#66d9ef">TO</span> <span style="color:#960050;background-color:#1e0010">库名</span>.<span style="color:#960050;background-color:#1e0010">表名</span>    <span style="color:#960050;background-color:#1e0010">（可将表移动到另一个数据库）</span>
+        <span style="color:#75715e">-- RENAME可以交换两个表名
+</span></code></pre></div><h2 id="删除表">删除表</h2>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-sql" data-lang="sql"><span style="color:#66d9ef">DROP</span> <span style="color:#66d9ef">TABLE</span>[ <span style="color:#66d9ef">IF</span> <span style="color:#66d9ef">EXISTS</span>] <span style="color:#960050;background-color:#1e0010">表名</span>
+</code></pre></div><h2 id="清空表数据">清空表数据</h2>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-sql" data-lang="sql"><span style="color:#66d9ef">TRUNCATE</span> [<span style="color:#66d9ef">TABLE</span>] <span style="color:#960050;background-color:#1e0010">表名</span>
+</code></pre></div><h2 id="复制表结构">复制表结构</h2>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-sql" data-lang="sql"><span style="color:#66d9ef">CREATE</span> <span style="color:#66d9ef">TABLE</span> <span style="color:#960050;background-color:#1e0010">表名</span> [<span style="color:#66d9ef">AS</span>] <span style="color:#66d9ef">SELECT</span> <span style="color:#f92672">*</span> <span style="color:#66d9ef">FROM</span> <span style="color:#960050;background-color:#1e0010">要复制的表名</span>
+</code></pre></div><h2 id="添加自增长">添加自增长</h2>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-sql" data-lang="sql"><span style="color:#66d9ef">alter</span> <span style="color:#66d9ef">table</span> tablename <span style="color:#66d9ef">modify</span> id int(<span style="color:#ae81ff">11</span>)  auto_increment;
+</code></pre></div>
 
                 
                 
@@ -657,81 +520,69 @@ use table;
                     </h4>
                     <ul class="catalog-body"></ul>
                     <nav id="TableOfContents">
-<ul>
-<li><a href="#操作数据操作语句优化认识">操作数据操作语句优化认识</a></li>
-<li><a href="#表增删查改">表增删查改</a>
-<ul>
-<li><a href="#insert语句">INSERT语句</a>
-<ul>
-<li><a href="#用法">用法</a></li>
-<li><a href="#优化">优化</a>
-<ul>
-<li><a href="#批量插入">批量插入</a></li>
-<li><a href="#顺序主键策略">顺序主键策略</a></li>
-<li><a href="#replace-语句代替insert">replace 语句代替insert</a></li>
-</ul></li>
-</ul></li>
-<li><a href="#delete语句">DELETE语句</a>
-<ul>
-<li><a href="#用法-1">用法</a></li>
-<li><a href="#truncate-table和delete语句">truncate table和delete语句</a></li>
-<li><a href="#注意">注意</a></li>
-</ul></li>
-<li><a href="#update语句">UPDATE语句</a>
-<ul>
-<li><a href="#用法-2">用法</a></li>
-<li><a href="#优化-1">优化</a>
-<ul>
-<li><a href="#更新多条记录">更新多条记录</a></li>
-<li><a href="#更新多条记录的多个值">更新多条记录的多个值</a></li>
-<li><a href="#其他优化">其他优化</a></li>
-</ul></li>
-</ul></li>
-<li><a href="#replace语句">REPLACE语句</a>
-<ul>
-<li><a href="#用法-3">用法</a>
-<ul>
-<li><a href="#replace-object-search-replace">replace(object, search, replace)</a></li>
-<li><a href="#修改表数据">修改表数据</a></li>
-</ul></li>
-<li><a href="#update和replace的区别">UPDATE和REPLACE的区别</a></li>
-</ul></li>
-</ul></li>
-<li><a href="#库的基本操作">库的基本操作</a>
-<ul>
-<li><a href="#查看所有数据库以及使用数据库">查看所有数据库以及使用数据库</a></li>
-<li><a href="#查看当前数据库">查看当前数据库</a></li>
-<li><a href="#显示当前时间-用户名-数据库版本">显示当前时间、用户名、数据库版本</a></li>
-<li><a href="#创建库">创建库</a></li>
-<li><a href="#查看当前库信息">查看当前库信息</a></li>
-<li><a href="#修改库的选项信息">修改库的选项信息</a></li>
-<li><a href="#删除库">删除库</a></li>
-</ul></li>
-<li><a href="#表的基本操作">表的基本操作</a>
-<ul>
-<li><a href="#创建表">创建表</a></li>
-<li><a href="#表的选项">表的选项</a>
-<ul>
-<li><a href="#删除列">删除列</a></li>
-<li><a href="#增加列">增加列</a></li>
-<li><a href="#修改列的类型信息">修改列的类型信息</a></li>
-<li><a href="#重命名列">重命名列</a></li>
-<li><a href="#重命名表">重命名表</a></li>
-<li><a href="#删除表中主键">删除表中主键</a></li>
-<li><a href="#添加主键">添加主键</a></li>
-<li><a href="#添加索引">添加索引</a></li>
-<li><a href="#添加唯一限制条件索引">添加唯一限制条件索引</a></li>
-<li><a href="#删除索引">删除索引</a></li>
-</ul></li>
-<li><a href="#查看所有表">查看所有表</a></li>
-<li><a href="#查看表机构">查看表机构</a></li>
-<li><a href="#修改表-对表进行重命名">修改表：对表进行重命名</a></li>
-<li><a href="#删除表">删除表</a></li>
-<li><a href="#清空表数据">清空表数据</a></li>
-<li><a href="#复制表结构">复制表结构</a></li>
-<li><a href="#添加自增长">添加自增长</a></li>
-</ul></li>
-</ul>
+  <ul>
+    <li><a href="#insert语句">INSERT语句</a>
+      <ul>
+        <li><a href="#用法">用法</a></li>
+        <li><a href="#优化">优化</a></li>
+      </ul>
+    </li>
+    <li><a href="#delete语句">DELETE语句</a>
+      <ul>
+        <li><a href="#用法-1">用法</a></li>
+        <li><a href="#truncate-table和delete语句">truncate table和delete语句</a></li>
+        <li><a href="#注意">注意</a></li>
+      </ul>
+    </li>
+    <li><a href="#update语句">UPDATE语句</a>
+      <ul>
+        <li><a href="#用法-2">用法</a></li>
+        <li><a href="#优化-1">优化</a></li>
+        <li><a href="#heading"></a></li>
+      </ul>
+    </li>
+    <li><a href="#replace语句">REPLACE语句</a>
+      <ul>
+        <li><a href="#用法-3">用法</a></li>
+        <li><a href="#update和replace的区别">UPDATE和REPLACE的区别</a></li>
+      </ul>
+    </li>
+  </ul>
+
+  <ul>
+    <li><a href="#查看所有数据库以及使用数据库">查看所有数据库以及使用数据库</a></li>
+    <li><a href="#查看当前数据库">查看当前数据库</a></li>
+    <li><a href="#显示当前时间用户名数据库版本">显示当前时间、用户名、数据库版本</a></li>
+    <li><a href="#创建库">创建库</a></li>
+    <li><a href="#查看当前库信息">查看当前库信息</a></li>
+    <li><a href="#修改库的选项信息">修改库的选项信息</a></li>
+    <li><a href="#删除库">删除库</a></li>
+  </ul>
+
+  <ul>
+    <li><a href="#创建表">创建表</a></li>
+    <li><a href="#表的选项">表的选项</a>
+      <ul>
+        <li><a href="#删除列">删除列</a></li>
+        <li><a href="#增加列">增加列</a></li>
+        <li><a href="#修改列的类型信息">修改列的类型信息</a></li>
+        <li><a href="#重命名列">重命名列</a></li>
+        <li><a href="#重命名表">重命名表</a></li>
+        <li><a href="#删除表中主键">删除表中主键</a></li>
+        <li><a href="#添加主键">添加主键</a></li>
+        <li><a href="#添加索引">添加索引</a></li>
+        <li><a href="#添加唯一限制条件索引">添加唯一限制条件索引</a></li>
+        <li><a href="#删除索引">删除索引</a></li>
+      </ul>
+    </li>
+    <li><a href="#查看所有表">查看所有表</a></li>
+    <li><a href="#查看表机构">查看表机构</a></li>
+    <li><a href="#修改表对表进行重命名">修改表：对表进行重命名</a></li>
+    <li><a href="#删除表">删除表</a></li>
+    <li><a href="#清空表数据">清空表数据</a></li>
+    <li><a href="#复制表结构">复制表结构</a></li>
+    <li><a href="#添加自增长">添加自增长</a></li>
+  </ul>
 </nav>
                     <br>
                     <br>
@@ -756,9 +607,6 @@ use table;
                         
                         
                         
-                        <a href="/tags/" title="">
-                            
-                        </a>
                         
                         
                         
@@ -768,101 +616,6 @@ use table;
                         
                         
                         
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        <a href="/tags/qt" title="QT">
-                            QT
-                        </a>
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        <a href="/tags/zookeeper" title="Zookeeper">
-                            Zookeeper
-                        </a>
                         
                         
                         
@@ -902,8 +655,10 @@ use table;
                         
                         
                         
-                        <a href="/tags/elasticsearch" title="elasticSearch">
-                            elasticSearch
+                        
+                        
+                        <a href="/tags/elasticsearch" title="elasticsearch">
+                            elasticsearch
                         </a>
                         
                         
@@ -914,9 +669,27 @@ use table;
                         
                         
                         
-                        <a href="/tags/golang" title="golang">
-                            golang
-                        </a>
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
                         
                         
                         
@@ -954,9 +727,21 @@ use table;
                         
                         
                         
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
                         <a href="/tags/jvm" title="jvm">
                             jvm
                         </a>
+                        
+                        
+                        
+                        
                         
                         
                         
@@ -980,9 +765,19 @@ use table;
                         
                         
                         
+                        
+                        
+                        
+                        
+                        
+                        
                         <a href="/tags/mongodb" title="mongodb">
                             mongodb
                         </a>
+                        
+                        
+                        
+                        
                         
                         
                         
@@ -993,10 +788,6 @@ use table;
                         </a>
                         
                         
-                        
-                        <a href="/tags/mycat" title="mycat">
-                            mycat
-                        </a>
                         
                         
                         
@@ -1010,9 +801,17 @@ use table;
                         
                         
                         
-                        <a href="/tags/nginx" title="nginx">
-                            nginx
-                        </a>
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
                         
                         
                         
@@ -1036,8 +835,22 @@ use table;
                         
                         
                         
+                        
+                        
                         <a href="/tags/rocketmq" title="rocketmq">
                             rocketmq
+                        </a>
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        <a href="/tags/security%E6%A1%86%E6%9E%B6%E5%AD%A6%E4%B9%A0" title="security框架学习">
+                            security框架学习
                         </a>
                         
                         
@@ -1064,17 +877,11 @@ use table;
                         
                         
                         
-                        <a href="/tags/springcloud" title="springCloud">
-                            springCloud
-                        </a>
-                        
-                        
-                        
-                        
-                        
                         <a href="/tags/springboot" title="springboot">
                             springboot
                         </a>
+                        
+                        
                         
                         
                         
@@ -1088,6 +895,9 @@ use table;
                         
                         
                         
+                        <a href="/tags/springcloud" title="springcloud">
+                            springcloud
+                        </a>
                         
                         
                         
@@ -1113,6 +923,33 @@ use table;
                         
                         
                         
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        <a href="/tags/zookeeper" title="zookeeper">
+                            zookeeper
+                        </a>
                         
                         
                         
@@ -1172,6 +1009,8 @@ use table;
                         
                         
                         
+                        
+                        
                         <a href="/tags/%E5%88%86%E5%B8%83%E5%BC%8F%E7%B3%BB%E5%88%97" title="分布式系列">
                             分布式系列
                         </a>
@@ -1191,6 +1030,10 @@ use table;
                         
                         
                         
+                        
+                        <a href="/tags/%E5%8D%8F%E8%AE%AE%E6%A0%88" title="协议栈">
+                            协议栈
+                        </a>
                         
                         
                         
@@ -1390,6 +1233,12 @@ use table;
                         
                         
                         
+                        
+                        
+                        
+                        
+                        
+                        
                         <a href="/tags/%E7%BD%91%E7%BB%9C%E7%BC%96%E7%A8%8B" title="网络编程">
                             网络编程
                         </a>
@@ -1413,6 +1262,10 @@ use table;
                         
                         
                         
+                        
+                        <a href="/tags/%E8%AE%A4%E8%AF%81%E5%92%8C%E6%8E%88%E6%9D%83" title="认证和授权">
+                            认证和授权
+                        </a>
                         
                         
                         
@@ -1583,7 +1436,7 @@ use table;
                     
                 </ul>
 		<p class="copyright text-muted">
-                    Copyright &copy;  2020
+                    Copyright &copy;  2021
                     <br>
                     <a href="https://themes.gohugo.io/hugo-theme-cleanwhite">CleanWhite Hugo Theme</a> by <a href="https://zhaohuabing.com">Huabing</a> |
                     <iframe

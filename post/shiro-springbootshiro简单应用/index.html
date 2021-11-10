@@ -97,15 +97,15 @@
                     </li>
                     
                     <li>
-                        <a href="/categories/english">English</a>
+                        <a href="/categories/english">english</a>
                     </li>
                     
                     <li>
-                        <a href="/categories/life">Life</a>
+                        <a href="/categories/life">life</a>
                     </li>
                     
                     <li>
-                        <a href="/categories/tech">Tech</a>
+                        <a href="/categories/tech">tech</a>
                     </li>
                     
 
@@ -237,283 +237,257 @@
                 
                 
                 
-                
-
-<p>[TOC]</p>
-
+                <p>[TOC]</p>
 <h1 id="简述">简述</h1>
-
 <p>实现SpringBoot和shiro的整合，不同的权限出现不同的页面的效果。 实现登录认证和授权处理。</p>
+<h1 id="pomxml">pom.xml</h1>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-xml" data-lang="xml"><span style="color:#f92672">&lt;dependency&gt;</span>
+  <span style="color:#f92672">&lt;groupId&gt;</span>org.apache.shiro<span style="color:#f92672">&lt;/groupId&gt;</span>
+  <span style="color:#f92672">&lt;artifactId&gt;</span>shiro-spring-boot-starter<span style="color:#f92672">&lt;/artifactId&gt;</span>
+  <span style="color:#f92672">&lt;version&gt;</span>1.4.1<span style="color:#f92672">&lt;/version&gt;</span>
+<span style="color:#f92672">&lt;/dependency&gt;</span>
 
-<h1 id="pom-xml">pom.xml</h1>
+<span style="color:#f92672">&lt;dependency&gt;</span>
+  <span style="color:#f92672">&lt;groupId&gt;</span>com.github.theborakompanioni<span style="color:#f92672">&lt;/groupId&gt;</span>
+  <span style="color:#f92672">&lt;artifactId&gt;</span>thymeleaf-extras-shiro<span style="color:#f92672">&lt;/artifactId&gt;</span>
+  <span style="color:#f92672">&lt;version&gt;</span>2.0.0<span style="color:#f92672">&lt;/version&gt;</span>
+<span style="color:#f92672">&lt;/dependency&gt;</span>
+</code></pre></div><h1 id="shiroconfig包含相关基础组件">ShiroConfig包含相关基础组件</h1>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-java" data-lang="java"><span style="color:#a6e22e">@Configuration</span>
+<span style="color:#66d9ef">public</span> <span style="color:#66d9ef">class</span> <span style="color:#a6e22e">ShiroConfig</span> <span style="color:#f92672">{</span>
 
-<pre><code class="language-xml">&lt;dependency&gt;
-  &lt;groupId&gt;org.apache.shiro&lt;/groupId&gt;
-  &lt;artifactId&gt;shiro-spring-boot-starter&lt;/artifactId&gt;
-  &lt;version&gt;1.4.1&lt;/version&gt;
-&lt;/dependency&gt;
+    <span style="color:#a6e22e">@Bean</span>
+    <span style="color:#66d9ef">public</span> ShiroFilterFactoryBean <span style="color:#a6e22e">shiroFilterFactory</span><span style="color:#f92672">(</span><span style="color:#a6e22e">@Qualifier</span><span style="color:#f92672">(</span><span style="color:#e6db74">&#34;securityManager&#34;</span><span style="color:#f92672">)</span> DefaultWebSecurityManager securityManager<span style="color:#f92672">)</span> <span style="color:#f92672">{</span>
+        ShiroFilterFactoryBean shiroFilterFactory <span style="color:#f92672">=</span> <span style="color:#66d9ef">new</span> ShiroFilterFactoryBean<span style="color:#f92672">();</span>
+        shiroFilterFactory<span style="color:#f92672">.</span><span style="color:#a6e22e">setSecurityManager</span><span style="color:#f92672">(</span>securityManager<span style="color:#f92672">);</span>
 
-&lt;dependency&gt;
-  &lt;groupId&gt;com.github.theborakompanioni&lt;/groupId&gt;
-  &lt;artifactId&gt;thymeleaf-extras-shiro&lt;/artifactId&gt;
-  &lt;version&gt;2.0.0&lt;/version&gt;
-&lt;/dependency&gt;
-</code></pre>
+        <span style="color:#75715e">/****
+</span><span style="color:#75715e">         * 
+</span><span style="color:#75715e">         * shiro内置过滤器，可以实现权限相关的拦截器 
+</span><span style="color:#75715e">         * 常用的过滤器 
+</span><span style="color:#75715e">         * anon: 无需认证（登录）可以访问 
+</span><span style="color:#75715e">         * authc: 必须认证才可以访问
+</span><span style="color:#75715e">         * user:如果使用rememberMe的功能可以直接访问 
+</span><span style="color:#75715e">         * perms: 该资源必须得到资源权限才可以访问 
+</span><span style="color:#75715e">         * role: 该资源必须得到角色权限才可以访问
+</span><span style="color:#75715e">         * 
+</span><span style="color:#75715e">         */</span>
 
-<h1 id="shiroconfig包含相关基础组件">ShiroConfig包含相关基础组件</h1>
+        Map<span style="color:#f92672">&lt;</span>String<span style="color:#f92672">,</span> String<span style="color:#f92672">&gt;</span> filtermap <span style="color:#f92672">=</span> <span style="color:#66d9ef">new</span> LinkedHashMap<span style="color:#f92672">&lt;</span>String<span style="color:#f92672">,</span> String<span style="color:#f92672">&gt;();</span>
+        filtermap<span style="color:#f92672">.</span><span style="color:#a6e22e">put</span><span style="color:#f92672">(</span><span style="color:#e6db74">&#34;/addUser&#34;</span><span style="color:#f92672">,</span> <span style="color:#e6db74">&#34;perms[user:addUser]&#34;</span><span style="color:#f92672">);</span>
+        filtermap<span style="color:#f92672">.</span><span style="color:#a6e22e">put</span><span style="color:#f92672">(</span><span style="color:#e6db74">&#34;/listUser&#34;</span><span style="color:#f92672">,</span> <span style="color:#e6db74">&#34;perms[user:listUser]&#34;</span><span style="color:#f92672">);</span>
+        shiroFilterFactory<span style="color:#f92672">.</span><span style="color:#a6e22e">setFilterChainDefinitionMap</span><span style="color:#f92672">(</span>filtermap<span style="color:#f92672">);</span>
 
-<pre><code class="language-java">@Configuration
-public class ShiroConfig {
+        <span style="color:#75715e">/**
+</span><span style="color:#75715e">         * 修改返回登录页面地址
+</span><span style="color:#75715e">         */</span>
+        shiroFilterFactory<span style="color:#f92672">.</span><span style="color:#a6e22e">setLoginUrl</span><span style="color:#f92672">(</span><span style="color:#e6db74">&#34;login&#34;</span><span style="color:#f92672">);</span>
 
-    @Bean
-    public ShiroFilterFactoryBean shiroFilterFactory(@Qualifier(&quot;securityManager&quot;) DefaultWebSecurityManager securityManager) {
-        ShiroFilterFactoryBean shiroFilterFactory = new ShiroFilterFactoryBean();
-        shiroFilterFactory.setSecurityManager(securityManager);
+        <span style="color:#75715e">/***
+</span><span style="color:#75715e">         * 设置未授权页面
+</span><span style="color:#75715e">         */</span>
+        shiroFilterFactory<span style="color:#f92672">.</span><span style="color:#a6e22e">setUnauthorizedUrl</span><span style="color:#f92672">(</span><span style="color:#e6db74">&#34;noAuthor&#34;</span><span style="color:#f92672">);</span>
+        <span style="color:#66d9ef">return</span> shiroFilterFactory<span style="color:#f92672">;</span>
+    <span style="color:#f92672">}</span>
 
-        /****
-         * 
-         * shiro内置过滤器，可以实现权限相关的拦截器 
-         * 常用的过滤器 
-         * anon: 无需认证（登录）可以访问 
-         * authc: 必须认证才可以访问
-         * user:如果使用rememberMe的功能可以直接访问 
-         * perms: 该资源必须得到资源权限才可以访问 
-         * role: 该资源必须得到角色权限才可以访问
-         * 
-         */
+    <span style="color:#a6e22e">@Bean</span><span style="color:#f92672">(</span>name <span style="color:#f92672">=</span> <span style="color:#e6db74">&#34;securityManager&#34;</span><span style="color:#f92672">)</span>
+    <span style="color:#66d9ef">public</span> DefaultWebSecurityManager <span style="color:#a6e22e">getDefaultWebSecurityManager</span><span style="color:#f92672">(</span><span style="color:#a6e22e">@Qualifier</span><span style="color:#f92672">(</span><span style="color:#e6db74">&#34;userRealm&#34;</span><span style="color:#f92672">)</span> UserRealm userRealm<span style="color:#f92672">)</span> <span style="color:#f92672">{</span>
+        DefaultWebSecurityManager securityManager <span style="color:#f92672">=</span> <span style="color:#66d9ef">new</span> DefaultWebSecurityManager<span style="color:#f92672">();</span>
+        securityManager<span style="color:#f92672">.</span><span style="color:#a6e22e">setRealm</span><span style="color:#f92672">(</span>userRealm<span style="color:#f92672">);</span>
+        <span style="color:#66d9ef">return</span> securityManager<span style="color:#f92672">;</span>
+    <span style="color:#f92672">}</span>
 
-        Map&lt;String, String&gt; filtermap = new LinkedHashMap&lt;String, String&gt;();
-        filtermap.put(&quot;/addUser&quot;, &quot;perms[user:addUser]&quot;);
-        filtermap.put(&quot;/listUser&quot;, &quot;perms[user:listUser]&quot;);
-        shiroFilterFactory.setFilterChainDefinitionMap(filtermap);
+    <span style="color:#a6e22e">@Bean</span><span style="color:#f92672">(</span>name <span style="color:#f92672">=</span> <span style="color:#e6db74">&#34;userRealm&#34;</span><span style="color:#f92672">)</span>
+    <span style="color:#66d9ef">public</span> UserRealm <span style="color:#a6e22e">getRealm</span><span style="color:#f92672">()</span> <span style="color:#f92672">{</span>
+        UserRealm userRealm <span style="color:#f92672">=</span> <span style="color:#66d9ef">new</span> UserRealm<span style="color:#f92672">();</span>
+        <span style="color:#66d9ef">return</span> userRealm<span style="color:#f92672">;</span>
+    <span style="color:#f92672">}</span>
 
-        /**
-         * 修改返回登录页面地址
-         */
-        shiroFilterFactory.setLoginUrl(&quot;login&quot;);
+    <span style="color:#75715e">/**
+</span><span style="color:#75715e">     * 用于处理在网页中使用标签
+</span><span style="color:#75715e">     * @return
+</span><span style="color:#75715e">     */</span>
+    <span style="color:#a6e22e">@Bean</span>
+    <span style="color:#66d9ef">public</span> ShiroDialect <span style="color:#a6e22e">getDialect</span><span style="color:#f92672">()</span> <span style="color:#f92672">{</span>
 
-        /***
-         * 设置未授权页面
-         */
-        shiroFilterFactory.setUnauthorizedUrl(&quot;noAuthor&quot;);
-        return shiroFilterFactory;
-    }
+        <span style="color:#66d9ef">return</span> <span style="color:#66d9ef">new</span> ShiroDialect<span style="color:#f92672">();</span>
+    <span style="color:#f92672">}</span>
 
-    @Bean(name = &quot;securityManager&quot;)
-    public DefaultWebSecurityManager getDefaultWebSecurityManager(@Qualifier(&quot;userRealm&quot;) UserRealm userRealm) {
-        DefaultWebSecurityManager securityManager = new DefaultWebSecurityManager();
-        securityManager.setRealm(userRealm);
-        return securityManager;
-    }
+<span style="color:#f92672">}</span>
+</code></pre></div><h1 id="自定义userrealm">自定义UserRealm</h1>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-java" data-lang="java"><span style="color:#66d9ef">public</span> <span style="color:#66d9ef">class</span> <span style="color:#a6e22e">UserRealm</span> <span style="color:#66d9ef">extends</span> AuthorizingRealm <span style="color:#f92672">{</span>
 
-    @Bean(name = &quot;userRealm&quot;)
-    public UserRealm getRealm() {
-        UserRealm userRealm = new UserRealm();
-        return userRealm;
-    }
+    <span style="color:#a6e22e">@Override</span>
+    <span style="color:#66d9ef">protected</span> AuthorizationInfo <span style="color:#a6e22e">doGetAuthorizationInfo</span><span style="color:#f92672">(</span>PrincipalCollection arg0<span style="color:#f92672">)</span> <span style="color:#f92672">{</span>
+        System<span style="color:#f92672">.</span><span style="color:#a6e22e">out</span><span style="color:#f92672">.</span><span style="color:#a6e22e">println</span><span style="color:#f92672">(</span><span style="color:#e6db74">&#34;执行授权逻辑&#34;</span><span style="color:#f92672">);</span>
+        SimpleAuthorizationInfo authorizationInfo <span style="color:#f92672">=</span> <span style="color:#66d9ef">new</span> SimpleAuthorizationInfo<span style="color:#f92672">();</span>
+        Subject subject <span style="color:#f92672">=</span> SecurityUtils<span style="color:#f92672">.</span><span style="color:#a6e22e">getSubject</span><span style="color:#f92672">();</span>
+        User user <span style="color:#f92672">=</span> <span style="color:#f92672">(</span>User<span style="color:#f92672">)</span> subject<span style="color:#f92672">.</span><span style="color:#a6e22e">getPrincipal</span><span style="color:#f92672">();</span>
+        authorizationInfo<span style="color:#f92672">.</span><span style="color:#a6e22e">addStringPermission</span><span style="color:#f92672">(</span>user<span style="color:#f92672">.</span><span style="color:#a6e22e">getPermission</span><span style="color:#f92672">());</span>
+        <span style="color:#66d9ef">return</span> authorizationInfo<span style="color:#f92672">;</span>
+    <span style="color:#f92672">}</span>
 
-    /**
-     * 用于处理在网页中使用标签
-     * @return
-     */
-    @Bean
-    public ShiroDialect getDialect() {
+    <span style="color:#a6e22e">@Override</span>
+    <span style="color:#66d9ef">protected</span> AuthenticationInfo <span style="color:#a6e22e">doGetAuthenticationInfo</span><span style="color:#f92672">(</span>AuthenticationToken arg0<span style="color:#f92672">)</span> <span style="color:#66d9ef">throws</span> AuthenticationException <span style="color:#f92672">{</span>
+        System<span style="color:#f92672">.</span><span style="color:#a6e22e">out</span><span style="color:#f92672">.</span><span style="color:#a6e22e">println</span><span style="color:#f92672">(</span><span style="color:#e6db74">&#34;执行认证逻辑&#34;</span><span style="color:#f92672">);</span>
 
-        return new ShiroDialect();
-    }
+        <span style="color:#75715e">// 数据库中查询出来用户名和密码
+</span><span style="color:#75715e"></span>        String addUsername <span style="color:#f92672">=</span> <span style="color:#e6db74">&#34;1&#34;</span><span style="color:#f92672">;</span>
+        String listUsername <span style="color:#f92672">=</span> <span style="color:#e6db74">&#34;2&#34;</span><span style="color:#f92672">;</span>
+        String password <span style="color:#f92672">=</span> <span style="color:#e6db74">&#34;123&#34;</span><span style="color:#f92672">;</span>
 
-}
-</code></pre>
-
-<h1 id="自定义userrealm">自定义UserRealm</h1>
-
-<pre><code class="language-java">public class UserRealm extends AuthorizingRealm {
-
-    @Override
-    protected AuthorizationInfo doGetAuthorizationInfo(PrincipalCollection arg0) {
-        System.out.println(&quot;执行授权逻辑&quot;);
-        SimpleAuthorizationInfo authorizationInfo = new SimpleAuthorizationInfo();
-        Subject subject = SecurityUtils.getSubject();
-        User user = (User) subject.getPrincipal();
-        authorizationInfo.addStringPermission(user.getPermission());
-        return authorizationInfo;
-    }
-
-    @Override
-    protected AuthenticationInfo doGetAuthenticationInfo(AuthenticationToken arg0) throws AuthenticationException {
-        System.out.println(&quot;执行认证逻辑&quot;);
-
-        // 数据库中查询出来用户名和密码
-        String addUsername = &quot;1&quot;;
-        String listUsername = &quot;2&quot;;
-        String password = &quot;123&quot;;
-
-        UsernamePasswordToken token = (UsernamePasswordToken) arg0;
-        if (!token.getUsername().equals(addUsername) &amp;&amp; !token.getUsername().equals(listUsername)) {
-            return null; // 抛出 UnknownAccountException 异常
-        }
+        UsernamePasswordToken token <span style="color:#f92672">=</span> <span style="color:#f92672">(</span>UsernamePasswordToken<span style="color:#f92672">)</span> arg0<span style="color:#f92672">;</span>
+        <span style="color:#66d9ef">if</span> <span style="color:#f92672">(!</span>token<span style="color:#f92672">.</span><span style="color:#a6e22e">getUsername</span><span style="color:#f92672">().</span><span style="color:#a6e22e">equals</span><span style="color:#f92672">(</span>addUsername<span style="color:#f92672">)</span> <span style="color:#f92672">&amp;&amp;</span> <span style="color:#f92672">!</span>token<span style="color:#f92672">.</span><span style="color:#a6e22e">getUsername</span><span style="color:#f92672">().</span><span style="color:#a6e22e">equals</span><span style="color:#f92672">(</span>listUsername<span style="color:#f92672">))</span> <span style="color:#f92672">{</span>
+            <span style="color:#66d9ef">return</span> <span style="color:#66d9ef">null</span><span style="color:#f92672">;</span> <span style="color:#75715e">// 抛出 UnknownAccountException 异常
+</span><span style="color:#75715e"></span>        <span style="color:#f92672">}</span>
 
 
-        User user = new User();
-        if (token.getUsername().equals(&quot;1&quot;)) {
-            String permission = &quot;user:addUser&quot;;
-            user.setUsername(addUsername);
-            user.setPassword(password);
-            user.setPermission(permission);
-        } else if (token.getUsername().equals(&quot;2&quot;)) {
-            String permission = &quot;user:listUser&quot;;
-            user.setUsername(addUsername);
-            user.setPassword(password);
-            user.setPermission(permission);
-        }
-        // info 会和 token对象进行匹配密码，如果不对，抛出异常处理。
-        SimpleAuthenticationInfo info = new SimpleAuthenticationInfo(user, password, &quot;&quot;);
-        return info;
-    }
+        User user <span style="color:#f92672">=</span> <span style="color:#66d9ef">new</span> User<span style="color:#f92672">();</span>
+        <span style="color:#66d9ef">if</span> <span style="color:#f92672">(</span>token<span style="color:#f92672">.</span><span style="color:#a6e22e">getUsername</span><span style="color:#f92672">().</span><span style="color:#a6e22e">equals</span><span style="color:#f92672">(</span><span style="color:#e6db74">&#34;1&#34;</span><span style="color:#f92672">))</span> <span style="color:#f92672">{</span>
+            String permission <span style="color:#f92672">=</span> <span style="color:#e6db74">&#34;user:addUser&#34;</span><span style="color:#f92672">;</span>
+            user<span style="color:#f92672">.</span><span style="color:#a6e22e">setUsername</span><span style="color:#f92672">(</span>addUsername<span style="color:#f92672">);</span>
+            user<span style="color:#f92672">.</span><span style="color:#a6e22e">setPassword</span><span style="color:#f92672">(</span>password<span style="color:#f92672">);</span>
+            user<span style="color:#f92672">.</span><span style="color:#a6e22e">setPermission</span><span style="color:#f92672">(</span>permission<span style="color:#f92672">);</span>
+        <span style="color:#f92672">}</span> <span style="color:#66d9ef">else</span> <span style="color:#66d9ef">if</span> <span style="color:#f92672">(</span>token<span style="color:#f92672">.</span><span style="color:#a6e22e">getUsername</span><span style="color:#f92672">().</span><span style="color:#a6e22e">equals</span><span style="color:#f92672">(</span><span style="color:#e6db74">&#34;2&#34;</span><span style="color:#f92672">))</span> <span style="color:#f92672">{</span>
+            String permission <span style="color:#f92672">=</span> <span style="color:#e6db74">&#34;user:listUser&#34;</span><span style="color:#f92672">;</span>
+            user<span style="color:#f92672">.</span><span style="color:#a6e22e">setUsername</span><span style="color:#f92672">(</span>addUsername<span style="color:#f92672">);</span>
+            user<span style="color:#f92672">.</span><span style="color:#a6e22e">setPassword</span><span style="color:#f92672">(</span>password<span style="color:#f92672">);</span>
+            user<span style="color:#f92672">.</span><span style="color:#a6e22e">setPermission</span><span style="color:#f92672">(</span>permission<span style="color:#f92672">);</span>
+        <span style="color:#f92672">}</span>
+        <span style="color:#75715e">// info 会和 token对象进行匹配密码，如果不对，抛出异常处理。
+</span><span style="color:#75715e"></span>        SimpleAuthenticationInfo info <span style="color:#f92672">=</span> <span style="color:#66d9ef">new</span> SimpleAuthenticationInfo<span style="color:#f92672">(</span>user<span style="color:#f92672">,</span> password<span style="color:#f92672">,</span> <span style="color:#e6db74">&#34;&#34;</span><span style="color:#f92672">);</span>
+        <span style="color:#66d9ef">return</span> info<span style="color:#f92672">;</span>
+    <span style="color:#f92672">}</span>
 
-}
-</code></pre>
+<span style="color:#f92672">}</span>
+</code></pre></div><h1 id="测试controller">测试Controller</h1>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-java" data-lang="java"><span style="color:#a6e22e">@Controller</span>
+<span style="color:#66d9ef">public</span> <span style="color:#66d9ef">class</span> <span style="color:#a6e22e">LoginController</span> <span style="color:#f92672">{</span>
 
-<h1 id="测试controller">测试Controller</h1>
+    <span style="color:#a6e22e">@GetMapping</span><span style="color:#f92672">(</span>value <span style="color:#f92672">=</span> <span style="color:#e6db74">&#34;index&#34;</span><span style="color:#f92672">)</span>
+    <span style="color:#66d9ef">public</span> String <span style="color:#a6e22e">showMsg</span><span style="color:#f92672">(</span>Model model<span style="color:#f92672">)</span> <span style="color:#f92672">{</span>
+        model<span style="color:#f92672">.</span><span style="color:#a6e22e">addAttribute</span><span style="color:#f92672">(</span><span style="color:#e6db74">&#34;index&#34;</span><span style="color:#f92672">,</span> <span style="color:#e6db74">&#34;首页&#34;</span><span style="color:#f92672">);</span>
+        <span style="color:#66d9ef">return</span> <span style="color:#e6db74">&#34;index&#34;</span><span style="color:#f92672">;</span>
+    <span style="color:#f92672">}</span>
 
-<pre><code class="language-java">@Controller
-public class LoginController {
+    <span style="color:#a6e22e">@GetMapping</span><span style="color:#f92672">(</span>value <span style="color:#f92672">=</span> <span style="color:#e6db74">&#34;addUser&#34;</span><span style="color:#f92672">)</span>
+    <span style="color:#66d9ef">public</span> String <span style="color:#a6e22e">addUser</span><span style="color:#f92672">()</span> <span style="color:#f92672">{</span>
 
-    @GetMapping(value = &quot;index&quot;)
-    public String showMsg(Model model) {
-        model.addAttribute(&quot;index&quot;, &quot;首页&quot;);
-        return &quot;index&quot;;
-    }
+        <span style="color:#66d9ef">return</span> <span style="color:#e6db74">&#34;/user/addUser&#34;</span><span style="color:#f92672">;</span>
+    <span style="color:#f92672">}</span>
 
-    @GetMapping(value = &quot;addUser&quot;)
-    public String addUser() {
+    <span style="color:#a6e22e">@GetMapping</span><span style="color:#f92672">(</span>value <span style="color:#f92672">=</span> <span style="color:#e6db74">&#34;listUser&#34;</span><span style="color:#f92672">)</span>
+    <span style="color:#66d9ef">public</span> String <span style="color:#a6e22e">listUser</span><span style="color:#f92672">()</span> <span style="color:#f92672">{</span>
 
-        return &quot;/user/addUser&quot;;
-    }
+        <span style="color:#66d9ef">return</span> <span style="color:#e6db74">&#34;/user/listUser&#34;</span><span style="color:#f92672">;</span>
+    <span style="color:#f92672">}</span>
 
-    @GetMapping(value = &quot;listUser&quot;)
-    public String listUser() {
+    <span style="color:#a6e22e">@GetMapping</span><span style="color:#f92672">(</span>value <span style="color:#f92672">=</span> <span style="color:#e6db74">&#34;login&#34;</span><span style="color:#f92672">)</span>
+    <span style="color:#66d9ef">public</span> String <span style="color:#a6e22e">login</span><span style="color:#f92672">()</span> <span style="color:#f92672">{</span>
 
-        return &quot;/user/listUser&quot;;
-    }
+        <span style="color:#66d9ef">return</span> <span style="color:#e6db74">&#34;/login&#34;</span><span style="color:#f92672">;</span>
+    <span style="color:#f92672">}</span>
 
-    @GetMapping(value = &quot;login&quot;)
-    public String login() {
-
-        return &quot;/login&quot;;
-    }
-
-    @GetMapping(value = &quot;noAuthor&quot;)
-    public String unauthorizedUrl( Model model) {
-        model.addAttribute(&quot;msg&quot;, &quot;授权不通过&quot;);
-        return &quot;/noAuthor&quot;;
-    }
+    <span style="color:#a6e22e">@GetMapping</span><span style="color:#f92672">(</span>value <span style="color:#f92672">=</span> <span style="color:#e6db74">&#34;noAuthor&#34;</span><span style="color:#f92672">)</span>
+    <span style="color:#66d9ef">public</span> String <span style="color:#a6e22e">unauthorizedUrl</span><span style="color:#f92672">(</span> Model model<span style="color:#f92672">)</span> <span style="color:#f92672">{</span>
+        model<span style="color:#f92672">.</span><span style="color:#a6e22e">addAttribute</span><span style="color:#f92672">(</span><span style="color:#e6db74">&#34;msg&#34;</span><span style="color:#f92672">,</span> <span style="color:#e6db74">&#34;授权不通过&#34;</span><span style="color:#f92672">);</span>
+        <span style="color:#66d9ef">return</span> <span style="color:#e6db74">&#34;/noAuthor&#34;</span><span style="color:#f92672">;</span>
+    <span style="color:#f92672">}</span>
 
     
 
-    @GetMapping(value = &quot;loginAction&quot;)
-    public String loginAction(String username, String password, Model model) {
-        Subject subject = SecurityUtils.getSubject();
-        UsernamePasswordToken token = new UsernamePasswordToken(username, password);
-        token.setRememberMe(true);
-        try {
-            subject.login(token);
-            // 登录成功后， 需要认证的页面就可以登录进入了。 
-            model.addAttribute(&quot;msg&quot;, &quot;登录成功&quot;);
-        } catch (UnknownAccountException e) {
-            model.addAttribute(&quot;msg&quot;, &quot;用户名不存在&quot;);
-            return &quot;/login&quot;;
-        } catch (IncorrectCredentialsException e) {
-            model.addAttribute(&quot;msg&quot;, &quot;密码错误&quot;);
-            return &quot;/login&quot;;
-        }
-        return &quot;/index&quot;;
-    }
-}
-</code></pre>
+    <span style="color:#a6e22e">@GetMapping</span><span style="color:#f92672">(</span>value <span style="color:#f92672">=</span> <span style="color:#e6db74">&#34;loginAction&#34;</span><span style="color:#f92672">)</span>
+    <span style="color:#66d9ef">public</span> String <span style="color:#a6e22e">loginAction</span><span style="color:#f92672">(</span>String username<span style="color:#f92672">,</span> String password<span style="color:#f92672">,</span> Model model<span style="color:#f92672">)</span> <span style="color:#f92672">{</span>
+        Subject subject <span style="color:#f92672">=</span> SecurityUtils<span style="color:#f92672">.</span><span style="color:#a6e22e">getSubject</span><span style="color:#f92672">();</span>
+        UsernamePasswordToken token <span style="color:#f92672">=</span> <span style="color:#66d9ef">new</span> UsernamePasswordToken<span style="color:#f92672">(</span>username<span style="color:#f92672">,</span> password<span style="color:#f92672">);</span>
+        token<span style="color:#f92672">.</span><span style="color:#a6e22e">setRememberMe</span><span style="color:#f92672">(</span><span style="color:#66d9ef">true</span><span style="color:#f92672">);</span>
+        <span style="color:#66d9ef">try</span> <span style="color:#f92672">{</span>
+            subject<span style="color:#f92672">.</span><span style="color:#a6e22e">login</span><span style="color:#f92672">(</span>token<span style="color:#f92672">);</span>
+            <span style="color:#75715e">// 登录成功后， 需要认证的页面就可以登录进入了。 
+</span><span style="color:#75715e"></span>            model<span style="color:#f92672">.</span><span style="color:#a6e22e">addAttribute</span><span style="color:#f92672">(</span><span style="color:#e6db74">&#34;msg&#34;</span><span style="color:#f92672">,</span> <span style="color:#e6db74">&#34;登录成功&#34;</span><span style="color:#f92672">);</span>
+        <span style="color:#f92672">}</span> <span style="color:#66d9ef">catch</span> <span style="color:#f92672">(</span>UnknownAccountException e<span style="color:#f92672">)</span> <span style="color:#f92672">{</span>
+            model<span style="color:#f92672">.</span><span style="color:#a6e22e">addAttribute</span><span style="color:#f92672">(</span><span style="color:#e6db74">&#34;msg&#34;</span><span style="color:#f92672">,</span> <span style="color:#e6db74">&#34;用户名不存在&#34;</span><span style="color:#f92672">);</span>
+            <span style="color:#66d9ef">return</span> <span style="color:#e6db74">&#34;/login&#34;</span><span style="color:#f92672">;</span>
+        <span style="color:#f92672">}</span> <span style="color:#66d9ef">catch</span> <span style="color:#f92672">(</span>IncorrectCredentialsException e<span style="color:#f92672">)</span> <span style="color:#f92672">{</span>
+            model<span style="color:#f92672">.</span><span style="color:#a6e22e">addAttribute</span><span style="color:#f92672">(</span><span style="color:#e6db74">&#34;msg&#34;</span><span style="color:#f92672">,</span> <span style="color:#e6db74">&#34;密码错误&#34;</span><span style="color:#f92672">);</span>
+            <span style="color:#66d9ef">return</span> <span style="color:#e6db74">&#34;/login&#34;</span><span style="color:#f92672">;</span>
+        <span style="color:#f92672">}</span>
+        <span style="color:#66d9ef">return</span> <span style="color:#e6db74">&#34;/index&#34;</span><span style="color:#f92672">;</span>
+    <span style="color:#f92672">}</span>
+<span style="color:#f92672">}</span>
+</code></pre></div><h1 id="相关页面">相关页面</h1>
+<h2 id="indexhtml">index.html</h2>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-html" data-lang="html"><span style="color:#75715e">&lt;!DOCTYPE html&gt;</span>
+&lt;<span style="color:#f92672">html</span>&gt;
 
-<h1 id="相关页面">相关页面</h1>
+&lt;<span style="color:#f92672">head</span>&gt;
+    &lt;<span style="color:#f92672">meta</span> <span style="color:#a6e22e">charset</span><span style="color:#f92672">=</span><span style="color:#e6db74">&#34;UTF-8&#34;</span>&gt;
+    &lt;<span style="color:#f92672">title</span>&gt;Insert title here&lt;/<span style="color:#f92672">title</span>&gt;
+    &lt;<span style="color:#f92672">script</span> <span style="color:#a6e22e">type</span><span style="color:#f92672">=</span><span style="color:#e6db74">&#34;text/javascript&#34;</span>&gt;&lt;/<span style="color:#f92672">script</span>&gt;
+&lt;/<span style="color:#f92672">head</span>&gt;
 
-<h2 id="index-html">index.html</h2>
-
-<pre><code class="language-html">&lt;!DOCTYPE html&gt;
-&lt;html&gt;
-
-&lt;head&gt;
-    &lt;meta charset=&quot;UTF-8&quot;&gt;
-    &lt;title&gt;Insert title here&lt;/title&gt;
-    &lt;script type=&quot;text/javascript&quot;&gt;&lt;/script&gt;
-&lt;/head&gt;
-
-&lt;body&gt;
-    &lt;h th:text=&quot;${msg}&quot; style=&quot;color:red&quot;&gt;&lt;/h&gt;&lt;br /&gt;&lt;br /&gt;
+&lt;<span style="color:#f92672">body</span>&gt;
+    &lt;<span style="color:#f92672">h</span> <span style="color:#a6e22e">th:text</span><span style="color:#f92672">=</span><span style="color:#e6db74">&#34;${msg}&#34;</span> <span style="color:#a6e22e">style</span><span style="color:#f92672">=</span><span style="color:#e6db74">&#34;color:red&#34;</span>&gt;&lt;/<span style="color:#f92672">h</span>&gt;&lt;<span style="color:#f92672">br</span> /&gt;&lt;<span style="color:#f92672">br</span> /&gt;
 
 
-    &lt;a href=&quot;login&quot;&gt;登录&lt;/a&gt;&lt;br /&gt;&lt;br /&gt;&lt;br /&gt;
+    &lt;<span style="color:#f92672">a</span> <span style="color:#a6e22e">href</span><span style="color:#f92672">=</span><span style="color:#e6db74">&#34;login&#34;</span>&gt;登录&lt;/<span style="color:#f92672">a</span>&gt;&lt;<span style="color:#f92672">br</span> /&gt;&lt;<span style="color:#f92672">br</span> /&gt;&lt;<span style="color:#f92672">br</span> /&gt;
 
 
-    &lt;div shiro:hasPermission=&quot;user:addUser&quot;&gt;
-        &lt;a href=&quot;addUser&quot;&gt;用户添加&lt;/a&gt;&lt;br /&gt;&lt;br /&gt;&lt;br /&gt;
-    &lt;/div&gt;
+    &lt;<span style="color:#f92672">div</span> <span style="color:#a6e22e">shiro:hasPermission</span><span style="color:#f92672">=</span><span style="color:#e6db74">&#34;user:addUser&#34;</span>&gt;
+        &lt;<span style="color:#f92672">a</span> <span style="color:#a6e22e">href</span><span style="color:#f92672">=</span><span style="color:#e6db74">&#34;addUser&#34;</span>&gt;用户添加&lt;/<span style="color:#f92672">a</span>&gt;&lt;<span style="color:#f92672">br</span> /&gt;&lt;<span style="color:#f92672">br</span> /&gt;&lt;<span style="color:#f92672">br</span> /&gt;
+    &lt;/<span style="color:#f92672">div</span>&gt;
 
-    &lt;div shiro:hasPermission=&quot;user:listUser&quot;&gt;
-        &lt;a href=&quot;listUser&quot;&gt;用户列表&lt;/a&gt;
-    &lt;/div&gt;
+    &lt;<span style="color:#f92672">div</span> <span style="color:#a6e22e">shiro:hasPermission</span><span style="color:#f92672">=</span><span style="color:#e6db74">&#34;user:listUser&#34;</span>&gt;
+        &lt;<span style="color:#f92672">a</span> <span style="color:#a6e22e">href</span><span style="color:#f92672">=</span><span style="color:#e6db74">&#34;listUser&#34;</span>&gt;用户列表&lt;/<span style="color:#f92672">a</span>&gt;
+    &lt;/<span style="color:#f92672">div</span>&gt;
 
 
-&lt;/body&gt;
+&lt;/<span style="color:#f92672">body</span>&gt;
 
-&lt;/html&gt;
-</code></pre>
+&lt;/<span style="color:#f92672">html</span>&gt;
+</code></pre></div><h2 id="loginhtml">login.html</h2>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-html" data-lang="html"><span style="color:#75715e">&lt;!DOCTYPE html&gt;</span>
+&lt;<span style="color:#f92672">html</span>&gt;
 
-<h2 id="login-html">login.html</h2>
+&lt;<span style="color:#f92672">head</span>&gt;
+    &lt;<span style="color:#f92672">meta</span> <span style="color:#a6e22e">charset</span><span style="color:#f92672">=</span><span style="color:#e6db74">&#34;UTF-8&#34;</span>&gt;
+    &lt;<span style="color:#f92672">title</span>&gt;Insert title here&lt;/<span style="color:#f92672">title</span>&gt;
+    &lt;<span style="color:#f92672">script</span> <span style="color:#a6e22e">type</span><span style="color:#f92672">=</span><span style="color:#e6db74">&#34;text/javascript&#34;</span>&gt;&lt;/<span style="color:#f92672">script</span>&gt;
+&lt;/<span style="color:#f92672">head</span>&gt;
 
-<pre><code class="language-html">&lt;!DOCTYPE html&gt;
-&lt;html&gt;
+&lt;<span style="color:#f92672">body</span>&gt;
+    &lt;<span style="color:#f92672">div</span> <span style="color:#a6e22e">id</span><span style="color:#f92672">=</span><span style="color:#e6db74">&#34;mydiv&#34;</span> <span style="color:#a6e22e">align</span><span style="color:#f92672">=</span><span style="color:#e6db74">&#34;center&#34;</span>&gt;
+        &lt;<span style="color:#f92672">h</span>&gt;我是登录页面&lt;/<span style="color:#f92672">h</span>&gt;
 
-&lt;head&gt;
-    &lt;meta charset=&quot;UTF-8&quot;&gt;
-    &lt;title&gt;Insert title here&lt;/title&gt;
-    &lt;script type=&quot;text/javascript&quot;&gt;&lt;/script&gt;
-&lt;/head&gt;
+        &lt;<span style="color:#f92672">form</span> <span style="color:#a6e22e">id</span><span style="color:#f92672">=</span><span style="color:#e6db74">&#34;myform&#34;</span> <span style="color:#a6e22e">action</span><span style="color:#f92672">=</span><span style="color:#e6db74">&#34;loginAction&#34;</span>&gt;
+            用户名:&lt;<span style="color:#f92672">input</span> <span style="color:#a6e22e">type</span><span style="color:#f92672">=</span><span style="color:#e6db74">&#34;text&#34;</span> <span style="color:#a6e22e">name</span><span style="color:#f92672">=</span><span style="color:#e6db74">&#34;username&#34;</span> /&gt;&lt;<span style="color:#f92672">br</span> /&gt;
+            密码:&lt;<span style="color:#f92672">input</span> <span style="color:#a6e22e">type</span><span style="color:#f92672">=</span><span style="color:#e6db74">&#34;text&#34;</span> <span style="color:#a6e22e">name</span><span style="color:#f92672">=</span><span style="color:#e6db74">&#34;password&#34;</span> /&gt;&lt;<span style="color:#f92672">br</span> /&gt;
+            &lt;<span style="color:#f92672">input</span> <span style="color:#a6e22e">type</span><span style="color:#f92672">=</span><span style="color:#e6db74">&#34;submit&#34;</span> <span style="color:#a6e22e">value</span><span style="color:#f92672">=</span><span style="color:#e6db74">&#34;提交&#34;</span> /&gt;
+        &lt;/<span style="color:#f92672">form</span>&gt;
 
-&lt;body&gt;
-    &lt;div id=&quot;mydiv&quot; align=&quot;center&quot;&gt;
-        &lt;h&gt;我是登录页面&lt;/h&gt;
+        &lt;<span style="color:#f92672">h</span> <span style="color:#a6e22e">th:text</span><span style="color:#f92672">=</span><span style="color:#e6db74">&#34;${msg}&#34;</span> <span style="color:#a6e22e">style</span><span style="color:#f92672">=</span><span style="color:#e6db74">&#34;color:red&#34;</span>&gt;&lt;/<span style="color:#f92672">h</span>&gt;
 
-        &lt;form id=&quot;myform&quot; action=&quot;loginAction&quot;&gt;
-            用户名:&lt;input type=&quot;text&quot; name=&quot;username&quot; /&gt;&lt;br /&gt;
-            密码:&lt;input type=&quot;text&quot; name=&quot;password&quot; /&gt;&lt;br /&gt;
-            &lt;input type=&quot;submit&quot; value=&quot;提交&quot; /&gt;
-        &lt;/form&gt;
+    &lt;/<span style="color:#f92672">div</span>&gt;
 
-        &lt;h th:text=&quot;${msg}&quot; style=&quot;color:red&quot;&gt;&lt;/h&gt;
+&lt;/<span style="color:#f92672">body</span>&gt;
 
-    &lt;/div&gt;
+&lt;/<span style="color:#f92672">html</span>&gt;
+</code></pre></div><h2 id="noauthorhtml">noAuthor.html</h2>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-html" data-lang="html"><span style="color:#75715e">&lt;!DOCTYPE html&gt;</span>
+&lt;<span style="color:#f92672">html</span>&gt;
 
-&lt;/body&gt;
+&lt;<span style="color:#f92672">head</span>&gt;
+        &lt;<span style="color:#f92672">meta</span> <span style="color:#a6e22e">charset</span><span style="color:#f92672">=</span><span style="color:#e6db74">&#34;UTF-8&#34;</span>&gt;
+        &lt;<span style="color:#f92672">title</span>&gt;Insert title here&lt;/<span style="color:#f92672">title</span>&gt;
+        &lt;<span style="color:#f92672">script</span> <span style="color:#a6e22e">type</span><span style="color:#f92672">=</span><span style="color:#e6db74">&#34;text/javascript&#34;</span>&gt;&lt;/<span style="color:#f92672">script</span>&gt;
+&lt;/<span style="color:#f92672">head</span>&gt;
 
-&lt;/html&gt;
-</code></pre>
+&lt;<span style="color:#f92672">body</span>&gt;
+        &lt;<span style="color:#f92672">h</span> <span style="color:#a6e22e">th:text</span><span style="color:#f92672">=</span><span style="color:#e6db74">&#34;${msg}&#34;</span> <span style="color:#a6e22e">style</span><span style="color:#f92672">=</span><span style="color:#e6db74">&#34;color:red&#34;</span>&gt;&lt;/<span style="color:#f92672">h</span>&gt;
+&lt;/<span style="color:#f92672">body</span>&gt;
 
-<h2 id="noauthor-html">noAuthor.html</h2>
-
-<pre><code class="language-html">&lt;!DOCTYPE html&gt;
-&lt;html&gt;
-
-&lt;head&gt;
-        &lt;meta charset=&quot;UTF-8&quot;&gt;
-        &lt;title&gt;Insert title here&lt;/title&gt;
-        &lt;script type=&quot;text/javascript&quot;&gt;&lt;/script&gt;
-&lt;/head&gt;
-
-&lt;body&gt;
-        &lt;h th:text=&quot;${msg}&quot; style=&quot;color:red&quot;&gt;&lt;/h&gt;
-&lt;/body&gt;
-
-&lt;/html&gt;
-</code></pre>
-
+&lt;/<span style="color:#f92672">html</span>&gt;
+</code></pre></div>
 
                 
                 
@@ -620,19 +594,11 @@ public class LoginController {
                     </h4>
                     <ul class="catalog-body"></ul>
                     <nav id="TableOfContents">
-<ul>
-<li><a href="#简述">简述</a></li>
-<li><a href="#pom-xml">pom.xml</a></li>
-<li><a href="#shiroconfig包含相关基础组件">ShiroConfig包含相关基础组件</a></li>
-<li><a href="#自定义userrealm">自定义UserRealm</a></li>
-<li><a href="#测试controller">测试Controller</a></li>
-<li><a href="#相关页面">相关页面</a>
-<ul>
-<li><a href="#index-html">index.html</a></li>
-<li><a href="#login-html">login.html</a></li>
-<li><a href="#noauthor-html">noAuthor.html</a></li>
-</ul></li>
-</ul>
+  <ul>
+    <li><a href="#indexhtml">index.html</a></li>
+    <li><a href="#loginhtml">login.html</a></li>
+    <li><a href="#noauthorhtml">noAuthor.html</a></li>
+  </ul>
 </nav>
                     <br>
                     <br>
@@ -657,9 +623,6 @@ public class LoginController {
                         
                         
                         
-                        <a href="/tags/" title="">
-                            
-                        </a>
                         
                         
                         
@@ -669,101 +632,6 @@ public class LoginController {
                         
                         
                         
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        <a href="/tags/qt" title="QT">
-                            QT
-                        </a>
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        <a href="/tags/zookeeper" title="Zookeeper">
-                            Zookeeper
-                        </a>
                         
                         
                         
@@ -803,8 +671,10 @@ public class LoginController {
                         
                         
                         
-                        <a href="/tags/elasticsearch" title="elasticSearch">
-                            elasticSearch
+                        
+                        
+                        <a href="/tags/elasticsearch" title="elasticsearch">
+                            elasticsearch
                         </a>
                         
                         
@@ -815,9 +685,27 @@ public class LoginController {
                         
                         
                         
-                        <a href="/tags/golang" title="golang">
-                            golang
-                        </a>
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
                         
                         
                         
@@ -855,9 +743,21 @@ public class LoginController {
                         
                         
                         
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
                         <a href="/tags/jvm" title="jvm">
                             jvm
                         </a>
+                        
+                        
+                        
+                        
                         
                         
                         
@@ -881,9 +781,19 @@ public class LoginController {
                         
                         
                         
+                        
+                        
+                        
+                        
+                        
+                        
                         <a href="/tags/mongodb" title="mongodb">
                             mongodb
                         </a>
+                        
+                        
+                        
+                        
                         
                         
                         
@@ -894,10 +804,6 @@ public class LoginController {
                         </a>
                         
                         
-                        
-                        <a href="/tags/mycat" title="mycat">
-                            mycat
-                        </a>
                         
                         
                         
@@ -911,9 +817,17 @@ public class LoginController {
                         
                         
                         
-                        <a href="/tags/nginx" title="nginx">
-                            nginx
-                        </a>
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
                         
                         
                         
@@ -937,8 +851,22 @@ public class LoginController {
                         
                         
                         
+                        
+                        
                         <a href="/tags/rocketmq" title="rocketmq">
                             rocketmq
+                        </a>
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        <a href="/tags/security%E6%A1%86%E6%9E%B6%E5%AD%A6%E4%B9%A0" title="security框架学习">
+                            security框架学习
                         </a>
                         
                         
@@ -965,17 +893,11 @@ public class LoginController {
                         
                         
                         
-                        <a href="/tags/springcloud" title="springCloud">
-                            springCloud
-                        </a>
-                        
-                        
-                        
-                        
-                        
                         <a href="/tags/springboot" title="springboot">
                             springboot
                         </a>
+                        
+                        
                         
                         
                         
@@ -989,6 +911,9 @@ public class LoginController {
                         
                         
                         
+                        <a href="/tags/springcloud" title="springcloud">
+                            springcloud
+                        </a>
                         
                         
                         
@@ -1014,6 +939,33 @@ public class LoginController {
                         
                         
                         
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        <a href="/tags/zookeeper" title="zookeeper">
+                            zookeeper
+                        </a>
                         
                         
                         
@@ -1073,6 +1025,8 @@ public class LoginController {
                         
                         
                         
+                        
+                        
                         <a href="/tags/%E5%88%86%E5%B8%83%E5%BC%8F%E7%B3%BB%E5%88%97" title="分布式系列">
                             分布式系列
                         </a>
@@ -1092,6 +1046,10 @@ public class LoginController {
                         
                         
                         
+                        
+                        <a href="/tags/%E5%8D%8F%E8%AE%AE%E6%A0%88" title="协议栈">
+                            协议栈
+                        </a>
                         
                         
                         
@@ -1291,6 +1249,12 @@ public class LoginController {
                         
                         
                         
+                        
+                        
+                        
+                        
+                        
+                        
                         <a href="/tags/%E7%BD%91%E7%BB%9C%E7%BC%96%E7%A8%8B" title="网络编程">
                             网络编程
                         </a>
@@ -1314,6 +1278,10 @@ public class LoginController {
                         
                         
                         
+                        
+                        <a href="/tags/%E8%AE%A4%E8%AF%81%E5%92%8C%E6%8E%88%E6%9D%83" title="认证和授权">
+                            认证和授权
+                        </a>
                         
                         
                         
@@ -1484,7 +1452,7 @@ public class LoginController {
                     
                 </ul>
 		<p class="copyright text-muted">
-                    Copyright &copy;  2020
+                    Copyright &copy;  2021
                     <br>
                     <a href="https://themes.gohugo.io/hugo-theme-cleanwhite">CleanWhite Hugo Theme</a> by <a href="https://zhaohuabing.com">Huabing</a> |
                     <iframe

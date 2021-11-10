@@ -97,15 +97,15 @@
                     </li>
                     
                     <li>
-                        <a href="/categories/english">English</a>
+                        <a href="/categories/english">english</a>
                     </li>
                     
                     <li>
-                        <a href="/categories/life">Life</a>
+                        <a href="/categories/life">life</a>
                     </li>
                     
                     <li>
-                        <a href="/categories/tech">Tech</a>
+                        <a href="/categories/tech">tech</a>
                     </li>
                     
 
@@ -241,230 +241,218 @@
                 
                 
                 
-                
-
-<p>[TOC]</p>
-
+                <p>[TOC]</p>
 <p><strong>说明： 本学习主要对尚硅谷大数据研发部《zookeeper视频》记录，一下文字来源这个视频PPT</strong></p>
-
 <h1 id="公共端代码">公共端代码</h1>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-java" data-lang="java"><span style="color:#f92672">package</span> com.example.demo<span style="color:#f92672">;</span>
+<span style="color:#75715e">/*
+</span><span style="color:#75715e"> * @Description: 请输入....
+</span><span style="color:#75715e"> * @Author: 麦子
+</span><span style="color:#75715e"> * @LastEditors: 麦子
+</span><span style="color:#75715e"> * @Date: 2019-05-09 23:04:35
+</span><span style="color:#75715e"> * @LastEditTime: 2019-05-09 23:28:19
+</span><span style="color:#75715e"> */</span>
 
-<pre><code class="language-java">package com.example.demo;
-/*
- * @Description: 请输入....
- * @Author: 麦子
- * @LastEditors: 麦子
- * @Date: 2019-05-09 23:04:35
- * @LastEditTime: 2019-05-09 23:28:19
- */
+<span style="color:#f92672">import</span> org.apache.zookeeper.Watcher<span style="color:#f92672">;</span>
+<span style="color:#f92672">import</span> org.apache.zookeeper.ZooKeeper<span style="color:#f92672">;</span>
 
-import org.apache.zookeeper.Watcher;
-import org.apache.zookeeper.ZooKeeper;
+<span style="color:#66d9ef">public</span> <span style="color:#66d9ef">class</span> <span style="color:#a6e22e">ZookeeperTemplete</span> <span style="color:#f92672">{</span>
 
-public class ZookeeperTemplete {
+    <span style="color:#66d9ef">private</span> String connec <span style="color:#f92672">=</span> <span style="color:#e6db74">&#34;127.0.0.1:2181,127.0.0.1:2182,127.0.0.1:2183&#34;</span><span style="color:#f92672">;</span>
+    <span style="color:#66d9ef">private</span> ZooKeeper zooKeeper <span style="color:#f92672">=</span> <span style="color:#66d9ef">null</span><span style="color:#f92672">;</span>
 
-    private String connec = &quot;127.0.0.1:2181,127.0.0.1:2182,127.0.0.1:2183&quot;;
-    private ZooKeeper zooKeeper = null;
+     <span style="color:#75715e">/**
+</span><span style="color:#75715e">     * @description: 连接服务端
+</span><span style="color:#75715e">     * @param {type}
+</span><span style="color:#75715e">     * @return:
+</span><span style="color:#75715e">     */</span>
+    <span style="color:#66d9ef">public</span> ZooKeeper <span style="color:#a6e22e">getConnection</span><span style="color:#f92672">(</span>Watcher watcher<span style="color:#f92672">)</span> <span style="color:#66d9ef">throws</span> Exception <span style="color:#f92672">{</span>
 
-     /**
-     * @description: 连接服务端
-     * @param {type}
-     * @return:
-     */
-    public ZooKeeper getConnection(Watcher watcher) throws Exception {
-
-        zooKeeper = new ZooKeeper(connec, 2000,watcher);
-        return zooKeeper;
-    }
+        zooKeeper <span style="color:#f92672">=</span> <span style="color:#66d9ef">new</span> ZooKeeper<span style="color:#f92672">(</span>connec<span style="color:#f92672">,</span> 2000<span style="color:#f92672">,</span>watcher<span style="color:#f92672">);</span>
+        <span style="color:#66d9ef">return</span> zooKeeper<span style="color:#f92672">;</span>
+    <span style="color:#f92672">}</span>
     
-}
-</code></pre>
+<span style="color:#f92672">}</span>
+</code></pre></div><h1 id="服务器注册处理">服务器注册处理</h1>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-java" data-lang="java"><span style="color:#f92672">package</span> com.example.demo<span style="color:#f92672">;</span>
+<span style="color:#75715e">/*
+</span><span style="color:#75715e"> * @Description: 请输入....
+</span><span style="color:#75715e"> * @Author: 麦子
+</span><span style="color:#75715e"> * @LastEditors: 麦子
+</span><span style="color:#75715e"> * @Date: 2019-05-09 22:48:56
+</span><span style="color:#75715e"> * @LastEditTime: 2019-05-10 02:00:07
+</span><span style="color:#75715e"> */</span>
 
-<h1 id="服务器注册处理">服务器注册处理</h1>
+<span style="color:#f92672">import</span> org.apache.zookeeper.CreateMode<span style="color:#f92672">;</span>
+<span style="color:#f92672">import</span> org.apache.zookeeper.KeeperException<span style="color:#f92672">;</span>
+<span style="color:#f92672">import</span> org.apache.zookeeper.WatchedEvent<span style="color:#f92672">;</span>
+<span style="color:#f92672">import</span> org.apache.zookeeper.Watcher<span style="color:#f92672">;</span>
+<span style="color:#f92672">import</span> org.apache.zookeeper.ZooKeeper<span style="color:#f92672">;</span>
+<span style="color:#f92672">import</span> org.apache.zookeeper.ZooDefs.Ids<span style="color:#f92672">;</span>
+<span style="color:#f92672">import</span> org.apache.zookeeper.data.Stat<span style="color:#f92672">;</span>
 
-<pre><code class="language-java">package com.example.demo;
-/*
- * @Description: 请输入....
- * @Author: 麦子
- * @LastEditors: 麦子
- * @Date: 2019-05-09 22:48:56
- * @LastEditTime: 2019-05-10 02:00:07
- */
+<span style="color:#66d9ef">public</span> <span style="color:#66d9ef">class</span> <span style="color:#a6e22e">ServiceHandle</span> <span style="color:#66d9ef">implements</span> Watcher <span style="color:#f92672">{</span>
 
-import org.apache.zookeeper.CreateMode;
-import org.apache.zookeeper.KeeperException;
-import org.apache.zookeeper.WatchedEvent;
-import org.apache.zookeeper.Watcher;
-import org.apache.zookeeper.ZooKeeper;
-import org.apache.zookeeper.ZooDefs.Ids;
-import org.apache.zookeeper.data.Stat;
+    <span style="color:#66d9ef">public</span> <span style="color:#66d9ef">static</span> <span style="color:#66d9ef">void</span> <span style="color:#a6e22e">main</span><span style="color:#f92672">(</span>String<span style="color:#f92672">[]</span> args<span style="color:#f92672">)</span> <span style="color:#66d9ef">throws</span> Exception <span style="color:#f92672">{</span>
+        ServiceHandle serviceHandle <span style="color:#f92672">=</span> <span style="color:#66d9ef">new</span> ServiceHandle<span style="color:#f92672">();</span>
+        <span style="color:#75715e">// serviceHandle.regist(&#34;tomcat7:2181&#34;);
+</span><span style="color:#75715e"></span>        serviceHandle<span style="color:#f92672">.</span><span style="color:#a6e22e">regist</span><span style="color:#f92672">(</span><span style="color:#e6db74">&#34;tomcat7:2182&#34;</span><span style="color:#f92672">);</span>
+        <span style="color:#75715e">// serviceHandle.regist(&#34;tomcat7:2183&#34;);
+</span><span style="color:#75715e"></span>        serviceHandle<span style="color:#f92672">.</span><span style="color:#a6e22e">business</span><span style="color:#f92672">();</span>
+    <span style="color:#f92672">}</span>
 
-public class ServiceHandle implements Watcher {
+    <span style="color:#75715e">/**
+</span><span style="color:#75715e">     * @description: 创建服务节点
+</span><span style="color:#75715e">     * @param {type}
+</span><span style="color:#75715e">     * @return:
+</span><span style="color:#75715e">     * @throws Exception
+</span><span style="color:#75715e">     */</span>
+    <span style="color:#66d9ef">public</span> <span style="color:#66d9ef">void</span> <span style="color:#a6e22e">regist</span><span style="color:#f92672">(</span>String hostName<span style="color:#f92672">)</span> <span style="color:#66d9ef">throws</span> Exception <span style="color:#f92672">{</span>
+        <span style="color:#66d9ef">try</span> <span style="color:#f92672">{</span>
+            ZookeeperTemplete zookeeperTemplete <span style="color:#f92672">=</span> <span style="color:#66d9ef">new</span> ZookeeperTemplete<span style="color:#f92672">();</span>
+            ZooKeeper zooKeeper <span style="color:#f92672">=</span> zookeeperTemplete<span style="color:#f92672">.</span><span style="color:#a6e22e">getConnection</span><span style="color:#f92672">(</span><span style="color:#66d9ef">this</span><span style="color:#f92672">);</span>
 
-    public static void main(String[] args) throws Exception {
-        ServiceHandle serviceHandle = new ServiceHandle();
-        // serviceHandle.regist(&quot;tomcat7:2181&quot;);
-        serviceHandle.regist(&quot;tomcat7:2182&quot;);
-        // serviceHandle.regist(&quot;tomcat7:2183&quot;);
-        serviceHandle.business();
-    }
+            Stat stat <span style="color:#f92672">=</span> zooKeeper<span style="color:#f92672">.</span><span style="color:#a6e22e">exists</span><span style="color:#f92672">(</span><span style="color:#e6db74">&#34;/servicelist&#34;</span><span style="color:#f92672">,</span> <span style="color:#66d9ef">false</span><span style="color:#f92672">);</span>
+            <span style="color:#66d9ef">if</span> <span style="color:#f92672">(</span>stat <span style="color:#f92672">==</span> <span style="color:#66d9ef">null</span><span style="color:#f92672">)</span> <span style="color:#f92672">{</span>
+                zooKeeper<span style="color:#f92672">.</span><span style="color:#a6e22e">create</span><span style="color:#f92672">(</span><span style="color:#e6db74">&#34;/servicelist&#34;</span><span style="color:#f92672">,</span> <span style="color:#66d9ef">null</span><span style="color:#f92672">,</span> Ids<span style="color:#f92672">.</span><span style="color:#a6e22e">OPEN_ACL_UNSAFE</span><span style="color:#f92672">,</span> CreateMode<span style="color:#f92672">.</span><span style="color:#a6e22e">PERSISTENT</span><span style="color:#f92672">);</span>
+            <span style="color:#f92672">}</span>
+            zooKeeper<span style="color:#f92672">.</span><span style="color:#a6e22e">create</span><span style="color:#f92672">(</span><span style="color:#e6db74">&#34;/servicelist/service&#34;</span><span style="color:#f92672">,</span> hostName<span style="color:#f92672">.</span><span style="color:#a6e22e">getBytes</span><span style="color:#f92672">(),</span> Ids<span style="color:#f92672">.</span><span style="color:#a6e22e">OPEN_ACL_UNSAFE</span><span style="color:#f92672">,</span>
+                    CreateMode<span style="color:#f92672">.</span><span style="color:#a6e22e">EPHEMERAL_SEQUENTIAL</span><span style="color:#f92672">);</span>
+        <span style="color:#f92672">}</span> <span style="color:#66d9ef">catch</span> <span style="color:#f92672">(</span>KeeperException <span style="color:#f92672">|</span> InterruptedException e<span style="color:#f92672">)</span> <span style="color:#f92672">{</span>
+            e<span style="color:#f92672">.</span><span style="color:#a6e22e">printStackTrace</span><span style="color:#f92672">();</span>
+        <span style="color:#f92672">}</span>
+    <span style="color:#f92672">}</span>
 
-    /**
-     * @description: 创建服务节点
-     * @param {type}
-     * @return:
-     * @throws Exception
-     */
-    public void regist(String hostName) throws Exception {
-        try {
-            ZookeeperTemplete zookeeperTemplete = new ZookeeperTemplete();
-            ZooKeeper zooKeeper = zookeeperTemplete.getConnection(this);
+    <span style="color:#75715e">/**
+</span><span style="color:#75715e">     * @description: 处理业务逻辑,让服务一直在运行状态模拟
+</span><span style="color:#75715e">     * @param {type}
+</span><span style="color:#75715e">     * @return:
+</span><span style="color:#75715e">     */</span>
+    <span style="color:#66d9ef">private</span> <span style="color:#66d9ef">void</span> <span style="color:#a6e22e">business</span><span style="color:#f92672">()</span> <span style="color:#f92672">{</span>
+        <span style="color:#66d9ef">try</span> <span style="color:#f92672">{</span>
+            Thread<span style="color:#f92672">.</span><span style="color:#a6e22e">sleep</span><span style="color:#f92672">(</span>Long<span style="color:#f92672">.</span><span style="color:#a6e22e">MAX_VALUE</span><span style="color:#f92672">);</span>
+        <span style="color:#f92672">}</span> <span style="color:#66d9ef">catch</span> <span style="color:#f92672">(</span>InterruptedException e<span style="color:#f92672">)</span> <span style="color:#f92672">{</span>
+            e<span style="color:#f92672">.</span><span style="color:#a6e22e">printStackTrace</span><span style="color:#f92672">();</span>
+        <span style="color:#f92672">}</span>
+    <span style="color:#f92672">}</span>
 
-            Stat stat = zooKeeper.exists(&quot;/servicelist&quot;, false);
-            if (stat == null) {
-                zooKeeper.create(&quot;/servicelist&quot;, null, Ids.OPEN_ACL_UNSAFE, CreateMode.PERSISTENT);
-            }
-            zooKeeper.create(&quot;/servicelist/service&quot;, hostName.getBytes(), Ids.OPEN_ACL_UNSAFE,
-                    CreateMode.EPHEMERAL_SEQUENTIAL);
-        } catch (KeeperException | InterruptedException e) {
-            e.printStackTrace();
-        }
-    }
+    <span style="color:#75715e">/**
+</span><span style="color:#75715e">     * @description:  服务端监听不做处理
+</span><span style="color:#75715e">     * @param {type} 
+</span><span style="color:#75715e">     * @return: 
+</span><span style="color:#75715e">     */</span>
+    <span style="color:#a6e22e">@Override</span>
+    <span style="color:#66d9ef">public</span> <span style="color:#66d9ef">void</span> <span style="color:#a6e22e">process</span><span style="color:#f92672">(</span>WatchedEvent event<span style="color:#f92672">)</span> <span style="color:#f92672">{</span>
 
-    /**
-     * @description: 处理业务逻辑,让服务一直在运行状态模拟
-     * @param {type}
-     * @return:
-     */
-    private void business() {
-        try {
-            Thread.sleep(Long.MAX_VALUE);
-        } catch (InterruptedException e) {
-            e.printStackTrace();
-        }
-    }
+    <span style="color:#f92672">}</span>
 
-    /**
-     * @description:  服务端监听不做处理
-     * @param {type} 
-     * @return: 
-     */
-    @Override
-    public void process(WatchedEvent event) {
+<span style="color:#f92672">}</span>
+</code></pre></div><h1 id="客户端监听处理">客户端监听处理</h1>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-java" data-lang="java"><span style="color:#f92672">package</span> com.example.demo<span style="color:#f92672">;</span>
+<span style="color:#75715e">/*
+</span><span style="color:#75715e"> * @Description: 请输入....
+</span><span style="color:#75715e"> * @Author: 麦子
+</span><span style="color:#75715e"> * @LastEditors: 麦子
+</span><span style="color:#75715e"> * @Date: 2019-05-09 23:11:22
+</span><span style="color:#75715e"> * @LastEditTime: 2019-05-10 02:19:36
+</span><span style="color:#75715e"> */</span>
 
-    }
+<span style="color:#f92672">import</span> java.io.File<span style="color:#f92672">;</span>
+<span style="color:#f92672">import</span> java.io.FileOutputStream<span style="color:#f92672">;</span>
+<span style="color:#f92672">import</span> java.io.IOException<span style="color:#f92672">;</span>
+<span style="color:#f92672">import</span> java.io.PrintStream<span style="color:#f92672">;</span>
+<span style="color:#f92672">import</span> java.util.ArrayList<span style="color:#f92672">;</span>
+<span style="color:#f92672">import</span> java.util.List<span style="color:#f92672">;</span>
 
-}
-</code></pre>
+<span style="color:#f92672">import</span> org.apache.zookeeper.WatchedEvent<span style="color:#f92672">;</span>
+<span style="color:#f92672">import</span> org.apache.zookeeper.Watcher<span style="color:#f92672">;</span>
+<span style="color:#f92672">import</span> org.apache.zookeeper.ZooKeeper<span style="color:#f92672">;</span>
 
-<h1 id="客户端监听处理">客户端监听处理</h1>
+<span style="color:#66d9ef">public</span> <span style="color:#66d9ef">class</span> <span style="color:#a6e22e">ClientHandle</span> <span style="color:#66d9ef">implements</span> Watcher <span style="color:#f92672">{</span>
 
-<pre><code class="language-java">package com.example.demo;
-/*
- * @Description: 请输入....
- * @Author: 麦子
- * @LastEditors: 麦子
- * @Date: 2019-05-09 23:11:22
- * @LastEditTime: 2019-05-10 02:19:36
- */
+    <span style="color:#66d9ef">private</span> ZooKeeper zooKeeper<span style="color:#f92672">;</span>
 
-import java.io.File;
-import java.io.FileOutputStream;
-import java.io.IOException;
-import java.io.PrintStream;
-import java.util.ArrayList;
-import java.util.List;
-
-import org.apache.zookeeper.WatchedEvent;
-import org.apache.zookeeper.Watcher;
-import org.apache.zookeeper.ZooKeeper;
-
-public class ClientHandle implements Watcher {
-
-    private ZooKeeper zooKeeper;
-
-    public static void main(String[] args) throws Exception {
-        ClientHandle clientHandle = new ClientHandle();
-        clientHandle.getConnection();
-        clientHandle.getClientList();
-        clientHandle.printOut();
-        clientHandle.business();
+    <span style="color:#66d9ef">public</span> <span style="color:#66d9ef">static</span> <span style="color:#66d9ef">void</span> <span style="color:#a6e22e">main</span><span style="color:#f92672">(</span>String<span style="color:#f92672">[]</span> args<span style="color:#f92672">)</span> <span style="color:#66d9ef">throws</span> Exception <span style="color:#f92672">{</span>
+        ClientHandle clientHandle <span style="color:#f92672">=</span> <span style="color:#66d9ef">new</span> ClientHandle<span style="color:#f92672">();</span>
+        clientHandle<span style="color:#f92672">.</span><span style="color:#a6e22e">getConnection</span><span style="color:#f92672">();</span>
+        clientHandle<span style="color:#f92672">.</span><span style="color:#a6e22e">getClientList</span><span style="color:#f92672">();</span>
+        clientHandle<span style="color:#f92672">.</span><span style="color:#a6e22e">printOut</span><span style="color:#f92672">();</span>
+        clientHandle<span style="color:#f92672">.</span><span style="color:#a6e22e">business</span><span style="color:#f92672">();</span>
         
-    }
+    <span style="color:#f92672">}</span>
 
-    /**
-     * @description: 输出到控制台
-     * @param {type} 
-     * @return: 
-     */
-    private void printOut() {
-        File f = new File(&quot;out.log&quot;);
-        try {
-            f.createNewFile();
-            FileOutputStream fileOutputStream = new FileOutputStream(f);
-            PrintStream printStream = new PrintStream(fileOutputStream);
-            System.setOut(printStream);
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-    }
+    <span style="color:#75715e">/**
+</span><span style="color:#75715e">     * @description: 输出到控制台
+</span><span style="color:#75715e">     * @param {type} 
+</span><span style="color:#75715e">     * @return: 
+</span><span style="color:#75715e">     */</span>
+    <span style="color:#66d9ef">private</span> <span style="color:#66d9ef">void</span> <span style="color:#a6e22e">printOut</span><span style="color:#f92672">()</span> <span style="color:#f92672">{</span>
+        File f <span style="color:#f92672">=</span> <span style="color:#66d9ef">new</span> File<span style="color:#f92672">(</span><span style="color:#e6db74">&#34;out.log&#34;</span><span style="color:#f92672">);</span>
+        <span style="color:#66d9ef">try</span> <span style="color:#f92672">{</span>
+            f<span style="color:#f92672">.</span><span style="color:#a6e22e">createNewFile</span><span style="color:#f92672">();</span>
+            FileOutputStream fileOutputStream <span style="color:#f92672">=</span> <span style="color:#66d9ef">new</span> FileOutputStream<span style="color:#f92672">(</span>f<span style="color:#f92672">);</span>
+            PrintStream printStream <span style="color:#f92672">=</span> <span style="color:#66d9ef">new</span> PrintStream<span style="color:#f92672">(</span>fileOutputStream<span style="color:#f92672">);</span>
+            System<span style="color:#f92672">.</span><span style="color:#a6e22e">setOut</span><span style="color:#f92672">(</span>printStream<span style="color:#f92672">);</span>
+        <span style="color:#f92672">}</span> <span style="color:#66d9ef">catch</span> <span style="color:#f92672">(</span>IOException e<span style="color:#f92672">)</span> <span style="color:#f92672">{</span>
+            e<span style="color:#f92672">.</span><span style="color:#a6e22e">printStackTrace</span><span style="color:#f92672">();</span>
+        <span style="color:#f92672">}</span>
+    <span style="color:#f92672">}</span>
 
 
-    /**
-     * @description:  获取连接
-     * @param {type} 
-     * @return: 
-     */
-    private void getConnection() throws Exception{
-        ZookeeperTemplete zookeeperTemplete = new ZookeeperTemplete();
-        zooKeeper = zookeeperTemplete.getConnection(this);
-    }
+    <span style="color:#75715e">/**
+</span><span style="color:#75715e">     * @description:  获取连接
+</span><span style="color:#75715e">     * @param {type} 
+</span><span style="color:#75715e">     * @return: 
+</span><span style="color:#75715e">     */</span>
+    <span style="color:#66d9ef">private</span> <span style="color:#66d9ef">void</span> <span style="color:#a6e22e">getConnection</span><span style="color:#f92672">()</span> <span style="color:#66d9ef">throws</span> Exception<span style="color:#f92672">{</span>
+        ZookeeperTemplete zookeeperTemplete <span style="color:#f92672">=</span> <span style="color:#66d9ef">new</span> ZookeeperTemplete<span style="color:#f92672">();</span>
+        zooKeeper <span style="color:#f92672">=</span> zookeeperTemplete<span style="color:#f92672">.</span><span style="color:#a6e22e">getConnection</span><span style="color:#f92672">(</span><span style="color:#66d9ef">this</span><span style="color:#f92672">);</span>
+    <span style="color:#f92672">}</span>
 
-    /**
-     * @description: 获取在线服务器列表
-     * @param {type}
-     * @return:
-     */
-    private void getClientList() throws Exception {
-        List&lt;String&gt; childs = zooKeeper.getChildren(&quot;/servicelist&quot;, true);
-        List&lt;String&gt; hostNameList = new ArrayList&lt;String&gt;();
-        for (String nodes : childs) {
-            byte[] bytes = zooKeeper.getData(&quot;/servicelist/&quot; + nodes, false, null);
-            String hostName = new String(bytes);
-            hostNameList.add(hostName);
-        }
-        System.out.println(&quot;线上服务器列表: &quot; + hostNameList);
-    }
+    <span style="color:#75715e">/**
+</span><span style="color:#75715e">     * @description: 获取在线服务器列表
+</span><span style="color:#75715e">     * @param {type}
+</span><span style="color:#75715e">     * @return:
+</span><span style="color:#75715e">     */</span>
+    <span style="color:#66d9ef">private</span> <span style="color:#66d9ef">void</span> <span style="color:#a6e22e">getClientList</span><span style="color:#f92672">()</span> <span style="color:#66d9ef">throws</span> Exception <span style="color:#f92672">{</span>
+        List<span style="color:#f92672">&lt;</span>String<span style="color:#f92672">&gt;</span> childs <span style="color:#f92672">=</span> zooKeeper<span style="color:#f92672">.</span><span style="color:#a6e22e">getChildren</span><span style="color:#f92672">(</span><span style="color:#e6db74">&#34;/servicelist&#34;</span><span style="color:#f92672">,</span> <span style="color:#66d9ef">true</span><span style="color:#f92672">);</span>
+        List<span style="color:#f92672">&lt;</span>String<span style="color:#f92672">&gt;</span> hostNameList <span style="color:#f92672">=</span> <span style="color:#66d9ef">new</span> ArrayList<span style="color:#f92672">&lt;</span>String<span style="color:#f92672">&gt;();</span>
+        <span style="color:#66d9ef">for</span> <span style="color:#f92672">(</span>String nodes <span style="color:#f92672">:</span> childs<span style="color:#f92672">)</span> <span style="color:#f92672">{</span>
+            <span style="color:#66d9ef">byte</span><span style="color:#f92672">[]</span> bytes <span style="color:#f92672">=</span> zooKeeper<span style="color:#f92672">.</span><span style="color:#a6e22e">getData</span><span style="color:#f92672">(</span><span style="color:#e6db74">&#34;/servicelist/&#34;</span> <span style="color:#f92672">+</span> nodes<span style="color:#f92672">,</span> <span style="color:#66d9ef">false</span><span style="color:#f92672">,</span> <span style="color:#66d9ef">null</span><span style="color:#f92672">);</span>
+            String hostName <span style="color:#f92672">=</span> <span style="color:#66d9ef">new</span> String<span style="color:#f92672">(</span>bytes<span style="color:#f92672">);</span>
+            hostNameList<span style="color:#f92672">.</span><span style="color:#a6e22e">add</span><span style="color:#f92672">(</span>hostName<span style="color:#f92672">);</span>
+        <span style="color:#f92672">}</span>
+        System<span style="color:#f92672">.</span><span style="color:#a6e22e">out</span><span style="color:#f92672">.</span><span style="color:#a6e22e">println</span><span style="color:#f92672">(</span><span style="color:#e6db74">&#34;线上服务器列表: &#34;</span> <span style="color:#f92672">+</span> hostNameList<span style="color:#f92672">);</span>
+    <span style="color:#f92672">}</span>
 
-    /**
-     * @description: 让客户端端一直执行，模拟
-     * @param {type}
-     * @return:
-     */
-    private void business() {
-        try {
-            Thread.sleep(Long.MAX_VALUE);
-        } catch (InterruptedException e) {
-            e.printStackTrace();
-        }
-    }
+    <span style="color:#75715e">/**
+</span><span style="color:#75715e">     * @description: 让客户端端一直执行，模拟
+</span><span style="color:#75715e">     * @param {type}
+</span><span style="color:#75715e">     * @return:
+</span><span style="color:#75715e">     */</span>
+    <span style="color:#66d9ef">private</span> <span style="color:#66d9ef">void</span> <span style="color:#a6e22e">business</span><span style="color:#f92672">()</span> <span style="color:#f92672">{</span>
+        <span style="color:#66d9ef">try</span> <span style="color:#f92672">{</span>
+            Thread<span style="color:#f92672">.</span><span style="color:#a6e22e">sleep</span><span style="color:#f92672">(</span>Long<span style="color:#f92672">.</span><span style="color:#a6e22e">MAX_VALUE</span><span style="color:#f92672">);</span>
+        <span style="color:#f92672">}</span> <span style="color:#66d9ef">catch</span> <span style="color:#f92672">(</span>InterruptedException e<span style="color:#f92672">)</span> <span style="color:#f92672">{</span>
+            e<span style="color:#f92672">.</span><span style="color:#a6e22e">printStackTrace</span><span style="color:#f92672">();</span>
+        <span style="color:#f92672">}</span>
+    <span style="color:#f92672">}</span>
 
-    /**
-     * @description: 最服务器节点进行监听，监听后，在进行注册，然后在监听。 避免监听一次后不在监听
-     * @param {type}
-     * @return:
-     */
-    @Override
-    public void process(WatchedEvent event) {
-        try {
-            getClientList();
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
-    }
-}
-</code></pre>
-
+    <span style="color:#75715e">/**
+</span><span style="color:#75715e">     * @description: 最服务器节点进行监听，监听后，在进行注册，然后在监听。 避免监听一次后不在监听
+</span><span style="color:#75715e">     * @param {type}
+</span><span style="color:#75715e">     * @return:
+</span><span style="color:#75715e">     */</span>
+    <span style="color:#a6e22e">@Override</span>
+    <span style="color:#66d9ef">public</span> <span style="color:#66d9ef">void</span> <span style="color:#a6e22e">process</span><span style="color:#f92672">(</span>WatchedEvent event<span style="color:#f92672">)</span> <span style="color:#f92672">{</span>
+        <span style="color:#66d9ef">try</span> <span style="color:#f92672">{</span>
+            getClientList<span style="color:#f92672">();</span>
+        <span style="color:#f92672">}</span> <span style="color:#66d9ef">catch</span> <span style="color:#f92672">(</span>Exception e<span style="color:#f92672">)</span> <span style="color:#f92672">{</span>
+            e<span style="color:#f92672">.</span><span style="color:#a6e22e">printStackTrace</span><span style="color:#f92672">();</span>
+        <span style="color:#f92672">}</span>
+    <span style="color:#f92672">}</span>
+<span style="color:#f92672">}</span>
+</code></pre></div>
 
                 
                 
@@ -570,13 +558,7 @@ public class ClientHandle implements Watcher {
                         <a class="catalog-toggle" style="font-size: 24px;" href="index.html#">目录结构</a>
                     </h4>
                     <ul class="catalog-body"></ul>
-                    <nav id="TableOfContents">
-<ul>
-<li><a href="#公共端代码">公共端代码</a></li>
-<li><a href="#服务器注册处理">服务器注册处理</a></li>
-<li><a href="#客户端监听处理">客户端监听处理</a></li>
-</ul>
-</nav>
+                    <nav id="TableOfContents"></nav>
                     <br>
                     <br>
                     <br>
@@ -600,9 +582,6 @@ public class ClientHandle implements Watcher {
                         
                         
                         
-                        <a href="/tags/" title="">
-                            
-                        </a>
                         
                         
                         
@@ -612,101 +591,6 @@ public class ClientHandle implements Watcher {
                         
                         
                         
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        <a href="/tags/qt" title="QT">
-                            QT
-                        </a>
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        <a href="/tags/zookeeper" title="Zookeeper">
-                            Zookeeper
-                        </a>
                         
                         
                         
@@ -746,8 +630,10 @@ public class ClientHandle implements Watcher {
                         
                         
                         
-                        <a href="/tags/elasticsearch" title="elasticSearch">
-                            elasticSearch
+                        
+                        
+                        <a href="/tags/elasticsearch" title="elasticsearch">
+                            elasticsearch
                         </a>
                         
                         
@@ -758,9 +644,27 @@ public class ClientHandle implements Watcher {
                         
                         
                         
-                        <a href="/tags/golang" title="golang">
-                            golang
-                        </a>
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
                         
                         
                         
@@ -798,9 +702,21 @@ public class ClientHandle implements Watcher {
                         
                         
                         
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
                         <a href="/tags/jvm" title="jvm">
                             jvm
                         </a>
+                        
+                        
+                        
+                        
                         
                         
                         
@@ -824,9 +740,19 @@ public class ClientHandle implements Watcher {
                         
                         
                         
+                        
+                        
+                        
+                        
+                        
+                        
                         <a href="/tags/mongodb" title="mongodb">
                             mongodb
                         </a>
+                        
+                        
+                        
+                        
                         
                         
                         
@@ -837,10 +763,6 @@ public class ClientHandle implements Watcher {
                         </a>
                         
                         
-                        
-                        <a href="/tags/mycat" title="mycat">
-                            mycat
-                        </a>
                         
                         
                         
@@ -854,9 +776,17 @@ public class ClientHandle implements Watcher {
                         
                         
                         
-                        <a href="/tags/nginx" title="nginx">
-                            nginx
-                        </a>
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
                         
                         
                         
@@ -880,8 +810,22 @@ public class ClientHandle implements Watcher {
                         
                         
                         
+                        
+                        
                         <a href="/tags/rocketmq" title="rocketmq">
                             rocketmq
+                        </a>
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        <a href="/tags/security%E6%A1%86%E6%9E%B6%E5%AD%A6%E4%B9%A0" title="security框架学习">
+                            security框架学习
                         </a>
                         
                         
@@ -908,17 +852,11 @@ public class ClientHandle implements Watcher {
                         
                         
                         
-                        <a href="/tags/springcloud" title="springCloud">
-                            springCloud
-                        </a>
-                        
-                        
-                        
-                        
-                        
                         <a href="/tags/springboot" title="springboot">
                             springboot
                         </a>
+                        
+                        
                         
                         
                         
@@ -932,6 +870,9 @@ public class ClientHandle implements Watcher {
                         
                         
                         
+                        <a href="/tags/springcloud" title="springcloud">
+                            springcloud
+                        </a>
                         
                         
                         
@@ -957,6 +898,33 @@ public class ClientHandle implements Watcher {
                         
                         
                         
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        <a href="/tags/zookeeper" title="zookeeper">
+                            zookeeper
+                        </a>
                         
                         
                         
@@ -1016,6 +984,8 @@ public class ClientHandle implements Watcher {
                         
                         
                         
+                        
+                        
                         <a href="/tags/%E5%88%86%E5%B8%83%E5%BC%8F%E7%B3%BB%E5%88%97" title="分布式系列">
                             分布式系列
                         </a>
@@ -1035,6 +1005,10 @@ public class ClientHandle implements Watcher {
                         
                         
                         
+                        
+                        <a href="/tags/%E5%8D%8F%E8%AE%AE%E6%A0%88" title="协议栈">
+                            协议栈
+                        </a>
                         
                         
                         
@@ -1234,6 +1208,12 @@ public class ClientHandle implements Watcher {
                         
                         
                         
+                        
+                        
+                        
+                        
+                        
+                        
                         <a href="/tags/%E7%BD%91%E7%BB%9C%E7%BC%96%E7%A8%8B" title="网络编程">
                             网络编程
                         </a>
@@ -1257,6 +1237,10 @@ public class ClientHandle implements Watcher {
                         
                         
                         
+                        
+                        <a href="/tags/%E8%AE%A4%E8%AF%81%E5%92%8C%E6%8E%88%E6%9D%83" title="认证和授权">
+                            认证和授权
+                        </a>
                         
                         
                         
@@ -1427,7 +1411,7 @@ public class ClientHandle implements Watcher {
                     
                 </ul>
 		<p class="copyright text-muted">
-                    Copyright &copy;  2020
+                    Copyright &copy;  2021
                     <br>
                     <a href="https://themes.gohugo.io/hugo-theme-cleanwhite">CleanWhite Hugo Theme</a> by <a href="https://zhaohuabing.com">Huabing</a> |
                     <iframe

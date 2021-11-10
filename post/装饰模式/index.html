@@ -97,15 +97,15 @@
                     </li>
                     
                     <li>
-                        <a href="/categories/english">English</a>
+                        <a href="/categories/english">english</a>
                     </li>
                     
                     <li>
-                        <a href="/categories/life">Life</a>
+                        <a href="/categories/life">life</a>
                     </li>
                     
                     <li>
-                        <a href="/categories/tech">Tech</a>
+                        <a href="/categories/tech">tech</a>
                     </li>
                     
 
@@ -237,158 +237,112 @@
                 
                 
                 
-                
-
-<p>[TOC]</p>
-
+                <p>[TOC]</p>
 <p><strong>记录来源：《设计模式之禅》作者：秦小波</strong></p>
-
 <h1 id="概述">概述</h1>
-
 <p>他其实和AOP的通知类似， 他是一个特殊的代理类。  装饰模式是继承关系的一个替代方案。</p>
-
 <h1 id="优点">优点</h1>
-
 <p>装饰模式是对继承的有力补充。你要知道继承不是万能的，继承可以解决实际的问题， 但是在项目中你要考虑诸如易维护、易扩展、易复用等，而且在一些情况下（比如上面那个 成绩单例子）你要是用继承就会增加很多子类，而且灵活性非常差，那当然维护也不容易 了，<strong>也就是说装饰模式可以替代继承，解决我们类膨胀的问题</strong>。<strong>同时，你还要知道继承是静 态地给类增加功能，而装饰模式则是动态地增加功能，</strong></p>
-
 <p>装饰模式还有一个非常好的优点：扩展性非常好。在一个项目中，你会有非常多的因素 考虑不到，特别是业务的变更，不时地冒出一个需求，尤其是提出一个令项目大量延迟的需 求时，那种心情是相当的难受！装饰模式可以给我们很好的帮助，通过装饰模式重新封装一 个类，而不是通过继承来完成，简单点说，三个继承关系Father、Son、GrandSon三个类，我 要在Son类上增强一些功能怎么办？我想你会坚决地顶回去！不允许，对了，为什么呢？你 增强的功能是修改Son类中的方法吗？增加方法吗？对GrandSon的影响呢？特别是GrandSon 有多个的情况，你会怎么办？这个评估的工作量就够你受的，所以这是不允许的，那还是要 解决问题的呀，怎么办？通过建立SonDecorator类来修饰Son，相当于创建了一个新的类，这 个对原有程序没有变更，通过扩展很好地完成了这次变更。</p>
-
 <h1 id="缺点">缺点</h1>
-
 <p>对于装饰模式记住一点就足够了：多层的装饰是比较复杂的。为什么会复杂呢？你想想 看，就像剥洋葱一样，你剥到了最后才发现是最里层的装饰出现了问题，想象一下工作量 吧，因此，尽量减少装饰类的数量，以便降低系统的复杂度。</p>
-
 <h1 id="装饰模式的使用场景">装饰模式的使用场景</h1>
-
 <p>● 需要扩展一个类的功能，或给一个类增加附加功能。</p>
-
 <p>● 需要动态地给一个对象增加功能，这些功能可以再动态地撤销。</p>
-
 <p>● 需要为一批的兄弟类进行改装或加装功能，当然是首选装饰模式。</p>
-
 <h1 id="通用模板">通用模板</h1>
-
 <h2 id="component抽象构件">Component抽象构件</h2>
-
 <p>Component是一个接口或者是抽象类，就是定义我们最核心的对象，也就是最原始的对 象。在装饰模式中，必然有一个最基本、最核心、最原始的接口或抽象类充当 Component抽象构件</p>
-
-<pre><code class="language-java">public abstract class Component { 
-    //抽象的方法 
-    public abstract void operate(); 
-}
-</code></pre>
-
-<h2 id="concretecomponent-具体构件">ConcreteComponent 具体构件</h2>
-
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-java" data-lang="java"><span style="color:#66d9ef">public</span> <span style="color:#66d9ef">abstract</span> <span style="color:#66d9ef">class</span> <span style="color:#a6e22e">Component</span> <span style="color:#f92672">{</span> 
+    <span style="color:#75715e">//抽象的方法 
+</span><span style="color:#75715e"></span>    <span style="color:#66d9ef">public</span> <span style="color:#66d9ef">abstract</span> <span style="color:#66d9ef">void</span> <span style="color:#a6e22e">operate</span><span style="color:#f92672">();</span> 
+<span style="color:#f92672">}</span>
+</code></pre></div><h2 id="concretecomponent-具体构件">ConcreteComponent 具体构件</h2>
 <p>ConcreteComponent是最核心、最原始、最基本的接口或抽象类的实现，<strong>你要装饰的就是 它</strong>。</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-java" data-lang="java"><span style="color:#66d9ef">public</span> <span style="color:#66d9ef">class</span> <span style="color:#a6e22e">ConcreteComponent</span> <span style="color:#66d9ef">extends</span> Component <span style="color:#f92672">{</span> 
+    <span style="color:#75715e">// 具体实现
+</span><span style="color:#75715e"></span>    <span style="color:#a6e22e">@Override</span>
+    <span style="color:#66d9ef">public</span> <span style="color:#66d9ef">void</span> <span style="color:#a6e22e">operate</span><span style="color:#f92672">()</span> <span style="color:#f92672">{</span>
 
-<pre><code class="language-java">public class ConcreteComponent extends Component { 
-    // 具体实现
-    @Override
-    public void operate() {
-
-        System.out.println(&quot;do Something&quot;);
-    }
-}
-</code></pre>
-
-<h2 id="decorator装饰角色">Decorator装饰角色</h2>
-
+        System<span style="color:#f92672">.</span><span style="color:#a6e22e">out</span><span style="color:#f92672">.</span><span style="color:#a6e22e">println</span><span style="color:#f92672">(</span><span style="color:#e6db74">&#34;do Something&#34;</span><span style="color:#f92672">);</span>
+    <span style="color:#f92672">}</span>
+<span style="color:#f92672">}</span>
+</code></pre></div><h2 id="decorator装饰角色">Decorator装饰角色</h2>
 <p>一般是一个抽象类，做什么用呢？实现接口或者抽象方法，它里面可不一定有抽象的方 法呀，在它的属性里必然有一个private变量指向Component抽象构件。</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-java" data-lang="java"><span style="color:#66d9ef">public</span> <span style="color:#66d9ef">abstract</span> <span style="color:#66d9ef">class</span> <span style="color:#a6e22e">Decorator</span> <span style="color:#66d9ef">extends</span> Component <span style="color:#f92672">{</span>
+    <span style="color:#66d9ef">private</span> Component component <span style="color:#f92672">=</span> <span style="color:#66d9ef">null</span><span style="color:#f92672">;</span>
 
-<pre><code class="language-java">public abstract class Decorator extends Component {
-    private Component component = null;
+    <span style="color:#75715e">// 通过构造函数传递被修饰者
+</span><span style="color:#75715e"></span>    <span style="color:#66d9ef">public</span> <span style="color:#a6e22e">Decorator</span><span style="color:#f92672">(</span>Component _component<span style="color:#f92672">)</span> <span style="color:#f92672">{</span>
+        <span style="color:#66d9ef">this</span><span style="color:#f92672">.</span><span style="color:#a6e22e">component</span> <span style="color:#f92672">=</span> _component<span style="color:#f92672">;</span>
+    <span style="color:#f92672">}</span>
 
-    // 通过构造函数传递被修饰者
-    public Decorator(Component _component) {
-        this.component = _component;
-    }
-
-    // 委托给被修饰者执行
-    @Override
-    public void operate() {
-        this.component.operate();
-    }
-}
-</code></pre>
-
-<h2 id="具体装饰角色">具体装饰角色</h2>
-
+    <span style="color:#75715e">// 委托给被修饰者执行
+</span><span style="color:#75715e"></span>    <span style="color:#a6e22e">@Override</span>
+    <span style="color:#66d9ef">public</span> <span style="color:#66d9ef">void</span> <span style="color:#a6e22e">operate</span><span style="color:#f92672">()</span> <span style="color:#f92672">{</span>
+        <span style="color:#66d9ef">this</span><span style="color:#f92672">.</span><span style="color:#a6e22e">component</span><span style="color:#f92672">.</span><span style="color:#a6e22e">operate</span><span style="color:#f92672">();</span>
+    <span style="color:#f92672">}</span>
+<span style="color:#f92672">}</span>
+</code></pre></div><h2 id="具体装饰角色">具体装饰角色</h2>
 <p>ConcreteDecoratorA和ConcreteDecoratorB是两个具体的装饰类，你要把你最核心的、最 原始的、最基本的东西装饰成其他东西，上面的例子就是把一个比较平庸的成绩单装饰成家 长认可的成绩单。</p>
-
 <p><strong>ConcreteDecorator1</strong></p>
-
-<pre><code class="language-java">public class ConcreteDecorator1 extends Decorator {
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-java" data-lang="java"><span style="color:#66d9ef">public</span> <span style="color:#66d9ef">class</span> <span style="color:#a6e22e">ConcreteDecorator1</span> <span style="color:#66d9ef">extends</span> Decorator <span style="color:#f92672">{</span>
     
-    // 定义被修饰者
-    public ConcreteDecorator1(Component _component) {
+    <span style="color:#75715e">// 定义被修饰者
+</span><span style="color:#75715e"></span>    <span style="color:#66d9ef">public</span> <span style="color:#a6e22e">ConcreteDecorator1</span><span style="color:#f92672">(</span>Component _component<span style="color:#f92672">)</span> <span style="color:#f92672">{</span>
 
-        super(_component);
-    }
+        <span style="color:#66d9ef">super</span><span style="color:#f92672">(</span>_component<span style="color:#f92672">);</span>
+    <span style="color:#f92672">}</span>
 
-    // 定义自己的修饰方法
-    private void method1() {
-        System.out.println(&quot;method1 修饰&quot;);
-    }
+    <span style="color:#75715e">// 定义自己的修饰方法
+</span><span style="color:#75715e"></span>    <span style="color:#66d9ef">private</span> <span style="color:#66d9ef">void</span> <span style="color:#a6e22e">method1</span><span style="color:#f92672">()</span> <span style="color:#f92672">{</span>
+        System<span style="color:#f92672">.</span><span style="color:#a6e22e">out</span><span style="color:#f92672">.</span><span style="color:#a6e22e">println</span><span style="color:#f92672">(</span><span style="color:#e6db74">&#34;method1 修饰&#34;</span><span style="color:#f92672">);</span>
+    <span style="color:#f92672">}</span>
 
-    // 重写父类的Operation方法
-    public void operate() {
-        this.method1();
-        super.operate();
-    }
-}
-</code></pre>
+    <span style="color:#75715e">// 重写父类的Operation方法
+</span><span style="color:#75715e"></span>    <span style="color:#66d9ef">public</span> <span style="color:#66d9ef">void</span> <span style="color:#a6e22e">operate</span><span style="color:#f92672">()</span> <span style="color:#f92672">{</span>
+        <span style="color:#66d9ef">this</span><span style="color:#f92672">.</span><span style="color:#a6e22e">method1</span><span style="color:#f92672">();</span>
+        <span style="color:#66d9ef">super</span><span style="color:#f92672">.</span><span style="color:#a6e22e">operate</span><span style="color:#f92672">();</span>
+    <span style="color:#f92672">}</span>
+<span style="color:#f92672">}</span>
+</code></pre></div><p><strong>ConcreteDecorator2</strong></p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-java" data-lang="java"><span style="color:#66d9ef">public</span> <span style="color:#66d9ef">class</span> <span style="color:#a6e22e">ConcreteDecorator2</span> <span style="color:#66d9ef">extends</span> Decorator <span style="color:#f92672">{</span>
+    <span style="color:#75715e">// 定义被修饰者
+</span><span style="color:#75715e"></span>    <span style="color:#66d9ef">public</span> <span style="color:#a6e22e">ConcreteDecorator2</span><span style="color:#f92672">(</span>Component _component<span style="color:#f92672">)</span> <span style="color:#f92672">{</span>
+        <span style="color:#66d9ef">super</span><span style="color:#f92672">(</span>_component<span style="color:#f92672">);</span>
+    <span style="color:#f92672">}</span>
 
-<p><strong>ConcreteDecorator2</strong></p>
+    <span style="color:#75715e">// 定义自己的修饰方法
+</span><span style="color:#75715e"></span>    <span style="color:#66d9ef">private</span> <span style="color:#66d9ef">void</span> <span style="color:#a6e22e">method2</span><span style="color:#f92672">()</span> <span style="color:#f92672">{</span>
+        System<span style="color:#f92672">.</span><span style="color:#a6e22e">out</span><span style="color:#f92672">.</span><span style="color:#a6e22e">println</span><span style="color:#f92672">(</span><span style="color:#e6db74">&#34;method2修饰&#34;</span><span style="color:#f92672">);</span>
+    <span style="color:#f92672">}</span>
 
-<pre><code class="language-java">public class ConcreteDecorator2 extends Decorator {
-    // 定义被修饰者
-    public ConcreteDecorator2(Component _component) {
-        super(_component);
-    }
-
-    // 定义自己的修饰方法
-    private void method2() {
-        System.out.println(&quot;method2修饰&quot;);
-    }
-
-    // 重写父类的Operation方法
-    public void operate() {
-        super.operate();
-        this.method2();
-    }
-}
-</code></pre>
-
-<h2 id="main类">Main类</h2>
-
-<pre><code class="language-java">public class Client {
-    public static void main(String[] args) {
-        Component component = new ConcreteComponent(); 
-        // 第一次修饰
-        component = new ConcreteDecorator1(component); 
-        // 第二次修饰
-        component = new ConcreteDecorator2(component); 
-        // 修饰后运行
-        component.operate();
-    }
-}
-</code></pre>
-
-<p>运行结果</p>
-
-<pre><code class="language-java">method1 修饰
-do Something
+    <span style="color:#75715e">// 重写父类的Operation方法
+</span><span style="color:#75715e"></span>    <span style="color:#66d9ef">public</span> <span style="color:#66d9ef">void</span> <span style="color:#a6e22e">operate</span><span style="color:#f92672">()</span> <span style="color:#f92672">{</span>
+        <span style="color:#66d9ef">super</span><span style="color:#f92672">.</span><span style="color:#a6e22e">operate</span><span style="color:#f92672">();</span>
+        <span style="color:#66d9ef">this</span><span style="color:#f92672">.</span><span style="color:#a6e22e">method2</span><span style="color:#f92672">();</span>
+    <span style="color:#f92672">}</span>
+<span style="color:#f92672">}</span>
+</code></pre></div><h2 id="main类">Main类</h2>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-java" data-lang="java"><span style="color:#66d9ef">public</span> <span style="color:#66d9ef">class</span> <span style="color:#a6e22e">Client</span> <span style="color:#f92672">{</span>
+    <span style="color:#66d9ef">public</span> <span style="color:#66d9ef">static</span> <span style="color:#66d9ef">void</span> <span style="color:#a6e22e">main</span><span style="color:#f92672">(</span>String<span style="color:#f92672">[]</span> args<span style="color:#f92672">)</span> <span style="color:#f92672">{</span>
+        Component component <span style="color:#f92672">=</span> <span style="color:#66d9ef">new</span> ConcreteComponent<span style="color:#f92672">();</span> 
+        <span style="color:#75715e">// 第一次修饰
+</span><span style="color:#75715e"></span>        component <span style="color:#f92672">=</span> <span style="color:#66d9ef">new</span> ConcreteDecorator1<span style="color:#f92672">(</span>component<span style="color:#f92672">);</span> 
+        <span style="color:#75715e">// 第二次修饰
+</span><span style="color:#75715e"></span>        component <span style="color:#f92672">=</span> <span style="color:#66d9ef">new</span> ConcreteDecorator2<span style="color:#f92672">(</span>component<span style="color:#f92672">);</span> 
+        <span style="color:#75715e">// 修饰后运行
+</span><span style="color:#75715e"></span>        component<span style="color:#f92672">.</span><span style="color:#a6e22e">operate</span><span style="color:#f92672">();</span>
+    <span style="color:#f92672">}</span>
+<span style="color:#f92672">}</span>
+</code></pre></div><p>运行结果</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-java" data-lang="java">method1 修饰
+<span style="color:#66d9ef">do</span> Something
 method2修饰
-</code></pre>
-
-<h1 id="注意">注意</h1>
-
+</code></pre></div><h1 id="注意">注意</h1>
 <p>可以看到上面的代码， 返回的对象接口</p>
-
-<pre><code class="language-java">Component component
-</code></pre>
-
-<p>如此，对原来的代码直接没有影响，同时也可以感觉 ，如果用一个接口植入进去进行业务代码的扩展也对原来的代码有改动，这种添加一个新类，直接在外层进行代码的处理是最理想的。</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-java" data-lang="java">Component component
+</code></pre></div><p>如此，对原来的代码直接没有影响，同时也可以感觉 ，如果用一个接口植入进去进行业务代码的扩展也对原来的代码有改动，这种添加一个新类，直接在外层进行代码的处理是最理想的。</p>
 
 
                 
@@ -496,21 +450,13 @@ method2修饰
                     </h4>
                     <ul class="catalog-body"></ul>
                     <nav id="TableOfContents">
-<ul>
-<li><a href="#概述">概述</a></li>
-<li><a href="#优点">优点</a></li>
-<li><a href="#缺点">缺点</a></li>
-<li><a href="#装饰模式的使用场景">装饰模式的使用场景</a></li>
-<li><a href="#通用模板">通用模板</a>
-<ul>
-<li><a href="#component抽象构件">Component抽象构件</a></li>
-<li><a href="#concretecomponent-具体构件">ConcreteComponent 具体构件</a></li>
-<li><a href="#decorator装饰角色">Decorator装饰角色</a></li>
-<li><a href="#具体装饰角色">具体装饰角色</a></li>
-<li><a href="#main类">Main类</a></li>
-</ul></li>
-<li><a href="#注意">注意</a></li>
-</ul>
+  <ul>
+    <li><a href="#component抽象构件">Component抽象构件</a></li>
+    <li><a href="#concretecomponent-具体构件">ConcreteComponent 具体构件</a></li>
+    <li><a href="#decorator装饰角色">Decorator装饰角色</a></li>
+    <li><a href="#具体装饰角色">具体装饰角色</a></li>
+    <li><a href="#main类">Main类</a></li>
+  </ul>
 </nav>
                     <br>
                     <br>
@@ -535,9 +481,6 @@ method2修饰
                         
                         
                         
-                        <a href="/tags/" title="">
-                            
-                        </a>
                         
                         
                         
@@ -547,101 +490,6 @@ method2修饰
                         
                         
                         
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        <a href="/tags/qt" title="QT">
-                            QT
-                        </a>
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        <a href="/tags/zookeeper" title="Zookeeper">
-                            Zookeeper
-                        </a>
                         
                         
                         
@@ -681,8 +529,10 @@ method2修饰
                         
                         
                         
-                        <a href="/tags/elasticsearch" title="elasticSearch">
-                            elasticSearch
+                        
+                        
+                        <a href="/tags/elasticsearch" title="elasticsearch">
+                            elasticsearch
                         </a>
                         
                         
@@ -693,9 +543,27 @@ method2修饰
                         
                         
                         
-                        <a href="/tags/golang" title="golang">
-                            golang
-                        </a>
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
                         
                         
                         
@@ -733,9 +601,21 @@ method2修饰
                         
                         
                         
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
                         <a href="/tags/jvm" title="jvm">
                             jvm
                         </a>
+                        
+                        
+                        
+                        
                         
                         
                         
@@ -759,9 +639,19 @@ method2修饰
                         
                         
                         
+                        
+                        
+                        
+                        
+                        
+                        
                         <a href="/tags/mongodb" title="mongodb">
                             mongodb
                         </a>
+                        
+                        
+                        
+                        
                         
                         
                         
@@ -772,10 +662,6 @@ method2修饰
                         </a>
                         
                         
-                        
-                        <a href="/tags/mycat" title="mycat">
-                            mycat
-                        </a>
                         
                         
                         
@@ -789,9 +675,17 @@ method2修饰
                         
                         
                         
-                        <a href="/tags/nginx" title="nginx">
-                            nginx
-                        </a>
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
                         
                         
                         
@@ -815,8 +709,22 @@ method2修饰
                         
                         
                         
+                        
+                        
                         <a href="/tags/rocketmq" title="rocketmq">
                             rocketmq
+                        </a>
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        <a href="/tags/security%E6%A1%86%E6%9E%B6%E5%AD%A6%E4%B9%A0" title="security框架学习">
+                            security框架学习
                         </a>
                         
                         
@@ -843,17 +751,11 @@ method2修饰
                         
                         
                         
-                        <a href="/tags/springcloud" title="springCloud">
-                            springCloud
-                        </a>
-                        
-                        
-                        
-                        
-                        
                         <a href="/tags/springboot" title="springboot">
                             springboot
                         </a>
+                        
+                        
                         
                         
                         
@@ -867,6 +769,9 @@ method2修饰
                         
                         
                         
+                        <a href="/tags/springcloud" title="springcloud">
+                            springcloud
+                        </a>
                         
                         
                         
@@ -892,6 +797,33 @@ method2修饰
                         
                         
                         
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        <a href="/tags/zookeeper" title="zookeeper">
+                            zookeeper
+                        </a>
                         
                         
                         
@@ -951,6 +883,8 @@ method2修饰
                         
                         
                         
+                        
+                        
                         <a href="/tags/%E5%88%86%E5%B8%83%E5%BC%8F%E7%B3%BB%E5%88%97" title="分布式系列">
                             分布式系列
                         </a>
@@ -970,6 +904,10 @@ method2修饰
                         
                         
                         
+                        
+                        <a href="/tags/%E5%8D%8F%E8%AE%AE%E6%A0%88" title="协议栈">
+                            协议栈
+                        </a>
                         
                         
                         
@@ -1169,6 +1107,12 @@ method2修饰
                         
                         
                         
+                        
+                        
+                        
+                        
+                        
+                        
                         <a href="/tags/%E7%BD%91%E7%BB%9C%E7%BC%96%E7%A8%8B" title="网络编程">
                             网络编程
                         </a>
@@ -1192,6 +1136,10 @@ method2修饰
                         
                         
                         
+                        
+                        <a href="/tags/%E8%AE%A4%E8%AF%81%E5%92%8C%E6%8E%88%E6%9D%83" title="认证和授权">
+                            认证和授权
+                        </a>
                         
                         
                         
@@ -1362,7 +1310,7 @@ method2修饰
                     
                 </ul>
 		<p class="copyright text-muted">
-                    Copyright &copy;  2020
+                    Copyright &copy;  2021
                     <br>
                     <a href="https://themes.gohugo.io/hugo-theme-cleanwhite">CleanWhite Hugo Theme</a> by <a href="https://zhaohuabing.com">Huabing</a> |
                     <iframe

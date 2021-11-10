@@ -97,15 +97,15 @@
                     </li>
                     
                     <li>
-                        <a href="/categories/english">English</a>
+                        <a href="/categories/english">english</a>
                     </li>
                     
                     <li>
-                        <a href="/categories/life">Life</a>
+                        <a href="/categories/life">life</a>
                     </li>
                     
                     <li>
-                        <a href="/categories/tech">Tech</a>
+                        <a href="/categories/tech">tech</a>
                     </li>
                     
 
@@ -241,155 +241,132 @@
                 
                 
                 
-                
-
-<p>[TOC]</p>
-
-<p><strong>转载地址：<a href="https://blog.csdn.net/weixin_42245930/article/details/88761176">https://blog.csdn.net/weixin_42245930/article/details/88761176</a></strong></p>
-
+                <p>[TOC]</p>
+<p><strong>转载地址：https://blog.csdn.net/weixin_42245930/article/details/88761176</strong></p>
 <h1 id="guarded-suspension">Guarded Suspension</h1>
-
-<p>Guarded 是被守护，被保护的意思，Suspension 是暂停的意思。如果执行现在的处理会造成问题，就让执行处理的线程进行等待。<strong>当现在并不适合马上执行某个操作时，就要求想要执行该操作的线程等待，</strong>这就是Guarded Suspension Pattern。Guarded Suspension Pattern 会要求线程等候，以保障实例的安全性。 <strong>其实和生产者和消费者模式有点类似</strong>。</p>
-
+<p>Guarded 是被守护，被保护的意思，Suspension 是暂停的意思。如果执行现在的处理会造成问题，就让执行处理的线程进行等待。**当现在并不适合马上执行某个操作时，就要求想要执行该操作的线程等待，**这就是Guarded Suspension Pattern。Guarded Suspension Pattern 会要求线程等候，以保障实例的安全性。 <strong>其实和生产者和消费者模式有点类似</strong>。</p>
 <h1 id="request">Request</h1>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-java" data-lang="java"><span style="color:#66d9ef">public</span> <span style="color:#66d9ef">class</span> <span style="color:#a6e22e">Request</span> <span style="color:#f92672">{</span>
+    <span style="color:#66d9ef">private</span> <span style="color:#66d9ef">final</span> String name<span style="color:#f92672">;</span>
 
-<pre><code class="language-java">public class Request {
-    private final String name;
+    <span style="color:#66d9ef">public</span> <span style="color:#a6e22e">Request</span><span style="color:#f92672">(</span>String name<span style="color:#f92672">)</span> <span style="color:#f92672">{</span>
+        <span style="color:#66d9ef">this</span><span style="color:#f92672">.</span><span style="color:#a6e22e">name</span> <span style="color:#f92672">=</span> name<span style="color:#f92672">;</span>
+    <span style="color:#f92672">}</span>
 
-    public Request(String name) {
-        this.name = name;
-    }
+    <span style="color:#66d9ef">public</span> String <span style="color:#a6e22e">getName</span><span style="color:#f92672">()</span> <span style="color:#f92672">{</span>
+        <span style="color:#66d9ef">return</span> name<span style="color:#f92672">;</span>
+    <span style="color:#f92672">}</span>
 
-    public String getName() {
-        return name;
-    }
+    <span style="color:#a6e22e">@Override</span>
+    <span style="color:#66d9ef">public</span> String <span style="color:#a6e22e">toString</span><span style="color:#f92672">()</span> <span style="color:#f92672">{</span>
+        <span style="color:#66d9ef">return</span> <span style="color:#e6db74">&#34;Request{&#34;</span> <span style="color:#f92672">+</span> <span style="color:#e6db74">&#34;name=&#39;&#34;</span> <span style="color:#f92672">+</span> name <span style="color:#f92672">+</span> <span style="color:#e6db74">&#39;\&#39;&#39;</span> <span style="color:#f92672">+</span> <span style="color:#e6db74">&#39;}&#39;</span><span style="color:#f92672">;</span>
+    <span style="color:#f92672">}</span>
+<span style="color:#f92672">}</span>
+</code></pre></div><h1 id="requestqueue">RequestQueue</h1>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-java" data-lang="java"><span style="color:#66d9ef">public</span> <span style="color:#66d9ef">class</span> <span style="color:#a6e22e">RequestQueue</span> <span style="color:#f92672">{</span>
 
-    @Override
-    public String toString() {
-        return &quot;Request{&quot; + &quot;name='&quot; + name + '\'' + '}';
-    }
-}
-</code></pre>
+    <span style="color:#66d9ef">private</span> <span style="color:#66d9ef">final</span> Queue<span style="color:#f92672">&lt;</span>Request<span style="color:#f92672">&gt;</span> queue <span style="color:#f92672">=</span> <span style="color:#66d9ef">new</span> LinkedList<span style="color:#f92672">&lt;&gt;();</span>
 
-<h1 id="requestqueue">RequestQueue</h1>
+    <span style="color:#75715e">// 取出最先放在RequestQueue的中的一个请求，作为返回值，
+</span><span style="color:#75715e"></span>    <span style="color:#75715e">// 如果一个请求也没有就一直等待，直到其他线程执行putRequest.
+</span><span style="color:#75715e"></span>    <span style="color:#66d9ef">public</span> <span style="color:#66d9ef">synchronized</span> Request <span style="color:#a6e22e">getRequest</span><span style="color:#f92672">()</span> <span style="color:#f92672">{</span>
+        <span style="color:#66d9ef">while</span> <span style="color:#f92672">(</span>queue<span style="color:#f92672">.</span><span style="color:#a6e22e">peek</span><span style="color:#f92672">()</span> <span style="color:#f92672">==</span> <span style="color:#66d9ef">null</span><span style="color:#f92672">)</span> <span style="color:#f92672">{</span>
+            <span style="color:#66d9ef">try</span> <span style="color:#f92672">{</span>
+                wait<span style="color:#f92672">();</span>
+            <span style="color:#f92672">}</span> <span style="color:#66d9ef">catch</span> <span style="color:#f92672">(</span>InterruptedException e<span style="color:#f92672">)</span> <span style="color:#f92672">{</span>
+                e<span style="color:#f92672">.</span><span style="color:#a6e22e">printStackTrace</span><span style="color:#f92672">();</span>
+            <span style="color:#f92672">}</span>
+        <span style="color:#f92672">}</span>
+        <span style="color:#66d9ef">return</span> queue<span style="color:#f92672">.</span><span style="color:#a6e22e">remove</span><span style="color:#f92672">();</span>
 
-<pre><code class="language-java">public class RequestQueue {
+    <span style="color:#f92672">}</span>
 
-    private final Queue&lt;Request&gt; queue = new LinkedList&lt;&gt;();
+    <span style="color:#75715e">// 添加一个请求
+</span><span style="color:#75715e"></span>    <span style="color:#66d9ef">public</span> <span style="color:#66d9ef">synchronized</span> <span style="color:#66d9ef">void</span> <span style="color:#a6e22e">putRequest</span><span style="color:#f92672">(</span>Request request<span style="color:#f92672">)</span> <span style="color:#f92672">{</span>
+        queue<span style="color:#f92672">.</span><span style="color:#a6e22e">offer</span><span style="color:#f92672">(</span>request<span style="color:#f92672">);</span>
+        notifyAll<span style="color:#f92672">();</span>
+    <span style="color:#f92672">}</span>
+<span style="color:#f92672">}</span>
 
-    // 取出最先放在RequestQueue的中的一个请求，作为返回值，
-    // 如果一个请求也没有就一直等待，直到其他线程执行putRequest.
-    public synchronized Request getRequest() {
-        while (queue.peek() == null) {
-            try {
-                wait();
-            } catch (InterruptedException e) {
-                e.printStackTrace();
-            }
-        }
-        return queue.remove();
+</code></pre></div><h1 id="clientthread">ClientThread</h1>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-java" data-lang="java"><span style="color:#66d9ef">public</span> <span style="color:#66d9ef">class</span> <span style="color:#a6e22e">ClientThread</span> <span style="color:#66d9ef">extends</span> Thread <span style="color:#f92672">{</span>
+    <span style="color:#66d9ef">private</span> <span style="color:#66d9ef">final</span> Random random<span style="color:#f92672">;</span>
+    <span style="color:#66d9ef">private</span> <span style="color:#66d9ef">final</span> RequestQueue requestQueue<span style="color:#f92672">;</span>
 
-    }
+    <span style="color:#66d9ef">public</span> <span style="color:#a6e22e">ClientThread</span><span style="color:#f92672">(</span>RequestQueue requestQueue<span style="color:#f92672">,</span> String name<span style="color:#f92672">,</span> <span style="color:#66d9ef">long</span> seed<span style="color:#f92672">)</span> <span style="color:#f92672">{</span>
+        <span style="color:#66d9ef">super</span><span style="color:#f92672">(</span>name<span style="color:#f92672">);</span>
+        <span style="color:#66d9ef">this</span><span style="color:#f92672">.</span><span style="color:#a6e22e">requestQueue</span> <span style="color:#f92672">=</span> requestQueue<span style="color:#f92672">;</span>
+        <span style="color:#66d9ef">this</span><span style="color:#f92672">.</span><span style="color:#a6e22e">random</span> <span style="color:#f92672">=</span> <span style="color:#66d9ef">new</span> Random<span style="color:#f92672">(</span>seed<span style="color:#f92672">);</span>
 
-    // 添加一个请求
-    public synchronized void putRequest(Request request) {
-        queue.offer(request);
-        notifyAll();
-    }
-}
+    <span style="color:#f92672">}</span>
 
-</code></pre>
+    <span style="color:#a6e22e">@Override</span>
+    <span style="color:#66d9ef">public</span> <span style="color:#66d9ef">void</span> <span style="color:#a6e22e">run</span><span style="color:#f92672">()</span> <span style="color:#f92672">{</span>
+        <span style="color:#66d9ef">for</span> <span style="color:#f92672">(</span><span style="color:#66d9ef">int</span> i <span style="color:#f92672">=</span> 0<span style="color:#f92672">;</span> i <span style="color:#f92672">&lt;</span> 10<span style="color:#f92672">;</span> i<span style="color:#f92672">++)</span> <span style="color:#f92672">{</span>
+            Request request <span style="color:#f92672">=</span> <span style="color:#66d9ef">new</span> Request<span style="color:#f92672">(</span><span style="color:#e6db74">&#34;No.&#34;</span> <span style="color:#f92672">+</span> i<span style="color:#f92672">);</span>
+            System<span style="color:#f92672">.</span><span style="color:#a6e22e">out</span><span style="color:#f92672">.</span><span style="color:#a6e22e">println</span><span style="color:#f92672">(</span>Thread<span style="color:#f92672">.</span><span style="color:#a6e22e">currentThread</span><span style="color:#f92672">().</span><span style="color:#a6e22e">getName</span><span style="color:#f92672">()</span> <span style="color:#f92672">+</span> <span style="color:#e6db74">&#34; requests &#34;</span> <span style="color:#f92672">+</span> request<span style="color:#f92672">+</span><span style="color:#e6db74">&#34;/n&#34;</span><span style="color:#f92672">);</span>
+            requestQueue<span style="color:#f92672">.</span><span style="color:#a6e22e">putRequest</span><span style="color:#f92672">(</span>request<span style="color:#f92672">);</span>
+            <span style="color:#66d9ef">try</span> <span style="color:#f92672">{</span>
+                <span style="color:#75715e">// 为了错开发送请求的执行点，使用java.util.Random类随机生成0-1000之间的数
+</span><span style="color:#75715e"></span>                Thread<span style="color:#f92672">.</span><span style="color:#a6e22e">sleep</span><span style="color:#f92672">(</span>random<span style="color:#f92672">.</span><span style="color:#a6e22e">nextInt</span><span style="color:#f92672">(</span>1000<span style="color:#f92672">));</span>
+            <span style="color:#f92672">}</span> <span style="color:#66d9ef">catch</span> <span style="color:#f92672">(</span>InterruptedException e<span style="color:#f92672">)</span> <span style="color:#f92672">{</span>
+                e<span style="color:#f92672">.</span><span style="color:#a6e22e">printStackTrace</span><span style="color:#f92672">();</span>
+            <span style="color:#f92672">}</span>
+        <span style="color:#f92672">}</span>
+    <span style="color:#f92672">}</span>
+<span style="color:#f92672">}</span>
 
-<h1 id="clientthread">ClientThread</h1>
+</code></pre></div><h1 id="serverthread">ServerThread</h1>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-java" data-lang="java"><span style="color:#75715e">/**
+</span><span style="color:#75715e"> * 用于表示接收请求的线程，该类也持有RuquestQueue的实例，ServerThread使用该实例的getRequst方法来接受请求。
+</span><span style="color:#75715e"> */</span>
+<span style="color:#66d9ef">public</span> <span style="color:#66d9ef">class</span> <span style="color:#a6e22e">ServerThread</span> <span style="color:#66d9ef">extends</span> Thread <span style="color:#f92672">{</span>
 
-<pre><code class="language-java">public class ClientThread extends Thread {
-    private final Random random;
-    private final RequestQueue requestQueue;
+    <span style="color:#66d9ef">private</span> <span style="color:#66d9ef">final</span> Random random<span style="color:#f92672">;</span>
+    <span style="color:#66d9ef">private</span> <span style="color:#66d9ef">final</span> RequestQueue requestQueue<span style="color:#f92672">;</span>
 
-    public ClientThread(RequestQueue requestQueue, String name, long seed) {
-        super(name);
-        this.requestQueue = requestQueue;
-        this.random = new Random(seed);
+    <span style="color:#66d9ef">public</span> <span style="color:#a6e22e">ServerThread</span><span style="color:#f92672">(</span>RequestQueue requestQueue<span style="color:#f92672">,</span> String name<span style="color:#f92672">,</span> <span style="color:#66d9ef">long</span> seed<span style="color:#f92672">)</span> <span style="color:#f92672">{</span>
+        <span style="color:#66d9ef">super</span><span style="color:#f92672">(</span>name<span style="color:#f92672">);</span>
+        <span style="color:#66d9ef">this</span><span style="color:#f92672">.</span><span style="color:#a6e22e">requestQueue</span> <span style="color:#f92672">=</span> requestQueue<span style="color:#f92672">;</span>
+        <span style="color:#66d9ef">this</span><span style="color:#f92672">.</span><span style="color:#a6e22e">random</span> <span style="color:#f92672">=</span> <span style="color:#66d9ef">new</span> Random<span style="color:#f92672">(</span>seed<span style="color:#f92672">);</span>
+    <span style="color:#f92672">}</span>
 
-    }
+    <span style="color:#a6e22e">@Override</span>
+    <span style="color:#66d9ef">public</span> <span style="color:#66d9ef">void</span> <span style="color:#a6e22e">run</span><span style="color:#f92672">()</span> <span style="color:#f92672">{</span>
+        <span style="color:#66d9ef">for</span> <span style="color:#f92672">(</span><span style="color:#66d9ef">int</span> i <span style="color:#f92672">=</span> 0<span style="color:#f92672">;</span> i <span style="color:#f92672">&lt;</span> 10<span style="color:#f92672">;</span> i<span style="color:#f92672">++)</span> <span style="color:#f92672">{</span>
+            Request request <span style="color:#f92672">=</span> requestQueue<span style="color:#f92672">.</span><span style="color:#a6e22e">getRequest</span><span style="color:#f92672">();</span>
+            System<span style="color:#f92672">.</span><span style="color:#a6e22e">out</span><span style="color:#f92672">.</span><span style="color:#a6e22e">println</span><span style="color:#f92672">(</span>Thread<span style="color:#f92672">.</span><span style="color:#a6e22e">currentThread</span><span style="color:#f92672">().</span><span style="color:#a6e22e">getName</span><span style="color:#f92672">()</span> <span style="color:#f92672">+</span> <span style="color:#e6db74">&#34; handles &#34;</span> <span style="color:#f92672">+</span> request<span style="color:#f92672">);</span>
+            <span style="color:#66d9ef">try</span> <span style="color:#f92672">{</span>
+                Thread<span style="color:#f92672">.</span><span style="color:#a6e22e">sleep</span><span style="color:#f92672">(</span>random<span style="color:#f92672">.</span><span style="color:#a6e22e">nextInt</span><span style="color:#f92672">(</span>1000<span style="color:#f92672">));</span>
+            <span style="color:#f92672">}</span> <span style="color:#66d9ef">catch</span> <span style="color:#f92672">(</span>InterruptedException e<span style="color:#f92672">)</span> <span style="color:#f92672">{</span>
+                e<span style="color:#f92672">.</span><span style="color:#a6e22e">printStackTrace</span><span style="color:#f92672">();</span>
+            <span style="color:#f92672">}</span>
 
-    @Override
-    public void run() {
-        for (int i = 0; i &lt; 10; i++) {
-            Request request = new Request(&quot;No.&quot; + i);
-            System.out.println(Thread.currentThread().getName() + &quot; requests &quot; + request+&quot;/n&quot;);
-            requestQueue.putRequest(request);
-            try {
-                // 为了错开发送请求的执行点，使用java.util.Random类随机生成0-1000之间的数
-                Thread.sleep(random.nextInt(1000));
-            } catch (InterruptedException e) {
-                e.printStackTrace();
-            }
-        }
-    }
-}
+        <span style="color:#f92672">}</span>
 
-</code></pre>
+    <span style="color:#f92672">}</span>
+<span style="color:#f92672">}</span>
+</code></pre></div><h1 id="main">Main</h1>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-java" data-lang="java"><span style="color:#66d9ef">public</span> <span style="color:#66d9ef">class</span> <span style="color:#a6e22e">Main</span> <span style="color:#f92672">{</span>
+    <span style="color:#66d9ef">public</span> <span style="color:#66d9ef">static</span> <span style="color:#66d9ef">void</span> <span style="color:#a6e22e">main</span><span style="color:#f92672">(</span>String<span style="color:#f92672">[]</span> args<span style="color:#f92672">)</span> <span style="color:#f92672">{</span>
+        RequestQueue requestQueue <span style="color:#f92672">=</span> <span style="color:#66d9ef">new</span> RequestQueue<span style="color:#f92672">();</span>
+        <span style="color:#66d9ef">new</span> ClientThread<span style="color:#f92672">(</span>requestQueue<span style="color:#f92672">,</span> <span style="color:#e6db74">&#34;发送请求--&gt;&#34;</span><span style="color:#f92672">,</span> 3141592L<span style="color:#f92672">).</span><span style="color:#a6e22e">start</span><span style="color:#f92672">();</span>
+        <span style="color:#66d9ef">new</span> ServerThread<span style="color:#f92672">(</span>requestQueue<span style="color:#f92672">,</span> <span style="color:#e6db74">&#34;处理请求--&gt;&#34;</span><span style="color:#f92672">,</span> 6535897L<span style="color:#f92672">).</span><span style="color:#a6e22e">start</span><span style="color:#f92672">();</span>
+    <span style="color:#f92672">}</span>
+<span style="color:#f92672">}</span>
+</code></pre></div><h1 id="运行结果">运行结果</h1>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-java" data-lang="java">送请求<span style="color:#f92672">--&gt;</span> requests Request<span style="color:#f92672">{</span>name<span style="color:#f92672">=</span><span style="color:#960050;background-color:#1e0010">&#39;</span>No<span style="color:#f92672">.</span><span style="color:#a6e22e">0</span><span style="color:#960050;background-color:#1e0010">&#39;</span><span style="color:#f92672">}</span>
+处理请求<span style="color:#f92672">--&gt;</span> handles Request<span style="color:#f92672">{</span>name<span style="color:#f92672">=</span><span style="color:#960050;background-color:#1e0010">&#39;</span>No<span style="color:#f92672">.</span><span style="color:#a6e22e">0</span><span style="color:#960050;background-color:#1e0010">&#39;</span><span style="color:#f92672">}</span>
 
-<h1 id="serverthread">ServerThread</h1>
+发送请求<span style="color:#f92672">--&gt;</span> requests Request<span style="color:#f92672">{</span>name<span style="color:#f92672">=</span><span style="color:#960050;background-color:#1e0010">&#39;</span>No<span style="color:#f92672">.</span><span style="color:#a6e22e">1</span><span style="color:#960050;background-color:#1e0010">&#39;</span><span style="color:#f92672">}</span>
+发送请求<span style="color:#f92672">--&gt;</span> requests Request<span style="color:#f92672">{</span>name<span style="color:#f92672">=</span><span style="color:#960050;background-color:#1e0010">&#39;</span>No<span style="color:#f92672">.</span><span style="color:#a6e22e">2</span><span style="color:#960050;background-color:#1e0010">&#39;</span><span style="color:#f92672">}</span>
 
-<pre><code class="language-java">/**
- * 用于表示接收请求的线程，该类也持有RuquestQueue的实例，ServerThread使用该实例的getRequst方法来接受请求。
- */
-public class ServerThread extends Thread {
+处理请求<span style="color:#f92672">--&gt;</span> handles Request<span style="color:#f92672">{</span>name<span style="color:#f92672">=</span><span style="color:#960050;background-color:#1e0010">&#39;</span>No<span style="color:#f92672">.</span><span style="color:#a6e22e">1</span><span style="color:#960050;background-color:#1e0010">&#39;</span><span style="color:#f92672">}</span>
+处理请求<span style="color:#f92672">--&gt;</span> handles Request<span style="color:#f92672">{</span>name<span style="color:#f92672">=</span><span style="color:#960050;background-color:#1e0010">&#39;</span>No<span style="color:#f92672">.</span><span style="color:#a6e22e">2</span><span style="color:#960050;background-color:#1e0010">&#39;</span><span style="color:#f92672">}</span>
 
-    private final Random random;
-    private final RequestQueue requestQueue;
-
-    public ServerThread(RequestQueue requestQueue, String name, long seed) {
-        super(name);
-        this.requestQueue = requestQueue;
-        this.random = new Random(seed);
-    }
-
-    @Override
-    public void run() {
-        for (int i = 0; i &lt; 10; i++) {
-            Request request = requestQueue.getRequest();
-            System.out.println(Thread.currentThread().getName() + &quot; handles &quot; + request);
-            try {
-                Thread.sleep(random.nextInt(1000));
-            } catch (InterruptedException e) {
-                e.printStackTrace();
-            }
-
-        }
-
-    }
-}
-</code></pre>
-
-<h1 id="main">Main</h1>
-
-<pre><code class="language-java">public class Main {
-    public static void main(String[] args) {
-        RequestQueue requestQueue = new RequestQueue();
-        new ClientThread(requestQueue, &quot;发送请求--&gt;&quot;, 3141592L).start();
-        new ServerThread(requestQueue, &quot;处理请求--&gt;&quot;, 6535897L).start();
-    }
-}
-</code></pre>
-
-<h1 id="运行结果">运行结果</h1>
-
-<pre><code class="language-java">送请求--&gt; requests Request{name='No.0'}
-处理请求--&gt; handles Request{name='No.0'}
-
-发送请求--&gt; requests Request{name='No.1'}
-发送请求--&gt; requests Request{name='No.2'}
-
-处理请求--&gt; handles Request{name='No.1'}
-处理请求--&gt; handles Request{name='No.2'}
-
-发送请求--&gt; requests Request{name='No.3'}
-处理请求--&gt; handles Request{name='No.3'}
-</code></pre>
-
+发送请求<span style="color:#f92672">--&gt;</span> requests Request<span style="color:#f92672">{</span>name<span style="color:#f92672">=</span><span style="color:#960050;background-color:#1e0010">&#39;</span>No<span style="color:#f92672">.</span><span style="color:#a6e22e">3</span><span style="color:#960050;background-color:#1e0010">&#39;</span><span style="color:#f92672">}</span>
+处理请求<span style="color:#f92672">--&gt;</span> handles Request<span style="color:#f92672">{</span>name<span style="color:#f92672">=</span><span style="color:#960050;background-color:#1e0010">&#39;</span>No<span style="color:#f92672">.</span><span style="color:#a6e22e">3</span><span style="color:#960050;background-color:#1e0010">&#39;</span><span style="color:#f92672">}</span>
+</code></pre></div>
 
                 
                 
@@ -437,15 +414,15 @@ public class ServerThread extends Thread {
                 <ul class="pager">
                     
                     <li class="previous">
-                        <a href="/post/threadlocal-%E8%AE%BE%E8%AE%A1%E6%A8%A1%E5%BC%8F/" data-toggle="tooltip" data-placement="top"
-                            title="ThreadLocal-设计模式">&larr;
+                        <a href="/post/immutable-%E8%AE%BE%E8%AE%A1%E6%A8%A1%E5%BC%8F/" data-toggle="tooltip" data-placement="top"
+                            title="immutable-设计模式">&larr;
                             Previous Post</a>
                     </li>
                     
                     
                     <li class="next">
-                        <a href="/post/future-%E8%AE%BE%E8%AE%A1%E6%A8%A1%E5%BC%8F/" data-toggle="tooltip" data-placement="top"
-                            title="Future-设计模式">Next
+                        <a href="/post/balking-%E8%AE%BE%E8%AE%A1%E6%A8%A1%E5%BC%8F/" data-toggle="tooltip" data-placement="top"
+                            title="balking-设计模式">Next
                             Post &rarr;</a>
                     </li>
                     
@@ -495,17 +472,7 @@ public class ServerThread extends Thread {
                         <a class="catalog-toggle" style="font-size: 24px;" href="index.html#">目录结构</a>
                     </h4>
                     <ul class="catalog-body"></ul>
-                    <nav id="TableOfContents">
-<ul>
-<li><a href="#guarded-suspension">Guarded Suspension</a></li>
-<li><a href="#request">Request</a></li>
-<li><a href="#requestqueue">RequestQueue</a></li>
-<li><a href="#clientthread">ClientThread</a></li>
-<li><a href="#serverthread">ServerThread</a></li>
-<li><a href="#main">Main</a></li>
-<li><a href="#运行结果">运行结果</a></li>
-</ul>
-</nav>
+                    <nav id="TableOfContents"></nav>
                     <br>
                     <br>
                     <br>
@@ -529,9 +496,6 @@ public class ServerThread extends Thread {
                         
                         
                         
-                        <a href="/tags/" title="">
-                            
-                        </a>
                         
                         
                         
@@ -541,101 +505,6 @@ public class ServerThread extends Thread {
                         
                         
                         
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        <a href="/tags/qt" title="QT">
-                            QT
-                        </a>
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        <a href="/tags/zookeeper" title="Zookeeper">
-                            Zookeeper
-                        </a>
                         
                         
                         
@@ -675,8 +544,10 @@ public class ServerThread extends Thread {
                         
                         
                         
-                        <a href="/tags/elasticsearch" title="elasticSearch">
-                            elasticSearch
+                        
+                        
+                        <a href="/tags/elasticsearch" title="elasticsearch">
+                            elasticsearch
                         </a>
                         
                         
@@ -687,9 +558,27 @@ public class ServerThread extends Thread {
                         
                         
                         
-                        <a href="/tags/golang" title="golang">
-                            golang
-                        </a>
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
                         
                         
                         
@@ -727,9 +616,21 @@ public class ServerThread extends Thread {
                         
                         
                         
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
                         <a href="/tags/jvm" title="jvm">
                             jvm
                         </a>
+                        
+                        
+                        
+                        
                         
                         
                         
@@ -753,9 +654,19 @@ public class ServerThread extends Thread {
                         
                         
                         
+                        
+                        
+                        
+                        
+                        
+                        
                         <a href="/tags/mongodb" title="mongodb">
                             mongodb
                         </a>
+                        
+                        
+                        
+                        
                         
                         
                         
@@ -766,10 +677,6 @@ public class ServerThread extends Thread {
                         </a>
                         
                         
-                        
-                        <a href="/tags/mycat" title="mycat">
-                            mycat
-                        </a>
                         
                         
                         
@@ -783,9 +690,17 @@ public class ServerThread extends Thread {
                         
                         
                         
-                        <a href="/tags/nginx" title="nginx">
-                            nginx
-                        </a>
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
                         
                         
                         
@@ -809,8 +724,22 @@ public class ServerThread extends Thread {
                         
                         
                         
+                        
+                        
                         <a href="/tags/rocketmq" title="rocketmq">
                             rocketmq
+                        </a>
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        <a href="/tags/security%E6%A1%86%E6%9E%B6%E5%AD%A6%E4%B9%A0" title="security框架学习">
+                            security框架学习
                         </a>
                         
                         
@@ -837,17 +766,11 @@ public class ServerThread extends Thread {
                         
                         
                         
-                        <a href="/tags/springcloud" title="springCloud">
-                            springCloud
-                        </a>
-                        
-                        
-                        
-                        
-                        
                         <a href="/tags/springboot" title="springboot">
                             springboot
                         </a>
+                        
+                        
                         
                         
                         
@@ -861,6 +784,9 @@ public class ServerThread extends Thread {
                         
                         
                         
+                        <a href="/tags/springcloud" title="springcloud">
+                            springcloud
+                        </a>
                         
                         
                         
@@ -886,6 +812,33 @@ public class ServerThread extends Thread {
                         
                         
                         
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        <a href="/tags/zookeeper" title="zookeeper">
+                            zookeeper
+                        </a>
                         
                         
                         
@@ -945,6 +898,8 @@ public class ServerThread extends Thread {
                         
                         
                         
+                        
+                        
                         <a href="/tags/%E5%88%86%E5%B8%83%E5%BC%8F%E7%B3%BB%E5%88%97" title="分布式系列">
                             分布式系列
                         </a>
@@ -964,6 +919,10 @@ public class ServerThread extends Thread {
                         
                         
                         
+                        
+                        <a href="/tags/%E5%8D%8F%E8%AE%AE%E6%A0%88" title="协议栈">
+                            协议栈
+                        </a>
                         
                         
                         
@@ -1163,6 +1122,12 @@ public class ServerThread extends Thread {
                         
                         
                         
+                        
+                        
+                        
+                        
+                        
+                        
                         <a href="/tags/%E7%BD%91%E7%BB%9C%E7%BC%96%E7%A8%8B" title="网络编程">
                             网络编程
                         </a>
@@ -1186,6 +1151,10 @@ public class ServerThread extends Thread {
                         
                         
                         
+                        
+                        <a href="/tags/%E8%AE%A4%E8%AF%81%E5%92%8C%E6%8E%88%E6%9D%83" title="认证和授权">
+                            认证和授权
+                        </a>
                         
                         
                         
@@ -1356,7 +1325,7 @@ public class ServerThread extends Thread {
                     
                 </ul>
 		<p class="copyright text-muted">
-                    Copyright &copy;  2020
+                    Copyright &copy;  2021
                     <br>
                     <a href="https://themes.gohugo.io/hugo-theme-cleanwhite">CleanWhite Hugo Theme</a> by <a href="https://zhaohuabing.com">Huabing</a> |
                     <iframe

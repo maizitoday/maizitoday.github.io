@@ -97,15 +97,15 @@
                     </li>
                     
                     <li>
-                        <a href="/categories/english">English</a>
+                        <a href="/categories/english">english</a>
                     </li>
                     
                     <li>
-                        <a href="/categories/life">Life</a>
+                        <a href="/categories/life">life</a>
                     </li>
                     
                     <li>
-                        <a href="/categories/tech">Tech</a>
+                        <a href="/categories/tech">tech</a>
                     </li>
                     
 
@@ -233,749 +233,693 @@
                 
                 
                 
-                
-
-<p>[TOC]</p>
-
+                <p>[TOC]</p>
 <p><strong>转载地址:   <a href="https://blog.csdn.net/weixin_42089175/article/details/88697374">https://blog.csdn.net/weixin_42089175/article/details/88697374</a></strong></p>
-
 <h1 id="大致流程">大致流程</h1>
-
 <p>先启动一个UDP的接收端，监听端口<strong>30201</strong>， 再启动一个UDP的发送端，进行广播发送到<strong>30201</strong>，同时这个发送端也进行一个监听端口<strong>30202</strong>的UDP线程接受。这个<strong>30202</strong>会作为参数发送给接收端UDP。</p>
-
 <p>当UDP发送端发送给UDP的接受端的时候，接收端马上也向这个原来发送端<strong>30202</strong>的UDP回复一条消息，这个消息里面就带有TCP的连接的端口<strong>30401</strong></p>
-
 <p>我们把接受UDP端的程序中启动<strong>ServerSocket</strong>，在UDP的发送端启动<strong>Socket</strong>，如此端口就已经知道了，也就完成了通过UDP知道接受广播的IP地址和端口，从而进行TCP网络的连接。</p>
-
 <p><strong>注意:</strong> 我们把需要的口令和参数通过map封装，然后转成byte进行传输。</p>
-
 <h1 id="具体代码如下">具体代码如下</h1>
-
 <h2 id="客户端代码">客户端代码</h2>
-
 <h3 id="client">Client</h3>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-java" data-lang="java"><span style="color:#f92672">import</span> java.io.IOException<span style="color:#f92672">;</span>
 
-<pre><code class="language-java">import java.io.IOException;
+<span style="color:#f92672">import</span> com.tcp.udp.client.bean.ServerInfo<span style="color:#f92672">;</span>
 
-import com.tcp.udp.client.bean.ServerInfo;
+<span style="color:#66d9ef">public</span> <span style="color:#66d9ef">class</span> <span style="color:#a6e22e">Client</span> <span style="color:#f92672">{</span>
+    <span style="color:#66d9ef">public</span> <span style="color:#66d9ef">static</span> <span style="color:#66d9ef">void</span> <span style="color:#a6e22e">main</span><span style="color:#f92672">(</span>String<span style="color:#f92672">[]</span> args<span style="color:#f92672">)</span> <span style="color:#f92672">{</span>
+        ServerInfo info <span style="color:#f92672">=</span> UDPSearcher<span style="color:#f92672">.</span><span style="color:#a6e22e">searchServer</span><span style="color:#f92672">(</span>10000<span style="color:#f92672">);</span>
+        System<span style="color:#f92672">.</span><span style="color:#a6e22e">out</span><span style="color:#f92672">.</span><span style="color:#a6e22e">println</span><span style="color:#f92672">(</span><span style="color:#e6db74">&#34;Server:&#34;</span> <span style="color:#f92672">+</span> info<span style="color:#f92672">);</span>
 
-public class Client {
-    public static void main(String[] args) {
-        ServerInfo info = UDPSearcher.searchServer(10000);
-        System.out.println(&quot;Server:&quot; + info);
-
-        if (info != null) {
-            try {
-                TCPClient.linkWith(info );
-            } catch (IOException e) {
-                e.printStackTrace();
-            }
-        }
-    }
-}
-</code></pre>
-
-<h3 id="udpsearcher">UDPSearcher</h3>
-
+        <span style="color:#66d9ef">if</span> <span style="color:#f92672">(</span>info <span style="color:#f92672">!=</span> <span style="color:#66d9ef">null</span><span style="color:#f92672">)</span> <span style="color:#f92672">{</span>
+            <span style="color:#66d9ef">try</span> <span style="color:#f92672">{</span>
+                TCPClient<span style="color:#f92672">.</span><span style="color:#a6e22e">linkWith</span><span style="color:#f92672">(</span>info <span style="color:#f92672">);</span>
+            <span style="color:#f92672">}</span> <span style="color:#66d9ef">catch</span> <span style="color:#f92672">(</span>IOException e<span style="color:#f92672">)</span> <span style="color:#f92672">{</span>
+                e<span style="color:#f92672">.</span><span style="color:#a6e22e">printStackTrace</span><span style="color:#f92672">();</span>
+            <span style="color:#f92672">}</span>
+        <span style="color:#f92672">}</span>
+    <span style="color:#f92672">}</span>
+<span style="color:#f92672">}</span>
+</code></pre></div><h3 id="udpsearcher">UDPSearcher</h3>
 <p>udp的发送和监听，最后获取TCP服务端的IP和端口</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-java" data-lang="java"><span style="color:#f92672">import</span> java.io.IOException<span style="color:#f92672">;</span>
+<span style="color:#f92672">import</span> java.net.DatagramPacket<span style="color:#f92672">;</span>
+<span style="color:#f92672">import</span> java.net.DatagramSocket<span style="color:#f92672">;</span>
+<span style="color:#f92672">import</span> java.net.InetAddress<span style="color:#f92672">;</span>
+<span style="color:#f92672">import</span> java.nio.ByteBuffer<span style="color:#f92672">;</span>
+<span style="color:#f92672">import</span> java.util.ArrayList<span style="color:#f92672">;</span>
+<span style="color:#f92672">import</span> java.util.HashMap<span style="color:#f92672">;</span>
+<span style="color:#f92672">import</span> java.util.Iterator<span style="color:#f92672">;</span>
+<span style="color:#f92672">import</span> java.util.List<span style="color:#f92672">;</span>
+<span style="color:#f92672">import</span> java.util.Map<span style="color:#f92672">;</span>
+<span style="color:#f92672">import</span> java.util.Map.Entry<span style="color:#f92672">;</span>
+<span style="color:#f92672">import</span> java.util.concurrent.CountDownLatch<span style="color:#f92672">;</span>
+<span style="color:#f92672">import</span> java.util.concurrent.TimeUnit<span style="color:#f92672">;</span>
 
-<pre><code class="language-java">import java.io.IOException;
-import java.net.DatagramPacket;
-import java.net.DatagramSocket;
-import java.net.InetAddress;
-import java.nio.ByteBuffer;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.Iterator;
-import java.util.List;
-import java.util.Map;
-import java.util.Map.Entry;
-import java.util.concurrent.CountDownLatch;
-import java.util.concurrent.TimeUnit;
+<span style="color:#f92672">import</span> com.tcp.udp.client.bean.ServerInfo<span style="color:#f92672">;</span>
+<span style="color:#f92672">import</span> com.tcp.udp.clink.utils.ByteUtils<span style="color:#f92672">;</span>
+<span style="color:#f92672">import</span> com.tcp.udp.clink.utils.JsonSerilizable<span style="color:#f92672">;</span>
+<span style="color:#f92672">import</span> com.tcp.udp.constants.UDPConstants<span style="color:#f92672">;</span>
 
-import com.tcp.udp.client.bean.ServerInfo;
-import com.tcp.udp.clink.utils.ByteUtils;
-import com.tcp.udp.clink.utils.JsonSerilizable;
-import com.tcp.udp.constants.UDPConstants;
+<span style="color:#66d9ef">public</span> <span style="color:#66d9ef">class</span> <span style="color:#a6e22e">UDPSearcher</span> <span style="color:#f92672">{</span>
+    <span style="color:#66d9ef">private</span> <span style="color:#66d9ef">static</span> <span style="color:#66d9ef">final</span> <span style="color:#66d9ef">int</span> LISTEN_PORT <span style="color:#f92672">=</span> UDPConstants<span style="color:#f92672">.</span><span style="color:#a6e22e">PORT_CLIENT_RESPONSE</span><span style="color:#f92672">;</span>
 
-public class UDPSearcher {
-    private static final int LISTEN_PORT = UDPConstants.PORT_CLIENT_RESPONSE;
+    <span style="color:#66d9ef">public</span> <span style="color:#66d9ef">static</span> ServerInfo <span style="color:#a6e22e">searchServer</span><span style="color:#f92672">(</span><span style="color:#66d9ef">int</span> timeout<span style="color:#f92672">)</span> <span style="color:#f92672">{</span>
+        System<span style="color:#f92672">.</span><span style="color:#a6e22e">out</span><span style="color:#f92672">.</span><span style="color:#a6e22e">println</span><span style="color:#f92672">(</span><span style="color:#e6db74">&#34;UDPSearcher Started.&#34;</span><span style="color:#f92672">);</span>
 
-    public static ServerInfo searchServer(int timeout) {
-        System.out.println(&quot;UDPSearcher Started.&quot;);
+        <span style="color:#75715e">// 成功收到回送的栅栏
+</span><span style="color:#75715e"></span>        CountDownLatch receiveLatch <span style="color:#f92672">=</span> <span style="color:#66d9ef">new</span> CountDownLatch<span style="color:#f92672">(</span>1<span style="color:#f92672">);</span>
+        Listener listener <span style="color:#f92672">=</span> <span style="color:#66d9ef">null</span><span style="color:#f92672">;</span>
+        <span style="color:#66d9ef">try</span> <span style="color:#f92672">{</span>
+            <span style="color:#75715e">// 发送广播
+</span><span style="color:#75715e"></span>            listener <span style="color:#f92672">=</span> listen<span style="color:#f92672">(</span>receiveLatch<span style="color:#f92672">);</span>
+            <span style="color:#75715e">// 搜索10秒
+</span><span style="color:#75715e"></span>            sendBroadcast<span style="color:#f92672">();</span>
+            receiveLatch<span style="color:#f92672">.</span><span style="color:#a6e22e">await</span><span style="color:#f92672">(</span>timeout<span style="color:#f92672">,</span> TimeUnit<span style="color:#f92672">.</span><span style="color:#a6e22e">MILLISECONDS</span><span style="color:#f92672">);</span>
+        <span style="color:#f92672">}</span> <span style="color:#66d9ef">catch</span> <span style="color:#f92672">(</span>Exception e<span style="color:#f92672">)</span> <span style="color:#f92672">{</span>
+            e<span style="color:#f92672">.</span><span style="color:#a6e22e">printStackTrace</span><span style="color:#f92672">();</span>
+        <span style="color:#f92672">}</span>
+        <span style="color:#75715e">// 完成
+</span><span style="color:#75715e"></span>        System<span style="color:#f92672">.</span><span style="color:#a6e22e">out</span><span style="color:#f92672">.</span><span style="color:#a6e22e">println</span><span style="color:#f92672">(</span><span style="color:#e6db74">&#34;UDPSearcher Finished.&#34;</span><span style="color:#f92672">);</span>
+        <span style="color:#66d9ef">if</span> <span style="color:#f92672">(</span>listener <span style="color:#f92672">==</span> <span style="color:#66d9ef">null</span><span style="color:#f92672">)</span> <span style="color:#f92672">{</span>
+            <span style="color:#66d9ef">return</span> <span style="color:#66d9ef">null</span><span style="color:#f92672">;</span>
+        <span style="color:#f92672">}</span>
+        List<span style="color:#f92672">&lt;</span>ServerInfo<span style="color:#f92672">&gt;</span> devices <span style="color:#f92672">=</span> listener<span style="color:#f92672">.</span><span style="color:#a6e22e">getServerAndClose</span><span style="color:#f92672">();</span>
+        <span style="color:#66d9ef">if</span> <span style="color:#f92672">(</span>devices<span style="color:#f92672">.</span><span style="color:#a6e22e">size</span><span style="color:#f92672">()</span> <span style="color:#f92672">&gt;</span> 0<span style="color:#f92672">)</span> <span style="color:#f92672">{</span>
+            <span style="color:#66d9ef">return</span> devices<span style="color:#f92672">.</span><span style="color:#a6e22e">get</span><span style="color:#f92672">(</span>0<span style="color:#f92672">);</span>
+        <span style="color:#f92672">}</span>
+        <span style="color:#66d9ef">return</span> <span style="color:#66d9ef">null</span><span style="color:#f92672">;</span>
+    <span style="color:#f92672">}</span>
 
-        // 成功收到回送的栅栏
-        CountDownLatch receiveLatch = new CountDownLatch(1);
-        Listener listener = null;
-        try {
-            // 发送广播
-            listener = listen(receiveLatch);
-            // 搜索10秒
-            sendBroadcast();
-            receiveLatch.await(timeout, TimeUnit.MILLISECONDS);
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
-        // 完成
-        System.out.println(&quot;UDPSearcher Finished.&quot;);
-        if (listener == null) {
-            return null;
-        }
-        List&lt;ServerInfo&gt; devices = listener.getServerAndClose();
-        if (devices.size() &gt; 0) {
-            return devices.get(0);
-        }
-        return null;
-    }
+    <span style="color:#66d9ef">private</span> <span style="color:#66d9ef">static</span> Listener <span style="color:#a6e22e">listen</span><span style="color:#f92672">(</span>CountDownLatch receiveLatch<span style="color:#f92672">)</span> <span style="color:#66d9ef">throws</span> InterruptedException <span style="color:#f92672">{</span>
+        System<span style="color:#f92672">.</span><span style="color:#a6e22e">out</span><span style="color:#f92672">.</span><span style="color:#a6e22e">println</span><span style="color:#f92672">(</span><span style="color:#e6db74">&#34;UDPSearcher start listen.&#34;</span><span style="color:#f92672">);</span>
+        CountDownLatch startDownLatch <span style="color:#f92672">=</span> <span style="color:#66d9ef">new</span> CountDownLatch<span style="color:#f92672">(</span>1<span style="color:#f92672">);</span>
+        Listener listener <span style="color:#f92672">=</span> <span style="color:#66d9ef">new</span> Listener<span style="color:#f92672">(</span>LISTEN_PORT<span style="color:#f92672">,</span> startDownLatch<span style="color:#f92672">,</span> receiveLatch<span style="color:#f92672">);</span>
+        listener<span style="color:#f92672">.</span><span style="color:#a6e22e">start</span><span style="color:#f92672">();</span>
+        startDownLatch<span style="color:#f92672">.</span><span style="color:#a6e22e">await</span><span style="color:#f92672">();</span>
+        <span style="color:#66d9ef">return</span> listener<span style="color:#f92672">;</span>
+    <span style="color:#f92672">}</span>
 
-    private static Listener listen(CountDownLatch receiveLatch) throws InterruptedException {
-        System.out.println(&quot;UDPSearcher start listen.&quot;);
-        CountDownLatch startDownLatch = new CountDownLatch(1);
-        Listener listener = new Listener(LISTEN_PORT, startDownLatch, receiveLatch);
-        listener.start();
-        startDownLatch.await();
-        return listener;
-    }
+    <span style="color:#66d9ef">private</span> <span style="color:#66d9ef">static</span> <span style="color:#66d9ef">void</span> <span style="color:#a6e22e">sendBroadcast</span><span style="color:#f92672">()</span> <span style="color:#66d9ef">throws</span> IOException <span style="color:#f92672">{</span>
+        System<span style="color:#f92672">.</span><span style="color:#a6e22e">out</span><span style="color:#f92672">.</span><span style="color:#a6e22e">println</span><span style="color:#f92672">(</span><span style="color:#e6db74">&#34;UDPSearcher sendBroadcast started.&#34;</span><span style="color:#f92672">);</span>
 
-    private static void sendBroadcast() throws IOException {
-        System.out.println(&quot;UDPSearcher sendBroadcast started.&quot;);
+        <span style="color:#75715e">// 作为搜索方，让系统自动分配端口
+</span><span style="color:#75715e"></span>        DatagramSocket ds <span style="color:#f92672">=</span> <span style="color:#66d9ef">new</span> DatagramSocket<span style="color:#f92672">();</span>
+        Map<span style="color:#f92672">&lt;</span>String<span style="color:#f92672">,</span> Object<span style="color:#f92672">&gt;</span> map <span style="color:#f92672">=</span> <span style="color:#66d9ef">new</span> HashMap<span style="color:#f92672">&lt;</span>String<span style="color:#f92672">,</span> Object<span style="color:#f92672">&gt;();</span>
+        <span style="color:#75715e">// CMD命名
+</span><span style="color:#75715e"></span>        map<span style="color:#f92672">.</span><span style="color:#a6e22e">put</span><span style="color:#f92672">(</span><span style="color:#e6db74">&#34;CMD&#34;</span><span style="color:#f92672">,</span> UDPConstants<span style="color:#f92672">.</span><span style="color:#a6e22e">UDP_PASSWORD_KEY</span><span style="color:#f92672">);</span>
+        <span style="color:#75715e">// 回送端口信息
+</span><span style="color:#75715e"></span>        map<span style="color:#f92672">.</span><span style="color:#a6e22e">put</span><span style="color:#f92672">(</span><span style="color:#e6db74">&#34;port&#34;</span><span style="color:#f92672">,</span> LISTEN_PORT<span style="color:#f92672">);</span>
+        <span style="color:#66d9ef">byte</span><span style="color:#f92672">[]</span> bytes <span style="color:#f92672">=</span> JsonSerilizable<span style="color:#f92672">.</span><span style="color:#a6e22e">changeMapToByte</span><span style="color:#f92672">(</span>map<span style="color:#f92672">);</span>
 
-        // 作为搜索方，让系统自动分配端口
-        DatagramSocket ds = new DatagramSocket();
-        Map&lt;String, Object&gt; map = new HashMap&lt;String, Object&gt;();
-        // CMD命名
-        map.put(&quot;CMD&quot;, UDPConstants.UDP_PASSWORD_KEY);
-        // 回送端口信息
-        map.put(&quot;port&quot;, LISTEN_PORT);
-        byte[] bytes = JsonSerilizable.changeMapToByte(map);
+        <span style="color:#75715e">// 直接构建packet
+</span><span style="color:#75715e"></span>        DatagramPacket requestPacket <span style="color:#f92672">=</span> <span style="color:#66d9ef">new</span> DatagramPacket<span style="color:#f92672">(</span>bytes<span style="color:#f92672">,</span> bytes<span style="color:#f92672">.</span><span style="color:#a6e22e">length</span><span style="color:#f92672">);</span>
+        <span style="color:#75715e">// 广播地址
+</span><span style="color:#75715e"></span>        requestPacket<span style="color:#f92672">.</span><span style="color:#a6e22e">setAddress</span><span style="color:#f92672">(</span>InetAddress<span style="color:#f92672">.</span><span style="color:#a6e22e">getByName</span><span style="color:#f92672">(</span><span style="color:#e6db74">&#34;255.255.255.255&#34;</span><span style="color:#f92672">));</span>
+        <span style="color:#75715e">// 设置服务器端口
+</span><span style="color:#75715e"></span>        requestPacket<span style="color:#f92672">.</span><span style="color:#a6e22e">setPort</span><span style="color:#f92672">(</span>UDPConstants<span style="color:#f92672">.</span><span style="color:#a6e22e">PORT_SERVER</span><span style="color:#f92672">);</span>
 
-        // 直接构建packet
-        DatagramPacket requestPacket = new DatagramPacket(bytes, bytes.length);
-        // 广播地址
-        requestPacket.setAddress(InetAddress.getByName(&quot;255.255.255.255&quot;));
-        // 设置服务器端口
-        requestPacket.setPort(UDPConstants.PORT_SERVER);
+        <span style="color:#75715e">// 发送
+</span><span style="color:#75715e"></span>        ds<span style="color:#f92672">.</span><span style="color:#a6e22e">send</span><span style="color:#f92672">(</span>requestPacket<span style="color:#f92672">);</span>
+        ds<span style="color:#f92672">.</span><span style="color:#a6e22e">close</span><span style="color:#f92672">();</span>
 
-        // 发送
-        ds.send(requestPacket);
-        ds.close();
+        <span style="color:#75715e">// 完成
+</span><span style="color:#75715e"></span>        System<span style="color:#f92672">.</span><span style="color:#a6e22e">out</span><span style="color:#f92672">.</span><span style="color:#a6e22e">println</span><span style="color:#f92672">(</span><span style="color:#e6db74">&#34;UDPSearcher sendBroadcast finished.&#34;</span><span style="color:#f92672">);</span>
+    <span style="color:#f92672">}</span>
 
-        // 完成
-        System.out.println(&quot;UDPSearcher sendBroadcast finished.&quot;);
-    }
+    <span style="color:#66d9ef">private</span> <span style="color:#66d9ef">static</span> <span style="color:#66d9ef">class</span> <span style="color:#a6e22e">Listener</span> <span style="color:#66d9ef">extends</span> Thread <span style="color:#f92672">{</span>
+        <span style="color:#66d9ef">private</span> <span style="color:#66d9ef">final</span> <span style="color:#66d9ef">int</span> listenPort<span style="color:#f92672">;</span>
+        <span style="color:#66d9ef">private</span> <span style="color:#66d9ef">final</span> CountDownLatch startDownLatch<span style="color:#f92672">;</span>
+        <span style="color:#66d9ef">private</span> <span style="color:#66d9ef">final</span> CountDownLatch receiveDownLatch<span style="color:#f92672">;</span>
+        <span style="color:#66d9ef">private</span> <span style="color:#66d9ef">final</span> List<span style="color:#f92672">&lt;</span>ServerInfo<span style="color:#f92672">&gt;</span> serverInfoList <span style="color:#f92672">=</span> <span style="color:#66d9ef">new</span> ArrayList<span style="color:#f92672">&lt;&gt;();</span>
+        <span style="color:#66d9ef">private</span> <span style="color:#66d9ef">final</span> <span style="color:#66d9ef">byte</span><span style="color:#f92672">[]</span> buffer <span style="color:#f92672">=</span> <span style="color:#66d9ef">new</span> <span style="color:#66d9ef">byte</span><span style="color:#f92672">[</span>128<span style="color:#f92672">];</span>
+        <span style="color:#66d9ef">private</span> <span style="color:#66d9ef">boolean</span> done <span style="color:#f92672">=</span> <span style="color:#66d9ef">false</span><span style="color:#f92672">;</span>
+        <span style="color:#66d9ef">private</span> DatagramSocket ds <span style="color:#f92672">=</span> <span style="color:#66d9ef">null</span><span style="color:#f92672">;</span>
 
-    private static class Listener extends Thread {
-        private final int listenPort;
-        private final CountDownLatch startDownLatch;
-        private final CountDownLatch receiveDownLatch;
-        private final List&lt;ServerInfo&gt; serverInfoList = new ArrayList&lt;&gt;();
-        private final byte[] buffer = new byte[128];
-        private boolean done = false;
-        private DatagramSocket ds = null;
+        <span style="color:#66d9ef">private</span> <span style="color:#a6e22e">Listener</span><span style="color:#f92672">(</span><span style="color:#66d9ef">int</span> listenPort<span style="color:#f92672">,</span> CountDownLatch startDownLatch<span style="color:#f92672">,</span> CountDownLatch receiveDownLatch<span style="color:#f92672">)</span> <span style="color:#f92672">{</span>
+            <span style="color:#66d9ef">super</span><span style="color:#f92672">();</span>
+            <span style="color:#66d9ef">this</span><span style="color:#f92672">.</span><span style="color:#a6e22e">listenPort</span> <span style="color:#f92672">=</span> listenPort<span style="color:#f92672">;</span>
+            <span style="color:#66d9ef">this</span><span style="color:#f92672">.</span><span style="color:#a6e22e">startDownLatch</span> <span style="color:#f92672">=</span> startDownLatch<span style="color:#f92672">;</span>
+            <span style="color:#66d9ef">this</span><span style="color:#f92672">.</span><span style="color:#a6e22e">receiveDownLatch</span> <span style="color:#f92672">=</span> receiveDownLatch<span style="color:#f92672">;</span>
+        <span style="color:#f92672">}</span>
 
-        private Listener(int listenPort, CountDownLatch startDownLatch, CountDownLatch receiveDownLatch) {
-            super();
-            this.listenPort = listenPort;
-            this.startDownLatch = startDownLatch;
-            this.receiveDownLatch = receiveDownLatch;
-        }
+        <span style="color:#a6e22e">@Override</span>
+        <span style="color:#66d9ef">public</span> <span style="color:#66d9ef">void</span> <span style="color:#a6e22e">run</span><span style="color:#f92672">()</span> <span style="color:#f92672">{</span>
+            <span style="color:#66d9ef">super</span><span style="color:#f92672">.</span><span style="color:#a6e22e">run</span><span style="color:#f92672">();</span>
+            <span style="color:#75715e">// 通知已启动
+</span><span style="color:#75715e"></span>            startDownLatch<span style="color:#f92672">.</span><span style="color:#a6e22e">countDown</span><span style="color:#f92672">();</span>
 
-        @Override
-        public void run() {
-            super.run();
-            // 通知已启动
-            startDownLatch.countDown();
+            <span style="color:#66d9ef">try</span> <span style="color:#f92672">{</span>
+                <span style="color:#75715e">// 监听30202回送端口
+</span><span style="color:#75715e"></span>                ds <span style="color:#f92672">=</span> <span style="color:#66d9ef">new</span> DatagramSocket<span style="color:#f92672">(</span>listenPort<span style="color:#f92672">);</span>
+                <span style="color:#75715e">// 构建接收实体
+</span><span style="color:#75715e"></span>                DatagramPacket receivePack <span style="color:#f92672">=</span> <span style="color:#66d9ef">new</span> DatagramPacket<span style="color:#f92672">(</span>buffer<span style="color:#f92672">,</span> buffer<span style="color:#f92672">.</span><span style="color:#a6e22e">length</span><span style="color:#f92672">);</span>
 
-            try {
-                // 监听30202回送端口
-                ds = new DatagramSocket(listenPort);
-                // 构建接收实体
-                DatagramPacket receivePack = new DatagramPacket(buffer, buffer.length);
+                <span style="color:#66d9ef">while</span> <span style="color:#f92672">(!</span>done<span style="color:#f92672">)</span> <span style="color:#f92672">{</span>
+                    <span style="color:#75715e">// 接收
+</span><span style="color:#75715e"></span>                    ds<span style="color:#f92672">.</span><span style="color:#a6e22e">receive</span><span style="color:#f92672">(</span>receivePack<span style="color:#f92672">);</span>
 
-                while (!done) {
-                    // 接收
-                    ds.receive(receivePack);
+                    <span style="color:#75715e">// 打印接收到的信息与发送者的信息
+</span><span style="color:#75715e"></span>                    <span style="color:#75715e">// 发送者的IP地址
+</span><span style="color:#75715e"></span>                    String ip <span style="color:#f92672">=</span> receivePack<span style="color:#f92672">.</span><span style="color:#a6e22e">getAddress</span><span style="color:#f92672">().</span><span style="color:#a6e22e">getHostAddress</span><span style="color:#f92672">();</span>
+                    <span style="color:#66d9ef">byte</span><span style="color:#f92672">[]</span> data <span style="color:#f92672">=</span> receivePack<span style="color:#f92672">.</span><span style="color:#a6e22e">getData</span><span style="color:#f92672">();</span>
 
-                    // 打印接收到的信息与发送者的信息
-                    // 发送者的IP地址
-                    String ip = receivePack.getAddress().getHostAddress();
-                    byte[] data = receivePack.getData();
+                    Map<span style="color:#f92672">&lt;</span>String<span style="color:#f92672">,</span> Object<span style="color:#f92672">&gt;</span> map <span style="color:#f92672">=</span> JsonSerilizable<span style="color:#f92672">.</span><span style="color:#a6e22e">changeByteToMap</span><span style="color:#f92672">(</span>data<span style="color:#f92672">);</span>
+                    Iterator<span style="color:#f92672">&lt;</span>Entry<span style="color:#f92672">&lt;</span>String<span style="color:#f92672">,</span> Object<span style="color:#f92672">&gt;&gt;</span> entries <span style="color:#f92672">=</span> map<span style="color:#f92672">.</span><span style="color:#a6e22e">entrySet</span><span style="color:#f92672">().</span><span style="color:#a6e22e">iterator</span><span style="color:#f92672">();</span>
 
-                    Map&lt;String, Object&gt; map = JsonSerilizable.changeByteToMap(data);
-                    Iterator&lt;Entry&lt;String, Object&gt;&gt; entries = map.entrySet().iterator();
+                    String cmdVal <span style="color:#f92672">=</span> <span style="color:#66d9ef">null</span><span style="color:#f92672">;</span>
+                    String snVal <span style="color:#f92672">=</span> <span style="color:#66d9ef">null</span><span style="color:#f92672">;</span>
+                    Integer serverPort <span style="color:#f92672">=</span> <span style="color:#66d9ef">null</span><span style="color:#f92672">;</span>
 
-                    String cmdVal = null;
-                    String snVal = null;
-                    Integer serverPort = null;
+                    <span style="color:#66d9ef">while</span> <span style="color:#f92672">(</span>entries<span style="color:#f92672">.</span><span style="color:#a6e22e">hasNext</span><span style="color:#f92672">())</span> <span style="color:#f92672">{</span>
+                        Map<span style="color:#f92672">.</span><span style="color:#a6e22e">Entry</span><span style="color:#f92672">&lt;</span>String<span style="color:#f92672">,</span> Object<span style="color:#f92672">&gt;</span> entry <span style="color:#f92672">=</span> entries<span style="color:#f92672">.</span><span style="color:#a6e22e">next</span><span style="color:#f92672">();</span>
+                        String key <span style="color:#f92672">=</span> entry<span style="color:#f92672">.</span><span style="color:#a6e22e">getKey</span><span style="color:#f92672">();</span>
+                        Object value <span style="color:#f92672">=</span> entry<span style="color:#f92672">.</span><span style="color:#a6e22e">getValue</span><span style="color:#f92672">();</span>
+                        <span style="color:#66d9ef">if</span> <span style="color:#f92672">(</span>key<span style="color:#f92672">.</span><span style="color:#a6e22e">equals</span><span style="color:#f92672">(</span><span style="color:#e6db74">&#34;CMD&#34;</span><span style="color:#f92672">))</span> <span style="color:#f92672">{</span>
+                            cmdVal <span style="color:#f92672">=</span> <span style="color:#f92672">(</span>String<span style="color:#f92672">)</span> value<span style="color:#f92672">;</span>
+                        <span style="color:#f92672">}</span> <span style="color:#66d9ef">else</span> <span style="color:#66d9ef">if</span> <span style="color:#f92672">(</span>key<span style="color:#f92672">.</span><span style="color:#a6e22e">equals</span><span style="color:#f92672">(</span><span style="color:#e6db74">&#34;sn&#34;</span><span style="color:#f92672">))</span> <span style="color:#f92672">{</span>
+                            snVal <span style="color:#f92672">=</span> <span style="color:#f92672">(</span>String<span style="color:#f92672">)</span> value<span style="color:#f92672">;</span>
+                        <span style="color:#f92672">}</span> <span style="color:#66d9ef">else</span> <span style="color:#66d9ef">if</span> <span style="color:#f92672">(</span>key<span style="color:#f92672">.</span><span style="color:#a6e22e">equals</span><span style="color:#f92672">(</span><span style="color:#e6db74">&#34;port&#34;</span><span style="color:#f92672">))</span> <span style="color:#f92672">{</span>
+                            serverPort <span style="color:#f92672">=</span> <span style="color:#f92672">(</span>Integer<span style="color:#f92672">)</span> value<span style="color:#f92672">;</span>
+                        <span style="color:#f92672">}</span>
+                    <span style="color:#f92672">}</span>
+                    <span style="color:#66d9ef">if</span> <span style="color:#f92672">(</span>UDPConstants<span style="color:#f92672">.</span><span style="color:#a6e22e">UDP_PASSWORD_KEY</span><span style="color:#f92672">.</span><span style="color:#a6e22e">equals</span><span style="color:#f92672">(</span>cmdVal<span style="color:#f92672">))</span> <span style="color:#f92672">{</span>
+                        ServerInfo info <span style="color:#f92672">=</span> <span style="color:#66d9ef">new</span> ServerInfo<span style="color:#f92672">(</span>serverPort<span style="color:#f92672">,</span> ip<span style="color:#f92672">,</span> snVal<span style="color:#f92672">);</span>
+                        serverInfoList<span style="color:#f92672">.</span><span style="color:#a6e22e">add</span><span style="color:#f92672">(</span>info<span style="color:#f92672">);</span>
+                    <span style="color:#f92672">}</span>
+                    <span style="color:#75715e">// 成功接收到一份
+</span><span style="color:#75715e"></span>                    receiveDownLatch<span style="color:#f92672">.</span><span style="color:#a6e22e">countDown</span><span style="color:#f92672">();</span>
+                    done <span style="color:#f92672">=</span> <span style="color:#66d9ef">true</span><span style="color:#f92672">;</span>
+                <span style="color:#f92672">}</span>
+            <span style="color:#f92672">}</span> <span style="color:#66d9ef">catch</span> <span style="color:#f92672">(</span>Exception e<span style="color:#f92672">)</span> <span style="color:#f92672">{</span>
+                e<span style="color:#f92672">.</span><span style="color:#a6e22e">printStackTrace</span><span style="color:#f92672">();</span>
+            <span style="color:#f92672">}</span> <span style="color:#66d9ef">finally</span> <span style="color:#f92672">{</span>
+                close<span style="color:#f92672">();</span>
+            <span style="color:#f92672">}</span>
+            System<span style="color:#f92672">.</span><span style="color:#a6e22e">out</span><span style="color:#f92672">.</span><span style="color:#a6e22e">println</span><span style="color:#f92672">(</span><span style="color:#e6db74">&#34;UDPSearcher listener finished.&#34;</span><span style="color:#f92672">);</span>
+        <span style="color:#f92672">}</span>
 
-                    while (entries.hasNext()) {
-                        Map.Entry&lt;String, Object&gt; entry = entries.next();
-                        String key = entry.getKey();
-                        Object value = entry.getValue();
-                        if (key.equals(&quot;CMD&quot;)) {
-                            cmdVal = (String) value;
-                        } else if (key.equals(&quot;sn&quot;)) {
-                            snVal = (String) value;
-                        } else if (key.equals(&quot;port&quot;)) {
-                            serverPort = (Integer) value;
-                        }
-                    }
-                    if (UDPConstants.UDP_PASSWORD_KEY.equals(cmdVal)) {
-                        ServerInfo info = new ServerInfo(serverPort, ip, snVal);
-                        serverInfoList.add(info);
-                    }
-                    // 成功接收到一份
-                    receiveDownLatch.countDown();
-                    done = true;
-                }
-            } catch (Exception e) {
-                e.printStackTrace();
-            } finally {
-                close();
-            }
-            System.out.println(&quot;UDPSearcher listener finished.&quot;);
-        }
+        <span style="color:#66d9ef">private</span> <span style="color:#66d9ef">void</span> <span style="color:#a6e22e">close</span><span style="color:#f92672">()</span> <span style="color:#f92672">{</span>
+            <span style="color:#66d9ef">if</span> <span style="color:#f92672">(</span>ds <span style="color:#f92672">!=</span> <span style="color:#66d9ef">null</span><span style="color:#f92672">)</span> <span style="color:#f92672">{</span>
+                ds<span style="color:#f92672">.</span><span style="color:#a6e22e">close</span><span style="color:#f92672">();</span>
+                ds <span style="color:#f92672">=</span> <span style="color:#66d9ef">null</span><span style="color:#f92672">;</span>
+                done <span style="color:#f92672">=</span> <span style="color:#66d9ef">true</span><span style="color:#f92672">;</span>
+            <span style="color:#f92672">}</span>
+        <span style="color:#f92672">}</span>
 
-        private void close() {
-            if (ds != null) {
-                ds.close();
-                ds = null;
-                done = true;
-            }
-        }
+        List<span style="color:#f92672">&lt;</span>ServerInfo<span style="color:#f92672">&gt;</span> <span style="color:#a6e22e">getServerAndClose</span><span style="color:#f92672">()</span> <span style="color:#f92672">{</span>
+            done <span style="color:#f92672">=</span> <span style="color:#66d9ef">true</span><span style="color:#f92672">;</span>
+            close<span style="color:#f92672">();</span>
+            <span style="color:#66d9ef">return</span> serverInfoList<span style="color:#f92672">;</span>
+        <span style="color:#f92672">}</span>
+    <span style="color:#f92672">}</span>
+<span style="color:#f92672">}</span>
 
-        List&lt;ServerInfo&gt; getServerAndClose() {
-            done = true;
-            close();
-            return serverInfoList;
-        }
-    }
-}
+</code></pre></div><h3 id="tcpclient">TCPClient</h3>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-java" data-lang="java"><span style="color:#f92672">import</span> java.io.BufferedReader<span style="color:#f92672">;</span>
+<span style="color:#f92672">import</span> java.io.IOException<span style="color:#f92672">;</span>
+<span style="color:#f92672">import</span> java.io.InputStream<span style="color:#f92672">;</span>
+<span style="color:#f92672">import</span> java.io.InputStreamReader<span style="color:#f92672">;</span>
+<span style="color:#f92672">import</span> java.io.OutputStream<span style="color:#f92672">;</span>
+<span style="color:#f92672">import</span> java.io.PrintStream<span style="color:#f92672">;</span>
+<span style="color:#f92672">import</span> java.net.Inet4Address<span style="color:#f92672">;</span>
+<span style="color:#f92672">import</span> java.net.InetSocketAddress<span style="color:#f92672">;</span>
+<span style="color:#f92672">import</span> java.net.Socket<span style="color:#f92672">;</span>
 
-</code></pre>
+<span style="color:#f92672">import</span> com.tcp.udp.client.bean.ServerInfo<span style="color:#f92672">;</span>
 
-<h3 id="tcpclient">TCPClient</h3>
+<span style="color:#66d9ef">public</span> <span style="color:#66d9ef">class</span> <span style="color:#a6e22e">TCPClient</span> <span style="color:#f92672">{</span>
+    <span style="color:#66d9ef">public</span> <span style="color:#66d9ef">static</span> <span style="color:#66d9ef">void</span> <span style="color:#a6e22e">linkWith</span><span style="color:#f92672">(</span>ServerInfo info<span style="color:#f92672">)</span> <span style="color:#66d9ef">throws</span> IOException <span style="color:#f92672">{</span>
+        Socket socket <span style="color:#f92672">=</span> <span style="color:#66d9ef">new</span> Socket<span style="color:#f92672">();</span>
+        <span style="color:#75715e">// 超时时间
+</span><span style="color:#75715e"></span>        socket<span style="color:#f92672">.</span><span style="color:#a6e22e">setSoTimeout</span><span style="color:#f92672">(</span>3000<span style="color:#f92672">);</span>
 
-<pre><code class="language-java">import java.io.BufferedReader;
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.InputStreamReader;
-import java.io.OutputStream;
-import java.io.PrintStream;
-import java.net.Inet4Address;
-import java.net.InetSocketAddress;
-import java.net.Socket;
+        <span style="color:#75715e">// 连接本地，端口2000；超时时间3000ms
+</span><span style="color:#75715e"></span>        socket<span style="color:#f92672">.</span><span style="color:#a6e22e">connect</span><span style="color:#f92672">(</span><span style="color:#66d9ef">new</span> InetSocketAddress<span style="color:#f92672">(</span>Inet4Address<span style="color:#f92672">.</span><span style="color:#a6e22e">getByName</span><span style="color:#f92672">(</span>info<span style="color:#f92672">.</span><span style="color:#a6e22e">getAddress</span><span style="color:#f92672">()),</span> info<span style="color:#f92672">.</span><span style="color:#a6e22e">getPort</span><span style="color:#f92672">()),</span> 3000<span style="color:#f92672">);</span>
 
-import com.tcp.udp.client.bean.ServerInfo;
+        System<span style="color:#f92672">.</span><span style="color:#a6e22e">out</span><span style="color:#f92672">.</span><span style="color:#a6e22e">println</span><span style="color:#f92672">(</span><span style="color:#e6db74">&#34;已发起服务器连接，并进入后续流程～&#34;</span><span style="color:#f92672">);</span>
+        System<span style="color:#f92672">.</span><span style="color:#a6e22e">out</span><span style="color:#f92672">.</span><span style="color:#a6e22e">println</span><span style="color:#f92672">(</span><span style="color:#e6db74">&#34;客户端信息：&#34;</span> <span style="color:#f92672">+</span> socket<span style="color:#f92672">.</span><span style="color:#a6e22e">getLocalAddress</span><span style="color:#f92672">()</span> <span style="color:#f92672">+</span> <span style="color:#e6db74">&#34; P:&#34;</span> <span style="color:#f92672">+</span> socket<span style="color:#f92672">.</span><span style="color:#a6e22e">getLocalPort</span><span style="color:#f92672">());</span>
+        System<span style="color:#f92672">.</span><span style="color:#a6e22e">out</span><span style="color:#f92672">.</span><span style="color:#a6e22e">println</span><span style="color:#f92672">(</span><span style="color:#e6db74">&#34;服务器信息：&#34;</span> <span style="color:#f92672">+</span> socket<span style="color:#f92672">.</span><span style="color:#a6e22e">getInetAddress</span><span style="color:#f92672">()</span> <span style="color:#f92672">+</span> <span style="color:#e6db74">&#34; P:&#34;</span> <span style="color:#f92672">+</span> socket<span style="color:#f92672">.</span><span style="color:#a6e22e">getPort</span><span style="color:#f92672">());</span>
 
-public class TCPClient {
-    public static void linkWith(ServerInfo info) throws IOException {
-        Socket socket = new Socket();
-        // 超时时间
-        socket.setSoTimeout(3000);
+        <span style="color:#66d9ef">try</span> <span style="color:#f92672">{</span>
+            <span style="color:#75715e">// 发送接收数据
+</span><span style="color:#75715e"></span>            todo<span style="color:#f92672">(</span>socket<span style="color:#f92672">);</span>
+        <span style="color:#f92672">}</span> <span style="color:#66d9ef">catch</span> <span style="color:#f92672">(</span>Exception e<span style="color:#f92672">)</span> <span style="color:#f92672">{</span>
+            System<span style="color:#f92672">.</span><span style="color:#a6e22e">out</span><span style="color:#f92672">.</span><span style="color:#a6e22e">println</span><span style="color:#f92672">(</span><span style="color:#e6db74">&#34;异常关闭&#34;</span><span style="color:#f92672">);</span>
+        <span style="color:#f92672">}</span>
 
-        // 连接本地，端口2000；超时时间3000ms
-        socket.connect(new InetSocketAddress(Inet4Address.getByName(info.getAddress()), info.getPort()), 3000);
+        <span style="color:#75715e">// 释放资源
+</span><span style="color:#75715e"></span>        socket<span style="color:#f92672">.</span><span style="color:#a6e22e">close</span><span style="color:#f92672">();</span>
+        System<span style="color:#f92672">.</span><span style="color:#a6e22e">out</span><span style="color:#f92672">.</span><span style="color:#a6e22e">println</span><span style="color:#f92672">(</span><span style="color:#e6db74">&#34;客户端已退出～&#34;</span><span style="color:#f92672">);</span>
 
-        System.out.println(&quot;已发起服务器连接，并进入后续流程～&quot;);
-        System.out.println(&quot;客户端信息：&quot; + socket.getLocalAddress() + &quot; P:&quot; + socket.getLocalPort());
-        System.out.println(&quot;服务器信息：&quot; + socket.getInetAddress() + &quot; P:&quot; + socket.getPort());
+    <span style="color:#f92672">}</span>
 
-        try {
-            // 发送接收数据
-            todo(socket);
-        } catch (Exception e) {
-            System.out.println(&quot;异常关闭&quot;);
-        }
-
-        // 释放资源
-        socket.close();
-        System.out.println(&quot;客户端已退出～&quot;);
-
-    }
-
-    private static void todo(Socket client) throws IOException {
-        // 构建键盘输入流
-        InputStream in = System.in;
-        BufferedReader input = new BufferedReader(new InputStreamReader(in));
+    <span style="color:#66d9ef">private</span> <span style="color:#66d9ef">static</span> <span style="color:#66d9ef">void</span> <span style="color:#a6e22e">todo</span><span style="color:#f92672">(</span>Socket client<span style="color:#f92672">)</span> <span style="color:#66d9ef">throws</span> IOException <span style="color:#f92672">{</span>
+        <span style="color:#75715e">// 构建键盘输入流
+</span><span style="color:#75715e"></span>        InputStream in <span style="color:#f92672">=</span> System<span style="color:#f92672">.</span><span style="color:#a6e22e">in</span><span style="color:#f92672">;</span>
+        BufferedReader input <span style="color:#f92672">=</span> <span style="color:#66d9ef">new</span> BufferedReader<span style="color:#f92672">(</span><span style="color:#66d9ef">new</span> InputStreamReader<span style="color:#f92672">(</span>in<span style="color:#f92672">));</span>
 
 
-        // 得到Socket输出流，并转换为打印流
-        OutputStream outputStream = client.getOutputStream();
-        PrintStream socketPrintStream = new PrintStream(outputStream);
+        <span style="color:#75715e">// 得到Socket输出流，并转换为打印流
+</span><span style="color:#75715e"></span>        OutputStream outputStream <span style="color:#f92672">=</span> client<span style="color:#f92672">.</span><span style="color:#a6e22e">getOutputStream</span><span style="color:#f92672">();</span>
+        PrintStream socketPrintStream <span style="color:#f92672">=</span> <span style="color:#66d9ef">new</span> PrintStream<span style="color:#f92672">(</span>outputStream<span style="color:#f92672">);</span>
 
 
-        // 得到Socket输入流，并转换为BufferedReader
-        InputStream inputStream = client.getInputStream();
-        BufferedReader socketBufferedReader = new BufferedReader(new InputStreamReader(inputStream));
+        <span style="color:#75715e">// 得到Socket输入流，并转换为BufferedReader
+</span><span style="color:#75715e"></span>        InputStream inputStream <span style="color:#f92672">=</span> client<span style="color:#f92672">.</span><span style="color:#a6e22e">getInputStream</span><span style="color:#f92672">();</span>
+        BufferedReader socketBufferedReader <span style="color:#f92672">=</span> <span style="color:#66d9ef">new</span> BufferedReader<span style="color:#f92672">(</span><span style="color:#66d9ef">new</span> InputStreamReader<span style="color:#f92672">(</span>inputStream<span style="color:#f92672">));</span>
 
-        boolean flag = true;
-        do {
-            // 键盘读取一行
-            String str = input.readLine();
-            // 发送到服务器
-            socketPrintStream.println(str);
+        <span style="color:#66d9ef">boolean</span> flag <span style="color:#f92672">=</span> <span style="color:#66d9ef">true</span><span style="color:#f92672">;</span>
+        <span style="color:#66d9ef">do</span> <span style="color:#f92672">{</span>
+            <span style="color:#75715e">// 键盘读取一行
+</span><span style="color:#75715e"></span>            String str <span style="color:#f92672">=</span> input<span style="color:#f92672">.</span><span style="color:#a6e22e">readLine</span><span style="color:#f92672">();</span>
+            <span style="color:#75715e">// 发送到服务器
+</span><span style="color:#75715e"></span>            socketPrintStream<span style="color:#f92672">.</span><span style="color:#a6e22e">println</span><span style="color:#f92672">(</span>str<span style="color:#f92672">);</span>
 
 
-            // 从服务器读取一行
-            String echo = socketBufferedReader.readLine();
-            if (&quot;bye&quot;.equalsIgnoreCase(echo)) {
-                flag = false;
-            } else {
-                System.out.println(echo);
-            }
-        } while (flag);
+            <span style="color:#75715e">// 从服务器读取一行
+</span><span style="color:#75715e"></span>            String echo <span style="color:#f92672">=</span> socketBufferedReader<span style="color:#f92672">.</span><span style="color:#a6e22e">readLine</span><span style="color:#f92672">();</span>
+            <span style="color:#66d9ef">if</span> <span style="color:#f92672">(</span><span style="color:#e6db74">&#34;bye&#34;</span><span style="color:#f92672">.</span><span style="color:#a6e22e">equalsIgnoreCase</span><span style="color:#f92672">(</span>echo<span style="color:#f92672">))</span> <span style="color:#f92672">{</span>
+                flag <span style="color:#f92672">=</span> <span style="color:#66d9ef">false</span><span style="color:#f92672">;</span>
+            <span style="color:#f92672">}</span> <span style="color:#66d9ef">else</span> <span style="color:#f92672">{</span>
+                System<span style="color:#f92672">.</span><span style="color:#a6e22e">out</span><span style="color:#f92672">.</span><span style="color:#a6e22e">println</span><span style="color:#f92672">(</span>echo<span style="color:#f92672">);</span>
+            <span style="color:#f92672">}</span>
+        <span style="color:#f92672">}</span> <span style="color:#66d9ef">while</span> <span style="color:#f92672">(</span>flag<span style="color:#f92672">);</span>
 
-        // 资源释放
-        socketPrintStream.close();
-        socketBufferedReader.close();
+        <span style="color:#75715e">// 资源释放
+</span><span style="color:#75715e"></span>        socketPrintStream<span style="color:#f92672">.</span><span style="color:#a6e22e">close</span><span style="color:#f92672">();</span>
+        socketBufferedReader<span style="color:#f92672">.</span><span style="color:#a6e22e">close</span><span style="color:#f92672">();</span>
 
-    }
+    <span style="color:#f92672">}</span>
 
-}
+<span style="color:#f92672">}</span>
 
-</code></pre>
-
-<h2 id="服务端代码">服务端代码</h2>
-
+</code></pre></div><h2 id="服务端代码">服务端代码</h2>
 <h3 id="server">Server</h3>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-java" data-lang="java"><span style="color:#f92672">import</span> java.io.IOException<span style="color:#f92672">;</span>
 
-<pre><code class="language-java">import java.io.IOException;
+<span style="color:#f92672">import</span> com.tcp.udp.constants.TCPConstants<span style="color:#f92672">;</span>
 
-import com.tcp.udp.constants.TCPConstants;
+<span style="color:#66d9ef">public</span> <span style="color:#66d9ef">class</span> <span style="color:#a6e22e">Server</span> <span style="color:#f92672">{</span>
+    <span style="color:#66d9ef">public</span> <span style="color:#66d9ef">static</span> <span style="color:#66d9ef">void</span> <span style="color:#a6e22e">main</span><span style="color:#f92672">(</span>String<span style="color:#f92672">[]</span> args<span style="color:#f92672">)</span> <span style="color:#f92672">{</span>
+        TCPServer tcpServer <span style="color:#f92672">=</span> <span style="color:#66d9ef">new</span> TCPServer<span style="color:#f92672">(</span>TCPConstants<span style="color:#f92672">.</span><span style="color:#a6e22e">PORT_SERVER</span><span style="color:#f92672">);</span>
+        <span style="color:#66d9ef">boolean</span> isSucceed <span style="color:#f92672">=</span> tcpServer<span style="color:#f92672">.</span><span style="color:#a6e22e">start</span><span style="color:#f92672">();</span>
+        <span style="color:#66d9ef">if</span> <span style="color:#f92672">(!</span>isSucceed<span style="color:#f92672">)</span> <span style="color:#f92672">{</span>
+            System<span style="color:#f92672">.</span><span style="color:#a6e22e">out</span><span style="color:#f92672">.</span><span style="color:#a6e22e">println</span><span style="color:#f92672">(</span><span style="color:#e6db74">&#34;Start TCP server failed!&#34;</span><span style="color:#f92672">);</span>
+            <span style="color:#66d9ef">return</span><span style="color:#f92672">;</span>
+        <span style="color:#f92672">}</span>
 
-public class Server {
-    public static void main(String[] args) {
-        TCPServer tcpServer = new TCPServer(TCPConstants.PORT_SERVER);
-        boolean isSucceed = tcpServer.start();
-        if (!isSucceed) {
-            System.out.println(&quot;Start TCP server failed!&quot;);
-            return;
-        }
+        UDPProvider<span style="color:#f92672">.</span><span style="color:#a6e22e">start</span><span style="color:#f92672">(</span>TCPConstants<span style="color:#f92672">.</span><span style="color:#a6e22e">PORT_SERVER</span><span style="color:#f92672">);</span>
 
-        UDPProvider.start(TCPConstants.PORT_SERVER);
+        <span style="color:#66d9ef">try</span> <span style="color:#f92672">{</span>
+            <span style="color:#75715e">//noinspection ResultOfMethodCallIgnored
+</span><span style="color:#75715e"></span>            System<span style="color:#f92672">.</span><span style="color:#a6e22e">in</span><span style="color:#f92672">.</span><span style="color:#a6e22e">read</span><span style="color:#f92672">();</span>
+        <span style="color:#f92672">}</span> <span style="color:#66d9ef">catch</span> <span style="color:#f92672">(</span>IOException e<span style="color:#f92672">)</span> <span style="color:#f92672">{</span>
+            e<span style="color:#f92672">.</span><span style="color:#a6e22e">printStackTrace</span><span style="color:#f92672">();</span>
+        <span style="color:#f92672">}</span>
 
-        try {
-            //noinspection ResultOfMethodCallIgnored
-            System.in.read();
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
+        UDPProvider<span style="color:#f92672">.</span><span style="color:#a6e22e">stop</span><span style="color:#f92672">();</span>
+        tcpServer<span style="color:#f92672">.</span><span style="color:#a6e22e">stop</span><span style="color:#f92672">();</span>
+    <span style="color:#f92672">}</span>
+<span style="color:#f92672">}</span>
 
-        UDPProvider.stop();
-        tcpServer.stop();
-    }
-}
-
-</code></pre>
-
-<h3 id="udpprovider">UDPProvider</h3>
-
+</code></pre></div><h3 id="udpprovider">UDPProvider</h3>
 <p>udp的广播的接受和回复，解析对应的口令处理，把TCP服务启动的端口通过UDP发送给客户端。</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-java" data-lang="java"><span style="color:#f92672">import</span> java.net.DatagramPacket<span style="color:#f92672">;</span>
+<span style="color:#f92672">import</span> java.net.DatagramSocket<span style="color:#f92672">;</span>
+<span style="color:#f92672">import</span> java.nio.ByteBuffer<span style="color:#f92672">;</span>
+<span style="color:#f92672">import</span> java.util.HashMap<span style="color:#f92672">;</span>
+<span style="color:#f92672">import</span> java.util.Iterator<span style="color:#f92672">;</span>
+<span style="color:#f92672">import</span> java.util.Map<span style="color:#f92672">;</span>
+<span style="color:#f92672">import</span> java.util.Map.Entry<span style="color:#f92672">;</span>
+<span style="color:#f92672">import</span> java.util.UUID<span style="color:#f92672">;</span>
 
-<pre><code class="language-java">import java.net.DatagramPacket;
-import java.net.DatagramSocket;
-import java.nio.ByteBuffer;
-import java.util.HashMap;
-import java.util.Iterator;
-import java.util.Map;
-import java.util.Map.Entry;
-import java.util.UUID;
+<span style="color:#f92672">import</span> com.tcp.udp.clink.utils.JsonSerilizable<span style="color:#f92672">;</span>
+<span style="color:#f92672">import</span> com.tcp.udp.constants.UDPConstants<span style="color:#f92672">;</span>
 
-import com.tcp.udp.clink.utils.JsonSerilizable;
-import com.tcp.udp.constants.UDPConstants;
+<span style="color:#66d9ef">class</span> <span style="color:#a6e22e">UDPProvider</span> <span style="color:#f92672">{</span>
+    <span style="color:#66d9ef">private</span> <span style="color:#66d9ef">static</span> Provider PROVIDER_INSTANCE<span style="color:#f92672">;</span>
 
-class UDPProvider {
-    private static Provider PROVIDER_INSTANCE;
+    <span style="color:#66d9ef">static</span> <span style="color:#66d9ef">void</span> <span style="color:#a6e22e">start</span><span style="color:#f92672">(</span><span style="color:#66d9ef">int</span> port<span style="color:#f92672">)</span> <span style="color:#f92672">{</span>
+        stop<span style="color:#f92672">();</span>
+        String sn <span style="color:#f92672">=</span> UUID<span style="color:#f92672">.</span><span style="color:#a6e22e">randomUUID</span><span style="color:#f92672">().</span><span style="color:#a6e22e">toString</span><span style="color:#f92672">();</span>
+        Provider provider <span style="color:#f92672">=</span> <span style="color:#66d9ef">new</span> Provider<span style="color:#f92672">(</span>sn<span style="color:#f92672">,</span> port<span style="color:#f92672">);</span>
+        provider<span style="color:#f92672">.</span><span style="color:#a6e22e">start</span><span style="color:#f92672">();</span>
+        PROVIDER_INSTANCE <span style="color:#f92672">=</span> provider<span style="color:#f92672">;</span>
+    <span style="color:#f92672">}</span>
 
-    static void start(int port) {
-        stop();
-        String sn = UUID.randomUUID().toString();
-        Provider provider = new Provider(sn, port);
-        provider.start();
-        PROVIDER_INSTANCE = provider;
-    }
+    <span style="color:#66d9ef">static</span> <span style="color:#66d9ef">void</span> <span style="color:#a6e22e">stop</span><span style="color:#f92672">()</span> <span style="color:#f92672">{</span>
+        <span style="color:#66d9ef">if</span> <span style="color:#f92672">(</span>PROVIDER_INSTANCE <span style="color:#f92672">!=</span> <span style="color:#66d9ef">null</span><span style="color:#f92672">)</span> <span style="color:#f92672">{</span>
+            PROVIDER_INSTANCE<span style="color:#f92672">.</span><span style="color:#a6e22e">exit</span><span style="color:#f92672">();</span>
+            PROVIDER_INSTANCE <span style="color:#f92672">=</span> <span style="color:#66d9ef">null</span><span style="color:#f92672">;</span>
+        <span style="color:#f92672">}</span>
+    <span style="color:#f92672">}</span>
 
-    static void stop() {
-        if (PROVIDER_INSTANCE != null) {
-            PROVIDER_INSTANCE.exit();
-            PROVIDER_INSTANCE = null;
-        }
-    }
+    <span style="color:#66d9ef">private</span> <span style="color:#66d9ef">static</span> <span style="color:#66d9ef">class</span> <span style="color:#a6e22e">Provider</span> <span style="color:#66d9ef">extends</span> Thread <span style="color:#f92672">{</span>
+        <span style="color:#66d9ef">private</span> <span style="color:#66d9ef">final</span> String sn<span style="color:#f92672">;</span>
+        <span style="color:#66d9ef">private</span> <span style="color:#66d9ef">final</span> <span style="color:#66d9ef">int</span> port<span style="color:#f92672">;</span>
+        <span style="color:#66d9ef">private</span> <span style="color:#66d9ef">boolean</span> done <span style="color:#f92672">=</span> <span style="color:#66d9ef">false</span><span style="color:#f92672">;</span>
+        <span style="color:#66d9ef">private</span> DatagramSocket ds <span style="color:#f92672">=</span> <span style="color:#66d9ef">null</span><span style="color:#f92672">;</span>
+        <span style="color:#75715e">// 存储消息的Buffer
+</span><span style="color:#75715e"></span>        <span style="color:#66d9ef">final</span> <span style="color:#66d9ef">byte</span><span style="color:#f92672">[]</span> buffer <span style="color:#f92672">=</span> <span style="color:#66d9ef">new</span> <span style="color:#66d9ef">byte</span><span style="color:#f92672">[</span>128<span style="color:#f92672">];</span>
 
-    private static class Provider extends Thread {
-        private final String sn;
-        private final int port;
-        private boolean done = false;
-        private DatagramSocket ds = null;
-        // 存储消息的Buffer
-        final byte[] buffer = new byte[128];
+        Provider<span style="color:#f92672">(</span>String sn<span style="color:#f92672">,</span> <span style="color:#66d9ef">int</span> port<span style="color:#f92672">)</span> <span style="color:#f92672">{</span>
+            <span style="color:#66d9ef">super</span><span style="color:#f92672">();</span>
+            <span style="color:#66d9ef">this</span><span style="color:#f92672">.</span><span style="color:#a6e22e">sn</span> <span style="color:#f92672">=</span> sn<span style="color:#f92672">;</span>
+            <span style="color:#66d9ef">this</span><span style="color:#f92672">.</span><span style="color:#a6e22e">port</span> <span style="color:#f92672">=</span> port<span style="color:#f92672">;</span>
+        <span style="color:#f92672">}</span>
 
-        Provider(String sn, int port) {
-            super();
-            this.sn = sn;
-            this.port = port;
-        }
+        <span style="color:#a6e22e">@Override</span>
+        <span style="color:#66d9ef">public</span> <span style="color:#66d9ef">void</span> <span style="color:#a6e22e">run</span><span style="color:#f92672">()</span> <span style="color:#f92672">{</span>
+            <span style="color:#66d9ef">super</span><span style="color:#f92672">.</span><span style="color:#a6e22e">run</span><span style="color:#f92672">();</span>
+            System<span style="color:#f92672">.</span><span style="color:#a6e22e">out</span><span style="color:#f92672">.</span><span style="color:#a6e22e">println</span><span style="color:#f92672">(</span><span style="color:#e6db74">&#34;UDPProvider Started.&#34;</span><span style="color:#f92672">);</span>
+            <span style="color:#66d9ef">try</span> <span style="color:#f92672">{</span>
+                <span style="color:#75715e">// 监听30201 端口
+</span><span style="color:#75715e"></span>                ds <span style="color:#f92672">=</span> <span style="color:#66d9ef">new</span> DatagramSocket<span style="color:#f92672">(</span>UDPConstants<span style="color:#f92672">.</span><span style="color:#a6e22e">PORT_SERVER</span><span style="color:#f92672">);</span>
+                <span style="color:#75715e">// 接收消息的Packet
+</span><span style="color:#75715e"></span>                DatagramPacket receivePack <span style="color:#f92672">=</span> <span style="color:#66d9ef">new</span> DatagramPacket<span style="color:#f92672">(</span>buffer<span style="color:#f92672">,</span> buffer<span style="color:#f92672">.</span><span style="color:#a6e22e">length</span><span style="color:#f92672">);</span>
+                <span style="color:#66d9ef">while</span> <span style="color:#f92672">(!</span>done<span style="color:#f92672">)</span> <span style="color:#f92672">{</span>
+                    <span style="color:#75715e">// 接收
+</span><span style="color:#75715e"></span>                    ds<span style="color:#f92672">.</span><span style="color:#a6e22e">receive</span><span style="color:#f92672">(</span>receivePack<span style="color:#f92672">);</span>
+                    <span style="color:#75715e">// 打印接收到的信息与发送者的信息
+</span><span style="color:#75715e"></span>                    <span style="color:#75715e">// 发送者的IP地址
+</span><span style="color:#75715e"></span>                    String clientIp <span style="color:#f92672">=</span> receivePack<span style="color:#f92672">.</span><span style="color:#a6e22e">getAddress</span><span style="color:#f92672">().</span><span style="color:#a6e22e">getHostAddress</span><span style="color:#f92672">();</span>
+                    <span style="color:#66d9ef">int</span> clientPort <span style="color:#f92672">=</span> receivePack<span style="color:#f92672">.</span><span style="color:#a6e22e">getPort</span><span style="color:#f92672">();</span>
+                    System<span style="color:#f92672">.</span><span style="color:#a6e22e">out</span><span style="color:#f92672">.</span><span style="color:#a6e22e">println</span><span style="color:#f92672">(</span>clientPort<span style="color:#f92672">);</span>
+                    <span style="color:#66d9ef">byte</span><span style="color:#f92672">[]</span> clientData <span style="color:#f92672">=</span> receivePack<span style="color:#f92672">.</span><span style="color:#a6e22e">getData</span><span style="color:#f92672">();</span>
 
-        @Override
-        public void run() {
-            super.run();
-            System.out.println(&quot;UDPProvider Started.&quot;);
-            try {
-                // 监听30201 端口
-                ds = new DatagramSocket(UDPConstants.PORT_SERVER);
-                // 接收消息的Packet
-                DatagramPacket receivePack = new DatagramPacket(buffer, buffer.length);
-                while (!done) {
-                    // 接收
-                    ds.receive(receivePack);
-                    // 打印接收到的信息与发送者的信息
-                    // 发送者的IP地址
-                    String clientIp = receivePack.getAddress().getHostAddress();
-                    int clientPort = receivePack.getPort();
-                    System.out.println(clientPort);
-                    byte[] clientData = receivePack.getData();
+                    Map<span style="color:#f92672">&lt;</span>String<span style="color:#f92672">,</span> Object<span style="color:#f92672">&gt;</span> map <span style="color:#f92672">=</span> JsonSerilizable<span style="color:#f92672">.</span><span style="color:#a6e22e">changeByteToMap</span><span style="color:#f92672">(</span>clientData<span style="color:#f92672">);</span>
+                    Iterator<span style="color:#f92672">&lt;</span>Entry<span style="color:#f92672">&lt;</span>String<span style="color:#f92672">,</span> Object<span style="color:#f92672">&gt;&gt;</span> entries <span style="color:#f92672">=</span> map<span style="color:#f92672">.</span><span style="color:#a6e22e">entrySet</span><span style="color:#f92672">().</span><span style="color:#a6e22e">iterator</span><span style="color:#f92672">();</span>
 
-                    Map&lt;String, Object&gt; map = JsonSerilizable.changeByteToMap(clientData);
-                    Iterator&lt;Entry&lt;String, Object&gt;&gt; entries = map.entrySet().iterator();
+                    String cmdVal <span style="color:#f92672">=</span> <span style="color:#66d9ef">null</span><span style="color:#f92672">;</span>
+                    <span style="color:#66d9ef">int</span> udpPort <span style="color:#f92672">=</span> 0<span style="color:#f92672">;</span>
 
-                    String cmdVal = null;
-                    int udpPort = 0;
+                    <span style="color:#66d9ef">while</span> <span style="color:#f92672">(</span>entries<span style="color:#f92672">.</span><span style="color:#a6e22e">hasNext</span><span style="color:#f92672">())</span> <span style="color:#f92672">{</span>
+                        Map<span style="color:#f92672">.</span><span style="color:#a6e22e">Entry</span><span style="color:#f92672">&lt;</span>String<span style="color:#f92672">,</span> Object<span style="color:#f92672">&gt;</span> entry <span style="color:#f92672">=</span> entries<span style="color:#f92672">.</span><span style="color:#a6e22e">next</span><span style="color:#f92672">();</span>
+                        String key <span style="color:#f92672">=</span> entry<span style="color:#f92672">.</span><span style="color:#a6e22e">getKey</span><span style="color:#f92672">();</span>
+                        Object value <span style="color:#f92672">=</span> entry<span style="color:#f92672">.</span><span style="color:#a6e22e">getValue</span><span style="color:#f92672">();</span>
+                        <span style="color:#66d9ef">if</span> <span style="color:#f92672">(</span>key<span style="color:#f92672">.</span><span style="color:#a6e22e">equals</span><span style="color:#f92672">(</span><span style="color:#e6db74">&#34;CMD&#34;</span><span style="color:#f92672">))</span> <span style="color:#f92672">{</span>
+                            cmdVal <span style="color:#f92672">=</span> <span style="color:#f92672">(</span>String<span style="color:#f92672">)</span> value<span style="color:#f92672">;</span>
+                        <span style="color:#f92672">}</span> <span style="color:#66d9ef">else</span> <span style="color:#66d9ef">if</span> <span style="color:#f92672">(</span>key<span style="color:#f92672">.</span><span style="color:#a6e22e">equals</span><span style="color:#f92672">(</span><span style="color:#e6db74">&#34;port&#34;</span><span style="color:#f92672">))</span> <span style="color:#f92672">{</span>
+                            udpPort <span style="color:#f92672">=</span> <span style="color:#f92672">(</span><span style="color:#66d9ef">int</span><span style="color:#f92672">)</span> value<span style="color:#f92672">;</span>
+                        <span style="color:#f92672">}</span>
+                    <span style="color:#f92672">}</span>
+                    <span style="color:#75715e">// 判断合法性
+</span><span style="color:#75715e"></span>                    <span style="color:#66d9ef">if</span> <span style="color:#f92672">(</span>UDPConstants<span style="color:#f92672">.</span><span style="color:#a6e22e">UDP_PASSWORD_KEY</span><span style="color:#f92672">.</span><span style="color:#a6e22e">equals</span><span style="color:#f92672">(</span>cmdVal<span style="color:#f92672">))</span> <span style="color:#f92672">{</span>
+                        <span style="color:#75715e">// 构建一份回送数据
+</span><span style="color:#75715e"></span>                        Map<span style="color:#f92672">&lt;</span>String<span style="color:#f92672">,</span> Object<span style="color:#f92672">&gt;</span> responseMap <span style="color:#f92672">=</span> <span style="color:#66d9ef">new</span> HashMap<span style="color:#f92672">&lt;</span>String<span style="color:#f92672">,</span> Object<span style="color:#f92672">&gt;();</span>
+                        <span style="color:#75715e">// CMD命名
+</span><span style="color:#75715e"></span>                        responseMap<span style="color:#f92672">.</span><span style="color:#a6e22e">put</span><span style="color:#f92672">(</span><span style="color:#e6db74">&#34;sn&#34;</span><span style="color:#f92672">,</span> sn<span style="color:#f92672">);</span>
+                        <span style="color:#75715e">// 回送端口信息
+</span><span style="color:#75715e"></span>                        responseMap<span style="color:#f92672">.</span><span style="color:#a6e22e">put</span><span style="color:#f92672">(</span><span style="color:#e6db74">&#34;port&#34;</span><span style="color:#f92672">,</span> port<span style="color:#f92672">);</span>
+                        responseMap<span style="color:#f92672">.</span><span style="color:#a6e22e">put</span><span style="color:#f92672">(</span><span style="color:#e6db74">&#34;CMD&#34;</span><span style="color:#f92672">,</span> UDPConstants<span style="color:#f92672">.</span><span style="color:#a6e22e">UDP_PASSWORD_KEY</span><span style="color:#f92672">);</span>
 
-                    while (entries.hasNext()) {
-                        Map.Entry&lt;String, Object&gt; entry = entries.next();
-                        String key = entry.getKey();
-                        Object value = entry.getValue();
-                        if (key.equals(&quot;CMD&quot;)) {
-                            cmdVal = (String) value;
-                        } else if (key.equals(&quot;port&quot;)) {
-                            udpPort = (int) value;
-                        }
-                    }
-                    // 判断合法性
-                    if (UDPConstants.UDP_PASSWORD_KEY.equals(cmdVal)) {
-                        // 构建一份回送数据
-                        Map&lt;String, Object&gt; responseMap = new HashMap&lt;String, Object&gt;();
-                        // CMD命名
-                        responseMap.put(&quot;sn&quot;, sn);
-                        // 回送端口信息
-                        responseMap.put(&quot;port&quot;, port);
-                        responseMap.put(&quot;CMD&quot;, UDPConstants.UDP_PASSWORD_KEY);
+                        <span style="color:#66d9ef">byte</span><span style="color:#f92672">[]</span> responseBytes <span style="color:#f92672">=</span> JsonSerilizable<span style="color:#f92672">.</span><span style="color:#a6e22e">changeMapToByte</span><span style="color:#f92672">(</span>responseMap<span style="color:#f92672">);</span>
 
-                        byte[] responseBytes = JsonSerilizable.changeMapToByte(responseMap);
+                        <span style="color:#75715e">// 直接根据发送者构建一份回送信息
+</span><span style="color:#75715e"></span>                        DatagramPacket responsePacket <span style="color:#f92672">=</span> <span style="color:#66d9ef">new</span> DatagramPacket<span style="color:#f92672">(</span>responseBytes<span style="color:#f92672">,</span> responseBytes<span style="color:#f92672">.</span><span style="color:#a6e22e">length</span><span style="color:#f92672">,</span>
+                                receivePack<span style="color:#f92672">.</span><span style="color:#a6e22e">getAddress</span><span style="color:#f92672">(),</span> udpPort<span style="color:#f92672">);</span>
+                        ds<span style="color:#f92672">.</span><span style="color:#a6e22e">send</span><span style="color:#f92672">(</span>responsePacket<span style="color:#f92672">);</span>
+                        System<span style="color:#f92672">.</span><span style="color:#a6e22e">out</span><span style="color:#f92672">.</span><span style="color:#a6e22e">println</span><span style="color:#f92672">(</span><span style="color:#e6db74">&#34;UDPProvider response to:&#34;</span> <span style="color:#f92672">+</span> clientIp <span style="color:#f92672">+</span> <span style="color:#e6db74">&#34;\tport:&#34;</span>
+                                <span style="color:#f92672">+</span> udpPort <span style="color:#f92672">+</span> <span style="color:#e6db74">&#34;\tdataLen:&#34;</span> <span style="color:#f92672">+</span> responseBytes<span style="color:#f92672">.</span><span style="color:#a6e22e">length</span><span style="color:#f92672">);</span>
+                    <span style="color:#f92672">}</span> <span style="color:#66d9ef">else</span> <span style="color:#f92672">{</span>
+                        System<span style="color:#f92672">.</span><span style="color:#a6e22e">out</span><span style="color:#f92672">.</span><span style="color:#a6e22e">println</span><span style="color:#f92672">(</span><span style="color:#e6db74">&#34;UDPProvider receive cmd nonsupport; cmd:&#34;</span> <span style="color:#f92672">+</span> cmdVal <span style="color:#f92672">+</span> <span style="color:#e6db74">&#34;\tport:&#34;</span> <span style="color:#f92672">+</span> port<span style="color:#f92672">);</span>
+                    <span style="color:#f92672">}</span>
+                <span style="color:#f92672">}</span>
+            <span style="color:#f92672">}</span> <span style="color:#66d9ef">catch</span> <span style="color:#f92672">(</span>Exception e<span style="color:#f92672">)</span> <span style="color:#f92672">{</span>
+                e<span style="color:#f92672">.</span><span style="color:#a6e22e">printStackTrace</span><span style="color:#f92672">();</span>
+            <span style="color:#f92672">}</span> <span style="color:#66d9ef">finally</span> <span style="color:#f92672">{</span>
+                close<span style="color:#f92672">();</span>
+            <span style="color:#f92672">}</span>
+            <span style="color:#75715e">// 完成
+</span><span style="color:#75715e"></span>            System<span style="color:#f92672">.</span><span style="color:#a6e22e">out</span><span style="color:#f92672">.</span><span style="color:#a6e22e">println</span><span style="color:#f92672">(</span><span style="color:#e6db74">&#34;UDPProvider Finished.&#34;</span><span style="color:#f92672">);</span>
+        <span style="color:#f92672">}</span>
 
-                        // 直接根据发送者构建一份回送信息
-                        DatagramPacket responsePacket = new DatagramPacket(responseBytes, responseBytes.length,
-                                receivePack.getAddress(), udpPort);
-                        ds.send(responsePacket);
-                        System.out.println(&quot;UDPProvider response to:&quot; + clientIp + &quot;\tport:&quot;
-                                + udpPort + &quot;\tdataLen:&quot; + responseBytes.length);
-                    } else {
-                        System.out.println(&quot;UDPProvider receive cmd nonsupport; cmd:&quot; + cmdVal + &quot;\tport:&quot; + port);
-                    }
-                }
-            } catch (Exception e) {
-                e.printStackTrace();
-            } finally {
-                close();
-            }
-            // 完成
-            System.out.println(&quot;UDPProvider Finished.&quot;);
-        }
+        <span style="color:#66d9ef">private</span> <span style="color:#66d9ef">void</span> <span style="color:#a6e22e">close</span><span style="color:#f92672">()</span> <span style="color:#f92672">{</span>
+            <span style="color:#66d9ef">if</span> <span style="color:#f92672">(</span>ds <span style="color:#f92672">!=</span> <span style="color:#66d9ef">null</span><span style="color:#f92672">)</span> <span style="color:#f92672">{</span>
+                ds<span style="color:#f92672">.</span><span style="color:#a6e22e">close</span><span style="color:#f92672">();</span>
+                ds <span style="color:#f92672">=</span> <span style="color:#66d9ef">null</span><span style="color:#f92672">;</span>
+            <span style="color:#f92672">}</span>
+        <span style="color:#f92672">}</span>
 
-        private void close() {
-            if (ds != null) {
-                ds.close();
-                ds = null;
-            }
-        }
+        <span style="color:#75715e">/**
+</span><span style="color:#75715e">         * 提供结束
+</span><span style="color:#75715e">         */</span>
+        <span style="color:#66d9ef">void</span> <span style="color:#a6e22e">exit</span><span style="color:#f92672">()</span> <span style="color:#f92672">{</span>
+            done <span style="color:#f92672">=</span> <span style="color:#66d9ef">true</span><span style="color:#f92672">;</span>
+            close<span style="color:#f92672">();</span>
+        <span style="color:#f92672">}</span>
+    <span style="color:#f92672">}</span>
+<span style="color:#f92672">}</span>
 
-        /**
-         * 提供结束
-         */
-        void exit() {
-            done = true;
-            close();
-        }
-    }
-}
+</code></pre></div><h3 id="tcpserver">TCPServer</h3>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-java" data-lang="java"><span style="color:#f92672">import</span> java.io.BufferedReader<span style="color:#f92672">;</span>
+<span style="color:#f92672">import</span> java.io.IOException<span style="color:#f92672">;</span>
+<span style="color:#f92672">import</span> java.io.InputStreamReader<span style="color:#f92672">;</span>
+<span style="color:#f92672">import</span> java.io.PrintStream<span style="color:#f92672">;</span>
+<span style="color:#f92672">import</span> java.net.ServerSocket<span style="color:#f92672">;</span>
+<span style="color:#f92672">import</span> java.net.Socket<span style="color:#f92672">;</span>
 
-</code></pre>
+<span style="color:#66d9ef">public</span> <span style="color:#66d9ef">class</span> <span style="color:#a6e22e">TCPServer</span> <span style="color:#f92672">{</span>
+    <span style="color:#66d9ef">private</span> <span style="color:#66d9ef">final</span> <span style="color:#66d9ef">int</span> port<span style="color:#f92672">;</span>
+    <span style="color:#66d9ef">private</span> ClientListener mListener<span style="color:#f92672">;</span>
 
-<h3 id="tcpserver">TCPServer</h3>
+    <span style="color:#66d9ef">public</span> <span style="color:#a6e22e">TCPServer</span><span style="color:#f92672">(</span><span style="color:#66d9ef">int</span> port<span style="color:#f92672">)</span> <span style="color:#f92672">{</span>
+        <span style="color:#66d9ef">this</span><span style="color:#f92672">.</span><span style="color:#a6e22e">port</span> <span style="color:#f92672">=</span> port<span style="color:#f92672">;</span>
+    <span style="color:#f92672">}</span>
 
-<pre><code class="language-java">import java.io.BufferedReader;
-import java.io.IOException;
-import java.io.InputStreamReader;
-import java.io.PrintStream;
-import java.net.ServerSocket;
-import java.net.Socket;
+    <span style="color:#66d9ef">public</span> <span style="color:#66d9ef">boolean</span> <span style="color:#a6e22e">start</span><span style="color:#f92672">()</span> <span style="color:#f92672">{</span>
+        <span style="color:#66d9ef">try</span> <span style="color:#f92672">{</span>
+            ClientListener listener <span style="color:#f92672">=</span> <span style="color:#66d9ef">new</span> ClientListener<span style="color:#f92672">(</span>port<span style="color:#f92672">);</span>
+            mListener <span style="color:#f92672">=</span> listener<span style="color:#f92672">;</span>
+            listener<span style="color:#f92672">.</span><span style="color:#a6e22e">start</span><span style="color:#f92672">();</span>
+        <span style="color:#f92672">}</span> <span style="color:#66d9ef">catch</span> <span style="color:#f92672">(</span>IOException e<span style="color:#f92672">)</span> <span style="color:#f92672">{</span>
+            e<span style="color:#f92672">.</span><span style="color:#a6e22e">printStackTrace</span><span style="color:#f92672">();</span>
+            <span style="color:#66d9ef">return</span> <span style="color:#66d9ef">false</span><span style="color:#f92672">;</span>
+        <span style="color:#f92672">}</span>
+        <span style="color:#66d9ef">return</span> <span style="color:#66d9ef">true</span><span style="color:#f92672">;</span>
+    <span style="color:#f92672">}</span>
 
-public class TCPServer {
-    private final int port;
-    private ClientListener mListener;
+    <span style="color:#66d9ef">public</span> <span style="color:#66d9ef">void</span> <span style="color:#a6e22e">stop</span><span style="color:#f92672">()</span> <span style="color:#f92672">{</span>
+        <span style="color:#66d9ef">if</span> <span style="color:#f92672">(</span>mListener <span style="color:#f92672">!=</span> <span style="color:#66d9ef">null</span><span style="color:#f92672">)</span> <span style="color:#f92672">{</span>
+            mListener<span style="color:#f92672">.</span><span style="color:#a6e22e">exit</span><span style="color:#f92672">();</span>
+        <span style="color:#f92672">}</span>
+    <span style="color:#f92672">}</span>
 
-    public TCPServer(int port) {
-        this.port = port;
-    }
+    <span style="color:#66d9ef">private</span> <span style="color:#66d9ef">static</span> <span style="color:#66d9ef">class</span> <span style="color:#a6e22e">ClientListener</span> <span style="color:#66d9ef">extends</span> Thread <span style="color:#f92672">{</span>
+        <span style="color:#66d9ef">private</span> ServerSocket server<span style="color:#f92672">;</span>
+        <span style="color:#66d9ef">private</span> <span style="color:#66d9ef">boolean</span> done <span style="color:#f92672">=</span> <span style="color:#66d9ef">false</span><span style="color:#f92672">;</span>
 
-    public boolean start() {
-        try {
-            ClientListener listener = new ClientListener(port);
-            mListener = listener;
-            listener.start();
-        } catch (IOException e) {
-            e.printStackTrace();
-            return false;
-        }
-        return true;
-    }
+        <span style="color:#66d9ef">private</span> <span style="color:#a6e22e">ClientListener</span><span style="color:#f92672">(</span><span style="color:#66d9ef">int</span> port<span style="color:#f92672">)</span> <span style="color:#66d9ef">throws</span> IOException <span style="color:#f92672">{</span>
+            server <span style="color:#f92672">=</span> <span style="color:#66d9ef">new</span> ServerSocket<span style="color:#f92672">(</span>port<span style="color:#f92672">);</span>
+            System<span style="color:#f92672">.</span><span style="color:#a6e22e">out</span><span style="color:#f92672">.</span><span style="color:#a6e22e">println</span><span style="color:#f92672">(</span><span style="color:#e6db74">&#34;服务器信息：&#34;</span> <span style="color:#f92672">+</span> server<span style="color:#f92672">.</span><span style="color:#a6e22e">getInetAddress</span><span style="color:#f92672">()</span> <span style="color:#f92672">+</span> <span style="color:#e6db74">&#34; P:&#34;</span> <span style="color:#f92672">+</span> server<span style="color:#f92672">.</span><span style="color:#a6e22e">getLocalPort</span><span style="color:#f92672">());</span>
+        <span style="color:#f92672">}</span>
 
-    public void stop() {
-        if (mListener != null) {
-            mListener.exit();
-        }
-    }
+        <span style="color:#a6e22e">@Override</span>
+        <span style="color:#66d9ef">public</span> <span style="color:#66d9ef">void</span> <span style="color:#a6e22e">run</span><span style="color:#f92672">()</span> <span style="color:#f92672">{</span>
+            <span style="color:#66d9ef">super</span><span style="color:#f92672">.</span><span style="color:#a6e22e">run</span><span style="color:#f92672">();</span>
 
-    private static class ClientListener extends Thread {
-        private ServerSocket server;
-        private boolean done = false;
+            System<span style="color:#f92672">.</span><span style="color:#a6e22e">out</span><span style="color:#f92672">.</span><span style="color:#a6e22e">println</span><span style="color:#f92672">(</span><span style="color:#e6db74">&#34;服务器准备就绪～&#34;</span><span style="color:#f92672">);</span>
+            <span style="color:#75715e">// 等待客户端连接
+</span><span style="color:#75715e"></span>            <span style="color:#66d9ef">do</span> <span style="color:#f92672">{</span>
+                <span style="color:#75715e">// 得到客户端
+</span><span style="color:#75715e"></span>                Socket client<span style="color:#f92672">;</span>
+                <span style="color:#66d9ef">try</span> <span style="color:#f92672">{</span>
+                    client <span style="color:#f92672">=</span> server<span style="color:#f92672">.</span><span style="color:#a6e22e">accept</span><span style="color:#f92672">();</span>
+                <span style="color:#f92672">}</span> <span style="color:#66d9ef">catch</span> <span style="color:#f92672">(</span>IOException e<span style="color:#f92672">)</span> <span style="color:#f92672">{</span>
+                    <span style="color:#66d9ef">continue</span><span style="color:#f92672">;</span>
+                <span style="color:#f92672">}</span>
+                <span style="color:#75715e">// 客户端构建异步线程
+</span><span style="color:#75715e"></span>                ClientHandler clientHandler <span style="color:#f92672">=</span> <span style="color:#66d9ef">new</span> ClientHandler<span style="color:#f92672">(</span>client<span style="color:#f92672">);</span>
+                <span style="color:#75715e">// 启动线程
+</span><span style="color:#75715e"></span>                clientHandler<span style="color:#f92672">.</span><span style="color:#a6e22e">start</span><span style="color:#f92672">();</span>
+            <span style="color:#f92672">}</span> <span style="color:#66d9ef">while</span> <span style="color:#f92672">(!</span>done<span style="color:#f92672">);</span>
 
-        private ClientListener(int port) throws IOException {
-            server = new ServerSocket(port);
-            System.out.println(&quot;服务器信息：&quot; + server.getInetAddress() + &quot; P:&quot; + server.getLocalPort());
-        }
+            System<span style="color:#f92672">.</span><span style="color:#a6e22e">out</span><span style="color:#f92672">.</span><span style="color:#a6e22e">println</span><span style="color:#f92672">(</span><span style="color:#e6db74">&#34;服务器已关闭！&#34;</span><span style="color:#f92672">);</span>
+        <span style="color:#f92672">}</span>
 
-        @Override
-        public void run() {
-            super.run();
+        <span style="color:#66d9ef">void</span> <span style="color:#a6e22e">exit</span><span style="color:#f92672">()</span> <span style="color:#f92672">{</span>
+            done <span style="color:#f92672">=</span> <span style="color:#66d9ef">true</span><span style="color:#f92672">;</span>
+            <span style="color:#66d9ef">try</span> <span style="color:#f92672">{</span>
+                server<span style="color:#f92672">.</span><span style="color:#a6e22e">close</span><span style="color:#f92672">();</span>
+            <span style="color:#f92672">}</span> <span style="color:#66d9ef">catch</span> <span style="color:#f92672">(</span>IOException e<span style="color:#f92672">)</span> <span style="color:#f92672">{</span>
+                e<span style="color:#f92672">.</span><span style="color:#a6e22e">printStackTrace</span><span style="color:#f92672">();</span>
+            <span style="color:#f92672">}</span>
+        <span style="color:#f92672">}</span>
+    <span style="color:#f92672">}</span>
 
-            System.out.println(&quot;服务器准备就绪～&quot;);
-            // 等待客户端连接
-            do {
-                // 得到客户端
-                Socket client;
-                try {
-                    client = server.accept();
-                } catch (IOException e) {
-                    continue;
-                }
-                // 客户端构建异步线程
-                ClientHandler clientHandler = new ClientHandler(client);
-                // 启动线程
-                clientHandler.start();
-            } while (!done);
+    <span style="color:#75715e">/**
+</span><span style="color:#75715e">     * 客户端消息处理
+</span><span style="color:#75715e">     */</span>
+    <span style="color:#66d9ef">private</span> <span style="color:#66d9ef">static</span> <span style="color:#66d9ef">class</span> <span style="color:#a6e22e">ClientHandler</span> <span style="color:#66d9ef">extends</span> Thread <span style="color:#f92672">{</span>
+        <span style="color:#66d9ef">private</span> Socket socket<span style="color:#f92672">;</span>
+        <span style="color:#66d9ef">private</span> <span style="color:#66d9ef">boolean</span> flag <span style="color:#f92672">=</span> <span style="color:#66d9ef">true</span><span style="color:#f92672">;</span>
 
-            System.out.println(&quot;服务器已关闭！&quot;);
-        }
+        ClientHandler<span style="color:#f92672">(</span>Socket socket<span style="color:#f92672">)</span> <span style="color:#f92672">{</span>
+            <span style="color:#66d9ef">this</span><span style="color:#f92672">.</span><span style="color:#a6e22e">socket</span> <span style="color:#f92672">=</span> socket<span style="color:#f92672">;</span>
+        <span style="color:#f92672">}</span>
 
-        void exit() {
-            done = true;
-            try {
-                server.close();
-            } catch (IOException e) {
-                e.printStackTrace();
-            }
-        }
-    }
+        <span style="color:#a6e22e">@Override</span>
+        <span style="color:#66d9ef">public</span> <span style="color:#66d9ef">void</span> <span style="color:#a6e22e">run</span><span style="color:#f92672">()</span> <span style="color:#f92672">{</span>
+            <span style="color:#66d9ef">super</span><span style="color:#f92672">.</span><span style="color:#a6e22e">run</span><span style="color:#f92672">();</span>
+            System<span style="color:#f92672">.</span><span style="color:#a6e22e">out</span><span style="color:#f92672">.</span><span style="color:#a6e22e">println</span><span style="color:#f92672">(</span><span style="color:#e6db74">&#34;新客户端连接：&#34;</span> <span style="color:#f92672">+</span> socket<span style="color:#f92672">.</span><span style="color:#a6e22e">getInetAddress</span><span style="color:#f92672">()</span> <span style="color:#f92672">+</span>
+                    <span style="color:#e6db74">&#34; P:&#34;</span> <span style="color:#f92672">+</span> socket<span style="color:#f92672">.</span><span style="color:#a6e22e">getPort</span><span style="color:#f92672">());</span>
 
-    /**
-     * 客户端消息处理
-     */
-    private static class ClientHandler extends Thread {
-        private Socket socket;
-        private boolean flag = true;
+            <span style="color:#66d9ef">try</span> <span style="color:#f92672">{</span>
+                <span style="color:#75715e">// 得到打印流，用于数据输出；服务器回送数据使用
+</span><span style="color:#75715e"></span>                PrintStream socketOutput <span style="color:#f92672">=</span> <span style="color:#66d9ef">new</span> PrintStream<span style="color:#f92672">(</span>socket<span style="color:#f92672">.</span><span style="color:#a6e22e">getOutputStream</span><span style="color:#f92672">());</span>
+                <span style="color:#75715e">// 得到输入流，用于接收数据
+</span><span style="color:#75715e"></span>                BufferedReader socketInput <span style="color:#f92672">=</span> <span style="color:#66d9ef">new</span> BufferedReader<span style="color:#f92672">(</span><span style="color:#66d9ef">new</span> InputStreamReader<span style="color:#f92672">(</span>
+                        socket<span style="color:#f92672">.</span><span style="color:#a6e22e">getInputStream</span><span style="color:#f92672">()));</span>
 
-        ClientHandler(Socket socket) {
-            this.socket = socket;
-        }
+                <span style="color:#66d9ef">do</span> <span style="color:#f92672">{</span>
+                    <span style="color:#75715e">// 客户端拿到一条数据
+</span><span style="color:#75715e"></span>                    String str <span style="color:#f92672">=</span> socketInput<span style="color:#f92672">.</span><span style="color:#a6e22e">readLine</span><span style="color:#f92672">();</span>
+                    <span style="color:#66d9ef">if</span> <span style="color:#f92672">(</span><span style="color:#e6db74">&#34;bye&#34;</span><span style="color:#f92672">.</span><span style="color:#a6e22e">equalsIgnoreCase</span><span style="color:#f92672">(</span>str<span style="color:#f92672">))</span> <span style="color:#f92672">{</span>
+                        flag <span style="color:#f92672">=</span> <span style="color:#66d9ef">false</span><span style="color:#f92672">;</span>
+                        <span style="color:#75715e">// 回送
+</span><span style="color:#75715e"></span>                        socketOutput<span style="color:#f92672">.</span><span style="color:#a6e22e">println</span><span style="color:#f92672">(</span><span style="color:#e6db74">&#34;bye&#34;</span><span style="color:#f92672">);</span>
+                    <span style="color:#f92672">}</span> <span style="color:#66d9ef">else</span> <span style="color:#f92672">{</span>
+                        <span style="color:#75715e">// 打印到屏幕。并回送数据长度
+</span><span style="color:#75715e"></span>                        System<span style="color:#f92672">.</span><span style="color:#a6e22e">out</span><span style="color:#f92672">.</span><span style="color:#a6e22e">println</span><span style="color:#f92672">(</span>str<span style="color:#f92672">);</span>
+                        socketOutput<span style="color:#f92672">.</span><span style="color:#a6e22e">println</span><span style="color:#f92672">(</span><span style="color:#e6db74">&#34;回送：&#34;</span> <span style="color:#f92672">+</span> str<span style="color:#f92672">.</span><span style="color:#a6e22e">length</span><span style="color:#f92672">());</span>
+                    <span style="color:#f92672">}</span>
 
-        @Override
-        public void run() {
-            super.run();
-            System.out.println(&quot;新客户端连接：&quot; + socket.getInetAddress() +
-                    &quot; P:&quot; + socket.getPort());
+                <span style="color:#f92672">}</span> <span style="color:#66d9ef">while</span> <span style="color:#f92672">(</span>flag<span style="color:#f92672">);</span>
 
-            try {
-                // 得到打印流，用于数据输出；服务器回送数据使用
-                PrintStream socketOutput = new PrintStream(socket.getOutputStream());
-                // 得到输入流，用于接收数据
-                BufferedReader socketInput = new BufferedReader(new InputStreamReader(
-                        socket.getInputStream()));
+                socketInput<span style="color:#f92672">.</span><span style="color:#a6e22e">close</span><span style="color:#f92672">();</span>
+                socketOutput<span style="color:#f92672">.</span><span style="color:#a6e22e">close</span><span style="color:#f92672">();</span>
 
-                do {
-                    // 客户端拿到一条数据
-                    String str = socketInput.readLine();
-                    if (&quot;bye&quot;.equalsIgnoreCase(str)) {
-                        flag = false;
-                        // 回送
-                        socketOutput.println(&quot;bye&quot;);
-                    } else {
-                        // 打印到屏幕。并回送数据长度
-                        System.out.println(str);
-                        socketOutput.println(&quot;回送：&quot; + str.length());
-                    }
+            <span style="color:#f92672">}</span> <span style="color:#66d9ef">catch</span> <span style="color:#f92672">(</span>Exception e<span style="color:#f92672">)</span> <span style="color:#f92672">{</span>
+                System<span style="color:#f92672">.</span><span style="color:#a6e22e">out</span><span style="color:#f92672">.</span><span style="color:#a6e22e">println</span><span style="color:#f92672">(</span><span style="color:#e6db74">&#34;连接异常断开&#34;</span><span style="color:#f92672">);</span>
+            <span style="color:#f92672">}</span> <span style="color:#66d9ef">finally</span> <span style="color:#f92672">{</span>
+                <span style="color:#75715e">// 连接关闭
+</span><span style="color:#75715e"></span>                <span style="color:#66d9ef">try</span> <span style="color:#f92672">{</span>
+                    socket<span style="color:#f92672">.</span><span style="color:#a6e22e">close</span><span style="color:#f92672">();</span>
+                <span style="color:#f92672">}</span> <span style="color:#66d9ef">catch</span> <span style="color:#f92672">(</span>IOException e<span style="color:#f92672">)</span> <span style="color:#f92672">{</span>
+                    e<span style="color:#f92672">.</span><span style="color:#a6e22e">printStackTrace</span><span style="color:#f92672">();</span>
+                <span style="color:#f92672">}</span>
+            <span style="color:#f92672">}</span>
 
-                } while (flag);
-
-                socketInput.close();
-                socketOutput.close();
-
-            } catch (Exception e) {
-                System.out.println(&quot;连接异常断开&quot;);
-            } finally {
-                // 连接关闭
-                try {
-                    socket.close();
-                } catch (IOException e) {
-                    e.printStackTrace();
-                }
-            }
-
-            System.out.println(&quot;客户端已退出：&quot; + socket.getInetAddress() +
-                    &quot; P:&quot; + socket.getPort());
-        }
-    }
-}
-</code></pre>
-
-<h2 id="相关工具类">相关工具类</h2>
-
+            System<span style="color:#f92672">.</span><span style="color:#a6e22e">out</span><span style="color:#f92672">.</span><span style="color:#a6e22e">println</span><span style="color:#f92672">(</span><span style="color:#e6db74">&#34;客户端已退出：&#34;</span> <span style="color:#f92672">+</span> socket<span style="color:#f92672">.</span><span style="color:#a6e22e">getInetAddress</span><span style="color:#f92672">()</span> <span style="color:#f92672">+</span>
+                    <span style="color:#e6db74">&#34; P:&#34;</span> <span style="color:#f92672">+</span> socket<span style="color:#f92672">.</span><span style="color:#a6e22e">getPort</span><span style="color:#f92672">());</span>
+        <span style="color:#f92672">}</span>
+    <span style="color:#f92672">}</span>
+<span style="color:#f92672">}</span>
+</code></pre></div><h2 id="相关工具类">相关工具类</h2>
 <h3 id="tcpconstants">TCPConstants</h3>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-java" data-lang="java"><span style="color:#66d9ef">public</span> <span style="color:#66d9ef">class</span> <span style="color:#a6e22e">TCPConstants</span> <span style="color:#f92672">{</span>
+    <span style="color:#75715e">// 服务器固化UDP接收端口
+</span><span style="color:#75715e"></span>    <span style="color:#66d9ef">public</span> <span style="color:#66d9ef">static</span> <span style="color:#66d9ef">int</span> PORT_SERVER <span style="color:#f92672">=</span> 30401<span style="color:#f92672">;</span>
+<span style="color:#f92672">}</span>
+</code></pre></div><h3 id="udpconstants">UDPConstants</h3>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-java" data-lang="java"><span style="color:#66d9ef">public</span> <span style="color:#66d9ef">class</span> <span style="color:#a6e22e">UDPConstants</span> <span style="color:#f92672">{</span>
+    <span style="color:#75715e">// 服务器固化UDP接收端口
+</span><span style="color:#75715e"></span>    <span style="color:#66d9ef">public</span> <span style="color:#66d9ef">static</span> <span style="color:#66d9ef">int</span> PORT_SERVER <span style="color:#f92672">=</span> 30201<span style="color:#f92672">;</span>
+    <span style="color:#75715e">// 客户端回送端口
+</span><span style="color:#75715e"></span>    <span style="color:#66d9ef">public</span> <span style="color:#66d9ef">static</span> <span style="color:#66d9ef">int</span> PORT_CLIENT_RESPONSE <span style="color:#f92672">=</span> 30202<span style="color:#f92672">;</span>
 
-<pre><code class="language-java">public class TCPConstants {
-    // 服务器固化UDP接收端口
-    public static int PORT_SERVER = 30401;
-}
-</code></pre>
+    <span style="color:#75715e">// UDP 密码口令
+</span><span style="color:#75715e"></span>    <span style="color:#66d9ef">public</span> <span style="color:#66d9ef">static</span> String UDP_PASSWORD_KEY <span style="color:#f92672">=</span> <span style="color:#e6db74">&#34;maizi&#34;</span><span style="color:#f92672">;</span>
+<span style="color:#f92672">}</span>
 
-<h3 id="udpconstants">UDPConstants</h3>
+</code></pre></div><h3 id="jsonserilizable">JsonSerilizable</h3>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-java" data-lang="java"><span style="color:#f92672">import</span> java.io.IOException<span style="color:#f92672">;</span>
+<span style="color:#f92672">import</span> java.util.HashMap<span style="color:#f92672">;</span>
+<span style="color:#f92672">import</span> java.util.Map<span style="color:#f92672">;</span>
 
-<pre><code class="language-java">public class UDPConstants {
-    // 服务器固化UDP接收端口
-    public static int PORT_SERVER = 30201;
-    // 客户端回送端口
-    public static int PORT_CLIENT_RESPONSE = 30202;
+<span style="color:#f92672">import</span> com.alibaba.fastjson.JSON<span style="color:#f92672">;</span>
+<span style="color:#f92672">import</span> com.alibaba.fastjson.TypeReference<span style="color:#f92672">;</span>
 
-    // UDP 密码口令
-    public static String UDP_PASSWORD_KEY = &quot;maizi&quot;;
-}
+<span style="color:#66d9ef">public</span> <span style="color:#66d9ef">class</span> <span style="color:#a6e22e">JsonSerilizable</span> <span style="color:#f92672">{</span>
+    <span style="color:#75715e">/* 将HashMap序列化为字符串存入json文件中 */</span>
+    <span style="color:#66d9ef">public</span> <span style="color:#66d9ef">static</span> String <span style="color:#a6e22e">serilizableForMap</span><span style="color:#f92672">(</span>Object objMap<span style="color:#f92672">)</span> <span style="color:#66d9ef">throws</span> IOException <span style="color:#f92672">{</span>
 
-</code></pre>
+        String listString <span style="color:#f92672">=</span> JSON<span style="color:#f92672">.</span><span style="color:#a6e22e">toJSONString</span><span style="color:#f92672">(</span>objMap<span style="color:#f92672">,</span> <span style="color:#66d9ef">true</span><span style="color:#f92672">);</span><span style="color:#75715e">// (maps,CityEntity.class);
+</span><span style="color:#75715e"></span>        <span style="color:#66d9ef">return</span> listString<span style="color:#f92672">;</span>
+    <span style="color:#f92672">}</span>
 
-<h3 id="jsonserilizable">JsonSerilizable</h3>
+    <span style="color:#75715e">/* 将json文件中的内容读取出来，反序列化为HashMap */</span>
+    <span style="color:#66d9ef">public</span> <span style="color:#66d9ef">static</span> <span style="color:#f92672">&lt;</span>T<span style="color:#f92672">,</span> K<span style="color:#f92672">&gt;</span> HashMap<span style="color:#f92672">&lt;</span>K<span style="color:#f92672">,</span> T<span style="color:#f92672">&gt;</span> <span style="color:#a6e22e">deserilizableForMapFromFile</span><span style="color:#f92672">(</span>String listString2<span style="color:#f92672">,</span> Class<span style="color:#f92672">&lt;</span>T<span style="color:#f92672">&gt;</span> clazz<span style="color:#f92672">)</span>
+            <span style="color:#66d9ef">throws</span> IOException <span style="color:#f92672">{</span>
 
-<pre><code class="language-java">import java.io.IOException;
-import java.util.HashMap;
-import java.util.Map;
+        Map<span style="color:#f92672">&lt;</span>K<span style="color:#f92672">,</span> T<span style="color:#f92672">&gt;</span> map <span style="color:#f92672">=</span> JSON<span style="color:#f92672">.</span><span style="color:#a6e22e">parseObject</span><span style="color:#f92672">(</span>listString2<span style="color:#f92672">,</span> <span style="color:#66d9ef">new</span> TypeReference<span style="color:#f92672">&lt;</span>Map<span style="color:#f92672">&lt;</span>K<span style="color:#f92672">,</span> T<span style="color:#f92672">&gt;&gt;()</span> <span style="color:#f92672">{</span>
+        <span style="color:#f92672">});</span>
 
-import com.alibaba.fastjson.JSON;
-import com.alibaba.fastjson.TypeReference;
+        <span style="color:#66d9ef">return</span> <span style="color:#f92672">(</span>HashMap<span style="color:#f92672">&lt;</span>K<span style="color:#f92672">,</span> T<span style="color:#f92672">&gt;)</span> map<span style="color:#f92672">;</span>
+    <span style="color:#f92672">}</span>
 
-public class JsonSerilizable {
-    /* 将HashMap序列化为字符串存入json文件中 */
-    public static String serilizableForMap(Object objMap) throws IOException {
+    <span style="color:#66d9ef">public</span> <span style="color:#66d9ef">static</span> <span style="color:#66d9ef">byte</span><span style="color:#f92672">[]</span> <span style="color:#a6e22e">changeMapToByte</span><span style="color:#f92672">(</span>Map<span style="color:#f92672">&lt;</span>String<span style="color:#f92672">,</span> Object<span style="color:#f92672">&gt;</span> map<span style="color:#f92672">)</span> <span style="color:#f92672">{</span>
 
-        String listString = JSON.toJSONString(objMap, true);// (maps,CityEntity.class);
-        return listString;
-    }
+        <span style="color:#66d9ef">byte</span><span style="color:#f92672">[]</span> bytes <span style="color:#f92672">=</span> <span style="color:#66d9ef">null</span><span style="color:#f92672">;</span>
+        <span style="color:#66d9ef">try</span> <span style="color:#f92672">{</span>
+            bytes <span style="color:#f92672">=</span> JsonSerilizable<span style="color:#f92672">.</span><span style="color:#a6e22e">serilizableForMap</span><span style="color:#f92672">(</span>map<span style="color:#f92672">).</span><span style="color:#a6e22e">getBytes</span><span style="color:#f92672">();</span>
+        <span style="color:#f92672">}</span> <span style="color:#66d9ef">catch</span> <span style="color:#f92672">(</span>Exception e<span style="color:#f92672">)</span> <span style="color:#f92672">{</span>
+            System<span style="color:#f92672">.</span><span style="color:#a6e22e">out</span><span style="color:#f92672">.</span><span style="color:#a6e22e">println</span><span style="color:#f92672">(</span><span style="color:#e6db74">&#34;map到byte[]转换异常&#34;</span><span style="color:#f92672">);</span>
+            e<span style="color:#f92672">.</span><span style="color:#a6e22e">printStackTrace</span><span style="color:#f92672">();</span>
+        <span style="color:#f92672">}</span>
 
-    /* 将json文件中的内容读取出来，反序列化为HashMap */
-    public static &lt;T, K&gt; HashMap&lt;K, T&gt; deserilizableForMapFromFile(String listString2, Class&lt;T&gt; clazz)
-            throws IOException {
+        <span style="color:#66d9ef">return</span> bytes<span style="color:#f92672">;</span>
+    <span style="color:#f92672">}</span>
 
-        Map&lt;K, T&gt; map = JSON.parseObject(listString2, new TypeReference&lt;Map&lt;K, T&gt;&gt;() {
-        });
+    <span style="color:#66d9ef">public</span> <span style="color:#66d9ef">static</span> Map<span style="color:#f92672">&lt;</span>String<span style="color:#f92672">,</span> Object<span style="color:#f92672">&gt;</span> <span style="color:#a6e22e">changeByteToMap</span><span style="color:#f92672">(</span><span style="color:#66d9ef">byte</span><span style="color:#f92672">[]</span> bytes<span style="color:#f92672">)</span> <span style="color:#f92672">{</span>
+        Map<span style="color:#f92672">&lt;</span>String<span style="color:#f92672">,</span> Object<span style="color:#f92672">&gt;</span> retmap <span style="color:#f92672">=</span> <span style="color:#66d9ef">null</span><span style="color:#f92672">;</span>
+        <span style="color:#66d9ef">try</span> <span style="color:#f92672">{</span>
+            <span style="color:#66d9ef">if</span> <span style="color:#f92672">(</span>bytes <span style="color:#f92672">!=</span> <span style="color:#66d9ef">null</span><span style="color:#f92672">)</span> <span style="color:#f92672">{</span>
+                retmap <span style="color:#f92672">=</span> JsonSerilizable<span style="color:#f92672">.</span><span style="color:#a6e22e">deserilizableForMapFromFile</span><span style="color:#f92672">(</span><span style="color:#66d9ef">new</span> String<span style="color:#f92672">(</span>bytes<span style="color:#f92672">),</span> Object<span style="color:#f92672">.</span><span style="color:#a6e22e">class</span><span style="color:#f92672">);</span>
+            <span style="color:#f92672">}</span> <span style="color:#66d9ef">else</span> <span style="color:#f92672">{</span>
+                System<span style="color:#f92672">.</span><span style="color:#a6e22e">out</span><span style="color:#f92672">.</span><span style="color:#a6e22e">println</span><span style="color:#f92672">(</span><span style="color:#e6db74">&#34;changeByteToMap中bytes为null&#34;</span><span style="color:#f92672">);</span>
+            <span style="color:#f92672">}</span>
+        <span style="color:#f92672">}</span> <span style="color:#66d9ef">catch</span> <span style="color:#f92672">(</span>Exception e<span style="color:#f92672">)</span> <span style="color:#f92672">{</span>
+            System<span style="color:#f92672">.</span><span style="color:#a6e22e">out</span><span style="color:#f92672">.</span><span style="color:#a6e22e">println</span><span style="color:#f92672">(</span><span style="color:#e6db74">&#34;byte到map转换异常&#34;</span><span style="color:#f92672">);</span>
+            e<span style="color:#f92672">.</span><span style="color:#a6e22e">printStackTrace</span><span style="color:#f92672">();</span>
+        <span style="color:#f92672">}</span>
+        <span style="color:#66d9ef">return</span> retmap<span style="color:#f92672">;</span>
+    <span style="color:#f92672">}</span>
 
-        return (HashMap&lt;K, T&gt;) map;
-    }
+<span style="color:#f92672">}</span>
+</code></pre></div><h3 id="serverinfo">ServerInfo</h3>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-java" data-lang="java"><span style="color:#66d9ef">public</span> <span style="color:#66d9ef">class</span> <span style="color:#a6e22e">ServerInfo</span> <span style="color:#f92672">{</span>
+    <span style="color:#66d9ef">private</span> String sn<span style="color:#f92672">;</span>
+    <span style="color:#66d9ef">private</span> <span style="color:#66d9ef">int</span> port<span style="color:#f92672">;</span>
+    <span style="color:#66d9ef">private</span> String address<span style="color:#f92672">;</span>
 
-    public static byte[] changeMapToByte(Map&lt;String, Object&gt; map) {
-
-        byte[] bytes = null;
-        try {
-            bytes = JsonSerilizable.serilizableForMap(map).getBytes();
-        } catch (Exception e) {
-            System.out.println(&quot;map到byte[]转换异常&quot;);
-            e.printStackTrace();
-        }
-
-        return bytes;
-    }
-
-    public static Map&lt;String, Object&gt; changeByteToMap(byte[] bytes) {
-        Map&lt;String, Object&gt; retmap = null;
-        try {
-            if (bytes != null) {
-                retmap = JsonSerilizable.deserilizableForMapFromFile(new String(bytes), Object.class);
-            } else {
-                System.out.println(&quot;changeByteToMap中bytes为null&quot;);
-            }
-        } catch (Exception e) {
-            System.out.println(&quot;byte到map转换异常&quot;);
-            e.printStackTrace();
-        }
-        return retmap;
-    }
-
-}
-</code></pre>
-
-<h3 id="serverinfo">ServerInfo</h3>
-
-<pre><code class="language-java">public class ServerInfo {
-    private String sn;
-    private int port;
-    private String address;
-
-    public ServerInfo(int port, String ip, String sn) {
-        this.port = port;
-        this.address = ip;
-        this.sn = sn;
-    }
-   .....
-</code></pre>
-
-<h3 id="pom-xml">pom.xml</h3>
-
-<pre><code class="language-xml">&lt;dependency&gt;
-      &lt;groupId&gt;com.alibaba&lt;/groupId&gt;
-      &lt;artifactId&gt;fastjson&lt;/artifactId&gt;
-      &lt;version&gt;1.2.51&lt;/version&gt;
- &lt;/dependency&gt;
-</code></pre>
-
-<h1 id="运行结果">运行结果</h1>
-
+    <span style="color:#66d9ef">public</span> <span style="color:#a6e22e">ServerInfo</span><span style="color:#f92672">(</span><span style="color:#66d9ef">int</span> port<span style="color:#f92672">,</span> String ip<span style="color:#f92672">,</span> String sn<span style="color:#f92672">)</span> <span style="color:#f92672">{</span>
+        <span style="color:#66d9ef">this</span><span style="color:#f92672">.</span><span style="color:#a6e22e">port</span> <span style="color:#f92672">=</span> port<span style="color:#f92672">;</span>
+        <span style="color:#66d9ef">this</span><span style="color:#f92672">.</span><span style="color:#a6e22e">address</span> <span style="color:#f92672">=</span> ip<span style="color:#f92672">;</span>
+        <span style="color:#66d9ef">this</span><span style="color:#f92672">.</span><span style="color:#a6e22e">sn</span> <span style="color:#f92672">=</span> sn<span style="color:#f92672">;</span>
+    <span style="color:#f92672">}</span>
+   <span style="color:#f92672">.....</span>
+</code></pre></div><h3 id="pomxml">pom.xml</h3>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-xml" data-lang="xml"><span style="color:#f92672">&lt;dependency&gt;</span>
+      <span style="color:#f92672">&lt;groupId&gt;</span>com.alibaba<span style="color:#f92672">&lt;/groupId&gt;</span>
+      <span style="color:#f92672">&lt;artifactId&gt;</span>fastjson<span style="color:#f92672">&lt;/artifactId&gt;</span>
+      <span style="color:#f92672">&lt;version&gt;</span>1.2.51<span style="color:#f92672">&lt;/version&gt;</span>
+ <span style="color:#f92672">&lt;/dependency&gt;</span>
+</code></pre></div><h1 id="运行结果">运行结果</h1>
 <h2 id="服务端">服务端</h2>
-
-<pre><code class="language-java">服务器信息：0.0.0.0/0.0.0.0 P:30401
-服务器准备就绪～
-UDPProvider Started.
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-java" data-lang="java">服务器信息<span style="color:#960050;background-color:#1e0010">：</span>0<span style="color:#f92672">.</span><span style="color:#a6e22e">0</span><span style="color:#f92672">.</span><span style="color:#a6e22e">0</span><span style="color:#f92672">.</span><span style="color:#a6e22e">0</span><span style="color:#f92672">/</span>0<span style="color:#f92672">.</span><span style="color:#a6e22e">0</span><span style="color:#f92672">.</span><span style="color:#a6e22e">0</span><span style="color:#f92672">.</span><span style="color:#a6e22e">0</span> P<span style="color:#f92672">:</span>30401
+服务器准备就绪<span style="color:#960050;background-color:#1e0010">～</span>
+UDPProvider Started<span style="color:#f92672">.</span>
 60360
-UDPProvider response to:192.168.0.7     port:30202      dataLen:79
-新客户端连接：/192.168.0.7 P:62086
+UDPProvider response to<span style="color:#f92672">:</span>192<span style="color:#f92672">.</span><span style="color:#a6e22e">168</span><span style="color:#f92672">.</span><span style="color:#a6e22e">0</span><span style="color:#f92672">.</span><span style="color:#a6e22e">7</span>     port<span style="color:#f92672">:</span>30202      dataLen<span style="color:#f92672">:</span>79
+新客户端连接<span style="color:#960050;background-color:#1e0010">：</span><span style="color:#f92672">/</span>192<span style="color:#f92672">.</span><span style="color:#a6e22e">168</span><span style="color:#f92672">.</span><span style="color:#a6e22e">0</span><span style="color:#f92672">.</span><span style="color:#a6e22e">7</span> P<span style="color:#f92672">:</span>62086
 sssss
-</code></pre>
-
-<h2 id="客户端">客户端</h2>
-
-<pre><code class="language-java">UDPSearcher Started.
-UDPSearcher start listen.
-UDPSearcher sendBroadcast started.
-UDPSearcher sendBroadcast finished.
-UDPSearcher Finished.
-UDPSearcher listener finished.
-Server:ServerInfo{sn='cdb9cdb4-6772-4e9b-8414-3dea10de9de3', port=30401, address='192.168.0.7'}
-已发起服务器连接，并进入后续流程～
-客户端信息：/127.0.0.1 P:62085
-服务器信息：/192.168.0.7 P:30401
+</code></pre></div><h2 id="客户端">客户端</h2>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-java" data-lang="java">UDPSearcher Started<span style="color:#f92672">.</span>
+UDPSearcher start listen<span style="color:#f92672">.</span>
+UDPSearcher sendBroadcast started<span style="color:#f92672">.</span>
+UDPSearcher sendBroadcast finished<span style="color:#f92672">.</span>
+UDPSearcher Finished<span style="color:#f92672">.</span>
+UDPSearcher listener finished<span style="color:#f92672">.</span>
+Server:ServerInfo<span style="color:#f92672">{</span>sn<span style="color:#f92672">=</span><span style="color:#960050;background-color:#1e0010">&#39;</span>cdb9cdb4<span style="color:#f92672">-</span>6772<span style="color:#f92672">-</span>4e9b<span style="color:#f92672">-</span>8414<span style="color:#f92672">-</span>3dea10de9de3<span style="color:#960050;background-color:#1e0010">&#39;</span><span style="color:#f92672">,</span> port<span style="color:#f92672">=</span>30401<span style="color:#f92672">,</span> address<span style="color:#f92672">=</span><span style="color:#960050;background-color:#1e0010">&#39;</span>192<span style="color:#f92672">.</span><span style="color:#a6e22e">168</span><span style="color:#f92672">.</span><span style="color:#a6e22e">0</span><span style="color:#f92672">.</span><span style="color:#a6e22e">7</span><span style="color:#960050;background-color:#1e0010">&#39;</span><span style="color:#f92672">}</span>
+已发起服务器连接<span style="color:#960050;background-color:#1e0010">，</span>并进入后续流程<span style="color:#960050;background-color:#1e0010">～</span>
+客户端信息<span style="color:#960050;background-color:#1e0010">：</span><span style="color:#f92672">/</span>127<span style="color:#f92672">.</span><span style="color:#a6e22e">0</span><span style="color:#f92672">.</span><span style="color:#a6e22e">0</span><span style="color:#f92672">.</span><span style="color:#a6e22e">1</span> P<span style="color:#f92672">:</span>62085
+服务器信息<span style="color:#960050;background-color:#1e0010">：</span><span style="color:#f92672">/</span>192<span style="color:#f92672">.</span><span style="color:#a6e22e">168</span><span style="color:#f92672">.</span><span style="color:#a6e22e">0</span><span style="color:#f92672">.</span><span style="color:#a6e22e">7</span> P<span style="color:#f92672">:</span>30401
 sssss
-回送：5
-</code></pre>
-
-<h1 id="说明">说明</h1>
-
+回送<span style="color:#960050;background-color:#1e0010">：</span>5
+</code></pre></div><h1 id="说明">说明</h1>
 <p>这边的服务端目前只可以接受数据， 无法发送数据，后期在进行升级处理。</p>
 
 
@@ -1084,38 +1028,36 @@ sssss
                     </h4>
                     <ul class="catalog-body"></ul>
                     <nav id="TableOfContents">
-<ul>
-<li><a href="#大致流程">大致流程</a></li>
-<li><a href="#具体代码如下">具体代码如下</a>
-<ul>
-<li><a href="#客户端代码">客户端代码</a>
-<ul>
-<li><a href="#client">Client</a></li>
-<li><a href="#udpsearcher">UDPSearcher</a></li>
-<li><a href="#tcpclient">TCPClient</a></li>
-</ul></li>
-<li><a href="#服务端代码">服务端代码</a>
-<ul>
-<li><a href="#server">Server</a></li>
-<li><a href="#udpprovider">UDPProvider</a></li>
-<li><a href="#tcpserver">TCPServer</a></li>
-</ul></li>
-<li><a href="#相关工具类">相关工具类</a>
-<ul>
-<li><a href="#tcpconstants">TCPConstants</a></li>
-<li><a href="#udpconstants">UDPConstants</a></li>
-<li><a href="#jsonserilizable">JsonSerilizable</a></li>
-<li><a href="#serverinfo">ServerInfo</a></li>
-<li><a href="#pom-xml">pom.xml</a></li>
-</ul></li>
-</ul></li>
-<li><a href="#运行结果">运行结果</a>
-<ul>
-<li><a href="#服务端">服务端</a></li>
-<li><a href="#客户端">客户端</a></li>
-</ul></li>
-<li><a href="#说明">说明</a></li>
-</ul>
+  <ul>
+    <li><a href="#客户端代码">客户端代码</a>
+      <ul>
+        <li><a href="#client">Client</a></li>
+        <li><a href="#udpsearcher">UDPSearcher</a></li>
+        <li><a href="#tcpclient">TCPClient</a></li>
+      </ul>
+    </li>
+    <li><a href="#服务端代码">服务端代码</a>
+      <ul>
+        <li><a href="#server">Server</a></li>
+        <li><a href="#udpprovider">UDPProvider</a></li>
+        <li><a href="#tcpserver">TCPServer</a></li>
+      </ul>
+    </li>
+    <li><a href="#相关工具类">相关工具类</a>
+      <ul>
+        <li><a href="#tcpconstants">TCPConstants</a></li>
+        <li><a href="#udpconstants">UDPConstants</a></li>
+        <li><a href="#jsonserilizable">JsonSerilizable</a></li>
+        <li><a href="#serverinfo">ServerInfo</a></li>
+        <li><a href="#pomxml">pom.xml</a></li>
+      </ul>
+    </li>
+  </ul>
+
+  <ul>
+    <li><a href="#服务端">服务端</a></li>
+    <li><a href="#客户端">客户端</a></li>
+  </ul>
 </nav>
                     <br>
                     <br>
@@ -1140,9 +1082,6 @@ sssss
                         
                         
                         
-                        <a href="/tags/" title="">
-                            
-                        </a>
                         
                         
                         
@@ -1152,101 +1091,6 @@ sssss
                         
                         
                         
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        <a href="/tags/qt" title="QT">
-                            QT
-                        </a>
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        <a href="/tags/zookeeper" title="Zookeeper">
-                            Zookeeper
-                        </a>
                         
                         
                         
@@ -1286,8 +1130,10 @@ sssss
                         
                         
                         
-                        <a href="/tags/elasticsearch" title="elasticSearch">
-                            elasticSearch
+                        
+                        
+                        <a href="/tags/elasticsearch" title="elasticsearch">
+                            elasticsearch
                         </a>
                         
                         
@@ -1298,9 +1144,27 @@ sssss
                         
                         
                         
-                        <a href="/tags/golang" title="golang">
-                            golang
-                        </a>
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
                         
                         
                         
@@ -1338,9 +1202,21 @@ sssss
                         
                         
                         
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
                         <a href="/tags/jvm" title="jvm">
                             jvm
                         </a>
+                        
+                        
+                        
+                        
                         
                         
                         
@@ -1364,9 +1240,19 @@ sssss
                         
                         
                         
+                        
+                        
+                        
+                        
+                        
+                        
                         <a href="/tags/mongodb" title="mongodb">
                             mongodb
                         </a>
+                        
+                        
+                        
+                        
                         
                         
                         
@@ -1377,10 +1263,6 @@ sssss
                         </a>
                         
                         
-                        
-                        <a href="/tags/mycat" title="mycat">
-                            mycat
-                        </a>
                         
                         
                         
@@ -1394,9 +1276,17 @@ sssss
                         
                         
                         
-                        <a href="/tags/nginx" title="nginx">
-                            nginx
-                        </a>
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
                         
                         
                         
@@ -1420,8 +1310,22 @@ sssss
                         
                         
                         
+                        
+                        
                         <a href="/tags/rocketmq" title="rocketmq">
                             rocketmq
+                        </a>
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        <a href="/tags/security%E6%A1%86%E6%9E%B6%E5%AD%A6%E4%B9%A0" title="security框架学习">
+                            security框架学习
                         </a>
                         
                         
@@ -1448,17 +1352,11 @@ sssss
                         
                         
                         
-                        <a href="/tags/springcloud" title="springCloud">
-                            springCloud
-                        </a>
-                        
-                        
-                        
-                        
-                        
                         <a href="/tags/springboot" title="springboot">
                             springboot
                         </a>
+                        
+                        
                         
                         
                         
@@ -1472,6 +1370,9 @@ sssss
                         
                         
                         
+                        <a href="/tags/springcloud" title="springcloud">
+                            springcloud
+                        </a>
                         
                         
                         
@@ -1497,6 +1398,33 @@ sssss
                         
                         
                         
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        <a href="/tags/zookeeper" title="zookeeper">
+                            zookeeper
+                        </a>
                         
                         
                         
@@ -1556,6 +1484,8 @@ sssss
                         
                         
                         
+                        
+                        
                         <a href="/tags/%E5%88%86%E5%B8%83%E5%BC%8F%E7%B3%BB%E5%88%97" title="分布式系列">
                             分布式系列
                         </a>
@@ -1575,6 +1505,10 @@ sssss
                         
                         
                         
+                        
+                        <a href="/tags/%E5%8D%8F%E8%AE%AE%E6%A0%88" title="协议栈">
+                            协议栈
+                        </a>
                         
                         
                         
@@ -1774,6 +1708,12 @@ sssss
                         
                         
                         
+                        
+                        
+                        
+                        
+                        
+                        
                         <a href="/tags/%E7%BD%91%E7%BB%9C%E7%BC%96%E7%A8%8B" title="网络编程">
                             网络编程
                         </a>
@@ -1797,6 +1737,10 @@ sssss
                         
                         
                         
+                        
+                        <a href="/tags/%E8%AE%A4%E8%AF%81%E5%92%8C%E6%8E%88%E6%9D%83" title="认证和授权">
+                            认证和授权
+                        </a>
                         
                         
                         
@@ -1967,7 +1911,7 @@ sssss
                     
                 </ul>
 		<p class="copyright text-muted">
-                    Copyright &copy;  2020
+                    Copyright &copy;  2021
                     <br>
                     <a href="https://themes.gohugo.io/hugo-theme-cleanwhite">CleanWhite Hugo Theme</a> by <a href="https://zhaohuabing.com">Huabing</a> |
                     <iframe

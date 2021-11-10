@@ -97,15 +97,15 @@
                     </li>
                     
                     <li>
-                        <a href="/categories/english">English</a>
+                        <a href="/categories/english">english</a>
                     </li>
                     
                     <li>
-                        <a href="/categories/life">Life</a>
+                        <a href="/categories/life">life</a>
                     </li>
                     
                     <li>
-                        <a href="/categories/tech">Tech</a>
+                        <a href="/categories/tech">tech</a>
                     </li>
                     
 
@@ -237,153 +237,86 @@
                 
                 
                 
-                
-
-<p>[TOC]</p>
-
+                <p>[TOC]</p>
 <p>微服务的理解：  就是把一个项目拆分为多个项目， 项目之间进行独立运行。 通过Http或者Socket来进行通信处理数据和调用。</p>
-
-<h1 id="spring-cloud-eureka-服务治理">Spring  Cloud  Eureka（服务治理）</h1>
-
+<h1 id="spring--cloud--eureka服务治理">Spring  Cloud  Eureka（服务治理）</h1>
 <p>详细介绍地址： <a href="https://blog.csdn.net/sunhuiliang85/article/details/76222517">https://blog.csdn.net/sunhuiliang85/article/details/76222517</a></p>
-
 <p>服务治理： 服务治理是微服务架构中最为核心和基础的模块，它主要用来实现各个微服务实例的自动化注册和发现。</p>
-
 <p>服务注册： 在服务治理框架中，通常都会构建一个注册中心，每个服务单元向注册中心登记自己提供的服务，包括服务的主机与端口号、服务版本号、通讯协议等一些附加信息。注册中心按照服务名分类组织服务清单，同时还需要以心跳检测的方式去监测清单中的服务是否可用，若不可用需要从服务清单中剔除，以达到排除故障服务的效果。</p>
-
 <p>服务发现： 在服务治理框架下，服务间的调用不再通过指定具体的实例地址来实现，而是通过服务名发起请求调用实现。服务调用方通过服务名从服务注册中心的服务清单中获取服务实例的列表清单，通过指定的负载均衡策略取出一个服务实例位置来进行服务调用。</p>
-
 <p>Eureka服务端：Eureka服务端，即服务注册中心。它同其他服务注册中心一样，支持高可用配置。依托于强一致性提供良好的服务实例可用性，可以应对多种不同的故障场景。Eureka服务端支持集群模式部署，当集群中有分片发生故障的时候，Eureka会自动转入自我保护模式。它允许在分片发生故障的时候继续提供服务的发现和注册，当故障分配恢复时，集群中的其他分片会把他们的状态再次同步回来。集群中的的不同服务注册中心通过异步模式互相复制各自的状态，这也意味着在给定的时间点每个实例关于所有服务的状态可能存在不一致的现象。</p>
-
-<h1 id="spring-cloud-ribbon-客户端负载均衡">Spring  Cloud  Ribbon（客户端负载均衡）</h1>
-
+<h1 id="spring--cloud--ribbon客户端负载均衡">Spring  Cloud  Ribbon（客户端负载均衡）</h1>
 <p>Spring Cloud Ribbon 是一个基于Http和TCP的客服端负载均衡工具，它是基于Netflix Ribbon实现的。它不像服务注册中心、配置中心、API网关那样独立部署，但是它几乎存在于每个微服务的基础设施中。包括前面的提供的声明式服务调用也是基于该Ribbon实现的。理解Ribbon对于我们使用Spring Cloud来讲非常的重要，因为负载均衡是对系统的高可用、网络压力的缓解和处理能力扩容的重要手段之一。</p>
-
 <p>使用springcloud ribbon实现与eureka的配合</p>
-
 <p>ribbon可从eureka服务注册表中获取服务提供者的地址列表，使用一定的负载均衡算法，Ribbon的工作主要分为2步。
 1.先选择eureka service ，优先选择一个zone负载较小的service。
 2.根据用户制定策，从service取得eureka 服务注册表中选择一个地址。</p>
-
 <p>提供的策略：轮询Round Robin、随机Random、ResponseTime加权</p>
-
-<h1 id="spring-cloud-hystrix-服务容错保护">Spring  Cloud  Hystrix（服务容错保护）</h1>
-
+<h1 id="spring--cloud--hystrix服务容错保护">Spring  Cloud  Hystrix（服务容错保护）</h1>
 <p>详细介绍地址： <a href="https://www.cnblogs.com/ityouknow/p/6868833.html">https://www.cnblogs.com/ityouknow/p/6868833.html</a></p>
-
 <p>在微服务架构中通常会有多个服务层调用，基础服务的故障可能会导致级联故障，进而造成整个系统不可用的情况，这种现象被称为服务雪崩效应。服务雪崩效应是一种因“服务提供者”的不可用导致“服务消费者”的不可用,并将不可用逐渐放大的过程。</p>
-
 <p>熔断器的原理很简单，如同电力过载保护器。它可以实现快速失败，如果它在一段时间内侦测到许多类似的错误，会强迫其以后的多个调用快速失败，不再访问远程服务器，从而防止应用程序不断地尝试执行可能会失败的操作，使得应用程序继续执行而不用等待修正错误，或者浪费CPU时间去等到长时间的超时产生。熔断器也可以使应用程序能够诊断错误是否已经修正，如果已经修正，应用程序会再次尝试调用操作。</p>
-
 <p>熔断器模式就像是那些容易导致错误的操作的一种代理。这种代理能够记录最近调用发生错误的次数，然后决定使用允许操作继续，或者立即返回错误。</p>
-
 <p>断路器很好理解, 当Hystrix Command请求后端服务失败数量超过一定比例(默认50%), 断路器会切换到开路状态(Open). 这时所有请求会直接失败而不会发送到后端服务. 断路器保持在开路状态一段时间后(默认5秒), 自动切换到半开路状态(HALF-OPEN). 这时会判断下一次请求的返回情况, 如果请求成功, 断路器切回闭路状态(CLOSED), 否则重新切换到开路状态(OPEN). Hystrix的断路器就像我们家庭电路中的保险丝, 一旦后端服务不可用, 断路器会直接切断请求链, 避免发送大量无效请求影响系统吞吐量, 并且断路器有自我检测并恢复的能力.</p>
-
-<h1 id="spring-cloud-feign-声明式服务调用">Spring  Cloud  Feign（声明式服务调用）</h1>
-
+<h1 id="spring--cloud--feign声明式服务调用">Spring  Cloud  Feign（声明式服务调用）</h1>
 <p>详细介绍地址：<a href="https://blog.csdn.net/neosmith/article/details/52449921">https://blog.csdn.net/neosmith/article/details/52449921</a></p>
-
 <p>Feign是一种声明式、模板化的HTTP客户端。在Spring Cloud中使用Feign, 我们可以做到使用HTTP请求远程服务时能与  调用本地方法一样的编码体验，开发者完全感知不到这      是远程方法，更感知不到这是个HTTP请求.</p>
-
-<h1 id="spring-cloud-zuul-api网关服务">Spring Cloud   Zuul（API网关服务）</h1>
-
+<h1 id="spring-cloud---zuulapi网关服务">Spring Cloud   Zuul（API网关服务）</h1>
 <p>详细介绍： <a href="https://blog.csdn.net/yejingtao703/article/details/77816555/">https://blog.csdn.net/yejingtao703/article/details/77816555/</a></p>
-
-<p>过滤<strong>:</strong>安全、监控、限流、路由</p>
-
+<p>过滤**:**安全、监控、限流、路由</p>
 <p>基于Spring的微服务结点在能力上没有高低贵贱之分，但是在角色上会分为边缘服务和内部服务两部分。内部服务顾名思义是为对内暴露服务的结点，供架构内部来调用；边缘服务是对外部网络暴露的服务结点，也就是对外API接口。</p>
-
 <p>开发人员头疼的地方：为了防止我的程序在网络上被人攻击，我们需要写各种权限机制，这些机制在每个微服务结点都要实现一次。一旦鉴权上有什么bug，又要全部节点上推倒重来，噩梦。
 运维人员头疼的地方：边缘服务前段都会架一个F5或者Nginx等负载均衡的代理，需要手动维护一份服务列表和服务地址的路由信息，随着结点的扩展或地址调整这份列表要变来变去。</p>
-
 <p>为了解决鉴权重复的问题，使业务结点本身只关心实现自己的业务，将对权限的处理抽离到上层。外部客户先请求到Zuul上，在Zuul服务上对权限进行统一实现和过滤，以实现微服务结点的过滤和验证。
 为了解决请求路由和安全过滤，Spring Cloud推出了一个API gateway组件：Spring Cloud Zuul。</p>
-
 <p>在路由方面，Zuul将自己作为一个微服务结点注册到Eureka上，就获取了所有微服务的实例信息，同时又以服务名为ContextPath的方式创建路由映射。</p>
-
-<p><img src="/img/4-9-30.png" alt="4-9-30" /></p>
-
-<h1 id="spring-cloud-config-分布式配置中心">Spring Cloud   Config（分布式配置中心）</h1>
-
+<p><img src="/img/4-9-30.png" alt="4-9-30"></p>
+<h1 id="spring-cloud---config分布式配置中心">Spring Cloud   Config（分布式配置中心）</h1>
 <p>详细介绍： <a href="https://blog.csdn.net/fox9916/article/details/79499854/">https://blog.csdn.net/fox9916/article/details/79499854/</a></p>
-
 <p>在分布式系统中，每一个功能模块都能拆分成一个独立的服务，一次请求的完成，可能会调用很多个服务协调来完成，为了方便服务配置文件统一管理，更易于部署、维护，所以就需要分布式配置中心组件了，在spring cloud中，有分布式配置中心组件spring cloud config，它支持配置文件放在在配置服务的内存中，也支持放在远程Git仓库里。引入spring cloud config后，我们的外部配置文件就可以集中放置在一个git仓库里，再新建一个config server，用来管理所有的配置文件，维护的时候需要更改配置时，只需要在本地更改后，推送到远程仓库，所有的服务实例都可以通过config server来获取配置文件，这时每个服务实例就相当于配置服务的客户端config client,为了保证系统的稳定，配置服务端config server可以进行集群部署，即使某一个实例，因为某种原因不能提供服务，也还有其他的实例保证服务的继续进行。</p>
-
-<p><img src="/img/4-9-31.png" alt="4-9-31" /></p>
-
-<h1 id="spring-cloud-bus-消息总线">Spring Cloud    Bus（消息总线）</h1>
-
+<p><img src="/img/4-9-31.png" alt="4-9-31"></p>
+<h1 id="spring-cloud----bus消息总线">Spring Cloud    Bus（消息总线）</h1>
 <p>详细介绍： <a href="https://blog.csdn.net/jack281706/article/details/73742522">https://blog.csdn.net/jack281706/article/details/73742522</a></p>
-
 <p>Spring Cloud Bus 将分布式的节点用轻量的消息代理连接起来。它可以用于广播配置文件的更改或者服务之间的通讯，也可以用于监控。</p>
-
 <p>消息总线是一种通信工具，可以在机器之间互相传输消息、文件等。消息总线扮演着一种消息路由的角色，拥有一套完备的路由机制来决定消息传输方向。发送段只需要向消息总线发出消息而不用管消息被如何转发。Spring cloud bus 通过轻量消息代理连接各个分布的节点。管理和传播所有分布式项目中的消息，本质是利用了MQ的广播机制在分布式的系统中传播消息，目前常用的有Kafka和RabbitMQ。</p>
-
 <p>1、提交代码触发post请求给bus/refresh
 2、server端接收到请求并发送给Spring Cloud Bus
 3、Spring Cloud bus接到消息并通知给其它客户端
 4、其它客户端接收到通知，请求Server端获取最新配置
 5、全部客户端均获取到最新的配置</p>
-
-<h1 id="spring-cloud-stream-消息驱动微服务">Spring Cloud    Stream（消息驱动微服务）</h1>
-
-<p>消息中间件简介：   详细介绍：<a href="https://www.cnblogs.com/bluestorm/p/6633492.html">https://www.cnblogs.com/bluestorm/p/6633492.html</a></p>
-
+<h1 id="spring-cloud----stream消息驱动微服务">Spring Cloud    Stream（消息驱动微服务）</h1>
+<p>消息中间件简介：   详细介绍：https://www.cnblogs.com/bluestorm/p/6633492.html</p>
 <p>消息驱动理解： Windows消息是，当一个窗体或者控件需要让另外一个窗体或者消息执行某个动作，就向那个窗体发一个消息，放到对方的消息队列中，然后对方有一个消息循环不停的读取消息队列，并执行相应的动作。</p>
-
 <p>简单的讲就是一种生产者，消费者模式。发布者是生产，将输出发布到数据中心，订阅者是消费者，订阅自己感兴趣的数据。当有数据到达数据中心时，就把数据发送给对应的订阅者。</p>
-
-<h1 id="spring-cloud-sleuth-分布式服务跟踪">Spring Cloud    Sleuth（分布式服务跟踪）</h1>
-
+<h1 id="spring-cloud----sleuth分布式服务跟踪">Spring Cloud    Sleuth（分布式服务跟踪）</h1>
 <p>在微服务框架中，一个由客户端发起的请求在后端系统中会经过多个不同的的服务节点调用来协同产生最后的请求结果，每一个前段请求都会形成一条复杂的分布式服务调用链路，链路中的任何一环出现高延时或错误都会引起整个请求最后的失败。</p>
-
 <p>Spring Cloud Sleuth提供了一套完整的服务跟踪的解决方案。</p>
-
-<h1 id="spring-cloud-shiro-安全权限控制">Spring  Cloud  Shiro（安全权限控制）</h1>
-
+<h1 id="spring--cloud--shiro安全权限控制">Spring  Cloud  Shiro（安全权限控制）</h1>
 <p>这个是进入系统了， 然后进行处理。 Zuul这个是路由器的管理，在系统未进入之前管理。</p>
-
-<p><img src="/img/4-9-32.jpeg" alt="4-9-32" /></p>
-
-<p><img src="/img/4-9-33.jpeg" alt="4-9-33" /></p>
-
+<p><img src="/img/4-9-32.jpeg" alt="4-9-32"></p>
+<p><img src="/img/4-9-33.jpeg" alt="4-9-33"></p>
 <h1 id="classpath理解">classpath理解</h1>
-
 <p>存放class文件 对应的是项目开发时的src目录编译文件，首先 classpath是指 WEB-INF文件夹下的classes目录
 classpath 和 classpath* 区别：
 classpath：只会到你的class路径中查找找文件;
 classpath*：不仅包含class路径，还包括jar文件中(class路径)进行查找.</p>
-
 <h1 id="spring-boot-maven-plugin-插件">spring-boot-maven-plugin 插件</h1>
-
 <p>spring boot加上这个插件，才可以使用Java -jar命令来启动jar包，并且有了这个插件，
 打的包里面才会有maven依赖的jar包和spring boot的启动类，所以打的jar包也就比较大，
 而且MANIFEST.MF文件里面也会有启动类的信息。但是如果不加这个插件，则打的包里面就只有class文件，
 没有依赖的Jar包，MANIFEST.MF文件里面也没有启动类的信息，所以如果不加这个插件就不能独立启动。</p>
-
 <p>注意：在用idea调试的时候加不加插件都可以启动，看不出来不同，所以必须要独立启动jar包才可以看出来。
 而且如果用了spring boot但是不需要独立启动，就不要加这个插件，否则spring boot会因为找不到启动类而导致报错。</p>
-
 <h1 id="spring-boot-actuator">spring-boot-actuator</h1>
-
 <p>Spring Boot Actuator 的关键特性是在应用程序里提供众多 Web 接口，通过它们了解应用程序运行时的内部状况。Actuator 提供了 13 个接口，可以分为三大类：配置接口、度量接口和其它接口，具体如下表所示。主要来监控系统的一些内存数据，主要是监控作用， 这个主要是监控服务端的服务器的。</p>
-
 <p>Spring boot actuator 是 spring 启动框架中的重要功能之一。Spring boot 监视器可帮助您访 问生产环境中正在运行的应用程序的当前状态。有几个指标必须在生产环境中进行检查和</p>
-
 <p>监控。即使一些外部应用程序可能正在使用这些服务来向相关人员触发警报消息。监视器 模块公开了一组可直接作为 HTTP URL 访问的 REST 端点来检查状态。</p>
-
 <h1 id="spring-boot-admin">Spring Boot Admin</h1>
-
-<p>链接：<a href="https://www.jianshu.com/p/e20a5f42a395">https://www.jianshu.com/p/e20a5f42a395</a></p>
-
+<p>链接：https://www.jianshu.com/p/e20a5f42a395</p>
 <p>Actuator功能强大，便于其他应用使用端点（只需要简单的REST调用）。但是开发人员使用时就没那么方便了。对于开发人员，有良好的交互界面会更方便浏览监控数据和管理应用。这正是Spring Boot Admin做的工作。它为actuator端点提供了良好的交互界面，并提供了额外的特性。</p>
-
 <p>了解了Spring Boot提供的监控接口，例如：/health、/info等等，实际上除了之前提到的信息，还有其他信息业需要监控：当前处于活跃状态的会话数量、当前应用的并发数、延迟以及其他度量信息。这次我们了解如何利用Spring-boot-admin对应用信息进行可视化，如何添加度量信息。</p>
-
 <h1 id="spring-boot-batch">Spring Boot Batch</h1>
-
 <p>提供可重用的函数，这些函数在处理大量记录时非常重要，包括日志/跟 踪，事务管理，作业处理统计信息，作业重新启动，跳过和资源管理。它还提供了更先进</p>
-
 <p>的技术服务和功能，通过优化和分区技术，可以实现极高批量和高性能批处理作业。简单 以及复杂的大批量批处理作业可以高度可扩展的方式利用框架处理重要大量的信息。</p>
 
 
@@ -433,8 +366,8 @@ classpath*：不仅包含class路径，还包括jar文件中(class路径)进行�
                 <ul class="pager">
                     
                     <li class="previous">
-                        <a href="/post/redis/" data-toggle="tooltip" data-placement="top"
-                            title="redis系列-入门">&larr;
+                        <a href="/post/springmvc%E5%B0%81%E8%A3%85%E5%B8%B8%E7%94%A8%E7%9A%84crud/" data-toggle="tooltip" data-placement="top"
+                            title="SpringMVC封装常用的CRUD操作">&larr;
                             Previous Post</a>
                     </li>
                     
@@ -491,25 +424,7 @@ classpath*：不仅包含class路径，还包括jar文件中(class路径)进行�
                         <a class="catalog-toggle" style="font-size: 24px;" href="index.html#">目录结构</a>
                     </h4>
                     <ul class="catalog-body"></ul>
-                    <nav id="TableOfContents">
-<ul>
-<li><a href="#spring-cloud-eureka-服务治理">Spring  Cloud  Eureka（服务治理）</a></li>
-<li><a href="#spring-cloud-ribbon-客户端负载均衡">Spring  Cloud  Ribbon（客户端负载均衡）</a></li>
-<li><a href="#spring-cloud-hystrix-服务容错保护">Spring  Cloud  Hystrix（服务容错保护）</a></li>
-<li><a href="#spring-cloud-feign-声明式服务调用">Spring  Cloud  Feign（声明式服务调用）</a></li>
-<li><a href="#spring-cloud-zuul-api网关服务">Spring Cloud   Zuul（API网关服务）</a></li>
-<li><a href="#spring-cloud-config-分布式配置中心">Spring Cloud   Config（分布式配置中心）</a></li>
-<li><a href="#spring-cloud-bus-消息总线">Spring Cloud    Bus（消息总线）</a></li>
-<li><a href="#spring-cloud-stream-消息驱动微服务">Spring Cloud    Stream（消息驱动微服务）</a></li>
-<li><a href="#spring-cloud-sleuth-分布式服务跟踪">Spring Cloud    Sleuth（分布式服务跟踪）</a></li>
-<li><a href="#spring-cloud-shiro-安全权限控制">Spring  Cloud  Shiro（安全权限控制）</a></li>
-<li><a href="#classpath理解">classpath理解</a></li>
-<li><a href="#spring-boot-maven-plugin-插件">spring-boot-maven-plugin 插件</a></li>
-<li><a href="#spring-boot-actuator">spring-boot-actuator</a></li>
-<li><a href="#spring-boot-admin">Spring Boot Admin</a></li>
-<li><a href="#spring-boot-batch">Spring Boot Batch</a></li>
-</ul>
-</nav>
+                    <nav id="TableOfContents"></nav>
                     <br>
                     <br>
                     <br>
@@ -533,9 +448,6 @@ classpath*：不仅包含class路径，还包括jar文件中(class路径)进行�
                         
                         
                         
-                        <a href="/tags/" title="">
-                            
-                        </a>
                         
                         
                         
@@ -545,101 +457,6 @@ classpath*：不仅包含class路径，还包括jar文件中(class路径)进行�
                         
                         
                         
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        <a href="/tags/qt" title="QT">
-                            QT
-                        </a>
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        <a href="/tags/zookeeper" title="Zookeeper">
-                            Zookeeper
-                        </a>
                         
                         
                         
@@ -679,8 +496,10 @@ classpath*：不仅包含class路径，还包括jar文件中(class路径)进行�
                         
                         
                         
-                        <a href="/tags/elasticsearch" title="elasticSearch">
-                            elasticSearch
+                        
+                        
+                        <a href="/tags/elasticsearch" title="elasticsearch">
+                            elasticsearch
                         </a>
                         
                         
@@ -691,9 +510,27 @@ classpath*：不仅包含class路径，还包括jar文件中(class路径)进行�
                         
                         
                         
-                        <a href="/tags/golang" title="golang">
-                            golang
-                        </a>
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
                         
                         
                         
@@ -731,9 +568,21 @@ classpath*：不仅包含class路径，还包括jar文件中(class路径)进行�
                         
                         
                         
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
                         <a href="/tags/jvm" title="jvm">
                             jvm
                         </a>
+                        
+                        
+                        
+                        
                         
                         
                         
@@ -757,9 +606,19 @@ classpath*：不仅包含class路径，还包括jar文件中(class路径)进行�
                         
                         
                         
+                        
+                        
+                        
+                        
+                        
+                        
                         <a href="/tags/mongodb" title="mongodb">
                             mongodb
                         </a>
+                        
+                        
+                        
+                        
                         
                         
                         
@@ -770,10 +629,6 @@ classpath*：不仅包含class路径，还包括jar文件中(class路径)进行�
                         </a>
                         
                         
-                        
-                        <a href="/tags/mycat" title="mycat">
-                            mycat
-                        </a>
                         
                         
                         
@@ -787,9 +642,17 @@ classpath*：不仅包含class路径，还包括jar文件中(class路径)进行�
                         
                         
                         
-                        <a href="/tags/nginx" title="nginx">
-                            nginx
-                        </a>
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
                         
                         
                         
@@ -813,8 +676,22 @@ classpath*：不仅包含class路径，还包括jar文件中(class路径)进行�
                         
                         
                         
+                        
+                        
                         <a href="/tags/rocketmq" title="rocketmq">
                             rocketmq
+                        </a>
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        <a href="/tags/security%E6%A1%86%E6%9E%B6%E5%AD%A6%E4%B9%A0" title="security框架学习">
+                            security框架学习
                         </a>
                         
                         
@@ -841,17 +718,11 @@ classpath*：不仅包含class路径，还包括jar文件中(class路径)进行�
                         
                         
                         
-                        <a href="/tags/springcloud" title="springCloud">
-                            springCloud
-                        </a>
-                        
-                        
-                        
-                        
-                        
                         <a href="/tags/springboot" title="springboot">
                             springboot
                         </a>
+                        
+                        
                         
                         
                         
@@ -865,6 +736,9 @@ classpath*：不仅包含class路径，还包括jar文件中(class路径)进行�
                         
                         
                         
+                        <a href="/tags/springcloud" title="springcloud">
+                            springcloud
+                        </a>
                         
                         
                         
@@ -890,6 +764,33 @@ classpath*：不仅包含class路径，还包括jar文件中(class路径)进行�
                         
                         
                         
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        <a href="/tags/zookeeper" title="zookeeper">
+                            zookeeper
+                        </a>
                         
                         
                         
@@ -949,6 +850,8 @@ classpath*：不仅包含class路径，还包括jar文件中(class路径)进行�
                         
                         
                         
+                        
+                        
                         <a href="/tags/%E5%88%86%E5%B8%83%E5%BC%8F%E7%B3%BB%E5%88%97" title="分布式系列">
                             分布式系列
                         </a>
@@ -968,6 +871,10 @@ classpath*：不仅包含class路径，还包括jar文件中(class路径)进行�
                         
                         
                         
+                        
+                        <a href="/tags/%E5%8D%8F%E8%AE%AE%E6%A0%88" title="协议栈">
+                            协议栈
+                        </a>
                         
                         
                         
@@ -1167,6 +1074,12 @@ classpath*：不仅包含class路径，还包括jar文件中(class路径)进行�
                         
                         
                         
+                        
+                        
+                        
+                        
+                        
+                        
                         <a href="/tags/%E7%BD%91%E7%BB%9C%E7%BC%96%E7%A8%8B" title="网络编程">
                             网络编程
                         </a>
@@ -1190,6 +1103,10 @@ classpath*：不仅包含class路径，还包括jar文件中(class路径)进行�
                         
                         
                         
+                        
+                        <a href="/tags/%E8%AE%A4%E8%AF%81%E5%92%8C%E6%8E%88%E6%9D%83" title="认证和授权">
+                            认证和授权
+                        </a>
                         
                         
                         
@@ -1360,7 +1277,7 @@ classpath*：不仅包含class路径，还包括jar文件中(class路径)进行�
                     
                 </ul>
 		<p class="copyright text-muted">
-                    Copyright &copy;  2020
+                    Copyright &copy;  2021
                     <br>
                     <a href="https://themes.gohugo.io/hugo-theme-cleanwhite">CleanWhite Hugo Theme</a> by <a href="https://zhaohuabing.com">Huabing</a> |
                     <iframe

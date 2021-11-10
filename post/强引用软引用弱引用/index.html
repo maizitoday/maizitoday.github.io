@@ -97,15 +97,15 @@
                     </li>
                     
                     <li>
-                        <a href="/categories/english">English</a>
+                        <a href="/categories/english">english</a>
                     </li>
                     
                     <li>
-                        <a href="/categories/life">Life</a>
+                        <a href="/categories/life">life</a>
                     </li>
                     
                     <li>
-                        <a href="/categories/tech">Tech</a>
+                        <a href="/categories/tech">tech</a>
                     </li>
                     
 
@@ -233,199 +233,136 @@
                 
                 
                 
-                
-
-<p>[TOC]</p>
-
+                <p>[TOC]</p>
 <h1 id="对象引用">对象引用</h1>
-
 <p>转载地址： <a href="https://juejin.im/post/5b82c02df265da436152f5ad">https://juejin.im/post/5b82c02df265da436152f5ad</a></p>
-
 <h2 id="概述">概述</h2>
-
 <p>对象的引用被划分为<code>4</code>种级别，从而使程序能更加灵活地控制<strong>对象的生命周期</strong>。这<code>4</code>种级别<strong>由高到低</strong>依次为：强引用、软引用、弱引用和虚引用。</p>
-
-<h2 id="强引用-strongreference">强引用(StrongReference)</h2>
-
+<h2 id="强引用strongreference">强引用(StrongReference)</h2>
 <p><strong>强引用</strong>是使用最普遍的引用。如果一个对象具有强引用，那<strong>垃圾回收器</strong>绝不会回收它。如下：</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-java" data-lang="java">    Object strongReference <span style="color:#f92672">=</span> <span style="color:#66d9ef">new</span> Object<span style="color:#f92672">();</span>		
+</code></pre></div><p>当<strong>内存空间不足</strong>时，<code>Java</code>虚拟机宁愿抛出<code>OutOfMemoryError</code>错误，使程序<strong>异常终止</strong>，也不会靠随意<strong>回收</strong>具有<strong>强引用</strong>的<strong>对象</strong>来解决内存不足的问题。 如果强引用对象<strong>不使用时</strong>，需要弱化从而使<code>GC</code>能够回收，如下：</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-java" data-lang="java">    strongReference <span style="color:#f92672">=</span> <span style="color:#66d9ef">null</span><span style="color:#f92672">;</span>
+</code></pre></div><p>显式地设置<code>strongReference</code>对象为<code>null</code>，或让其<strong>超出</strong>对象的<strong>生命周期</strong>范围，则<code>gc</code>认为该对象<strong>不存在引用</strong>，这时就可以回收这个对象。具体什么时候收集这要取决于<code>GC</code>算法。</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-java" data-lang="java">    <span style="color:#66d9ef">public</span> <span style="color:#66d9ef">void</span> <span style="color:#a6e22e">test</span><span style="color:#f92672">()</span> <span style="color:#f92672">{</span>
+        Object strongReference <span style="color:#f92672">=</span> <span style="color:#66d9ef">new</span> Object<span style="color:#f92672">();</span>
+        <span style="color:#75715e">// 省略其他操作
+</span><span style="color:#75715e"></span>    <span style="color:#f92672">}</span>
 
-<pre><code class="language-java">    Object strongReference = new Object();		
-</code></pre>
-
-<p>当<strong>内存空间不足</strong>时，<code>Java</code>虚拟机宁愿抛出<code>OutOfMemoryError</code>错误，使程序<strong>异常终止</strong>，也不会靠随意<strong>回收</strong>具有<strong>强引用</strong>的<strong>对象</strong>来解决内存不足的问题。 如果强引用对象<strong>不使用时</strong>，需要弱化从而使<code>GC</code>能够回收，如下：</p>
-
-<pre><code class="language-java">    strongReference = null;
-</code></pre>
-
-<p>显式地设置<code>strongReference</code>对象为<code>null</code>，或让其<strong>超出</strong>对象的<strong>生命周期</strong>范围，则<code>gc</code>认为该对象<strong>不存在引用</strong>，这时就可以回收这个对象。具体什么时候收集这要取决于<code>GC</code>算法。</p>
-
-<pre><code class="language-java">    public void test() {
-        Object strongReference = new Object();
-        // 省略其他操作
-    }
-
-</code></pre>
-
-<p>在一个<strong>方法的内部</strong>有一个<strong>强引用</strong>，这个引用保存在<code>Java</code><strong>栈</strong>中，而真正的引用内容(<code>Object</code>)保存在<code>Java</code><strong>堆</strong>中。 当这个<strong>方法运行完成</strong>后，就会退出<strong>方法栈</strong>，则引用对象的<strong>引用数</strong>为<code>0</code>，这个对象会被回收。</p>
-
+</code></pre></div><p>在一个<strong>方法的内部</strong>有一个<strong>强引用</strong>，这个引用保存在<code>Java</code><strong>栈</strong>中，而真正的引用内容(<code>Object</code>)保存在<code>Java</code><strong>堆</strong>中。 当这个<strong>方法运行完成</strong>后，就会退出<strong>方法栈</strong>，则引用对象的<strong>引用数</strong>为<code>0</code>，这个对象会被回收。</p>
 <p>但是如果这个<code>strongReference</code>是<strong>全局变量</strong>时，就需要在不用这个对象时赋值为<code>null</code>，因为<strong>强引用</strong>不会被垃圾回收。</p>
-
-<h2 id="软引用-softreference">软引用(SoftReference)</h2>
-
+<h2 id="软引用softreference">软引用(SoftReference)</h2>
 <p>如果一个对象只具有<strong>软引用</strong>，则<strong>内存空间充足</strong>时，<strong>垃圾回收器</strong>就<strong>不会</strong>回收它；如果<strong>内存空间不足</strong>了，就会<strong>回收</strong>这些对象的内存。只要垃圾回收器没有回收它，该对象就可以被程序使用。</p>
-
 <h3 id="使用场景">使用场景</h3>
-
 <p>软引用可用来实现内存敏感的高速缓存。</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-java" data-lang="java">    <span style="color:#75715e">// 强引用
+</span><span style="color:#75715e"></span>    String strongReference <span style="color:#f92672">=</span> <span style="color:#66d9ef">new</span> String<span style="color:#f92672">(</span><span style="color:#e6db74">&#34;abc&#34;</span><span style="color:#f92672">);</span>
+    <span style="color:#75715e">// 软引用
+</span><span style="color:#75715e"></span>    String str <span style="color:#f92672">=</span> <span style="color:#66d9ef">new</span> String<span style="color:#f92672">(</span><span style="color:#e6db74">&#34;abc&#34;</span><span style="color:#f92672">);</span>
+    SoftReference<span style="color:#f92672">&lt;</span>String<span style="color:#f92672">&gt;</span> softReference <span style="color:#f92672">=</span> <span style="color:#66d9ef">new</span> SoftReference<span style="color:#f92672">&lt;</span>String<span style="color:#f92672">&gt;(</span>str<span style="color:#f92672">);</span>
 
-<pre><code class="language-java">    // 强引用
-    String strongReference = new String(&quot;abc&quot;);
-    // 软引用
-    String str = new String(&quot;abc&quot;);
-    SoftReference&lt;String&gt; softReference = new SoftReference&lt;String&gt;(str);
+</code></pre></div><p><strong>软引用</strong>可以和一个<strong>引用队列</strong>(<code>ReferenceQueue</code>)联合使用。如果<strong>软引用</strong>所引用对象被<strong>垃圾回收</strong>，<code>JAVA</code>虚拟机就会把这个<strong>软引用</strong>加入到与之关联的<strong>引用队列</strong>中。</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-java" data-lang="java">    ReferenceQueue<span style="color:#f92672">&lt;</span>String<span style="color:#f92672">&gt;</span> referenceQueue <span style="color:#f92672">=</span> <span style="color:#66d9ef">new</span> ReferenceQueue<span style="color:#f92672">&lt;&gt;();</span>
+    String str <span style="color:#f92672">=</span> <span style="color:#66d9ef">new</span> String<span style="color:#f92672">(</span><span style="color:#e6db74">&#34;abc&#34;</span><span style="color:#f92672">);</span>
+    SoftReference<span style="color:#f92672">&lt;</span>String<span style="color:#f92672">&gt;</span> softReference <span style="color:#f92672">=</span> <span style="color:#66d9ef">new</span> SoftReference<span style="color:#f92672">&lt;&gt;(</span>str<span style="color:#f92672">,</span> referenceQueue<span style="color:#f92672">);</span>
 
-</code></pre>
+    str <span style="color:#f92672">=</span> <span style="color:#66d9ef">null</span><span style="color:#f92672">;</span>
+    <span style="color:#75715e">// Notify GC
+</span><span style="color:#75715e"></span>    System<span style="color:#f92672">.</span><span style="color:#a6e22e">gc</span><span style="color:#f92672">();</span>
 
-<p><strong>软引用</strong>可以和一个<strong>引用队列</strong>(<code>ReferenceQueue</code>)联合使用。如果<strong>软引用</strong>所引用对象被<strong>垃圾回收</strong>，<code>JAVA</code>虚拟机就会把这个<strong>软引用</strong>加入到与之关联的<strong>引用队列</strong>中。</p>
-
-<pre><code class="language-java">    ReferenceQueue&lt;String&gt; referenceQueue = new ReferenceQueue&lt;&gt;();
-    String str = new String(&quot;abc&quot;);
-    SoftReference&lt;String&gt; softReference = new SoftReference&lt;&gt;(str, referenceQueue);
-
-    str = null;
-    // Notify GC
-    System.gc();
-
-    System.out.println(softReference.get()); // abc
-
-    Reference&lt;? extends String&gt; reference = referenceQueue.poll();
-    System.out.println(reference); //null
-
-</code></pre>
-
-<h2 id="弱引用-weakreference">弱引用(WeakReference)</h2>
-
+    System<span style="color:#f92672">.</span><span style="color:#a6e22e">out</span><span style="color:#f92672">.</span><span style="color:#a6e22e">println</span><span style="color:#f92672">(</span>softReference<span style="color:#f92672">.</span><span style="color:#a6e22e">get</span><span style="color:#f92672">());</span> <span style="color:#75715e">// abc
+</span><span style="color:#75715e"></span>
+    Reference<span style="color:#f92672">&lt;?</span> <span style="color:#66d9ef">extends</span> String<span style="color:#f92672">&gt;</span> reference <span style="color:#f92672">=</span> referenceQueue<span style="color:#f92672">.</span><span style="color:#a6e22e">poll</span><span style="color:#f92672">();</span>
+    System<span style="color:#f92672">.</span><span style="color:#a6e22e">out</span><span style="color:#f92672">.</span><span style="color:#a6e22e">println</span><span style="color:#f92672">(</span>reference<span style="color:#f92672">);</span> <span style="color:#75715e">//null
+</span><span style="color:#75715e"></span>
+</code></pre></div><h2 id="弱引用weakreference">弱引用(WeakReference)</h2>
 <p><strong>弱引用</strong>与<strong>软引用</strong>的区别在于：只具有<strong>弱引用</strong>的对象拥有<strong>更短暂</strong>的<strong>生命周期</strong>。在垃圾回收器线程扫描它所管辖的内存区域的过程中，一旦发现了只具有<strong>弱引用</strong>的对象，不管当前<strong>内存空间足够与否</strong>，都会<strong>回收</strong>它的内存。不过，由于垃圾回收器是一个<strong>优先级很低的线程</strong>，因此<strong>不一定</strong>会<strong>很快</strong>发现那些只具有<strong>弱引用</strong>的对象。</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-java" data-lang="java">    String str <span style="color:#f92672">=</span> <span style="color:#66d9ef">new</span> String<span style="color:#f92672">(</span><span style="color:#e6db74">&#34;abc&#34;</span><span style="color:#f92672">);</span>
+    WeakReference<span style="color:#f92672">&lt;</span>String<span style="color:#f92672">&gt;</span> weakReference <span style="color:#f92672">=</span> <span style="color:#66d9ef">new</span> WeakReference<span style="color:#f92672">&lt;&gt;(</span>str<span style="color:#f92672">);</span>
+    str <span style="color:#f92672">=</span> <span style="color:#66d9ef">null</span><span style="color:#f92672">;</span>
 
-<pre><code class="language-java">    String str = new String(&quot;abc&quot;);
-    WeakReference&lt;String&gt; weakReference = new WeakReference&lt;&gt;(str);
-    str = null;
+</code></pre></div><h3 id="弱引用变强引用">弱引用变强引用</h3>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-java" data-lang="java">    String str <span style="color:#f92672">=</span> <span style="color:#66d9ef">new</span> String<span style="color:#f92672">(</span><span style="color:#e6db74">&#34;abc&#34;</span><span style="color:#f92672">);</span>
+    WeakReference<span style="color:#f92672">&lt;</span>String<span style="color:#f92672">&gt;</span> weakReference <span style="color:#f92672">=</span> <span style="color:#66d9ef">new</span> WeakReference<span style="color:#f92672">&lt;&gt;(</span>str<span style="color:#f92672">);</span>
+    <span style="color:#75715e">// 弱引用转强引用
+</span><span style="color:#75715e"></span>    String strongReference <span style="color:#f92672">=</span> weakReference<span style="color:#f92672">.</span><span style="color:#a6e22e">get</span><span style="color:#f92672">();</span>
 
-</code></pre>
-
-<h3 id="弱引用变强引用">弱引用变强引用</h3>
-
-<pre><code class="language-java">    String str = new String(&quot;abc&quot;);
-    WeakReference&lt;String&gt; weakReference = new WeakReference&lt;&gt;(str);
-    // 弱引用转强引用
-    String strongReference = weakReference.get();
-
-</code></pre>
-
-<p>同样，<strong>弱引用</strong>可以和一个<strong>引用队列</strong>(<code>ReferenceQueue</code>)联合使用，如果<strong>弱引用</strong>所引用的<strong>对象</strong>被<strong>垃圾回收</strong>，<code>Java</code>虚拟机就会把这个<strong>弱引用</strong>加入到与之关联的<strong>引用队列</strong>中。</p>
-
+</code></pre></div><p>同样，<strong>弱引用</strong>可以和一个<strong>引用队列</strong>(<code>ReferenceQueue</code>)联合使用，如果<strong>弱引用</strong>所引用的<strong>对象</strong>被<strong>垃圾回收</strong>，<code>Java</code>虚拟机就会把这个<strong>弱引用</strong>加入到与之关联的<strong>引用队列</strong>中。</p>
 <h3 id="总结">总结</h3>
-
 <p>可见<code>WeakReference</code>对象的生命周期基本由<strong>垃圾回收器</strong>决定，一旦垃圾回收线程发现了<strong>弱引用对象</strong>，在下一次<code>GC</code>过程中就会对其进行回收。</p>
-
-<h2 id="虚引用-phantomreference">虚引用(PhantomReference)</h2>
-
+<h2 id="虚引用phantomreference">虚引用(PhantomReference)</h2>
 <p><strong>虚引用</strong>顾名思义，就是<strong>形同虚设</strong>。与其他几种引用都不同，<strong>虚引用</strong>并<strong>不会</strong>决定对象的<strong>生命周期</strong>。如果一个对象<strong>仅持有虚引用</strong>，那么它就和<strong>没有任何引用</strong>一样，在任何时候都可能被垃圾回收器回收。</p>
-
 <h3 id="应用场景">应用场景</h3>
-
 <p><strong>虚引用</strong>主要用来<strong>跟踪对象</strong>被垃圾回收器<strong>回收</strong>的活动。 <strong>虚引用</strong>与<strong>软引用</strong>和<strong>弱引用</strong>的一个区别在于：</p>
-
 <p>虚引用必须和引用队列(ReferenceQueue)联合使用。当垃圾回收器准备回收一个对象时，如果发现它还有虚引用，就会在回收对象的内存之前，把这个虚引用加入到与之关联的引用队列中。</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-java" data-lang="java">    String str <span style="color:#f92672">=</span> <span style="color:#66d9ef">new</span> String<span style="color:#f92672">(</span><span style="color:#e6db74">&#34;abc&#34;</span><span style="color:#f92672">);</span>
+    ReferenceQueue queue <span style="color:#f92672">=</span> <span style="color:#66d9ef">new</span> ReferenceQueue<span style="color:#f92672">();</span>
+    <span style="color:#75715e">// 创建虚引用，要求必须与一个引用队列关联
+</span><span style="color:#75715e"></span>    PhantomReference pr <span style="color:#f92672">=</span> <span style="color:#66d9ef">new</span> PhantomReference<span style="color:#f92672">(</span>str<span style="color:#f92672">,</span> queue<span style="color:#f92672">);</span>
 
-<pre><code class="language-java">    String str = new String(&quot;abc&quot;);
-    ReferenceQueue queue = new ReferenceQueue();
-    // 创建虚引用，要求必须与一个引用队列关联
-    PhantomReference pr = new PhantomReference(str, queue);
-
-</code></pre>
-
-<p>程序可以通过判断引用<strong>队列</strong>中是否已经加入了<strong>虚引用</strong>，来了解被引用的对象是否将要进行<strong>垃圾回收</strong>。如果程序发现某个虚引用已经被加入到引用队列，那么就可以在所引用的对象的<strong>内存被回收之前</strong>采取必要的行动。</p>
-
+</code></pre></div><p>程序可以通过判断引用<strong>队列</strong>中是否已经加入了<strong>虚引用</strong>，来了解被引用的对象是否将要进行<strong>垃圾回收</strong>。如果程序发现某个虚引用已经被加入到引用队列，那么就可以在所引用的对象的<strong>内存被回收之前</strong>采取必要的行动。</p>
 <h1 id="referencequeue">ReferenceQueue</h1>
-
 <p>转载地址： <a href="https://www.jianshu.com/p/73260a46291c">https://www.jianshu.com/p/73260a46291c</a></p>
-
 <p>对于<code>软引用</code>和<code>弱引用</code>，我们希望当一个对象被gc掉的时候通知用户线程，进行额外的处理时，就需要使用引用队列了。ReferenceQueue即这样的一个对象，当一个obj被gc掉之后，其相应的包装类，即ref对象会被放入queue中。我们可以从queue中获取到相应的对象信息，同时进行额外的处理。比如反向操作，数据清理等。</p>
-
 <h2 id="示例">示例</h2>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-java" data-lang="java"><span style="color:#f92672">package</span> reference<span style="color:#f92672">;</span>
 
-<pre><code class="language-java">package reference;
+<span style="color:#f92672">import</span> java.lang.ref.ReferenceQueue<span style="color:#f92672">;</span>
+<span style="color:#f92672">import</span> java.lang.ref.WeakReference<span style="color:#f92672">;</span>
+<span style="color:#f92672">import</span> java.util.HashMap<span style="color:#f92672">;</span>
+<span style="color:#f92672">import</span> java.util.Map<span style="color:#f92672">;</span>
 
-import java.lang.ref.ReferenceQueue;
-import java.lang.ref.WeakReference;
-import java.util.HashMap;
-import java.util.Map;
+<span style="color:#75715e">/**
+</span><span style="color:#75715e"> * Created by haicheng.lhc on 11/05/2017.
+</span><span style="color:#75715e"> *
+</span><span style="color:#75715e"> * @author haicheng.lhc
+</span><span style="color:#75715e"> * @date 2017/05/11
+</span><span style="color:#75715e"> */</span>
+<span style="color:#66d9ef">public</span> <span style="color:#66d9ef">class</span> <span style="color:#a6e22e">RefTest</span> <span style="color:#f92672">{</span>
 
-/**
- * Created by haicheng.lhc on 11/05/2017.
- *
- * @author haicheng.lhc
- * @date 2017/05/11
- */
-public class RefTest {
+    <span style="color:#66d9ef">private</span> <span style="color:#66d9ef">static</span> ReferenceQueue<span style="color:#f92672">&lt;</span><span style="color:#66d9ef">byte</span><span style="color:#f92672">[]&gt;</span> rq <span style="color:#f92672">=</span> <span style="color:#66d9ef">new</span> ReferenceQueue<span style="color:#f92672">&lt;</span><span style="color:#66d9ef">byte</span><span style="color:#f92672">[]&gt;();</span>
+    <span style="color:#66d9ef">private</span> <span style="color:#66d9ef">static</span> <span style="color:#66d9ef">int</span> _1M <span style="color:#f92672">=</span> 1024<span style="color:#f92672">*</span>1024<span style="color:#f92672">;</span>
 
-    private static ReferenceQueue&lt;byte[]&gt; rq = new ReferenceQueue&lt;byte[]&gt;();
-    private static int _1M = 1024*1024;
+    <span style="color:#66d9ef">public</span> <span style="color:#66d9ef">static</span> <span style="color:#66d9ef">void</span> <span style="color:#a6e22e">main</span><span style="color:#f92672">(</span>String<span style="color:#f92672">[]</span> args<span style="color:#f92672">)</span> <span style="color:#f92672">{</span>
+        Object value <span style="color:#f92672">=</span> <span style="color:#66d9ef">new</span> Object<span style="color:#f92672">();</span>
+        Map<span style="color:#f92672">&lt;</span>Object<span style="color:#f92672">,</span> Object<span style="color:#f92672">&gt;</span> map <span style="color:#f92672">=</span> <span style="color:#66d9ef">new</span> HashMap<span style="color:#f92672">&lt;&gt;();</span>
+        Thread thread <span style="color:#f92672">=</span> <span style="color:#66d9ef">new</span> Thread<span style="color:#f92672">(()</span> <span style="color:#f92672">-&gt;</span> <span style="color:#f92672">{</span>
+            <span style="color:#66d9ef">try</span> <span style="color:#f92672">{</span>
+                <span style="color:#66d9ef">int</span> cnt <span style="color:#f92672">=</span> 0<span style="color:#f92672">;</span>
+                WeakReference<span style="color:#f92672">&lt;</span><span style="color:#66d9ef">byte</span><span style="color:#f92672">[]&gt;</span> k<span style="color:#f92672">;</span>
+                <span style="color:#66d9ef">while</span><span style="color:#f92672">((</span>k <span style="color:#f92672">=</span> <span style="color:#f92672">(</span>WeakReference<span style="color:#f92672">)</span> rq<span style="color:#f92672">.</span><span style="color:#a6e22e">remove</span><span style="color:#f92672">())</span> <span style="color:#f92672">!=</span> <span style="color:#66d9ef">null</span><span style="color:#f92672">)</span> <span style="color:#f92672">{</span>
+                    System<span style="color:#f92672">.</span><span style="color:#a6e22e">out</span><span style="color:#f92672">.</span><span style="color:#a6e22e">println</span><span style="color:#f92672">((</span>cnt<span style="color:#f92672">++)</span> <span style="color:#f92672">+</span> <span style="color:#e6db74">&#34;回收了:&#34;</span> <span style="color:#f92672">+</span> k<span style="color:#f92672">);</span>
+                <span style="color:#f92672">}</span>
+            <span style="color:#f92672">}</span> <span style="color:#66d9ef">catch</span><span style="color:#f92672">(</span>InterruptedException e<span style="color:#f92672">)</span> <span style="color:#f92672">{</span>
+                <span style="color:#75715e">//结束循环
+</span><span style="color:#75715e"></span>            <span style="color:#f92672">}</span>
+        <span style="color:#f92672">});</span>
+        thread<span style="color:#f92672">.</span><span style="color:#a6e22e">setDaemon</span><span style="color:#f92672">(</span><span style="color:#66d9ef">true</span><span style="color:#f92672">);</span>
+        thread<span style="color:#f92672">.</span><span style="color:#a6e22e">start</span><span style="color:#f92672">();</span>
 
-    public static void main(String[] args) {
-        Object value = new Object();
-        Map&lt;Object, Object&gt; map = new HashMap&lt;&gt;();
-        Thread thread = new Thread(() -&gt; {
-            try {
-                int cnt = 0;
-                WeakReference&lt;byte[]&gt; k;
-                while((k = (WeakReference) rq.remove()) != null) {
-                    System.out.println((cnt++) + &quot;回收了:&quot; + k);
-                }
-            } catch(InterruptedException e) {
-                //结束循环
-            }
-        });
-        thread.setDaemon(true);
-        thread.start();
+        <span style="color:#66d9ef">for</span><span style="color:#f92672">(</span><span style="color:#66d9ef">int</span> i <span style="color:#f92672">=</span> 0<span style="color:#f92672">;</span>i <span style="color:#f92672">&lt;</span> 10000<span style="color:#f92672">;</span>i<span style="color:#f92672">++)</span> <span style="color:#f92672">{</span>
+            <span style="color:#66d9ef">byte</span><span style="color:#f92672">[]</span> bytes <span style="color:#f92672">=</span> <span style="color:#66d9ef">new</span> <span style="color:#66d9ef">byte</span><span style="color:#f92672">[</span>_1M<span style="color:#f92672">];</span>
+            WeakReference<span style="color:#f92672">&lt;</span><span style="color:#66d9ef">byte</span><span style="color:#f92672">[]&gt;</span> weakReference <span style="color:#f92672">=</span> <span style="color:#66d9ef">new</span> WeakReference<span style="color:#f92672">&lt;</span><span style="color:#66d9ef">byte</span><span style="color:#f92672">[]&gt;(</span>bytes<span style="color:#f92672">,</span> rq<span style="color:#f92672">);</span>
+            map<span style="color:#f92672">.</span><span style="color:#a6e22e">put</span><span style="color:#f92672">(</span>weakReference<span style="color:#f92672">,</span> value<span style="color:#f92672">);</span>
+        <span style="color:#f92672">}</span>
+        System<span style="color:#f92672">.</span><span style="color:#a6e22e">out</span><span style="color:#f92672">.</span><span style="color:#a6e22e">println</span><span style="color:#f92672">(</span><span style="color:#e6db74">&#34;map.size-&gt;&#34;</span> <span style="color:#f92672">+</span> map<span style="color:#f92672">.</span><span style="color:#a6e22e">size</span><span style="color:#f92672">());</span>
+    <span style="color:#f92672">}</span>
+<span style="color:#f92672">}</span>
+</code></pre></div><p>输出结果是：</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-java" data-lang="java"><span style="color:#f92672">...</span>
+9803回收了:java<span style="color:#f92672">.</span><span style="color:#a6e22e">lang</span><span style="color:#f92672">.</span><span style="color:#a6e22e">ref</span><span style="color:#f92672">.</span><span style="color:#a6e22e">WeakReference</span><span style="color:#a6e22e">@702c436b</span>
+9804回收了:java<span style="color:#f92672">.</span><span style="color:#a6e22e">lang</span><span style="color:#f92672">.</span><span style="color:#a6e22e">ref</span><span style="color:#f92672">.</span><span style="color:#a6e22e">WeakReference</span><span style="color:#a6e22e">@1744a475</span>
+9805回收了:java<span style="color:#f92672">.</span><span style="color:#a6e22e">lang</span><span style="color:#f92672">.</span><span style="color:#a6e22e">ref</span><span style="color:#f92672">.</span><span style="color:#a6e22e">WeakReference</span><span style="color:#a6e22e">@213bd3d5</span>
+map<span style="color:#f92672">.</span><span style="color:#a6e22e">size</span><span style="color:#f92672">-&gt;</span>10000
 
-        for(int i = 0;i &lt; 10000;i++) {
-            byte[] bytes = new byte[_1M];
-            WeakReference&lt;byte[]&gt; weakReference = new WeakReference&lt;byte[]&gt;(bytes, rq);
-            map.put(weakReference, value);
-        }
-        System.out.println(&quot;map.size-&gt;&quot; + map.size());
-    }
-}
-</code></pre>
-
-<p>输出结果是：</p>
-
-<pre><code class="language-java">...
-9803回收了:java.lang.ref.WeakReference@702c436b
-9804回收了:java.lang.ref.WeakReference@1744a475
-9805回收了:java.lang.ref.WeakReference@213bd3d5
-map.size-&gt;10000
-
-</code></pre>
-
-<h2 id="结果分析">结果分析</h2>
-
+</code></pre></div><h2 id="结果分析">结果分析</h2>
 <p>因为map的key是<code>WeakReference</code>，所以在内存不足的时候，<code>weakReference</code>所指向的对象就会被GC，在对象被GC的同时，会把该对象的包装类即<code>weakReference</code>放入到<code>ReferenceQueue</code>里面。但是这个map的大小是10000.</p>
-
 <h2 id="注意">注意</h2>
-
 <p>上面的reference换成SoftReference，结果一样。</p>
-
 <h1 id="总结-1">总结</h1>
-
 <p>Java中4种引用的级别和强度由高到低依次为：强引用 -&gt; 软引用 -&gt; 弱引用 -&gt; 虚引用</p>
-
 <p>当<strong>垃圾回收器</strong>回收时，某些对象会被回收，某些不会被回收。垃圾回收器会从<strong>根对象</strong><code>Object</code>来<strong>标记</strong>存活的对象，然后将某些不可达的对象和一些引用的对象进行回收。</p>
-
 <p>通过表格来说明一下，如下：</p>
-
 <table>
 <thead>
 <tr>
@@ -435,7 +372,6 @@ map.size-&gt;10000
 <th>生存时间</th>
 </tr>
 </thead>
-
 <tbody>
 <tr>
 <td>强引用</td>
@@ -443,21 +379,18 @@ map.size-&gt;10000
 <td>对象的一般状态</td>
 <td>JVM停止运行时终止</td>
 </tr>
-
 <tr>
 <td>软引用</td>
 <td>当内存不足时</td>
 <td>对象缓存</td>
 <td>内存不足时终止</td>
 </tr>
-
 <tr>
 <td>弱引用</td>
 <td>正常垃圾回收时</td>
 <td>对象缓存</td>
 <td>垃圾回收后终止</td>
 </tr>
-
 <tr>
 <td>虚引用</td>
 <td>正常垃圾回收时</td>
@@ -573,33 +506,32 @@ map.size-&gt;10000
                     </h4>
                     <ul class="catalog-body"></ul>
                     <nav id="TableOfContents">
-<ul>
-<li><a href="#对象引用">对象引用</a>
-<ul>
-<li><a href="#概述">概述</a></li>
-<li><a href="#强引用-strongreference">强引用(StrongReference)</a></li>
-<li><a href="#软引用-softreference">软引用(SoftReference)</a>
-<ul>
-<li><a href="#使用场景">使用场景</a></li>
-</ul></li>
-<li><a href="#弱引用-weakreference">弱引用(WeakReference)</a>
-<ul>
-<li><a href="#弱引用变强引用">弱引用变强引用</a></li>
-<li><a href="#总结">总结</a></li>
-</ul></li>
-<li><a href="#虚引用-phantomreference">虚引用(PhantomReference)</a>
-<ul>
-<li><a href="#应用场景">应用场景</a></li>
-</ul></li>
-</ul></li>
-<li><a href="#referencequeue">ReferenceQueue</a>
-<ul>
-<li><a href="#示例">示例</a></li>
-<li><a href="#结果分析">结果分析</a></li>
-<li><a href="#注意">注意</a></li>
-</ul></li>
-<li><a href="#总结-1">总结</a></li>
-</ul>
+  <ul>
+    <li><a href="#概述">概述</a></li>
+    <li><a href="#强引用strongreference">强引用(StrongReference)</a></li>
+    <li><a href="#软引用softreference">软引用(SoftReference)</a>
+      <ul>
+        <li><a href="#使用场景">使用场景</a></li>
+      </ul>
+    </li>
+    <li><a href="#弱引用weakreference">弱引用(WeakReference)</a>
+      <ul>
+        <li><a href="#弱引用变强引用">弱引用变强引用</a></li>
+        <li><a href="#总结">总结</a></li>
+      </ul>
+    </li>
+    <li><a href="#虚引用phantomreference">虚引用(PhantomReference)</a>
+      <ul>
+        <li><a href="#应用场景">应用场景</a></li>
+      </ul>
+    </li>
+  </ul>
+
+  <ul>
+    <li><a href="#示例">示例</a></li>
+    <li><a href="#结果分析">结果分析</a></li>
+    <li><a href="#注意">注意</a></li>
+  </ul>
 </nav>
                     <br>
                     <br>
@@ -624,9 +556,6 @@ map.size-&gt;10000
                         
                         
                         
-                        <a href="/tags/" title="">
-                            
-                        </a>
                         
                         
                         
@@ -636,101 +565,6 @@ map.size-&gt;10000
                         
                         
                         
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        <a href="/tags/qt" title="QT">
-                            QT
-                        </a>
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        <a href="/tags/zookeeper" title="Zookeeper">
-                            Zookeeper
-                        </a>
                         
                         
                         
@@ -770,8 +604,10 @@ map.size-&gt;10000
                         
                         
                         
-                        <a href="/tags/elasticsearch" title="elasticSearch">
-                            elasticSearch
+                        
+                        
+                        <a href="/tags/elasticsearch" title="elasticsearch">
+                            elasticsearch
                         </a>
                         
                         
@@ -782,9 +618,27 @@ map.size-&gt;10000
                         
                         
                         
-                        <a href="/tags/golang" title="golang">
-                            golang
-                        </a>
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
                         
                         
                         
@@ -822,9 +676,21 @@ map.size-&gt;10000
                         
                         
                         
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
                         <a href="/tags/jvm" title="jvm">
                             jvm
                         </a>
+                        
+                        
+                        
+                        
                         
                         
                         
@@ -848,9 +714,19 @@ map.size-&gt;10000
                         
                         
                         
+                        
+                        
+                        
+                        
+                        
+                        
                         <a href="/tags/mongodb" title="mongodb">
                             mongodb
                         </a>
+                        
+                        
+                        
+                        
                         
                         
                         
@@ -861,10 +737,6 @@ map.size-&gt;10000
                         </a>
                         
                         
-                        
-                        <a href="/tags/mycat" title="mycat">
-                            mycat
-                        </a>
                         
                         
                         
@@ -878,9 +750,17 @@ map.size-&gt;10000
                         
                         
                         
-                        <a href="/tags/nginx" title="nginx">
-                            nginx
-                        </a>
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
                         
                         
                         
@@ -904,8 +784,22 @@ map.size-&gt;10000
                         
                         
                         
+                        
+                        
                         <a href="/tags/rocketmq" title="rocketmq">
                             rocketmq
+                        </a>
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        <a href="/tags/security%E6%A1%86%E6%9E%B6%E5%AD%A6%E4%B9%A0" title="security框架学习">
+                            security框架学习
                         </a>
                         
                         
@@ -932,17 +826,11 @@ map.size-&gt;10000
                         
                         
                         
-                        <a href="/tags/springcloud" title="springCloud">
-                            springCloud
-                        </a>
-                        
-                        
-                        
-                        
-                        
                         <a href="/tags/springboot" title="springboot">
                             springboot
                         </a>
+                        
+                        
                         
                         
                         
@@ -956,6 +844,9 @@ map.size-&gt;10000
                         
                         
                         
+                        <a href="/tags/springcloud" title="springcloud">
+                            springcloud
+                        </a>
                         
                         
                         
@@ -981,6 +872,33 @@ map.size-&gt;10000
                         
                         
                         
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        <a href="/tags/zookeeper" title="zookeeper">
+                            zookeeper
+                        </a>
                         
                         
                         
@@ -1040,6 +958,8 @@ map.size-&gt;10000
                         
                         
                         
+                        
+                        
                         <a href="/tags/%E5%88%86%E5%B8%83%E5%BC%8F%E7%B3%BB%E5%88%97" title="分布式系列">
                             分布式系列
                         </a>
@@ -1059,6 +979,10 @@ map.size-&gt;10000
                         
                         
                         
+                        
+                        <a href="/tags/%E5%8D%8F%E8%AE%AE%E6%A0%88" title="协议栈">
+                            协议栈
+                        </a>
                         
                         
                         
@@ -1258,6 +1182,12 @@ map.size-&gt;10000
                         
                         
                         
+                        
+                        
+                        
+                        
+                        
+                        
                         <a href="/tags/%E7%BD%91%E7%BB%9C%E7%BC%96%E7%A8%8B" title="网络编程">
                             网络编程
                         </a>
@@ -1281,6 +1211,10 @@ map.size-&gt;10000
                         
                         
                         
+                        
+                        <a href="/tags/%E8%AE%A4%E8%AF%81%E5%92%8C%E6%8E%88%E6%9D%83" title="认证和授权">
+                            认证和授权
+                        </a>
                         
                         
                         
@@ -1451,7 +1385,7 @@ map.size-&gt;10000
                     
                 </ul>
 		<p class="copyright text-muted">
-                    Copyright &copy;  2020
+                    Copyright &copy;  2021
                     <br>
                     <a href="https://themes.gohugo.io/hugo-theme-cleanwhite">CleanWhite Hugo Theme</a> by <a href="https://zhaohuabing.com">Huabing</a> |
                     <iframe

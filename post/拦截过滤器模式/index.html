@@ -97,15 +97,15 @@
                     </li>
                     
                     <li>
-                        <a href="/categories/english">English</a>
+                        <a href="/categories/english">english</a>
                     </li>
                     
                     <li>
-                        <a href="/categories/life">Life</a>
+                        <a href="/categories/life">life</a>
                     </li>
                     
                     <li>
-                        <a href="/categories/tech">Tech</a>
+                        <a href="/categories/tech">tech</a>
                     </li>
                     
 
@@ -237,22 +237,13 @@
                 
                 
                 
-                
-
-<p>[TOC]</p>
-
-<p><strong>转载地址：<a href="https://www.twle.cn/l/yufei/gof/gof-basic-intercepting-filter-pattern.html">https://www.twle.cn/l/yufei/gof/gof-basic-intercepting-filter-pattern.html</a></strong></p>
-
+                <p>[TOC]</p>
+<p><strong>转载地址：https://www.twle.cn/l/yufei/gof/gof-basic-intercepting-filter-pattern.html</strong></p>
 <h1 id="简介">简介</h1>
-
 <p>拦截过滤器模式（Intercepting Filter Pattern）用于对应用程序的请求或响应做一些预处理/后处理。</p>
-
 <p>定义过滤器，并在把请求传给实际目标应用程序之前应用在请求上</p>
-
 <p>过滤器可以做认证/授权/记录日志，或者跟踪请求，然后把请求传给相应的处理程序</p>
-
 <p>拦截过滤器模式涉及以下实体：</p>
-
 <ul>
 <li><strong>过滤器（Filter）</strong> - 过滤器在请求处理程序执行请求之前或之后，执行某些任务。</li>
 <li><strong>过滤器链（Filter Chain）</strong> - 过滤器链带有多个过滤器，并在 Target 上按照定义的顺序执行这些过滤器。</li>
@@ -260,227 +251,196 @@
 <li><strong>过滤管理器（Filter Manager）</strong> - 过滤管理器管理过滤器和过滤器链。</li>
 <li><strong>客户端（Client）</strong> - Client 是向 Target 对象发送请求的对象。</li>
 </ul>
-
 <h1 id="实现">实现</h1>
-
-<p><img src="/img/interceptingfilter_pattern_1.jpg" alt="interceptingfilter_pattern_1" /></p>
-
+<p><img src="/img/interceptingfilter_pattern_1.jpg" alt="interceptingfilter_pattern_1"></p>
 <ol>
 <li>定义类 <em>FilterChain</em> 、 <em>FilterManager</em> 、 <em>Target</em> 、 <em>Client</em> 作为表示实体的各种对象</li>
 <li>定义类 <em>AuthenticationFilter</em> 和 <em>DebugFilter</em> 表示实体过滤器</li>
 <li>定义类 <em>InterceptingFilterDemo</em> 使用 <em>Client</em> 来演示拦截过滤器设计模式</li>
 </ol>
-
 <h1 id="示例">示例</h1>
+<h2 id="创建过滤器接口--filter">创建过滤器接口  Filter</h2>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-java" data-lang="java"><span style="color:#f92672">package</span> com.fifler<span style="color:#f92672">;</span>
+<span style="color:#75715e">/*
+</span><span style="color:#75715e"> * @Description: 创建过滤器接口
+</span><span style="color:#75715e"> * @Author: 麦子
+</span><span style="color:#75715e"> * @Date: 2020-04-11 15:27:05
+</span><span style="color:#75715e"> * @LastEditTime: 2020-04-11 15:40:57
+</span><span style="color:#75715e"> * @LastEditors: 麦子
+</span><span style="color:#75715e"> */</span>
+<span style="color:#66d9ef">public</span> <span style="color:#66d9ef">interface</span> <span style="color:#a6e22e">Filter</span> <span style="color:#f92672">{</span>
 
-<h2 id="创建过滤器接口-filter">创建过滤器接口  Filter</h2>
+    <span style="color:#66d9ef">public</span> <span style="color:#66d9ef">void</span> <span style="color:#a6e22e">execute</span><span style="color:#f92672">(</span>String request<span style="color:#f92672">);</span>
 
-<pre><code class="language-java">package com.fifler;
-/*
- * @Description: 创建过滤器接口
- * @Author: 麦子
- * @Date: 2020-04-11 15:27:05
- * @LastEditTime: 2020-04-11 15:40:57
- * @LastEditors: 麦子
- */
-public interface Filter {
+<span style="color:#f92672">}</span>
+</code></pre></div><h2 id="authenticationfilter">AuthenticationFilter</h2>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-java" data-lang="java"><span style="color:#f92672">package</span> com.fifler<span style="color:#f92672">;</span>
+<span style="color:#75715e">/*
+</span><span style="color:#75715e"> * @Description: 创建实体过滤器
+</span><span style="color:#75715e"> * @Author: 麦子
+</span><span style="color:#75715e"> * @Date: 2020-04-11 15:28:46
+</span><span style="color:#75715e"> * @LastEditTime: 2020-04-11 15:41:12
+</span><span style="color:#75715e"> * @LastEditors: 麦子
+</span><span style="color:#75715e"> */</span>
+<span style="color:#66d9ef">public</span> <span style="color:#66d9ef">class</span> <span style="color:#a6e22e">AuthenticationFilter</span> <span style="color:#66d9ef">implements</span> Filter<span style="color:#f92672">{</span>
 
-    public void execute(String request);
-
-}
-</code></pre>
-
-<h2 id="authenticationfilter">AuthenticationFilter</h2>
-
-<pre><code class="language-java">package com.fifler;
-/*
- * @Description: 创建实体过滤器
- * @Author: 麦子
- * @Date: 2020-04-11 15:28:46
- * @LastEditTime: 2020-04-11 15:41:12
- * @LastEditors: 麦子
- */
-public class AuthenticationFilter implements Filter{
-
-    @Override
-    public void execute(String request) {
+    <span style="color:#a6e22e">@Override</span>
+    <span style="color:#66d9ef">public</span> <span style="color:#66d9ef">void</span> <span style="color:#a6e22e">execute</span><span style="color:#f92672">(</span>String request<span style="color:#f92672">)</span> <span style="color:#f92672">{</span>
          
-        System.out.println(&quot;Authenticating request: &quot; + request);
+        System<span style="color:#f92672">.</span><span style="color:#a6e22e">out</span><span style="color:#f92672">.</span><span style="color:#a6e22e">println</span><span style="color:#f92672">(</span><span style="color:#e6db74">&#34;Authenticating request: &#34;</span> <span style="color:#f92672">+</span> request<span style="color:#f92672">);</span>
 
-    }
+    <span style="color:#f92672">}</span>
     
-}
-</code></pre>
+<span style="color:#f92672">}</span>
+</code></pre></div><h2 id="debugfilter">DebugFilter</h2>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-java" data-lang="java"><span style="color:#f92672">package</span> com.fifler<span style="color:#f92672">;</span>
+<span style="color:#75715e">/*
+</span><span style="color:#75715e"> * @Description: 请输入....
+</span><span style="color:#75715e"> * @Author: 麦子
+</span><span style="color:#75715e"> * @Date: 2020-04-11 15:29:59
+</span><span style="color:#75715e"> * @LastEditTime: 2020-04-11 15:34:30
+</span><span style="color:#75715e"> * @LastEditors: 麦子
+</span><span style="color:#75715e"> */</span>
 
-<h2 id="debugfilter">DebugFilter</h2>
+<span style="color:#66d9ef">public</span> <span style="color:#66d9ef">class</span> <span style="color:#a6e22e">DebugFilter</span> <span style="color:#66d9ef">implements</span> Filter <span style="color:#f92672">{</span>
 
-<pre><code class="language-java">package com.fifler;
-/*
- * @Description: 请输入....
- * @Author: 麦子
- * @Date: 2020-04-11 15:29:59
- * @LastEditTime: 2020-04-11 15:34:30
- * @LastEditors: 麦子
- */
+    <span style="color:#a6e22e">@Override</span>
+    <span style="color:#66d9ef">public</span> <span style="color:#66d9ef">void</span> <span style="color:#a6e22e">execute</span><span style="color:#f92672">(</span>String request<span style="color:#f92672">)</span> <span style="color:#f92672">{</span>
 
-public class DebugFilter implements Filter {
-
-    @Override
-    public void execute(String request) {
-
-        System.out.println(&quot;request log: &quot; + request);
+        System<span style="color:#f92672">.</span><span style="color:#a6e22e">out</span><span style="color:#f92672">.</span><span style="color:#a6e22e">println</span><span style="color:#f92672">(</span><span style="color:#e6db74">&#34;request log: &#34;</span> <span style="color:#f92672">+</span> request<span style="color:#f92672">);</span>
         
-    }
+    <span style="color:#f92672">}</span>
     
-}
-</code></pre>
+<span style="color:#f92672">}</span>
+</code></pre></div><h2 id="创建-target具体业务类">创建 Target，具体业务类</h2>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-java" data-lang="java"><span style="color:#f92672">package</span> com.fifler<span style="color:#f92672">;</span>
+<span style="color:#75715e">/*
+</span><span style="color:#75715e"> * @Description: 创建 Target， 这个类是具体的业务处理类
+</span><span style="color:#75715e"> * @Author: 麦子
+</span><span style="color:#75715e"> * @Date: 2020-04-11 15:34:43
+</span><span style="color:#75715e"> * @LastEditTime: 2020-04-11 15:42:47
+</span><span style="color:#75715e"> * @LastEditors: 麦子
+</span><span style="color:#75715e"> */</span>
+<span style="color:#66d9ef">public</span> <span style="color:#66d9ef">class</span> <span style="color:#a6e22e">Target</span> <span style="color:#f92672">{</span>
 
-<h2 id="创建-target-具体业务类">创建 Target，具体业务类</h2>
+    <span style="color:#66d9ef">public</span> <span style="color:#66d9ef">void</span> <span style="color:#a6e22e">execute</span><span style="color:#f92672">(</span>String request<span style="color:#f92672">)</span> <span style="color:#f92672">{</span>
 
-<pre><code class="language-java">package com.fifler;
-/*
- * @Description: 创建 Target， 这个类是具体的业务处理类
- * @Author: 麦子
- * @Date: 2020-04-11 15:34:43
- * @LastEditTime: 2020-04-11 15:42:47
- * @LastEditors: 麦子
- */
-public class Target {
-
-    public void execute(String request) {
-
-        System.out.println(&quot;真正业务处理类： Executing request: &quot; + request);
+        System<span style="color:#f92672">.</span><span style="color:#a6e22e">out</span><span style="color:#f92672">.</span><span style="color:#a6e22e">println</span><span style="color:#f92672">(</span><span style="color:#e6db74">&#34;真正业务处理类： Executing request: &#34;</span> <span style="color:#f92672">+</span> request<span style="color:#f92672">);</span>
     
-    }
-}
-</code></pre>
+    <span style="color:#f92672">}</span>
+<span style="color:#f92672">}</span>
+</code></pre></div><h2 id="filterchain-过滤器链">FilterChain 过滤器链</h2>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-java" data-lang="java"><span style="color:#f92672">package</span> com.fifler<span style="color:#f92672">;</span>
+<span style="color:#75715e">/*
+</span><span style="color:#75715e"> * @Description: 请输入....
+</span><span style="color:#75715e"> * @Author: 麦子
+</span><span style="color:#75715e"> * @Date: 2020-04-11 15:35:58
+</span><span style="color:#75715e"> * @LastEditTime: 2020-04-11 15:42:17
+</span><span style="color:#75715e"> * @LastEditors: 麦子
+</span><span style="color:#75715e"> */</span>
 
-<h2 id="filterchain-过滤器链">FilterChain 过滤器链</h2>
+<span style="color:#f92672">import</span> java.util.ArrayList<span style="color:#f92672">;</span>
+<span style="color:#f92672">import</span> java.util.List<span style="color:#f92672">;</span>
 
-<pre><code class="language-java">package com.fifler;
-/*
- * @Description: 请输入....
- * @Author: 麦子
- * @Date: 2020-04-11 15:35:58
- * @LastEditTime: 2020-04-11 15:42:17
- * @LastEditors: 麦子
- */
+<span style="color:#75715e">// 创建过滤器链
+</span><span style="color:#75715e"></span><span style="color:#66d9ef">public</span> <span style="color:#66d9ef">class</span> <span style="color:#a6e22e">FilterChain</span> <span style="color:#f92672">{</span>
+    <span style="color:#66d9ef">private</span> List<span style="color:#f92672">&lt;</span>Filter<span style="color:#f92672">&gt;</span> filters <span style="color:#f92672">=</span> <span style="color:#66d9ef">new</span> ArrayList<span style="color:#f92672">&lt;</span>Filter<span style="color:#f92672">&gt;();</span>
+    <span style="color:#66d9ef">private</span> Target target<span style="color:#f92672">;</span>
 
-import java.util.ArrayList;
-import java.util.List;
+    <span style="color:#66d9ef">public</span> <span style="color:#66d9ef">void</span> <span style="color:#a6e22e">addFilter</span><span style="color:#f92672">(</span>Filter filter<span style="color:#f92672">)</span> <span style="color:#f92672">{</span>
+        filters<span style="color:#f92672">.</span><span style="color:#a6e22e">add</span><span style="color:#f92672">(</span>filter<span style="color:#f92672">);</span>
+    <span style="color:#f92672">}</span>
 
-// 创建过滤器链
-public class FilterChain {
-    private List&lt;Filter&gt; filters = new ArrayList&lt;Filter&gt;();
-    private Target target;
+    <span style="color:#66d9ef">public</span> <span style="color:#66d9ef">void</span> <span style="color:#a6e22e">execute</span><span style="color:#f92672">(</span>String request<span style="color:#f92672">)</span> <span style="color:#f92672">{</span>
+        <span style="color:#66d9ef">for</span> <span style="color:#f92672">(</span>Filter filter <span style="color:#f92672">:</span> filters<span style="color:#f92672">)</span> <span style="color:#f92672">{</span>
+            filter<span style="color:#f92672">.</span><span style="color:#a6e22e">execute</span><span style="color:#f92672">(</span>request<span style="color:#f92672">);</span>
+        <span style="color:#f92672">}</span>
+        <span style="color:#75715e">// 这个是真正的业务处理
+</span><span style="color:#75715e"></span>        target<span style="color:#f92672">.</span><span style="color:#a6e22e">execute</span><span style="color:#f92672">(</span>request<span style="color:#f92672">);</span>
+    <span style="color:#f92672">}</span>
 
-    public void addFilter(Filter filter) {
-        filters.add(filter);
-    }
+    <span style="color:#66d9ef">public</span> <span style="color:#66d9ef">void</span> <span style="color:#a6e22e">setTarget</span><span style="color:#f92672">(</span>Target target<span style="color:#f92672">)</span> <span style="color:#f92672">{</span>
+        <span style="color:#66d9ef">this</span><span style="color:#f92672">.</span><span style="color:#a6e22e">target</span> <span style="color:#f92672">=</span> target<span style="color:#f92672">;</span>
+    <span style="color:#f92672">}</span>
 
-    public void execute(String request) {
-        for (Filter filter : filters) {
-            filter.execute(request);
-        }
-        // 这个是真正的业务处理
-        target.execute(request);
-    }
+<span style="color:#f92672">}</span>
+</code></pre></div><h2 id="创建过滤管理器-filtermanager">创建过滤管理器 FilterManager</h2>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-java" data-lang="java"><span style="color:#f92672">package</span> com.fifler<span style="color:#f92672">;</span>
 
-    public void setTarget(Target target) {
-        this.target = target;
-    }
+<span style="color:#75715e">/*
+</span><span style="color:#75715e"> * @Description: 创建过滤管理器
+</span><span style="color:#75715e"> * @Author: 麦子
+</span><span style="color:#75715e"> * @Date: 2020-04-11 15:38:10
+</span><span style="color:#75715e"> * @LastEditTime: 2020-04-11 15:45:52
+</span><span style="color:#75715e"> * @LastEditors: 麦子
+</span><span style="color:#75715e"> */</span>
+<span style="color:#66d9ef">public</span> <span style="color:#66d9ef">class</span> <span style="color:#a6e22e">FilterManager</span> <span style="color:#f92672">{</span>
 
-}
-</code></pre>
+    FilterChain filterChain<span style="color:#f92672">;</span>
 
-<h2 id="创建过滤管理器-filtermanager">创建过滤管理器 FilterManager</h2>
+    <span style="color:#66d9ef">public</span> <span style="color:#a6e22e">FilterManager</span><span style="color:#f92672">(</span>Target target<span style="color:#f92672">)</span> <span style="color:#f92672">{</span>
+        filterChain <span style="color:#f92672">=</span> <span style="color:#66d9ef">new</span> FilterChain<span style="color:#f92672">();</span>
+        filterChain<span style="color:#f92672">.</span><span style="color:#a6e22e">setTarget</span><span style="color:#f92672">(</span>target<span style="color:#f92672">);</span>
+    <span style="color:#f92672">}</span>
 
-<pre><code class="language-java">package com.fifler;
+    <span style="color:#66d9ef">public</span> <span style="color:#66d9ef">void</span> <span style="color:#a6e22e">setFilter</span><span style="color:#f92672">(</span>Filter filter<span style="color:#f92672">)</span> <span style="color:#f92672">{</span>
+        filterChain<span style="color:#f92672">.</span><span style="color:#a6e22e">addFilter</span><span style="color:#f92672">(</span>filter<span style="color:#f92672">);</span>
+    <span style="color:#f92672">}</span>
 
-/*
- * @Description: 创建过滤管理器
- * @Author: 麦子
- * @Date: 2020-04-11 15:38:10
- * @LastEditTime: 2020-04-11 15:45:52
- * @LastEditors: 麦子
- */
-public class FilterManager {
+    <span style="color:#66d9ef">public</span> <span style="color:#66d9ef">void</span> <span style="color:#a6e22e">filterRequest</span><span style="color:#f92672">(</span>String request<span style="color:#f92672">)</span> <span style="color:#f92672">{</span>
+        filterChain<span style="color:#f92672">.</span><span style="color:#a6e22e">execute</span><span style="color:#f92672">(</span>request<span style="color:#f92672">);</span>
+    <span style="color:#f92672">}</span>
+<span style="color:#f92672">}</span>
+</code></pre></div><h2 id="创建客户端-client">创建客户端 Client</h2>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-java" data-lang="java"><span style="color:#f92672">package</span> com.fifler<span style="color:#f92672">;</span>
+<span style="color:#75715e">/*
+</span><span style="color:#75715e"> * @Description: 创建客户端
+</span><span style="color:#75715e"> * @Author: 麦子
+</span><span style="color:#75715e"> * @Date: 2020-04-11 15:38:56
+</span><span style="color:#75715e"> * @LastEditTime: 2020-04-11 15:39:35
+</span><span style="color:#75715e"> * @LastEditors: 麦子
+</span><span style="color:#75715e"> */</span>
 
-    FilterChain filterChain;
+<span style="color:#66d9ef">public</span> <span style="color:#66d9ef">class</span> <span style="color:#a6e22e">Client</span> <span style="color:#f92672">{</span>
+    FilterManager filterManager<span style="color:#f92672">;</span>
 
-    public FilterManager(Target target) {
-        filterChain = new FilterChain();
-        filterChain.setTarget(target);
-    }
+    <span style="color:#66d9ef">public</span> <span style="color:#66d9ef">void</span> <span style="color:#a6e22e">setFilterManager</span><span style="color:#f92672">(</span>FilterManager filterManager<span style="color:#f92672">)</span> <span style="color:#f92672">{</span>
+        <span style="color:#66d9ef">this</span><span style="color:#f92672">.</span><span style="color:#a6e22e">filterManager</span> <span style="color:#f92672">=</span> filterManager<span style="color:#f92672">;</span>
+    <span style="color:#f92672">}</span>
 
-    public void setFilter(Filter filter) {
-        filterChain.addFilter(filter);
-    }
+    <span style="color:#66d9ef">public</span> <span style="color:#66d9ef">void</span> <span style="color:#a6e22e">sendRequest</span><span style="color:#f92672">(</span>String request<span style="color:#f92672">)</span> <span style="color:#f92672">{</span>
+        filterManager<span style="color:#f92672">.</span><span style="color:#a6e22e">filterRequest</span><span style="color:#f92672">(</span>request<span style="color:#f92672">);</span>
+    <span style="color:#f92672">}</span>
+<span style="color:#f92672">}</span>
+</code></pre></div><h2 id="frontcontrollerpatterndemo-入口类">FrontControllerPatternDemo 入口类</h2>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-java" data-lang="java"><span style="color:#f92672">package</span> com.fifler<span style="color:#f92672">;</span>
+<span style="color:#75715e">/*
+</span><span style="color:#75715e"> * @Description: 请输入....
+</span><span style="color:#75715e"> * @Author: 麦子
+</span><span style="color:#75715e"> * @Date: 2020-04-11 15:39:52
+</span><span style="color:#75715e"> * @LastEditTime: 2020-04-11 15:48:48
+</span><span style="color:#75715e"> * @LastEditors: 麦子
+</span><span style="color:#75715e"> */</span>
 
-    public void filterRequest(String request) {
-        filterChain.execute(request);
-    }
-}
-</code></pre>
+<span style="color:#66d9ef">public</span> <span style="color:#66d9ef">class</span> <span style="color:#a6e22e">FrontControllerPatternDemo</span> <span style="color:#f92672">{</span>
 
-<h2 id="创建客户端-client">创建客户端 Client</h2>
-
-<pre><code class="language-java">package com.fifler;
-/*
- * @Description: 创建客户端
- * @Author: 麦子
- * @Date: 2020-04-11 15:38:56
- * @LastEditTime: 2020-04-11 15:39:35
- * @LastEditors: 麦子
- */
-
-public class Client {
-    FilterManager filterManager;
-
-    public void setFilterManager(FilterManager filterManager) {
-        this.filterManager = filterManager;
-    }
-
-    public void sendRequest(String request) {
-        filterManager.filterRequest(request);
-    }
-}
-</code></pre>
-
-<h2 id="frontcontrollerpatterndemo-入口类">FrontControllerPatternDemo 入口类</h2>
-
-<pre><code class="language-java">package com.fifler;
-/*
- * @Description: 请输入....
- * @Author: 麦子
- * @Date: 2020-04-11 15:39:52
- * @LastEditTime: 2020-04-11 15:48:48
- * @LastEditors: 麦子
- */
-
-public class FrontControllerPatternDemo {
-
-    public static void main(String[] args) {
+    <span style="color:#66d9ef">public</span> <span style="color:#66d9ef">static</span> <span style="color:#66d9ef">void</span> <span style="color:#a6e22e">main</span><span style="color:#f92672">(</span>String<span style="color:#f92672">[]</span> args<span style="color:#f92672">)</span> <span style="color:#f92672">{</span>
         
-        FilterManager filterManager = new FilterManager(new Target());
-        filterManager.setFilter(new AuthenticationFilter());
-        filterManager.setFilter(new DebugFilter());
+        FilterManager filterManager <span style="color:#f92672">=</span> <span style="color:#66d9ef">new</span> FilterManager<span style="color:#f92672">(</span><span style="color:#66d9ef">new</span> Target<span style="color:#f92672">());</span>
+        filterManager<span style="color:#f92672">.</span><span style="color:#a6e22e">setFilter</span><span style="color:#f92672">(</span><span style="color:#66d9ef">new</span> AuthenticationFilter<span style="color:#f92672">());</span>
+        filterManager<span style="color:#f92672">.</span><span style="color:#a6e22e">setFilter</span><span style="color:#f92672">(</span><span style="color:#66d9ef">new</span> DebugFilter<span style="color:#f92672">());</span>
 
-        Client client = new Client();
-        client.setFilterManager(filterManager);
-        client.sendRequest(&quot;HOME&quot;);
-    }
+        Client client <span style="color:#f92672">=</span> <span style="color:#66d9ef">new</span> Client<span style="color:#f92672">();</span>
+        client<span style="color:#f92672">.</span><span style="color:#a6e22e">setFilterManager</span><span style="color:#f92672">(</span>filterManager<span style="color:#f92672">);</span>
+        client<span style="color:#f92672">.</span><span style="color:#a6e22e">sendRequest</span><span style="color:#f92672">(</span><span style="color:#e6db74">&#34;HOME&#34;</span><span style="color:#f92672">);</span>
+    <span style="color:#f92672">}</span>
 
-}
-</code></pre>
-
-<h2 id="运行结果">运行结果</h2>
-
-<pre><code class="language-java">Authenticating request: HOME
-request log: HOME
-真正业务处理类： Executing request: HOME
-</code></pre>
-
+<span style="color:#f92672">}</span>
+</code></pre></div><h2 id="运行结果">运行结果</h2>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-java" data-lang="java">Authenticating request<span style="color:#f92672">:</span> HOME
+request log<span style="color:#f92672">:</span> HOME
+真正业务处理类<span style="color:#960050;background-color:#1e0010">：</span> Executing request<span style="color:#f92672">:</span> HOME
+</code></pre></div>
 
                 
                 
@@ -587,22 +547,17 @@ request log: HOME
                     </h4>
                     <ul class="catalog-body"></ul>
                     <nav id="TableOfContents">
-<ul>
-<li><a href="#简介">简介</a></li>
-<li><a href="#实现">实现</a></li>
-<li><a href="#示例">示例</a>
-<ul>
-<li><a href="#创建过滤器接口-filter">创建过滤器接口  Filter</a></li>
-<li><a href="#authenticationfilter">AuthenticationFilter</a></li>
-<li><a href="#debugfilter">DebugFilter</a></li>
-<li><a href="#创建-target-具体业务类">创建 Target，具体业务类</a></li>
-<li><a href="#filterchain-过滤器链">FilterChain 过滤器链</a></li>
-<li><a href="#创建过滤管理器-filtermanager">创建过滤管理器 FilterManager</a></li>
-<li><a href="#创建客户端-client">创建客户端 Client</a></li>
-<li><a href="#frontcontrollerpatterndemo-入口类">FrontControllerPatternDemo 入口类</a></li>
-<li><a href="#运行结果">运行结果</a></li>
-</ul></li>
-</ul>
+  <ul>
+    <li><a href="#创建过滤器接口--filter">创建过滤器接口  Filter</a></li>
+    <li><a href="#authenticationfilter">AuthenticationFilter</a></li>
+    <li><a href="#debugfilter">DebugFilter</a></li>
+    <li><a href="#创建-target具体业务类">创建 Target，具体业务类</a></li>
+    <li><a href="#filterchain-过滤器链">FilterChain 过滤器链</a></li>
+    <li><a href="#创建过滤管理器-filtermanager">创建过滤管理器 FilterManager</a></li>
+    <li><a href="#创建客户端-client">创建客户端 Client</a></li>
+    <li><a href="#frontcontrollerpatterndemo-入口类">FrontControllerPatternDemo 入口类</a></li>
+    <li><a href="#运行结果">运行结果</a></li>
+  </ul>
 </nav>
                     <br>
                     <br>
@@ -627,9 +582,6 @@ request log: HOME
                         
                         
                         
-                        <a href="/tags/" title="">
-                            
-                        </a>
                         
                         
                         
@@ -639,101 +591,6 @@ request log: HOME
                         
                         
                         
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        <a href="/tags/qt" title="QT">
-                            QT
-                        </a>
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        <a href="/tags/zookeeper" title="Zookeeper">
-                            Zookeeper
-                        </a>
                         
                         
                         
@@ -773,8 +630,10 @@ request log: HOME
                         
                         
                         
-                        <a href="/tags/elasticsearch" title="elasticSearch">
-                            elasticSearch
+                        
+                        
+                        <a href="/tags/elasticsearch" title="elasticsearch">
+                            elasticsearch
                         </a>
                         
                         
@@ -785,9 +644,27 @@ request log: HOME
                         
                         
                         
-                        <a href="/tags/golang" title="golang">
-                            golang
-                        </a>
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
                         
                         
                         
@@ -825,9 +702,21 @@ request log: HOME
                         
                         
                         
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
                         <a href="/tags/jvm" title="jvm">
                             jvm
                         </a>
+                        
+                        
+                        
+                        
                         
                         
                         
@@ -851,9 +740,19 @@ request log: HOME
                         
                         
                         
+                        
+                        
+                        
+                        
+                        
+                        
                         <a href="/tags/mongodb" title="mongodb">
                             mongodb
                         </a>
+                        
+                        
+                        
+                        
                         
                         
                         
@@ -864,10 +763,6 @@ request log: HOME
                         </a>
                         
                         
-                        
-                        <a href="/tags/mycat" title="mycat">
-                            mycat
-                        </a>
                         
                         
                         
@@ -881,9 +776,17 @@ request log: HOME
                         
                         
                         
-                        <a href="/tags/nginx" title="nginx">
-                            nginx
-                        </a>
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
                         
                         
                         
@@ -907,8 +810,22 @@ request log: HOME
                         
                         
                         
+                        
+                        
                         <a href="/tags/rocketmq" title="rocketmq">
                             rocketmq
+                        </a>
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        <a href="/tags/security%E6%A1%86%E6%9E%B6%E5%AD%A6%E4%B9%A0" title="security框架学习">
+                            security框架学习
                         </a>
                         
                         
@@ -935,17 +852,11 @@ request log: HOME
                         
                         
                         
-                        <a href="/tags/springcloud" title="springCloud">
-                            springCloud
-                        </a>
-                        
-                        
-                        
-                        
-                        
                         <a href="/tags/springboot" title="springboot">
                             springboot
                         </a>
+                        
+                        
                         
                         
                         
@@ -959,6 +870,9 @@ request log: HOME
                         
                         
                         
+                        <a href="/tags/springcloud" title="springcloud">
+                            springcloud
+                        </a>
                         
                         
                         
@@ -984,6 +898,33 @@ request log: HOME
                         
                         
                         
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        <a href="/tags/zookeeper" title="zookeeper">
+                            zookeeper
+                        </a>
                         
                         
                         
@@ -1043,6 +984,8 @@ request log: HOME
                         
                         
                         
+                        
+                        
                         <a href="/tags/%E5%88%86%E5%B8%83%E5%BC%8F%E7%B3%BB%E5%88%97" title="分布式系列">
                             分布式系列
                         </a>
@@ -1062,6 +1005,10 @@ request log: HOME
                         
                         
                         
+                        
+                        <a href="/tags/%E5%8D%8F%E8%AE%AE%E6%A0%88" title="协议栈">
+                            协议栈
+                        </a>
                         
                         
                         
@@ -1261,6 +1208,12 @@ request log: HOME
                         
                         
                         
+                        
+                        
+                        
+                        
+                        
+                        
                         <a href="/tags/%E7%BD%91%E7%BB%9C%E7%BC%96%E7%A8%8B" title="网络编程">
                             网络编程
                         </a>
@@ -1284,6 +1237,10 @@ request log: HOME
                         
                         
                         
+                        
+                        <a href="/tags/%E8%AE%A4%E8%AF%81%E5%92%8C%E6%8E%88%E6%9D%83" title="认证和授权">
+                            认证和授权
+                        </a>
                         
                         
                         
@@ -1454,7 +1411,7 @@ request log: HOME
                     
                 </ul>
 		<p class="copyright text-muted">
-                    Copyright &copy;  2020
+                    Copyright &copy;  2021
                     <br>
                     <a href="https://themes.gohugo.io/hugo-theme-cleanwhite">CleanWhite Hugo Theme</a> by <a href="https://zhaohuabing.com">Huabing</a> |
                     <iframe

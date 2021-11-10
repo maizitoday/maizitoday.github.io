@@ -97,15 +97,15 @@
                     </li>
                     
                     <li>
-                        <a href="/categories/english">English</a>
+                        <a href="/categories/english">english</a>
                     </li>
                     
                     <li>
-                        <a href="/categories/life">Life</a>
+                        <a href="/categories/life">life</a>
                     </li>
                     
                     <li>
-                        <a href="/categories/tech">Tech</a>
+                        <a href="/categories/tech">tech</a>
                     </li>
                     
 
@@ -237,127 +237,86 @@
                 
                 
                 
-                
-
-<p>转载地址：<a href="https://www.jianshu.com/p/5ec98a11fe63">https://www.jianshu.com/p/5ec98a11fe63</a></p>
-
-<p>转载地址：<a href="https://www.cnblogs.com/javazhiyin/p/11841374.html">https://www.cnblogs.com/javazhiyin/p/11841374.html</a></p>
-
+                <p>转载地址：https://www.jianshu.com/p/5ec98a11fe63</p>
+<p>转载地址：https://www.cnblogs.com/javazhiyin/p/11841374.html</p>
 <h1 id="序列化和反序列化的概念">序列化和反序列化的概念</h1>
-
 <p>Java序列化是指把Java对象转换为字节序列的过程，而Java反序列化是指把字节序列恢复为Java对象的过程：</p>
-
-<p><strong>序列化：</strong>对象序列化的最主要的用处就是在传递和保存对象的时候，保证对象的完整性和可传递性。序列化是把对象转换成有序字节流，以便在网络上传输或者保存在本地文件中。核心作用是对象状态的保存与重建。</p>
-
-<p><strong>反序列化：</strong>客户端从文件中或网络上获得序列化后的对象字节流，根据字节流中所保存的对象状态及描述信息，通过反序列化重建对象。</p>
-
+<p>**序列化：**对象序列化的最主要的用处就是在传递和保存对象的时候，保证对象的完整性和可传递性。序列化是把对象转换成有序字节流，以便在网络上传输或者保存在本地文件中。核心作用是对象状态的保存与重建。</p>
+<p>**反序列化：**客户端从文件中或网络上获得序列化后的对象字节流，根据字节流中所保存的对象状态及描述信息，通过反序列化重建对象。</p>
 <h1 id="为什么需要序列化与反序列化">为什么需要序列化与反序列化？</h1>
-
 <p>为什么要序列化，那就是说一下序列化的好处喽，序列化有什么什么优点，所以我们要序列化。</p>
-
 <p><strong>一：对象序列化可以实现分布式对象。</strong></p>
-
 <p>主要应用例如：RMI(即远程调用Remote Method Invocation)要利用对象序列化运行远程主机上的服务，就像在本地机上运行对象时一样。</p>
-
 <p><strong>二：java对象序列化不仅保留一个对象的数据，而且递归保存对象引用的每个对象的数据。</strong></p>
-
-<p>可以将整个对象层次写入字节流中，可以保存在文件中或在网络连接上传递。利用对象序列化可以进行对象的&rdquo;深复制&rdquo;，即复制对象本身及引用的对象本身。序列化一个对象可能得到整个对象序列。</p>
-
+<p>可以将整个对象层次写入字节流中，可以保存在文件中或在网络连接上传递。利用对象序列化可以进行对象的&quot;深复制&quot;，即复制对象本身及引用的对象本身。序列化一个对象可能得到整个对象序列。</p>
 <p><strong>三：序列化可以将内存中的类写入文件或数据库中。</strong></p>
-
 <p>比如：将某个类序列化后存为文件，下次读取时只需将文件中的数据反序列化就可以将原先的类还原到内存中。也可以将类序列化为流数据进行传输。</p>
-
 <p>总的来说就是将一个已经实例化的类转成文件存储，下次需要实例化的时候只要反序列化即可将类实例化到内存中并保留序列化时类中的所有变量和状态。</p>
-
 <p><strong>四：对象、文件、数据，有许多不同的格式，很难统一传输和保存。</strong></p>
-
 <p>序列化以后就都是字节流了，无论原来是什么东西，都能变成一样的东西，就可以进行通用的格式传输或保存，传输结束以后，要再次使用，就进行反序列化还原，这样对象还是对象，文件还是文件。</p>
-
 <h1 id="如何实现java序列化与反序列化">如何实现Java序列化与反序列化</h1>
-
 <p>首先我们要把准备要序列化类，实现 Serializabel接口</p>
-
 <p>例如：我们要Person类里的name和age都序列化</p>
-
-<pre><code class="language-java">import java.io.Serializable;
-
-
-public class Person implements Serializable { //本类可以序列化
-
-    private String name;
-    private int age;
-
-    public Person(String name, int age) {
-        this.name = name;
-        this.age = age;
-    }
-
-    public String toString() {
-        return &quot;姓名：&quot; + this.name + &quot;，年龄&quot; + this.age;
-    }
-}
-</code></pre>
-
-<p>然后：我们将name和age序列化（也就是把这2个对象转为二进制，理解为“打碎”）</p>
-
-<pre><code class="language-java">package org.lxh.SerDemo;
-
-import java.io.File;
-import java.io.FileOutputStream;
-import java.io.ObjectOutputStream;
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-java" data-lang="java"><span style="color:#f92672">import</span> java.io.Serializable<span style="color:#f92672">;</span>
 
 
-public class ObjectOutputStreamDemo { //序列化
-    public static void main(String[] args) throws Exception {
-        //序列化后生成指定文件路径
-        File file = new File(&quot;D:&quot; + File.separator + &quot;person.ser&quot;);
-        ObjectOutputStream oos = null;
-        //装饰流（流）
-        oos = new ObjectOutputStream(new FileOutputStream(file));
+<span style="color:#66d9ef">public</span> <span style="color:#66d9ef">class</span> <span style="color:#a6e22e">Person</span> <span style="color:#66d9ef">implements</span> Serializable <span style="color:#f92672">{</span> <span style="color:#75715e">//本类可以序列化
+</span><span style="color:#75715e"></span>
+    <span style="color:#66d9ef">private</span> String name<span style="color:#f92672">;</span>
+    <span style="color:#66d9ef">private</span> <span style="color:#66d9ef">int</span> age<span style="color:#f92672">;</span>
 
-        //实例化类
-        Person per = new Person(&quot;张三&quot;, 30);
-        oos.writeObject(per); //把类对象序列化
-        oos.close();
-    }
-}
-</code></pre>
+    <span style="color:#66d9ef">public</span> <span style="color:#a6e22e">Person</span><span style="color:#f92672">(</span>String name<span style="color:#f92672">,</span> <span style="color:#66d9ef">int</span> age<span style="color:#f92672">)</span> <span style="color:#f92672">{</span>
+        <span style="color:#66d9ef">this</span><span style="color:#f92672">.</span><span style="color:#a6e22e">name</span> <span style="color:#f92672">=</span> name<span style="color:#f92672">;</span>
+        <span style="color:#66d9ef">this</span><span style="color:#f92672">.</span><span style="color:#a6e22e">age</span> <span style="color:#f92672">=</span> age<span style="color:#f92672">;</span>
+    <span style="color:#f92672">}</span>
 
-<h1 id="serialversionuid概述说明">serialVersionUID概述说明</h1>
+    <span style="color:#66d9ef">public</span> String <span style="color:#a6e22e">toString</span><span style="color:#f92672">()</span> <span style="color:#f92672">{</span>
+        <span style="color:#66d9ef">return</span> <span style="color:#e6db74">&#34;姓名：&#34;</span> <span style="color:#f92672">+</span> <span style="color:#66d9ef">this</span><span style="color:#f92672">.</span><span style="color:#a6e22e">name</span> <span style="color:#f92672">+</span> <span style="color:#e6db74">&#34;，年龄&#34;</span> <span style="color:#f92672">+</span> <span style="color:#66d9ef">this</span><span style="color:#f92672">.</span><span style="color:#a6e22e">age</span><span style="color:#f92672">;</span>
+    <span style="color:#f92672">}</span>
+<span style="color:#f92672">}</span>
+</code></pre></div><p>然后：我们将name和age序列化（也就是把这2个对象转为二进制，理解为“打碎”）</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-java" data-lang="java"><span style="color:#f92672">package</span> org.lxh.SerDemo<span style="color:#f92672">;</span>
 
-<pre><code class="language-java">import java.io.Serializable;
+<span style="color:#f92672">import</span> java.io.File<span style="color:#f92672">;</span>
+<span style="color:#f92672">import</span> java.io.FileOutputStream<span style="color:#f92672">;</span>
+<span style="color:#f92672">import</span> java.io.ObjectOutputStream<span style="color:#f92672">;</span>
 
-public class User implements Serializable {
 
-    /**
-     *
-     */
-    private static final long serialVersionUID = 1L;
+<span style="color:#66d9ef">public</span> <span style="color:#66d9ef">class</span> <span style="color:#a6e22e">ObjectOutputStreamDemo</span> <span style="color:#f92672">{</span> <span style="color:#75715e">//序列化
+</span><span style="color:#75715e"></span>    <span style="color:#66d9ef">public</span> <span style="color:#66d9ef">static</span> <span style="color:#66d9ef">void</span> <span style="color:#a6e22e">main</span><span style="color:#f92672">(</span>String<span style="color:#f92672">[]</span> args<span style="color:#f92672">)</span> <span style="color:#66d9ef">throws</span> Exception <span style="color:#f92672">{</span>
+        <span style="color:#75715e">//序列化后生成指定文件路径
+</span><span style="color:#75715e"></span>        File file <span style="color:#f92672">=</span> <span style="color:#66d9ef">new</span> File<span style="color:#f92672">(</span><span style="color:#e6db74">&#34;D:&#34;</span> <span style="color:#f92672">+</span> File<span style="color:#f92672">.</span><span style="color:#a6e22e">separator</span> <span style="color:#f92672">+</span> <span style="color:#e6db74">&#34;person.ser&#34;</span><span style="color:#f92672">);</span>
+        ObjectOutputStream oos <span style="color:#f92672">=</span> <span style="color:#66d9ef">null</span><span style="color:#f92672">;</span>
+        <span style="color:#75715e">//装饰流（流）
+</span><span style="color:#75715e"></span>        oos <span style="color:#f92672">=</span> <span style="color:#66d9ef">new</span> ObjectOutputStream<span style="color:#f92672">(</span><span style="color:#66d9ef">new</span> FileOutputStream<span style="color:#f92672">(</span>file<span style="color:#f92672">));</span>
+
+        <span style="color:#75715e">//实例化类
+</span><span style="color:#75715e"></span>        Person per <span style="color:#f92672">=</span> <span style="color:#66d9ef">new</span> Person<span style="color:#f92672">(</span><span style="color:#e6db74">&#34;张三&#34;</span><span style="color:#f92672">,</span> 30<span style="color:#f92672">);</span>
+        oos<span style="color:#f92672">.</span><span style="color:#a6e22e">writeObject</span><span style="color:#f92672">(</span>per<span style="color:#f92672">);</span> <span style="color:#75715e">//把类对象序列化
+</span><span style="color:#75715e"></span>        oos<span style="color:#f92672">.</span><span style="color:#a6e22e">close</span><span style="color:#f92672">();</span>
+    <span style="color:#f92672">}</span>
+<span style="color:#f92672">}</span>
+</code></pre></div><h1 id="serialversionuid概述说明">serialVersionUID概述说明</h1>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-java" data-lang="java"><span style="color:#f92672">import</span> java.io.Serializable<span style="color:#f92672">;</span>
+
+<span style="color:#66d9ef">public</span> <span style="color:#66d9ef">class</span> <span style="color:#a6e22e">User</span> <span style="color:#66d9ef">implements</span> Serializable <span style="color:#f92672">{</span>
+
+    <span style="color:#75715e">/**
+</span><span style="color:#75715e">     *
+</span><span style="color:#75715e">     */</span>
+    <span style="color:#66d9ef">private</span> <span style="color:#66d9ef">static</span> <span style="color:#66d9ef">final</span> <span style="color:#66d9ef">long</span> serialVersionUID <span style="color:#f92672">=</span> 1L<span style="color:#f92672">;</span>
     
-}
-</code></pre>
-
-<p>serialVersionUID作用：<strong>相当于java类的身份证。主要用于版本控制</strong>。
+<span style="color:#f92672">}</span>
+</code></pre></div><p>serialVersionUID作用：<strong>相当于java类的身份证。主要用于版本控制</strong>。
 serialVersionUID作用是序列化时保持版本的兼容性，即在版本升级时反序列化仍保持对象的唯一性。</p>
-
 <h1 id="有两种生成方式">有两种生成方式</h1>
-
 <p>一个是默认的1L</p>
-
-<pre><code class="language-java">比如：private static final long serialVersionUID = 1L; 
-</code></pre>
-
-<p>一个是根据类名、接口名、成员方法及属性等来生成一个64位的哈希字段</p>
-
-<pre><code class="language-java">比如：private static final long serialVersionUID = xxxxL;
-</code></pre>
-
-<h1 id="说明">说明</h1>
-
-<p>如果你没有考虑到兼容性问题时，就把它关掉，不过有这个功能是好的，只要任何类别实现了Serializable这个接口的话，如果没有加入serialVersionUID，Eclipse都会给你warning提示，这个serialVersionUID为了让该类别Serializable<a href="https://www.baidu.com/s?wd=向后兼容&amp;tn=SE_PcZhidaonwhc_ngpagmjz&amp;rsv_dl=gh_pc_zhidao">向后兼容</a>。</p>
-
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-java" data-lang="java">比如<span style="color:#960050;background-color:#1e0010">：</span><span style="color:#66d9ef">private</span> <span style="color:#66d9ef">static</span> <span style="color:#66d9ef">final</span> <span style="color:#66d9ef">long</span> serialVersionUID <span style="color:#f92672">=</span> 1L<span style="color:#f92672">;</span> 
+</code></pre></div><p>一个是根据类名、接口名、成员方法及属性等来生成一个64位的哈希字段</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-java" data-lang="java">比如<span style="color:#960050;background-color:#1e0010">：</span><span style="color:#66d9ef">private</span> <span style="color:#66d9ef">static</span> <span style="color:#66d9ef">final</span> <span style="color:#66d9ef">long</span> serialVersionUID <span style="color:#f92672">=</span> xxxxL<span style="color:#f92672">;</span>
+</code></pre></div><h1 id="说明">说明</h1>
+<p>如果你没有考虑到兼容性问题时，就把它关掉，不过有这个功能是好的，只要任何类别实现了Serializable这个接口的话，如果没有加入serialVersionUID，Eclipse都会给你warning提示，这个serialVersionUID为了让该类别Serializable<a href="https://www.baidu.com/s?wd=%E5%90%91%E5%90%8E%E5%85%BC%E5%AE%B9&amp;tn=SE_PcZhidaonwhc_ngpagmjz&amp;rsv_dl=gh_pc_zhidao">向后兼容</a>。</p>
 <p>如果你的类Serialized存到硬盘上面后，可是后来你却更改了类别的field(增加或减少或改名)，当你Deserialize时，就会出现Exception的，这样就会造成不兼容性的问题。</p>
-
 <p>但当serialVersionUID相同时，它就会将不一样的field以type的预设值Deserialize，可避开不兼容性问题。</p>
 
 
@@ -414,8 +373,8 @@ serialVersionUID作用是序列化时保持版本的兼容性，即在版本升�
                     
                     
                     <li class="next">
-                        <a href="/post/java%E5%9F%BA%E7%A1%80-java%E4%B8%AD%E7%9A%84hook/" data-toggle="tooltip" data-placement="top"
-                            title="java中的Hook">Next
+                        <a href="/post/java%E5%9F%BA%E7%A1%80-runtime/" data-toggle="tooltip" data-placement="top"
+                            title="Runtime">Next
                             Post &rarr;</a>
                     </li>
                     
@@ -465,16 +424,7 @@ serialVersionUID作用是序列化时保持版本的兼容性，即在版本升�
                         <a class="catalog-toggle" style="font-size: 24px;" href="index.html#">目录结构</a>
                     </h4>
                     <ul class="catalog-body"></ul>
-                    <nav id="TableOfContents">
-<ul>
-<li><a href="#序列化和反序列化的概念">序列化和反序列化的概念</a></li>
-<li><a href="#为什么需要序列化与反序列化">为什么需要序列化与反序列化？</a></li>
-<li><a href="#如何实现java序列化与反序列化">如何实现Java序列化与反序列化</a></li>
-<li><a href="#serialversionuid概述说明">serialVersionUID概述说明</a></li>
-<li><a href="#有两种生成方式">有两种生成方式</a></li>
-<li><a href="#说明">说明</a></li>
-</ul>
-</nav>
+                    <nav id="TableOfContents"></nav>
                     <br>
                     <br>
                     <br>
@@ -498,9 +448,6 @@ serialVersionUID作用是序列化时保持版本的兼容性，即在版本升�
                         
                         
                         
-                        <a href="/tags/" title="">
-                            
-                        </a>
                         
                         
                         
@@ -510,101 +457,6 @@ serialVersionUID作用是序列化时保持版本的兼容性，即在版本升�
                         
                         
                         
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        <a href="/tags/qt" title="QT">
-                            QT
-                        </a>
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        <a href="/tags/zookeeper" title="Zookeeper">
-                            Zookeeper
-                        </a>
                         
                         
                         
@@ -644,8 +496,10 @@ serialVersionUID作用是序列化时保持版本的兼容性，即在版本升�
                         
                         
                         
-                        <a href="/tags/elasticsearch" title="elasticSearch">
-                            elasticSearch
+                        
+                        
+                        <a href="/tags/elasticsearch" title="elasticsearch">
+                            elasticsearch
                         </a>
                         
                         
@@ -656,9 +510,27 @@ serialVersionUID作用是序列化时保持版本的兼容性，即在版本升�
                         
                         
                         
-                        <a href="/tags/golang" title="golang">
-                            golang
-                        </a>
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
                         
                         
                         
@@ -696,9 +568,21 @@ serialVersionUID作用是序列化时保持版本的兼容性，即在版本升�
                         
                         
                         
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
                         <a href="/tags/jvm" title="jvm">
                             jvm
                         </a>
+                        
+                        
+                        
+                        
                         
                         
                         
@@ -722,9 +606,19 @@ serialVersionUID作用是序列化时保持版本的兼容性，即在版本升�
                         
                         
                         
+                        
+                        
+                        
+                        
+                        
+                        
                         <a href="/tags/mongodb" title="mongodb">
                             mongodb
                         </a>
+                        
+                        
+                        
+                        
                         
                         
                         
@@ -735,10 +629,6 @@ serialVersionUID作用是序列化时保持版本的兼容性，即在版本升�
                         </a>
                         
                         
-                        
-                        <a href="/tags/mycat" title="mycat">
-                            mycat
-                        </a>
                         
                         
                         
@@ -752,9 +642,17 @@ serialVersionUID作用是序列化时保持版本的兼容性，即在版本升�
                         
                         
                         
-                        <a href="/tags/nginx" title="nginx">
-                            nginx
-                        </a>
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
                         
                         
                         
@@ -778,8 +676,22 @@ serialVersionUID作用是序列化时保持版本的兼容性，即在版本升�
                         
                         
                         
+                        
+                        
                         <a href="/tags/rocketmq" title="rocketmq">
                             rocketmq
+                        </a>
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        <a href="/tags/security%E6%A1%86%E6%9E%B6%E5%AD%A6%E4%B9%A0" title="security框架学习">
+                            security框架学习
                         </a>
                         
                         
@@ -806,17 +718,11 @@ serialVersionUID作用是序列化时保持版本的兼容性，即在版本升�
                         
                         
                         
-                        <a href="/tags/springcloud" title="springCloud">
-                            springCloud
-                        </a>
-                        
-                        
-                        
-                        
-                        
                         <a href="/tags/springboot" title="springboot">
                             springboot
                         </a>
+                        
+                        
                         
                         
                         
@@ -830,6 +736,9 @@ serialVersionUID作用是序列化时保持版本的兼容性，即在版本升�
                         
                         
                         
+                        <a href="/tags/springcloud" title="springcloud">
+                            springcloud
+                        </a>
                         
                         
                         
@@ -855,6 +764,33 @@ serialVersionUID作用是序列化时保持版本的兼容性，即在版本升�
                         
                         
                         
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        <a href="/tags/zookeeper" title="zookeeper">
+                            zookeeper
+                        </a>
                         
                         
                         
@@ -914,6 +850,8 @@ serialVersionUID作用是序列化时保持版本的兼容性，即在版本升�
                         
                         
                         
+                        
+                        
                         <a href="/tags/%E5%88%86%E5%B8%83%E5%BC%8F%E7%B3%BB%E5%88%97" title="分布式系列">
                             分布式系列
                         </a>
@@ -933,6 +871,10 @@ serialVersionUID作用是序列化时保持版本的兼容性，即在版本升�
                         
                         
                         
+                        
+                        <a href="/tags/%E5%8D%8F%E8%AE%AE%E6%A0%88" title="协议栈">
+                            协议栈
+                        </a>
                         
                         
                         
@@ -1132,6 +1074,12 @@ serialVersionUID作用是序列化时保持版本的兼容性，即在版本升�
                         
                         
                         
+                        
+                        
+                        
+                        
+                        
+                        
                         <a href="/tags/%E7%BD%91%E7%BB%9C%E7%BC%96%E7%A8%8B" title="网络编程">
                             网络编程
                         </a>
@@ -1155,6 +1103,10 @@ serialVersionUID作用是序列化时保持版本的兼容性，即在版本升�
                         
                         
                         
+                        
+                        <a href="/tags/%E8%AE%A4%E8%AF%81%E5%92%8C%E6%8E%88%E6%9D%83" title="认证和授权">
+                            认证和授权
+                        </a>
                         
                         
                         
@@ -1325,7 +1277,7 @@ serialVersionUID作用是序列化时保持版本的兼容性，即在版本升�
                     
                 </ul>
 		<p class="copyright text-muted">
-                    Copyright &copy;  2020
+                    Copyright &copy;  2021
                     <br>
                     <a href="https://themes.gohugo.io/hugo-theme-cleanwhite">CleanWhite Hugo Theme</a> by <a href="https://zhaohuabing.com">Huabing</a> |
                     <iframe

@@ -97,15 +97,15 @@
                     </li>
                     
                     <li>
-                        <a href="/categories/english">English</a>
+                        <a href="/categories/english">english</a>
                     </li>
                     
                     <li>
-                        <a href="/categories/life">Life</a>
+                        <a href="/categories/life">life</a>
                     </li>
                     
                     <li>
-                        <a href="/categories/tech">Tech</a>
+                        <a href="/categories/tech">tech</a>
                     </li>
                     
 
@@ -241,150 +241,133 @@
                 
                 
                 
-                
-
-<p>[TOC]</p>
-
-<p><strong>转载：<a href="https://www.cnblogs.com/lykxqhh/p/5690941.html">https://www.cnblogs.com/lykxqhh/p/5690941.html</a></strong></p>
-
+                <p>[TOC]</p>
+<p><strong>转载：https://www.cnblogs.com/lykxqhh/p/5690941.html</strong></p>
 <h1 id="mybatis的缓存">Mybatis的缓存</h1>
-
 <p>通大多数ORM层框架一样，Mybatis自然也提供了对一级缓存和二级缓存的支持。一下是一级缓存和二级缓存的作用于和定义。</p>
-
 <ol>
-<li><p>一级缓存是SqlSession级别的缓存。在操作数据库时需要构造 sqlSession对象，在对象中有一个(内存区域)数据结构（HashMap）用于存储缓存数据。不同的sqlSession之间的缓存数据区域（HashMap）是互相不影响的。</p></li>
-
-<li><p>二级缓存是mapper级别的缓存，多个SqlSession去操作同一个Mapper的sql语句，多个SqlSession去操作数据库得到数据会存在二级缓存区域，多个SqlSession可以共用二级缓存，二级缓存是跨SqlSession的。</p></li>
-
-<li><p>一级缓存的作用域是同一个SqlSession，在同一个sqlSession中两次执行相同的sql语句，第一次执行完毕会将数据库中查询的数据写 到缓存（内存），第二次会从缓存中获取数据将不再从数据库查询，从而提高查询效率。当一个sqlSession结束后该sqlSession中的一级缓存 也就不存在了。Mybatis默认开启一级缓存。</p></li>
-
-<li><p>二级缓存是多个SqlSession共享的，其作用域是mapper的同一个namespace，不同的sqlSession两次执行相同 namespace下的sql语句且向sql中传递参数也相同即最终执行相同的sql语句，第一次执行完毕会将数据库中查询的数据写到缓存（内存），第二 次会从缓存中获取数据将不再从数据库查询，从而提高查询效率。Mybatis默认没有开启二级缓存需要在setting全局参数中配置开启二级缓存。</p></li>
-
-<li><p>一般的我们将Mybatis和Spring整合时，mybatis-spring包会自动分装sqlSession，而Spring通过动态代理 sqlSessionProxy使用一个模板方法封装了select()等操作，每一次select()查询都会自动先执行openSession()， 执行完close()以后调用close()方法，<strong>相当于生成了一个新的session实例，所以我们无需手动的去关闭这个session()，当然也无 法使用mybatis的一级缓存，也就是说mybatis的一级缓存在spring中是没有作用的。</strong></p></li>
+<li>
+<p>一级缓存是SqlSession级别的缓存。在操作数据库时需要构造 sqlSession对象，在对象中有一个(内存区域)数据结构（HashMap）用于存储缓存数据。不同的sqlSession之间的缓存数据区域（HashMap）是互相不影响的。</p>
+</li>
+<li>
+<p>二级缓存是mapper级别的缓存，多个SqlSession去操作同一个Mapper的sql语句，多个SqlSession去操作数据库得到数据会存在二级缓存区域，多个SqlSession可以共用二级缓存，二级缓存是跨SqlSession的。</p>
+</li>
+<li>
+<p>一级缓存的作用域是同一个SqlSession，在同一个sqlSession中两次执行相同的sql语句，第一次执行完毕会将数据库中查询的数据写 到缓存（内存），第二次会从缓存中获取数据将不再从数据库查询，从而提高查询效率。当一个sqlSession结束后该sqlSession中的一级缓存 也就不存在了。Mybatis默认开启一级缓存。</p>
+</li>
+<li>
+<p>二级缓存是多个SqlSession共享的，其作用域是mapper的同一个namespace，不同的sqlSession两次执行相同 namespace下的sql语句且向sql中传递参数也相同即最终执行相同的sql语句，第一次执行完毕会将数据库中查询的数据写到缓存（内存），第二 次会从缓存中获取数据将不再从数据库查询，从而提高查询效率。Mybatis默认没有开启二级缓存需要在setting全局参数中配置开启二级缓存。</p>
+</li>
+<li>
+<p>一般的我们将Mybatis和Spring整合时，mybatis-spring包会自动分装sqlSession，而Spring通过动态代理 sqlSessionProxy使用一个模板方法封装了select()等操作，每一次select()查询都会自动先执行openSession()， 执行完close()以后调用close()方法，<strong>相当于生成了一个新的session实例，所以我们无需手动的去关闭这个session()，当然也无 法使用mybatis的一级缓存，也就是说mybatis的一级缓存在spring中是没有作用的。</strong></p>
+</li>
 </ol>
-
 <p><strong>因此我们一般在项目中实现Mybatis的二级缓存，虽然Mybatis自带二级缓存功能，但是如果实在集群环境下，使用自带的二级缓存只是针对单个的节 点，所以我们采用分布式的二级缓存功能。一般的缓存NoSql数据库如redis，Mancache等，或者EhCache都可以实现，从而更好地服务 tomcat集群中ORM的查询。</strong></p>
-
 <h1 id="mybatis的二级缓存的实现">Mybatis的二级缓存的实现</h1>
-
 <p>下面主要通过Redis实现Mybatis的二级缓存功能。</p>
-
-<h2 id="1-配置文件中开启二级缓存">1、配置文件中开启二级缓存</h2>
-
-<pre><code class="language-xml">&lt;setting name=&quot;cacheEnabled&quot; value=&quot;true&quot;/&gt;  
-</code></pre>
-
-<p>默认二级缓存是开启的。</p>
-
-<h2 id="2-实现mybatis的cache接口">2.  实现Mybatis的Cache接口</h2>
-
+<h2 id="1配置文件中开启二级缓存">1、配置文件中开启二级缓存</h2>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-xml" data-lang="xml"><span style="color:#f92672">&lt;setting</span> <span style="color:#a6e22e">name=</span><span style="color:#e6db74">&#34;cacheEnabled&#34;</span> <span style="color:#a6e22e">value=</span><span style="color:#e6db74">&#34;true&#34;</span><span style="color:#f92672">/&gt;</span>  
+</code></pre></div><p>默认二级缓存是开启的。</p>
+<h2 id="2--实现mybatis的cache接口">2.  实现Mybatis的Cache接口</h2>
 <p>Mybatis提供了第三方Cache实现的接口，我们自定义MybatisRedisCache实现Cache接口，代码如下：</p>
-
-<pre><code class="language-java">/**
- * 创建时间：2016年1月7日 上午11:40:00
- * 
- * Mybatis二级缓存实现类
- * 
- * @author andy
- * @version 2.2
- */
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-java" data-lang="java"><span style="color:#75715e">/**
+</span><span style="color:#75715e"> * 创建时间：2016年1月7日 上午11:40:00
+</span><span style="color:#75715e"> * 
+</span><span style="color:#75715e"> * Mybatis二级缓存实现类
+</span><span style="color:#75715e"> * 
+</span><span style="color:#75715e"> * @author andy
+</span><span style="color:#75715e"> * @version 2.2
+</span><span style="color:#75715e"> */</span>
  
-public class MybatisRedisCache implements Cache {
+<span style="color:#66d9ef">public</span> <span style="color:#66d9ef">class</span> <span style="color:#a6e22e">MybatisRedisCache</span> <span style="color:#66d9ef">implements</span> Cache <span style="color:#f92672">{</span>
  
-	private static final Logger LOG = Logger.getLogger(MybatisRedisCache.class); 
+	<span style="color:#66d9ef">private</span> <span style="color:#66d9ef">static</span> <span style="color:#66d9ef">final</span> Logger LOG <span style="color:#f92672">=</span> Logger<span style="color:#f92672">.</span><span style="color:#a6e22e">getLogger</span><span style="color:#f92672">(</span>MybatisRedisCache<span style="color:#f92672">.</span><span style="color:#a6e22e">class</span><span style="color:#f92672">);</span> 
 	
-	private final ReadWriteLock readWriteLock = new ReentrantReadWriteLock(true);
+	<span style="color:#66d9ef">private</span> <span style="color:#66d9ef">final</span> ReadWriteLock readWriteLock <span style="color:#f92672">=</span> <span style="color:#66d9ef">new</span> ReentrantReadWriteLock<span style="color:#f92672">(</span><span style="color:#66d9ef">true</span><span style="color:#f92672">);</span>
 	
-	private RedisTemplate&lt;Serializable, Serializable&gt; redisTemplate =  (RedisTemplate&lt;Serializable, Serializable&gt;) SpringContextHolder.getBean(&quot;redisTemplate&quot;); 
+	<span style="color:#66d9ef">private</span> RedisTemplate<span style="color:#f92672">&lt;</span>Serializable<span style="color:#f92672">,</span> Serializable<span style="color:#f92672">&gt;</span> redisTemplate <span style="color:#f92672">=</span>  <span style="color:#f92672">(</span>RedisTemplate<span style="color:#f92672">&lt;</span>Serializable<span style="color:#f92672">,</span> Serializable<span style="color:#f92672">&gt;)</span> SpringContextHolder<span style="color:#f92672">.</span><span style="color:#a6e22e">getBean</span><span style="color:#f92672">(</span><span style="color:#e6db74">&#34;redisTemplate&#34;</span><span style="color:#f92672">);</span> 
 	
-	private String id;
+	<span style="color:#66d9ef">private</span> String id<span style="color:#f92672">;</span>
 	
-	private JdkSerializationRedisSerializer jdkSerializer = new JdkSerializationRedisSerializer();
+	<span style="color:#66d9ef">private</span> JdkSerializationRedisSerializer jdkSerializer <span style="color:#f92672">=</span> <span style="color:#66d9ef">new</span> JdkSerializationRedisSerializer<span style="color:#f92672">();</span>
 	
-	public MybatisRedisCache(final String id){
-		if(id == null){
-			throw new IllegalArgumentException(&quot;Cache instances require an ID&quot;);
-		}
-		LOG.info(&quot;Redis Cache id &quot; + id);
-		this.id = id;
-	}
+	<span style="color:#66d9ef">public</span> <span style="color:#a6e22e">MybatisRedisCache</span><span style="color:#f92672">(</span><span style="color:#66d9ef">final</span> String id<span style="color:#f92672">){</span>
+		<span style="color:#66d9ef">if</span><span style="color:#f92672">(</span>id <span style="color:#f92672">==</span> <span style="color:#66d9ef">null</span><span style="color:#f92672">){</span>
+			<span style="color:#66d9ef">throw</span> <span style="color:#66d9ef">new</span> IllegalArgumentException<span style="color:#f92672">(</span><span style="color:#e6db74">&#34;Cache instances require an ID&#34;</span><span style="color:#f92672">);</span>
+		<span style="color:#f92672">}</span>
+		LOG<span style="color:#f92672">.</span><span style="color:#a6e22e">info</span><span style="color:#f92672">(</span><span style="color:#e6db74">&#34;Redis Cache id &#34;</span> <span style="color:#f92672">+</span> id<span style="color:#f92672">);</span>
+		<span style="color:#66d9ef">this</span><span style="color:#f92672">.</span><span style="color:#a6e22e">id</span> <span style="color:#f92672">=</span> id<span style="color:#f92672">;</span>
+	<span style="color:#f92672">}</span>
 	
-	@Override
-	public String getId() {
-		return this.id;
-	}
+	<span style="color:#a6e22e">@Override</span>
+	<span style="color:#66d9ef">public</span> String <span style="color:#a6e22e">getId</span><span style="color:#f92672">()</span> <span style="color:#f92672">{</span>
+		<span style="color:#66d9ef">return</span> <span style="color:#66d9ef">this</span><span style="color:#f92672">.</span><span style="color:#a6e22e">id</span><span style="color:#f92672">;</span>
+	<span style="color:#f92672">}</span>
  
-	@Override
-	public void putObject(Object key, Object value) {
-		if(value != null){
-			redisTemplate.opsForValue().set(key.toString(), jdkSerializer.serialize(value), 2, TimeUnit.DAYS);
-		}
-	}
+	<span style="color:#a6e22e">@Override</span>
+	<span style="color:#66d9ef">public</span> <span style="color:#66d9ef">void</span> <span style="color:#a6e22e">putObject</span><span style="color:#f92672">(</span>Object key<span style="color:#f92672">,</span> Object value<span style="color:#f92672">)</span> <span style="color:#f92672">{</span>
+		<span style="color:#66d9ef">if</span><span style="color:#f92672">(</span>value <span style="color:#f92672">!=</span> <span style="color:#66d9ef">null</span><span style="color:#f92672">){</span>
+			redisTemplate<span style="color:#f92672">.</span><span style="color:#a6e22e">opsForValue</span><span style="color:#f92672">().</span><span style="color:#a6e22e">set</span><span style="color:#f92672">(</span>key<span style="color:#f92672">.</span><span style="color:#a6e22e">toString</span><span style="color:#f92672">(),</span> jdkSerializer<span style="color:#f92672">.</span><span style="color:#a6e22e">serialize</span><span style="color:#f92672">(</span>value<span style="color:#f92672">),</span> 2<span style="color:#f92672">,</span> TimeUnit<span style="color:#f92672">.</span><span style="color:#a6e22e">DAYS</span><span style="color:#f92672">);</span>
+		<span style="color:#f92672">}</span>
+	<span style="color:#f92672">}</span>
  
-	@Override
-	public Object getObject(Object key) {
-		try {
-			if(key != null){
-				Object obj = redisTemplate.opsForValue().get(key.toString());
-				return jdkSerializer.deserialize((byte[])obj); 
-			}
-		} catch (Exception e) {
-			LOG.error(&quot;redis &quot;);
-		}
-		return null;
-	}
+	<span style="color:#a6e22e">@Override</span>
+	<span style="color:#66d9ef">public</span> Object <span style="color:#a6e22e">getObject</span><span style="color:#f92672">(</span>Object key<span style="color:#f92672">)</span> <span style="color:#f92672">{</span>
+		<span style="color:#66d9ef">try</span> <span style="color:#f92672">{</span>
+			<span style="color:#66d9ef">if</span><span style="color:#f92672">(</span>key <span style="color:#f92672">!=</span> <span style="color:#66d9ef">null</span><span style="color:#f92672">){</span>
+				Object obj <span style="color:#f92672">=</span> redisTemplate<span style="color:#f92672">.</span><span style="color:#a6e22e">opsForValue</span><span style="color:#f92672">().</span><span style="color:#a6e22e">get</span><span style="color:#f92672">(</span>key<span style="color:#f92672">.</span><span style="color:#a6e22e">toString</span><span style="color:#f92672">());</span>
+				<span style="color:#66d9ef">return</span> jdkSerializer<span style="color:#f92672">.</span><span style="color:#a6e22e">deserialize</span><span style="color:#f92672">((</span><span style="color:#66d9ef">byte</span><span style="color:#f92672">[])</span>obj<span style="color:#f92672">);</span> 
+			<span style="color:#f92672">}</span>
+		<span style="color:#f92672">}</span> <span style="color:#66d9ef">catch</span> <span style="color:#f92672">(</span>Exception e<span style="color:#f92672">)</span> <span style="color:#f92672">{</span>
+			LOG<span style="color:#f92672">.</span><span style="color:#a6e22e">error</span><span style="color:#f92672">(</span><span style="color:#e6db74">&#34;redis &#34;</span><span style="color:#f92672">);</span>
+		<span style="color:#f92672">}</span>
+		<span style="color:#66d9ef">return</span> <span style="color:#66d9ef">null</span><span style="color:#f92672">;</span>
+	<span style="color:#f92672">}</span>
  
-	@Override
-	public Object removeObject(Object key) {
-		try {
-			if(key != null){
-				redisTemplate.expire(key.toString(), 1, TimeUnit.SECONDS);
-			}
-		} catch (Exception e) {
-		}
-		return null;
-	}
+	<span style="color:#a6e22e">@Override</span>
+	<span style="color:#66d9ef">public</span> Object <span style="color:#a6e22e">removeObject</span><span style="color:#f92672">(</span>Object key<span style="color:#f92672">)</span> <span style="color:#f92672">{</span>
+		<span style="color:#66d9ef">try</span> <span style="color:#f92672">{</span>
+			<span style="color:#66d9ef">if</span><span style="color:#f92672">(</span>key <span style="color:#f92672">!=</span> <span style="color:#66d9ef">null</span><span style="color:#f92672">){</span>
+				redisTemplate<span style="color:#f92672">.</span><span style="color:#a6e22e">expire</span><span style="color:#f92672">(</span>key<span style="color:#f92672">.</span><span style="color:#a6e22e">toString</span><span style="color:#f92672">(),</span> 1<span style="color:#f92672">,</span> TimeUnit<span style="color:#f92672">.</span><span style="color:#a6e22e">SECONDS</span><span style="color:#f92672">);</span>
+			<span style="color:#f92672">}</span>
+		<span style="color:#f92672">}</span> <span style="color:#66d9ef">catch</span> <span style="color:#f92672">(</span>Exception e<span style="color:#f92672">)</span> <span style="color:#f92672">{</span>
+		<span style="color:#f92672">}</span>
+		<span style="color:#66d9ef">return</span> <span style="color:#66d9ef">null</span><span style="color:#f92672">;</span>
+	<span style="color:#f92672">}</span>
  
-	@Override
-	public void clear() {
-		//jedis nonsupport
-	}
+	<span style="color:#a6e22e">@Override</span>
+	<span style="color:#66d9ef">public</span> <span style="color:#66d9ef">void</span> <span style="color:#a6e22e">clear</span><span style="color:#f92672">()</span> <span style="color:#f92672">{</span>
+		<span style="color:#75715e">//jedis nonsupport
+</span><span style="color:#75715e"></span>	<span style="color:#f92672">}</span>
  
-	@Override
-	public int getSize() {
-		Long size = redisTemplate.getMasterRedisTemplate().execute(new RedisCallback&lt;Long&gt;(){
-			@Override
-			public Long doInRedis(RedisConnection connection)
-					throws DataAccessException {
-				return connection.dbSize();
-			}
-		});
-		return size.intValue();
-	}
+	<span style="color:#a6e22e">@Override</span>
+	<span style="color:#66d9ef">public</span> <span style="color:#66d9ef">int</span> <span style="color:#a6e22e">getSize</span><span style="color:#f92672">()</span> <span style="color:#f92672">{</span>
+		Long size <span style="color:#f92672">=</span> redisTemplate<span style="color:#f92672">.</span><span style="color:#a6e22e">getMasterRedisTemplate</span><span style="color:#f92672">().</span><span style="color:#a6e22e">execute</span><span style="color:#f92672">(</span><span style="color:#66d9ef">new</span> RedisCallback<span style="color:#f92672">&lt;</span>Long<span style="color:#f92672">&gt;(){</span>
+			<span style="color:#a6e22e">@Override</span>
+			<span style="color:#66d9ef">public</span> Long <span style="color:#a6e22e">doInRedis</span><span style="color:#f92672">(</span>RedisConnection connection<span style="color:#f92672">)</span>
+					<span style="color:#66d9ef">throws</span> DataAccessException <span style="color:#f92672">{</span>
+				<span style="color:#66d9ef">return</span> connection<span style="color:#f92672">.</span><span style="color:#a6e22e">dbSize</span><span style="color:#f92672">();</span>
+			<span style="color:#f92672">}</span>
+		<span style="color:#f92672">});</span>
+		<span style="color:#66d9ef">return</span> size<span style="color:#f92672">.</span><span style="color:#a6e22e">intValue</span><span style="color:#f92672">();</span>
+	<span style="color:#f92672">}</span>
  
-	@Override
-	public ReadWriteLock getReadWriteLock() {
-		return this.readWriteLock;
-	}
+	<span style="color:#a6e22e">@Override</span>
+	<span style="color:#66d9ef">public</span> ReadWriteLock <span style="color:#a6e22e">getReadWriteLock</span><span style="color:#f92672">()</span> <span style="color:#f92672">{</span>
+		<span style="color:#66d9ef">return</span> <span style="color:#66d9ef">this</span><span style="color:#f92672">.</span><span style="color:#a6e22e">readWriteLock</span><span style="color:#f92672">;</span>
+	<span style="color:#f92672">}</span>
 	
-}
-</code></pre>
-
-<h2 id="3-二级缓存的实用">3. 二级缓存的实用</h2>
-
+<span style="color:#f92672">}</span>
+</code></pre></div><h2 id="3-二级缓存的实用">3. 二级缓存的实用</h2>
 <p>我们需要将所有的实体类进行序列化，然后在Mapper中添加自定义cache功能。</p>
-
-<pre><code class="language-xml">   &lt;cache
-        type=&quot;org.andy.shop.cache.MybatisRedisCache&quot;
-        eviction=&quot;LRU&quot;
-        flushInterval=&quot;6000000&quot;
-        size=&quot;1024&quot;
-        readOnly=&quot;false&quot;
-	/&gt;
-</code></pre>
-
-<h2 id="4-redis中的存储">4. Redis中的存储</h2>
-
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-xml" data-lang="xml">   <span style="color:#f92672">&lt;cache</span>
+        <span style="color:#a6e22e">type=</span><span style="color:#e6db74">&#34;org.andy.shop.cache.MybatisRedisCache&#34;</span>
+        <span style="color:#a6e22e">eviction=</span><span style="color:#e6db74">&#34;LRU&#34;</span>
+        <span style="color:#a6e22e">flushInterval=</span><span style="color:#e6db74">&#34;6000000&#34;</span>
+        <span style="color:#a6e22e">size=</span><span style="color:#e6db74">&#34;1024&#34;</span>
+        <span style="color:#a6e22e">readOnly=</span><span style="color:#e6db74">&#34;false&#34;</span>
+	<span style="color:#f92672">/&gt;</span>
+</code></pre></div><h2 id="4-redis中的存储">4. Redis中的存储</h2>
 <p>redis会自动的将Sql+条件+Hash等当做key值，而将查询结果作为value，只有请求中的所有参数都符合，那么就会使用redis中的二级缓存。其查询结果如下：</p>
 
 
@@ -493,16 +476,12 @@ public class MybatisRedisCache implements Cache {
                     </h4>
                     <ul class="catalog-body"></ul>
                     <nav id="TableOfContents">
-<ul>
-<li><a href="#mybatis的缓存">Mybatis的缓存</a></li>
-<li><a href="#mybatis的二级缓存的实现">Mybatis的二级缓存的实现</a>
-<ul>
-<li><a href="#1-配置文件中开启二级缓存">1、配置文件中开启二级缓存</a></li>
-<li><a href="#2-实现mybatis的cache接口">2.  实现Mybatis的Cache接口</a></li>
-<li><a href="#3-二级缓存的实用">3. 二级缓存的实用</a></li>
-<li><a href="#4-redis中的存储">4. Redis中的存储</a></li>
-</ul></li>
-</ul>
+  <ul>
+    <li><a href="#1配置文件中开启二级缓存">1、配置文件中开启二级缓存</a></li>
+    <li><a href="#2--实现mybatis的cache接口">2.  实现Mybatis的Cache接口</a></li>
+    <li><a href="#3-二级缓存的实用">3. 二级缓存的实用</a></li>
+    <li><a href="#4-redis中的存储">4. Redis中的存储</a></li>
+  </ul>
 </nav>
                     <br>
                     <br>
@@ -527,9 +506,6 @@ public class MybatisRedisCache implements Cache {
                         
                         
                         
-                        <a href="/tags/" title="">
-                            
-                        </a>
                         
                         
                         
@@ -539,101 +515,6 @@ public class MybatisRedisCache implements Cache {
                         
                         
                         
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        <a href="/tags/qt" title="QT">
-                            QT
-                        </a>
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        <a href="/tags/zookeeper" title="Zookeeper">
-                            Zookeeper
-                        </a>
                         
                         
                         
@@ -673,8 +554,10 @@ public class MybatisRedisCache implements Cache {
                         
                         
                         
-                        <a href="/tags/elasticsearch" title="elasticSearch">
-                            elasticSearch
+                        
+                        
+                        <a href="/tags/elasticsearch" title="elasticsearch">
+                            elasticsearch
                         </a>
                         
                         
@@ -685,9 +568,27 @@ public class MybatisRedisCache implements Cache {
                         
                         
                         
-                        <a href="/tags/golang" title="golang">
-                            golang
-                        </a>
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
                         
                         
                         
@@ -725,9 +626,21 @@ public class MybatisRedisCache implements Cache {
                         
                         
                         
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
                         <a href="/tags/jvm" title="jvm">
                             jvm
                         </a>
+                        
+                        
+                        
+                        
                         
                         
                         
@@ -751,9 +664,19 @@ public class MybatisRedisCache implements Cache {
                         
                         
                         
+                        
+                        
+                        
+                        
+                        
+                        
                         <a href="/tags/mongodb" title="mongodb">
                             mongodb
                         </a>
+                        
+                        
+                        
+                        
                         
                         
                         
@@ -764,10 +687,6 @@ public class MybatisRedisCache implements Cache {
                         </a>
                         
                         
-                        
-                        <a href="/tags/mycat" title="mycat">
-                            mycat
-                        </a>
                         
                         
                         
@@ -781,9 +700,17 @@ public class MybatisRedisCache implements Cache {
                         
                         
                         
-                        <a href="/tags/nginx" title="nginx">
-                            nginx
-                        </a>
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
                         
                         
                         
@@ -807,8 +734,22 @@ public class MybatisRedisCache implements Cache {
                         
                         
                         
+                        
+                        
                         <a href="/tags/rocketmq" title="rocketmq">
                             rocketmq
+                        </a>
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        <a href="/tags/security%E6%A1%86%E6%9E%B6%E5%AD%A6%E4%B9%A0" title="security框架学习">
+                            security框架学习
                         </a>
                         
                         
@@ -835,17 +776,11 @@ public class MybatisRedisCache implements Cache {
                         
                         
                         
-                        <a href="/tags/springcloud" title="springCloud">
-                            springCloud
-                        </a>
-                        
-                        
-                        
-                        
-                        
                         <a href="/tags/springboot" title="springboot">
                             springboot
                         </a>
+                        
+                        
                         
                         
                         
@@ -859,6 +794,9 @@ public class MybatisRedisCache implements Cache {
                         
                         
                         
+                        <a href="/tags/springcloud" title="springcloud">
+                            springcloud
+                        </a>
                         
                         
                         
@@ -884,6 +822,33 @@ public class MybatisRedisCache implements Cache {
                         
                         
                         
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        <a href="/tags/zookeeper" title="zookeeper">
+                            zookeeper
+                        </a>
                         
                         
                         
@@ -943,6 +908,8 @@ public class MybatisRedisCache implements Cache {
                         
                         
                         
+                        
+                        
                         <a href="/tags/%E5%88%86%E5%B8%83%E5%BC%8F%E7%B3%BB%E5%88%97" title="分布式系列">
                             分布式系列
                         </a>
@@ -962,6 +929,10 @@ public class MybatisRedisCache implements Cache {
                         
                         
                         
+                        
+                        <a href="/tags/%E5%8D%8F%E8%AE%AE%E6%A0%88" title="协议栈">
+                            协议栈
+                        </a>
                         
                         
                         
@@ -1161,6 +1132,12 @@ public class MybatisRedisCache implements Cache {
                         
                         
                         
+                        
+                        
+                        
+                        
+                        
+                        
                         <a href="/tags/%E7%BD%91%E7%BB%9C%E7%BC%96%E7%A8%8B" title="网络编程">
                             网络编程
                         </a>
@@ -1184,6 +1161,10 @@ public class MybatisRedisCache implements Cache {
                         
                         
                         
+                        
+                        <a href="/tags/%E8%AE%A4%E8%AF%81%E5%92%8C%E6%8E%88%E6%9D%83" title="认证和授权">
+                            认证和授权
+                        </a>
                         
                         
                         
@@ -1354,7 +1335,7 @@ public class MybatisRedisCache implements Cache {
                     
                 </ul>
 		<p class="copyright text-muted">
-                    Copyright &copy;  2020
+                    Copyright &copy;  2021
                     <br>
                     <a href="https://themes.gohugo.io/hugo-theme-cleanwhite">CleanWhite Hugo Theme</a> by <a href="https://zhaohuabing.com">Huabing</a> |
                     <iframe

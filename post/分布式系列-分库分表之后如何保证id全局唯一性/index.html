@@ -97,15 +97,15 @@
                     </li>
                     
                     <li>
-                        <a href="/categories/english">English</a>
+                        <a href="/categories/english">english</a>
                     </li>
                     
                     <li>
-                        <a href="/categories/life">Life</a>
+                        <a href="/categories/life">life</a>
                     </li>
                     
                     <li>
-                        <a href="/categories/tech">Tech</a>
+                        <a href="/categories/tech">tech</a>
                     </li>
                     
 
@@ -233,57 +233,30 @@
                 
                 
                 
-                
-
-<p>[TOC]</p>
-
-<p><strong>说明： 原文地址<a href="https://blog.csdn.net/bjweimengshu/article/details/80162731">https://blog.csdn.net/bjweimengshu/article/details/80162731</a></strong></p>
-
+                <p>[TOC]</p>
+<p><strong>说明： 原文地址https://blog.csdn.net/bjweimengshu/article/details/80162731</strong></p>
 <h1 id="常见几种方式">常见几种方式</h1>
-
 <h2 id="uuid">UUID</h2>
-
 <p>虽然可以保证全局唯一，但是占用32位有些太长，而且是无序的，入库时性能较差。</p>
-
 <h2 id="数据库主键">数据库主键</h2>
-
 <p>ID的生成对数据库的严重依赖，不但影响性能，而且一旦数据库挂掉，服务将变的不可用。当达到扩展的上线的瓶颈也就是步长的最大值的时候，就不行了。</p>
-
 <h2 id="分布式锁">分布式锁</h2>
-
 <p>性能不行。</p>
-
 <h2 id="redis自增">Redis自增</h2>
-
-<pre><code class="language-java">incr(key)
-</code></pre>
-
-<p>根据 redis 的官网的  <a href="https://redis.io/commands/incr">INCR 命令介绍</a>，它是一个原子操作，效果是是将 redis 数据库中 key 的值加一并且返回这个结果。如果 key 不存在，将在执行加一操作前，将这个 key 的值设置为0，也就是说执行这个命令的结果是从 1 开始一直累加下去的。</p>
-
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-java" data-lang="java">incr<span style="color:#f92672">(</span>key<span style="color:#f92672">)</span>
+</code></pre></div><p>根据 redis 的官网的  <a href="https://redis.io/commands/incr">INCR 命令介绍</a>，它是一个原子操作，效果是是将 redis 数据库中 key 的值加一并且返回这个结果。如果 key 不存在，将在执行加一操作前，将这个 key 的值设置为0，也就是说执行这个命令的结果是从 1 开始一直累加下去的。</p>
 <p>而且redis为单线程，不存在线程安全问题。每秒可以生成5万个标识。这个可以满足一般的高性能需求了。</p>
-
 <h1 id="snowflake算法">SnowFlake算法</h1>
-
 <p>snowflake算法所生成的ID结构是什么样子呢？我们来看看下图：</p>
-
-<p><img src="/img/5-21-11.jpeg" alt="5-21-11" /></p>
-
+<p><img src="/img/5-21-11.jpeg" alt="5-21-11"></p>
 <p>SnowFlake所生成的ID一共分成四部分：</p>
-
 <p><strong>第一位</strong>：占用1bit，其值始终是0，没有实际作用。</p>
-
 <p><strong>时间戳</strong>：占用41bit，精确到毫秒，总共可以容纳约140年的时间。</p>
-
 <p><strong>工作机器id</strong>：占用10bit，其中高位5bit是数据中心ID（datacenterId），低位5bit是工作节点ID（workerId），做多可以容纳1024个节点。</p>
-
 <p><strong>序列号</strong>：占用12bit，这个值在同一毫秒同一节点上从0开始不断累加，最多可以累加到4095。</p>
-
 <p>SnowFlake算法在同一毫秒内最多可以生成多少个全局唯一ID呢？只需要做一个简单的乘法：<strong>同一毫秒的ID数量 = 1024 X 4096 =  4194304</strong>，这个数字在绝大多数并发场景下都是够用的。</p>
-
 <h1 id="snowflake的优势和劣势">SnowFlake的优势和劣势</h1>
-
 <h2 id="优点">优点</h2>
-
 <ol>
 <li>生成ID时不依赖于DB，完全在内存生成，高性能高可用。</li>
 <li>ID呈趋势递增，后续插入索引树的时候性能较好。</li>
@@ -291,22 +264,16 @@
 <li>数值型的分布式ID（替换了UUID）</li>
 <li>高性能的ID生成器（超高400w/s的超高性能）</li>
 </ol>
-
 <h2 id="缺点">缺点</h2>
-
 <ol>
 <li>依赖于系统时钟的一致性。如果某台机器的系统时钟回拨，有可能造成ID冲突，或者ID乱序。</li>
 <li>他是部分递增的。</li>
 <li>依赖服务器时间来生成的，所以服务器的时间要是一样的。</li>
 </ol>
-
 <h2 id="实现">实现</h2>
-
 <p><a href="https://gitee.com/wayz/snowflake">https://gitee.com/wayz/snowflake</a></p>
-
 <h1 id="几种方式对比">几种方式对比</h1>
-
-<p><img src="/img/Xnip2020-03-13_11-19-50.png" alt="Xnip2020-03-13_11-19-50" /></p>
+<p><img src="/img/Xnip2020-03-13_11-19-50.png" alt="Xnip2020-03-13_11-19-50"></p>
 
 
                 
@@ -414,23 +381,18 @@
                     </h4>
                     <ul class="catalog-body"></ul>
                     <nav id="TableOfContents">
-<ul>
-<li><a href="#常见几种方式">常见几种方式</a>
-<ul>
-<li><a href="#uuid">UUID</a></li>
-<li><a href="#数据库主键">数据库主键</a></li>
-<li><a href="#分布式锁">分布式锁</a></li>
-<li><a href="#redis自增">Redis自增</a></li>
-</ul></li>
-<li><a href="#snowflake算法">SnowFlake算法</a></li>
-<li><a href="#snowflake的优势和劣势">SnowFlake的优势和劣势</a>
-<ul>
-<li><a href="#优点">优点</a></li>
-<li><a href="#缺点">缺点</a></li>
-<li><a href="#实现">实现</a></li>
-</ul></li>
-<li><a href="#几种方式对比">几种方式对比</a></li>
-</ul>
+  <ul>
+    <li><a href="#uuid">UUID</a></li>
+    <li><a href="#数据库主键">数据库主键</a></li>
+    <li><a href="#分布式锁">分布式锁</a></li>
+    <li><a href="#redis自增">Redis自增</a></li>
+  </ul>
+
+  <ul>
+    <li><a href="#优点">优点</a></li>
+    <li><a href="#缺点">缺点</a></li>
+    <li><a href="#实现">实现</a></li>
+  </ul>
 </nav>
                     <br>
                     <br>
@@ -455,9 +417,6 @@
                         
                         
                         
-                        <a href="/tags/" title="">
-                            
-                        </a>
                         
                         
                         
@@ -467,101 +426,6 @@
                         
                         
                         
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        <a href="/tags/qt" title="QT">
-                            QT
-                        </a>
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        <a href="/tags/zookeeper" title="Zookeeper">
-                            Zookeeper
-                        </a>
                         
                         
                         
@@ -601,8 +465,10 @@
                         
                         
                         
-                        <a href="/tags/elasticsearch" title="elasticSearch">
-                            elasticSearch
+                        
+                        
+                        <a href="/tags/elasticsearch" title="elasticsearch">
+                            elasticsearch
                         </a>
                         
                         
@@ -613,9 +479,27 @@
                         
                         
                         
-                        <a href="/tags/golang" title="golang">
-                            golang
-                        </a>
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
                         
                         
                         
@@ -653,9 +537,21 @@
                         
                         
                         
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
                         <a href="/tags/jvm" title="jvm">
                             jvm
                         </a>
+                        
+                        
+                        
+                        
                         
                         
                         
@@ -679,9 +575,19 @@
                         
                         
                         
+                        
+                        
+                        
+                        
+                        
+                        
                         <a href="/tags/mongodb" title="mongodb">
                             mongodb
                         </a>
+                        
+                        
+                        
+                        
                         
                         
                         
@@ -692,10 +598,6 @@
                         </a>
                         
                         
-                        
-                        <a href="/tags/mycat" title="mycat">
-                            mycat
-                        </a>
                         
                         
                         
@@ -709,9 +611,17 @@
                         
                         
                         
-                        <a href="/tags/nginx" title="nginx">
-                            nginx
-                        </a>
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
                         
                         
                         
@@ -735,8 +645,22 @@
                         
                         
                         
+                        
+                        
                         <a href="/tags/rocketmq" title="rocketmq">
                             rocketmq
+                        </a>
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        <a href="/tags/security%E6%A1%86%E6%9E%B6%E5%AD%A6%E4%B9%A0" title="security框架学习">
+                            security框架学习
                         </a>
                         
                         
@@ -763,17 +687,11 @@
                         
                         
                         
-                        <a href="/tags/springcloud" title="springCloud">
-                            springCloud
-                        </a>
-                        
-                        
-                        
-                        
-                        
                         <a href="/tags/springboot" title="springboot">
                             springboot
                         </a>
+                        
+                        
                         
                         
                         
@@ -787,6 +705,9 @@
                         
                         
                         
+                        <a href="/tags/springcloud" title="springcloud">
+                            springcloud
+                        </a>
                         
                         
                         
@@ -812,6 +733,33 @@
                         
                         
                         
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        <a href="/tags/zookeeper" title="zookeeper">
+                            zookeeper
+                        </a>
                         
                         
                         
@@ -871,6 +819,8 @@
                         
                         
                         
+                        
+                        
                         <a href="/tags/%E5%88%86%E5%B8%83%E5%BC%8F%E7%B3%BB%E5%88%97" title="分布式系列">
                             分布式系列
                         </a>
@@ -890,6 +840,10 @@
                         
                         
                         
+                        
+                        <a href="/tags/%E5%8D%8F%E8%AE%AE%E6%A0%88" title="协议栈">
+                            协议栈
+                        </a>
                         
                         
                         
@@ -1089,6 +1043,12 @@
                         
                         
                         
+                        
+                        
+                        
+                        
+                        
+                        
                         <a href="/tags/%E7%BD%91%E7%BB%9C%E7%BC%96%E7%A8%8B" title="网络编程">
                             网络编程
                         </a>
@@ -1112,6 +1072,10 @@
                         
                         
                         
+                        
+                        <a href="/tags/%E8%AE%A4%E8%AF%81%E5%92%8C%E6%8E%88%E6%9D%83" title="认证和授权">
+                            认证和授权
+                        </a>
                         
                         
                         
@@ -1282,7 +1246,7 @@
                     
                 </ul>
 		<p class="copyright text-muted">
-                    Copyright &copy;  2020
+                    Copyright &copy;  2021
                     <br>
                     <a href="https://themes.gohugo.io/hugo-theme-cleanwhite">CleanWhite Hugo Theme</a> by <a href="https://zhaohuabing.com">Huabing</a> |
                     <iframe

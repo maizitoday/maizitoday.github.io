@@ -97,15 +97,15 @@
                     </li>
                     
                     <li>
-                        <a href="/categories/english">English</a>
+                        <a href="/categories/english">english</a>
                     </li>
                     
                     <li>
-                        <a href="/categories/life">Life</a>
+                        <a href="/categories/life">life</a>
                     </li>
                     
                     <li>
-                        <a href="/categories/tech">Tech</a>
+                        <a href="/categories/tech">tech</a>
                     </li>
                     
 
@@ -237,763 +237,523 @@
                 
                 
                 
-                
-
-<p>[TOC]</p>
-
-<p><strong>转载地址：<a href="https://www.zhihu.com/question/29005375">https://www.zhihu.com/question/29005375</a></strong></p>
-
-<p><strong>转载地址：<a href="https://yq.aliyun.com/articles/2371">https://yq.aliyun.com/articles/2371</a></strong></p>
-
-<p><strong>转载地址：<a href="https://segmentfault.com/a/1190000017040893">https://segmentfault.com/a/1190000017040893</a></strong></p>
-
-<p><strong>转载地址：<a href="https://www.cnblogs.com/pony1223/p/8138233.html">https://www.cnblogs.com/pony1223/p/8138233.html</a></strong></p>
-
+                <p>[TOC]</p>
+<p><strong>转载地址：https://www.zhihu.com/question/29005375</strong></p>
+<p><strong>转载地址：https://yq.aliyun.com/articles/2371</strong></p>
+<p><strong>转载地址：https://segmentfault.com/a/1190000017040893</strong></p>
+<p><strong>转载地址：https://www.cnblogs.com/pony1223/p/8138233.html</strong></p>
 <h1 id="传统io">传统IO</h1>
-
 <p>我们知道，一个新技术的出现总是伴随着改进和提升，Java NIO的出现亦如此。</p>
-
 <p>传统 I/O 是阻塞式I/O，主要问题是系统资源的浪费。比如我们为了读取一个TCP连接的数据，调用 InputStream 的 read() 方法，这会使当前线程被挂起，直到有数据到达才被唤醒，那该线程在数据到达这段时间内，占用着内存资源（存储线程栈）却无所作为，也就是俗话说的占着茅坑不拉屎，为了读取其他连接的数据，我们不得不启动另外的线程。在并发连接数量不多的时候，这可能没什么问题，然而当连接数量达到一定规模，内存资源会被大量线程消耗殆尽。另一方面，线程切换需要更改处理器的状态，比如程序计数器、寄存器的值，因此非常频繁的在大量线程之间切换，同样是一种资源浪费。</p>
-
 <p>随着技术的发展，现代操作系统提供了新的I/O机制，可以避免这种资源浪费。基于此，诞生了Java NIO，NIO的代表性特征就是非阻塞I/O。紧接着我们发现，简单的使用非阻塞I/O并不能解决问题，因为在非阻塞模式下，read()方法在没有读取到数据时就会立即返回，不知道数据何时到达的我们，只能不停的调用read()方法进行重试，这显然太浪费CPU资源了，从下文可以知道，Selector组件正是为解决此问题而生。</p>
-
 <h1 id="概述">概述</h1>
-
 <p>NIO被叫为 <code>no-blocking io</code>，其实是在<strong>网络这个层次中理解的</strong>，对于<strong>FileChannel来说一样是阻塞</strong>。</p>
-
-<p><img src="/img/v2-4d04d38300aac19a8147e33b490a751b_hd.jpg" alt="v2-4d04d38300aac19a8147e33b490a751b_hd" /></p>
-
+<p><img src="/img/v2-4d04d38300aac19a8147e33b490a751b_hd.jpg" alt="v2-4d04d38300aac19a8147e33b490a751b_hd"></p>
 <p>所以说：我们<strong>通常</strong>使用NIO是在网络中使用的，网上大部分讨论NIO都是在<strong>网络通信的基础之上</strong>的！说NIO是非阻塞的NIO也是<strong>网络中体现</strong>的！</p>
-
 <p><strong>常用流程</strong></p>
-
-<p><img src="/img/401339-20171228225947225-1081873422.png" alt="401339-20171228225947225-1081873422" /></p>
-
+<p><img src="/img/401339-20171228225947225-1081873422.png" alt="401339-20171228225947225-1081873422"></p>
 <h1 id="形象比喻nio模式">形象比喻NIO模式</h1>
-
-<p>转载地址：<a href="https://www.cnblogs.com/pony1223/p/8138233.html">https://www.cnblogs.com/pony1223/p/8138233.html</a></p>
-
+<p>转载地址：https://www.cnblogs.com/pony1223/p/8138233.html</p>
 <p>传统的socket IO中，需要为每个连接创建一个线程，当并发的连接数量非常巨大时，线程所占用的栈内存和CPU线程切换的开销将非常巨大。使用NIO，不再需要为每个线程创建单独的线程，可以用一个含有限数量线程的线程池，甚至一个线程来为任意数量的连接服务。由于线程数量小于连接数量，所以每个线程进行IO操作时就不能阻塞，如果阻塞的话，有些连接就得不到处理，NIO提供了这种非阻塞的能力。</p>
-
 <p>小量的线程如何同时为大量连接服务呢，答案就是就绪选择。这就好比到餐厅吃饭，每来一桌客人，都有一个服务员专门为你服务，从你到餐厅到结帐走人，这样方式的好处是服务质量好，一对一的服务，VIP啊，可是缺点也很明显，成本高，如果餐厅生意好，同时来100桌客人，就需要100个服务员，那老板发工资的时候得心痛死了，这就是传统的一个连接一个线程的方式。</p>
-
 <p>老板是什么人啊，精着呢。这老板就得捉摸怎么能用10个服务员同时为100桌客人服务呢，老板就发现，服务员在为客人服务的过程中并不是一直都忙着，客人点完菜，上完菜，吃着的这段时间，服务员就闲下来了，可是这个服务员还是被这桌客人占用着，不能为别的客人服务，用华为领导的话说，就是工作不饱满。那怎么把这段闲着的时间利用起来呢。这餐厅老板就想了一个办法，让一个服务员（前台）专门负责收集客人的需求，登记下来，比如有客人进来了、客人点菜了，客人要结帐了，都先记录下来按顺序排好。每个服务员到这里领一个需求，比如点菜，就拿着菜单帮客人点菜去了。点好菜以后，服务员马上回来，领取下一个需求，继续为别人客人服务去了。这种方式服务质量就不如一对一的服务了，当客人数据很多的时候可能需要等待。但好处也很明显，由于在客人正吃饭着的时候服务员不用闲着了，服务员这个时间内可以为其他客人服务了，原来10个服务员最多同时为10桌客人服务，现在可能为50桌，60客人服务了。</p>
-
 <p>这种服务方式跟传统的区别有两个：</p>
-
 <p>1、增加了一个角色，要有一个专门负责收集客人需求的人。NIO里对应的就是Selector。</p>
-
 <p>2、由阻塞服务方式改为非阻塞服务了，客人吃着的时候服务员不用一直侯在客人旁边了。传统的IO操作，比如read()，当没有数据可读的时候，线程一直阻塞被占用，直到数据到来。NIO中没有数据可读时，read()会立即返回0，线程不会阻塞。</p>
-
 <p>NIO中，客户端创建一个连接后，先要将连接注册到Selector，相当于客人进入餐厅后，告诉前台你要用餐，前台会告诉你你的桌号是几号，然后你就可能到那张桌子坐下了，SelectionKey就是桌号。当某一桌需要服务时，前台就记录哪一桌需要什么服务，比如1号桌要点菜，2号桌要结帐，服务员从前台取一条记录，根据记录提供服务，完了再来取下一条。这样服务的时间就被最有效的利用起来了。</p>
-
-<p><img src="/img/Xnip2020-03-14_16-16-42.png" alt="Xnip2020-03-14_16-16-42" /></p>
-
+<p><img src="/img/Xnip2020-03-14_16-16-42.png" alt="Xnip2020-03-14_16-16-42"></p>
 <h1 id="为什么用">为什么用</h1>
-
-<p><img src="/img/Xnip2020-01-28_10-59-22.png" alt="Xnip2020-01-28_10-59-22" /></p>
-
+<p><img src="/img/Xnip2020-01-28_10-59-22.png" alt="Xnip2020-01-28_10-59-22"></p>
 <p>传统流I/O是基于字节的，所有I/O都被视为单个字节的移动；而NIO是基于块的，大家可能猜到了，NIO的性能肯定优于流I/O。没错！其性能的提高 要得益于其使用的结构更接近操作系统执行I/O的方式：通道和缓冲器。我们可以把它想象成一个煤矿，通道是一个包含煤层（数据）的矿藏，而缓冲器则是派送 到矿藏的卡车。卡车载满煤炭而归，我们再从卡车上获得煤炭。也就是说，我们并没有直接和通道交互；我们只是和缓冲器交互，并把缓冲器派送到通道。通道要么 从缓冲器获得数据，要么向缓冲器发送数据。（这段比喻出自Java编程思想）</p>
-
 <p>可简单认为：<strong>IO是面向流的处理，NIO是面向块(缓冲区)的处理</strong></p>
-
 <p>NIO的主要应用在高性能、高容量服务端应用程序，典型的有Apache Mina就是基于它的。</p>
-
 <h2 id="多路复用模型">多路复用模型</h2>
-
 <p>我们在网络中使用NIO往往是I/O模型的<strong>多路复用模型</strong>！</p>
-
 <p><strong>模拟场景</strong></p>
-
 <p>Java3y跟女朋友去麦当劳吃汉堡包，现在就厉害了可以使用微信小程序点餐了。于是跟女朋友找了个地方坐下就用小程序点餐了。点餐了之后玩玩斗地主、聊聊天什么的。<strong>时不时听到广播在复述XXX请取餐</strong>，反正我的单号还没到，就继续玩呗。~~<strong>等听到广播的时候再取餐就是了</strong>。时间过得挺快的，此时传来：Java3y请过来取餐。于是我就能拿到我的麦辣鸡翅汉堡了。</p>
-
 <p>听广播取餐，<strong>广播不是为我一个人服务</strong>。广播喊到我了，我过去取就Ok了。</p>
-
 <h1 id="三个核心部分组成">三个核心部分组成</h1>
-
 <h2 id="buffer缓冲区">Buffer缓冲区</h2>
-
-<p><img src="/img/Xnip2020-03-14_17-21-45.png" alt="Xnip2020-03-14_17-21-45" /></p>
-
+<p><img src="/img/Xnip2020-03-14_17-21-45.png" alt="Xnip2020-03-14_17-21-45"></p>
 <p>缓冲区实质上就是一个数组，但它不仅仅是一个数组，缓冲区还提供了对数据的结构化访问，而且还可以跟踪系统的读/写进程。</p>
-
 <p>讲缓冲区细节之前，我们先来看一下缓冲区“家谱”：</p>
-
-<p><img src="/img/280b3a26ebd7043d41022d77fcd4ada43f53d4ac-1.png" alt="280b3a26ebd7043d41022d77fcd4ada43f53d4ac-1" /></p>
-
+<p><img src="/img/280b3a26ebd7043d41022d77fcd4ada43f53d4ac-1.png" alt="280b3a26ebd7043d41022d77fcd4ada43f53d4ac-1"></p>
 <h3 id="buffer缓冲区和channel管道">buffer缓冲区和Channel管道</h3>
-
 <p>在NIO中并不是以流的方式来处理数据的，而是以buffer缓冲区和Channel管道<strong>配合使用</strong>来处理数据。</p>
-
 <p>简单理解一下：</p>
-
 <ul>
 <li>Channel管道比作成铁路，buffer缓冲区比作成火车(运载着货物)</li>
 </ul>
-
 <p>而我们的NIO就是<strong>通过Channel管道运输着存储数据的Buffer缓冲区的来实现数据的处理</strong>！</p>
-
 <ul>
-<li><p>要时刻记住：Channel不与数据打交道，它只负责运输数据。与数据打交道的是Buffer缓冲区</p></li>
-
-<li><ul>
+<li>
+<p>要时刻记住：Channel不与数据打交道，它只负责运输数据。与数据打交道的是Buffer缓冲区</p>
+</li>
+<li>
+<ul>
 <li><strong>Channel&ndash;&gt;运输</strong></li>
-</ul>
-
-<ul>
 <li><strong>Buffer&ndash;&gt;数据</strong></li>
-</ul></li>
 </ul>
-
+</li>
+</ul>
 <p>相对于传统IO而言，<strong>流是单向的</strong>。对于NIO而言，有了Channel管道这个概念，我们的<strong>读写都是双向</strong>的(铁路上的火车能从广州去北京、自然就能从北京返还到广州)！</p>
-
 <h3 id="buffer缓冲区核心要点">buffer缓冲区核心要点</h3>
-
 <p>我们来看看Buffer缓冲区有什么值得我们注意的地方。</p>
-
 <p>Buffer是缓冲区的抽象类， 其中ByteBuffer是<strong>用得最多的实现类</strong>(在管道中读写字节数据)。</p>
-
-<p><img src="/img/v2-bd5b82fe7838a13d88d1633989b06296_hd.jpg" alt="v2-bd5b82fe7838a13d88d1633989b06296_hd" /></p>
-
+<p><img src="/img/v2-bd5b82fe7838a13d88d1633989b06296_hd.jpg" alt="v2-bd5b82fe7838a13d88d1633989b06296_hd"></p>
 <p>拿到一个缓冲区我们往往会做什么？很简单，就是<strong>读取缓冲区的数据/写数据到缓冲区中</strong>。所以，缓冲区的核心方法就是:</p>
-
 <ul>
 <li><code>put()</code></li>
 <li><code>get()</code></li>
 </ul>
-
-<p><img src="/img/v2-53ab8fb02d97b19e762acc6174806a27_hd.jpg" alt="v2-53ab8fb02d97b19e762acc6174806a27_hd" /></p>
-
-<p><img src="/img/v2-3cd3eca0d73d04d58d92835e4e1af569_hd.jpg" alt="v2-3cd3eca0d73d04d58d92835e4e1af569_hd" /></p>
-
+<p><img src="/img/v2-53ab8fb02d97b19e762acc6174806a27_hd.jpg" alt="v2-53ab8fb02d97b19e762acc6174806a27_hd"></p>
+<p><img src="/img/v2-3cd3eca0d73d04d58d92835e4e1af569_hd.jpg" alt="v2-3cd3eca0d73d04d58d92835e4e1af569_hd"></p>
 <p>Buffer类维护了4个核心变量属性来提供<strong>关于其所包含的数组的信息</strong>。它们是：</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-java" data-lang="java"><span style="color:#66d9ef">public</span> <span style="color:#66d9ef">abstract</span> <span style="color:#66d9ef">class</span> <span style="color:#a6e22e">Buffer</span> <span style="color:#f92672">{</span>
 
-<pre><code class="language-java">public abstract class Buffer {
+    <span style="color:#75715e">/**
+</span><span style="color:#75715e">     * The characteristics of Spliterators that traverse and split elements
+</span><span style="color:#75715e">     * maintained in Buffers.
+</span><span style="color:#75715e">     */</span>
+    <span style="color:#66d9ef">static</span> <span style="color:#66d9ef">final</span> <span style="color:#66d9ef">int</span> SPLITERATOR_CHARACTERISTICS <span style="color:#f92672">=</span>
+        Spliterator<span style="color:#f92672">.</span><span style="color:#a6e22e">SIZED</span> <span style="color:#f92672">|</span> Spliterator<span style="color:#f92672">.</span><span style="color:#a6e22e">SUBSIZED</span> <span style="color:#f92672">|</span> Spliterator<span style="color:#f92672">.</span><span style="color:#a6e22e">ORDERED</span><span style="color:#f92672">;</span>
 
-    /**
-     * The characteristics of Spliterators that traverse and split elements
-     * maintained in Buffers.
-     */
-    static final int SPLITERATOR_CHARACTERISTICS =
-        Spliterator.SIZED | Spliterator.SUBSIZED | Spliterator.ORDERED;
-
-    // Invariants: mark &lt;= position &lt;= limit &lt;= capacity
-    private int mark = -1;
-    private int position = 0;
-    private int limit;
-    private int capacity;
-</code></pre>
-
-<h4 id="4个核心变量">4个核心变量</h4>
-
-<h5 id="1-容量capacity">1.  容量Capacity</h5>
-
+    <span style="color:#75715e">// Invariants: mark &lt;= position &lt;= limit &lt;= capacity
+</span><span style="color:#75715e"></span>    <span style="color:#66d9ef">private</span> <span style="color:#66d9ef">int</span> mark <span style="color:#f92672">=</span> <span style="color:#f92672">-</span>1<span style="color:#f92672">;</span>
+    <span style="color:#66d9ef">private</span> <span style="color:#66d9ef">int</span> position <span style="color:#f92672">=</span> 0<span style="color:#f92672">;</span>
+    <span style="color:#66d9ef">private</span> <span style="color:#66d9ef">int</span> limit<span style="color:#f92672">;</span>
+    <span style="color:#66d9ef">private</span> <span style="color:#66d9ef">int</span> capacity<span style="color:#f92672">;</span>
+</code></pre></div><h4 id="4个核心变量">4个核心变量</h4>
+<h5 id="1--容量capacity">1.  容量Capacity</h5>
 <p>缓冲区能够容纳的数据元素的最大数量。容量在缓冲区创建时被设定，并且永远不能被改变。(不能被改变的原因也很简单，底层是数组嘛)</p>
-
-<h5 id="2-上界limit">2.  上界Limit</h5>
-
+<h5 id="2--上界limit">2.  上界Limit</h5>
 <p>缓冲区里的数据的总数，代表了<strong>当前</strong>缓冲区中一共有多少数据</p>
-
-<h5 id="3-位置position">3.  位置Position</h5>
-
+<h5 id="3--位置position">3.  位置Position</h5>
 <p>下一个要被读或写的元素的位置。Position会自动由相应的 <code>get( )</code>和 <code>put( )</code>函数更新。</p>
-
-<h5 id="4-标记mark">4.  标记Mark</h5>
-
+<h5 id="4--标记mark">4.  标记Mark</h5>
 <p>一个备忘位置。<strong>用于记录上一次读写的位置</strong></p>
-
-<p><img src="/img/v2-2778e2763e68f87dab017fa8cbb5ddb5_hd.jpg" alt="v2-2778e2763e68f87dab017fa8cbb5ddb5_hd" /></p>
-
+<p><img src="/img/v2-2778e2763e68f87dab017fa8cbb5ddb5_hd.jpg" alt="v2-2778e2763e68f87dab017fa8cbb5ddb5_hd"></p>
 <h3 id="buffer核心变量值的变化">buffer核心变量值的变化</h3>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-java" data-lang="java"><span style="color:#66d9ef">public</span> <span style="color:#66d9ef">class</span> <span style="color:#a6e22e">App</span> <span style="color:#f92672">{</span>
+    <span style="color:#66d9ef">public</span> <span style="color:#66d9ef">static</span> <span style="color:#66d9ef">void</span> <span style="color:#a6e22e">main</span><span style="color:#f92672">(</span>String<span style="color:#f92672">[]</span> args<span style="color:#f92672">)</span> <span style="color:#f92672">{</span>
 
-<pre><code class="language-java">public class App {
-    public static void main(String[] args) {
+        <span style="color:#75715e">// 创建一个缓冲区
+</span><span style="color:#75715e"></span>        ByteBuffer byteBuffer <span style="color:#f92672">=</span> ByteBuffer<span style="color:#f92672">.</span><span style="color:#a6e22e">allocate</span><span style="color:#f92672">(</span>1024<span style="color:#f92672">);</span>
 
-        // 创建一个缓冲区
-        ByteBuffer byteBuffer = ByteBuffer.allocate(1024);
+        <span style="color:#75715e">// 看一下初始时4个核心变量的值
+</span><span style="color:#75715e"></span>        System<span style="color:#f92672">.</span><span style="color:#a6e22e">out</span><span style="color:#f92672">.</span><span style="color:#a6e22e">println</span><span style="color:#f92672">(</span><span style="color:#e6db74">&#34;初始时--&gt;limit---&gt;&#34;</span> <span style="color:#f92672">+</span> byteBuffer<span style="color:#f92672">.</span><span style="color:#a6e22e">limit</span><span style="color:#f92672">());</span>
+        System<span style="color:#f92672">.</span><span style="color:#a6e22e">out</span><span style="color:#f92672">.</span><span style="color:#a6e22e">println</span><span style="color:#f92672">(</span><span style="color:#e6db74">&#34;初始时--&gt;position---&gt;&#34;</span> <span style="color:#f92672">+</span> byteBuffer<span style="color:#f92672">.</span><span style="color:#a6e22e">position</span><span style="color:#f92672">());</span>
+        System<span style="color:#f92672">.</span><span style="color:#a6e22e">out</span><span style="color:#f92672">.</span><span style="color:#a6e22e">println</span><span style="color:#f92672">(</span><span style="color:#e6db74">&#34;初始时--&gt;capacity---&gt;&#34;</span> <span style="color:#f92672">+</span> byteBuffer<span style="color:#f92672">.</span><span style="color:#a6e22e">capacity</span><span style="color:#f92672">());</span>
+        System<span style="color:#f92672">.</span><span style="color:#a6e22e">out</span><span style="color:#f92672">.</span><span style="color:#a6e22e">println</span><span style="color:#f92672">(</span><span style="color:#e6db74">&#34;初始时--&gt;mark---&gt;&#34;</span> <span style="color:#f92672">+</span> byteBuffer<span style="color:#f92672">.</span><span style="color:#a6e22e">mark</span><span style="color:#f92672">());</span>
 
-        // 看一下初始时4个核心变量的值
-        System.out.println(&quot;初始时--&gt;limit---&gt;&quot; + byteBuffer.limit());
-        System.out.println(&quot;初始时--&gt;position---&gt;&quot; + byteBuffer.position());
-        System.out.println(&quot;初始时--&gt;capacity---&gt;&quot; + byteBuffer.capacity());
-        System.out.println(&quot;初始时--&gt;mark---&gt;&quot; + byteBuffer.mark());
+        System<span style="color:#f92672">.</span><span style="color:#a6e22e">out</span><span style="color:#f92672">.</span><span style="color:#a6e22e">println</span><span style="color:#f92672">(</span><span style="color:#e6db74">&#34;--------------------------------------&#34;</span><span style="color:#f92672">);</span>
 
-        System.out.println(&quot;--------------------------------------&quot;);
+        <span style="color:#75715e">// 添加一些数据到缓冲区中
+</span><span style="color:#75715e"></span>        String s <span style="color:#f92672">=</span> <span style="color:#e6db74">&#34;Java3y&#34;</span><span style="color:#f92672">;</span>
+        byteBuffer<span style="color:#f92672">.</span><span style="color:#a6e22e">put</span><span style="color:#f92672">(</span>s<span style="color:#f92672">.</span><span style="color:#a6e22e">getBytes</span><span style="color:#f92672">());</span>
 
-        // 添加一些数据到缓冲区中
-        String s = &quot;Java3y&quot;;
-        byteBuffer.put(s.getBytes());
+        <span style="color:#75715e">// 看一下初始时4个核心变量的值
+</span><span style="color:#75715e"></span>        System<span style="color:#f92672">.</span><span style="color:#a6e22e">out</span><span style="color:#f92672">.</span><span style="color:#a6e22e">println</span><span style="color:#f92672">(</span><span style="color:#e6db74">&#34;put完之后--&gt;limit---&gt;&#34;</span> <span style="color:#f92672">+</span> byteBuffer<span style="color:#f92672">.</span><span style="color:#a6e22e">limit</span><span style="color:#f92672">());</span>
+        System<span style="color:#f92672">.</span><span style="color:#a6e22e">out</span><span style="color:#f92672">.</span><span style="color:#a6e22e">println</span><span style="color:#f92672">(</span><span style="color:#e6db74">&#34;put完之后--&gt;position---&gt;&#34;</span> <span style="color:#f92672">+</span> byteBuffer<span style="color:#f92672">.</span><span style="color:#a6e22e">position</span><span style="color:#f92672">());</span>
+        System<span style="color:#f92672">.</span><span style="color:#a6e22e">out</span><span style="color:#f92672">.</span><span style="color:#a6e22e">println</span><span style="color:#f92672">(</span><span style="color:#e6db74">&#34;put完之后--&gt;capacity---&gt;&#34;</span> <span style="color:#f92672">+</span> byteBuffer<span style="color:#f92672">.</span><span style="color:#a6e22e">capacity</span><span style="color:#f92672">());</span>
+        System<span style="color:#f92672">.</span><span style="color:#a6e22e">out</span><span style="color:#f92672">.</span><span style="color:#a6e22e">println</span><span style="color:#f92672">(</span><span style="color:#e6db74">&#34;put完之后--&gt;mark---&gt;&#34;</span> <span style="color:#f92672">+</span> byteBuffer<span style="color:#f92672">.</span><span style="color:#a6e22e">mark</span><span style="color:#f92672">());</span>
 
-        // 看一下初始时4个核心变量的值
-        System.out.println(&quot;put完之后--&gt;limit---&gt;&quot; + byteBuffer.limit());
-        System.out.println(&quot;put完之后--&gt;position---&gt;&quot; + byteBuffer.position());
-        System.out.println(&quot;put完之后--&gt;capacity---&gt;&quot; + byteBuffer.capacity());
-        System.out.println(&quot;put完之后--&gt;mark---&gt;&quot; + byteBuffer.mark());
+        System<span style="color:#f92672">.</span><span style="color:#a6e22e">out</span><span style="color:#f92672">.</span><span style="color:#a6e22e">println</span><span style="color:#f92672">(</span><span style="color:#e6db74">&#34;--------------------------------------&#34;</span><span style="color:#f92672">);</span>
+        byteBuffer<span style="color:#f92672">.</span><span style="color:#a6e22e">flip</span><span style="color:#f92672">();</span>
+        <span style="color:#75715e">// 看一下初始时4个核心变量的值
+</span><span style="color:#75715e"></span>        System<span style="color:#f92672">.</span><span style="color:#a6e22e">out</span><span style="color:#f92672">.</span><span style="color:#a6e22e">println</span><span style="color:#f92672">(</span><span style="color:#e6db74">&#34;flip完之后--&gt;limit---&gt;&#34;</span> <span style="color:#f92672">+</span> byteBuffer<span style="color:#f92672">.</span><span style="color:#a6e22e">limit</span><span style="color:#f92672">());</span>
+        System<span style="color:#f92672">.</span><span style="color:#a6e22e">out</span><span style="color:#f92672">.</span><span style="color:#a6e22e">println</span><span style="color:#f92672">(</span><span style="color:#e6db74">&#34;flip完之后--&gt;position---&gt;&#34;</span> <span style="color:#f92672">+</span> byteBuffer<span style="color:#f92672">.</span><span style="color:#a6e22e">position</span><span style="color:#f92672">());</span>
+        System<span style="color:#f92672">.</span><span style="color:#a6e22e">out</span><span style="color:#f92672">.</span><span style="color:#a6e22e">println</span><span style="color:#f92672">(</span><span style="color:#e6db74">&#34;flip完之后--&gt;capacity---&gt;&#34;</span> <span style="color:#f92672">+</span> byteBuffer<span style="color:#f92672">.</span><span style="color:#a6e22e">capacity</span><span style="color:#f92672">());</span>
+        System<span style="color:#f92672">.</span><span style="color:#a6e22e">out</span><span style="color:#f92672">.</span><span style="color:#a6e22e">println</span><span style="color:#f92672">(</span><span style="color:#e6db74">&#34;flip完之后--&gt;mark---&gt;&#34;</span> <span style="color:#f92672">+</span> byteBuffer<span style="color:#f92672">.</span><span style="color:#a6e22e">mark</span><span style="color:#f92672">());</span>
 
-        System.out.println(&quot;--------------------------------------&quot;);
-        byteBuffer.flip();
-        // 看一下初始时4个核心变量的值
-        System.out.println(&quot;flip完之后--&gt;limit---&gt;&quot; + byteBuffer.limit());
-        System.out.println(&quot;flip完之后--&gt;position---&gt;&quot; + byteBuffer.position());
-        System.out.println(&quot;flip完之后--&gt;capacity---&gt;&quot; + byteBuffer.capacity());
-        System.out.println(&quot;flip完之后--&gt;mark---&gt;&quot; + byteBuffer.mark());
+    <span style="color:#f92672">}</span>
+<span style="color:#f92672">}</span>
 
-    }
-}
-
-</code></pre>
-
-<p>运行结果</p>
-
-<pre><code class="language-java">初始时--&gt;limit---&gt;1024
-初始时--&gt;position---&gt;0
-初始时--&gt;capacity---&gt;1024
-初始时--&gt;mark---&gt;java.nio.HeapByteBuffer[pos=0 lim=1024 cap=1024]
---------------------------------------
-put完之后--&gt;limit---&gt;1024
-put完之后--&gt;position---&gt;6
-put完之后--&gt;capacity---&gt;1024
-put完之后--&gt;mark---&gt;java.nio.HeapByteBuffer[pos=6 lim=1024 cap=1024]
---------------------------------------
-flip完之后--&gt;limit---&gt;6
-flip完之后--&gt;position---&gt;0
-flip完之后--&gt;capacity---&gt;1024
-flip完之后--&gt;mark---&gt;java.nio.HeapByteBuffer[pos=0 lim=6 cap=1024]
-</code></pre>
-
-<h3 id="缓存区拿数据">缓存区拿数据</h3>
-
+</code></pre></div><p>运行结果</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-java" data-lang="java">初始时<span style="color:#f92672">--&gt;</span>limit<span style="color:#f92672">---&gt;</span>1024
+初始时<span style="color:#f92672">--&gt;</span>position<span style="color:#f92672">---&gt;</span>0
+初始时<span style="color:#f92672">--&gt;</span>capacity<span style="color:#f92672">---&gt;</span>1024
+初始时<span style="color:#f92672">--&gt;</span>mark<span style="color:#f92672">---&gt;</span>java<span style="color:#f92672">.</span><span style="color:#a6e22e">nio</span><span style="color:#f92672">.</span><span style="color:#a6e22e">HeapByteBuffer</span><span style="color:#f92672">[</span>pos<span style="color:#f92672">=</span>0 lim<span style="color:#f92672">=</span>1024 cap<span style="color:#f92672">=</span>1024<span style="color:#f92672">]</span>
+<span style="color:#f92672">--------------------------------------</span>
+put完之后<span style="color:#f92672">--&gt;</span>limit<span style="color:#f92672">---&gt;</span>1024
+put完之后<span style="color:#f92672">--&gt;</span>position<span style="color:#f92672">---&gt;</span>6
+put完之后<span style="color:#f92672">--&gt;</span>capacity<span style="color:#f92672">---&gt;</span>1024
+put完之后<span style="color:#f92672">--&gt;</span>mark<span style="color:#f92672">---&gt;</span>java<span style="color:#f92672">.</span><span style="color:#a6e22e">nio</span><span style="color:#f92672">.</span><span style="color:#a6e22e">HeapByteBuffer</span><span style="color:#f92672">[</span>pos<span style="color:#f92672">=</span>6 lim<span style="color:#f92672">=</span>1024 cap<span style="color:#f92672">=</span>1024<span style="color:#f92672">]</span>
+<span style="color:#f92672">--------------------------------------</span>
+flip完之后<span style="color:#f92672">--&gt;</span>limit<span style="color:#f92672">---&gt;</span>6
+flip完之后<span style="color:#f92672">--&gt;</span>position<span style="color:#f92672">---&gt;</span>0
+flip完之后<span style="color:#f92672">--&gt;</span>capacity<span style="color:#f92672">---&gt;</span>1024
+flip完之后<span style="color:#f92672">--&gt;</span>mark<span style="color:#f92672">---&gt;</span>java<span style="color:#f92672">.</span><span style="color:#a6e22e">nio</span><span style="color:#f92672">.</span><span style="color:#a6e22e">HeapByteBuffer</span><span style="color:#f92672">[</span>pos<span style="color:#f92672">=</span>0 lim<span style="color:#f92672">=</span>6 cap<span style="color:#f92672">=</span>1024<span style="color:#f92672">]</span>
+</code></pre></div><h3 id="缓存区拿数据">缓存区拿数据</h3>
 <p>NIO给了我们一个<code>flip()</code>方法。这个方法可以<strong>改动position和limit的位置</strong>！查看上面输出显示：</p>
-
 <ul>
 <li><strong>limit变成了position的位置了</strong></li>
 <li><strong>而position变成了0</strong></li>
 </ul>
-
 <p>看到这里的同学可能就会想到了：当调用完<code>filp()</code>时：<strong>limit是限制读到哪里，而position是从哪里读</strong></p>
-
-<p>一般我们称<code>filp()</code>为<strong>“切换成读模式”</strong>，每当要从缓存区的时候读取数据时，就调用<code>filp()</code><strong>“切换成读模式”</strong>。</p>
-
-<p><img src="/img/v2-228c5b3548e521e8a45b4fd4ffde9e89_hd.jpg" alt="v2-228c5b3548e521e8a45b4fd4ffde9e89_hd" /></p>
-
-<pre><code class="language-java"> // 创建一个limit()大小的字节数组(因为就只有limit这么多个数据可读)
- byte[] bytes = new byte[byteBuffer.limit()];
- // 将读取的数据装进我们的字节数组中
- byteBuffer.get(bytes);
- // 输出数据
- System.out.println(new String(bytes, 0, bytes.length));
-</code></pre>
-
-<p>再次查看4个变量</p>
-
-<pre><code class="language-java">System.out.println(&quot;-----------------get---------------------&quot;);
-System.out.println(&quot;get完之后--&gt;limit---&gt;&quot; + byteBuffer.limit());
-System.out.println(&quot;get完之后--&gt;position---&gt;&quot; + byteBuffer.position());
-System.out.println(&quot;get完之后--&gt;capacity---&gt;&quot; + byteBuffer.capacity());
-System.out.println(&quot;get完之后--&gt;mark---&gt;&quot; + byteBuffer.mark());
-</code></pre>
-
-<p>运行结果</p>
-
-<pre><code class="language-java">-----------------get---------------------
-get完之后--&gt;limit---&gt;6
-get完之后--&gt;position---&gt;6
-get完之后--&gt;capacity---&gt;1024
-get完之后--&gt;mark---&gt;java.nio.HeapByteBuffer[pos=6 lim=6 cap=1024]
-</code></pre>
-
-<p><strong>读完我们还想写数据到缓冲区</strong>，那就使用<code>clear()</code>函数，这个函数会“清空”缓冲区：</p>
-
-<pre><code class="language-java">    byteBuffer.clear();
-    System.out.println(&quot;-----------------clear---------------------&quot;);
-    System.out.println(&quot;clear完之后--&gt;limit---&gt;&quot; + byteBuffer.limit());
-    System.out.println(&quot;clear完之后--&gt;position---&gt;&quot; + byteBuffer.position());
-    System.out.println(&quot;clear完之后--&gt;capacity---&gt;&quot; + byteBuffer.capacity());
-    System.out.println(&quot;clear完之后--&gt;mark---&gt;&quot; + byteBuffer.mark());
-</code></pre>
-
-<p>运行结果：</p>
-
-<pre><code class="language-java">-----------------clear---------------------
-clear完之后--&gt;limit---&gt;1024
-clear完之后--&gt;position---&gt;0
-clear完之后--&gt;capacity---&gt;1024
-clear完之后--&gt;mark---&gt;java.nio.HeapByteBuffer[pos=0 lim=1024 cap=1024]
-</code></pre>
-
-<p><strong>注意：数据没有真正被清空，只是被遗忘掉了</strong></p>
-
+<p>一般我们称<code>filp()</code>为**“切换成读模式”<strong>，每当要从缓存区的时候读取数据时，就调用<code>filp()</code></strong>“切换成读模式”**。</p>
+<p><img src="/img/v2-228c5b3548e521e8a45b4fd4ffde9e89_hd.jpg" alt="v2-228c5b3548e521e8a45b4fd4ffde9e89_hd"></p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-java" data-lang="java"> <span style="color:#75715e">// 创建一个limit()大小的字节数组(因为就只有limit这么多个数据可读)
+</span><span style="color:#75715e"></span> <span style="color:#66d9ef">byte</span><span style="color:#f92672">[]</span> bytes <span style="color:#f92672">=</span> <span style="color:#66d9ef">new</span> <span style="color:#66d9ef">byte</span><span style="color:#f92672">[</span>byteBuffer<span style="color:#f92672">.</span><span style="color:#a6e22e">limit</span><span style="color:#f92672">()];</span>
+ <span style="color:#75715e">// 将读取的数据装进我们的字节数组中
+</span><span style="color:#75715e"></span> byteBuffer<span style="color:#f92672">.</span><span style="color:#a6e22e">get</span><span style="color:#f92672">(</span>bytes<span style="color:#f92672">);</span>
+ <span style="color:#75715e">// 输出数据
+</span><span style="color:#75715e"></span> System<span style="color:#f92672">.</span><span style="color:#a6e22e">out</span><span style="color:#f92672">.</span><span style="color:#a6e22e">println</span><span style="color:#f92672">(</span><span style="color:#66d9ef">new</span> String<span style="color:#f92672">(</span>bytes<span style="color:#f92672">,</span> 0<span style="color:#f92672">,</span> bytes<span style="color:#f92672">.</span><span style="color:#a6e22e">length</span><span style="color:#f92672">));</span>
+</code></pre></div><p>再次查看4个变量</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-java" data-lang="java">System<span style="color:#f92672">.</span><span style="color:#a6e22e">out</span><span style="color:#f92672">.</span><span style="color:#a6e22e">println</span><span style="color:#f92672">(</span><span style="color:#e6db74">&#34;-----------------get---------------------&#34;</span><span style="color:#f92672">);</span>
+System<span style="color:#f92672">.</span><span style="color:#a6e22e">out</span><span style="color:#f92672">.</span><span style="color:#a6e22e">println</span><span style="color:#f92672">(</span><span style="color:#e6db74">&#34;get完之后--&gt;limit---&gt;&#34;</span> <span style="color:#f92672">+</span> byteBuffer<span style="color:#f92672">.</span><span style="color:#a6e22e">limit</span><span style="color:#f92672">());</span>
+System<span style="color:#f92672">.</span><span style="color:#a6e22e">out</span><span style="color:#f92672">.</span><span style="color:#a6e22e">println</span><span style="color:#f92672">(</span><span style="color:#e6db74">&#34;get完之后--&gt;position---&gt;&#34;</span> <span style="color:#f92672">+</span> byteBuffer<span style="color:#f92672">.</span><span style="color:#a6e22e">position</span><span style="color:#f92672">());</span>
+System<span style="color:#f92672">.</span><span style="color:#a6e22e">out</span><span style="color:#f92672">.</span><span style="color:#a6e22e">println</span><span style="color:#f92672">(</span><span style="color:#e6db74">&#34;get完之后--&gt;capacity---&gt;&#34;</span> <span style="color:#f92672">+</span> byteBuffer<span style="color:#f92672">.</span><span style="color:#a6e22e">capacity</span><span style="color:#f92672">());</span>
+System<span style="color:#f92672">.</span><span style="color:#a6e22e">out</span><span style="color:#f92672">.</span><span style="color:#a6e22e">println</span><span style="color:#f92672">(</span><span style="color:#e6db74">&#34;get完之后--&gt;mark---&gt;&#34;</span> <span style="color:#f92672">+</span> byteBuffer<span style="color:#f92672">.</span><span style="color:#a6e22e">mark</span><span style="color:#f92672">());</span>
+</code></pre></div><p>运行结果</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-java" data-lang="java"><span style="color:#f92672">-----------------</span>get<span style="color:#f92672">---------------------</span>
+get完之后<span style="color:#f92672">--&gt;</span>limit<span style="color:#f92672">---&gt;</span>6
+get完之后<span style="color:#f92672">--&gt;</span>position<span style="color:#f92672">---&gt;</span>6
+get完之后<span style="color:#f92672">--&gt;</span>capacity<span style="color:#f92672">---&gt;</span>1024
+get完之后<span style="color:#f92672">--&gt;</span>mark<span style="color:#f92672">---&gt;</span>java<span style="color:#f92672">.</span><span style="color:#a6e22e">nio</span><span style="color:#f92672">.</span><span style="color:#a6e22e">HeapByteBuffer</span><span style="color:#f92672">[</span>pos<span style="color:#f92672">=</span>6 lim<span style="color:#f92672">=</span>6 cap<span style="color:#f92672">=</span>1024<span style="color:#f92672">]</span>
+</code></pre></div><p><strong>读完我们还想写数据到缓冲区</strong>，那就使用<code>clear()</code>函数，这个函数会“清空”缓冲区：</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-java" data-lang="java">    byteBuffer<span style="color:#f92672">.</span><span style="color:#a6e22e">clear</span><span style="color:#f92672">();</span>
+    System<span style="color:#f92672">.</span><span style="color:#a6e22e">out</span><span style="color:#f92672">.</span><span style="color:#a6e22e">println</span><span style="color:#f92672">(</span><span style="color:#e6db74">&#34;-----------------clear---------------------&#34;</span><span style="color:#f92672">);</span>
+    System<span style="color:#f92672">.</span><span style="color:#a6e22e">out</span><span style="color:#f92672">.</span><span style="color:#a6e22e">println</span><span style="color:#f92672">(</span><span style="color:#e6db74">&#34;clear完之后--&gt;limit---&gt;&#34;</span> <span style="color:#f92672">+</span> byteBuffer<span style="color:#f92672">.</span><span style="color:#a6e22e">limit</span><span style="color:#f92672">());</span>
+    System<span style="color:#f92672">.</span><span style="color:#a6e22e">out</span><span style="color:#f92672">.</span><span style="color:#a6e22e">println</span><span style="color:#f92672">(</span><span style="color:#e6db74">&#34;clear完之后--&gt;position---&gt;&#34;</span> <span style="color:#f92672">+</span> byteBuffer<span style="color:#f92672">.</span><span style="color:#a6e22e">position</span><span style="color:#f92672">());</span>
+    System<span style="color:#f92672">.</span><span style="color:#a6e22e">out</span><span style="color:#f92672">.</span><span style="color:#a6e22e">println</span><span style="color:#f92672">(</span><span style="color:#e6db74">&#34;clear完之后--&gt;capacity---&gt;&#34;</span> <span style="color:#f92672">+</span> byteBuffer<span style="color:#f92672">.</span><span style="color:#a6e22e">capacity</span><span style="color:#f92672">());</span>
+    System<span style="color:#f92672">.</span><span style="color:#a6e22e">out</span><span style="color:#f92672">.</span><span style="color:#a6e22e">println</span><span style="color:#f92672">(</span><span style="color:#e6db74">&#34;clear完之后--&gt;mark---&gt;&#34;</span> <span style="color:#f92672">+</span> byteBuffer<span style="color:#f92672">.</span><span style="color:#a6e22e">mark</span><span style="color:#f92672">());</span>
+</code></pre></div><p>运行结果：</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-java" data-lang="java"><span style="color:#f92672">-----------------</span>clear<span style="color:#f92672">---------------------</span>
+clear完之后<span style="color:#f92672">--&gt;</span>limit<span style="color:#f92672">---&gt;</span>1024
+clear完之后<span style="color:#f92672">--&gt;</span>position<span style="color:#f92672">---&gt;</span>0
+clear完之后<span style="color:#f92672">--&gt;</span>capacity<span style="color:#f92672">---&gt;</span>1024
+clear完之后<span style="color:#f92672">--&gt;</span>mark<span style="color:#f92672">---&gt;</span>java<span style="color:#f92672">.</span><span style="color:#a6e22e">nio</span><span style="color:#f92672">.</span><span style="color:#a6e22e">HeapByteBuffer</span><span style="color:#f92672">[</span>pos<span style="color:#f92672">=</span>0 lim<span style="color:#f92672">=</span>1024 cap<span style="color:#f92672">=</span>1024<span style="color:#f92672">]</span>
+</code></pre></div><p><strong>注意：数据没有真正被清空，只是被遗忘掉了</strong></p>
 <h3 id="buffer的使用">Buffer的使用</h3>
-
-<p>转载地址：<a href="https://www.jianshu.com/p/a9b2fec31fd1">https://www.jianshu.com/p/a9b2fec31fd1</a></p>
-
+<p>转载地址：https://www.jianshu.com/p/a9b2fec31fd1</p>
 <p>通常遵循四个步骤：</p>
-
-<pre><code class="language-java">1. 把数据写入buffer；
-2. 调用flip；
-3. 从Buffer中读取数据；
-4. 调用buffer.clear()
-</code></pre>
-
-<p>当写入数据到buffer中时，buffer会记录已经写入的数据大小。当需要读数据时，通过flip()方法把buffer从写模式调整为读模式；在读模式下，可以读取所有已经写入的数据。</p>
-
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-java" data-lang="java">1<span style="color:#f92672">.</span> 把数据写入buffer<span style="color:#960050;background-color:#1e0010">；</span>
+2<span style="color:#f92672">.</span> 调用flip<span style="color:#960050;background-color:#1e0010">；</span>
+3<span style="color:#f92672">.</span> 从Buffer中读取数据<span style="color:#960050;background-color:#1e0010">；</span>
+4<span style="color:#f92672">.</span> 调用buffer<span style="color:#f92672">.</span><span style="color:#a6e22e">clear</span><span style="color:#f92672">()</span>
+</code></pre></div><p>当写入数据到buffer中时，buffer会记录已经写入的数据大小。当需要读数据时，通过flip()方法把buffer从写模式调整为读模式；在读模式下，可以读取所有已经写入的数据。</p>
 <p>当读取完数据后，需要清空buffer，以满足后续写入操作。清空buffer有两种方式：调用clear()，一旦读完Buffer中的数据，需要让Buffer准备好再次被写入，clear会恢复状态值，但不会擦除数据。</p>
-
 <h3 id="常用方法">常用方法</h3>
-
 <p>在对Buffer进行读/写操作前，我们可以调用Buffer类提供的一些辅助方法来正确设置 position 和 limit 的值，主要有如下几个</p>
-
-<pre><code class="language-java">- flip(): 设置 limit 为 position 的值，然后 position 置为0。对Buffer进行读取操作前调用。
-- rewind(): 仅仅将 position
-  置0。一般是在重新读取Buffer数据前调用，比如要读取同一个Buffer的数据写入多个通道时会用到。
-- clear(): 回到初始状态，即 limit 等于 capacity，position 置0。重新对Buffer进行写入操作前调用。
-- compact(): 将未读取完的数据（position 与 limit 之间的数据）移动到缓冲区开头，并将 position
-  设置为这段数据末尾的下一个位置。其实就等价于重新向缓冲区中写入了这么一段数据。
-</code></pre>
-
-<p><img src="/img/Xnip2020-03-14_17-30-45.png" alt="Xnip2020-03-14_17-30-45" /></p>
-
-<p><img src="/img/Xnip2020-03-14_17-33-03.png" alt="Xnip2020-03-14_17-33-03" /></p>
-
-<p><img src="/img/Xnip2020-03-14_17-33-59.png" alt="Xnip2020-03-14_17-33-59" /></p>
-
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-java" data-lang="java"><span style="color:#f92672">-</span> flip<span style="color:#f92672">():</span> 设置 limit 为 position 的值<span style="color:#960050;background-color:#1e0010">，</span>然后 position 置为0<span style="color:#960050;background-color:#1e0010">。</span>对Buffer进行读取操作前调用<span style="color:#960050;background-color:#1e0010">。</span>
+<span style="color:#f92672">-</span> rewind<span style="color:#f92672">():</span> 仅仅将 position
+  置0<span style="color:#960050;background-color:#1e0010">。</span>一般是在重新读取Buffer数据前调用<span style="color:#960050;background-color:#1e0010">，</span>比如要读取同一个Buffer的数据写入多个通道时会用到<span style="color:#960050;background-color:#1e0010">。</span>
+<span style="color:#f92672">-</span> clear<span style="color:#f92672">():</span> 回到初始状态<span style="color:#960050;background-color:#1e0010">，</span>即 limit 等于 capacity<span style="color:#960050;background-color:#1e0010">，</span>position 置0<span style="color:#960050;background-color:#1e0010">。</span>重新对Buffer进行写入操作前调用<span style="color:#960050;background-color:#1e0010">。</span>
+<span style="color:#f92672">-</span> compact<span style="color:#f92672">():</span> 将未读取完的数据<span style="color:#960050;background-color:#1e0010">（</span>position 与 limit 之间的数据<span style="color:#960050;background-color:#1e0010">）</span>移动到缓冲区开头<span style="color:#960050;background-color:#1e0010">，</span>并将 position
+  设置为这段数据末尾的下一个位置<span style="color:#960050;background-color:#1e0010">。</span>其实就等价于重新向缓冲区中写入了这么一段数据<span style="color:#960050;background-color:#1e0010">。</span>
+</code></pre></div><p><img src="/img/Xnip2020-03-14_17-30-45.png" alt="Xnip2020-03-14_17-30-45"></p>
+<p><img src="/img/Xnip2020-03-14_17-33-03.png" alt="Xnip2020-03-14_17-33-03"></p>
+<p><img src="/img/Xnip2020-03-14_17-33-59.png" alt="Xnip2020-03-14_17-33-59"></p>
 <h2 id="channel通道">Channel通道</h2>
-
 <h3 id="概述-1">概述</h3>
-
-<p><img src="/img/Xnip2020-03-14_17-46-13.png" alt="Xnip2020-03-14_17-46-13" /></p>
-
+<p><img src="/img/Xnip2020-03-14_17-46-13.png" alt="Xnip2020-03-14_17-46-13"></p>
 <p>Channel和传统IO中的Stream很相似。虽然很相似，但是有很大的区别，主要区别为：通道是双向的，通过一个Channel既可以进行读，也可以进行写；而Stream只能进行单向操作，通过一个Stream只能进行读或者写，比如InputStream只能进行读取操作，OutputStream只能进行写操作；</p>
-
 <p>通道是一个对象，通过它可以读取和写入数据，当然了所有数据都通过Buffer对象来处理。我们永远不会将字节直接写入通道中，相反是将数据写入包含一个或者多个字节的缓冲区。同样不会直接从通道中读取字节，而是将数据从通道读入缓冲区，再从缓冲区获取这个字节。</p>
-
 <p>从上述内容可知，一个Channel（通道）代表和某一实体的连接，这个实体可以是文件、网络套接字等。也就是说，通道是Java NIO提供的一座桥梁，用于我们的程序和操作系统底层I/O服务进行交互。</p>
-
 <p>FileChannel用于文件的数据读写。 DatagramChannel用于UDP的数据读写。 SocketChannel用于TCP的数据读写。 ServerSocketChannel允许我们监听TCP链接请求，每个请求会创建会一个SocketChannel。</p>
-
-<p><img src="/img/v2-fc9b8ac13041d003ebc879826097555a_hd.jpg" alt="v2-fc9b8ac13041d003ebc879826097555a_hd" /></p>
-
+<p><img src="/img/v2-fc9b8ac13041d003ebc879826097555a_hd.jpg" alt="v2-fc9b8ac13041d003ebc879826097555a_hd"></p>
 <p>Channel通道<strong>只负责传输数据、不直接操作数据的</strong>。操作数据都是通过Buffer缓冲区来进行操作！</p>
-
-<p><img src="/img/da765298fc108442b3918dc51b6c7ec48e713a88.png" alt="da765298fc108442b3918dc51b6c7ec48e713a88" /></p>
-
+<p><img src="/img/da765298fc108442b3918dc51b6c7ec48e713a88.png" alt="da765298fc108442b3918dc51b6c7ec48e713a88"></p>
 <h3 id="filechannel">FileChannel</h3>
-
-<p><img src="/img/Xnip2020-03-14_17-52-43.png" alt="Xnip2020-03-14_17-52-43" /></p>
-
+<p><img src="/img/Xnip2020-03-14_17-52-43.png" alt="Xnip2020-03-14_17-52-43"></p>
 <h3 id="使用通道">使用通道</h3>
-
 <p>打开通道比较简单，除了FileChannel，都用open方法打开。</p>
-
 <p>我们知道，通道是和缓冲区交互的，从缓冲区获取数据进行传输，或将数据传输给缓冲区。从类继承层次结构可以看出，通道一般都是双向的（除FileChannel）。</p>
-
 <h3 id="关闭通道">关闭通道</h3>
-
 <p>通道不能被重复使用，这点与缓冲区不同；关闭通道后，通道将不再连接任何东西，任何的读或写操作都会导致ClosedChannelException。</p>
-
 <p>调用通道的close()方法时，可能会导致线程暂时阻塞，就算通道处于非阻塞模式也不例外。如果通道实现了InterruptibleChannel接 口，那么阻塞在该通道上的一个线程被中断时，该通道将被关闭，被阻塞线程也会抛出ClosedByInterruptException异常。当一个通道 关闭时，休眠在该通道上的所有线程都将被唤醒并收到一个AsynchronousCloseException异常。</p>
-
-<h3 id="发散-聚集">发散、聚集</h3>
-
+<h3 id="发散聚集">发散、聚集</h3>
 <p>发散、聚集，又被称为矢量I/O，简单而强大的概念，它是指在多个缓冲区上实现一个简单的I/O操作。它减少或避免了缓冲区的拷贝和系统调用，它应该使用直接缓冲区以从本地I/O获取最大性能优势。</p>
-
 <ul>
 <li>Scatter(发散):  从一个Channel读取的信息分散到N个缓冲区中(Buufer).</li>
 <li>Gather(聚集):  将N个Buffer里面内容按照顺序发送到一个Channel.</li>
 </ul>
-
-<p><img src="/img/Xnip2020-03-15_11-19-49.png" alt="Xnip2020-03-15_11-19-49" /></p>
-
+<p><img src="/img/Xnip2020-03-15_11-19-49.png" alt="Xnip2020-03-15_11-19-49"></p>
 <h3 id="socket通道">Socket通道</h3>
-
 <p>Socket通道有三个，分别是ServerSocketChannel、SocketChannel和DatagramChannel，而它们又分别对 应java.net包中的Socket对象ServerSocket、Socket和DatagramSocket；Socket通道被实例化时，都会创 建一个对等的Socket对象。</p>
-
 <p>Socket通道可以运行非阻塞模式并且是可选择的，非阻塞I/O与可选择性是紧密相连的，这也正是管理阻塞的API要在 SelectableChannel中定义的原因。设置非阻塞非常简单，只要调用configureBlocking(false)方法即可。如果需要中 途更改阻塞模式，那么必须首先获得blockingLock()方法返回的对象的锁。</p>
-
 <h4 id="serversocketchannel">ServerSocketChannel</h4>
-
 <p>ServerSocketChannel是一个基于通道的socket监听器。但它没有bind()方法，因此需要取出对等的Socket对象并使用它来 绑定到某一端口以开始监听连接。在非阻塞模式下，当没有传入连接在等待时，其accept()方法会立即返回null。正是这种检查连接而不阻塞的能力实 现了可伸缩性并降低了复杂性，选择性也因此得以实现。</p>
-
 <h4 id="socketchannel">SocketChannel</h4>
-
 <p>相对于ServerSocketChannel，它扮演客户端，发起到监听服务器的连接，连接成功后，开始接收数据。</p>
-
 <p>要注意的是，调用它的open()方法仅仅是打开但并未连接，要建立连接需要紧接着调用connect()方法；也可以两步合为一步，调用open(SocketAddress remote)方法。 你会发现connect()方法并未提供timout参数，作为替代方案，你可以用isConnected()、isConnectPending()或finishConnect()方法来检查连接状态。</p>
-
 <h4 id="datagramchannel">DatagramChannel</h4>
-
 <p>不同于前面两个通道对象，它是无连接的，它既可以作为服务器，也可以作为客户端。</p>
-
 <h3 id="常用方法-1">常用方法</h3>
-
 <p>Channel中最常用的三个类方法就是map、read和write，其中map方法用于将Channel对应的部分或全部数据映射成ByteBuffer，而read或write方法有一系列的重载形式，这些方法用于从Buffer中读取数据或向Buffer中写入数据。</p>
-
 <h2 id="selector选择器">Selector选择器</h2>
-
-<p>转载地址：<a href="https://www.jianshu.com/p/a9b2fec31fd1">https://www.jianshu.com/p/a9b2fec31fd1</a></p>
-
+<p>转载地址：https://www.jianshu.com/p/a9b2fec31fd1</p>
 <h3 id="概述-2">概述</h3>
-
-<p><img src="/img/Xnip2020-03-16_09-51-46.png" alt="Xnip2020-03-16_09-51-46" /></p>
-
+<p><img src="/img/Xnip2020-03-16_09-51-46.png" alt="Xnip2020-03-16_09-51-46"></p>
 <p>Selector类是NIO的核心类，Selector能够检测多个注册的通道上是否有事件发生，如果有事件发生，便获取事件然后针对每个事件进行相应的响应处理。这样一来，只是用一个单线程就可以管理多个通道，也就是管理多个连接。这样使得只有在连接真正有读写事件发生时，才会调用函数来进行读写，就大大地减少了系统开销，并且不必为每个连接都创建一个线程，不用去维护多个线程，并且避免了多线程之间的上下文切换导致的开销。</p>
-
 <p>与Selector有关的一个关键类是SelectionKey，一个SelectionKey表示一个到达的事件，这2个类构成了服务端处理业务的关键逻辑。</p>
-
 <p>Selector（选择器）是一个特殊的组件，用于采集各个通道的状态（或者说事件）。我们先将通道注册到选择器，并设置好关心的事件，然后就可以通过调用select()方法，静静地等待事件发生。</p>
-
 <p>Selector是Java NIO中的一个组件，用于检查一个或多个NIO Channel的状态是否处于可读、可写。如此可以实现单线程管理多个channels,也就是可以管理多个网络链接。</p>
-
-<p><img src="/img/Xnip2020-01-28_16-34-42.png" alt="Xnip2020-01-28_16-34-42" /></p>
-
+<p><img src="/img/Xnip2020-01-28_16-34-42.png" alt="Xnip2020-01-28_16-34-42"></p>
 <h3 id="为什么要用selector">为什么要用Selector</h3>
-
 <p>如果用阻塞I/O，需要多线程（浪费内存），如果用非阻塞I/O，需要不断重试（耗费CPU）。Selector的出现解决了这尴尬的问题，非阻塞模式下，通过Selector，我们的线程只为已就绪的通道工作，不用盲目的重试了。比如，当所有通道都没有数据到达时，也就没有Read事件发生，我们的线程会在select()方法处被挂起，从而让出了CPU资源。</p>
-
 <h3 id="常用方法-2">常用方法</h3>
-
-<p><img src="/img/Xnip2020-03-16_10-00-17.png" alt="Xnip2020-03-16_10-00-17" /></p>
-
-<p><img src="/img/Xnip2020-03-16_10-55-15.png" alt="Xnip2020-03-16_10-55-15" /></p>
-
+<p><img src="/img/Xnip2020-03-16_10-00-17.png" alt="Xnip2020-03-16_10-00-17"></p>
+<p><img src="/img/Xnip2020-03-16_10-55-15.png" alt="Xnip2020-03-16_10-55-15"></p>
 <h3 id="使用">使用</h3>
-
 <p>创建Selector(Creating a Selector)。创建一个Selector可以通过Selector.open()方法：</p>
-
-<pre><code class="language-java">Selector selector = Selector.open();
-</code></pre>
-
-<p>注册Channel到Selector上：</p>
-
-<pre><code class="language-java">channel.configureBlocking(false);
-SelectionKey key = channel.register(selector, SelectionKey.OP_READ);
-</code></pre>
-
-<p><strong>Channel必须是非阻塞的。FileChannel不适用Selector，因为FileChannel不能切换为非阻塞模式。Socket channel可以正常使用。</strong></p>
-
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-java" data-lang="java">Selector selector <span style="color:#f92672">=</span> Selector<span style="color:#f92672">.</span><span style="color:#a6e22e">open</span><span style="color:#f92672">();</span>
+</code></pre></div><p>注册Channel到Selector上：</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-java" data-lang="java">channel<span style="color:#f92672">.</span><span style="color:#a6e22e">configureBlocking</span><span style="color:#f92672">(</span><span style="color:#66d9ef">false</span><span style="color:#f92672">);</span>
+SelectionKey key <span style="color:#f92672">=</span> channel<span style="color:#f92672">.</span><span style="color:#a6e22e">register</span><span style="color:#f92672">(</span>selector<span style="color:#f92672">,</span> SelectionKey<span style="color:#f92672">.</span><span style="color:#a6e22e">OP_READ</span><span style="color:#f92672">);</span>
+</code></pre></div><p><strong>Channel必须是非阻塞的。FileChannel不适用Selector，因为FileChannel不能切换为非阻塞模式。Socket channel可以正常使用。</strong></p>
 <h3 id="四种注册事件">四种注册事件</h3>
-
 <p>register的第二个参数，这个参数是一个“关注集合”，代表我们关注的channel状态，有四种基础类型可供监听</p>
-
-<pre><code class="language-java">Accept：有可以接受的连接
-Connect：连接成功
-Read：有数据可读
-Write：可以写入数据了
-</code></pre>
-
-<p><strong>一个channel触发了一个事件也可视作该事件处于就绪状态。</strong></p>
-
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-java" data-lang="java">Accept<span style="color:#960050;background-color:#1e0010">：</span>有可以接受的连接
+Connect<span style="color:#960050;background-color:#1e0010">：</span>连接成功
+Read<span style="color:#960050;background-color:#1e0010">：</span>有数据可读
+Write<span style="color:#960050;background-color:#1e0010">：</span>可以写入数据了
+</code></pre></div><p><strong>一个channel触发了一个事件也可视作该事件处于就绪状态。</strong></p>
 <p>因此当channel与server连接成功后，那么就是“Connetct”状态。server channel接收请求连接时处于“Accept”状态。channel有数据可读时处于“Read”状态。channel可以进行数据写入时处于“Writer”状态。当注册到Selector的所有Channel注册完后，调用Selector的select()方法，将会不断轮询检查是否有以上设置的状态产生，如果产生便会加入到SelectionKey集合中，进行后续操作。</p>
-
 <p><strong>上述的四种就绪状态用SelectionKey中的常量表示如下：</strong></p>
-
-<pre><code class="language-java">SelectionKey.OP_CONNECT
-SelectionKey.OP_ACCEPT
-SelectionKey.OP_READ
-SelectionKey.OP_WRITE
-</code></pre>
-
-<p><strong>从Selector中选择channel(Selecting Channels via a Selector)</strong></p>
-
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-java" data-lang="java">SelectionKey<span style="color:#f92672">.</span><span style="color:#a6e22e">OP_CONNECT</span>
+SelectionKey<span style="color:#f92672">.</span><span style="color:#a6e22e">OP_ACCEPT</span>
+SelectionKey<span style="color:#f92672">.</span><span style="color:#a6e22e">OP_READ</span>
+SelectionKey<span style="color:#f92672">.</span><span style="color:#a6e22e">OP_WRITE</span>
+</code></pre></div><p><strong>从Selector中选择channel(Selecting Channels via a Selector)</strong></p>
 <p>一旦我们向Selector注册了一个或多个channel后，就可以调用select来获取channel。select方法会返回所有处于就绪状态的channel。</p>
-
 <p><strong>select方法具体如下：</strong></p>
-
-<pre><code class="language-java">int select()
-int select(long timeout)
-int selectNow()
-</code></pre>
-
-<p>select()方法在返回channel之前处于阻塞状态。 select(long timeout)和select做的事一样，不过他的阻塞有一个超时限制。</p>
-
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-java" data-lang="java"><span style="color:#66d9ef">int</span> <span style="color:#a6e22e">select</span><span style="color:#f92672">()</span>
+<span style="color:#66d9ef">int</span> <span style="color:#a6e22e">select</span><span style="color:#f92672">(</span><span style="color:#66d9ef">long</span> timeout<span style="color:#f92672">)</span>
+<span style="color:#66d9ef">int</span> <span style="color:#a6e22e">selectNow</span><span style="color:#f92672">()</span>
+</code></pre></div><p>select()方法在返回channel之前处于阻塞状态。 select(long timeout)和select做的事一样，不过他的阻塞有一个超时限制。</p>
 <p>selectNow()不会阻塞，根据当前状态立刻返回合适的channel。</p>
-
 <p><strong>select()方法的返回值是一个int整形，代表有多少channel处于就绪了。也就是自上一次select后有多少channel进入就绪。</strong></p>
-
 <p>举例来说，假设第一次调用select时正好有一个channel就绪，那么返回值是1，并且对这个channel做任何处理，接着再次调用select，此时恰好又有一个新的channel就绪，那么返回值还是1，现在我们一共有两个channel处于就绪，但是在每次调用select时只有一个channel是就绪的。</p>
-
 <p><strong>selectedKeys()</strong></p>
-
 <p>在调用select并返回了有channel就绪之后，可以通过选中的key集合来获取channel，这个操作通过调用selectedKeys()方法：</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-java" data-lang="java">Set<span style="color:#f92672">&lt;</span>SelectionKey<span style="color:#f92672">&gt;</span> selectedKeys <span style="color:#f92672">=</span> selector<span style="color:#f92672">.</span><span style="color:#a6e22e">selectedKeys</span><span style="color:#f92672">();</span>    
+</code></pre></div><p>遍历这些SelectionKey可以通过如下方法：</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-java" data-lang="java">Set<span style="color:#f92672">&lt;</span>SelectionKey<span style="color:#f92672">&gt;</span> selectedKeys <span style="color:#f92672">=</span> selector<span style="color:#f92672">.</span><span style="color:#a6e22e">selectedKeys</span><span style="color:#f92672">();</span>
 
-<pre><code class="language-java">Set&lt;SelectionKey&gt; selectedKeys = selector.selectedKeys();    
-</code></pre>
+Iterator<span style="color:#f92672">&lt;</span>SelectionKey<span style="color:#f92672">&gt;</span> keyIterator <span style="color:#f92672">=</span> selectedKeys<span style="color:#f92672">.</span><span style="color:#a6e22e">iterator</span><span style="color:#f92672">();</span>
 
-<p>遍历这些SelectionKey可以通过如下方法：</p>
+<span style="color:#66d9ef">while</span><span style="color:#f92672">(</span>keyIterator<span style="color:#f92672">.</span><span style="color:#a6e22e">hasNext</span><span style="color:#f92672">())</span> <span style="color:#f92672">{</span>
 
-<pre><code class="language-java">Set&lt;SelectionKey&gt; selectedKeys = selector.selectedKeys();
+    SelectionKey key <span style="color:#f92672">=</span> keyIterator<span style="color:#f92672">.</span><span style="color:#a6e22e">next</span><span style="color:#f92672">();</span>
 
-Iterator&lt;SelectionKey&gt; keyIterator = selectedKeys.iterator();
+    <span style="color:#66d9ef">if</span><span style="color:#f92672">(</span>key<span style="color:#f92672">.</span><span style="color:#a6e22e">isAcceptable</span><span style="color:#f92672">())</span> <span style="color:#f92672">{</span>
+        <span style="color:#75715e">// a connection was accepted by a ServerSocketChannel.
+</span><span style="color:#75715e"></span>
+    <span style="color:#f92672">}</span> <span style="color:#66d9ef">else</span> <span style="color:#66d9ef">if</span> <span style="color:#f92672">(</span>key<span style="color:#f92672">.</span><span style="color:#a6e22e">isConnectable</span><span style="color:#f92672">())</span> <span style="color:#f92672">{</span>
+        <span style="color:#75715e">// a connection was established with a remote server.
+</span><span style="color:#75715e"></span>
+    <span style="color:#f92672">}</span> <span style="color:#66d9ef">else</span> <span style="color:#66d9ef">if</span> <span style="color:#f92672">(</span>key<span style="color:#f92672">.</span><span style="color:#a6e22e">isReadable</span><span style="color:#f92672">())</span> <span style="color:#f92672">{</span>
+        <span style="color:#75715e">// a channel is ready for reading
+</span><span style="color:#75715e"></span>
+    <span style="color:#f92672">}</span> <span style="color:#66d9ef">else</span> <span style="color:#66d9ef">if</span> <span style="color:#f92672">(</span>key<span style="color:#f92672">.</span><span style="color:#a6e22e">isWritable</span><span style="color:#f92672">())</span> <span style="color:#f92672">{</span>
+        <span style="color:#75715e">// a channel is ready for writing
+</span><span style="color:#75715e"></span>    <span style="color:#f92672">}</span>
 
-while(keyIterator.hasNext()) {
-
-    SelectionKey key = keyIterator.next();
-
-    if(key.isAcceptable()) {
-        // a connection was accepted by a ServerSocketChannel.
-
-    } else if (key.isConnectable()) {
-        // a connection was established with a remote server.
-
-    } else if (key.isReadable()) {
-        // a channel is ready for reading
-
-    } else if (key.isWritable()) {
-        // a channel is ready for writing
-    }
-
-    keyIterator.remove();
-}
-</code></pre>
-
-<p>上述循环会迭代key集合，针对每个key我们单独判断他是处于何种就绪状态。</p>
-
+    keyIterator<span style="color:#f92672">.</span><span style="color:#a6e22e">remove</span><span style="color:#f92672">();</span>
+<span style="color:#f92672">}</span>
+</code></pre></div><p>上述循环会迭代key集合，针对每个key我们单独判断他是处于何种就绪状态。</p>
 <p><strong>注意keyIterater.remove()方法的调用</strong>，Selector本身并不会移除SelectionKey对象，这个操作需要我们收到执行。当下次channel处于就绪是，Selector任然会把这些key再次加入进来。</p>
-
 <p>SelectionKey.channel返回的channel实例需要强转为我们实际使用的具体的channel类型，例如ServerSocketChannel或SocketChannel.</p>
-
 <p><strong>wakeUp()</strong></p>
-
 <p>由于调用select而被阻塞的线程，可以通过调用Selector.wakeup()来唤醒即便此时已然没有channel处于就绪状态。具体操作是，在另外一个线程调用wakeup，被阻塞与select方法的线程就会立刻返回。</p>
-
 <p><strong>close()</strong></p>
-
 <p>当操作Selector完毕后，需要调用close方法。close的调用会关闭Selector并使相关的SelectionKey都无效。channel本身不管被关闭。</p>
-
 <h3 id="完整selector实例">完整Selector实例</h3>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-java" data-lang="java">Selector selector <span style="color:#f92672">=</span> Selector<span style="color:#f92672">.</span><span style="color:#a6e22e">open</span><span style="color:#f92672">();</span>
 
-<pre><code class="language-java">Selector selector = Selector.open();
+channel<span style="color:#f92672">.</span><span style="color:#a6e22e">configureBlocking</span><span style="color:#f92672">(</span><span style="color:#66d9ef">false</span><span style="color:#f92672">);</span>
 
-channel.configureBlocking(false);
+SelectionKey key <span style="color:#f92672">=</span> channel<span style="color:#f92672">.</span><span style="color:#a6e22e">register</span><span style="color:#f92672">(</span>selector<span style="color:#f92672">,</span> SelectionKey<span style="color:#f92672">.</span><span style="color:#a6e22e">OP_READ</span><span style="color:#f92672">);</span>
 
-SelectionKey key = channel.register(selector, SelectionKey.OP_READ);
+<span style="color:#66d9ef">while</span><span style="color:#f92672">(</span><span style="color:#66d9ef">true</span><span style="color:#f92672">)</span> <span style="color:#f92672">{</span>
 
-while(true) {
+  <span style="color:#66d9ef">int</span> readyChannels <span style="color:#f92672">=</span> selector<span style="color:#f92672">.</span><span style="color:#a6e22e">select</span><span style="color:#f92672">();</span>
 
-  int readyChannels = selector.select();
+  <span style="color:#66d9ef">if</span><span style="color:#f92672">(</span>readyChannels <span style="color:#f92672">==</span> 0<span style="color:#f92672">)</span> <span style="color:#66d9ef">continue</span><span style="color:#f92672">;</span>
 
-  if(readyChannels == 0) continue;
+  Set<span style="color:#f92672">&lt;</span>SelectionKey<span style="color:#f92672">&gt;</span> selectedKeys <span style="color:#f92672">=</span> selector<span style="color:#f92672">.</span><span style="color:#a6e22e">selectedKeys</span><span style="color:#f92672">();</span>
 
-  Set&lt;SelectionKey&gt; selectedKeys = selector.selectedKeys();
+  Iterator<span style="color:#f92672">&lt;</span>SelectionKey<span style="color:#f92672">&gt;</span> keyIterator <span style="color:#f92672">=</span> selectedKeys<span style="color:#f92672">.</span><span style="color:#a6e22e">iterator</span><span style="color:#f92672">();</span>
 
-  Iterator&lt;SelectionKey&gt; keyIterator = selectedKeys.iterator();
+  <span style="color:#66d9ef">while</span><span style="color:#f92672">(</span>keyIterator<span style="color:#f92672">.</span><span style="color:#a6e22e">hasNext</span><span style="color:#f92672">())</span> <span style="color:#f92672">{</span>
 
-  while(keyIterator.hasNext()) {
+    SelectionKey key <span style="color:#f92672">=</span> keyIterator<span style="color:#f92672">.</span><span style="color:#a6e22e">next</span><span style="color:#f92672">();</span>
 
-    SelectionKey key = keyIterator.next();
+    <span style="color:#66d9ef">if</span><span style="color:#f92672">(</span>key<span style="color:#f92672">.</span><span style="color:#a6e22e">isAcceptable</span><span style="color:#f92672">())</span> <span style="color:#f92672">{</span>
+        <span style="color:#75715e">// a connection was accepted by a ServerSocketChannel.
+</span><span style="color:#75715e"></span>
+    <span style="color:#f92672">}</span> <span style="color:#66d9ef">else</span> <span style="color:#66d9ef">if</span> <span style="color:#f92672">(</span>key<span style="color:#f92672">.</span><span style="color:#a6e22e">isConnectable</span><span style="color:#f92672">())</span> <span style="color:#f92672">{</span>
+        <span style="color:#75715e">// a connection was established with a remote server.
+</span><span style="color:#75715e"></span>
+    <span style="color:#f92672">}</span> <span style="color:#66d9ef">else</span> <span style="color:#66d9ef">if</span> <span style="color:#f92672">(</span>key<span style="color:#f92672">.</span><span style="color:#a6e22e">isReadable</span><span style="color:#f92672">())</span> <span style="color:#f92672">{</span>
+        <span style="color:#75715e">// a channel is ready for reading
+</span><span style="color:#75715e"></span>
+    <span style="color:#f92672">}</span> <span style="color:#66d9ef">else</span> <span style="color:#66d9ef">if</span> <span style="color:#f92672">(</span>key<span style="color:#f92672">.</span><span style="color:#a6e22e">isWritable</span><span style="color:#f92672">())</span> <span style="color:#f92672">{</span>
+        <span style="color:#75715e">// a channel is ready for writing
+</span><span style="color:#75715e"></span>    <span style="color:#f92672">}</span>
 
-    if(key.isAcceptable()) {
-        // a connection was accepted by a ServerSocketChannel.
-
-    } else if (key.isConnectable()) {
-        // a connection was established with a remote server.
-
-    } else if (key.isReadable()) {
-        // a channel is ready for reading
-
-    } else if (key.isWritable()) {
-        // a channel is ready for writing
-    }
-
-    keyIterator.remove();
-  }
-}
-</code></pre>
-
-<h3 id="使用流程">使用流程</h3>
-
-<p><img src="/img/Xnip2020-01-21_10-12-40.png" alt="Xnip2020-01-21_10-12-40" /></p>
-
+    keyIterator<span style="color:#f92672">.</span><span style="color:#a6e22e">remove</span><span style="color:#f92672">();</span>
+  <span style="color:#f92672">}</span>
+<span style="color:#f92672">}</span>
+</code></pre></div><h3 id="使用流程">使用流程</h3>
+<p><img src="/img/Xnip2020-01-21_10-12-40.png" alt="Xnip2020-01-21_10-12-40"></p>
 <h3 id="selector的wakeup理解">selector的wakeup理解</h3>
-
-<p>转载地址：<a href="https://www.hxlzpnyist.site/2017/12/21/NIO-selector的wakeup/">https://www.hxlzpnyist.site/2017/12/21/NIO-selector%E7%9A%84wakeup/</a></p>
-
+<p>转载地址：<a href="https://www.hxlzpnyist.site/2017/12/21/NIO-selector%E7%9A%84wakeup/">https://www.hxlzpnyist.site/2017/12/21/NIO-selector%E7%9A%84wakeup/</a></p>
 <p>某个线程调用select()方法后阻塞了，即使没有通道已经就绪，也有办法让其从select()方法返回。只要让其它线程在第一个线程调用select()方法的那个对象上调用Selector.wakeup()方法即可。阻塞在select()方法上的线程会立马返回。</p>
-
 <p>如果有其它线程调用了wakeup()方法，但当前没有线程阻塞在select()方法上，下个调用select()方法的线程会立即“醒来（wake up）”</p>
-
 <h4 id="代码测试">代码测试</h4>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-java" data-lang="java"><span style="color:#f92672">import</span> java.io.IOException<span style="color:#f92672">;</span>
+<span style="color:#f92672">import</span> java.net.InetSocketAddress<span style="color:#f92672">;</span>
+<span style="color:#f92672">import</span> java.nio.channels.SelectionKey<span style="color:#f92672">;</span>
+<span style="color:#f92672">import</span> java.nio.channels.Selector<span style="color:#f92672">;</span>
+<span style="color:#f92672">import</span> java.nio.channels.ServerSocketChannel<span style="color:#f92672">;</span>
+<span style="color:#f92672">import</span> java.util.concurrent.TimeUnit<span style="color:#f92672">;</span>
 
-<pre><code class="language-java">import java.io.IOException;
-import java.net.InetSocketAddress;
-import java.nio.channels.SelectionKey;
-import java.nio.channels.Selector;
-import java.nio.channels.ServerSocketChannel;
-import java.util.concurrent.TimeUnit;
+<span style="color:#66d9ef">public</span> <span style="color:#66d9ef">class</span> <span style="color:#a6e22e">NioWakeUp</span> <span style="color:#f92672">{</span>
 
-public class NioWakeUp {
+    <span style="color:#66d9ef">private</span> Selector selector<span style="color:#f92672">;</span>
 
-    private Selector selector;
+    <span style="color:#66d9ef">public</span> <span style="color:#66d9ef">void</span> <span style="color:#a6e22e">start</span><span style="color:#f92672">()</span> <span style="color:#66d9ef">throws</span> IOException <span style="color:#f92672">{</span>
+        <span style="color:#75715e">// 开启选择器 selector
+</span><span style="color:#75715e"></span>        selector <span style="color:#f92672">=</span> Selector<span style="color:#f92672">.</span><span style="color:#a6e22e">open</span><span style="color:#f92672">();</span>
 
-    public void start() throws IOException {
-        // 开启选择器 selector
-        selector = Selector.open();
+        <span style="color:#75715e">// 开启服务端 socket 通道
+</span><span style="color:#75715e"></span>        ServerSocketChannel serverSocketChannel <span style="color:#f92672">=</span> ServerSocketChannel<span style="color:#f92672">.</span><span style="color:#a6e22e">open</span><span style="color:#f92672">();</span>
+        <span style="color:#75715e">// 设置为非阻塞
+</span><span style="color:#75715e"></span>        serverSocketChannel<span style="color:#f92672">.</span><span style="color:#a6e22e">configureBlocking</span><span style="color:#f92672">(</span><span style="color:#66d9ef">false</span><span style="color:#f92672">);</span>
+        <span style="color:#75715e">// 绑定服务端端口
+</span><span style="color:#75715e"></span>        serverSocketChannel<span style="color:#f92672">.</span><span style="color:#a6e22e">socket</span><span style="color:#f92672">().</span><span style="color:#a6e22e">bind</span><span style="color:#f92672">(</span><span style="color:#66d9ef">new</span> InetSocketAddress<span style="color:#f92672">(</span>8888<span style="color:#f92672">));</span>
+        <span style="color:#75715e">// 通道注册到选择器上 并监听 接收客户端事件
+</span><span style="color:#75715e"></span>        serverSocketChannel<span style="color:#f92672">.</span><span style="color:#a6e22e">register</span><span style="color:#f92672">(</span>selector<span style="color:#f92672">,</span> SelectionKey<span style="color:#f92672">.</span><span style="color:#a6e22e">OP_ACCEPT</span><span style="color:#f92672">);</span>
 
-        // 开启服务端 socket 通道
-        ServerSocketChannel serverSocketChannel = ServerSocketChannel.open();
-        // 设置为非阻塞
-        serverSocketChannel.configureBlocking(false);
-        // 绑定服务端端口
-        serverSocketChannel.socket().bind(new InetSocketAddress(8888));
-        // 通道注册到选择器上 并监听 接收客户端事件
-        serverSocketChannel.register(selector, SelectionKey.OP_ACCEPT);
+        <span style="color:#75715e">// 因 selector.select 会阻塞当前线程 故异步处理
+</span><span style="color:#75715e"></span>        <span style="color:#66d9ef">new</span> Thread<span style="color:#f92672">(</span><span style="color:#66d9ef">new</span> Runnable<span style="color:#f92672">()</span> <span style="color:#f92672">{</span>
+            <span style="color:#a6e22e">@Override</span>
+            <span style="color:#66d9ef">public</span> <span style="color:#66d9ef">void</span> <span style="color:#a6e22e">run</span><span style="color:#f92672">()</span> <span style="color:#f92672">{</span>
+                <span style="color:#66d9ef">while</span> <span style="color:#f92672">(</span><span style="color:#66d9ef">true</span><span style="color:#f92672">)</span> <span style="color:#f92672">{</span>
+                    System<span style="color:#f92672">.</span><span style="color:#a6e22e">out</span><span style="color:#f92672">.</span><span style="color:#a6e22e">println</span><span style="color:#f92672">(</span><span style="color:#e6db74">&#34;select 前执行&#34;</span><span style="color:#f92672">);</span>
 
-        // 因 selector.select 会阻塞当前线程 故异步处理
-        new Thread(new Runnable() {
-            @Override
-            public void run() {
-                while (true) {
-                    System.out.println(&quot;select 前执行&quot;);
+                    <span style="color:#66d9ef">try</span> <span style="color:#f92672">{</span>
+                        selector<span style="color:#f92672">.</span><span style="color:#a6e22e">select</span><span style="color:#f92672">();</span>
+                    <span style="color:#f92672">}</span> <span style="color:#66d9ef">catch</span> <span style="color:#f92672">(</span>IOException e<span style="color:#f92672">)</span> <span style="color:#f92672">{</span>
+                        e<span style="color:#f92672">.</span><span style="color:#a6e22e">printStackTrace</span><span style="color:#f92672">();</span>
+                    <span style="color:#f92672">}</span>
 
-                    try {
-                        selector.select();
-                    } catch (IOException e) {
-                        e.printStackTrace();
-                    }
+                    System<span style="color:#f92672">.</span><span style="color:#a6e22e">out</span><span style="color:#f92672">.</span><span style="color:#a6e22e">println</span><span style="color:#f92672">(</span><span style="color:#e6db74">&#34;select 后执行&#34;</span><span style="color:#f92672">);</span>
+                <span style="color:#f92672">}</span>
+            <span style="color:#f92672">}</span>
+        <span style="color:#f92672">}).</span><span style="color:#a6e22e">start</span><span style="color:#f92672">();</span>
 
-                    System.out.println(&quot;select 后执行&quot;);
-                }
-            }
-        }).start();
+    <span style="color:#f92672">}</span>
 
-    }
+    <span style="color:#66d9ef">public</span> <span style="color:#66d9ef">void</span> <span style="color:#a6e22e">wakeup</span><span style="color:#f92672">()</span> <span style="color:#f92672">{</span>
+        System<span style="color:#f92672">.</span><span style="color:#a6e22e">out</span><span style="color:#f92672">.</span><span style="color:#a6e22e">println</span><span style="color:#f92672">(</span><span style="color:#e6db74">&#34;开始唤醒&#34;</span><span style="color:#f92672">);</span>
+        selector<span style="color:#f92672">.</span><span style="color:#a6e22e">wakeup</span><span style="color:#f92672">();</span>
+    <span style="color:#f92672">}</span>
 
-    public void wakeup() {
-        System.out.println(&quot;开始唤醒&quot;);
-        selector.wakeup();
-    }
+    <span style="color:#66d9ef">public</span> <span style="color:#66d9ef">static</span> <span style="color:#66d9ef">void</span> <span style="color:#a6e22e">main</span><span style="color:#f92672">(</span>String<span style="color:#f92672">[]</span> args<span style="color:#f92672">)</span> <span style="color:#66d9ef">throws</span> IOException<span style="color:#f92672">,</span> InterruptedException <span style="color:#f92672">{</span>
+        <span style="color:#66d9ef">final</span> NioWakeUp app <span style="color:#f92672">=</span> <span style="color:#66d9ef">new</span> NioWakeUp<span style="color:#f92672">();</span>
+        app<span style="color:#f92672">.</span><span style="color:#a6e22e">start</span><span style="color:#f92672">();</span>
 
-    public static void main(String[] args) throws IOException, InterruptedException {
-        final NioWakeUp app = new NioWakeUp();
-        app.start();
+        Thread thread <span style="color:#f92672">=</span> <span style="color:#66d9ef">new</span> Thread<span style="color:#f92672">(</span><span style="color:#66d9ef">new</span> Runnable<span style="color:#f92672">()</span> <span style="color:#f92672">{</span>
+            <span style="color:#a6e22e">@Override</span>
+            <span style="color:#66d9ef">public</span> <span style="color:#66d9ef">void</span> <span style="color:#a6e22e">run</span><span style="color:#f92672">()</span> <span style="color:#f92672">{</span>
+                <span style="color:#66d9ef">while</span> <span style="color:#f92672">(</span><span style="color:#66d9ef">true</span><span style="color:#f92672">)</span> <span style="color:#f92672">{</span>
+                    <span style="color:#66d9ef">try</span> <span style="color:#f92672">{</span>
+                        TimeUnit<span style="color:#f92672">.</span><span style="color:#a6e22e">SECONDS</span><span style="color:#f92672">.</span><span style="color:#a6e22e">sleep</span><span style="color:#f92672">(</span>3<span style="color:#f92672">);</span>
+                    <span style="color:#f92672">}</span> <span style="color:#66d9ef">catch</span> <span style="color:#f92672">(</span>InterruptedException e<span style="color:#f92672">)</span> <span style="color:#f92672">{</span>
+                        e<span style="color:#f92672">.</span><span style="color:#a6e22e">printStackTrace</span><span style="color:#f92672">();</span>
+                    <span style="color:#f92672">}</span>
+                    app<span style="color:#f92672">.</span><span style="color:#a6e22e">wakeup</span><span style="color:#f92672">();</span>
+                <span style="color:#f92672">}</span>
+            <span style="color:#f92672">}</span>
+        <span style="color:#f92672">});</span>
 
-        Thread thread = new Thread(new Runnable() {
-            @Override
-            public void run() {
-                while (true) {
-                    try {
-                        TimeUnit.SECONDS.sleep(3);
-                    } catch (InterruptedException e) {
-                        e.printStackTrace();
-                    }
-                    app.wakeup();
-                }
-            }
-        });
+        thread<span style="color:#f92672">.</span><span style="color:#a6e22e">start</span><span style="color:#f92672">();</span>
 
-        thread.start();
+        thread<span style="color:#f92672">.</span><span style="color:#a6e22e">join</span><span style="color:#f92672">();</span>
+    <span style="color:#f92672">}</span>
 
-        thread.join();
-    }
-
-}
-</code></pre>
-
-<h4 id="运行结果">运行结果</h4>
-
-<pre><code class="language-java">select-----&gt;前执行
+<span style="color:#f92672">}</span>
+</code></pre></div><h4 id="运行结果">运行结果</h4>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-java" data-lang="java">select<span style="color:#f92672">-----&gt;</span>前执行
 开始唤醒
-select-----&gt;后执行
+select<span style="color:#f92672">-----&gt;</span>后执行
 
-select-----&gt;前执行
+select<span style="color:#f92672">-----&gt;</span>前执行
 开始唤醒
-select-----&gt;后执行
+select<span style="color:#f92672">-----&gt;</span>后执行
 
-select-----&gt;前执行
+select<span style="color:#f92672">-----&gt;</span>前执行
 开始唤醒
-select-----&gt;后执行
+select<span style="color:#f92672">-----&gt;</span>后执行
 
-select-----&gt;前执行
+select<span style="color:#f92672">-----&gt;</span>前执行
 开始唤醒
-select-----&gt;后执行
+select<span style="color:#f92672">-----&gt;</span>后执行
 
-select-----&gt;前执行
+select<span style="color:#f92672">-----&gt;</span>前执行
 开始唤醒
-select-----&gt;后执行
+select<span style="color:#f92672">-----&gt;</span>后执行
 
-select-----&gt;前执行
+select<span style="color:#f92672">-----&gt;</span>前执行
 开始唤醒
-select-----&gt;后执行
+select<span style="color:#f92672">-----&gt;</span>后执行
 
-select-----&gt;前执行
-</code></pre>
-
-<h1 id="nio-vs-io">NIO vs IO</h1>
-
+select<span style="color:#f92672">-----&gt;</span>前执行
+</code></pre></div><h1 id="nio-vs-io">NIO vs IO</h1>
 <p>学习了NIO之后我们都会有这样一个疑问：到底什么时候该用NIO，什么时候该用传统的I/O呢？</p>
-
 <p>其实了解他们的特性后，答案还是比较明确的，NIO擅长1个线程管理多条连接，节约系统资源，但是如果每条连接要传输的数据量很大的话，因为是同步I/O，会导致整体的响应速度很慢；而传统I/O为每一条连接创建一个线程，能充分利用处理器并行处理的能力，但是如果连接数量太多，内存资源会很紧张。</p>
-
 <p>总结就是：连接数多数据量小用NIO，连接数少用I/O（写起来也简单- -）。</p>
-
-<h2 id="io是面向流的-nio是面向缓冲区的">IO是面向流的，NIO是面向缓冲区的</h2>
-
+<h2 id="io是面向流的nio是面向缓冲区的">IO是面向流的，NIO是面向缓冲区的</h2>
 <ol>
-<li><p>Java IO面向流意味着每次从流中读一个或多个字节，直至读取所有字节，它们没有被缓存在任何地方；</p></li>
-
-<li><p>NIO则能前后移动流中的数据，因为是面向缓冲区的</p></li>
+<li>
+<p>Java IO面向流意味着每次从流中读一个或多个字节，直至读取所有字节，它们没有被缓存在任何地方；</p>
+</li>
+<li>
+<p>NIO则能前后移动流中的数据，因为是面向缓冲区的</p>
+</li>
 </ol>
-
-<h2 id="io流是阻塞的-nio流是不阻塞的">IO流是阻塞的，NIO流是不阻塞的</h2>
-
+<h2 id="io流是阻塞的nio流是不阻塞的">IO流是阻塞的，NIO流是不阻塞的</h2>
 <ol>
-<li><p>Java IO的各种流是阻塞的。这意味着，当一个线程调用read() 或 write()时，该线程被阻塞，直到有一些数据被读取，或数据完全写入。该线程在此期间不能再干任何事情了</p></li>
-
-<li><p>Java NIO的非阻塞模式，使一个线程从某通道发送请求读取数据，但是它仅能得到目前可用的数据，如果目前没有数据可用时，就什么都不会获取。NIO可让您只使用一个（或几个）单线程管理多个通道（网络连接或文件），但付出的代价是解析数据可能会比从一个阻塞流中读取数据更复杂。</p></li>
-
-<li><p>非阻塞写也是如此。一个线程请求写入一些数据到某通道，但不需要等待它完全写入，这个线程同时可以去做别的事情。</p></li>
+<li>
+<p>Java IO的各种流是阻塞的。这意味着，当一个线程调用read() 或 write()时，该线程被阻塞，直到有一些数据被读取，或数据完全写入。该线程在此期间不能再干任何事情了</p>
+</li>
+<li>
+<p>Java NIO的非阻塞模式，使一个线程从某通道发送请求读取数据，但是它仅能得到目前可用的数据，如果目前没有数据可用时，就什么都不会获取。NIO可让您只使用一个（或几个）单线程管理多个通道（网络连接或文件），但付出的代价是解析数据可能会比从一个阻塞流中读取数据更复杂。</p>
+</li>
+<li>
+<p>非阻塞写也是如此。一个线程请求写入一些数据到某通道，但不需要等待它完全写入，这个线程同时可以去做别的事情。</p>
+</li>
 </ol>
-
 <h2 id="选择器">选择器</h2>
-
 <ol>
 <li>Java NIO的选择器允许一个单独的线程来监视多个输入通道，你可以注册多个通道使用一个选择器，然后使用一个单独的线程来“选择”通道：这些通道里已经有可以处理的输入，或者选择已准备写入的通道。这种选择机制，使得一个单独的线程很容易来管理多个通道。</li>
 </ol>
-
-<p><img src="/img/401339-20171228231302459-2106552668.png" alt="401339-20171228231302459-2106552668" /></p>
-
+<p><img src="/img/401339-20171228231302459-2106552668.png" alt="401339-20171228231302459-2106552668"></p>
 <h1 id="selector-channel-buffer-关系图">Selector, Channel Buffer 关系图</h1>
-
-<p><img src="/img/Xnip2020-03-14_16-30-53.png" alt="Xnip2020-03-14_16-30-53" /></p>
-
+<p><img src="/img/Xnip2020-03-14_16-30-53.png" alt="Xnip2020-03-14_16-30-53"></p>
 <h1 id="问题">问题</h1>
-
-<h2 id="1-filechannel无法设置为非阻塞模式的原因">1.  FileChannel无法设置为非阻塞模式的原因</h2>
-
+<h2 id="1--filechannel无法设置为非阻塞模式的原因">1.  FileChannel无法设置为非阻塞模式的原因</h2>
 <p>在SelectableChannel中有configureBlocking方法，AbstractInterruptibleChannel中没有此方法，FileChannel类中也没有此方法。所以从源码的角度分析FileChannel不能切换到非阻塞模式，这就是原因。</p>
-
-<h2 id="2-selectionkey-cancel-取消读事件的监控">2.  SelectionKey.cancel(); 取消读事件的监控</h2>
-
-<p>链接：<a href="https://juejin.im/post/5da960185188257a63539646">https://juejin.im/post/5da960185188257a63539646</a></p>
-
-<p>无论通过<a href="https://docs.oracle.com/javase/8/docs/api/java/nio/channels/Channel.html#close--">channel.close()</a>还是通过<a href="https://docs.oracle.com/javase/8/docs/api/java/nio/channels/SelectionKey.html#cancel--">selectionKey.cancel()</a>来<code>取消</code>一个<code>selectionKey</code> ，这个<code>selectionKey</code>都会被立即添加到<code>selector</code>的 *<strong>cancelled-key</strong>  set* 中，但是所关联的<code>channel</code>并没有立即被<code>撤销登记</code>，直到发生下次 <strong>selection operations</strong>, 这些<code>channel</code>才被从<code>selector</code>中<code>撤销登记</code>，与此同时这些<strong>Cancelled keys</strong>才会被从这个<code>selector</code>的所有<code>selectionKey set</code>（可能是_<strong>key</strong> set_、*<strong>selected-key</strong> set*、*<strong>cancelled-key</strong> set*）中移除，但是不会影响这些集合本身。</p>
-
-<h2 id="3-socketchannel-register-和key-interestops-之间的区别">3.  SocketChannel.register()和key.interestOps()之间的区别</h2>
-
+<h2 id="2--selectionkeycancel-取消读事件的监控">2.  SelectionKey.cancel(); 取消读事件的监控</h2>
+<p>链接：https://juejin.im/post/5da960185188257a63539646</p>
+<p>无论通过<a href="https://docs.oracle.com/javase/8/docs/api/java/nio/channels/Channel.html#close--">channel.close()</a>还是通过<a href="https://docs.oracle.com/javase/8/docs/api/java/nio/channels/SelectionKey.html#cancel--">selectionKey.cancel()</a>来<code>取消</code>一个<code>selectionKey</code> ，这个<code>selectionKey</code>都会被立即添加到<code>selector</code>的 <em><strong>cancelled-key</strong>  set</em> 中，但是所关联的<code>channel</code>并没有立即被<code>撤销登记</code>，直到发生下次 <strong>selection operations</strong>, 这些<code>channel</code>才被从<code>selector</code>中<code>撤销登记</code>，与此同时这些<strong>Cancelled keys</strong>才会被从这个<code>selector</code>的所有<code>selectionKey set</code>（可能是_<strong>key</strong> set_、<em><strong>selected-key</strong> set</em>、<em><strong>cancelled-key</strong> set</em>）中移除，但是不会影响这些集合本身。</p>
+<h2 id="3--socketchannelregister和keyinterestops之间的区别">3.  SocketChannel.register()和key.interestOps()之间的区别</h2>
 <p>在<a href="https://stackoom.com/link/aHR0cHM6Ly9zdGFja292ZXJmbG93LmNvbS9xdWVzdGlvbnMvMTc1NTY5MDEvamF2YS1oaWdoLWxvYWQtbmlvLXRjcC1zZXJ2ZXI=">这个SO问题中</a>找到的echo NIO服务器<a href="https://stackoom.com/link/aHR0cHM6Ly9zdGFja292ZXJmbG93LmNvbS9xdWVzdGlvbnMvMTc1NTY5MDEvamF2YS1oaWdoLWxvYWQtbmlvLXRjcC1zZXJ2ZXI=">中</a> ，对于每个接受的密钥，都会调用一个寄存器来进行读操作。 然后，一旦读取消息，就再次调用寄存器以进行写操作。 但是，在写入消息之后，不是注册另一个读取操作，而是调用<code>key.interestOps(SelectionKey.OP_READ)</code> 。为什么用这个了？</p>
-
-<p>register()<code>将丢失或更改密钥附件，并可能完全返回一个新的</code>SelectionKey<code>：未指定。 在这种情况下使用</code>interestOps()` 。</p>
-
-<h2 id="4-完全理解nio-selector">4.  完全理解NIO Selector</h2>
-
-<p>好文：<a href="https://juejin.im/post/5da960185188257a63539646">https://juejin.im/post/5da960185188257a63539646</a></p>
-
+<p>register()<code>将丢失或更改密钥附件，并可能完全返回一个新的</code>SelectionKey<code> ：未指定。 在这种情况下使用</code>interestOps()` 。</p>
+<h2 id="4--完全理解nio-selector">4.  完全理解NIO Selector</h2>
+<p>好文：https://juejin.im/post/5da960185188257a63539646</p>
 <h2 id="5-bio和nio对比">5. BIO和NIO对比</h2>
-
-<p><img src="/img/Xnip2020-03-14_11-12-37.png" alt="Xnip2020-03-14_11-12-37" /></p>
-
+<p><img src="/img/Xnip2020-03-14_11-12-37.png" alt="Xnip2020-03-14_11-12-37"></p>
 <p>也可以多个线程来接受。</p>
-
-<p><img src="/img/Xnip2020-03-14_11-13-30.png" alt="Xnip2020-03-14_11-13-30" /></p>
-
-<p><img src="/img/Xnip2020-03-14_16-22-56.png" alt="Xnip2020-03-14_16-22-56" /></p>
-
-<p><img src="/img/Xnip2020-03-16_12-12-17.png" alt="Xnip2020-03-16_12-12-17" /></p>
-
-<h2 id="6-如何理解他是非阻塞和阻塞的关系">6.  如何理解他是非阻塞和阻塞的关系</h2>
-
-<p><img src="/img/Xnip2020-03-16_10-17-05.png.png" alt="Xnip2020-03-16_10-17-05.png" /></p>
-
+<p><img src="/img/Xnip2020-03-14_11-13-30.png" alt="Xnip2020-03-14_11-13-30"></p>
+<p><img src="/img/Xnip2020-03-14_16-22-56.png" alt="Xnip2020-03-14_16-22-56"></p>
+<p><img src="/img/Xnip2020-03-16_12-12-17.png" alt="Xnip2020-03-16_12-12-17"></p>
+<h2 id="6--如何理解他是非阻塞和阻塞的关系">6.  如何理解他是非阻塞和阻塞的关系</h2>
+<p><img src="/img/Xnip2020-03-16_10-17-05.png.png" alt="Xnip2020-03-16_10-17-05.png"></p>
 <p>可以看到，等1秒后，就不等了，可以做其他的事情去了。</p>
 
 
@@ -1102,82 +862,60 @@ select-----&gt;前执行
                     </h4>
                     <ul class="catalog-body"></ul>
                     <nav id="TableOfContents">
-<ul>
-<li><a href="#传统io">传统IO</a></li>
-<li><a href="#概述">概述</a></li>
-<li><a href="#形象比喻nio模式">形象比喻NIO模式</a></li>
-<li><a href="#为什么用">为什么用</a>
-<ul>
-<li><a href="#多路复用模型">多路复用模型</a></li>
-</ul></li>
-<li><a href="#三个核心部分组成">三个核心部分组成</a>
-<ul>
-<li><a href="#buffer缓冲区">Buffer缓冲区</a>
-<ul>
-<li><a href="#buffer缓冲区和channel管道">buffer缓冲区和Channel管道</a></li>
-<li><a href="#buffer缓冲区核心要点">buffer缓冲区核心要点</a>
-<ul>
-<li><a href="#4个核心变量">4个核心变量</a>
-<ul>
-<li><a href="#1-容量capacity">1.  容量Capacity</a></li>
-<li><a href="#2-上界limit">2.  上界Limit</a></li>
-<li><a href="#3-位置position">3.  位置Position</a></li>
-<li><a href="#4-标记mark">4.  标记Mark</a></li>
-</ul></li>
-</ul></li>
-<li><a href="#buffer核心变量值的变化">buffer核心变量值的变化</a></li>
-<li><a href="#缓存区拿数据">缓存区拿数据</a></li>
-<li><a href="#buffer的使用">Buffer的使用</a></li>
-<li><a href="#常用方法">常用方法</a></li>
-</ul></li>
-<li><a href="#channel通道">Channel通道</a>
-<ul>
-<li><a href="#概述-1">概述</a></li>
-<li><a href="#filechannel">FileChannel</a></li>
-<li><a href="#使用通道">使用通道</a></li>
-<li><a href="#关闭通道">关闭通道</a></li>
-<li><a href="#发散-聚集">发散、聚集</a></li>
-<li><a href="#socket通道">Socket通道</a>
-<ul>
-<li><a href="#serversocketchannel">ServerSocketChannel</a></li>
-<li><a href="#socketchannel">SocketChannel</a></li>
-<li><a href="#datagramchannel">DatagramChannel</a></li>
-</ul></li>
-<li><a href="#常用方法-1">常用方法</a></li>
-</ul></li>
-<li><a href="#selector选择器">Selector选择器</a>
-<ul>
-<li><a href="#概述-2">概述</a></li>
-<li><a href="#为什么要用selector">为什么要用Selector</a></li>
-<li><a href="#常用方法-2">常用方法</a></li>
-<li><a href="#使用">使用</a></li>
-<li><a href="#四种注册事件">四种注册事件</a></li>
-<li><a href="#完整selector实例">完整Selector实例</a></li>
-<li><a href="#使用流程">使用流程</a></li>
-<li><a href="#selector的wakeup理解">selector的wakeup理解</a>
-<ul>
-<li><a href="#代码测试">代码测试</a></li>
-<li><a href="#运行结果">运行结果</a></li>
-</ul></li>
-</ul></li>
-</ul></li>
-<li><a href="#nio-vs-io">NIO vs IO</a>
-<ul>
-<li><a href="#io是面向流的-nio是面向缓冲区的">IO是面向流的，NIO是面向缓冲区的</a></li>
-<li><a href="#io流是阻塞的-nio流是不阻塞的">IO流是阻塞的，NIO流是不阻塞的</a></li>
-<li><a href="#选择器">选择器</a></li>
-</ul></li>
-<li><a href="#selector-channel-buffer-关系图">Selector, Channel Buffer 关系图</a></li>
-<li><a href="#问题">问题</a>
-<ul>
-<li><a href="#1-filechannel无法设置为非阻塞模式的原因">1.  FileChannel无法设置为非阻塞模式的原因</a></li>
-<li><a href="#2-selectionkey-cancel-取消读事件的监控">2.  SelectionKey.cancel(); 取消读事件的监控</a></li>
-<li><a href="#3-socketchannel-register-和key-interestops-之间的区别">3.  SocketChannel.register()和key.interestOps()之间的区别</a></li>
-<li><a href="#4-完全理解nio-selector">4.  完全理解NIO Selector</a></li>
-<li><a href="#5-bio和nio对比">5. BIO和NIO对比</a></li>
-<li><a href="#6-如何理解他是非阻塞和阻塞的关系">6.  如何理解他是非阻塞和阻塞的关系</a></li>
-</ul></li>
-</ul>
+  <ul>
+    <li><a href="#多路复用模型">多路复用模型</a></li>
+  </ul>
+
+  <ul>
+    <li><a href="#buffer缓冲区">Buffer缓冲区</a>
+      <ul>
+        <li><a href="#buffer缓冲区和channel管道">buffer缓冲区和Channel管道</a></li>
+        <li><a href="#buffer缓冲区核心要点">buffer缓冲区核心要点</a></li>
+        <li><a href="#buffer核心变量值的变化">buffer核心变量值的变化</a></li>
+        <li><a href="#缓存区拿数据">缓存区拿数据</a></li>
+        <li><a href="#buffer的使用">Buffer的使用</a></li>
+        <li><a href="#常用方法">常用方法</a></li>
+      </ul>
+    </li>
+    <li><a href="#channel通道">Channel通道</a>
+      <ul>
+        <li><a href="#概述-1">概述</a></li>
+        <li><a href="#filechannel">FileChannel</a></li>
+        <li><a href="#使用通道">使用通道</a></li>
+        <li><a href="#关闭通道">关闭通道</a></li>
+        <li><a href="#发散聚集">发散、聚集</a></li>
+        <li><a href="#socket通道">Socket通道</a></li>
+        <li><a href="#常用方法-1">常用方法</a></li>
+      </ul>
+    </li>
+    <li><a href="#selector选择器">Selector选择器</a>
+      <ul>
+        <li><a href="#概述-2">概述</a></li>
+        <li><a href="#为什么要用selector">为什么要用Selector</a></li>
+        <li><a href="#常用方法-2">常用方法</a></li>
+        <li><a href="#使用">使用</a></li>
+        <li><a href="#四种注册事件">四种注册事件</a></li>
+        <li><a href="#完整selector实例">完整Selector实例</a></li>
+        <li><a href="#使用流程">使用流程</a></li>
+        <li><a href="#selector的wakeup理解">selector的wakeup理解</a></li>
+      </ul>
+    </li>
+  </ul>
+
+  <ul>
+    <li><a href="#io是面向流的nio是面向缓冲区的">IO是面向流的，NIO是面向缓冲区的</a></li>
+    <li><a href="#io流是阻塞的nio流是不阻塞的">IO流是阻塞的，NIO流是不阻塞的</a></li>
+    <li><a href="#选择器">选择器</a></li>
+  </ul>
+
+  <ul>
+    <li><a href="#1--filechannel无法设置为非阻塞模式的原因">1.  FileChannel无法设置为非阻塞模式的原因</a></li>
+    <li><a href="#2--selectionkeycancel-取消读事件的监控">2.  SelectionKey.cancel(); 取消读事件的监控</a></li>
+    <li><a href="#3--socketchannelregister和keyinterestops之间的区别">3.  SocketChannel.register()和key.interestOps()之间的区别</a></li>
+    <li><a href="#4--完全理解nio-selector">4.  完全理解NIO Selector</a></li>
+    <li><a href="#5-bio和nio对比">5. BIO和NIO对比</a></li>
+    <li><a href="#6--如何理解他是非阻塞和阻塞的关系">6.  如何理解他是非阻塞和阻塞的关系</a></li>
+  </ul>
 </nav>
                     <br>
                     <br>
@@ -1202,9 +940,6 @@ select-----&gt;前执行
                         
                         
                         
-                        <a href="/tags/" title="">
-                            
-                        </a>
                         
                         
                         
@@ -1214,101 +949,6 @@ select-----&gt;前执行
                         
                         
                         
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        <a href="/tags/qt" title="QT">
-                            QT
-                        </a>
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        <a href="/tags/zookeeper" title="Zookeeper">
-                            Zookeeper
-                        </a>
                         
                         
                         
@@ -1348,8 +988,10 @@ select-----&gt;前执行
                         
                         
                         
-                        <a href="/tags/elasticsearch" title="elasticSearch">
-                            elasticSearch
+                        
+                        
+                        <a href="/tags/elasticsearch" title="elasticsearch">
+                            elasticsearch
                         </a>
                         
                         
@@ -1360,9 +1002,27 @@ select-----&gt;前执行
                         
                         
                         
-                        <a href="/tags/golang" title="golang">
-                            golang
-                        </a>
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
                         
                         
                         
@@ -1400,9 +1060,21 @@ select-----&gt;前执行
                         
                         
                         
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
                         <a href="/tags/jvm" title="jvm">
                             jvm
                         </a>
+                        
+                        
+                        
+                        
                         
                         
                         
@@ -1426,9 +1098,19 @@ select-----&gt;前执行
                         
                         
                         
+                        
+                        
+                        
+                        
+                        
+                        
                         <a href="/tags/mongodb" title="mongodb">
                             mongodb
                         </a>
+                        
+                        
+                        
+                        
                         
                         
                         
@@ -1439,10 +1121,6 @@ select-----&gt;前执行
                         </a>
                         
                         
-                        
-                        <a href="/tags/mycat" title="mycat">
-                            mycat
-                        </a>
                         
                         
                         
@@ -1456,9 +1134,17 @@ select-----&gt;前执行
                         
                         
                         
-                        <a href="/tags/nginx" title="nginx">
-                            nginx
-                        </a>
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
                         
                         
                         
@@ -1482,8 +1168,22 @@ select-----&gt;前执行
                         
                         
                         
+                        
+                        
                         <a href="/tags/rocketmq" title="rocketmq">
                             rocketmq
+                        </a>
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        <a href="/tags/security%E6%A1%86%E6%9E%B6%E5%AD%A6%E4%B9%A0" title="security框架学习">
+                            security框架学习
                         </a>
                         
                         
@@ -1510,17 +1210,11 @@ select-----&gt;前执行
                         
                         
                         
-                        <a href="/tags/springcloud" title="springCloud">
-                            springCloud
-                        </a>
-                        
-                        
-                        
-                        
-                        
                         <a href="/tags/springboot" title="springboot">
                             springboot
                         </a>
+                        
+                        
                         
                         
                         
@@ -1534,6 +1228,9 @@ select-----&gt;前执行
                         
                         
                         
+                        <a href="/tags/springcloud" title="springcloud">
+                            springcloud
+                        </a>
                         
                         
                         
@@ -1559,6 +1256,33 @@ select-----&gt;前执行
                         
                         
                         
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        <a href="/tags/zookeeper" title="zookeeper">
+                            zookeeper
+                        </a>
                         
                         
                         
@@ -1618,6 +1342,8 @@ select-----&gt;前执行
                         
                         
                         
+                        
+                        
                         <a href="/tags/%E5%88%86%E5%B8%83%E5%BC%8F%E7%B3%BB%E5%88%97" title="分布式系列">
                             分布式系列
                         </a>
@@ -1637,6 +1363,10 @@ select-----&gt;前执行
                         
                         
                         
+                        
+                        <a href="/tags/%E5%8D%8F%E8%AE%AE%E6%A0%88" title="协议栈">
+                            协议栈
+                        </a>
                         
                         
                         
@@ -1836,6 +1566,12 @@ select-----&gt;前执行
                         
                         
                         
+                        
+                        
+                        
+                        
+                        
+                        
                         <a href="/tags/%E7%BD%91%E7%BB%9C%E7%BC%96%E7%A8%8B" title="网络编程">
                             网络编程
                         </a>
@@ -1859,6 +1595,10 @@ select-----&gt;前执行
                         
                         
                         
+                        
+                        <a href="/tags/%E8%AE%A4%E8%AF%81%E5%92%8C%E6%8E%88%E6%9D%83" title="认证和授权">
+                            认证和授权
+                        </a>
                         
                         
                         
@@ -2029,7 +1769,7 @@ select-----&gt;前执行
                     
                 </ul>
 		<p class="copyright text-muted">
-                    Copyright &copy;  2020
+                    Copyright &copy;  2021
                     <br>
                     <a href="https://themes.gohugo.io/hugo-theme-cleanwhite">CleanWhite Hugo Theme</a> by <a href="https://zhaohuabing.com">Huabing</a> |
                     <iframe

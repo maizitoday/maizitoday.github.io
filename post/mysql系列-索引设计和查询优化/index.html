@@ -97,15 +97,15 @@
                     </li>
                     
                     <li>
-                        <a href="/categories/english">English</a>
+                        <a href="/categories/english">english</a>
                     </li>
                     
                     <li>
-                        <a href="/categories/life">Life</a>
+                        <a href="/categories/life">life</a>
                     </li>
                     
                     <li>
-                        <a href="/categories/tech">Tech</a>
+                        <a href="/categories/tech">tech</a>
                     </li>
                     
 
@@ -237,16 +237,10 @@
                 
                 
                 
-                
-
-<p>[TOC]</p>
-
-<p><strong>转载地址: &lt;<a href="https://blog.csdn.net/jack__frost/article/details/72571540">https://blog.csdn.net/jack__frost/article/details/72571540</a></strong>&gt;**</p>
-
+                <p>[TOC]</p>
+<p><strong>转载地址: <a href="https://blog.csdn.net/jack__frost/article/details/72571540**">https://blog.csdn.net/jack__frost/article/details/72571540**</a></strong></p>
 <h1 id="索引设计优化">索引设计优化</h1>
-
 <h2 id="适合使用索引的场景">适合使用索引的场景</h2>
-
 <ol>
 <li>主键自动创建唯一索引</li>
 <li>频繁作为查询条件的字段</li>
@@ -254,9 +248,7 @@
 <li>查询中排序的字段</li>
 <li>查询中统计或分组字段</li>
 </ol>
-
 <h2 id="不适合使用索引的场景">不适合使用索引的场景</h2>
-
 <ol>
 <li>频繁更新的字段</li>
 <li>where 条件中用不到的字段</li>
@@ -264,378 +256,203 @@
 <li>经常增删改的表</li>
 <li>字段的值的差异性不大或重复性高</li>
 </ol>
-
 <h2 id="索引建立的几大原则">索引建立的几大原则</h2>
-
 <h4 id="1-最左前缀匹配原则">1. 最左前缀匹配原则</h4>
-
 <p>非常重要的原则，mysql会一直向右匹配直到遇到范围查询(&gt;、&lt;、between、like)就停止匹配，比如a = 1 and b = 2 and c &gt; 3 and d = 4 如果建立(a,b,c,d)顺序的索引，d是用不到索引的，如果建立(a,b,d,c)的索引则都可以用到，a,b,d的顺序可以任意调整。</p>
-
 <h4 id="2-尽量选择区分度高的列作为索引">2. 尽量选择区分度高的列作为索引</h4>
-
 <p>表示字段不重复的比例，比例越大我们扫描的记录数越少，唯一键的区分度是1，而一些状态、性别字段可能在大数据面前区分度就是0，那可能有人会问，这个比例有什么经验值吗？使用场景不同，这个值也很难确定，一般需要join的字段我们都要求是0.1以上，即平均1条扫描10条记录。</p>
-
-<h4 id="3-索引列不能参与计算-保持列-干净">3. 索引列不能参与计算，保持列“干净”</h4>
-
+<h4 id="3-索引列不能参与计算保持列干净">3. 索引列不能参与计算，保持列“干净”</h4>
 <p>比如from_unixtime(create_time) = ’2014-05-29’就不能使用到索引，原因很简单，<strong>b+树中存的都是数据表中的字段值</strong>，但进行检索时，需要把所有元素都应用函数才能比较，显然成本太大。所以语句应该写成create_time = unix_timestamp(’2014-05-29’);</p>
-
-<h4 id="4-尽量的扩展索引-不要新建索引">4. 尽量的扩展索引，不要新建索引。</h4>
-
+<h4 id="4-尽量的扩展索引不要新建索引">4. 尽量的扩展索引，不要新建索引。</h4>
 <p>比如表中已经有a的索引，现在要加(a,b)的索引，那么只需要修改原来的索引即可。</p>
-
 <h4 id="5-定义有外键的数据列一定要建立索引">5. 定义有外键的数据列一定要建立索引。</h4>
-
-<h4 id="6-对于那些查询中很少涉及的列-重复值比较多的列不要建立索引">6. 对于那些查询中很少涉及的列，重复值比较多的列不要建立索引。</h4>
-
-<h4 id="7-对于定义为text-image和bit的数据类型的列不要建立索引">7. 对于定义为text、image和bit的数据类型的列不要建立索引。</h4>
-
-<h4 id="8-对于经常存取的列避免建立索引-因为索引字段的存取都要消耗很大性能">8. 对于经常存取的列避免建立索引，因为索引字段的存取都要消耗很大性能。</h4>
-
+<h4 id="6-对于那些查询中很少涉及的列重复值比较多的列不要建立索引">6. 对于那些查询中很少涉及的列，重复值比较多的列不要建立索引。</h4>
+<h4 id="7-对于定义为textimage和bit的数据类型的列不要建立索引">7. 对于定义为text、image和bit的数据类型的列不要建立索引。</h4>
+<h4 id="8-对于经常存取的列避免建立索引因为索引字段的存取都要消耗很大性能">8. 对于经常存取的列避免建立索引，因为索引字段的存取都要消耗很大性能。</h4>
 <h2 id="索引和查询优化">索引和查询优化</h2>
-
-<h4 id="1-join-where判断和order-by排序的字段上建立索引">1.  JOIN,WHERE判断和ORDER BY排序的字段上建立索引</h4>
-
+<h4 id="1--joinwhere判断和order-by排序的字段上建立索引">1.  JOIN,WHERE判断和ORDER BY排序的字段上建立索引</h4>
 <p>一般说来，索引应建立在那些将用于JOIN,WHERE判断和ORDER BY排序的字段上。尽量不要对数据库中某个含有大量重复的值的字段建立索引。对于一个ENUM类型的字段来说，出现大量重复值是很有可能的情况。</p>
-
-<h4 id="2-避免在-where-子句中对字段进行-null-值判断">2.  避免在 where 子句中对字段进行 null 值判断</h4>
-
+<h4 id="2--避免在-where-子句中对字段进行-null-值判断">2.  避免在 where 子句中对字段进行 null 值判断</h4>
 <p>应尽量避免在 where 子句中对字段进行 null 值判断，否则将导致引擎放弃使用索引而进行<strong>全表扫描</strong>。如：</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-sql" data-lang="sql"><span style="color:#66d9ef">select</span> id <span style="color:#66d9ef">from</span> t <span style="color:#66d9ef">where</span> num <span style="color:#66d9ef">is</span> <span style="color:#66d9ef">null</span>
 
-<pre><code class="language-sql">select id from t where num is null
-
-</code></pre>
-
-<p>备注、描述、评论之类的可以设置为 NULL，其他的，最好不要使用NULL。
+</code></pre></div><p>备注、描述、评论之类的可以设置为 NULL，其他的，最好不要使用NULL。
 不要以为 NULL 不需要空间，比如：char(100) 型，在字段建立时，空间就固定了， 不管是否插入值（NULL也包含在内），都是占用 100个字符的空间的，
 如果是varchar这样的变长字段， null 不占用空间。
 可以在num上设置默认值0，确保表中num列没有null值，然后这样查询：</p>
-
-<pre><code class="language-sql">select id from t where num = 0;
-</code></pre>
-
-<h4 id="4-应尽量避免在-where-子句中使用-或-操作符-否则将引擎放弃使用索引而进行全表扫描">4.  应尽量避免在 where 子句中使用 != 或 &lt;&gt; 操作符，否则将引擎放弃使用索引而进行全表扫描。</h4>
-
-<h4 id="5-应尽量避免在-where-子句中使用-or-来连接条件">5.  应尽量避免在 where 子句中使用 or 来连接条件</h4>
-
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-sql" data-lang="sql"><span style="color:#66d9ef">select</span> id <span style="color:#66d9ef">from</span> t <span style="color:#66d9ef">where</span> num <span style="color:#f92672">=</span> <span style="color:#ae81ff">0</span>;
+</code></pre></div><h4 id="4--应尽量避免在-where-子句中使用--或--操作符否则将引擎放弃使用索引而进行全表扫描">4.  应尽量避免在 where 子句中使用 != 或 &lt;&gt; 操作符，否则将引擎放弃使用索引而进行全表扫描。</h4>
+<h4 id="5--应尽量避免在-where-子句中使用-or-来连接条件">5.  应尽量避免在 where 子句中使用 or 来连接条件</h4>
 <p>应尽量避免在 where 子句中使用 or 来连接条件，如果一个字段有索引，一个字段没有索引，将导致引擎放弃使用索引而进行全表扫描。如：</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-sql" data-lang="sql"><span style="color:#66d9ef">select</span> id <span style="color:#66d9ef">from</span> t <span style="color:#66d9ef">where</span> num<span style="color:#f92672">=</span><span style="color:#ae81ff">10</span> <span style="color:#66d9ef">or</span> Name <span style="color:#f92672">=</span> <span style="color:#e6db74">&#39;fuzhu&#39;</span>	
 
-<pre><code class="language-sql">select id from t where num=10 or Name = 'fuzhu'	
+</code></pre></div><p>可以这样查询，充分利用索引：</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-sql" data-lang="sql"><span style="color:#66d9ef">select</span> id <span style="color:#66d9ef">from</span> t <span style="color:#66d9ef">where</span> num <span style="color:#f92672">=</span> <span style="color:#ae81ff">10</span>
+<span style="color:#66d9ef">union</span> <span style="color:#66d9ef">all</span>
+<span style="color:#66d9ef">select</span> id <span style="color:#66d9ef">from</span> t <span style="color:#66d9ef">where</span> Name <span style="color:#f92672">=</span> <span style="color:#e6db74">&#39;fuzhu&#39;</span>
 
-</code></pre>
-
-<p>可以这样查询，充分利用索引：</p>
-
-<pre><code class="language-sql">select id from t where num = 10
-union all
-select id from t where Name = 'fuzhu'
-
-</code></pre>
-
-<h4 id="6-in-和-not-in-也要慎用-否则会导致全表扫描">6.  in 和 not in 也要慎用，否则会导致全表扫描。</h4>
-
+</code></pre></div><h4 id="6--in-和-not-in-也要慎用否则会导致全表扫描">6.  in 和 not in 也要慎用，否则会导致全表扫描。</h4>
 <p>而且负向查询（not , not in, not like, &lt;&gt;, != ,!&gt;,!&lt; ） 不会使用索引</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-sql" data-lang="sql"><span style="color:#66d9ef">select</span> id <span style="color:#66d9ef">from</span> t <span style="color:#66d9ef">where</span> num <span style="color:#66d9ef">in</span>(<span style="color:#ae81ff">1</span>,<span style="color:#ae81ff">2</span>,<span style="color:#ae81ff">3</span>)
 
-<pre><code class="language-sql">select id from t where num in(1,2,3)
+</code></pre></div><p>对于连续的数值，能用 between 就不要用 in 了：</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-sql" data-lang="sql"><span style="color:#66d9ef">select</span> id <span style="color:#66d9ef">from</span> t <span style="color:#66d9ef">where</span> num <span style="color:#66d9ef">between</span> <span style="color:#ae81ff">1</span> <span style="color:#66d9ef">and</span> <span style="color:#ae81ff">3</span>
 
-</code></pre>
+</code></pre></div><p>很多时候用 exists 代替 in 是一个好的选择，<strong>当然exists也不跑索引</strong>。</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-sql" data-lang="sql"><span style="color:#66d9ef">select</span> num <span style="color:#66d9ef">from</span> a <span style="color:#66d9ef">where</span> num <span style="color:#66d9ef">in</span>(<span style="color:#66d9ef">select</span> num <span style="color:#66d9ef">from</span> b)
 
-<p>对于连续的数值，能用 between 就不要用 in 了：</p>
+</code></pre></div><h4 id="7--aaa模糊查询也将导致全表扫描">7.  %aaa%”模糊查询也将导致全表扫描</h4>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-sql" data-lang="sql"><span style="color:#66d9ef">select</span> id <span style="color:#66d9ef">from</span> t <span style="color:#66d9ef">where</span> name <span style="color:#66d9ef">like</span> <span style="color:#960050;background-color:#1e0010">‘</span><span style="color:#f92672">%</span>abc<span style="color:#f92672">%</span><span style="color:#960050;background-color:#1e0010">’</span>
 
-<pre><code class="language-sql">select id from t where num between 1 and 3
-
-</code></pre>
-
-<p>很多时候用 exists 代替 in 是一个好的选择，<strong>当然exists也不跑索引</strong>。</p>
-
-<pre><code class="language-sql">select num from a where num in(select num from b)
-
-</code></pre>
-
-<h4 id="7-aaa-模糊查询也将导致全表扫描">7.  %aaa%”模糊查询也将导致全表扫描</h4>
-
-<pre><code class="language-sql">select id from t where name like ‘%abc%’
-
-</code></pre>
-
-<p>一般情况下不鼓励使用like操作，如果非使用不可，如何使用也是一个问题。like “%aaa%” 不会使用索引，而like “aaa%”可以使用索引。<strong>若要提高效率，可以考虑全文检索。</strong></p>
-
-<h4 id="a-like-keyword-索引失效-使用全表扫描">a. like %keyword 索引失效，使用全表扫描。</h4>
-
+</code></pre></div><p>一般情况下不鼓励使用like操作，如果非使用不可，如何使用也是一个问题。like “%aaa%” 不会使用索引，而like “aaa%”可以使用索引。<strong>若要提高效率，可以考虑全文检索。</strong></p>
+<h4 id="a-like-keyword-索引失效使用全表扫描">a. like %keyword 索引失效，使用全表扫描。</h4>
 <h4 id="b-like-keyword-索引有效">b. like keyword% 索引有效。</h4>
-
 <h4 id="c-like-keyword-索引失效">c. like %keyword% 索引失效，</h4>
-
-<h4 id="8-如果在-where-子句中使用参数-也会导致全表扫描">8.  如果在 where 子句中使用参数，也会导致全表扫描。</h4>
-
+<h4 id="8--如果在-where-子句中使用参数也会导致全表扫描">8.  如果在 where 子句中使用参数，也会导致全表扫描。</h4>
 <p>因为SQL只有在运行时才会解析局部变量，但优化程序不能将访问计划的选择推迟到运行时；
 它必须在编译时进行选择。然 而，如果在编译时建立访问计划，变量的值还是未知的，因而无法作为索引选择的输入项。如下面语句将进行全表扫描：</p>
-
-<pre><code class="language-sql">select id from t where num = @num
-</code></pre>
-
-<p>可以改为强制查询使用索引：</p>
-
-<pre><code class="language-sql"> select id from t with(index(索引名)) where num = @num； 
-</code></pre>
-
-<h4 id="8-应尽量避免在-where-子句中对字段进行表达式操作">8. 应尽量避免在 where 子句中对字段进行表达式操作，</h4>
-
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-sql" data-lang="sql"><span style="color:#66d9ef">select</span> id <span style="color:#66d9ef">from</span> t <span style="color:#66d9ef">where</span> num <span style="color:#f92672">=</span> <span style="color:#f92672">@</span>num
+</code></pre></div><p>可以改为强制查询使用索引：</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-sql" data-lang="sql"> <span style="color:#66d9ef">select</span> id <span style="color:#66d9ef">from</span> t <span style="color:#66d9ef">with</span>(<span style="color:#66d9ef">index</span>(<span style="color:#960050;background-color:#1e0010">索引名</span>)) <span style="color:#66d9ef">where</span> num <span style="color:#f92672">=</span> <span style="color:#f92672">@</span>num<span style="color:#960050;background-color:#1e0010">；</span> 
+</code></pre></div><h4 id="8-应尽量避免在-where-子句中对字段进行表达式操作">8. 应尽量避免在 where 子句中对字段进行表达式操作，</h4>
 <p>这将导致引擎放弃使用索引而进行全表扫描。如：</p>
-
-<pre><code class="language-sql">select id from t where num/2 = 100
-</code></pre>
-
-<p>可以改为:</p>
-
-<pre><code class="language-sql">select id from t where num = 100*2；
-</code></pre>
-
-<h4 id="9-应尽量避免在where子句中对字段进行函数操作">9.  应尽量避免在where子句中对字段进行函数操作。</h4>
-
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-sql" data-lang="sql"><span style="color:#66d9ef">select</span> id <span style="color:#66d9ef">from</span> t <span style="color:#66d9ef">where</span> num<span style="color:#f92672">/</span><span style="color:#ae81ff">2</span> <span style="color:#f92672">=</span> <span style="color:#ae81ff">100</span>
+</code></pre></div><p>可以改为:</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-sql" data-lang="sql"><span style="color:#66d9ef">select</span> id <span style="color:#66d9ef">from</span> t <span style="color:#66d9ef">where</span> num <span style="color:#f92672">=</span> <span style="color:#ae81ff">100</span><span style="color:#f92672">*</span><span style="color:#ae81ff">2</span><span style="color:#960050;background-color:#1e0010">；</span>
+</code></pre></div><h4 id="9--应尽量避免在where子句中对字段进行函数操作">9.  应尽量避免在where子句中对字段进行函数操作。</h4>
 <p>这将导致引擎放弃使用索引而进行全表扫描</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-sql" data-lang="sql"><span style="color:#66d9ef">select</span> id <span style="color:#66d9ef">from</span> t <span style="color:#66d9ef">where</span> <span style="color:#66d9ef">substring</span>(name,<span style="color:#ae81ff">1</span>,<span style="color:#ae81ff">3</span>) <span style="color:#f92672">=</span> <span style="color:#960050;background-color:#1e0010">’</span>abc<span style="color:#960050;background-color:#1e0010">’</span>       <span style="color:#f92672">//</span>name以abc开头的id
+<span style="color:#66d9ef">select</span> id <span style="color:#66d9ef">from</span> t <span style="color:#66d9ef">where</span> datediff(<span style="color:#66d9ef">day</span>,createdate,<span style="color:#960050;background-color:#1e0010">’</span><span style="color:#ae81ff">2005</span><span style="color:#f92672">-</span><span style="color:#ae81ff">11</span><span style="color:#f92672">-</span><span style="color:#ae81ff">30</span><span style="color:#960050;background-color:#1e0010">′</span>) <span style="color:#f92672">=</span> <span style="color:#ae81ff">0</span>  <span style="color:#f92672">-</span><span style="color:#960050;background-color:#1e0010">–‘</span><span style="color:#ae81ff">2005</span><span style="color:#f92672">-</span><span style="color:#ae81ff">11</span><span style="color:#f92672">-</span><span style="color:#ae81ff">30</span><span style="color:#960050;background-color:#1e0010">’</span>    <span style="color:#f92672">//</span><span style="color:#960050;background-color:#1e0010">生成的</span>id
 
-<pre><code class="language-sql">select id from t where substring(name,1,3) = ’abc’       //name以abc开头的id
-select id from t where datediff(day,createdate,’2005-11-30′) = 0  -–‘2005-11-30’    //生成的id
-
-</code></pre>
-
-<p><strong>应改为:</strong></p>
-
-<pre><code class="language-sql">select id from t where name like 'abc%'
-select id from t where createdate &gt;= '2005-11-30' and createdate &lt; '2005-12-1'
-</code></pre>
-
-<h4 id="10-where-子句中的-左边进行函数-算术运算或其他表达式运算无法正确使用索引">10.  where 子句中的“=”左边进行函数、算术运算或其他表达式运算无法正确使用索引。</h4>
-
-<h4 id="11-索引字段作为条件时-如果该索引是多列索引-需要注意">11.  索引字段作为条件时，如果该索引是多列索引，需要注意</h4>
-
+</code></pre></div><p><strong>应改为:</strong></p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-sql" data-lang="sql"><span style="color:#66d9ef">select</span> id <span style="color:#66d9ef">from</span> t <span style="color:#66d9ef">where</span> name <span style="color:#66d9ef">like</span> <span style="color:#e6db74">&#39;abc%&#39;</span>
+<span style="color:#66d9ef">select</span> id <span style="color:#66d9ef">from</span> t <span style="color:#66d9ef">where</span> createdate <span style="color:#f92672">&gt;=</span> <span style="color:#e6db74">&#39;2005-11-30&#39;</span> <span style="color:#66d9ef">and</span> createdate <span style="color:#f92672">&lt;</span> <span style="color:#e6db74">&#39;2005-12-1&#39;</span>
+</code></pre></div><h4 id="10--where-子句中的左边进行函数算术运算或其他表达式运算无法正确使用索引">10.  where 子句中的“=”左边进行函数、算术运算或其他表达式运算无法正确使用索引。</h4>
+<h4 id="11--索引字段作为条件时如果该索引是多列索引需要注意">11.  索引字段作为条件时，如果该索引是多列索引，需要注意</h4>
 <p>在使用索引字段作为条件时，如果该索引是复合索引（多列索引），那么必须使用到该索引中的第一个字段作为条件时才能保证系统使用该索引，否则该索引将不会被使用，并且应尽可能的让字段顺序与索引顺序相一致。</p>
-
-<h4 id="11-select-count-from-table-全表扫描">11. select count(*) from table；全表扫描</h4>
-
+<h4 id="11-select-count-from-table全表扫描">11. select count(*) from table；全表扫描</h4>
 <p>这样不带任何条件的count会引起全表扫描，并且没有任何业务意义，是一定要杜绝的；</p>
-
-<h4 id="12-索引并不是越多越好">12.  索引并不是越多越好</h4>
-
+<h4 id="12--索引并不是越多越好">12.  索引并不是越多越好</h4>
 <p>索引固然可以提高相应的 select 的效率，但同时也降低了 insert 及 update 的效率，<strong>因为 insert 或 update 时有可能会重建索引</strong>，所以怎样建索引需要慎重考虑，视具体情况而定。<strong>一个表的索引数最好不要超过6个</strong>，若太多则应考虑一些不常使用到的列上建的索引是否有必要。</p>
-
-<h4 id="13-尽量避免向客户端返回大数据量-若数据量过大-应该考虑相应需求是否合理">13.  尽量避免向客户端返回大数据量，若数据量过大，应该考虑相应需求是否合理</h4>
-
-<h4 id="14-尽量使用数字型字段">14.  尽量使用数字型字段</h4>
-
+<h4 id="13--尽量避免向客户端返回大数据量若数据量过大应该考虑相应需求是否合理">13.  尽量避免向客户端返回大数据量，若数据量过大，应该考虑相应需求是否合理</h4>
+<h4 id="14--尽量使用数字型字段">14.  尽量使用数字型字段</h4>
 <p>尽量使用数字型字段，若只含数值信息的字段尽量不要设计为字符型，这会降低查询和连接的性能，并会增加存储开销。</p>
-
 <p>这是因为引擎在处理查询和连 接时会逐个比较字符串中每一个字符，而对于数字型而言只需要比较一次就够了；</p>
-
-<h4 id="15-任何地方都不要使用-select-from-t">15. 任何地方都不要使用 select * from t ，</h4>
-
+<h4 id="15-任何地方都不要使用-select--from-t-">15. 任何地方都不要使用 select * from t ，</h4>
 <p>用具体的字段列表代替“*”，不要返回用不到的任何字段；</p>
-
-<h4 id="16-尽量避免使用游标-因为游标的效率较差">16. 尽量避免使用游标，因为游标的效率较差</h4>
-
+<h4 id="16-尽量避免使用游标因为游标的效率较差">16. 尽量避免使用游标，因为游标的效率较差</h4>
 <p>如果游标操作的数据超过1万行，那么就应该考虑改写；</p>
-
 <h4 id="17-优化limit">17. 优化limit</h4>
-
 <p>比如：</p>
-
-<pre><code class="language-sql">select id from t order by id limit 99999,10
-</code></pre>
-
-<p>原语句虽然使用了id索引，但是相当于从第一行定位到99999行再去扫描后10行，相当于扫描全表
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-sql" data-lang="sql"><span style="color:#66d9ef">select</span> id <span style="color:#66d9ef">from</span> t <span style="color:#66d9ef">order</span> <span style="color:#66d9ef">by</span> id <span style="color:#66d9ef">limit</span> <span style="color:#ae81ff">99999</span>,<span style="color:#ae81ff">10</span>
+</code></pre></div><p>原语句虽然使用了id索引，但是相当于从第一行定位到99999行再去扫描后10行，相当于扫描全表
 如果改为</p>
-
-<pre><code class="language-sql">select id from t where id&gt;=100000 order by id limit 10
-</code></pre>
-
-<p>则直接定位到100000查找</p>
-
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-sql" data-lang="sql"><span style="color:#66d9ef">select</span> id <span style="color:#66d9ef">from</span> t <span style="color:#66d9ef">where</span> id<span style="color:#f92672">&gt;=</span><span style="color:#ae81ff">100000</span> <span style="color:#66d9ef">order</span> <span style="color:#66d9ef">by</span> id <span style="color:#66d9ef">limit</span> <span style="color:#ae81ff">10</span>
+</code></pre></div><p>则直接定位到100000查找</p>
 <h4 id="18-利用limit-1取得唯一行">18. 利用LIMIT 1取得唯一行</h4>
-
 <p>当你要查询一张表是，你知道自己只需要看一行。在这种情况下，增加一个LIMIT 1会令你的查询更加有效。</p>
-
 <p>这样数据库引擎发现只有1后将停止扫描，而不是去扫描整个表或索引。</p>
-
 <p>不过如果主键做了索引后，直接查询 id = 1 ，这种形式也是很快的。</p>
-
-<h4 id="19-及-操作">19. &lt;及&gt;操作</h4>
-
+<h4 id="19-及操作">19. &lt;及&gt;操作</h4>
 <p>大于或小于一般情况不用调整，因为它有索引就会采用索引查找，但有的情况下可以对它进行优化。如一个表有100万记录，那么执行&gt;2与&gt;=3的效果就有很大区别了。</p>
-
-<pre><code class="language-sql">（低效）select * from [emp] where [deptno]&gt;2
-（高效）select * from [emp] where [deptno]&gt;=3
-</code></pre>
-
-<h4 id="20-在join表的时候使用相当类型的例-并将其索引">20. 在Join表的时候使用相当类型的例，并将其索引</h4>
-
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-sql" data-lang="sql"><span style="color:#960050;background-color:#1e0010">（低效）</span><span style="color:#66d9ef">select</span> <span style="color:#f92672">*</span> <span style="color:#66d9ef">from</span> [emp] <span style="color:#66d9ef">where</span> [deptno]<span style="color:#f92672">&gt;</span><span style="color:#ae81ff">2</span>
+<span style="color:#960050;background-color:#1e0010">（高效）</span><span style="color:#66d9ef">select</span> <span style="color:#f92672">*</span> <span style="color:#66d9ef">from</span> [emp] <span style="color:#66d9ef">where</span> [deptno]<span style="color:#f92672">&gt;=</span><span style="color:#ae81ff">3</span>
+</code></pre></div><h4 id="20-在join表的时候使用相当类型的例并将其索引">20. 在Join表的时候使用相当类型的例，并将其索引</h4>
 <p>如果你的应用程序有很多 JOIN 查询，你应该确认两个表中Join的字段是被建过索引的。这样，MySQL内部会启动为你优化Join的SQL语句的机制。而且，这些被用来Join的字段，应该是相同的类型的。</p>
-
 <p>例如：如果你要把 DECIMAL 字段和一个 INT 字段Join在一起，MySQL就无法使用它们的索引。对于那些STRING类型，还需要有相同的字符集才行。（两个表的字符集有可能不一样）</p>
-
-<pre><code class="language-sql">SELECT company_name FROM users
-  LEFT JOIN companies ON (users.state = companies.state)
-   WHERE users.id = $user_id&quot;
-</code></pre>
-
-<p><strong>两个 state 字段应该是被建过索引的，而且应该是相当的类型，相同的字符集</strong></p>
-
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-sql" data-lang="sql"><span style="color:#66d9ef">SELECT</span> company_name <span style="color:#66d9ef">FROM</span> users
+  <span style="color:#66d9ef">LEFT</span> <span style="color:#66d9ef">JOIN</span> companies <span style="color:#66d9ef">ON</span> (users.<span style="color:#66d9ef">state</span> <span style="color:#f92672">=</span> companies.<span style="color:#66d9ef">state</span>)
+   <span style="color:#66d9ef">WHERE</span> users.id <span style="color:#f92672">=</span> <span style="color:#960050;background-color:#1e0010">$</span>user_id<span style="color:#e6db74">&#34;
+</span></code></pre></div><p><strong>两个 state 字段应该是被建过索引的，而且应该是相当的类型，相同的字符集</strong></p>
 <h4 id="21-使用分页语句优化">21. 使用分页语句优化</h4>
-
 <p>limit start , count 或者条件 where子句。有什么可限制的条件尽量加上，查一条就limit一条。做到不多拿不乱拿。对limit的使用再优化，利用自增主键，避免offset的使用（演示在积分表score，商品表设计得不太好），约是上面方法的1/3时间。</p>
-
-<pre><code class="language-sql">select * from school.student limit 0,1;  
-</code></pre>
-
-<pre><code class="language-sql">select * from school.student where id &gt; 1 limit 2; 
-</code></pre>
-
-<h4 id="22-如果是有序的查询-可使用-order-by">22.  如果是有序的查询，可使用<strong>ORDER BY</strong></h4>
-
-<pre><code class="language-sql">select * from score  WHERE id&gt;0  ORDER BY score ASC  LIMIT 10000;
-</code></pre>
-
-<h4 id="23-开启查询缓存">23. 开启查询缓存</h4>
-
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-sql" data-lang="sql"><span style="color:#66d9ef">select</span> <span style="color:#f92672">*</span> <span style="color:#66d9ef">from</span> school.student <span style="color:#66d9ef">limit</span> <span style="color:#ae81ff">0</span>,<span style="color:#ae81ff">1</span>;  
+</code></pre></div><div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-sql" data-lang="sql"><span style="color:#66d9ef">select</span> <span style="color:#f92672">*</span> <span style="color:#66d9ef">from</span> school.student <span style="color:#66d9ef">where</span> id <span style="color:#f92672">&gt;</span> <span style="color:#ae81ff">1</span> <span style="color:#66d9ef">limit</span> <span style="color:#ae81ff">2</span>; 
+</code></pre></div><h4 id="22--如果是有序的查询可使用order-by">22.  如果是有序的查询，可使用<strong>ORDER BY</strong></h4>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-sql" data-lang="sql"><span style="color:#66d9ef">select</span> <span style="color:#f92672">*</span> <span style="color:#66d9ef">from</span> score  <span style="color:#66d9ef">WHERE</span> id<span style="color:#f92672">&gt;</span><span style="color:#ae81ff">0</span>  <span style="color:#66d9ef">ORDER</span> <span style="color:#66d9ef">BY</span> score <span style="color:#66d9ef">ASC</span>  <span style="color:#66d9ef">LIMIT</span> <span style="color:#ae81ff">10000</span>;
+</code></pre></div><h4 id="23-开启查询缓存">23. 开启查询缓存</h4>
 <p>大多数的MySQL服务器都开启了查询缓存。这是提高性最有效的方法之一。当有很多相同的查询被执行了多次的时候，这些查询结果会被放到一个缓存中，这样，后续的相同的查询就不用操作表而直接访问缓存结果了。</p>
-
 <p><strong>命中缓存条件</strong></p>
-
 <ol>
-<li>缓存存在一个hash表中,通过查询SQL,查询数据库,客户端协议等作为key.在判断是否命中前,MySQL不会解析SQL,而是直接使用SQL去查询缓存,<strong>SQL</strong>任何字符上的不同,如空格,注释,都会导致缓存不命中<strong>.</strong></li>
+<li>缓存存在一个hash表中,通过查询SQL,查询数据库,客户端协议等作为key.在判断是否命中前,MySQL不会解析SQL,而是直接使用SQL去查询缓存,<strong>SQL</strong>任何字符上的不同,如空格,注释,都会导致缓存不命中**.**</li>
 <li>如果查询中有不确定数据,例如<strong>CURRENT_DATE</strong>()和<strong>NOW</strong>()函数,那么查询完毕后则不会被缓存.所以,包含不确定数据的查询是肯定不会找到可用缓存的</li>
 </ol>
-
-<h4 id="24-超过三个表禁止-join">24.  超过三个表禁止 join。</h4>
-
+<h4 id="24--超过三个表禁止-join">24.  超过三个表禁止 join。</h4>
 <p>需要 join 的字段，数据类型必须绝对一致；多表关联查询时， 保证被关联的字段需要有索引。</p>
-
-<h4 id="25-如果有-order-by-的场景-请注意利用索引的有序性">25.  如果有 order by 的场景，请注意利用索引的有序性。</h4>
-
+<h4 id="25--如果有-order-by-的场景请注意利用索引的有序性">25.  如果有 order by 的场景，请注意利用索引的有序性。</h4>
 <p>order by 最后的字段是组合 索引的一部分，<strong>并且放在索引组合顺序的最后</strong>，避免出现 file_sort 的情况，影响查询性能。</p>
-
-<h4 id="26-不要使用-count-列名-或-count-常量-来替代-count">26.  不要使用 count(列名)或 count(常量)来替代 count()，</h4>
-
+<h4 id="26--不要使用-count列名或-count常量来替代-count">26.  不要使用 count(列名)或 count(常量)来替代 count()，</h4>
 <p>count()是 SQL92 定义的标准统计行数的语法，跟数据库无关，跟 NULL 和非 NULL 无关。 说明：count(*)会统计值为 NULL 的行，而 count(列名)不会统计此列为 NULL 值的行。</p>
-
-<h4 id="27-count-distinct-col-计算该列除-null-之外的不重复行数">27.  count(distinct col) 计算该列除 NULL 之外的不重复行数，</h4>
-
+<h4 id="27--countdistinct-col-计算该列除-null-之外的不重复行数">27.  count(distinct col) 计算该列除 NULL 之外的不重复行数，</h4>
 <p>注意 count(di col1, col2) 如果其中一列全为 NULL，那么即使另一列有不同的值，也返回为 0。</p>
-
-<h4 id="28-当某一列的值全是-null-时-count-col-的返回结果为-0">28.  当某一列的值全是 NULL 时，count(col)的返回结果为 0，</h4>
-
+<h4 id="28--当某一列的值全是-null-时countcol的返回结果为-0">28.  当某一列的值全是 NULL 时，count(col)的返回结果为 0，</h4>
 <p>但 sum(col)的返回结果为NULL，因此使用 sum()时需注意 NPE 问题。</p>
-
-<h4 id="29-使用-isnull-来判断是否为-null-值">29.  使用 ISNULL()来判断是否为 NULL 值。</h4>
-
-<h4 id="30-禁止使用存储过程-存储过程难以调试和扩展-更没有移植性">30.  禁止使用存储过程，存储过程难以调试和扩展，更没有移植性。</h4>
-
+<h4 id="29--使用-isnull来判断是否为-null-值">29.  使用 ISNULL()来判断是否为 NULL 值。</h4>
+<h4 id="30--禁止使用存储过程存储过程难以调试和扩展更没有移植性">30.  禁止使用存储过程，存储过程难以调试和扩展，更没有移植性。</h4>
 <h2 id="联合索引问题优化">联合索引问题优化</h2>
-
-<p><strong>转载地址：<a href="https://zhuanlan.zhihu.com/p/143464808">https://zhuanlan.zhihu.com/p/143464808</a></strong></p>
-
+<p><strong>转载地址：https://zhuanlan.zhihu.com/p/143464808</strong></p>
 <p>细看《mysql系列-覆盖索引与回表》博客，对于他们的定义。</p>
-
 <p>联合索引其实有两个作用：</p>
-
-<h4 id="1-充分利用where条件-缩小范围">1.充分利用where条件，缩小范围</h4>
-
+<h4 id="1充分利用where条件缩小范围">1.充分利用where条件，缩小范围</h4>
 <p>例如我们需要查询以下语句：</p>
-
-<pre><code class="language-sql">SELECT * FROM test WHERE a = 1 AND b = 2
-</code></pre>
-
-<p>如果对字段a建立单列索引，对b建立单列索引，那么在查询时，只能选择走索引a，查询所有a=1的主键id，然后进行回表，在回表的过程中，在聚集索引中读取每一行数据，然后过滤出b = 2结果集，或者走索引b，也是这样的过程。 如果对a，b建立了联合索引(a,b),那么在查询时，直接在联合索引中先查到a=1的节点，然后根据b=2继续往下查，查出符合条件的结果集，进行回表。</p>
-
-<h4 id="2-避免回表-此时也叫覆盖索引">2.避免回表(此时也叫覆盖索引)</h4>
-
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-sql" data-lang="sql"><span style="color:#66d9ef">SELECT</span> <span style="color:#f92672">*</span> <span style="color:#66d9ef">FROM</span> test <span style="color:#66d9ef">WHERE</span> a <span style="color:#f92672">=</span> <span style="color:#ae81ff">1</span> <span style="color:#66d9ef">AND</span> b <span style="color:#f92672">=</span> <span style="color:#ae81ff">2</span>
+</code></pre></div><p>如果对字段a建立单列索引，对b建立单列索引，那么在查询时，只能选择走索引a，查询所有a=1的主键id，然后进行回表，在回表的过程中，在聚集索引中读取每一行数据，然后过滤出b = 2结果集，或者走索引b，也是这样的过程。 如果对a，b建立了联合索引(a,b),那么在查询时，直接在联合索引中先查到a=1的节点，然后根据b=2继续往下查，查出符合条件的结果集，进行回表。</p>
+<h4 id="2避免回表此时也叫覆盖索引">2.避免回表(此时也叫覆盖索引)</h4>
 <p>这种情况就是假如我们只查询某几个常用字段，例如查询a和b如下：</p>
-
-<pre><code class="language-sql">SELECT a,b FROM test WHERE a = 1 AND b = 2
-</code></pre>
-
-<p>对字段a建立单列索引，对b建立单列索引就需要像上面所说的，查到符合条件的主键id集合后需要去聚集索引下回表查询，但是如果我们要查询的字段本身在联合索引中就都包含了，那么就不用回表了。</p>
-
-<h4 id="3-减少需要回表的数据的行数">3.减少需要回表的数据的行数</h4>
-
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-sql" data-lang="sql"><span style="color:#66d9ef">SELECT</span> a,b <span style="color:#66d9ef">FROM</span> test <span style="color:#66d9ef">WHERE</span> a <span style="color:#f92672">=</span> <span style="color:#ae81ff">1</span> <span style="color:#66d9ef">AND</span> b <span style="color:#f92672">=</span> <span style="color:#ae81ff">2</span>
+</code></pre></div><p>对字段a建立单列索引，对b建立单列索引就需要像上面所说的，查到符合条件的主键id集合后需要去聚集索引下回表查询，但是如果我们要查询的字段本身在联合索引中就都包含了，那么就不用回表了。</p>
+<h4 id="3减少需要回表的数据的行数">3.减少需要回表的数据的行数</h4>
 <p>这种情况就是假如我们需要查询a&gt;1并且b=2的数据</p>
-
-<pre><code class="language-sql">SELECT * FROM test WHERE a &gt; 1 AND b = 2
-</code></pre>
-
-<p>如果建立的是单列索引a，那么在查询时会在单列索引a中把a&gt;1的主键id全部查找出来然后进行回表。 如果建立的是联合索引(a,b),基于最左前缀匹配原则，因为a的查询条件是一个范围查找(=或者in之外的查询条件都是范围查找)，这样虽然在联合索引中查询时只能命中索引a的部分，b的部分命中不了，只能根据a&gt;1进行查询，但是由于联合索引中每个叶子节点包含b的信息，在查询出所有a&gt;1的主键id时，也会对b=2进行筛选，这样需要回表的主键id就只有a&gt;1并且b=2这部分了，所以回表的数据量会变小。</p>
-
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-sql" data-lang="sql"><span style="color:#66d9ef">SELECT</span> <span style="color:#f92672">*</span> <span style="color:#66d9ef">FROM</span> test <span style="color:#66d9ef">WHERE</span> a <span style="color:#f92672">&gt;</span> <span style="color:#ae81ff">1</span> <span style="color:#66d9ef">AND</span> b <span style="color:#f92672">=</span> <span style="color:#ae81ff">2</span>
+</code></pre></div><p>如果建立的是单列索引a，那么在查询时会在单列索引a中把a&gt;1的主键id全部查找出来然后进行回表。 如果建立的是联合索引(a,b),基于最左前缀匹配原则，因为a的查询条件是一个范围查找(=或者in之外的查询条件都是范围查找)，这样虽然在联合索引中查询时只能命中索引a的部分，b的部分命中不了，只能根据a&gt;1进行查询，但是由于联合索引中每个叶子节点包含b的信息，在查询出所有a&gt;1的主键id时，也会对b=2进行筛选，这样需要回表的主键id就只有a&gt;1并且b=2这部分了，所以回表的数据量会变小。</p>
 <h4 id="示例01">示例01</h4>
-
 <p>我们业务中碰到的就是第3种情况，我们的业务SQL本来更加复杂，还会join其他表，但是由于优化的瓶颈在于建立联合索引，所以进行了一些简化，下面是简化后的SQL：</p>
-
-<pre><code class="language-sql">SELECT
-  a.id as article_id ,
-  a.title as title ,
-  a.author_id as author_id 
-from
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-sql" data-lang="sql"><span style="color:#66d9ef">SELECT</span>
+  a.id <span style="color:#66d9ef">as</span> article_id ,
+  a.title <span style="color:#66d9ef">as</span> title ,
+  a.author_id <span style="color:#66d9ef">as</span> author_id 
+<span style="color:#66d9ef">from</span>
   article a
-where
-  a.create_time between '2020-03-29 03:00:00.003'
-and '2020-04-29 03:00:00.003'
-and a.status = 1
-</code></pre>
-
-<p>我们的需求其实就是从article表中查询出最近一个月，status为1的文章，我们本来就是针对create_time建了单列索引，结果在慢查询日志中发现了这条语句，查询时间需要0.91s左右，所以开始尝试着进行优化。</p>
-
+<span style="color:#66d9ef">where</span>
+  a.create_time <span style="color:#66d9ef">between</span> <span style="color:#e6db74">&#39;2020-03-29 03:00:00.003&#39;</span>
+<span style="color:#66d9ef">and</span> <span style="color:#e6db74">&#39;2020-04-29 03:00:00.003&#39;</span>
+<span style="color:#66d9ef">and</span> a.status <span style="color:#f92672">=</span> <span style="color:#ae81ff">1</span>
+</code></pre></div><p>我们的需求其实就是从article表中查询出最近一个月，status为1的文章，我们本来就是针对create_time建了单列索引，结果在慢查询日志中发现了这条语句，查询时间需要0.91s左右，所以开始尝试着进行优化。</p>
 <p>为了便于测试，我们在表中分别对create_time建立了单列索引create_time，对(create_time,status)建立联合索引idx_createTime_status。</p>
-
 <p>强制使用idx_createTime进行查询</p>
-
-<pre><code class="language-sql">SELECT
-  a.id as article_id ,
-  a.title as title ,
-  a.author_id as author_id 
-from
-  article a  FORCE INDEX(idx_createTime)
-where
-  a.create_time between '2020-03-22 03:00:00.003'
-and '2020-04-22 03:00:00.003'
-and a.status = 1
-</code></pre>
-
-<p>强制使用idx_createTime_status进行查询（即使不强制也是会选择这个索引）</p>
-
-<pre><code class="language-sql">SELECT
-  a.id as article_id ,
-  a.title as title ,
-  a.author_id as author_id 
-from
-  article a  FORCE INDEX(idx_createTime_status)
-where
-  a.create_time between '2020-03-22 03:00:00.003'
-and '2020-04-22 03:00:00.003'
-and a.status = 1
-</code></pre>
-
-<p><strong>优化结果：</strong></p>
-
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-sql" data-lang="sql"><span style="color:#66d9ef">SELECT</span>
+  a.id <span style="color:#66d9ef">as</span> article_id ,
+  a.title <span style="color:#66d9ef">as</span> title ,
+  a.author_id <span style="color:#66d9ef">as</span> author_id 
+<span style="color:#66d9ef">from</span>
+  article a  <span style="color:#66d9ef">FORCE</span> <span style="color:#66d9ef">INDEX</span>(idx_createTime)
+<span style="color:#66d9ef">where</span>
+  a.create_time <span style="color:#66d9ef">between</span> <span style="color:#e6db74">&#39;2020-03-22 03:00:00.003&#39;</span>
+<span style="color:#66d9ef">and</span> <span style="color:#e6db74">&#39;2020-04-22 03:00:00.003&#39;</span>
+<span style="color:#66d9ef">and</span> a.status <span style="color:#f92672">=</span> <span style="color:#ae81ff">1</span>
+</code></pre></div><p>强制使用idx_createTime_status进行查询（即使不强制也是会选择这个索引）</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-sql" data-lang="sql"><span style="color:#66d9ef">SELECT</span>
+  a.id <span style="color:#66d9ef">as</span> article_id ,
+  a.title <span style="color:#66d9ef">as</span> title ,
+  a.author_id <span style="color:#66d9ef">as</span> author_id 
+<span style="color:#66d9ef">from</span>
+  article a  <span style="color:#66d9ef">FORCE</span> <span style="color:#66d9ef">INDEX</span>(idx_createTime_status)
+<span style="color:#66d9ef">where</span>
+  a.create_time <span style="color:#66d9ef">between</span> <span style="color:#e6db74">&#39;2020-03-22 03:00:00.003&#39;</span>
+<span style="color:#66d9ef">and</span> <span style="color:#e6db74">&#39;2020-04-22 03:00:00.003&#39;</span>
+<span style="color:#66d9ef">and</span> a.status <span style="color:#f92672">=</span> <span style="color:#ae81ff">1</span>
+</code></pre></div><p><strong>优化结果：</strong></p>
 <p>优化前使用idx_createTime单列索引，查询时间为0.91s</p>
-
 <p>优化前使用idx_createTime_status联合索引，查询时间为0.21s</p>
-
 <h4 id="示例02">示例02</h4>
-
-<p><img src="/img/5-19-1.png" alt="5-19-1.png" /></p>
-
-<p><img src="/img/5-19-2.png" alt="5-19-2.png" /></p>
-
+<p><img src="/img/5-19-1.png" alt="5-19-1.png"></p>
+<p><img src="/img/5-19-2.png" alt="5-19-2.png"></p>
 <h5 id="什么是离散度">什么是离散度</h5>
-
-<p>转载：<a href="https://www.cnblogs.com/toby/archive/2012/11/09/2763151.html">https://www.cnblogs.com/toby/archive/2012/11/09/2763151.html</a></p>
-
+<p>转载：https://www.cnblogs.com/toby/archive/2012/11/09/2763151.html</p>
 <p><strong>mysql</strong>数据中离散程度的大小的判定方法</p>
-
 <p>离散程度的大小的判定方法：计算出数据库中记录不重复数量</p>
-
-<pre><code class="language-sql">select count(distinct row1),count(distinct row2) from table;
-</code></pre>
-
-<p>count()值大的就离散度高。 离散度大的列放在联合索引的前面。</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-sql" data-lang="sql"><span style="color:#66d9ef">select</span> <span style="color:#66d9ef">count</span>(<span style="color:#66d9ef">distinct</span> row1),<span style="color:#66d9ef">count</span>(<span style="color:#66d9ef">distinct</span> row2) <span style="color:#66d9ef">from</span> <span style="color:#66d9ef">table</span>;
+</code></pre></div><p>count()值大的就离散度高。 离散度大的列放在联合索引的前面。</p>
 
 
                 
@@ -743,81 +560,25 @@ and a.status = 1
                     </h4>
                     <ul class="catalog-body"></ul>
                     <nav id="TableOfContents">
-<ul>
-<li><a href="#索引设计优化">索引设计优化</a>
-<ul>
-<li><a href="#适合使用索引的场景">适合使用索引的场景</a></li>
-<li><a href="#不适合使用索引的场景">不适合使用索引的场景</a></li>
-<li><a href="#索引建立的几大原则">索引建立的几大原则</a>
-<ul>
-<li>
-<ul>
-<li><a href="#1-最左前缀匹配原则">1. 最左前缀匹配原则</a></li>
-<li><a href="#2-尽量选择区分度高的列作为索引">2. 尽量选择区分度高的列作为索引</a></li>
-<li><a href="#3-索引列不能参与计算-保持列-干净">3. 索引列不能参与计算，保持列“干净”</a></li>
-<li><a href="#4-尽量的扩展索引-不要新建索引">4. 尽量的扩展索引，不要新建索引。</a></li>
-<li><a href="#5-定义有外键的数据列一定要建立索引">5. 定义有外键的数据列一定要建立索引。</a></li>
-<li><a href="#6-对于那些查询中很少涉及的列-重复值比较多的列不要建立索引">6. 对于那些查询中很少涉及的列，重复值比较多的列不要建立索引。</a></li>
-<li><a href="#7-对于定义为text-image和bit的数据类型的列不要建立索引">7. 对于定义为text、image和bit的数据类型的列不要建立索引。</a></li>
-<li><a href="#8-对于经常存取的列避免建立索引-因为索引字段的存取都要消耗很大性能">8. 对于经常存取的列避免建立索引，因为索引字段的存取都要消耗很大性能。</a></li>
-</ul></li>
-</ul></li>
-<li><a href="#索引和查询优化">索引和查询优化</a>
-<ul>
-<li>
-<ul>
-<li><a href="#1-join-where判断和order-by排序的字段上建立索引">1.  JOIN,WHERE判断和ORDER BY排序的字段上建立索引</a></li>
-<li><a href="#2-避免在-where-子句中对字段进行-null-值判断">2.  避免在 where 子句中对字段进行 null 值判断</a></li>
-<li><a href="#4-应尽量避免在-where-子句中使用-或-操作符-否则将引擎放弃使用索引而进行全表扫描">4.  应尽量避免在 where 子句中使用 != 或 &lt;&gt; 操作符，否则将引擎放弃使用索引而进行全表扫描。</a></li>
-<li><a href="#5-应尽量避免在-where-子句中使用-or-来连接条件">5.  应尽量避免在 where 子句中使用 or 来连接条件</a></li>
-<li><a href="#6-in-和-not-in-也要慎用-否则会导致全表扫描">6.  in 和 not in 也要慎用，否则会导致全表扫描。</a></li>
-<li><a href="#7-aaa-模糊查询也将导致全表扫描">7.  %aaa%”模糊查询也将导致全表扫描</a></li>
-<li><a href="#a-like-keyword-索引失效-使用全表扫描">a. like %keyword 索引失效，使用全表扫描。</a></li>
-<li><a href="#b-like-keyword-索引有效">b. like keyword% 索引有效。</a></li>
-<li><a href="#c-like-keyword-索引失效">c. like %keyword% 索引失效，</a></li>
-<li><a href="#8-如果在-where-子句中使用参数-也会导致全表扫描">8.  如果在 where 子句中使用参数，也会导致全表扫描。</a></li>
-<li><a href="#8-应尽量避免在-where-子句中对字段进行表达式操作">8. 应尽量避免在 where 子句中对字段进行表达式操作，</a></li>
-<li><a href="#9-应尽量避免在where子句中对字段进行函数操作">9.  应尽量避免在where子句中对字段进行函数操作。</a></li>
-<li><a href="#10-where-子句中的-左边进行函数-算术运算或其他表达式运算无法正确使用索引">10.  where 子句中的“=”左边进行函数、算术运算或其他表达式运算无法正确使用索引。</a></li>
-<li><a href="#11-索引字段作为条件时-如果该索引是多列索引-需要注意">11.  索引字段作为条件时，如果该索引是多列索引，需要注意</a></li>
-<li><a href="#11-select-count-from-table-全表扫描">11. select count(*) from table；全表扫描</a></li>
-<li><a href="#12-索引并不是越多越好">12.  索引并不是越多越好</a></li>
-<li><a href="#13-尽量避免向客户端返回大数据量-若数据量过大-应该考虑相应需求是否合理">13.  尽量避免向客户端返回大数据量，若数据量过大，应该考虑相应需求是否合理</a></li>
-<li><a href="#14-尽量使用数字型字段">14.  尽量使用数字型字段</a></li>
-<li><a href="#15-任何地方都不要使用-select-from-t">15. 任何地方都不要使用 select * from t ，</a></li>
-<li><a href="#16-尽量避免使用游标-因为游标的效率较差">16. 尽量避免使用游标，因为游标的效率较差</a></li>
-<li><a href="#17-优化limit">17. 优化limit</a></li>
-<li><a href="#18-利用limit-1取得唯一行">18. 利用LIMIT 1取得唯一行</a></li>
-<li><a href="#19-及-操作">19. &lt;及&gt;操作</a></li>
-<li><a href="#20-在join表的时候使用相当类型的例-并将其索引">20. 在Join表的时候使用相当类型的例，并将其索引</a></li>
-<li><a href="#21-使用分页语句优化">21. 使用分页语句优化</a></li>
-<li><a href="#22-如果是有序的查询-可使用-order-by">22.  如果是有序的查询，可使用<strong>ORDER BY</strong></a></li>
-<li><a href="#23-开启查询缓存">23. 开启查询缓存</a></li>
-<li><a href="#24-超过三个表禁止-join">24.  超过三个表禁止 join。</a></li>
-<li><a href="#25-如果有-order-by-的场景-请注意利用索引的有序性">25.  如果有 order by 的场景，请注意利用索引的有序性。</a></li>
-<li><a href="#26-不要使用-count-列名-或-count-常量-来替代-count">26.  不要使用 count(列名)或 count(常量)来替代 count()，</a></li>
-<li><a href="#27-count-distinct-col-计算该列除-null-之外的不重复行数">27.  count(distinct col) 计算该列除 NULL 之外的不重复行数，</a></li>
-<li><a href="#28-当某一列的值全是-null-时-count-col-的返回结果为-0">28.  当某一列的值全是 NULL 时，count(col)的返回结果为 0，</a></li>
-<li><a href="#29-使用-isnull-来判断是否为-null-值">29.  使用 ISNULL()来判断是否为 NULL 值。</a></li>
-<li><a href="#30-禁止使用存储过程-存储过程难以调试和扩展-更没有移植性">30.  禁止使用存储过程，存储过程难以调试和扩展，更没有移植性。</a></li>
-</ul></li>
-</ul></li>
-<li><a href="#联合索引问题优化">联合索引问题优化</a>
-<ul>
-<li>
-<ul>
-<li><a href="#1-充分利用where条件-缩小范围">1.充分利用where条件，缩小范围</a></li>
-<li><a href="#2-避免回表-此时也叫覆盖索引">2.避免回表(此时也叫覆盖索引)</a></li>
-<li><a href="#3-减少需要回表的数据的行数">3.减少需要回表的数据的行数</a></li>
-<li><a href="#示例01">示例01</a></li>
-<li><a href="#示例02">示例02</a>
-<ul>
-<li><a href="#什么是离散度">什么是离散度</a></li>
-</ul></li>
-</ul></li>
-</ul></li>
-</ul></li>
-</ul>
+  <ul>
+    <li><a href="#适合使用索引的场景">适合使用索引的场景</a></li>
+    <li><a href="#不适合使用索引的场景">不适合使用索引的场景</a></li>
+    <li><a href="#索引建立的几大原则">索引建立的几大原则</a>
+      <ul>
+        <li></li>
+      </ul>
+    </li>
+    <li><a href="#索引和查询优化">索引和查询优化</a>
+      <ul>
+        <li></li>
+      </ul>
+    </li>
+    <li><a href="#联合索引问题优化">联合索引问题优化</a>
+      <ul>
+        <li></li>
+      </ul>
+    </li>
+  </ul>
 </nav>
                     <br>
                     <br>
@@ -842,9 +603,6 @@ and a.status = 1
                         
                         
                         
-                        <a href="/tags/" title="">
-                            
-                        </a>
                         
                         
                         
@@ -854,101 +612,6 @@ and a.status = 1
                         
                         
                         
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        <a href="/tags/qt" title="QT">
-                            QT
-                        </a>
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        <a href="/tags/zookeeper" title="Zookeeper">
-                            Zookeeper
-                        </a>
                         
                         
                         
@@ -988,8 +651,10 @@ and a.status = 1
                         
                         
                         
-                        <a href="/tags/elasticsearch" title="elasticSearch">
-                            elasticSearch
+                        
+                        
+                        <a href="/tags/elasticsearch" title="elasticsearch">
+                            elasticsearch
                         </a>
                         
                         
@@ -1000,9 +665,27 @@ and a.status = 1
                         
                         
                         
-                        <a href="/tags/golang" title="golang">
-                            golang
-                        </a>
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
                         
                         
                         
@@ -1040,9 +723,21 @@ and a.status = 1
                         
                         
                         
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
                         <a href="/tags/jvm" title="jvm">
                             jvm
                         </a>
+                        
+                        
+                        
+                        
                         
                         
                         
@@ -1066,9 +761,19 @@ and a.status = 1
                         
                         
                         
+                        
+                        
+                        
+                        
+                        
+                        
                         <a href="/tags/mongodb" title="mongodb">
                             mongodb
                         </a>
+                        
+                        
+                        
+                        
                         
                         
                         
@@ -1079,10 +784,6 @@ and a.status = 1
                         </a>
                         
                         
-                        
-                        <a href="/tags/mycat" title="mycat">
-                            mycat
-                        </a>
                         
                         
                         
@@ -1096,9 +797,17 @@ and a.status = 1
                         
                         
                         
-                        <a href="/tags/nginx" title="nginx">
-                            nginx
-                        </a>
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
                         
                         
                         
@@ -1122,8 +831,22 @@ and a.status = 1
                         
                         
                         
+                        
+                        
                         <a href="/tags/rocketmq" title="rocketmq">
                             rocketmq
+                        </a>
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        <a href="/tags/security%E6%A1%86%E6%9E%B6%E5%AD%A6%E4%B9%A0" title="security框架学习">
+                            security框架学习
                         </a>
                         
                         
@@ -1150,17 +873,11 @@ and a.status = 1
                         
                         
                         
-                        <a href="/tags/springcloud" title="springCloud">
-                            springCloud
-                        </a>
-                        
-                        
-                        
-                        
-                        
                         <a href="/tags/springboot" title="springboot">
                             springboot
                         </a>
+                        
+                        
                         
                         
                         
@@ -1174,6 +891,9 @@ and a.status = 1
                         
                         
                         
+                        <a href="/tags/springcloud" title="springcloud">
+                            springcloud
+                        </a>
                         
                         
                         
@@ -1199,6 +919,33 @@ and a.status = 1
                         
                         
                         
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        <a href="/tags/zookeeper" title="zookeeper">
+                            zookeeper
+                        </a>
                         
                         
                         
@@ -1258,6 +1005,8 @@ and a.status = 1
                         
                         
                         
+                        
+                        
                         <a href="/tags/%E5%88%86%E5%B8%83%E5%BC%8F%E7%B3%BB%E5%88%97" title="分布式系列">
                             分布式系列
                         </a>
@@ -1277,6 +1026,10 @@ and a.status = 1
                         
                         
                         
+                        
+                        <a href="/tags/%E5%8D%8F%E8%AE%AE%E6%A0%88" title="协议栈">
+                            协议栈
+                        </a>
                         
                         
                         
@@ -1476,6 +1229,12 @@ and a.status = 1
                         
                         
                         
+                        
+                        
+                        
+                        
+                        
+                        
                         <a href="/tags/%E7%BD%91%E7%BB%9C%E7%BC%96%E7%A8%8B" title="网络编程">
                             网络编程
                         </a>
@@ -1499,6 +1258,10 @@ and a.status = 1
                         
                         
                         
+                        
+                        <a href="/tags/%E8%AE%A4%E8%AF%81%E5%92%8C%E6%8E%88%E6%9D%83" title="认证和授权">
+                            认证和授权
+                        </a>
                         
                         
                         
@@ -1669,7 +1432,7 @@ and a.status = 1
                     
                 </ul>
 		<p class="copyright text-muted">
-                    Copyright &copy;  2020
+                    Copyright &copy;  2021
                     <br>
                     <a href="https://themes.gohugo.io/hugo-theme-cleanwhite">CleanWhite Hugo Theme</a> by <a href="https://zhaohuabing.com">Huabing</a> |
                     <iframe

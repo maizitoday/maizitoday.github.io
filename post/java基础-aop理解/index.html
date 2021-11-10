@@ -97,15 +97,15 @@
                     </li>
                     
                     <li>
-                        <a href="/categories/english">English</a>
+                        <a href="/categories/english">english</a>
                     </li>
                     
                     <li>
-                        <a href="/categories/life">Life</a>
+                        <a href="/categories/life">life</a>
                     </li>
                     
                     <li>
-                        <a href="/categories/tech">Tech</a>
+                        <a href="/categories/tech">tech</a>
                     </li>
                     
 
@@ -241,83 +241,59 @@
                 
                 
                 
-                
-
-<p>[TOC]</p>
-
+                <p>[TOC]</p>
 <h1 id="概述">概述</h1>
-
 <p>AOP：面向切面编程，相对于OOP面向对象编程 Spring的AOP的存在目的是为了解耦。AOP可以让一组类共享相同的行为。在OOP中只能继承和实现接口，且类继承只能单继承，阻碍更多行为添加到一组类上，AOP弥补了OOP的不足。</p>
-
 <h1 id="aop好处">Aop好处</h1>
-
 <p>利用AOP可以对业务逻辑的各个部分进行隔离，从而使得业务逻辑各部分之间的耦合度降低，提高程序的可重用性，同时提高了开发的效率。</p>
-
 <h1 id="aop专业术语">Aop专业术语</h1>
-
 <p>通知（Advice）：通知定义了切面是什么以及何时使用；里面就是增强方法的逻辑，分为前置增强，后置增强，环绕增强，最终增强，异常增强。</p>
-
 <p>切入点（Pointcut）：切点有助于缩小切面所通知的连接点的范围，一般通过正则表达式或者自定义注解来处理。</p>
-
 <p>切面（Aspect：切面是通知和切点的结合。通知和切点定义了切面的全部内容，添加辅助代码的地方。</p>
-
 <p>连接点（JoinPoint）：连接点是在应用执行过程中能够插入切面的一个点。这个点可以是调用方法时，抛出异常时，甚至修改一个字段时。切面代码可以利用这些点插入到应用的正常流程中，并添加新的行为。</p>
-
 <h1 id="springboot实现aop">Springboot实现Aop</h1>
+<h2 id="pomxml">pom.xml</h2>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-xml" data-lang="xml"><span style="color:#f92672">&lt;dependency&gt;</span>
+			<span style="color:#f92672">&lt;groupId&gt;</span>org.springframework.boot<span style="color:#f92672">&lt;/groupId&gt;</span>
+			<span style="color:#f92672">&lt;artifactId&gt;</span>spring-boot-starter-aop<span style="color:#f92672">&lt;/artifactId&gt;</span>
+<span style="color:#f92672">&lt;/dependency&gt;</span>
+</code></pre></div><h2 id="自定义注解">自定义注解</h2>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-java" data-lang="java"><span style="color:#a6e22e">@Target</span><span style="color:#f92672">(</span>ElementType<span style="color:#f92672">.</span><span style="color:#a6e22e">METHOD</span><span style="color:#f92672">)</span>
+<span style="color:#a6e22e">@Retention</span><span style="color:#f92672">(</span>RetentionPolicy<span style="color:#f92672">.</span><span style="color:#a6e22e">RUNTIME</span><span style="color:#f92672">)</span>
+<span style="color:#66d9ef">public</span> <span style="color:#a6e22e">@interface</span> MyLog <span style="color:#f92672">{</span>
+    String <span style="color:#a6e22e">fileName</span><span style="color:#f92672">();</span>
+<span style="color:#f92672">}</span>
+</code></pre></div><h2 id="切面">切面</h2>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-java" data-lang="java"><span style="color:#a6e22e">@Aspect</span> <span style="color:#75715e">// 记得这个注解
+</span><span style="color:#75715e"></span><span style="color:#a6e22e">@Component</span>
+<span style="color:#66d9ef">public</span> <span style="color:#66d9ef">class</span> <span style="color:#a6e22e">AopTest</span> <span style="color:#f92672">{</span>
 
-<h2 id="pom-xml">pom.xml</h2>
+    <span style="color:#a6e22e">@Around</span><span style="color:#f92672">(</span><span style="color:#e6db74">&#34;@annotation(myLog)&#34;</span><span style="color:#f92672">)</span> <span style="color:#75715e">// 注意这个地方自定义的注解， 头字母要小写，不然报错找不到切点
+</span><span style="color:#75715e"></span>    <span style="color:#66d9ef">public</span> Object <span style="color:#a6e22e">around</span><span style="color:#f92672">(</span>ProceedingJoinPoint joinPoint<span style="color:#f92672">,</span> MyLog myLog<span style="color:#f92672">)</span> <span style="color:#66d9ef">throws</span> Throwable <span style="color:#f92672">{</span>
+        System<span style="color:#f92672">.</span><span style="color:#a6e22e">out</span><span style="color:#f92672">.</span><span style="color:#a6e22e">println</span><span style="color:#f92672">(</span><span style="color:#e6db74">&#34;方法开始时间是:&#34;</span> <span style="color:#f92672">+</span> <span style="color:#66d9ef">new</span> Date<span style="color:#f92672">());</span>
+        Object o <span style="color:#f92672">=</span> joinPoint<span style="color:#f92672">.</span><span style="color:#a6e22e">proceed</span><span style="color:#f92672">();</span>
+        System<span style="color:#f92672">.</span><span style="color:#a6e22e">out</span><span style="color:#f92672">.</span><span style="color:#a6e22e">println</span><span style="color:#f92672">(</span><span style="color:#e6db74">&#34;方法结束时间是:&#34;</span> <span style="color:#f92672">+</span> <span style="color:#66d9ef">new</span> Date<span style="color:#f92672">());</span>
+        <span style="color:#66d9ef">return</span> o<span style="color:#f92672">;</span>
+    <span style="color:#f92672">}</span>
 
-<pre><code class="language-xml">&lt;dependency&gt;
-			&lt;groupId&gt;org.springframework.boot&lt;/groupId&gt;
-			&lt;artifactId&gt;spring-boot-starter-aop&lt;/artifactId&gt;
-&lt;/dependency&gt;
-</code></pre>
-
-<h2 id="自定义注解">自定义注解</h2>
-
-<pre><code class="language-java">@Target(ElementType.METHOD)
-@Retention(RetentionPolicy.RUNTIME)
-public @interface MyLog {
-    String fileName();
-}
-</code></pre>
-
-<h2 id="切面">切面</h2>
-
-<pre><code class="language-java">@Aspect // 记得这个注解
-@Component
-public class AopTest {
-
-    @Around(&quot;@annotation(myLog)&quot;) // 注意这个地方自定义的注解， 头字母要小写，不然报错找不到切点
-    public Object around(ProceedingJoinPoint joinPoint, MyLog myLog) throws Throwable {
-        System.out.println(&quot;方法开始时间是:&quot; + new Date());
-        Object o = joinPoint.proceed();
-        System.out.println(&quot;方法结束时间是:&quot; + new Date());
-        return o;
-    }
-
-}
-</code></pre>
-
-<h2 id="测试controller">测试Controller</h2>
-
-<pre><code class="language-java">@RestController
-public class MyAopController {
+<span style="color:#f92672">}</span>
+</code></pre></div><h2 id="测试controller">测试Controller</h2>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-java" data-lang="java"><span style="color:#a6e22e">@RestController</span>
+<span style="color:#66d9ef">public</span> <span style="color:#66d9ef">class</span> <span style="color:#a6e22e">MyAopController</span> <span style="color:#f92672">{</span>
     
-     @RequestMapping(&quot;/myaop&quot;)
-     @MyLog(fileName = &quot;MyAopController&quot;)
-     public void showMessage() {
-         System.out.println(&quot;MyAopController 被切入&quot;);
-     }
-}
+     <span style="color:#a6e22e">@RequestMapping</span><span style="color:#f92672">(</span><span style="color:#e6db74">&#34;/myaop&#34;</span><span style="color:#f92672">)</span>
+     <span style="color:#a6e22e">@MyLog</span><span style="color:#f92672">(</span>fileName <span style="color:#f92672">=</span> <span style="color:#e6db74">&#34;MyAopController&#34;</span><span style="color:#f92672">)</span>
+     <span style="color:#66d9ef">public</span> <span style="color:#66d9ef">void</span> <span style="color:#a6e22e">showMessage</span><span style="color:#f92672">()</span> <span style="color:#f92672">{</span>
+         System<span style="color:#f92672">.</span><span style="color:#a6e22e">out</span><span style="color:#f92672">.</span><span style="color:#a6e22e">println</span><span style="color:#f92672">(</span><span style="color:#e6db74">&#34;MyAopController 被切入&#34;</span><span style="color:#f92672">);</span>
+     <span style="color:#f92672">}</span>
+<span style="color:#f92672">}</span>
 
 运行结果
 
-方法开始时间是:Fri Jul 12 14:45:48 CST 2019
+方法开始时间是:Fri Jul 12 14<span style="color:#f92672">:</span>45<span style="color:#f92672">:</span>48 CST 2019
 MyAopController 被切入
-方法结束时间是:Fri Jul 12 14:45:48 CST 2019
-</code></pre>
-
+方法结束时间是:Fri Jul 12 14<span style="color:#f92672">:</span>45<span style="color:#f92672">:</span>48 CST 2019
+</code></pre></div>
 
                 
                 
@@ -424,18 +400,12 @@ MyAopController 被切入
                     </h4>
                     <ul class="catalog-body"></ul>
                     <nav id="TableOfContents">
-<ul>
-<li><a href="#概述">概述</a></li>
-<li><a href="#aop好处">Aop好处</a></li>
-<li><a href="#aop专业术语">Aop专业术语</a></li>
-<li><a href="#springboot实现aop">Springboot实现Aop</a>
-<ul>
-<li><a href="#pom-xml">pom.xml</a></li>
-<li><a href="#自定义注解">自定义注解</a></li>
-<li><a href="#切面">切面</a></li>
-<li><a href="#测试controller">测试Controller</a></li>
-</ul></li>
-</ul>
+  <ul>
+    <li><a href="#pomxml">pom.xml</a></li>
+    <li><a href="#自定义注解">自定义注解</a></li>
+    <li><a href="#切面">切面</a></li>
+    <li><a href="#测试controller">测试Controller</a></li>
+  </ul>
 </nav>
                     <br>
                     <br>
@@ -460,9 +430,6 @@ MyAopController 被切入
                         
                         
                         
-                        <a href="/tags/" title="">
-                            
-                        </a>
                         
                         
                         
@@ -472,101 +439,6 @@ MyAopController 被切入
                         
                         
                         
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        <a href="/tags/qt" title="QT">
-                            QT
-                        </a>
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        <a href="/tags/zookeeper" title="Zookeeper">
-                            Zookeeper
-                        </a>
                         
                         
                         
@@ -606,8 +478,10 @@ MyAopController 被切入
                         
                         
                         
-                        <a href="/tags/elasticsearch" title="elasticSearch">
-                            elasticSearch
+                        
+                        
+                        <a href="/tags/elasticsearch" title="elasticsearch">
+                            elasticsearch
                         </a>
                         
                         
@@ -618,9 +492,27 @@ MyAopController 被切入
                         
                         
                         
-                        <a href="/tags/golang" title="golang">
-                            golang
-                        </a>
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
                         
                         
                         
@@ -658,9 +550,21 @@ MyAopController 被切入
                         
                         
                         
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
                         <a href="/tags/jvm" title="jvm">
                             jvm
                         </a>
+                        
+                        
+                        
+                        
                         
                         
                         
@@ -684,9 +588,19 @@ MyAopController 被切入
                         
                         
                         
+                        
+                        
+                        
+                        
+                        
+                        
                         <a href="/tags/mongodb" title="mongodb">
                             mongodb
                         </a>
+                        
+                        
+                        
+                        
                         
                         
                         
@@ -697,10 +611,6 @@ MyAopController 被切入
                         </a>
                         
                         
-                        
-                        <a href="/tags/mycat" title="mycat">
-                            mycat
-                        </a>
                         
                         
                         
@@ -714,9 +624,17 @@ MyAopController 被切入
                         
                         
                         
-                        <a href="/tags/nginx" title="nginx">
-                            nginx
-                        </a>
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
                         
                         
                         
@@ -740,8 +658,22 @@ MyAopController 被切入
                         
                         
                         
+                        
+                        
                         <a href="/tags/rocketmq" title="rocketmq">
                             rocketmq
+                        </a>
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        <a href="/tags/security%E6%A1%86%E6%9E%B6%E5%AD%A6%E4%B9%A0" title="security框架学习">
+                            security框架学习
                         </a>
                         
                         
@@ -768,17 +700,11 @@ MyAopController 被切入
                         
                         
                         
-                        <a href="/tags/springcloud" title="springCloud">
-                            springCloud
-                        </a>
-                        
-                        
-                        
-                        
-                        
                         <a href="/tags/springboot" title="springboot">
                             springboot
                         </a>
+                        
+                        
                         
                         
                         
@@ -792,6 +718,9 @@ MyAopController 被切入
                         
                         
                         
+                        <a href="/tags/springcloud" title="springcloud">
+                            springcloud
+                        </a>
                         
                         
                         
@@ -817,6 +746,33 @@ MyAopController 被切入
                         
                         
                         
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        <a href="/tags/zookeeper" title="zookeeper">
+                            zookeeper
+                        </a>
                         
                         
                         
@@ -876,6 +832,8 @@ MyAopController 被切入
                         
                         
                         
+                        
+                        
                         <a href="/tags/%E5%88%86%E5%B8%83%E5%BC%8F%E7%B3%BB%E5%88%97" title="分布式系列">
                             分布式系列
                         </a>
@@ -895,6 +853,10 @@ MyAopController 被切入
                         
                         
                         
+                        
+                        <a href="/tags/%E5%8D%8F%E8%AE%AE%E6%A0%88" title="协议栈">
+                            协议栈
+                        </a>
                         
                         
                         
@@ -1094,6 +1056,12 @@ MyAopController 被切入
                         
                         
                         
+                        
+                        
+                        
+                        
+                        
+                        
                         <a href="/tags/%E7%BD%91%E7%BB%9C%E7%BC%96%E7%A8%8B" title="网络编程">
                             网络编程
                         </a>
@@ -1117,6 +1085,10 @@ MyAopController 被切入
                         
                         
                         
+                        
+                        <a href="/tags/%E8%AE%A4%E8%AF%81%E5%92%8C%E6%8E%88%E6%9D%83" title="认证和授权">
+                            认证和授权
+                        </a>
                         
                         
                         
@@ -1287,7 +1259,7 @@ MyAopController 被切入
                     
                 </ul>
 		<p class="copyright text-muted">
-                    Copyright &copy;  2020
+                    Copyright &copy;  2021
                     <br>
                     <a href="https://themes.gohugo.io/hugo-theme-cleanwhite">CleanWhite Hugo Theme</a> by <a href="https://zhaohuabing.com">Huabing</a> |
                     <iframe

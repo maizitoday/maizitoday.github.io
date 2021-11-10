@@ -97,15 +97,15 @@
                     </li>
                     
                     <li>
-                        <a href="/categories/english">English</a>
+                        <a href="/categories/english">english</a>
                     </li>
                     
                     <li>
-                        <a href="/categories/life">Life</a>
+                        <a href="/categories/life">life</a>
                     </li>
                     
                     <li>
-                        <a href="/categories/tech">Tech</a>
+                        <a href="/categories/tech">tech</a>
                     </li>
                     
 
@@ -237,171 +237,150 @@
                 
                 
                 
-                
-
-<p>[TOC]</p>
-
-<p><strong>转载地址：<a href="https://cloud.tencent.com/developer/article/1178048">https://cloud.tencent.com/developer/article/1178048</a></strong></p>
-
+                <p>[TOC]</p>
+<p><strong>转载地址：https://cloud.tencent.com/developer/article/1178048</strong></p>
 <h1 id="简介">简介</h1>
-
 <p>在项目开发中，会遇到如下情形：我们自己的服务订阅、接收来自<a href="https://cloud.tencent.com/product/cmq?from=10680">消息队列</a>或者客户端的事件和请求，基于不同的事件采取对应的行动，这种情况下适合应用派发器模式。</p>
-
 <h1 id="主要模块">主要模块</h1>
-
 <p>XXXEventDispatcher类  核心类，维护事件类型（EventType）到处理器（handler）的映射（存放在ConcurrentHashMap中）；这个类在启动时，会通过XXXEventHandlerInitializer初始化这个map数据结构；在启动时，需要订阅或监听来自消息队列的事件；当对应的事件到达时，该类的dispatch方法会负责将事件分发到具体的处理器方法中进行处理。</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-java" data-lang="java"><span style="color:#f92672">package</span> org.java.learn.java8.dispatcher<span style="color:#f92672">;</span>
+<span style="color:#f92672">import</span> org.springframework.stereotype.Component<span style="color:#f92672">;</span>
+<span style="color:#f92672">import</span> java.util.Map<span style="color:#f92672">;</span>
+<span style="color:#f92672">import</span> java.util.concurrent.ConcurrentHashMap<span style="color:#f92672">;</span>
+<span style="color:#f92672">import</span> javax.annotation.PostConstruct<span style="color:#f92672">;</span>
+<span style="color:#f92672">import</span> javax.annotation.Resource<span style="color:#f92672">;</span>
+<span style="color:#75715e">/**
+</span><span style="color:#75715e"> * Created by IntelliJ IDEA.
+</span><span style="color:#75715e"> * User: duqi
+</span><span style="color:#75715e"> * Date: 2016/11/3
+</span><span style="color:#75715e"> * Time: 21:53
+</span><span style="color:#75715e"> */</span>
+<span style="color:#a6e22e">@Component</span>
+<span style="color:#66d9ef">public</span> <span style="color:#66d9ef">class</span> <span style="color:#a6e22e">XXXEventDispatcher</span> <span style="color:#66d9ef">implements</span> AutoCloseable <span style="color:#f92672">{</span>
+    <span style="color:#a6e22e">@Resource</span>
+    <span style="color:#66d9ef">private</span> XXXEventHandlerInitializer initializer<span style="color:#f92672">;</span>
 
-<pre><code class="language-java">package org.java.learn.java8.dispatcher;
-import org.springframework.stereotype.Component;
-import java.util.Map;
-import java.util.concurrent.ConcurrentHashMap;
-import javax.annotation.PostConstruct;
-import javax.annotation.Resource;
-/**
- * Created by IntelliJ IDEA.
- * User: duqi
- * Date: 2016/11/3
- * Time: 21:53
- */
-@Component
-public class XXXEventDispatcher implements AutoCloseable {
-    @Resource
-    private XXXEventHandlerInitializer initializer;
+    <span style="color:#66d9ef">private</span> Map<span style="color:#f92672">&lt;</span>XXXEventType<span style="color:#f92672">,</span> XXXEventHandler<span style="color:#f92672">&gt;</span> handlers <span style="color:#f92672">=</span> <span style="color:#66d9ef">new</span> ConcurrentHashMap<span style="color:#f92672">&lt;&gt;();</span>
 
-    private Map&lt;XXXEventType, XXXEventHandler&gt; handlers = new ConcurrentHashMap&lt;&gt;();
+    <span style="color:#a6e22e">@PostConstruct</span>
+    <span style="color:#66d9ef">public</span> <span style="color:#66d9ef">void</span> <span style="color:#a6e22e">init</span><span style="color:#f92672">()</span> <span style="color:#f92672">{</span>
+        <span style="color:#75715e">//建立绑定关系；
+</span><span style="color:#75715e"></span>        initializer<span style="color:#f92672">.</span><span style="color:#a6e22e">init</span><span style="color:#f92672">();</span>
+        <span style="color:#75715e">//监听事件并派发
+</span><span style="color:#75715e"></span>        dispatch<span style="color:#f92672">(</span><span style="color:#e6db74">&#34;testMsg&#34;</span><span style="color:#f92672">);</span>
+    <span style="color:#f92672">}</span>
 
-    @PostConstruct
-    public void init() {
-        //建立绑定关系；
-        initializer.init();
-        //监听事件并派发
-        dispatch(&quot;testMsg&quot;);
-    }
+    <span style="color:#75715e">/**
+</span><span style="color:#75715e">     * 将XXX事件注册到派发器
+</span><span style="color:#75715e">     *
+</span><span style="color:#75715e">     * @param xxxEventType
+</span><span style="color:#75715e">     * @param xxxEventHandler
+</span><span style="color:#75715e">     */</span>
+    <span style="color:#66d9ef">public</span> <span style="color:#66d9ef">void</span> <span style="color:#a6e22e">bind</span><span style="color:#f92672">(</span>XXXEventType xxxEventType<span style="color:#f92672">,</span> XXXEventHandler xxxEventHandler<span style="color:#f92672">)</span> <span style="color:#f92672">{</span>
+        <span style="color:#66d9ef">this</span><span style="color:#f92672">.</span><span style="color:#a6e22e">handlers</span><span style="color:#f92672">.</span><span style="color:#a6e22e">put</span><span style="color:#f92672">(</span>xxxEventType<span style="color:#f92672">,</span> <span style="color:#f92672">((</span>eventType<span style="color:#f92672">,</span> context<span style="color:#f92672">)</span> <span style="color:#f92672">-&gt;</span> <span style="color:#f92672">{</span>
+            <span style="color:#66d9ef">try</span> <span style="color:#f92672">{</span>
+                xxxEventHandler<span style="color:#f92672">.</span><span style="color:#a6e22e">handle</span><span style="color:#f92672">(</span>eventType<span style="color:#f92672">,</span> context<span style="color:#f92672">);</span>
+            <span style="color:#f92672">}</span> <span style="color:#66d9ef">catch</span> <span style="color:#f92672">(</span>Exception e<span style="color:#f92672">)</span> <span style="color:#f92672">{</span>
+                <span style="color:#75715e">//记录错误日志
+</span><span style="color:#75715e"></span>                e<span style="color:#f92672">.</span><span style="color:#a6e22e">printStackTrace</span><span style="color:#f92672">();</span>
+            <span style="color:#f92672">}</span>
+            <span style="color:#75715e">//打印处理器执行日志
+</span><span style="color:#75715e"></span>        <span style="color:#f92672">}));</span>
+    <span style="color:#f92672">}</span>
 
-    /**
-     * 将XXX事件注册到派发器
-     *
-     * @param xxxEventType
-     * @param xxxEventHandler
-     */
-    public void bind(XXXEventType xxxEventType, XXXEventHandler xxxEventHandler) {
-        this.handlers.put(xxxEventType, ((eventType, context) -&gt; {
-            try {
-                xxxEventHandler.handle(eventType, context);
-            } catch (Exception e) {
-                //记录错误日志
-                e.printStackTrace();
-            }
-            //打印处理器执行日志
-        }));
-    }
+    <span style="color:#75715e">/**
+</span><span style="color:#75715e">     * 进行事件派发
+</span><span style="color:#75715e">     * @param eventMsg
+</span><span style="color:#75715e">     */</span>
+    <span style="color:#66d9ef">private</span> <span style="color:#66d9ef">void</span> <span style="color:#a6e22e">dispatch</span><span style="color:#f92672">(</span>String eventMsg<span style="color:#f92672">)</span> <span style="color:#f92672">{</span>
+        <span style="color:#75715e">//(1) 从eventMsg中获取eventType;
+</span><span style="color:#75715e"></span>        <span style="color:#75715e">//(2) 根据eventMsg构造eventContext;
+</span><span style="color:#75715e"></span>        <span style="color:#75715e">//(3) 执行具体的处理器方法
+</span><span style="color:#75715e"></span>    <span style="color:#f92672">}</span>
 
-    /**
-     * 进行事件派发
-     * @param eventMsg
-     */
-    private void dispatch(String eventMsg) {
-        //(1) 从eventMsg中获取eventType;
-        //(2) 根据eventMsg构造eventContext;
-        //(3) 执行具体的处理器方法
-    }
+    <span style="color:#66d9ef">public</span> <span style="color:#66d9ef">void</span> <span style="color:#a6e22e">close</span><span style="color:#f92672">()</span> <span style="color:#66d9ef">throws</span> Exception <span style="color:#f92672">{</span>
+        <span style="color:#75715e">//释放资源
+</span><span style="color:#75715e"></span>    <span style="color:#f92672">}</span>
+<span style="color:#f92672">}</span>
+</code></pre></div><p>XXXEventHandlerInitializer类  这个类包括具体的业务处理方法，在系统初始化的时候，会将这些业务处理方法的方法引用注册到派发器中。</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-java" data-lang="java"><span style="color:#f92672">package</span> org.java.learn.java8.dispatcher<span style="color:#f92672">;</span>
+<span style="color:#f92672">import</span> org.springframework.stereotype.Component<span style="color:#f92672">;</span>
+<span style="color:#f92672">import</span> javax.annotation.Resource<span style="color:#f92672">;</span>
+<span style="color:#75715e">/**
+</span><span style="color:#75715e"> * Created by IntelliJ IDEA.
+</span><span style="color:#75715e"> * User: duqi
+</span><span style="color:#75715e"> * Date: 2016/11/3
+</span><span style="color:#75715e"> * Time: 21:56
+</span><span style="color:#75715e"> */</span>
+<span style="color:#a6e22e">@Component</span>
+<span style="color:#66d9ef">public</span> <span style="color:#66d9ef">class</span> <span style="color:#a6e22e">XXXEventHandlerInitializer</span> <span style="color:#f92672">{</span>
+    <span style="color:#a6e22e">@Resource</span>
+    <span style="color:#66d9ef">private</span> XXXEventDispatcher dispatcher<span style="color:#f92672">;</span>
 
-    public void close() throws Exception {
-        //释放资源
-    }
-}
-</code></pre>
+    <span style="color:#66d9ef">public</span> <span style="color:#66d9ef">void</span> <span style="color:#a6e22e">init</span><span style="color:#f92672">()</span> <span style="color:#f92672">{</span>
+        dispatcher<span style="color:#f92672">.</span><span style="color:#a6e22e">bind</span><span style="color:#f92672">(</span>XXXEventType<span style="color:#f92672">.</span><span style="color:#a6e22e">event1</span><span style="color:#f92672">,</span> <span style="color:#66d9ef">this</span><span style="color:#f92672">::</span>handleProcess1<span style="color:#f92672">);</span>
+        dispatcher<span style="color:#f92672">.</span><span style="color:#a6e22e">bind</span><span style="color:#f92672">(</span>XXXEventType<span style="color:#f92672">.</span><span style="color:#a6e22e">event2</span><span style="color:#f92672">,</span> <span style="color:#66d9ef">this</span><span style="color:#f92672">::</span>handleProcess2<span style="color:#f92672">);</span>
+        dispatcher<span style="color:#f92672">.</span><span style="color:#a6e22e">bind</span><span style="color:#f92672">(</span>XXXEventType<span style="color:#f92672">.</span><span style="color:#a6e22e">event3</span><span style="color:#f92672">,</span> <span style="color:#66d9ef">this</span><span style="color:#f92672">::</span>handleProcess3<span style="color:#f92672">);</span>
+    <span style="color:#f92672">}</span>
 
-<p>XXXEventHandlerInitializer类  这个类包括具体的业务处理方法，在系统初始化的时候，会将这些业务处理方法的方法引用注册到派发器中。</p>
+    <span style="color:#66d9ef">private</span> <span style="color:#66d9ef">void</span> <span style="color:#a6e22e">handleProcess1</span><span style="color:#f92672">(</span>XXXEventType eventType<span style="color:#f92672">,</span> XXXEventContext context<span style="color:#f92672">)</span> <span style="color:#f92672">{</span>
+        <span style="color:#75715e">//事件1的处理逻辑
+</span><span style="color:#75715e"></span>    <span style="color:#f92672">}</span>
 
-<pre><code class="language-java">package org.java.learn.java8.dispatcher;
-import org.springframework.stereotype.Component;
-import javax.annotation.Resource;
-/**
- * Created by IntelliJ IDEA.
- * User: duqi
- * Date: 2016/11/3
- * Time: 21:56
- */
-@Component
-public class XXXEventHandlerInitializer {
-    @Resource
-    private XXXEventDispatcher dispatcher;
+    <span style="color:#66d9ef">private</span> <span style="color:#66d9ef">void</span> <span style="color:#a6e22e">handleProcess2</span><span style="color:#f92672">(</span>XXXEventType eventType<span style="color:#f92672">,</span> XXXEventContext context<span style="color:#f92672">)</span> <span style="color:#f92672">{</span>
+        <span style="color:#75715e">//事件2的处理逻辑
+</span><span style="color:#75715e"></span>    <span style="color:#f92672">}</span>
 
-    public void init() {
-        dispatcher.bind(XXXEventType.event1, this::handleProcess1);
-        dispatcher.bind(XXXEventType.event2, this::handleProcess2);
-        dispatcher.bind(XXXEventType.event3, this::handleProcess3);
-    }
+    <span style="color:#66d9ef">private</span> <span style="color:#66d9ef">void</span> <span style="color:#a6e22e">handleProcess3</span><span style="color:#f92672">(</span>XXXEventType eventType<span style="color:#f92672">,</span> XXXEventContext context<span style="color:#f92672">)</span> <span style="color:#f92672">{</span>
+        <span style="color:#75715e">//事件3的处理逻辑
+</span><span style="color:#75715e"></span>    <span style="color:#f92672">}</span>
+<span style="color:#f92672">}</span>
+</code></pre></div><p>XXXEventHandler：函数式接口</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-java" data-lang="java"><span style="color:#f92672">package</span> org.java.learn.java8.dispatcher<span style="color:#f92672">;</span>
+<span style="color:#75715e">/**
+</span><span style="color:#75715e"> * Created by IntelliJ IDEA.
+</span><span style="color:#75715e"> * User: duqi
+</span><span style="color:#75715e"> * Date: 2016/11/3
+</span><span style="color:#75715e"> * Time: 22:03
+</span><span style="color:#75715e"> */</span>
+<span style="color:#a6e22e">@FunctionalInterface</span>
+<span style="color:#66d9ef">public</span> <span style="color:#66d9ef">interface</span> <span style="color:#a6e22e">XXXEventHandler</span> <span style="color:#f92672">{</span>
+    <span style="color:#66d9ef">void</span> <span style="color:#a6e22e">handle</span><span style="color:#f92672">(</span>XXXEventType eventType<span style="color:#f92672">,</span> XXXEventContext context<span style="color:#f92672">);</span>
+<span style="color:#f92672">}</span>
+</code></pre></div><p>XXXEventContext类，这个类用于存储入参和返回值，具体情况可以灵活处理。</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-java" data-lang="java"><span style="color:#f92672">package</span> org.java.learn.java8.dispatcher<span style="color:#f92672">;</span>
+<span style="color:#75715e">/**
+</span><span style="color:#75715e"> * Created by IntelliJ IDEA.
+</span><span style="color:#75715e"> * User: duqi
+</span><span style="color:#75715e"> * Date: 2016/11/3
+</span><span style="color:#75715e"> * Time: 22:04
+</span><span style="color:#75715e"> */</span>
+<span style="color:#66d9ef">public</span> <span style="color:#66d9ef">class</span> <span style="color:#a6e22e">XXXEventContext</span> <span style="color:#f92672">{</span>
+    <span style="color:#66d9ef">private</span> <span style="color:#66d9ef">int</span> param1<span style="color:#f92672">;</span>
+    <span style="color:#66d9ef">private</span> <span style="color:#66d9ef">int</span> param2<span style="color:#f92672">;</span>
 
-    private void handleProcess1(XXXEventType eventType, XXXEventContext context) {
-        //事件1的处理逻辑
-    }
-
-    private void handleProcess2(XXXEventType eventType, XXXEventContext context) {
-        //事件2的处理逻辑
-    }
-
-    private void handleProcess3(XXXEventType eventType, XXXEventContext context) {
-        //事件3的处理逻辑
-    }
-}
-</code></pre>
-
-<p>XXXEventHandler：函数式接口</p>
-
-<pre><code class="language-java">package org.java.learn.java8.dispatcher;
-/**
- * Created by IntelliJ IDEA.
- * User: duqi
- * Date: 2016/11/3
- * Time: 22:03
- */
-@FunctionalInterface
-public interface XXXEventHandler {
-    void handle(XXXEventType eventType, XXXEventContext context);
-}
-</code></pre>
-
-<p>XXXEventContext类，这个类用于存储入参和返回值，具体情况可以灵活处理。</p>
-
-<pre><code class="language-java">package org.java.learn.java8.dispatcher;
-/**
- * Created by IntelliJ IDEA.
- * User: duqi
- * Date: 2016/11/3
- * Time: 22:04
- */
-public class XXXEventContext {
-    private int param1;
-    private int param2;
-
-    @Override
-    public String toString() {
-        return &quot;XXXEventContext{&quot; +
-               &quot;param1=&quot; + param1 +
-               &quot;, param2=&quot; + param2 +
-               '}';
-    }
-}
-</code></pre>
-
-<p>XXXEventType枚举， 这个类显然用于存储事件类型</p>
-
-<pre><code class="language-java">package org.java.learn.java8.dispatcher;
-/**
- * Created by IntelliJ IDEA.
- * User: duqi
- * Date: 2016/11/3
- * Time: 22:03
- */
-public enum XXXEventType {
-    event1,
-    event2,
+    <span style="color:#a6e22e">@Override</span>
+    <span style="color:#66d9ef">public</span> String <span style="color:#a6e22e">toString</span><span style="color:#f92672">()</span> <span style="color:#f92672">{</span>
+        <span style="color:#66d9ef">return</span> <span style="color:#e6db74">&#34;XXXEventContext{&#34;</span> <span style="color:#f92672">+</span>
+               <span style="color:#e6db74">&#34;param1=&#34;</span> <span style="color:#f92672">+</span> param1 <span style="color:#f92672">+</span>
+               <span style="color:#e6db74">&#34;, param2=&#34;</span> <span style="color:#f92672">+</span> param2 <span style="color:#f92672">+</span>
+               <span style="color:#e6db74">&#39;}&#39;</span><span style="color:#f92672">;</span>
+    <span style="color:#f92672">}</span>
+<span style="color:#f92672">}</span>
+</code></pre></div><p>XXXEventType枚举， 这个类显然用于存储事件类型</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-java" data-lang="java"><span style="color:#f92672">package</span> org.java.learn.java8.dispatcher<span style="color:#f92672">;</span>
+<span style="color:#75715e">/**
+</span><span style="color:#75715e"> * Created by IntelliJ IDEA.
+</span><span style="color:#75715e"> * User: duqi
+</span><span style="color:#75715e"> * Date: 2016/11/3
+</span><span style="color:#75715e"> * Time: 22:03
+</span><span style="color:#75715e"> */</span>
+<span style="color:#66d9ef">public</span> <span style="color:#66d9ef">enum</span> XXXEventType <span style="color:#f92672">{</span>
+    event1<span style="color:#f92672">,</span>
+    event2<span style="color:#f92672">,</span>
     event3
-}
-</code></pre>
-
+<span style="color:#f92672">}</span>
+</code></pre></div>
 
                 
                 
@@ -507,12 +486,7 @@ public enum XXXEventType {
                         <a class="catalog-toggle" style="font-size: 24px;" href="index.html#">目录结构</a>
                     </h4>
                     <ul class="catalog-body"></ul>
-                    <nav id="TableOfContents">
-<ul>
-<li><a href="#简介">简介</a></li>
-<li><a href="#主要模块">主要模块</a></li>
-</ul>
-</nav>
+                    <nav id="TableOfContents"></nav>
                     <br>
                     <br>
                     <br>
@@ -536,9 +510,6 @@ public enum XXXEventType {
                         
                         
                         
-                        <a href="/tags/" title="">
-                            
-                        </a>
                         
                         
                         
@@ -548,101 +519,6 @@ public enum XXXEventType {
                         
                         
                         
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        <a href="/tags/qt" title="QT">
-                            QT
-                        </a>
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        <a href="/tags/zookeeper" title="Zookeeper">
-                            Zookeeper
-                        </a>
                         
                         
                         
@@ -682,8 +558,10 @@ public enum XXXEventType {
                         
                         
                         
-                        <a href="/tags/elasticsearch" title="elasticSearch">
-                            elasticSearch
+                        
+                        
+                        <a href="/tags/elasticsearch" title="elasticsearch">
+                            elasticsearch
                         </a>
                         
                         
@@ -694,9 +572,27 @@ public enum XXXEventType {
                         
                         
                         
-                        <a href="/tags/golang" title="golang">
-                            golang
-                        </a>
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
                         
                         
                         
@@ -734,9 +630,21 @@ public enum XXXEventType {
                         
                         
                         
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
                         <a href="/tags/jvm" title="jvm">
                             jvm
                         </a>
+                        
+                        
+                        
+                        
                         
                         
                         
@@ -760,9 +668,19 @@ public enum XXXEventType {
                         
                         
                         
+                        
+                        
+                        
+                        
+                        
+                        
                         <a href="/tags/mongodb" title="mongodb">
                             mongodb
                         </a>
+                        
+                        
+                        
+                        
                         
                         
                         
@@ -773,10 +691,6 @@ public enum XXXEventType {
                         </a>
                         
                         
-                        
-                        <a href="/tags/mycat" title="mycat">
-                            mycat
-                        </a>
                         
                         
                         
@@ -790,9 +704,17 @@ public enum XXXEventType {
                         
                         
                         
-                        <a href="/tags/nginx" title="nginx">
-                            nginx
-                        </a>
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
                         
                         
                         
@@ -816,8 +738,22 @@ public enum XXXEventType {
                         
                         
                         
+                        
+                        
                         <a href="/tags/rocketmq" title="rocketmq">
                             rocketmq
+                        </a>
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        <a href="/tags/security%E6%A1%86%E6%9E%B6%E5%AD%A6%E4%B9%A0" title="security框架学习">
+                            security框架学习
                         </a>
                         
                         
@@ -844,17 +780,11 @@ public enum XXXEventType {
                         
                         
                         
-                        <a href="/tags/springcloud" title="springCloud">
-                            springCloud
-                        </a>
-                        
-                        
-                        
-                        
-                        
                         <a href="/tags/springboot" title="springboot">
                             springboot
                         </a>
+                        
+                        
                         
                         
                         
@@ -868,6 +798,9 @@ public enum XXXEventType {
                         
                         
                         
+                        <a href="/tags/springcloud" title="springcloud">
+                            springcloud
+                        </a>
                         
                         
                         
@@ -893,6 +826,33 @@ public enum XXXEventType {
                         
                         
                         
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        <a href="/tags/zookeeper" title="zookeeper">
+                            zookeeper
+                        </a>
                         
                         
                         
@@ -952,6 +912,8 @@ public enum XXXEventType {
                         
                         
                         
+                        
+                        
                         <a href="/tags/%E5%88%86%E5%B8%83%E5%BC%8F%E7%B3%BB%E5%88%97" title="分布式系列">
                             分布式系列
                         </a>
@@ -971,6 +933,10 @@ public enum XXXEventType {
                         
                         
                         
+                        
+                        <a href="/tags/%E5%8D%8F%E8%AE%AE%E6%A0%88" title="协议栈">
+                            协议栈
+                        </a>
                         
                         
                         
@@ -1170,6 +1136,12 @@ public enum XXXEventType {
                         
                         
                         
+                        
+                        
+                        
+                        
+                        
+                        
                         <a href="/tags/%E7%BD%91%E7%BB%9C%E7%BC%96%E7%A8%8B" title="网络编程">
                             网络编程
                         </a>
@@ -1193,6 +1165,10 @@ public enum XXXEventType {
                         
                         
                         
+                        
+                        <a href="/tags/%E8%AE%A4%E8%AF%81%E5%92%8C%E6%8E%88%E6%9D%83" title="认证和授权">
+                            认证和授权
+                        </a>
                         
                         
                         
@@ -1363,7 +1339,7 @@ public enum XXXEventType {
                     
                 </ul>
 		<p class="copyright text-muted">
-                    Copyright &copy;  2020
+                    Copyright &copy;  2021
                     <br>
                     <a href="https://themes.gohugo.io/hugo-theme-cleanwhite">CleanWhite Hugo Theme</a> by <a href="https://zhaohuabing.com">Huabing</a> |
                     <iframe

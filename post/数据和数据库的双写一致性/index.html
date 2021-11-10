@@ -97,15 +97,15 @@
                     </li>
                     
                     <li>
-                        <a href="/categories/english">English</a>
+                        <a href="/categories/english">english</a>
                     </li>
                     
                     <li>
-                        <a href="/categories/life">Life</a>
+                        <a href="/categories/life">life</a>
                     </li>
                     
                     <li>
-                        <a href="/categories/tech">Tech</a>
+                        <a href="/categories/tech">tech</a>
                     </li>
                     
 
@@ -245,68 +245,42 @@
                 
                 
                 
-                
-
-<p>[TOC]</p>
-
-<p><strong>转载地址：<a href="https://www.cnblogs.com/rjzheng/p/9041659.html">https://www.cnblogs.com/rjzheng/p/9041659.html</a></strong></p>
-
+                <p>[TOC]</p>
+<p><strong>转载地址：https://www.cnblogs.com/rjzheng/p/9041659.html</strong></p>
 <h1 id="引言">引言</h1>
-
 <p><strong>为什么写这篇文章？</strong></p>
-
 <p>首先，缓存由于其高并发和高性能的特性，已经在项目中被广泛使用。在读取缓存方面，大家没啥疑问，都是按照下图的流程来进行业务操作。</p>
-
-<p><img src="/img/o_getkeyflow.png" alt="o_getkeyflow" /></p>
-
+<p><img src="/img/o_getkeyflow.png" alt="o_getkeyflow"></p>
 <p>但是在更新缓存方面，对于更新完数据库，是更新缓存呢，还是删除缓存。又或者是先删除缓存，再更新数据库，其实大家存在很大的争议。目前没有一篇全面的博客，对这几种方案进行解析。于是博主战战兢兢，顶着被大家喷的风险，写了这篇文章。</p>
-
 <h1 id="正文">正文</h1>
-
 <p>先做一个说明，从理论上来说，给缓存设置过期时间，是保证最终一致性的解决方案。这种方案下，我们可以对存入缓存的数据设置过期时间，所有的写操作以数据库为准，对缓存操作只是尽最大努力即可。也就是说如果数据库写成功，缓存更新失败，那么只要到达过期时间，则后面的读请求自然会从数据库中读取新值然后回填缓存。因此，接下来讨论的思路不依赖于给缓存设置过期时间这个方案。</p>
-
 <p>在这里，我们讨论<strong>三种</strong>更新策略：</p>
-
 <ol>
 <li><strong>先更新数据库，再更新缓存</strong></li>
 <li><strong>先删除缓存，再更新数据库</strong></li>
 <li><strong>先更新数据库，再删除缓存</strong></li>
 </ol>
-
 <p>应该没人问我，为什么没有先更新缓存，再更新数据库这种策略。</p>
-
-<h1 id="先更新数据库-再更新缓存">先更新数据库，再更新缓存</h1>
-
+<h1 id="先更新数据库再更新缓存">先更新数据库，再更新缓存</h1>
 <p>这套方案，大家是普遍反对的。为什么呢？有如下两点原因。</p>
-
 <p><strong>原因一（线程安全角度）</strong></p>
-
 <p>同时有请求A和请求B进行更新操作，那么会出现</p>
-
 <ol>
 <li>线程A更新了数据库</li>
 <li>线程B更新了数据库</li>
 <li>线程B更新了缓存</li>
 <li>线程A更新了缓存</li>
 </ol>
-
 <p>这就出现请求A更新缓存应该比请求B更新缓存早才对，但是因为网络等原因，B却比A更早更新了缓存。这就导致了脏数据，因此不考虑。</p>
-
 <p><strong>原因二（业务场景角度）</strong></p>
-
 <p>有如下两点：</p>
-
 <ol>
 <li>如果你是一个写数据库场景比较多，而读数据场景比较少的业务需求，采用这种方案就会导致，数据压根还没读到，缓存就被频繁的更新，浪费性能</li>
 <li>如果你写入数据库的值，并不是直接写入缓存的，而是要经过一系列复杂的计算再写入缓存。那么，每次写入数据库后，都再次计算写入缓存的值，无疑是浪费性能的。显然，删除缓存更为适合。</li>
 </ol>
-
 <p>接下来讨论的就是争议最大的，先删缓存，再更新数据库。还是先更新数据库，再删缓存的问题。</p>
-
-<h1 id="先删缓存-再更新数据库">先删缓存，再更新数据库</h1>
-
+<h1 id="先删缓存再更新数据库">先删缓存，再更新数据库</h1>
 <p>该方案会导致不一致的原因是。同时有一个请求A进行更新操作，另一个请求B进行查询操作。那么会出现如下情形:</p>
-
 <ol>
 <li>请求A进行写操作，删除缓存</li>
 <li>请求B查询发现缓存不存在</li>
@@ -314,39 +288,26 @@
 <li>请求B将旧值写入缓存</li>
 <li>请求A将新值写入数据库</li>
 </ol>
-
 <p>上述情况就会导致不一致的情形出现。而且，如果不采用给缓存设置过期时间策略，<strong>该数据永远都是脏数据。</strong></p>
-
 <p>那么，<strong>如何解决呢？采用延时双删策略</strong></p>
-
 <p>伪代码如下</p>
-
-<pre><code class="language-java">public void write(String key,Object data){
-		redis.delKey(key);
-	    db.updateData(data);
-	    Thread.sleep(1000);
-	    redis.delKey(key);
-	}
-</code></pre>
-
-<p>转化为中文描述就是</p>
-
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-java" data-lang="java"><span style="color:#66d9ef">public</span> <span style="color:#66d9ef">void</span> <span style="color:#a6e22e">write</span><span style="color:#f92672">(</span>String key<span style="color:#f92672">,</span>Object data<span style="color:#f92672">){</span>
+		redis<span style="color:#f92672">.</span><span style="color:#a6e22e">delKey</span><span style="color:#f92672">(</span>key<span style="color:#f92672">);</span>
+	    db<span style="color:#f92672">.</span><span style="color:#a6e22e">updateData</span><span style="color:#f92672">(</span>data<span style="color:#f92672">);</span>
+	    Thread<span style="color:#f92672">.</span><span style="color:#a6e22e">sleep</span><span style="color:#f92672">(</span>1000<span style="color:#f92672">);</span>
+	    redis<span style="color:#f92672">.</span><span style="color:#a6e22e">delKey</span><span style="color:#f92672">(</span>key<span style="color:#f92672">);</span>
+	<span style="color:#f92672">}</span>
+</code></pre></div><p>转化为中文描述就是</p>
 <ol>
 <li>先淘汰缓存</li>
 <li>再写数据库（这两步和原来一样）</li>
 <li>休眠1秒，再次淘汰缓存</li>
 </ol>
-
 <p>这么做，可以将1秒内所造成的缓存脏数据，再次删除。</p>
-
 <p><strong>那么，这个1秒怎么确定的，具体该休眠多久呢？</strong></p>
-
 <p>针对上面的情形，读者应该自行评估自己的项目的读数据业务逻辑的耗时。然后写数据的休眠时间则在读数据业务逻辑的耗时基础上，加几百ms即可。这么做的目的，就是确保读请求结束，写请求可以删除读请求造成的缓存脏数据。</p>
-
 <p><strong>如果你用了mysql的读写分离架构怎么办？</strong></p>
-
 <p>ok，在这种情况下，造成数据不一致的原因如下，还是两个请求，一个请求A进行更新操作，另一个请求B进行查询操作。</p>
-
 <ol>
 <li>请求A进行写操作，删除缓存</li>
 <li>请求A将数据写入数据库了，</li>
@@ -355,17 +316,11 @@
 <li>请求B将旧值写入缓存</li>
 <li>数据库完成主从同步，从库变为新值</li>
 </ol>
-
 <p>上述情形，就是数据不一致的原因。还是使用双删延时策略。只是，睡眠时间修改为在主从同步的延时时间基础上，加几百ms。</p>
-
 <p><strong>采用这种同步淘汰策略，吞吐量降低怎么办？</strong></p>
-
 <p>ok，那就将第二次删除作为异步的。自己起一个线程，异步删除。这样，写的请求就不用沉睡一段时间后了，再返回。这么做，加大吞吐量。</p>
-
 <p><strong>第二次删除,如果删除失败怎么办？</strong></p>
-
 <p>这是个非常好的问题，因为第二次删除失败，就会出现如下情形。还是有两个请求，一个请求A进行更新操作，另一个请求B进行查询操作，为了方便，假设是单库：</p>
-
 <ol>
 <li>请求A进行写操作，删除缓存</li>
 <li>请求B查询发现缓存不存在</li>
@@ -374,29 +329,19 @@
 <li>请求A将新值写入数据库</li>
 <li>请求A试图去删除请求B写入对缓存值，结果失败了。</li>
 </ol>
-
 <p>ok,这也就是说。如果第二次删除缓存失败，会再次出现缓存和数据库不一致的问题。</p>
-
 <p><strong>如何解决呢？</strong></p>
-
 <p>具体解决方案，且看博主对第(3)种更新策略的解析。</p>
-
-<h1 id="先更新数据库-再删缓存">先更新数据库，再删缓存</h1>
-
+<h1 id="先更新数据库再删缓存">先更新数据库，再删缓存</h1>
 <p>首先，先说一下。老外提出了一个缓存更新套路，名为<a href="https://docs.microsoft.com/en-us/azure/architecture/patterns/cache-aside">《Cache-Aside pattern》</a>。其中就指出</p>
-
 <ul>
 <li><strong>失效</strong>：应用程序先从cache取数据，没有得到，则从数据库中取数据，成功后，放到缓存中。</li>
 <li><strong>命中</strong>：应用程序从cache中取数据，取到后返回。</li>
 <li><strong>更新</strong>：先把数据存到数据库中，成功后，再让缓存失效。</li>
 </ul>
-
 <p><strong>另外，知名社交网站facebook也在论文<a href="https://www.usenix.org/system/files/conference/nsdi13/nsdi13-final170_update.pdf">《Scaling Memcache at Facebook》</a>中提出，他们用的也是先更新数据库，再删缓存的策略。</strong></p>
-
 <p><strong>这种情况不存在并发问题么？</strong></p>
-
 <p>不是的。假设这会有两个请求，一个请求A做查询操作，一个请求B做更新操作，那么会有如下情形产生</p>
-
 <ol>
 <li>缓存刚好失效</li>
 <li>请求A查询数据库，得一个旧值</li>
@@ -404,34 +349,20 @@
 <li>请求B删除缓存</li>
 <li>请求A将查到的旧值写入缓存</li>
 </ol>
-
 <p>ok，如果发生上述情况，确实是会发生脏数据。</p>
-
 <p><strong>然而，发生这种情况的概率又有多少呢？</strong></p>
-
 <p>发生上述情况有一个先天性条件，就是步骤（3）的写数据库操作比步骤（2）的读数据库操作耗时更短，才有可能使得步骤（4）先于步骤（5）。可是，大家想想，数据库的读操作的速度远快于写操作的（不然做读写分离干嘛，做读写分离的意义就是因为读操作比较快，耗资源少），因此步骤（3）耗时比步骤（2）更短，这一情形很难出现。
 假设，有人非要抬杠，有强迫症，一定要解决怎么办？</p>
-
 <p><strong>如何解决上述并发问题？</strong></p>
-
 <p>首先，给缓存设有效时间是一种方案。其次，采用策略（2）里给出的异步延时删除策略，保证读请求完成以后，再进行删除操作。</p>
-
 <p><strong>还有其他造成不一致的原因么？</strong></p>
-
 <p>有的，这也是缓存更新策略（2）和缓存更新策略（3）都存在的一个问题，如果删缓存失败了怎么办，那不是会有不一致的情况出现么。比如一个写数据请求，然后写入数据库了，删缓存失败了，这会就出现不一致的情况了。这也是缓存更新策略（2）里留下的最后一个疑问。</p>
-
 <p><strong>如何解决？</strong></p>
-
 <p>提供一个保障的重试机制即可，这里给出两套方案。</p>
-
 <p><strong>方案一</strong>：</p>
-
 <p>如下图所示</p>
-
-<p><img src="/img/o_update1.png" alt="o_update1" /></p>
-
+<p><img src="/img/o_update1.png" alt="o_update1"></p>
 <p>流程如下所示</p>
-
 <ol>
 <li>更新数据库数据；</li>
 <li>缓存因为种种问题删除失败</li>
@@ -439,15 +370,10 @@
 <li>自己消费消息，获得需要删除的key</li>
 <li>继续重试删除操作，直到成功</li>
 </ol>
-
-<p><strong>然而，该方案有一个缺点，对业务线代码造成大量的侵入。</strong>于是有了方案二，在方案二中，启动一个订阅程序去订阅数据库的binlog，获得需要操作的数据。在应用程序中，另起一段程序，获得这个订阅程序传来的信息，进行删除缓存操作。</p>
-
+<p>**然而，该方案有一个缺点，对业务线代码造成大量的侵入。**于是有了方案二，在方案二中，启动一个订阅程序去订阅数据库的binlog，获得需要操作的数据。在应用程序中，另起一段程序，获得这个订阅程序传来的信息，进行删除缓存操作。</p>
 <p><strong>方案二</strong>：</p>
-
-<p><img src="/img/o_update2.png" alt="o_update2" /></p>
-
+<p><img src="/img/o_update2.png" alt="o_update2"></p>
 <p>流程如下图所示：</p>
-
 <ol>
 <li>更新数据库数据</li>
 <li>数据库会将操作信息写入binlog日志当中</li>
@@ -457,13 +383,9 @@
 <li>将这些信息发送至消息队列</li>
 <li>重新从消息队列中获得该数据，重试操作。</li>
 </ol>
-
 <h1 id="说明">说明</h1>
-
 <p>上述的订阅binlog程序在mysql中有现成的<strong>中间件叫canal，可以完成订阅binlog日志的功能</strong>。至于oracle中，博主目前不知道有没有现成中间件可以使用。另外，重试机制，博主是采用的是消息队列的方式。如果对一致性要求不是很高，直接在程序中另起一个线程，每隔一段时间去重试即可，这些大家可以灵活自由发挥，只是提供一个思路。</p>
-
 <h1 id="总结">总结</h1>
-
 <p>本文其实是对目前互联网中已有的一致性方案，进行了一个总结。对于先删缓存，再更新数据库的更新策略，还有方案提出维护一个内存队列的方式，博主看了一下，觉得实现异常复杂，没有必要，因此没有必要在文中给出。最后，希望大家有所收获。</p>
 
 
@@ -571,17 +493,7 @@
                         <a class="catalog-toggle" style="font-size: 24px;" href="index.html#">目录结构</a>
                     </h4>
                     <ul class="catalog-body"></ul>
-                    <nav id="TableOfContents">
-<ul>
-<li><a href="#引言">引言</a></li>
-<li><a href="#正文">正文</a></li>
-<li><a href="#先更新数据库-再更新缓存">先更新数据库，再更新缓存</a></li>
-<li><a href="#先删缓存-再更新数据库">先删缓存，再更新数据库</a></li>
-<li><a href="#先更新数据库-再删缓存">先更新数据库，再删缓存</a></li>
-<li><a href="#说明">说明</a></li>
-<li><a href="#总结">总结</a></li>
-</ul>
-</nav>
+                    <nav id="TableOfContents"></nav>
                     <br>
                     <br>
                     <br>
@@ -605,9 +517,6 @@
                         
                         
                         
-                        <a href="/tags/" title="">
-                            
-                        </a>
                         
                         
                         
@@ -617,101 +526,6 @@
                         
                         
                         
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        <a href="/tags/qt" title="QT">
-                            QT
-                        </a>
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        <a href="/tags/zookeeper" title="Zookeeper">
-                            Zookeeper
-                        </a>
                         
                         
                         
@@ -751,8 +565,10 @@
                         
                         
                         
-                        <a href="/tags/elasticsearch" title="elasticSearch">
-                            elasticSearch
+                        
+                        
+                        <a href="/tags/elasticsearch" title="elasticsearch">
+                            elasticsearch
                         </a>
                         
                         
@@ -763,9 +579,27 @@
                         
                         
                         
-                        <a href="/tags/golang" title="golang">
-                            golang
-                        </a>
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
                         
                         
                         
@@ -803,9 +637,21 @@
                         
                         
                         
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
                         <a href="/tags/jvm" title="jvm">
                             jvm
                         </a>
+                        
+                        
+                        
+                        
                         
                         
                         
@@ -829,9 +675,19 @@
                         
                         
                         
+                        
+                        
+                        
+                        
+                        
+                        
                         <a href="/tags/mongodb" title="mongodb">
                             mongodb
                         </a>
+                        
+                        
+                        
+                        
                         
                         
                         
@@ -842,10 +698,6 @@
                         </a>
                         
                         
-                        
-                        <a href="/tags/mycat" title="mycat">
-                            mycat
-                        </a>
                         
                         
                         
@@ -859,9 +711,17 @@
                         
                         
                         
-                        <a href="/tags/nginx" title="nginx">
-                            nginx
-                        </a>
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
                         
                         
                         
@@ -885,8 +745,22 @@
                         
                         
                         
+                        
+                        
                         <a href="/tags/rocketmq" title="rocketmq">
                             rocketmq
+                        </a>
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        <a href="/tags/security%E6%A1%86%E6%9E%B6%E5%AD%A6%E4%B9%A0" title="security框架学习">
+                            security框架学习
                         </a>
                         
                         
@@ -913,17 +787,11 @@
                         
                         
                         
-                        <a href="/tags/springcloud" title="springCloud">
-                            springCloud
-                        </a>
-                        
-                        
-                        
-                        
-                        
                         <a href="/tags/springboot" title="springboot">
                             springboot
                         </a>
+                        
+                        
                         
                         
                         
@@ -937,6 +805,9 @@
                         
                         
                         
+                        <a href="/tags/springcloud" title="springcloud">
+                            springcloud
+                        </a>
                         
                         
                         
@@ -962,6 +833,33 @@
                         
                         
                         
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        <a href="/tags/zookeeper" title="zookeeper">
+                            zookeeper
+                        </a>
                         
                         
                         
@@ -1021,6 +919,8 @@
                         
                         
                         
+                        
+                        
                         <a href="/tags/%E5%88%86%E5%B8%83%E5%BC%8F%E7%B3%BB%E5%88%97" title="分布式系列">
                             分布式系列
                         </a>
@@ -1040,6 +940,10 @@
                         
                         
                         
+                        
+                        <a href="/tags/%E5%8D%8F%E8%AE%AE%E6%A0%88" title="协议栈">
+                            协议栈
+                        </a>
                         
                         
                         
@@ -1239,6 +1143,12 @@
                         
                         
                         
+                        
+                        
+                        
+                        
+                        
+                        
                         <a href="/tags/%E7%BD%91%E7%BB%9C%E7%BC%96%E7%A8%8B" title="网络编程">
                             网络编程
                         </a>
@@ -1262,6 +1172,10 @@
                         
                         
                         
+                        
+                        <a href="/tags/%E8%AE%A4%E8%AF%81%E5%92%8C%E6%8E%88%E6%9D%83" title="认证和授权">
+                            认证和授权
+                        </a>
                         
                         
                         
@@ -1432,7 +1346,7 @@
                     
                 </ul>
 		<p class="copyright text-muted">
-                    Copyright &copy;  2020
+                    Copyright &copy;  2021
                     <br>
                     <a href="https://themes.gohugo.io/hugo-theme-cleanwhite">CleanWhite Hugo Theme</a> by <a href="https://zhaohuabing.com">Huabing</a> |
                     <iframe

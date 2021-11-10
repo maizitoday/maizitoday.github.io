@@ -97,15 +97,15 @@
                     </li>
                     
                     <li>
-                        <a href="/categories/english">English</a>
+                        <a href="/categories/english">english</a>
                     </li>
                     
                     <li>
-                        <a href="/categories/life">Life</a>
+                        <a href="/categories/life">life</a>
                     </li>
                     
                     <li>
-                        <a href="/categories/tech">Tech</a>
+                        <a href="/categories/tech">tech</a>
                     </li>
                     
 
@@ -237,168 +237,118 @@
                 
                 
                 
-                
-
-<p>[TOC]</p>
-
+                <p>[TOC]</p>
 <p><strong>说明： 本学习主要对尚硅谷周阳大神《SpringCloud视频》记录，一下文字来源这个视频PPT</strong></p>
-
-<p><strong>说明： 版本springboot2.14</strong>   <strong><spring-cloud.version>Greenwich.SR1</spring-cloud.version></strong></p>
-
+<p><strong>说明： 版本springboot2.14</strong>   <strong>&lt;spring-cloud.version&gt;Greenwich.SR1&lt;/spring-cloud.version&gt;</strong></p>
 <h1 id="config作用">config作用</h1>
-
 <p>SpringCloud Config为微服务架构中的微服务提供集中化的外部配置支持，配置服务器为<strong>各个不同微服务</strong>应用的所有环境提供了一个中心化的<strong>外部</strong>配置。 我们现在可以直接在clone在本地的git配置环境中，进行直接修改相关配置，然后不需要重启对应的服务。更加的方便。</p>
-
 <ol>
 <li>集中管理配置文件</li>
 <li>不同环境不同配置，动态化配置更新，分环境部署比如dev/test/prod</li>
 <li>运行期间动态调整配置，不再需要在每个服务部署的机器上编写配置文件,服务会向配置中心统一拉取配置自己的配置</li>
 <li>当配置发生变动时，服务不需要重启即可感知到配置的变化并应用新的配置。</li>
 </ol>
-
 <h1 id="config流程">config流程</h1>
-
-<p><img src="/img/5-16-11.png" alt="5-16-11" /></p>
-
+<p><img src="/img/5-16-11.png" alt="5-16-11"></p>
 <h2 id="config-server-和-git-通信">config-server 和 git 通信</h2>
-
-<h3 id="pom-xml">pom.xml</h3>
-
-<pre><code class="language-xml">&lt;dependency&gt;
-			&lt;groupId&gt;org.springframework.cloud&lt;/groupId&gt;
-			&lt;artifactId&gt;spring-cloud-config-server&lt;/artifactId&gt;
-&lt;/dependency&gt;
-</code></pre>
-
-<h3 id="application-yml">application.yml</h3>
-
-<pre><code class="language-yaml">spring:
-  application:
-    name: service-config
-  cloud:
-    config:
-      server:
-        git:
-          uri: https://github.com/maizitoday/springcloud-config.git  #git 地址 
-          search-paths: 
-             -projectA #会在github下面的这个文件夹下面去找相关文件。
-          default-label： #分支
-</code></pre>
-
-<h3 id="测试访问效果">测试访问效果</h3>
-
-<p><img src="/img/5-16-12.png" alt="5-16-12" /></p>
-
+<h3 id="pomxml">pom.xml</h3>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-xml" data-lang="xml"><span style="color:#f92672">&lt;dependency&gt;</span>
+			<span style="color:#f92672">&lt;groupId&gt;</span>org.springframework.cloud<span style="color:#f92672">&lt;/groupId&gt;</span>
+			<span style="color:#f92672">&lt;artifactId&gt;</span>spring-cloud-config-server<span style="color:#f92672">&lt;/artifactId&gt;</span>
+<span style="color:#f92672">&lt;/dependency&gt;</span>
+</code></pre></div><h3 id="applicationyml">application.yml</h3>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-yaml" data-lang="yaml"><span style="color:#f92672">spring</span>:
+  <span style="color:#f92672">application</span>:
+    <span style="color:#f92672">name</span>: <span style="color:#ae81ff">service-config</span>
+  <span style="color:#f92672">cloud</span>:
+    <span style="color:#f92672">config</span>:
+      <span style="color:#f92672">server</span>:
+        <span style="color:#f92672">git</span>:
+          <span style="color:#f92672">uri</span>: <span style="color:#ae81ff">https://github.com/maizitoday/springcloud-config.git </span> <span style="color:#75715e">#git 地址 </span>
+          <span style="color:#f92672">search-paths</span>: 
+             -<span style="color:#ae81ff">projectA</span> <span style="color:#75715e">#会在github下面的这个文件夹下面去找相关文件。</span>
+          <span style="color:#ae81ff">default-label：</span> <span style="color:#75715e">#分支</span>
+</code></pre></div><h3 id="测试访问效果">测试访问效果</h3>
+<p><img src="/img/5-16-12.png" alt="5-16-12"></p>
 <h3 id="配置的读取规则">配置的读取规则</h3>
-
-<p><img src="/img/5-16-13.png" alt="5-16-13" /></p>
-
+<p><img src="/img/5-16-13.png" alt="5-16-13"></p>
 <p>上面图，显示访问github上面的application.yml的方式。label是分支的名称。可以根据这种方式来读取git上面的数据</p>
-
 <h2 id="config-client-和-config-server通信">config-client 和 config-server通信</h2>
-
-<h3 id="pom-xml-1">pom.xml</h3>
-
-<pre><code class="language-xml">&lt;dependency&gt;
-			&lt;groupId&gt;org.springframework.cloud&lt;/groupId&gt;
-			&lt;artifactId&gt;spring-cloud-starter-config&lt;/artifactId&gt;
-&lt;/dependency&gt;
-</code></pre>
-
-<h3 id="bootstrap-yml">bootstrap.yml</h3>
-
-<pre><code class="language-yaml">spring:
-  cloud:
-    config:
-      name: application-client  #指定github上面的确定的资源文件名称，没有后缀yml
-      profile: dev  #本次访问的资源项目
-      label: master  #当前分支 
-      uri: http://localhost:8080  #config 服务， 指定从哪一个服务来获取github上面的资源
-</code></pre>
-
-<h3 id="github上面资源文件路径和application-yml文件">github上面资源文件路径和application.yml文件</h3>
-
-<p><img src="/img/5-16-14.png" alt="5-16-14" /></p>
-
+<h3 id="pomxml-1">pom.xml</h3>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-xml" data-lang="xml"><span style="color:#f92672">&lt;dependency&gt;</span>
+			<span style="color:#f92672">&lt;groupId&gt;</span>org.springframework.cloud<span style="color:#f92672">&lt;/groupId&gt;</span>
+			<span style="color:#f92672">&lt;artifactId&gt;</span>spring-cloud-starter-config<span style="color:#f92672">&lt;/artifactId&gt;</span>
+<span style="color:#f92672">&lt;/dependency&gt;</span>
+</code></pre></div><h3 id="bootstrapyml">bootstrap.yml</h3>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-yaml" data-lang="yaml"><span style="color:#f92672">spring</span>:
+  <span style="color:#f92672">cloud</span>:
+    <span style="color:#f92672">config</span>:
+      <span style="color:#f92672">name</span>: <span style="color:#ae81ff">application-client </span> <span style="color:#75715e">#指定github上面的确定的资源文件名称，没有后缀yml</span>
+      <span style="color:#f92672">profile</span>: <span style="color:#ae81ff">dev </span> <span style="color:#75715e">#本次访问的资源项目</span>
+      <span style="color:#f92672">label</span>: <span style="color:#ae81ff">master </span> <span style="color:#75715e">#当前分支 </span>
+      <span style="color:#f92672">uri</span>: <span style="color:#ae81ff">http://localhost:8080 </span> <span style="color:#75715e">#config 服务， 指定从哪一个服务来获取github上面的资源</span>
+</code></pre></div><h3 id="github上面资源文件路径和applicationyml文件">github上面资源文件路径和application.yml文件</h3>
+<p><img src="/img/5-16-14.png" alt="5-16-14"></p>
 <h3 id="运行效果">运行效果</h3>
-
-<p><img src="/img/5-16-15.png" alt="5-16-15" /></p>
-
+<p><img src="/img/5-16-15.png" alt="5-16-15"></p>
+<h2 id="heading"></h2>
 <h1 id="自动刷新">自动刷新</h1>
-
 <p>当我们修改github本地文件的时候，需要在浏览器端，马上可以看到最新的数据，需要Spring Cloud Bus 加上 MQ 来实现，然后在github上面需要设置一个钩子， 加入相关指令代码， 然后就可以了 。 后期在加上这一块的知识实现。</p>
-
-<pre><code>AutowiredAnnotationBeanPostProcessor   inject  
-</code></pre>
-
-<p>上面类里面的方法就是最终把数据源赋值给实体的。</p>
-
+<h2 id="heading-1"></h2>
+<pre tabindex="0"><code>AutowiredAnnotationBeanPostProcessor   inject  
+</code></pre><p>上面类里面的方法就是最终把数据源赋值给实体的。</p>
 <p>基本思路：</p>
-
 <ol>
-<li><p>重写数据源EnvironmentRepository，获取mongdb里面的数据。</p></li>
+<li>
+<p>重写数据源EnvironmentRepository，获取mongdb里面的数据。</p>
+</li>
+<li>
+<p>其他的微服务通过Http的请求，获取到mongdb里面的数据， 然后放到各自的数据源中。</p>
+</li>
+<li>
+<p>各自的微服务启动的时候， 扫描所有的@value的注解， 然后找到</p>
+</li>
+<li>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-java" data-lang="java"><span style="color:#a6e22e">@Value</span><span style="color:#f92672">(</span><span style="color:#e6db74">&#34;${xxl.job.admin.addresses}&#34;</span><span style="color:#f92672">)</span>
+    <span style="color:#66d9ef">private</span> String adminAddresses<span style="color:#f92672">;</span>
+</code></pre></div><p>找到${xxl.job.admin.addresses} 值， 然后去掉{} 变成</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-java" data-lang="java">xxl<span style="color:#f92672">.</span><span style="color:#a6e22e">job</span><span style="color:#f92672">.</span><span style="color:#a6e22e">admin</span><span style="color:#f92672">.</span><span style="color:#a6e22e">addresses</span>
+</code></pre></div><p>如此， 就和你的配置文件一样了。</p>
+<pre tabindex="0"><code class="language-properties" data-lang="properties">xxl.job.admin.addresses=${xxl-job-admin-addresses}
 
-<li><p>其他的微服务通过Http的请求，获取到mongdb里面的数据， 然后放到各自的数据源中。</p></li>
-
-<li><p>各自的微服务启动的时候， 扫描所有的@value的注解， 然后找到</p></li>
-
-<li><pre><code class="language-java">@Value(&quot;${xxl.job.admin.addresses}&quot;)
-   private String adminAddresses;
+### xxl-job executor address
+xxl.job.executor.appname=${spring.application.name}
+xxl.job.executor.ip=
+xxl.job.executor.port=${xxl-job-executor-port}
 </code></pre></li>
 </ol>
-
-<p>找到${xxl.job.admin.addresses} 值， 然后去掉{} 变成</p>
-
-<pre><code class="language-java">   xxl.job.admin.addresses
-</code></pre>
-
-<p>如此， 就和你的配置文件一样了。</p>
-
-<pre><code class="language-properties">   xxl.job.admin.addresses=${xxl-job-admin-addresses}
-   
-   ### xxl-job executor address
-   xxl.job.executor.appname=${spring.application.name}
-   xxl.job.executor.ip=
-   xxl.job.executor.port=${xxl-job-executor-port}
-</code></pre>
-
 <p>同时这个时候可以获取到</p>
-
-<pre><code class="language-java">${xxl-job-admin-addresses} 
-</code></pre>
-
-<p>这个值。</p>
-
-<ol>
-<li><p>查看mongdb的数据源数据</p></li>
-
-<li><pre><code class="language-json">{
-        &quot;key&quot; : &quot;task&quot;,
-        &quot;value&quot; : {
-            &quot;xxl-job-executor-port&quot; : &quot;8209&quot;,
-            &quot;xxl-job-executor-logpath&quot; : &quot;/home/XX&quot;,
-            &quot;xxl-job-accessToken&quot; : &quot;&quot;,
-            &quot;xxl-job-admin-addresses&quot; : &quot;http://XX&quot;
-        }
-    }
-</code></pre></li>
-</ol>
-
-<p>如此可以看到和这边的</p>
-
-<pre><code>   xxl-job-admin-addresses
-</code></pre>
-
-<p>对应起来，如此就获取到了值。 注意这里和 key是没有关系的， 加载配置文件的时候，都是加载</p>
-
-<pre><code>   application_dev.yml
-   application_dataSource.yml
-</code></pre>
-
-<p>这样来加载的。</p>
-
-<ol>
-<li>如此获取到了值， 然后在bean类的时候， 因为在扫描所有的@Value的注解的时候，就可以获取到bean类， 所以进行反射机制 ，这个配置文件的值就填充到了这个实体类了。</li>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-java" data-lang="java">$<span style="color:#f92672">{</span>xxl<span style="color:#f92672">-</span>job<span style="color:#f92672">-</span>admin<span style="color:#f92672">-</span>addresses<span style="color:#f92672">}</span> 
+</code></pre></div><p>这个值。</p>
+<ol start="5">
+<li>
+<p>查看mongdb的数据源数据</p>
+</li>
+<li>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-json" data-lang="json">{
+			<span style="color:#f92672">&#34;key&#34;</span> : <span style="color:#e6db74">&#34;task&#34;</span>,
+			<span style="color:#f92672">&#34;value&#34;</span> : {
+				<span style="color:#f92672">&#34;xxl-job-executor-port&#34;</span> : <span style="color:#e6db74">&#34;8209&#34;</span>,
+				<span style="color:#f92672">&#34;xxl-job-executor-logpath&#34;</span> : <span style="color:#e6db74">&#34;/home/XX&#34;</span>,
+				<span style="color:#f92672">&#34;xxl-job-accessToken&#34;</span> : <span style="color:#e6db74">&#34;&#34;</span>,
+				<span style="color:#f92672">&#34;xxl-job-admin-addresses&#34;</span> : <span style="color:#e6db74">&#34;http://XX&#34;</span>
+			}
+		}
+</code></pre></div><p>如此可以看到和这边的</p>
+<pre tabindex="0"><code>xxl-job-admin-addresses
+</code></pre><p>对应起来，如此就获取到了值。 注意这里和 key是没有关系的， 加载配置文件的时候，都是加载</p>
+<pre tabindex="0"><code>application_dev.yml
+application_dataSource.yml
+</code></pre><p>这样来加载的。</p>
+</li>
+<li>
+<p>如此获取到了值， 然后在bean类的时候， 因为在扫描所有的@Value的注解的时候，就可以获取到bean类， 所以进行反射机制 ，这个配置文件的值就填充到了这个实体类了。</p>
+</li>
 </ol>
 
 
@@ -507,27 +457,29 @@
                     </h4>
                     <ul class="catalog-body"></ul>
                     <nav id="TableOfContents">
-<ul>
-<li><a href="#config作用">config作用</a></li>
-<li><a href="#config流程">config流程</a>
-<ul>
-<li><a href="#config-server-和-git-通信">config-server 和 git 通信</a>
-<ul>
-<li><a href="#pom-xml">pom.xml</a></li>
-<li><a href="#application-yml">application.yml</a></li>
-<li><a href="#测试访问效果">测试访问效果</a></li>
-<li><a href="#配置的读取规则">配置的读取规则</a></li>
-</ul></li>
-<li><a href="#config-client-和-config-server通信">config-client 和 config-server通信</a>
-<ul>
-<li><a href="#pom-xml-1">pom.xml</a></li>
-<li><a href="#bootstrap-yml">bootstrap.yml</a></li>
-<li><a href="#github上面资源文件路径和application-yml文件">github上面资源文件路径和application.yml文件</a></li>
-<li><a href="#运行效果">运行效果</a></li>
-</ul></li>
-</ul></li>
-<li><a href="#自动刷新">自动刷新</a></li>
-</ul>
+  <ul>
+    <li><a href="#config-server-和-git-通信">config-server 和 git 通信</a>
+      <ul>
+        <li><a href="#pomxml">pom.xml</a></li>
+        <li><a href="#applicationyml">application.yml</a></li>
+        <li><a href="#测试访问效果">测试访问效果</a></li>
+        <li><a href="#配置的读取规则">配置的读取规则</a></li>
+      </ul>
+    </li>
+    <li><a href="#config-client-和-config-server通信">config-client 和 config-server通信</a>
+      <ul>
+        <li><a href="#pomxml-1">pom.xml</a></li>
+        <li><a href="#bootstrapyml">bootstrap.yml</a></li>
+        <li><a href="#github上面资源文件路径和applicationyml文件">github上面资源文件路径和application.yml文件</a></li>
+        <li><a href="#运行效果">运行效果</a></li>
+      </ul>
+    </li>
+    <li><a href="#heading"></a></li>
+  </ul>
+
+  <ul>
+    <li><a href="#heading-1"></a></li>
+  </ul>
 </nav>
                     <br>
                     <br>
@@ -552,9 +504,6 @@
                         
                         
                         
-                        <a href="/tags/" title="">
-                            
-                        </a>
                         
                         
                         
@@ -564,101 +513,6 @@
                         
                         
                         
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        <a href="/tags/qt" title="QT">
-                            QT
-                        </a>
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        <a href="/tags/zookeeper" title="Zookeeper">
-                            Zookeeper
-                        </a>
                         
                         
                         
@@ -698,8 +552,10 @@
                         
                         
                         
-                        <a href="/tags/elasticsearch" title="elasticSearch">
-                            elasticSearch
+                        
+                        
+                        <a href="/tags/elasticsearch" title="elasticsearch">
+                            elasticsearch
                         </a>
                         
                         
@@ -710,9 +566,27 @@
                         
                         
                         
-                        <a href="/tags/golang" title="golang">
-                            golang
-                        </a>
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
                         
                         
                         
@@ -750,9 +624,21 @@
                         
                         
                         
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
                         <a href="/tags/jvm" title="jvm">
                             jvm
                         </a>
+                        
+                        
+                        
+                        
                         
                         
                         
@@ -776,9 +662,19 @@
                         
                         
                         
+                        
+                        
+                        
+                        
+                        
+                        
                         <a href="/tags/mongodb" title="mongodb">
                             mongodb
                         </a>
+                        
+                        
+                        
+                        
                         
                         
                         
@@ -789,10 +685,6 @@
                         </a>
                         
                         
-                        
-                        <a href="/tags/mycat" title="mycat">
-                            mycat
-                        </a>
                         
                         
                         
@@ -806,9 +698,17 @@
                         
                         
                         
-                        <a href="/tags/nginx" title="nginx">
-                            nginx
-                        </a>
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
                         
                         
                         
@@ -832,8 +732,22 @@
                         
                         
                         
+                        
+                        
                         <a href="/tags/rocketmq" title="rocketmq">
                             rocketmq
+                        </a>
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        <a href="/tags/security%E6%A1%86%E6%9E%B6%E5%AD%A6%E4%B9%A0" title="security框架学习">
+                            security框架学习
                         </a>
                         
                         
@@ -860,17 +774,11 @@
                         
                         
                         
-                        <a href="/tags/springcloud" title="springCloud">
-                            springCloud
-                        </a>
-                        
-                        
-                        
-                        
-                        
                         <a href="/tags/springboot" title="springboot">
                             springboot
                         </a>
+                        
+                        
                         
                         
                         
@@ -884,6 +792,9 @@
                         
                         
                         
+                        <a href="/tags/springcloud" title="springcloud">
+                            springcloud
+                        </a>
                         
                         
                         
@@ -909,6 +820,33 @@
                         
                         
                         
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        <a href="/tags/zookeeper" title="zookeeper">
+                            zookeeper
+                        </a>
                         
                         
                         
@@ -968,6 +906,8 @@
                         
                         
                         
+                        
+                        
                         <a href="/tags/%E5%88%86%E5%B8%83%E5%BC%8F%E7%B3%BB%E5%88%97" title="分布式系列">
                             分布式系列
                         </a>
@@ -987,6 +927,10 @@
                         
                         
                         
+                        
+                        <a href="/tags/%E5%8D%8F%E8%AE%AE%E6%A0%88" title="协议栈">
+                            协议栈
+                        </a>
                         
                         
                         
@@ -1186,6 +1130,12 @@
                         
                         
                         
+                        
+                        
+                        
+                        
+                        
+                        
                         <a href="/tags/%E7%BD%91%E7%BB%9C%E7%BC%96%E7%A8%8B" title="网络编程">
                             网络编程
                         </a>
@@ -1209,6 +1159,10 @@
                         
                         
                         
+                        
+                        <a href="/tags/%E8%AE%A4%E8%AF%81%E5%92%8C%E6%8E%88%E6%9D%83" title="认证和授权">
+                            认证和授权
+                        </a>
                         
                         
                         
@@ -1379,7 +1333,7 @@
                     
                 </ul>
 		<p class="copyright text-muted">
-                    Copyright &copy;  2020
+                    Copyright &copy;  2021
                     <br>
                     <a href="https://themes.gohugo.io/hugo-theme-cleanwhite">CleanWhite Hugo Theme</a> by <a href="https://zhaohuabing.com">Huabing</a> |
                     <iframe

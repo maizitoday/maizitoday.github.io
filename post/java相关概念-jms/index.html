@@ -97,15 +97,15 @@
                     </li>
                     
                     <li>
-                        <a href="/categories/english">English</a>
+                        <a href="/categories/english">english</a>
                     </li>
                     
                     <li>
-                        <a href="/categories/life">Life</a>
+                        <a href="/categories/life">life</a>
                     </li>
                     
                     <li>
-                        <a href="/categories/tech">Tech</a>
+                        <a href="/categories/tech">tech</a>
                     </li>
                     
 
@@ -237,79 +237,55 @@
                 
                 
                 
-                
-
-<p><strong>转载地址：<a href="https://www.cnblogs.com/Zender/p/9098410.html">https://www.cnblogs.com/Zender/p/9098410.html</a></strong></p>
-
+                <p><strong>转载地址：https://www.cnblogs.com/Zender/p/9098410.html</strong></p>
 <h1 id="消息服务">消息服务</h1>
-
 <p>消息服务指的是两个应用程序之间进行异步通信的API，它为标准消息协议和消息服务提供了一组通用接口，包括创建、发送、读取消息等，用于支持应用程序开发。在Java中，当两个应用程序使用JMS进行通信时，它们之间并不是直接相连的，而是通过一个共同的消息收发服务连接起来，可以达到解耦的效果。</p>
-
 <h1 id="简介">简介</h1>
-
 <p>JMS即Java消息服务（Java Message Service）应用程序接口，是一个Java平台中关于面向消息中间件（MOM-分布式系统的集成）的API，用于在两个应用程序之间，或分布式系统中发送消息，进行异步通信。</p>
-
 <p>JMS是一种与厂商无关的 API，用来访问消息收发系统消息，它类似于JDBC(Java Database Connectivity)。</p>
-
 <h1 id="体系架构">体系架构</h1>
-
 <p>JMS由以下元素组成：</p>
-
 <table>
 <thead>
 <tr>
-<th align="center">JMS提供者</th>
-<th align="left">连接面向消息中间件的，JMS接口的一个实现。提供者可以是Java平台的JMS实现，也可以是非Java平台的面向消息中间件的适配器。</th>
+<th style="text-align:center">JMS提供者</th>
+<th style="text-align:left">连接面向消息中间件的，JMS接口的一个实现。提供者可以是Java平台的JMS实现，也可以是非Java平台的面向消息中间件的适配器。</th>
 </tr>
 </thead>
-
 <tbody>
 <tr>
-<td align="center">JMS客户</td>
-<td align="left">生产或消费基于消息的Java的应用程序或对象。</td>
+<td style="text-align:center">JMS客户</td>
+<td style="text-align:left">生产或消费基于消息的Java的应用程序或对象。</td>
 </tr>
-
 <tr>
-<td align="center">JMS生产者</td>
-<td align="left">创建并发送消息的JMS客户。</td>
+<td style="text-align:center">JMS生产者</td>
+<td style="text-align:left">创建并发送消息的JMS客户。</td>
 </tr>
-
 <tr>
-<td align="center">JMS消费者</td>
-<td align="left">接收消息的JMS客户。</td>
+<td style="text-align:center">JMS消费者</td>
+<td style="text-align:left">接收消息的JMS客户。</td>
 </tr>
-
 <tr>
-<td align="center">JMS消息</td>
-<td align="left">包括可以在JMS客户之间传递的数据的对象。</td>
+<td style="text-align:center">JMS消息</td>
+<td style="text-align:left">包括可以在JMS客户之间传递的数据的对象。</td>
 </tr>
-
 <tr>
-<td align="center">JMS队列</td>
-<td align="left">一个容纳那些被发送的等待阅读的消息的区域。与队列名字所暗示的意思不同，消息的接受顺序并不一定要与消息的发送顺序相同。一旦一个消息被阅读，该消息将被从队列中移走。</td>
+<td style="text-align:center">JMS队列</td>
+<td style="text-align:left">一个容纳那些被发送的等待阅读的消息的区域。与队列名字所暗示的意思不同，消息的接受顺序并不一定要与消息的发送顺序相同。一旦一个消息被阅读，该消息将被从队列中移走。</td>
 </tr>
-
 <tr>
-<td align="center">JMS主题</td>
-<td align="left">一种支持发送消息给多个订阅者的机制。</td>
+<td style="text-align:center">JMS主题</td>
+<td style="text-align:left">一种支持发送消息给多个订阅者的机制。</td>
 </tr>
 </tbody>
 </table>
-
 <h1 id="通常会说到一些术语">通常会说到一些术语</h1>
-
 <p>消息中间件（JMS Provider) ： <strong>指提供了对JMS协议的第三方组件，比如RocketMQ就是一个消息中间件，另外比较知名的还有KafKa、 Rabbit MQ、ActiveMQ等</strong>。</p>
-
 <p>消息（Message): 通信内容的载体，其结构主要分为消息头，属性和消息体，并且根据存储结构的不同分为好几种，后面会详细提到。</p>
-
 <p>消息模式：分为点对点（Point to Point，即P2P）和发布/订阅（Pub/Sub)，对应的数据结构分别是队列（Queue)和主题（Topic)</p>
-
 <p>消息生产者：产生消息的一方，在P2P模式下，指消息发送者(Sender)，在P/S模式下指消息发布者(Publisher)</p>
-
 <p>消息消费者：接收消息的一方，对应于两种模式分别是消息接收者（Receiver）和消息订阅者(Subscriber)</p>
-
 <h1 id="和rocketmq关系">和RocketMQ关系</h1>
-
 <p>指提供了对JMS协议的第三方组件，比如RocketMQ就是一个消息中间件，另外比较知名的还有KafKa、 Rabbit MQ、ActiveMQ。</p>
 
 
@@ -417,15 +393,7 @@
                         <a class="catalog-toggle" style="font-size: 24px;" href="index.html#">目录结构</a>
                     </h4>
                     <ul class="catalog-body"></ul>
-                    <nav id="TableOfContents">
-<ul>
-<li><a href="#消息服务">消息服务</a></li>
-<li><a href="#简介">简介</a></li>
-<li><a href="#体系架构">体系架构</a></li>
-<li><a href="#通常会说到一些术语">通常会说到一些术语</a></li>
-<li><a href="#和rocketmq关系">和RocketMQ关系</a></li>
-</ul>
-</nav>
+                    <nav id="TableOfContents"></nav>
                     <br>
                     <br>
                     <br>
@@ -449,9 +417,6 @@
                         
                         
                         
-                        <a href="/tags/" title="">
-                            
-                        </a>
                         
                         
                         
@@ -461,101 +426,6 @@
                         
                         
                         
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        <a href="/tags/qt" title="QT">
-                            QT
-                        </a>
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        <a href="/tags/zookeeper" title="Zookeeper">
-                            Zookeeper
-                        </a>
                         
                         
                         
@@ -595,8 +465,10 @@
                         
                         
                         
-                        <a href="/tags/elasticsearch" title="elasticSearch">
-                            elasticSearch
+                        
+                        
+                        <a href="/tags/elasticsearch" title="elasticsearch">
+                            elasticsearch
                         </a>
                         
                         
@@ -607,9 +479,27 @@
                         
                         
                         
-                        <a href="/tags/golang" title="golang">
-                            golang
-                        </a>
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
                         
                         
                         
@@ -647,9 +537,21 @@
                         
                         
                         
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
                         <a href="/tags/jvm" title="jvm">
                             jvm
                         </a>
+                        
+                        
+                        
+                        
                         
                         
                         
@@ -673,9 +575,19 @@
                         
                         
                         
+                        
+                        
+                        
+                        
+                        
+                        
                         <a href="/tags/mongodb" title="mongodb">
                             mongodb
                         </a>
+                        
+                        
+                        
+                        
                         
                         
                         
@@ -686,10 +598,6 @@
                         </a>
                         
                         
-                        
-                        <a href="/tags/mycat" title="mycat">
-                            mycat
-                        </a>
                         
                         
                         
@@ -703,9 +611,17 @@
                         
                         
                         
-                        <a href="/tags/nginx" title="nginx">
-                            nginx
-                        </a>
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
                         
                         
                         
@@ -729,8 +645,22 @@
                         
                         
                         
+                        
+                        
                         <a href="/tags/rocketmq" title="rocketmq">
                             rocketmq
+                        </a>
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        <a href="/tags/security%E6%A1%86%E6%9E%B6%E5%AD%A6%E4%B9%A0" title="security框架学习">
+                            security框架学习
                         </a>
                         
                         
@@ -757,17 +687,11 @@
                         
                         
                         
-                        <a href="/tags/springcloud" title="springCloud">
-                            springCloud
-                        </a>
-                        
-                        
-                        
-                        
-                        
                         <a href="/tags/springboot" title="springboot">
                             springboot
                         </a>
+                        
+                        
                         
                         
                         
@@ -781,6 +705,9 @@
                         
                         
                         
+                        <a href="/tags/springcloud" title="springcloud">
+                            springcloud
+                        </a>
                         
                         
                         
@@ -806,6 +733,33 @@
                         
                         
                         
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        <a href="/tags/zookeeper" title="zookeeper">
+                            zookeeper
+                        </a>
                         
                         
                         
@@ -865,6 +819,8 @@
                         
                         
                         
+                        
+                        
                         <a href="/tags/%E5%88%86%E5%B8%83%E5%BC%8F%E7%B3%BB%E5%88%97" title="分布式系列">
                             分布式系列
                         </a>
@@ -884,6 +840,10 @@
                         
                         
                         
+                        
+                        <a href="/tags/%E5%8D%8F%E8%AE%AE%E6%A0%88" title="协议栈">
+                            协议栈
+                        </a>
                         
                         
                         
@@ -1083,6 +1043,12 @@
                         
                         
                         
+                        
+                        
+                        
+                        
+                        
+                        
                         <a href="/tags/%E7%BD%91%E7%BB%9C%E7%BC%96%E7%A8%8B" title="网络编程">
                             网络编程
                         </a>
@@ -1106,6 +1072,10 @@
                         
                         
                         
+                        
+                        <a href="/tags/%E8%AE%A4%E8%AF%81%E5%92%8C%E6%8E%88%E6%9D%83" title="认证和授权">
+                            认证和授权
+                        </a>
                         
                         
                         
@@ -1276,7 +1246,7 @@
                     
                 </ul>
 		<p class="copyright text-muted">
-                    Copyright &copy;  2020
+                    Copyright &copy;  2021
                     <br>
                     <a href="https://themes.gohugo.io/hugo-theme-cleanwhite">CleanWhite Hugo Theme</a> by <a href="https://zhaohuabing.com">Huabing</a> |
                     <iframe

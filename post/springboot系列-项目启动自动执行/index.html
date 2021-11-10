@@ -97,15 +97,15 @@
                     </li>
                     
                     <li>
-                        <a href="/categories/english">English</a>
+                        <a href="/categories/english">english</a>
                     </li>
                     
                     <li>
-                        <a href="/categories/life">Life</a>
+                        <a href="/categories/life">life</a>
                     </li>
                     
                     <li>
-                        <a href="/categories/tech">Tech</a>
+                        <a href="/categories/tech">tech</a>
                     </li>
                     
 
@@ -237,86 +237,63 @@
                 
                 
                 
-                
-
-<p>[TOC]</p>
-
-<p><strong>转载：<a href="https://blog.csdn.net/fyyyr/article/details/86505304">https://blog.csdn.net/fyyyr/article/details/86505304</a></strong></p>
-
+                <p>[TOC]</p>
+<p><strong>转载：https://blog.csdn.net/fyyyr/article/details/86505304</strong></p>
 <h1 id="概述">概述</h1>
-
 <p>通常，有些操作需要在工程启动时执行，例如某些资源的加载。SpringBoot提供了几种方式来实现该功能：</p>
-
 <h1 id="postconstruct">@PostConstruct</h1>
-
 <p>对于注入到Spring容器中的类，在其成员函数前添加<code>@PostConstruct</code>注解，则在执行Spring beans初始化时，就会执行该函数。</p>
-
 <p><strong>但由于该函数执行时，其他Spring beans可能并未初始化完成，因此在该函数中执行的初始化操作应当不依赖于其他Spring beans</strong>。</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-java" data-lang="java"><span style="color:#a6e22e">@Component</span>
+<span style="color:#66d9ef">public</span> <span style="color:#66d9ef">class</span> <span style="color:#a6e22e">Construct</span> <span style="color:#f92672">{</span>
+    <span style="color:#a6e22e">@PostConstruct</span>
+    <span style="color:#66d9ef">public</span> <span style="color:#66d9ef">void</span> <span style="color:#a6e22e">doConstruct</span><span style="color:#f92672">()</span> <span style="color:#66d9ef">throws</span> Exception <span style="color:#f92672">{</span>
+        System<span style="color:#f92672">.</span><span style="color:#a6e22e">out</span><span style="color:#f92672">.</span><span style="color:#a6e22e">println</span><span style="color:#f92672">(</span><span style="color:#e6db74">&#34;初始化：PostConstruct&#34;</span><span style="color:#f92672">);</span>
+    <span style="color:#f92672">}</span>
+<span style="color:#f92672">}</span>
 
-<pre><code class="language-java">@Component
-public class Construct {
-    @PostConstruct
-    public void doConstruct() throws Exception {
-        System.out.println(&quot;初始化：PostConstruct&quot;);
-    }
-}
-
-</code></pre>
-
-<h1 id="commandlinerunner">CommandLineRunner</h1>
-
+</code></pre></div><h1 id="commandlinerunner">CommandLineRunner</h1>
 <p><code>CommandLineRunner</code>是Spring提供的接口，定义了一个run()方法，用于执行初始化操作。</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-java" data-lang="java"><span style="color:#a6e22e">@Component</span>
+<span style="color:#66d9ef">public</span> <span style="color:#66d9ef">class</span> <span style="color:#a6e22e">InitCommandLineRunner</span> <span style="color:#66d9ef">implements</span> CommandLineRunner <span style="color:#f92672">{</span>
+    <span style="color:#a6e22e">@Override</span>
+    <span style="color:#66d9ef">public</span> <span style="color:#66d9ef">void</span> <span style="color:#a6e22e">run</span><span style="color:#f92672">(</span>String<span style="color:#f92672">...</span> args<span style="color:#f92672">)</span> <span style="color:#66d9ef">throws</span> Exception <span style="color:#f92672">{</span>
+        System<span style="color:#f92672">.</span><span style="color:#a6e22e">out</span><span style="color:#f92672">.</span><span style="color:#a6e22e">println</span><span style="color:#f92672">(</span><span style="color:#e6db74">&#34;初始化：InitCommandLineRunner&#34;</span><span style="color:#f92672">);</span>
+    <span style="color:#f92672">}</span>
+<span style="color:#f92672">}</span>
 
-<pre><code class="language-java">@Component
-public class InitCommandLineRunner implements CommandLineRunner {
-    @Override
-    public void run(String... args) throws Exception {
-        System.out.println(&quot;初始化：InitCommandLineRunner&quot;);
-    }
-}
-
-</code></pre>
-
-<p><code>CommandLineRunner</code>的时机为Spring beans初始化之后，因此<code>CommandLineRunner</code>的执行一定是晚于<code>@PostConstruct</code>的。
+</code></pre></div><p><code>CommandLineRunner</code>的时机为Spring beans初始化之后，因此<code>CommandLineRunner</code>的执行一定是晚于<code>@PostConstruct</code>的。
 若有多组初始化操作，则每一组操作都要定义一个<code>CommandLineRunner</code>派生类并实现run()方法。这些操作的执行顺序使用<code>@Order(n)</code>来设置，n为int型数据。</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-java" data-lang="java"><span style="color:#a6e22e">@Component</span>
+<span style="color:#a6e22e">@Order</span><span style="color:#f92672">(</span>99<span style="color:#f92672">)</span>
+<span style="color:#66d9ef">public</span> <span style="color:#66d9ef">class</span> <span style="color:#a6e22e">CommandLineRunnerA</span> <span style="color:#66d9ef">implements</span> CommandLineRunner <span style="color:#f92672">{</span>
+    <span style="color:#a6e22e">@Override</span>
+    <span style="color:#66d9ef">public</span> <span style="color:#66d9ef">void</span> <span style="color:#a6e22e">run</span><span style="color:#f92672">(</span>String<span style="color:#f92672">...</span> args<span style="color:#f92672">)</span> <span style="color:#66d9ef">throws</span> Exception <span style="color:#f92672">{</span>
+        System<span style="color:#f92672">.</span><span style="color:#a6e22e">out</span><span style="color:#f92672">.</span><span style="color:#a6e22e">println</span><span style="color:#f92672">(</span><span style="color:#e6db74">&#34;初始化：CommandLineRunnerA&#34;</span><span style="color:#f92672">);</span>
+    <span style="color:#f92672">}</span>
+<span style="color:#f92672">}</span>
 
-<pre><code class="language-java">@Component
-@Order(99)
-public class CommandLineRunnerA implements CommandLineRunner {
-    @Override
-    public void run(String... args) throws Exception {
-        System.out.println(&quot;初始化：CommandLineRunnerA&quot;);
-    }
-}
+<span style="color:#a6e22e">@Component</span>
+<span style="color:#a6e22e">@Order</span><span style="color:#f92672">(</span>1<span style="color:#f92672">)</span>
+<span style="color:#66d9ef">public</span> <span style="color:#66d9ef">class</span> <span style="color:#a6e22e">CommandLineRunnerB</span> <span style="color:#66d9ef">implements</span> CommandLineRunner <span style="color:#f92672">{</span>
+    <span style="color:#a6e22e">@Override</span>
+    <span style="color:#66d9ef">public</span> <span style="color:#66d9ef">void</span> <span style="color:#a6e22e">run</span><span style="color:#f92672">(</span>String<span style="color:#f92672">...</span> args<span style="color:#f92672">)</span> <span style="color:#66d9ef">throws</span> Exception <span style="color:#f92672">{</span>
+        System<span style="color:#f92672">.</span><span style="color:#a6e22e">out</span><span style="color:#f92672">.</span><span style="color:#a6e22e">println</span><span style="color:#f92672">(</span><span style="color:#e6db74">&#34;初始化：CommandLineRunnerB&#34;</span><span style="color:#f92672">);</span>
+    <span style="color:#f92672">}</span>
+<span style="color:#f92672">}</span>
 
-@Component
-@Order(1)
-public class CommandLineRunnerB implements CommandLineRunner {
-    @Override
-    public void run(String... args) throws Exception {
-        System.out.println(&quot;初始化：CommandLineRunnerB&quot;);
-    }
-}
-
-</code></pre>
-
-<p>如上，会先执行<code>CommandLineRunnerB</code>的run()，再执行<code>CommandLineRunnerA</code>的run()。<code>@Order(n)</code>中的n较小的会先执行，较大的后执行。n只要是int值即可，无需顺序递增。</p>
-
+</code></pre></div><p>如上，会先执行<code>CommandLineRunnerB</code>的run()，再执行<code>CommandLineRunnerA</code>的run()。<code>@Order(n)</code>中的n较小的会先执行，较大的后执行。n只要是int值即可，无需顺序递增。</p>
 <h1 id="applicationrunner">ApplicationRunner</h1>
-
 <p><code>ApplicationRunner</code>接口与<code>CommandLineRunner</code>接口类似，都需要实现run()方法。二者的区别在于run()方法的参数不同：</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-java" data-lang="java"><span style="color:#a6e22e">@Component</span>
+<span style="color:#66d9ef">public</span> <span style="color:#66d9ef">class</span> <span style="color:#a6e22e">InitApplicationRunner</span> <span style="color:#66d9ef">implements</span> ApplicationRunner <span style="color:#f92672">{</span>
+    <span style="color:#a6e22e">@Override</span>
+    <span style="color:#66d9ef">public</span> <span style="color:#66d9ef">void</span> <span style="color:#a6e22e">run</span><span style="color:#f92672">(</span>ApplicationArguments applicationArguments<span style="color:#f92672">)</span> <span style="color:#66d9ef">throws</span> Exception <span style="color:#f92672">{</span>
+        System<span style="color:#f92672">.</span><span style="color:#a6e22e">out</span><span style="color:#f92672">.</span><span style="color:#a6e22e">println</span><span style="color:#f92672">(</span><span style="color:#e6db74">&#34;初始化：InitApplicationRunner&#34;</span><span style="color:#f92672">);</span>
+    <span style="color:#f92672">}</span>
+<span style="color:#f92672">}</span>
 
-<pre><code class="language-java">@Component
-public class InitApplicationRunner implements ApplicationRunner {
-    @Override
-    public void run(ApplicationArguments applicationArguments) throws Exception {
-        System.out.println(&quot;初始化：InitApplicationRunner&quot;);
-    }
-}
-
-</code></pre>
-
-<p><code>ApplicationRunner</code>接口的run()参数为ApplicationArguments对象，因此可以获取更多项目相关的内容。
+</code></pre></div><p><code>ApplicationRunner</code>接口的run()参数为ApplicationArguments对象，因此可以获取更多项目相关的内容。
 <code>ApplicationRunner</code>接口与<code>CommandLineRunner</code>接口的调用时机也是相同的，都是Spring beans初始化之后。因此<code>ApplicationRunner</code>接口也使用<code>@Order(n)</code>来设置执行顺序。</p>
 
 
@@ -424,14 +401,7 @@ public class InitApplicationRunner implements ApplicationRunner {
                         <a class="catalog-toggle" style="font-size: 24px;" href="index.html#">目录结构</a>
                     </h4>
                     <ul class="catalog-body"></ul>
-                    <nav id="TableOfContents">
-<ul>
-<li><a href="#概述">概述</a></li>
-<li><a href="#postconstruct">@PostConstruct</a></li>
-<li><a href="#commandlinerunner">CommandLineRunner</a></li>
-<li><a href="#applicationrunner">ApplicationRunner</a></li>
-</ul>
-</nav>
+                    <nav id="TableOfContents"></nav>
                     <br>
                     <br>
                     <br>
@@ -455,9 +425,6 @@ public class InitApplicationRunner implements ApplicationRunner {
                         
                         
                         
-                        <a href="/tags/" title="">
-                            
-                        </a>
                         
                         
                         
@@ -467,101 +434,6 @@ public class InitApplicationRunner implements ApplicationRunner {
                         
                         
                         
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        <a href="/tags/qt" title="QT">
-                            QT
-                        </a>
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        <a href="/tags/zookeeper" title="Zookeeper">
-                            Zookeeper
-                        </a>
                         
                         
                         
@@ -601,8 +473,10 @@ public class InitApplicationRunner implements ApplicationRunner {
                         
                         
                         
-                        <a href="/tags/elasticsearch" title="elasticSearch">
-                            elasticSearch
+                        
+                        
+                        <a href="/tags/elasticsearch" title="elasticsearch">
+                            elasticsearch
                         </a>
                         
                         
@@ -613,9 +487,27 @@ public class InitApplicationRunner implements ApplicationRunner {
                         
                         
                         
-                        <a href="/tags/golang" title="golang">
-                            golang
-                        </a>
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
                         
                         
                         
@@ -653,9 +545,21 @@ public class InitApplicationRunner implements ApplicationRunner {
                         
                         
                         
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
                         <a href="/tags/jvm" title="jvm">
                             jvm
                         </a>
+                        
+                        
+                        
+                        
                         
                         
                         
@@ -679,9 +583,19 @@ public class InitApplicationRunner implements ApplicationRunner {
                         
                         
                         
+                        
+                        
+                        
+                        
+                        
+                        
                         <a href="/tags/mongodb" title="mongodb">
                             mongodb
                         </a>
+                        
+                        
+                        
+                        
                         
                         
                         
@@ -692,10 +606,6 @@ public class InitApplicationRunner implements ApplicationRunner {
                         </a>
                         
                         
-                        
-                        <a href="/tags/mycat" title="mycat">
-                            mycat
-                        </a>
                         
                         
                         
@@ -709,9 +619,17 @@ public class InitApplicationRunner implements ApplicationRunner {
                         
                         
                         
-                        <a href="/tags/nginx" title="nginx">
-                            nginx
-                        </a>
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
                         
                         
                         
@@ -735,8 +653,22 @@ public class InitApplicationRunner implements ApplicationRunner {
                         
                         
                         
+                        
+                        
                         <a href="/tags/rocketmq" title="rocketmq">
                             rocketmq
+                        </a>
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        <a href="/tags/security%E6%A1%86%E6%9E%B6%E5%AD%A6%E4%B9%A0" title="security框架学习">
+                            security框架学习
                         </a>
                         
                         
@@ -763,17 +695,11 @@ public class InitApplicationRunner implements ApplicationRunner {
                         
                         
                         
-                        <a href="/tags/springcloud" title="springCloud">
-                            springCloud
-                        </a>
-                        
-                        
-                        
-                        
-                        
                         <a href="/tags/springboot" title="springboot">
                             springboot
                         </a>
+                        
+                        
                         
                         
                         
@@ -787,6 +713,9 @@ public class InitApplicationRunner implements ApplicationRunner {
                         
                         
                         
+                        <a href="/tags/springcloud" title="springcloud">
+                            springcloud
+                        </a>
                         
                         
                         
@@ -812,6 +741,33 @@ public class InitApplicationRunner implements ApplicationRunner {
                         
                         
                         
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        <a href="/tags/zookeeper" title="zookeeper">
+                            zookeeper
+                        </a>
                         
                         
                         
@@ -871,6 +827,8 @@ public class InitApplicationRunner implements ApplicationRunner {
                         
                         
                         
+                        
+                        
                         <a href="/tags/%E5%88%86%E5%B8%83%E5%BC%8F%E7%B3%BB%E5%88%97" title="分布式系列">
                             分布式系列
                         </a>
@@ -890,6 +848,10 @@ public class InitApplicationRunner implements ApplicationRunner {
                         
                         
                         
+                        
+                        <a href="/tags/%E5%8D%8F%E8%AE%AE%E6%A0%88" title="协议栈">
+                            协议栈
+                        </a>
                         
                         
                         
@@ -1089,6 +1051,12 @@ public class InitApplicationRunner implements ApplicationRunner {
                         
                         
                         
+                        
+                        
+                        
+                        
+                        
+                        
                         <a href="/tags/%E7%BD%91%E7%BB%9C%E7%BC%96%E7%A8%8B" title="网络编程">
                             网络编程
                         </a>
@@ -1112,6 +1080,10 @@ public class InitApplicationRunner implements ApplicationRunner {
                         
                         
                         
+                        
+                        <a href="/tags/%E8%AE%A4%E8%AF%81%E5%92%8C%E6%8E%88%E6%9D%83" title="认证和授权">
+                            认证和授权
+                        </a>
                         
                         
                         
@@ -1282,7 +1254,7 @@ public class InitApplicationRunner implements ApplicationRunner {
                     
                 </ul>
 		<p class="copyright text-muted">
-                    Copyright &copy;  2020
+                    Copyright &copy;  2021
                     <br>
                     <a href="https://themes.gohugo.io/hugo-theme-cleanwhite">CleanWhite Hugo Theme</a> by <a href="https://zhaohuabing.com">Huabing</a> |
                     <iframe

@@ -97,15 +97,15 @@
                     </li>
                     
                     <li>
-                        <a href="/categories/english">English</a>
+                        <a href="/categories/english">english</a>
                     </li>
                     
                     <li>
-                        <a href="/categories/life">Life</a>
+                        <a href="/categories/life">life</a>
                     </li>
                     
                     <li>
-                        <a href="/categories/tech">Tech</a>
+                        <a href="/categories/tech">tech</a>
                     </li>
                     
 
@@ -233,132 +233,79 @@
                 
                 
                 
-                
-
-<p>[TOC]</p>
-
-<p><strong>转载地址：<a href="https://blog.csdn.net/weixin_42089175/article/details/89343529">https://blog.csdn.net/weixin_42089175/article/details/89343529</a></strong></p>
-
-<p><strong>转载地址：<a href="https://blog.csdn.net/zhangxinrun/article/details/6721495">https://blog.csdn.net/zhangxinrun/article/details/6721495</a></strong></p>
-
+                <p>[TOC]</p>
+<p><strong>转载地址：https://blog.csdn.net/weixin_42089175/article/details/89343529</strong></p>
+<p><strong>转载地址：https://blog.csdn.net/zhangxinrun/article/details/6721495</strong></p>
 <h1 id="消息粘包">消息粘包</h1>
-
 <h2 id="概述">概述</h2>
-
-<p><img src="/img/Xnip2020-02-02_17-49-26.png" alt="Xnip2020-02-02_17-49-26" /></p>
-
+<p><img src="/img/Xnip2020-02-02_17-49-26.png" alt="Xnip2020-02-02_17-49-26"></p>
 <h2 id="什么时候需要考虑粘包问题">什么时候需要考虑粘包问题</h2>
-
 <ul>
-<li><p>如果利用tcp每次发送数据，就与对方建立连接，然后双方发送完一段数据后，就关闭连接，这样就不会出现粘包问题（因为只有一种包结构,类似于http协议）。关闭连接主要要双方都发送close连接（参考tcp关闭协议）。如：A需要发送一段字符串给B，那么A与B建立连接，然后发送双方都默认好的协议字符如&rdquo;hello give me sth abour yourself&rdquo;，然后B收到报文后，就将缓冲区数据接收,然后关闭连接，这样粘包问题不用考虑到，因为大家都知道是发送一段字符。</p></li>
-
-<li><p>如果发送数据无结构，如文件传输，这样发送方只管发送，接收方只管接收存储就ok，也不用考虑粘包</p></li>
-
-<li><p>如果双方建立连接，需要在连接后一段时间内发送不同结构数据，如连接后，有好几种结构：
+<li>
+<p>如果利用tcp每次发送数据，就与对方建立连接，然后双方发送完一段数据后，就关闭连接，这样就不会出现粘包问题（因为只有一种包结构,类似于http协议）。关闭连接主要要双方都发送close连接（参考tcp关闭协议）。如：A需要发送一段字符串给B，那么A与B建立连接，然后发送双方都默认好的协议字符如&quot;hello give me sth abour yourself&quot;，然后B收到报文后，就将缓冲区数据接收,然后关闭连接，这样粘包问题不用考虑到，因为大家都知道是发送一段字符。</p>
+</li>
+<li>
+<p>如果发送数据无结构，如文件传输，这样发送方只管发送，接收方只管接收存储就ok，也不用考虑粘包</p>
+</li>
+<li>
+<p>如果双方建立连接，需要在连接后一段时间内发送不同结构数据，如连接后，有好几种结构：
 1)&ldquo;hello give me sth abour yourself&rdquo;
-2)&ldquo;Don&rsquo;t give me sth abour yourself&rdquo;</p></li>
+2)&ldquo;Don&rsquo;t give me sth abour yourself&rdquo;</p>
+<p>那这样的话，如果发送方连续发送这个两个包出去，接收方一次接收可能会是&quot;hello give me sth abour yourselfDon&rsquo;t   give me sth abour yourself&quot; 这样接收方就傻了，到底是要干嘛？不知道，因为协议没有规定这么诡异的字符串，所<strong>以要处理把它分包，怎么分也需要双方组织一个比较好的包结构，所以一般可能会在头加一个数据长度之类的包，以确保接收。</strong></p>
+</li>
 </ul>
-
-<p>那这样的话，如果发送方连续发送这个两个包出去，接收方一次接收可能会是&rdquo;hello give me sth abour yourselfDon&rsquo;t   give me sth abour yourself&rdquo; 这样接收方就傻了，到底是要干嘛？不知道，因为协议没有规定这么诡异的字符串，所<strong>以要处理把它分包，怎么分也需要双方组织一个比较好的包结构，所以一般可能会在头加一个数据长度之类的包，以确保接收。</strong></p>
-
 <h2 id="粘包出现原因">粘包出现原因</h2>
-
 <p>在流传输中出现，<strong>UDP不会出现粘包，因为它有消息边界</strong>。</p>
-
 <ol>
 <li>发送端需要等缓冲区满才发送出去，造成粘包.</li>
 <li>接收方不及时接收缓冲区的包，造成多个包接收.</li>
 </ol>
-
 <h3 id="什么是保护消息边界和流">什么是保护消息边界和流</h3>
-
-<p>转载地址：<a href="https://blog.csdn.net/zhangxinrun/article/details/6721427">https://blog.csdn.net/zhangxinrun/article/details/6721427</a></p>
-
+<p>转载地址：https://blog.csdn.net/zhangxinrun/article/details/6721427</p>
 <p>保护消息边界，就是指传输协议把数据当作一条独立的消息在网上传输,接收端只能接收独立的消息.也就是说存在保护消息边界,接收端一次只能接收发送端发出的一个数据包.而面向流则是指无保护<strong>消息保护边界</strong>的,如果发送端连续发送数据,
 接收端有可能在一次接收动作中,会接收两个或者更多的数据包.</p>
-
 <p>我们举个例子来说,例如,我们连续发送三个数据包,大小分别是2k,4k , 8k,这三个数据包,都已经到达了接收端的网络堆栈中,如果使用<strong>UDP</strong>协议,不管我们使用多大的接收缓冲区去接收数据,我们必须有三次接收动作,才能够把所有的数据包接收完.而使用TCP协议,我们只要把接收的缓冲区大小设置在14k以上,我们就能够一次把所有的数据包接收下来.只需要有一次接收动作.</p>
-
 <p><strong>这就是因为UDP协议的保护消息边界使得每一个消息都是独立的.而流传输,却把数据当作一串数据流,他不认为数据是一个一个的消息.</strong></p>
-
 <p>所以有很多人在使用tcp协议通讯的时候,并不清楚tcp是基于流的传输,当连续发送数据的时候,他们时常会认识tcp会丢包.其实不然,因为当他们使用的缓冲区足够大时,他们有可能会一次接收到两个甚至更多的数据包,而很多人往往会忽视这一点,只解析检查了第一个数据包,而已经接收的其他数据包却被忽略了.所以大家如果要作这类的网络编程的时候,必须要注意这一点.</p>
-
 <h3 id="结论">结论</h3>
-
 <p>根据以上所说，可以这样理解，TCP为了保证可靠传输，尽量减少额外开销（每次发包都要验证），因此采用了流式传输，面向流的传输，相对于面向消息的传输，可以减少发送包的数量。从而减少了额外开
 销。但是，对于数据传输频繁的程序来讲，使用TCP可能会容易粘包。当然，对接收端的程序来讲，如果机器负荷很重，也会在接收缓冲里粘包。这样，就需要接收端额外拆包，增加了工作量。因此，这个特别适合的是数据要求可靠传输，但是不需要太频繁传输的场合（两次操作间隔100ms，具体是由TCP等待发送间隔决定的，取决于内核中的socket的写法）</p>
-
 <p>而UDP，由于面向的是消息传输，它把所有接收到的消息都挂接到缓冲区的接受队列中，因此，它对于数据的提取分离就更加方便，但是，它没有粘包机制，因此，当发送数据量较小的时候，就会发生数据包有效载荷较小的情况，也会增加多次发送的系统发送开销（系统调用，写硬件等）和接收开销。因此，应该最好设置一个比较合适的数据包的包长，来进行UDP数据的发送。（UDP最大载荷为1472，因此最好能每次传输接近这个数的数据量，这特别适合于视频，音频等大块数据的发送，同时，通过减少握手来保证流媒体的实时性）</p>
-
 <h3 id="tcp解决粘包办法">TCP解决粘包办法</h3>
-
 <p>为了避免粘包现象，可采取以下几种措施。</p>
-
 <p>第一种:  是对于发送方引起的粘包现象，用户可通过编程设置来避免，TCP提供了强制数据立即传送的操作指令push，TCP软件收到该操作指令后，就立即将本段数据发送出去，而不必等待发送缓冲区满；</p>
-
 <p>第二种:  是对于接收方引起的粘包，则可通过优化程序设计、精简接收进程工作量、提高接收进程优先级等措施，使其及时接收数据，从而尽量避免出现粘包现象；</p>
-
 <p>第三种:  是由接收方控制，将一包数据按结构字段，人为控制分多次接收，然后合并，通过这种手段来避免粘包。</p>
-
 <p><strong>以上提到的三种措施，都有其不足之处</strong>。第一种编程设置方法虽然可以避免发送方引起的粘包，但它关闭了优化算法，降低了网络发送效率，影响应用程序的性能，一般不建议使用。第二种方法只能减少出现粘包的可能性，但并不能完全避免粘包，当发送频率较高时，或由于网络突发可能使某个时间段数据包到达接收方较快，接收方还是有可能来不及接收，从而导致粘包。第三种方法虽然避免了粘包，但应用程序的效率较低，对实时应用的场合不适合。</p>
-
 <h2 id="网络通讯的封包和拆包">网络通讯的封包和拆包</h2>
-
 <p>对于基于TCP开发的通讯程序,有个很重要的问题需要解决,就是封包和拆包.</p>
-
 <h3 id="tcp封包和拆包">TCP封包和拆包</h3>
-
-<p>TCP是个&rdquo;流&rdquo;协议,所谓流,就是没有界限的一串数据.大家可以想想河里的流水,是连成一片的,其间是没有分界线的.但一般通讯程序开发是需要定义一个个相互独立的数据包的,比如用于登陆的数据包,用于注销的数据包.由于TCP&rdquo;流&rdquo;的特性以及网络状况,在进行数据传输时会出现以下几种情况.</p>
-
+<p>TCP是个&quot;流&quot;协议,所谓流,就是没有界限的一串数据.大家可以想想河里的流水,是连成一片的,其间是没有分界线的.但一般通讯程序开发是需要定义一个个相互独立的数据包的,比如用于登陆的数据包,用于注销的数据包.由于TCP&quot;流&quot;的特性以及网络状况,在进行数据传输时会出现以下几种情况.</p>
 <p>假设我们连续调用两次send分别发送两段数据data1和data2,<strong>在接收端有以下几种接收情况</strong>(当然不止这几种情况,这里只列出了有代表性的情况).</p>
-
 <p><strong>A.</strong> 先接收到data1,然后接收到data2.</p>
-
 <p><strong>B.</strong> 先接收到data1的部分数据,然后接收到data1余下的部分以及data2的全部.</p>
-
 <p><strong>C.</strong> 先接收到了data1的全部数据和data2的部分数据,然后接收到了data2的余下的数据.</p>
-
 <p>**D. **一次性接收到了data1和data2的全部数据.</p>
-
-<p>对于A这种情况正是我们需要的,不再做讨论.<strong>对于B,C,D的情况就是大家经常说的&rdquo;粘包&rdquo;,就需要我们把接收到的数据进行拆包,拆成一个个独立的数据包.为了拆包就必须在发送端进行封包.</strong></p>
-
-<p><strong>注意说明:</strong>   对于UDP来说就不存在拆包的问题,因为UDP是个&rdquo;数据包&rdquo;协议,也就是两段数据间是有界限的,在接收端要么接收不到数据要么就是接收一个完整的一段数据,不会少接收也不会多接收.</p>
-
-<h3 id="为什么会出现b-c-d的情况">为什么会出现B.C.D的情况.</h3>
-
-<p>&ldquo;粘包&rdquo;可发生在发送端也可发生在接收端.</p>
-
+<p>对于A这种情况正是我们需要的,不再做讨论.<strong>对于B,C,D的情况就是大家经常说的&quot;粘包&quot;,就需要我们把接收到的数据进行拆包,拆成一个个独立的数据包.为了拆包就必须在发送端进行封包.</strong></p>
+<p><strong>注意说明:</strong>   对于UDP来说就不存在拆包的问题,因为UDP是个&quot;数据包&quot;协议,也就是两段数据间是有界限的,在接收端要么接收不到数据要么就是接收一个完整的一段数据,不会少接收也不会多接收.</p>
+<h3 id="为什么会出现bcd的情况">为什么会出现B.C.D的情况.</h3>
+<p>&ldquo;粘包&quot;可发生在发送端也可发生在接收端.</p>
 <p><strong>1.  由Nagle算法造成的发送端的粘包</strong></p>
-
 <p>Nagle算法是一种改善网络传输效率的算法.简单的说,当我们提交一段数据给TCP发送时,TCP并不立刻发送此段数据,而是等待一小段时间,看看在等待期间是否还有要发送的数据,若有则会一次把这两段数据发送出去.这是对Nagle算法一个简单的解释,详细的请看相关书籍.象C和D的情况就有可能是Nagle算法造成的.</p>
-
 <p><strong>2.  接收端接收不及时造成的接收端粘包</strong></p>
-
 <p>TCP会把接收到的数据存在自己的缓冲区中,然后通知应用层取数据.当应用层由于某些原因不能及时的把TCP的数据取出来,就会造成TCP缓冲区中存放了几段数据.</p>
-
 <h3 id="怎样封包和拆包">怎样封包和拆包</h3>
-
 <p>封包就是给一段数据加上包头，这样一来数据包就分为包头和包体两部分内容了（可加上包尾）。包头其实是一个大小固定的结构体，其中有个结构体成员变量表示包体的长度，这是个很重要的变量，其他的结构体成员可根据需要自己定义。根据固定的包头长度以及包头中含有的包体长度变量值就能正确的拆分出一个完整的数据包。</p>
-
 <p>利用底层的缓冲区来进行拆包时，由于TCP也维护了一个缓冲区，所以可以利用TCP的缓冲区来拆包，也就是循环不停地接收包头给出的数据，直到收够为止，这就是一个完整的TCP包。</p>
-
 <p><strong>示例</strong></p>
-
 <p>为了解决“粘包”问题，大家通常会在所发送的内容前，加上发送内容的长度，所以对方会先收到4Byte，解析获得接下来所需要接收的长度，再进行收包。</p>
-
 <h2 id="nagle算法">Nagle算法</h2>
-
 <p>TCP/IP协议中，无论发送多少数据，总是要在数据前面加上协议头，同时，对方接收到数据，也需要发送ACK表示确认。为了尽可能的利用网络带宽，TCP总是希望尽可能的发送足够大的数据。Nagle算法就是为了尽可能发送大块数据，避免网络中充斥着许多小数据块。</p>
-
-<pre><code class="language-java">// 但是对于实时交互性高的程序，建议其改为 true，即关闭 Nagle 算法，客户端每发送一次数据，无论数据包大小都会将这些数据发送出去
-clientSocket.setTcpNoDelay(true);
-</code></pre>
-
-<h1 id="消息不完整">消息不完整</h1>
-
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-java" data-lang="java"><span style="color:#75715e">// 但是对于实时交互性高的程序，建议其改为 true，即关闭 Nagle 算法，客户端每发送一次数据，无论数据包大小都会将这些数据发送出去
+</span><span style="color:#75715e"></span>clientSocket<span style="color:#f92672">.</span><span style="color:#a6e22e">setTcpNoDelay</span><span style="color:#f92672">(</span><span style="color:#66d9ef">true</span><span style="color:#f92672">);</span>
+</code></pre></div><h1 id="消息不完整">消息不完整</h1>
 <h2 id="概述-1">概述</h2>
-
-<p><img src="/img/Xnip2020-02-04_15-53-41.png" alt="Xnip2020-02-04_15-53-41" /></p>
+<p><img src="/img/Xnip2020-02-04_15-53-41.png" alt="Xnip2020-02-04_15-53-41"></p>
 
 
                 
@@ -466,30 +413,29 @@ clientSocket.setTcpNoDelay(true);
                     </h4>
                     <ul class="catalog-body"></ul>
                     <nav id="TableOfContents">
-<ul>
-<li><a href="#消息粘包">消息粘包</a>
-<ul>
-<li><a href="#概述">概述</a></li>
-<li><a href="#什么时候需要考虑粘包问题">什么时候需要考虑粘包问题</a></li>
-<li><a href="#粘包出现原因">粘包出现原因</a>
-<ul>
-<li><a href="#什么是保护消息边界和流">什么是保护消息边界和流</a></li>
-<li><a href="#结论">结论</a></li>
-<li><a href="#tcp解决粘包办法">TCP解决粘包办法</a></li>
-</ul></li>
-<li><a href="#网络通讯的封包和拆包">网络通讯的封包和拆包</a>
-<ul>
-<li><a href="#tcp封包和拆包">TCP封包和拆包</a></li>
-<li><a href="#为什么会出现b-c-d的情况">为什么会出现B.C.D的情况.</a></li>
-<li><a href="#怎样封包和拆包">怎样封包和拆包</a></li>
-</ul></li>
-<li><a href="#nagle算法">Nagle算法</a></li>
-</ul></li>
-<li><a href="#消息不完整">消息不完整</a>
-<ul>
-<li><a href="#概述-1">概述</a></li>
-</ul></li>
-</ul>
+  <ul>
+    <li><a href="#概述">概述</a></li>
+    <li><a href="#什么时候需要考虑粘包问题">什么时候需要考虑粘包问题</a></li>
+    <li><a href="#粘包出现原因">粘包出现原因</a>
+      <ul>
+        <li><a href="#什么是保护消息边界和流">什么是保护消息边界和流</a></li>
+        <li><a href="#结论">结论</a></li>
+        <li><a href="#tcp解决粘包办法">TCP解决粘包办法</a></li>
+      </ul>
+    </li>
+    <li><a href="#网络通讯的封包和拆包">网络通讯的封包和拆包</a>
+      <ul>
+        <li><a href="#tcp封包和拆包">TCP封包和拆包</a></li>
+        <li><a href="#为什么会出现bcd的情况">为什么会出现B.C.D的情况.</a></li>
+        <li><a href="#怎样封包和拆包">怎样封包和拆包</a></li>
+      </ul>
+    </li>
+    <li><a href="#nagle算法">Nagle算法</a></li>
+  </ul>
+
+  <ul>
+    <li><a href="#概述-1">概述</a></li>
+  </ul>
 </nav>
                     <br>
                     <br>
@@ -514,9 +460,6 @@ clientSocket.setTcpNoDelay(true);
                         
                         
                         
-                        <a href="/tags/" title="">
-                            
-                        </a>
                         
                         
                         
@@ -526,101 +469,6 @@ clientSocket.setTcpNoDelay(true);
                         
                         
                         
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        <a href="/tags/qt" title="QT">
-                            QT
-                        </a>
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        <a href="/tags/zookeeper" title="Zookeeper">
-                            Zookeeper
-                        </a>
                         
                         
                         
@@ -660,8 +508,10 @@ clientSocket.setTcpNoDelay(true);
                         
                         
                         
-                        <a href="/tags/elasticsearch" title="elasticSearch">
-                            elasticSearch
+                        
+                        
+                        <a href="/tags/elasticsearch" title="elasticsearch">
+                            elasticsearch
                         </a>
                         
                         
@@ -672,9 +522,27 @@ clientSocket.setTcpNoDelay(true);
                         
                         
                         
-                        <a href="/tags/golang" title="golang">
-                            golang
-                        </a>
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
                         
                         
                         
@@ -712,9 +580,21 @@ clientSocket.setTcpNoDelay(true);
                         
                         
                         
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
                         <a href="/tags/jvm" title="jvm">
                             jvm
                         </a>
+                        
+                        
+                        
+                        
                         
                         
                         
@@ -738,9 +618,19 @@ clientSocket.setTcpNoDelay(true);
                         
                         
                         
+                        
+                        
+                        
+                        
+                        
+                        
                         <a href="/tags/mongodb" title="mongodb">
                             mongodb
                         </a>
+                        
+                        
+                        
+                        
                         
                         
                         
@@ -751,10 +641,6 @@ clientSocket.setTcpNoDelay(true);
                         </a>
                         
                         
-                        
-                        <a href="/tags/mycat" title="mycat">
-                            mycat
-                        </a>
                         
                         
                         
@@ -768,9 +654,17 @@ clientSocket.setTcpNoDelay(true);
                         
                         
                         
-                        <a href="/tags/nginx" title="nginx">
-                            nginx
-                        </a>
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
                         
                         
                         
@@ -794,8 +688,22 @@ clientSocket.setTcpNoDelay(true);
                         
                         
                         
+                        
+                        
                         <a href="/tags/rocketmq" title="rocketmq">
                             rocketmq
+                        </a>
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        <a href="/tags/security%E6%A1%86%E6%9E%B6%E5%AD%A6%E4%B9%A0" title="security框架学习">
+                            security框架学习
                         </a>
                         
                         
@@ -822,17 +730,11 @@ clientSocket.setTcpNoDelay(true);
                         
                         
                         
-                        <a href="/tags/springcloud" title="springCloud">
-                            springCloud
-                        </a>
-                        
-                        
-                        
-                        
-                        
                         <a href="/tags/springboot" title="springboot">
                             springboot
                         </a>
+                        
+                        
                         
                         
                         
@@ -846,6 +748,9 @@ clientSocket.setTcpNoDelay(true);
                         
                         
                         
+                        <a href="/tags/springcloud" title="springcloud">
+                            springcloud
+                        </a>
                         
                         
                         
@@ -871,6 +776,33 @@ clientSocket.setTcpNoDelay(true);
                         
                         
                         
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        <a href="/tags/zookeeper" title="zookeeper">
+                            zookeeper
+                        </a>
                         
                         
                         
@@ -930,6 +862,8 @@ clientSocket.setTcpNoDelay(true);
                         
                         
                         
+                        
+                        
                         <a href="/tags/%E5%88%86%E5%B8%83%E5%BC%8F%E7%B3%BB%E5%88%97" title="分布式系列">
                             分布式系列
                         </a>
@@ -949,6 +883,10 @@ clientSocket.setTcpNoDelay(true);
                         
                         
                         
+                        
+                        <a href="/tags/%E5%8D%8F%E8%AE%AE%E6%A0%88" title="协议栈">
+                            协议栈
+                        </a>
                         
                         
                         
@@ -1148,6 +1086,12 @@ clientSocket.setTcpNoDelay(true);
                         
                         
                         
+                        
+                        
+                        
+                        
+                        
+                        
                         <a href="/tags/%E7%BD%91%E7%BB%9C%E7%BC%96%E7%A8%8B" title="网络编程">
                             网络编程
                         </a>
@@ -1171,6 +1115,10 @@ clientSocket.setTcpNoDelay(true);
                         
                         
                         
+                        
+                        <a href="/tags/%E8%AE%A4%E8%AF%81%E5%92%8C%E6%8E%88%E6%9D%83" title="认证和授权">
+                            认证和授权
+                        </a>
                         
                         
                         
@@ -1341,7 +1289,7 @@ clientSocket.setTcpNoDelay(true);
                     
                 </ul>
 		<p class="copyright text-muted">
-                    Copyright &copy;  2020
+                    Copyright &copy;  2021
                     <br>
                     <a href="https://themes.gohugo.io/hugo-theme-cleanwhite">CleanWhite Hugo Theme</a> by <a href="https://zhaohuabing.com">Huabing</a> |
                     <iframe

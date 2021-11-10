@@ -97,15 +97,15 @@
                     </li>
                     
                     <li>
-                        <a href="/categories/english">English</a>
+                        <a href="/categories/english">english</a>
                     </li>
                     
                     <li>
-                        <a href="/categories/life">Life</a>
+                        <a href="/categories/life">life</a>
                     </li>
                     
                     <li>
-                        <a href="/categories/tech">Tech</a>
+                        <a href="/categories/tech">tech</a>
                     </li>
                     
 
@@ -237,37 +237,24 @@
                 
                 
                 
-                
-
-<p>[TOC]</p>
-
+                <p>[TOC]</p>
 <p><strong>说明：本文来自于<a href="https://www.bilibili.com/video/av36394924/?p=2">https://www.bilibili.com/video/av36394924/?p=2</a>视频讲解</strong></p>
-
 <p><strong>官方文档：<a href="https://docs.mongodb.com/">https://docs.mongodb.com/</a>  4.2版本</strong></p>
-
 <h1 id="简介">简介</h1>
-
 <p><a href="https://docs.mongodb.com/manual/reference/glossary/#term-gridfs">GridFS</a>是用于存储和检索<strong>超过</strong><a href="https://docs.mongodb.com/manual/reference/glossary/#term-bson"> BSON -</a>文档<a href="https://docs.mongodb.com/manual/reference/limits/#limit-bson-document-size">大小限制</a>为16 MB的文件的规范。</p>
-
 <p>GridFS不是将文件存储在单个文档中，而是将文件分成多个部分或块[<a href="https://docs.mongodb.com/manual/core/gridfs/#chunk-disambiguation">1]</a>，并将每个块存储为单独的文档。默认情况下，GridFS使用默认的块大小255 kB; 也就是说，<strong>GridFS将文件分成255 kB的块</strong>，但最后一个块除外。最后一个块只有必要的大小。类似地，不大于块大小的文件只有最终块，只使用所需的空间和一些额外的元数据。</p>
-
 <ol>
 <li>多机器存储， 备份。</li>
 <li>可以突破一般的文件系统对files的限制</li>
 <li>分段存储，不像普通的file system整个存储。</li>
 </ol>
-
 <h1 id="mongofiles">mongofiles</h1>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-sql" data-lang="sql">mongofiles <span style="color:#f92672">&lt;</span><span style="color:#66d9ef">options</span><span style="color:#f92672">&gt;</span> <span style="color:#f92672">&lt;</span>commands<span style="color:#f92672">&gt;</span> <span style="color:#f92672">&lt;</span>filename<span style="color:#f92672">&gt;</span>
 
-<pre><code class="language-sql">mongofiles &lt;options&gt; &lt;commands&gt; &lt;filename&gt;
 
-
---host &lt;hostname&gt;&lt;:port&gt;
-</code></pre>
-
-<h2 id="命令">命令</h2>
-
-<pre><code>list &lt;prefix&gt;
+<span style="color:#75715e">--host &lt;hostname&gt;&lt;:port&gt;
+</span></code></pre></div><h2 id="命令">命令</h2>
+<pre tabindex="0"><code>list &lt;prefix&gt;
 列出GridFS存储中的文件。list（例如&lt;prefix&gt;）之后指定的字符 可选地将返回项的列表限制为以该字符串开头的文件。
 
 search &lt;string&gt;
@@ -279,39 +266,23 @@ put &lt;filename&gt;
 get &lt;filename&gt;
 将指定文件从GridFS存储复制到本地文件系统。
  
-</code></pre>
-
-<h2 id="实例操作">实例操作</h2>
-
+</code></pre><h2 id="实例操作">实例操作</h2>
 <p>把一个pdf文件放入到GridFS中</p>
-
-<pre><code class="language-shell">root@cdcbbd0f125a:/usr/bin# ./mongofiles -d records put /macfile/110.pdf 
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-shell" data-lang="shell">root@cdcbbd0f125a:/usr/bin# ./mongofiles -d records put /macfile/110.pdf 
 2019-09-16T10:37:02.086+0000    connected to: mongodb://localhost/
 2019-09-16T10:37:02.231+0000    added gridFile: /macfile/110.pdf
 
-#不需要创建数据库，他会自动加载。  -d 后面是数据库
-</code></pre>
-
-<p>当导入file的时候， grid会在指定的db上面生成两个collection</p>
-
+<span style="color:#75715e">#不需要创建数据库，他会自动加载。  -d 后面是数据库</span>
+</code></pre></div><p>当导入file的时候， grid会在指定的db上面生成两个collection</p>
 <h3 id="chunks">chunks</h3>
-
 <p>就是把文件分割成了一个一个的255 kB的chunks块</p>
-
-<p><img src="/img/Xnip2019-09-16_18-44-40.png" alt="Xnip2019-09-16_18-44-40" /></p>
-
-<pre><code class="language-sql">#查询出当前的一个端的数据。
-db.getCollection(&quot;fs.chunks&quot;).find({n:2})
-</code></pre>
-
-<h3 id="files">files</h3>
-
+<p><img src="/img/Xnip2019-09-16_18-44-40.png" alt="Xnip2019-09-16_18-44-40"></p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-sql" data-lang="sql"><span style="color:#f92672">#</span><span style="color:#960050;background-color:#1e0010">查询出当前的一个端的数据。</span>
+db.getCollection(<span style="color:#e6db74">&#34;fs.chunks&#34;</span>).find(<span style="color:#960050;background-color:#1e0010">{</span>n:<span style="color:#ae81ff">2</span><span style="color:#960050;background-color:#1e0010">}</span>)
+</code></pre></div><h3 id="files">files</h3>
 <p>就是文件的相关信息。</p>
-
-<p><img src="/img/Xnip2019-09-16_18-45-38.png" alt="Xnip2019-09-16_18-45-38" /></p>
-
+<p><img src="/img/Xnip2019-09-16_18-45-38.png" alt="Xnip2019-09-16_18-45-38"></p>
 <h1 id="分布式文件系统建立">分布式文件系统建立</h1>
-
 <p>我们可以通过GridFS加上mongdb的分片，建立一个分布式的文件系统。</p>
 
 
@@ -361,15 +332,15 @@ db.getCollection(&quot;fs.chunks&quot;).find({n:2})
                 <ul class="pager">
                     
                     <li class="previous">
-                        <a href="/post/mongodb%E7%B3%BB%E5%88%97-aggregation-pipeline%E8%81%9A%E5%90%88/" data-toggle="tooltip" data-placement="top"
-                            title="mongodb-aggregation pipeline聚合">&larr;
+                        <a href="/post/mongodb%E7%B3%BB%E5%88%97-%E5%AD%98%E5%82%A8%E5%BC%95%E6%93%8E/" data-toggle="tooltip" data-placement="top"
+                            title="mongodb-存储引擎">&larr;
                             Previous Post</a>
                     </li>
                     
                     
                     <li class="next">
-                        <a href="/post/elasticsearch-%E7%AE%80%E4%BB%8B%E5%92%8C%E5%AE%89%E8%A3%85/" data-toggle="tooltip" data-placement="top"
-                            title="ElasticSearch-入门">Next
+                        <a href="/post/mongodb%E7%B3%BB%E5%88%97-aggregation-pipeline%E8%81%9A%E5%90%88/" data-toggle="tooltip" data-placement="top"
+                            title="mongodb-aggregation pipeline聚合">Next
                             Post &rarr;</a>
                     </li>
                     
@@ -420,19 +391,15 @@ db.getCollection(&quot;fs.chunks&quot;).find({n:2})
                     </h4>
                     <ul class="catalog-body"></ul>
                     <nav id="TableOfContents">
-<ul>
-<li><a href="#简介">简介</a></li>
-<li><a href="#mongofiles">mongofiles</a>
-<ul>
-<li><a href="#命令">命令</a></li>
-<li><a href="#实例操作">实例操作</a>
-<ul>
-<li><a href="#chunks">chunks</a></li>
-<li><a href="#files">files</a></li>
-</ul></li>
-</ul></li>
-<li><a href="#分布式文件系统建立">分布式文件系统建立</a></li>
-</ul>
+  <ul>
+    <li><a href="#命令">命令</a></li>
+    <li><a href="#实例操作">实例操作</a>
+      <ul>
+        <li><a href="#chunks">chunks</a></li>
+        <li><a href="#files">files</a></li>
+      </ul>
+    </li>
+  </ul>
 </nav>
                     <br>
                     <br>
@@ -457,9 +424,6 @@ db.getCollection(&quot;fs.chunks&quot;).find({n:2})
                         
                         
                         
-                        <a href="/tags/" title="">
-                            
-                        </a>
                         
                         
                         
@@ -469,101 +433,6 @@ db.getCollection(&quot;fs.chunks&quot;).find({n:2})
                         
                         
                         
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        <a href="/tags/qt" title="QT">
-                            QT
-                        </a>
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        <a href="/tags/zookeeper" title="Zookeeper">
-                            Zookeeper
-                        </a>
                         
                         
                         
@@ -603,8 +472,10 @@ db.getCollection(&quot;fs.chunks&quot;).find({n:2})
                         
                         
                         
-                        <a href="/tags/elasticsearch" title="elasticSearch">
-                            elasticSearch
+                        
+                        
+                        <a href="/tags/elasticsearch" title="elasticsearch">
+                            elasticsearch
                         </a>
                         
                         
@@ -615,9 +486,27 @@ db.getCollection(&quot;fs.chunks&quot;).find({n:2})
                         
                         
                         
-                        <a href="/tags/golang" title="golang">
-                            golang
-                        </a>
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
                         
                         
                         
@@ -655,9 +544,21 @@ db.getCollection(&quot;fs.chunks&quot;).find({n:2})
                         
                         
                         
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
                         <a href="/tags/jvm" title="jvm">
                             jvm
                         </a>
+                        
+                        
+                        
+                        
                         
                         
                         
@@ -681,9 +582,19 @@ db.getCollection(&quot;fs.chunks&quot;).find({n:2})
                         
                         
                         
+                        
+                        
+                        
+                        
+                        
+                        
                         <a href="/tags/mongodb" title="mongodb">
                             mongodb
                         </a>
+                        
+                        
+                        
+                        
                         
                         
                         
@@ -694,10 +605,6 @@ db.getCollection(&quot;fs.chunks&quot;).find({n:2})
                         </a>
                         
                         
-                        
-                        <a href="/tags/mycat" title="mycat">
-                            mycat
-                        </a>
                         
                         
                         
@@ -711,9 +618,17 @@ db.getCollection(&quot;fs.chunks&quot;).find({n:2})
                         
                         
                         
-                        <a href="/tags/nginx" title="nginx">
-                            nginx
-                        </a>
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
                         
                         
                         
@@ -737,8 +652,22 @@ db.getCollection(&quot;fs.chunks&quot;).find({n:2})
                         
                         
                         
+                        
+                        
                         <a href="/tags/rocketmq" title="rocketmq">
                             rocketmq
+                        </a>
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        <a href="/tags/security%E6%A1%86%E6%9E%B6%E5%AD%A6%E4%B9%A0" title="security框架学习">
+                            security框架学习
                         </a>
                         
                         
@@ -765,17 +694,11 @@ db.getCollection(&quot;fs.chunks&quot;).find({n:2})
                         
                         
                         
-                        <a href="/tags/springcloud" title="springCloud">
-                            springCloud
-                        </a>
-                        
-                        
-                        
-                        
-                        
                         <a href="/tags/springboot" title="springboot">
                             springboot
                         </a>
+                        
+                        
                         
                         
                         
@@ -789,6 +712,9 @@ db.getCollection(&quot;fs.chunks&quot;).find({n:2})
                         
                         
                         
+                        <a href="/tags/springcloud" title="springcloud">
+                            springcloud
+                        </a>
                         
                         
                         
@@ -814,6 +740,33 @@ db.getCollection(&quot;fs.chunks&quot;).find({n:2})
                         
                         
                         
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        <a href="/tags/zookeeper" title="zookeeper">
+                            zookeeper
+                        </a>
                         
                         
                         
@@ -873,6 +826,8 @@ db.getCollection(&quot;fs.chunks&quot;).find({n:2})
                         
                         
                         
+                        
+                        
                         <a href="/tags/%E5%88%86%E5%B8%83%E5%BC%8F%E7%B3%BB%E5%88%97" title="分布式系列">
                             分布式系列
                         </a>
@@ -892,6 +847,10 @@ db.getCollection(&quot;fs.chunks&quot;).find({n:2})
                         
                         
                         
+                        
+                        <a href="/tags/%E5%8D%8F%E8%AE%AE%E6%A0%88" title="协议栈">
+                            协议栈
+                        </a>
                         
                         
                         
@@ -1091,6 +1050,12 @@ db.getCollection(&quot;fs.chunks&quot;).find({n:2})
                         
                         
                         
+                        
+                        
+                        
+                        
+                        
+                        
                         <a href="/tags/%E7%BD%91%E7%BB%9C%E7%BC%96%E7%A8%8B" title="网络编程">
                             网络编程
                         </a>
@@ -1114,6 +1079,10 @@ db.getCollection(&quot;fs.chunks&quot;).find({n:2})
                         
                         
                         
+                        
+                        <a href="/tags/%E8%AE%A4%E8%AF%81%E5%92%8C%E6%8E%88%E6%9D%83" title="认证和授权">
+                            认证和授权
+                        </a>
                         
                         
                         
@@ -1284,7 +1253,7 @@ db.getCollection(&quot;fs.chunks&quot;).find({n:2})
                     
                 </ul>
 		<p class="copyright text-muted">
-                    Copyright &copy;  2020
+                    Copyright &copy;  2021
                     <br>
                     <a href="https://themes.gohugo.io/hugo-theme-cleanwhite">CleanWhite Hugo Theme</a> by <a href="https://zhaohuabing.com">Huabing</a> |
                     <iframe

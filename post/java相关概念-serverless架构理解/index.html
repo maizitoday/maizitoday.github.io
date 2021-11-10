@@ -97,15 +97,15 @@
                     </li>
                     
                     <li>
-                        <a href="/categories/english">English</a>
+                        <a href="/categories/english">english</a>
                     </li>
                     
                     <li>
-                        <a href="/categories/life">Life</a>
+                        <a href="/categories/life">life</a>
                     </li>
                     
                     <li>
-                        <a href="/categories/tech">Tech</a>
+                        <a href="/categories/tech">tech</a>
                     </li>
                     
 
@@ -233,208 +233,106 @@
                 
                 
                 
-                
-
-<p>[TOC]</p>
-
-<p><strong>转载地址：<a href="https://www.jianshu.com/p/c972a383c132">https://www.jianshu.com/p/c972a383c132</a>    作者：新栋BOOK</strong></p>
-
+                <p>[TOC]</p>
+<p><strong>转载地址：https://www.jianshu.com/p/c972a383c132    作者：新栋BOOK</strong></p>
 <h1 id="初识serverless架构">初识serverless架构</h1>
-
 <p>我们要上线一个系统，需要考虑的是需要多少台服务器或者多少容器资源，还有多大的存储，以及上线之后运行的过程中当需要扩容的时候，到底需要新增多少资源，而且流量高峰之后还需要缩掉多少资源。</p>
-
 <p>如果我们不想在这个上面花费精力，有没有一种办法。也就是不要让我们再关注服务器等资源了。答案就是，<strong>Serverless（无服务器）架构</strong>。</p>
-
 <p>在Serverless领域里面，著名的当属AWS Lambda，我们一起来看下AWS官方网站上的描述，从这段描述中也可看出Serverless的价值。</p>
-
 <p>AWS Lambda 是一项计算服务，可使您无需预配置或管理服务器即可运行代码。AWS Lambda 只在需要时执行您的代码并自动缩放，从每天几个请求到每秒数千个请求。</p>
-
 <p>您只需按消耗的计算时间付费 – 代码未运行时不产生费用。借助 AWS Lambda，您几乎可以为任何类型的应用程序或后端服务运行代码，并且不必进行任何管理。</p>
-
 <p>AWS Lambda 在可用性高的计算基础设施上运行您的代码，执行计算资源的所有管理工作，其中包括服务器和操作系统维护、容量预置和自动扩展、代码监控和记录。</p>
-
 <p>先入为主，我们先给一个浅显的概念性定义，当然也是事实：Serverless架构是云计算架构的一种自然延伸。既然跟云计算有关，因此在接触Serverless架构之前，让我们首先回顾一下云计算的发展。</p>
-
 <h1 id="iaas">IAAS</h1>
-
 <p>[基础架构即服务 (IaaS)] 是一种云计算产品，供应商为用户提供对服务器、存储和网络等计算资源的访问。组织可以在服务提供商的基础架构中使用自己的平台和应用。</p>
-
 <p>主要功能</p>
-
 <p>用户按需支付 IaaS，无需购买整套硬件。</p>
-
 <p>可根据处理和存储需求扩展基础架构。</p>
-
 <p>节省企业购买和维护硬件的成本。</p>
-
 <p>由于数据位于云端，因此不会有单点故障。</p>
-
 <p>支持管理任务虚拟化，腾出时间处理其他事务。</p>
-
 <p><strong>IAAS从本质上讲是服务器的租赁，同时提供了基础设施的外包服务</strong>，跟我们日常使用的水和电一样。IAAS接触的是底层的硬件和操作系统。</p>
-
 <h1 id="pass">PASS</h1>
-
 <p>[平台即服务 (PaaS)]是一种云计算产品，为用户提供云环境，用于开发、管理和交付应用。除存储器和其他计算资源以外，用户能够使用预构建工具套件，开发、定制和测试自己的应用。</p>
-
 <p>主要功能</p>
-
 <p>PaaS 提供平台，包含多种工具，用于在同一环境中测试、开发和运行应用。</p>
-
 <p>使组织能够将精力集中于开发，无需担心底层基础架构。</p>
-
 <p>供应商负责管理安全性、操作系统、服务器软件以及备份。</p>
-
 <p>促进密切协作，即使团队远程工作也毫不影响。</p>
-
 <p>PAAS上面使用较多，较广泛的技术就是docker，可以使用开源的技术[Kubernetes]、[Mesos]来构建这样的容器管理平台。<strong>PAAS是一种更上一层的抽象，我们研发人员已经接触不到底层的操作系统。</strong></p>
-
-<p>以上IAAS和PAAS介绍参考：<a href="https://www.ibm.com/cn-zh/cloud/learn/iaas-paas-saas">https://www.ibm.com/cn-zh/cloud/learn/iaas-paas-saas</a></p>
-
+<p>以上IAAS和PAAS介绍参考：https://www.ibm.com/cn-zh/cloud/learn/iaas-paas-saas</p>
 <p><strong>IT计算发展历程</strong></p>
-
 <p>我们的IT计算的发展历程的演进，正如下图所示：</p>
-
-<p><img src="/img/4098122-ebbfc0902427cf9b.png" alt="4098122-ebbfc0902427cf9b" /></p>
-
+<p><img src="/img/4098122-ebbfc0902427cf9b.png" alt="4098122-ebbfc0902427cf9b"></p>
 <p>物理机-虚拟化-云计算-容器-Serverless</p>
-
 <p>在这个<strong>演进的过程中软件计算和运维的效率是一直提升的</strong>，但即使到了容器时代，还有很重要的一个问题没有解决，比如我们的系统遇到大促，评估了调用量要比平时多5倍，那么我们就要人工去申请容器资源。待到大促流量高峰已过，我们再人工缩掉先前增加的容器数量。</p>
-
 <p>这个问题是，我们不能按需去自动增减我们的资源。Serverless架构可以做到量入为出，利用弹性扩展，快速构建新的计算能力，当业务高峰过去后，资源能够自动释放。</p>
-
 <p>另外一个问题是，<strong>即使到了云时代，虽然IT资源，比如存储、网络、计算等可以被分离部署配置，但是对于我们研发人员来讲，我们始终都没有脱离服务器</strong>。我们的应用必须运行在一个对应的IP服务器上面，即使是一个docker容器。必须经过部署、配置、初始化才可以运行。</p>
-
 <p>那么，Serverless技术架构能够解决上面的问题吗。</p>
-
 <h1 id="进入serverless架构">进入Serverless架构</h1>
-
 <p><strong>Serverless架构，从字面意思理解就是无服务器架构，注意是“无服务器”，而不是“无服务”。</strong></p>
-
 <p>这是一种架构思想，类似微服务一样，不过微服务这种思想架构，目前已经有成熟的框架来支撑，比如dubbo、spring cloud等，但是Serverless架构目前还没有一个框架来支撑，也因此说Serverless技术实际上是一组技术的集合。</p>
-
 <p>主要包括了两个领域的技术，BaaS（Backend as a Service）和FaaS（Function as a Service）。</p>
-
-<h2 id="baas-概念介绍">BAAS（概念介绍）</h2>
-
+<h2 id="baas概念介绍">BAAS（概念介绍）</h2>
 <p>BaaS（Backend as a Service）后端即服务。BAAS是在PAAS平台的基础之上为了提升开发者的软件工程效率进一步的发展，PAAS侧重点是关注简化应用开发人员的部署流程，BAAS侧重点是关注如何简化应用开发流程。</p>
-
 <p>在PAAS平台里面，研发人员管理容器，管理部署，管理配置文件。在BAAS平台里面研发人员可以直接操作需求对应的功能模型，比如有一个增删改查的集合功能，在BAAS之外，研发人员需要创建表、写业务逻辑、写接口等处理这样的研发工作。</p>
-
 <p><strong>在BAAS平台里面，所有的功能需求都被往上抽象出了一层模型，研发人员只需要根据需求定义模型，BAAS平台就会自动生成对应的接口。如此一来，研发人员就只需要关注业务逻辑需求。</strong></p>
-
 <p>研发人员可以在PAAS平台上选择RDS、OSS这样省去了我们自己创建数据库的操作，如果之后我们还需要消息推送，需要Oauth认证授权，需要更多中间件的功能，云平台还能够提供给我们吗，BAAS就可以提供这些内容。</p>
-
 <p>这就是后端即服务名称的由来，将我们平时后端开发所需要的这样的能力，整合之后并打包（SDK）提供给我们研发人员。我们在BAAS平台上面输入我们想要的功能之后，便会有对应功能的API提供给我们。</p>
-
-<p>所以，<strong>有观点认为：</strong><strong>BaaS = IaaS + PaaS + APIs + SDKs</strong>。这样，对于我们研发人员来讲，只需要利用SDK和API就可以完成对应的业务功能开发了。</p>
-
+<p>所以，**有观点认为：**<strong>BaaS = IaaS + PaaS + APIs + SDKs</strong>。这样，对于我们研发人员来讲，只需要利用SDK和API就可以完成对应的业务功能开发了。</p>
 <p>这种开发结构下，业务系统开发速度可以提高，也没有后端复杂的开发和维护工作了，同时也降低了研发人员的技术要求。</p>
-
-<p><img src="/img/4098122-286d4517cf6be568.png" alt="4098122-286d4517cf6be568" /></p>
-
+<p><img src="/img/4098122-286d4517cf6be568.png" alt="4098122-286d4517cf6be568"></p>
 <p><strong>BAAS的位置处于PAAS和SAAS（软件即服务）之间</strong>，将后端诸如消息服务、认证服务、数据存储服务等等后端的能力以SDK和API的形式提供。</p>
-
 <p>在PAAS平台开发能力的基础上，利用了SAAS的思路，将我们开发过程中通用的后端能力服务化，研发人员利用这些服务可以快速的开发出业务功能。</p>
-
 <p><strong>“BaaS的主旨是为开发者免去后端开发和部署的烦恼，让开发者无需购买服务器（IaaS），无需部署后端环境（PaaS），无需编写后端代码（BaaS），轻松修改业务逻辑（SDK和API），快速实现需求功能。”</strong></p>
-
-<h2 id="faas-概念介绍">FAAS（概念介绍）</h2>
-
+<h2 id="faas概念介绍">FAAS（概念介绍）</h2>
 <p>FaaS（Functions as a Service）函数即服务。我们研发人员编写业务逻辑代码的方式都换成了编写函数代码，比如一个订单系统普通的增删改查功能，之前我们是编写代码，然后编译、发布，部署到我们的WEB系统中。如下图所示。</p>
-
-<p><img src="/img/4098122-262e38320ede7c4f.jpeg" alt="4098122-262e38320ede7c4f" /></p>
-
+<p><img src="/img/4098122-262e38320ede7c4f.jpeg" alt="4098122-262e38320ede7c4f"></p>
 <h3 id="传统部署"><strong>传统部署</strong></h3>
-
 <p>在FAAS里面，我们只需要编写增删改查的四个函数，而且不再需要我们编译，发布，只需要将函数提交到FAAS平台上面。当客户端的请求过来后，通过API GATEWAY路由到具体的函数，进而执行和处理相应的业务逻辑。如下图所示。</p>
-
-<p><img src="/img/4098122-bb9ff7a9c1216c86.png" alt="4098122-bb9ff7a9c1216c86" /></p>
-
+<p><img src="/img/4098122-bb9ff7a9c1216c86.png" alt="4098122-bb9ff7a9c1216c86"></p>
 <h3 id="faas部署"><strong>faas部署</strong></h3>
-
 <p>传统的服务端软件部署到含有操作系统的物理机、虚拟机或者容器中之后，需要启动一个进程，然后一直等待请求进来。<strong>当在FAAS平台上部署的时候，是直接将写好的函数发布到平台上面，当有事件到来的时候才触发执行，而且执行完毕之后还可以卸载掉。因为FAAS环境里面都是基于函数的。</strong></p>
-
-<p><img src="/img/4098122-5c87dba6042d9545.png" alt="4098122-5c87dba6042d9545" /></p>
-
+<p><img src="/img/4098122-5c87dba6042d9545.png" alt="4098122-5c87dba6042d9545"></p>
 <h3 id="faas平台">Faas平台</h3>
-
 <p>以上主要介绍了BAAS和FAAS两个平台思维，他们构成了Serverless架构的核心。微服务思想架构下我们会按照功能职责去拆分服务，然后一个个的去将这些小的功能独立部署起来。</p>
-
 <p>到了Serverless思想架构里面，比如一组增删改查功能，粒度就会被进一步细化，细化到函数层面。增、删、改、查分别对应四个函数，研发人员将这些个函数部署到平台上。</p>
-
 <h1 id="serverless架构使用场景">Serverless架构使用场景</h1>
-
 <h2 id="事件请求场景">事件请求场景</h2>
-
 <p>图片动态切割事件。在我们的电商系统中经常会按照需求来对同一张图片做不同尺寸大小的处理，在商家将商品图片上传到云存储上之后，在Serverless架构平台里面，有一个触发器来触发对应的函数计算，从而根据不同的尺寸规则要求来生成不同大小的图片。</p>
-
 <h2 id="流量突发场景">流量突发场景</h2>
-
 <p>电商领域或者其它互联网场景比如视频直播等经常会遇到流量突发的情况。比如通常流量在QPS 300，当在大促的时候突然上到QPS 2000甚至更多。</p>
-
 <p>相对于Serverless的传统架构里面，我们必须扩展硬件能力来应对流量高峰。在Serverless架构下，就可以快速的动态构建新的计算能力来满足当前的需求，业务高峰后，资源还可以自动释放。</p>
-
 <h2 id="大数据处理场景">大数据处理场景</h2>
-
 <p>当安全审计的时候，我们需要从多个OSS里面将过去一年的数据（1 个小时一个文件）中找出特定关键字访问的日志，同时做聚合运算（计算出总值）。</p>
-
 <p>如果使用函数计算，将高峰期每 2 小时的访问日志，或者低谷期每 4 小时的访问日志交给一个计算函数处理，并将处理结果存到RDS中。使用一个函数分派数据给另一个函数，使其执行成千上万个相同的实例。</p>
-
 <p>这样会同时运行近千个计算函数（24 x 365 / 10），在不到一分钟的时间内完成整个工作</p>
-
 <p>下面我们来重点叙述流量突发弹性扩容的场景，目前阿里云也支持了Serverless的架构，下面是官方关于该场景的描述。</p>
-
 <p>&ndash;START</p>
-
-<p><img src="/img/4098122-c7133c197b5f272a.jpeg" alt="4098122-c7133c197b5f272a" /></p>
-
+<p><img src="/img/4098122-c7133c197b5f272a.jpeg" alt="4098122-c7133c197b5f272a"></p>
 <p>图片来自阿里云</p>
-
 <h1 id="场景描述">场景描述</h1>
-
 <p>直播间的客户端把主播和连麦观众的音视频采集发送给函数计算做混流服务，函数计算把数据汇集后交给混流服务进行合成，并把合成画面视频流推送给CDN，终端观众实时拉取直播流，能实时看到混流合成画面。</p>
-
 <p>视频直播应用场景中，有一种场景视频直播的多人连麦，主播可以同时和多个工作进行连麦，把多个观众或者好友画面接入，并把画面合成到一个场景中，供给更多观看直播的观众观看。这个场景中，有几个技术难度需要关注：</p>
-
 <p>连麦的观众不固定，需要考虑适度的并发和弹性。</p>
-
 <p>直播不可能 24 小时在线，有较为明显的业务访问高峰期和低谷期。</p>
-
 <p>直播是事件或者公众点爆的场景，更新速度较快，版本迭代较快，需要快速完成对新热点的技术升级。</p>
-
 <p>综合以上几个特点，可以通过Serverless这种架构来完美地解决以上痛点。</p>
-
 <p>函数计算作为连麦观众和主播接入的实时音频和视频转发集群，当并发量过来时，函数计算自动扩容多个执行环境来处理实时数据流；当业务高峰期过去后，会适度缩减资源使用。</p>
-
 <p>代码管理部署在云端，代码迭代可以随时进行修改和维护，无需再多管理一套软件运行环境。</p>
-
 <p><strong>视频直播场景常规做法：</strong></p>
-
 <p>购买负载均衡应付并发。</p>
-
 <p>购买计算资源做数据处理。</p>
-
 <p>业务低谷期需要想办法释放硬件资源来节省成本。</p>
-
 <p>多版本要维护多套运行环境。</p>
-
 <p><strong>函数计算解法：</strong></p>
-
 <p>把负载分发程序写到函数里。</p>
-
 <p>多版本迭代无需更换运行环境，仅仅替换代码版本即可。</p>
-
 <p>业务访问按需付费，业务低谷期无费用。</p>
-
 <h1 id="写在最后">写在最后</h1>
-
 <p>目前Serverless主要是AWS来引领，我们再来看下AWS的CTO  沃纳·威格尔 在2018年8月中国的AWS Summit上讲的两段话。</p>
-
 <p>&ldquo;大概12年之前，我们深知云将给软件带来翻天覆地的变化，我们创造了AWS。一直以来AWS希望与软件开发者密切合作，打造出一个现代化的软件开发框架。而不是告诉客户，你们需要什么工具。在AWS的信念中，我们认为真正知道软件应该如何开发的只有一个人，就是客户本人。&rdquo;</p>
-
 <p>“现代化的架构是使用AWS的服务、Lambda的功能，把它们连接在一起。没有中间层、没有应用层，也没有数据库层，它是一系列web服务连接在一起，由功能连接在一起，无需服务器，而安全、可靠性、规模、性能、成本管理这些事项由AWS做好”。</p>
-
 <p><strong>软件架构思维的发展就是要一步一步剥离出研发人员关心的IT基础设施，让其更多的精力参与到业务逻辑开发中，同时，我们孜孜不倦的追求着软件开发的效率，希望在软件的复杂度和效率之间得到一个平衡。软件发展的本质目标追求是降低成本和提高效率。</strong></p>
 
 
@@ -543,29 +441,22 @@
                     </h4>
                     <ul class="catalog-body"></ul>
                     <nav id="TableOfContents">
-<ul>
-<li><a href="#初识serverless架构">初识serverless架构</a></li>
-<li><a href="#iaas">IAAS</a></li>
-<li><a href="#pass">PASS</a></li>
-<li><a href="#进入serverless架构">进入Serverless架构</a>
-<ul>
-<li><a href="#baas-概念介绍">BAAS（概念介绍）</a></li>
-<li><a href="#faas-概念介绍">FAAS（概念介绍）</a>
-<ul>
-<li><a href="#传统部署"><strong>传统部署</strong></a></li>
-<li><a href="#faas部署"><strong>faas部署</strong></a></li>
-<li><a href="#faas平台">Faas平台</a></li>
-</ul></li>
-</ul></li>
-<li><a href="#serverless架构使用场景">Serverless架构使用场景</a>
-<ul>
-<li><a href="#事件请求场景">事件请求场景</a></li>
-<li><a href="#流量突发场景">流量突发场景</a></li>
-<li><a href="#大数据处理场景">大数据处理场景</a></li>
-</ul></li>
-<li><a href="#场景描述">场景描述</a></li>
-<li><a href="#写在最后">写在最后</a></li>
-</ul>
+  <ul>
+    <li><a href="#baas概念介绍">BAAS（概念介绍）</a></li>
+    <li><a href="#faas概念介绍">FAAS（概念介绍）</a>
+      <ul>
+        <li><a href="#传统部署"><strong>传统部署</strong></a></li>
+        <li><a href="#faas部署"><strong>faas部署</strong></a></li>
+        <li><a href="#faas平台">Faas平台</a></li>
+      </ul>
+    </li>
+  </ul>
+
+  <ul>
+    <li><a href="#事件请求场景">事件请求场景</a></li>
+    <li><a href="#流量突发场景">流量突发场景</a></li>
+    <li><a href="#大数据处理场景">大数据处理场景</a></li>
+  </ul>
 </nav>
                     <br>
                     <br>
@@ -590,9 +481,6 @@
                         
                         
                         
-                        <a href="/tags/" title="">
-                            
-                        </a>
                         
                         
                         
@@ -602,101 +490,6 @@
                         
                         
                         
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        <a href="/tags/qt" title="QT">
-                            QT
-                        </a>
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        <a href="/tags/zookeeper" title="Zookeeper">
-                            Zookeeper
-                        </a>
                         
                         
                         
@@ -736,8 +529,10 @@
                         
                         
                         
-                        <a href="/tags/elasticsearch" title="elasticSearch">
-                            elasticSearch
+                        
+                        
+                        <a href="/tags/elasticsearch" title="elasticsearch">
+                            elasticsearch
                         </a>
                         
                         
@@ -748,9 +543,27 @@
                         
                         
                         
-                        <a href="/tags/golang" title="golang">
-                            golang
-                        </a>
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
                         
                         
                         
@@ -788,9 +601,21 @@
                         
                         
                         
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
                         <a href="/tags/jvm" title="jvm">
                             jvm
                         </a>
+                        
+                        
+                        
+                        
                         
                         
                         
@@ -814,9 +639,19 @@
                         
                         
                         
+                        
+                        
+                        
+                        
+                        
+                        
                         <a href="/tags/mongodb" title="mongodb">
                             mongodb
                         </a>
+                        
+                        
+                        
+                        
                         
                         
                         
@@ -827,10 +662,6 @@
                         </a>
                         
                         
-                        
-                        <a href="/tags/mycat" title="mycat">
-                            mycat
-                        </a>
                         
                         
                         
@@ -844,9 +675,17 @@
                         
                         
                         
-                        <a href="/tags/nginx" title="nginx">
-                            nginx
-                        </a>
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
                         
                         
                         
@@ -870,8 +709,22 @@
                         
                         
                         
+                        
+                        
                         <a href="/tags/rocketmq" title="rocketmq">
                             rocketmq
+                        </a>
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        <a href="/tags/security%E6%A1%86%E6%9E%B6%E5%AD%A6%E4%B9%A0" title="security框架学习">
+                            security框架学习
                         </a>
                         
                         
@@ -898,17 +751,11 @@
                         
                         
                         
-                        <a href="/tags/springcloud" title="springCloud">
-                            springCloud
-                        </a>
-                        
-                        
-                        
-                        
-                        
                         <a href="/tags/springboot" title="springboot">
                             springboot
                         </a>
+                        
+                        
                         
                         
                         
@@ -922,6 +769,9 @@
                         
                         
                         
+                        <a href="/tags/springcloud" title="springcloud">
+                            springcloud
+                        </a>
                         
                         
                         
@@ -947,6 +797,33 @@
                         
                         
                         
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        <a href="/tags/zookeeper" title="zookeeper">
+                            zookeeper
+                        </a>
                         
                         
                         
@@ -1006,6 +883,8 @@
                         
                         
                         
+                        
+                        
                         <a href="/tags/%E5%88%86%E5%B8%83%E5%BC%8F%E7%B3%BB%E5%88%97" title="分布式系列">
                             分布式系列
                         </a>
@@ -1025,6 +904,10 @@
                         
                         
                         
+                        
+                        <a href="/tags/%E5%8D%8F%E8%AE%AE%E6%A0%88" title="协议栈">
+                            协议栈
+                        </a>
                         
                         
                         
@@ -1224,6 +1107,12 @@
                         
                         
                         
+                        
+                        
+                        
+                        
+                        
+                        
                         <a href="/tags/%E7%BD%91%E7%BB%9C%E7%BC%96%E7%A8%8B" title="网络编程">
                             网络编程
                         </a>
@@ -1247,6 +1136,10 @@
                         
                         
                         
+                        
+                        <a href="/tags/%E8%AE%A4%E8%AF%81%E5%92%8C%E6%8E%88%E6%9D%83" title="认证和授权">
+                            认证和授权
+                        </a>
                         
                         
                         
@@ -1417,7 +1310,7 @@
                     
                 </ul>
 		<p class="copyright text-muted">
-                    Copyright &copy;  2020
+                    Copyright &copy;  2021
                     <br>
                     <a href="https://themes.gohugo.io/hugo-theme-cleanwhite">CleanWhite Hugo Theme</a> by <a href="https://zhaohuabing.com">Huabing</a> |
                     <iframe

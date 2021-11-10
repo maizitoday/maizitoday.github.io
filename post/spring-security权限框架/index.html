@@ -97,15 +97,15 @@
                     </li>
                     
                     <li>
-                        <a href="/categories/english">English</a>
+                        <a href="/categories/english">english</a>
                     </li>
                     
                     <li>
-                        <a href="/categories/life">Life</a>
+                        <a href="/categories/life">life</a>
                     </li>
                     
                     <li>
-                        <a href="/categories/tech">Tech</a>
+                        <a href="/categories/tech">tech</a>
                     </li>
                     
 
@@ -241,426 +241,309 @@
                 
                 
                 
-                
-
-<p>[TOC]</p>
-
-<p><strong>转载地址：<a href="http://www.spring4all.com/article/443">http://www.spring4all.com/article/443</a></strong></p>
-
-<p><strong>好文列子地址：<a href="https://blog.csdn.net/weixin_39792935/article/details/84541194?utm_medium=distribute.pc_relevant.none-task-blog-BlogCommendFromMachineLearnPai2-1.pc_relevant_is_cache&amp;depth_1-utm_source=distribute.pc_relevant.none-task-blog-BlogCommendFromMachineLearnPai2-1.pc_relevant_is_cache">https://blog.csdn.net/weixin_39792935/article/details/84541194?utm_medium=distribute.pc_relevant.none-task-blog-BlogCommendFromMachineLearnPai2-1.pc_relevant_is_cache&amp;depth_1-utm_source=distribute.pc_relevant.none-task-blog-BlogCommendFromMachineLearnPai2-1.pc_relevant_is_cache</a></strong></p>
-
+                <p>[TOC]</p>
+<p><strong>转载地址：http://www.spring4all.com/article/443</strong></p>
+<p><strong>好文列子地址：https://blog.csdn.net/weixin_39792935/article/details/84541194?utm_medium=distribute.pc_relevant.none-task-blog-BlogCommendFromMachineLearnPai2-1.pc_relevant_is_cache&amp;depth_1-utm_source=distribute.pc_relevant.none-task-blog-BlogCommendFromMachineLearnPai2-1.pc_relevant_is_cache</strong></p>
 <h1 id="认证流程">认证流程</h1>
-
-<p><img src="/img/20201031133740.png" alt="Xnip2020-10-31_13-37-40.png" /></p>
-
+<p><img src="/img/20201031133740.png" alt="Xnip2020-10-31_13-37-40.png"></p>
 <h1 id="授权流程">授权流程</h1>
-
-<p><img src="/img/20201031144551.png" alt="Xnip2020-10-31_14-45-51.png" /></p>
-
+<p><img src="/img/20201031144551.png" alt="Xnip2020-10-31_14-45-51.png"></p>
 <h1 id="流程图">流程图</h1>
-
-<p><img src="/img/3424642-7418a70abdfc7287.jpg" alt="3424642-7418a70abdfc7287" /></p>
-
+<p><img src="/img/3424642-7418a70abdfc7287.jpg" alt="3424642-7418a70abdfc7287"></p>
 <h1 id="核心组件">核心组件</h1>
-
 <h2 id="securitycontextholder">SecurityContextHolder</h2>
-
 <p><code>SecurityContextHolder</code>用于存储安全上下文（security context）的信息。当前操作的用户是谁，该用户是否已经被认证，他拥有哪些角色权限…这些都被保存在SecurityContextHolder中。<code>SecurityContextHolder</code>默认使用<code>ThreadLocal</code> 策略来存储认证信息。看到<code>ThreadLocal</code> 也就意味着，这是一种与线程绑定的策略。Spring Security在用户登录时自动绑定认证信息到当前线程，在用户退出时，自动清除当前线程的认证信息。但这一切的前提，是你在web场景下使用Spring Security，而如果是Swing界面，Spring也提供了支持，<code>SecurityContextHolder</code>的策略则需要被替换，鉴于我的初衷是基于web来介绍Spring Security，所以这里以及后续，非web的相关的内容都一笔带过。</p>
-
 <h3 id="获取当前用户的信息">获取当前用户的信息</h3>
-
 <p>因为身份信息是与线程绑定的，所以可以在程序的任何地方使用静态方法获取用户信息。一个典型的获取当前登录用户的姓名的例子如下所示：</p>
-
-<pre><code class="language-java">Object principal = SecurityContextHolder.getContext().getAuthentication().getPrincipal();
-if (principal instanceof UserDetails) {
-    String username = ((UserDetails)principal).getUsername();
-} else {
-    String username = principal.toString();
-}
-</code></pre>
-
-<p>getAuthentication()返回了认证信息，再次getPrincipal()返回了身份信息，UserDetails便是Spring对身份信息封装的一个接口。</p>
-
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-java" data-lang="java">Object principal <span style="color:#f92672">=</span> SecurityContextHolder<span style="color:#f92672">.</span><span style="color:#a6e22e">getContext</span><span style="color:#f92672">().</span><span style="color:#a6e22e">getAuthentication</span><span style="color:#f92672">().</span><span style="color:#a6e22e">getPrincipal</span><span style="color:#f92672">();</span>
+<span style="color:#66d9ef">if</span> <span style="color:#f92672">(</span>principal <span style="color:#66d9ef">instanceof</span> UserDetails<span style="color:#f92672">)</span> <span style="color:#f92672">{</span>
+    String username <span style="color:#f92672">=</span> <span style="color:#f92672">((</span>UserDetails<span style="color:#f92672">)</span>principal<span style="color:#f92672">).</span><span style="color:#a6e22e">getUsername</span><span style="color:#f92672">();</span>
+<span style="color:#f92672">}</span> <span style="color:#66d9ef">else</span> <span style="color:#f92672">{</span>
+    String username <span style="color:#f92672">=</span> principal<span style="color:#f92672">.</span><span style="color:#a6e22e">toString</span><span style="color:#f92672">();</span>
+<span style="color:#f92672">}</span>
+</code></pre></div><p>getAuthentication()返回了认证信息，再次getPrincipal()返回了身份信息，UserDetails便是Spring对身份信息封装的一个接口。</p>
 <h2 id="authentication">Authentication</h2>
-
 <p>先看看这个接口的源码长什么样：</p>
-
-<pre><code class="language-java">package org.springframework.security.core;// &lt;1&gt;
-
-public interface Authentication extends Principal, Serializable { // &lt;1&gt;
-    Collection&lt;? extends GrantedAuthority&gt; getAuthorities(); // &lt;2&gt;
-
-    Object getCredentials();// &lt;2&gt;
-
-    Object getDetails();// &lt;2&gt;
-
-    Object getPrincipal();// &lt;2&gt;
-
-    boolean isAuthenticated();// &lt;2&gt;
-
-    void setAuthenticated(boolean var1) throws IllegalArgumentException;
-}
-</code></pre>
-
-<ol>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-java" data-lang="java"><span style="color:#f92672">package</span> org.springframework.security.core<span style="color:#f92672">;</span><span style="color:#75715e">// &lt;1&gt;
+</span><span style="color:#75715e"></span>
+<span style="color:#66d9ef">public</span> <span style="color:#66d9ef">interface</span> <span style="color:#a6e22e">Authentication</span> <span style="color:#66d9ef">extends</span> Principal<span style="color:#f92672">,</span> Serializable <span style="color:#f92672">{</span> <span style="color:#75715e">// &lt;1&gt;
+</span><span style="color:#75715e"></span>    Collection<span style="color:#f92672">&lt;?</span> <span style="color:#66d9ef">extends</span> GrantedAuthority<span style="color:#f92672">&gt;</span> <span style="color:#a6e22e">getAuthorities</span><span style="color:#f92672">();</span> <span style="color:#75715e">// &lt;2&gt;
+</span><span style="color:#75715e"></span>
+    Object <span style="color:#a6e22e">getCredentials</span><span style="color:#f92672">();</span><span style="color:#75715e">// &lt;2&gt;
+</span><span style="color:#75715e"></span>
+    Object <span style="color:#a6e22e">getDetails</span><span style="color:#f92672">();</span><span style="color:#75715e">// &lt;2&gt;
+</span><span style="color:#75715e"></span>
+    Object <span style="color:#a6e22e">getPrincipal</span><span style="color:#f92672">();</span><span style="color:#75715e">// &lt;2&gt;
+</span><span style="color:#75715e"></span>
+    <span style="color:#66d9ef">boolean</span> <span style="color:#a6e22e">isAuthenticated</span><span style="color:#f92672">();</span><span style="color:#75715e">// &lt;2&gt;
+</span><span style="color:#75715e"></span>
+    <span style="color:#66d9ef">void</span> <span style="color:#a6e22e">setAuthenticated</span><span style="color:#f92672">(</span><span style="color:#66d9ef">boolean</span> var1<span style="color:#f92672">)</span> <span style="color:#66d9ef">throws</span> IllegalArgumentException<span style="color:#f92672">;</span>
+<span style="color:#f92672">}</span>
+</code></pre></div><ol>
 <li>Authentication是spring security包中的接口，直接继承自Principal类，而Principal是位于<code>java.security</code>包中的。可以见得，Authentication在spring security中是最高级别的身份/认证的抽象。</li>
 <li>由这个顶级接口，我们可以得到用户拥有的权限信息列表，密码，用户细节信息，用户身份信息，认证信息。</li>
 </ol>
-
 <p><strong>提供基础认证数据接口</strong></p>
-
 <h2 id="spring-security是如何完成身份认证的">Spring Security是如何完成身份认证的</h2>
-
 <ol>
 <li>用户名和密码被过滤器获取到，封装成<code>Authentication</code>,通常情况下是<code>UsernamePasswordAuthenticationToken</code>这个实现类</li>
-<li>AuthenticationManager<code>身份管理器负责验证这个</code>Authentication</li>
+<li>AuthenticationManager<code> 身份管理器负责验证这个</code>Authentication</li>
 <li>认证成功后，<code>AuthenticationManager</code>身份管理器返回一个被填充满了信息的（包括上面提到的权限信息，身份信息，细节信息，但密码通常会被移除）<code>Authentication</code>实例。</li>
 <li><code>SecurityContextHolder</code>安全上下文容器将第3步填充了信息的<code>Authentication</code>，通过SecurityContextHolder.getContext().setAuthentication(…)方法，设置到其中。</li>
 </ol>
-
 <h2 id="authenticationmanager">AuthenticationManager</h2>
-
 <p>初次接触Spring Security的朋友相信会被<code>AuthenticationManager</code>，<code>ProviderManager</code> ，<code>AuthenticationProvider</code> …这么多相似的Spring认证类搞得晕头转向，但只要稍微梳理一下就可以理解清楚它们的联系和设计者的用意。AuthenticationManager（接口）是认证相关的核心接口，也是发起认证的出发点，因为在实际需求中，我们可能会允许用户使用用户名+密码登录，同时允许用户使用邮箱+密码，手机号码+密码登录，甚至，可能允许用户使用指纹登录（还有这样的操作？没想到吧），所以说AuthenticationManager一般不直接认证，AuthenticationManager接口的常用实现类<code>ProviderManager</code> 内部会维护一个<code>List&lt;AuthenticationProvider&gt;</code>列表，存放多种认证方式，实际上这是委托者模式的应用（Delegate）。也就是说，核心的认证入口始终只有一个：AuthenticationManager，不同的认证方式：用户名+密码（UsernamePasswordAuthenticationToken），邮箱+密码，手机号码+密码登录则对应了三个AuthenticationProvider。这样一来四不四就好理解多了？熟悉shiro的朋友可以把AuthenticationProvider理解成Realm。在默认策略下，只需要通过一个AuthenticationProvider的认证，即可被认为是登录成功。</p>
-
-<p>ProviderManager<code>中的List&lt;AuthenticationProvider&gt;，会依照次序去认证，认证成功则立即返回，若认证失败则返回null，下一个AuthenticationProvider会继续尝试认证，如果所有认证器都无法认证成功，则</code>ProviderManager` 会抛出一个ProviderNotFoundException异常。</p>
-
+<p>ProviderManager<code> 中的List&lt;AuthenticationProvider&gt;，会依照次序去认证，认证成功则立即返回，若认证失败则返回null，下一个AuthenticationProvider会继续尝试认证，如果所有认证器都无法认证成功，则</code>ProviderManager` 会抛出一个ProviderNotFoundException异常。</p>
 <p><strong>进行数据认证接口</strong></p>
-
 <p><strong>到这里，如果不纠结于AuthenticationProvider的实现细节以及安全相关的过滤器，认证相关的核心类其实都已经介绍完毕了：身份信息的存放容器SecurityContextHolder，身份信息的抽象Authentication，身份认证器AuthenticationManager及其认证流程。姑且在这里做一个分隔线。下面来介绍下AuthenticationProvider接口的具体实现。</strong></p>
-
 <h3 id="daoauthenticationprovider">DaoAuthenticationProvider</h3>
-
 <p>AuthenticationProvider最最最常用的一个实现便是DaoAuthenticationProvider。顾名思义，Dao正是数据访问层的缩写，也暗示了这个身份认证器的实现思路。</p>
-
 <p>按照我们最直观的思路，怎么去认证一个用户呢？用户前台提交了用户名和密码，而数据库中保存了用户名和密码，认证便是负责比对同一个用户名，提交的密码和保存的密码是否相同便是了。在Spring Security中。提交的用户名和密码，被封装成了UsernamePasswordAuthenticationToken，而根据用户名加载用户的任务则是交给了UserDetailsService，在DaoAuthenticationProvider中，对应的方法便是retrieveUser，虽然有两个参数，但是retrieveUser只有第一个参数起主要作用，返回一个UserDetails。还需要完成UsernamePasswordAuthenticationToken和UserDetails密码的比对，这便是交给additionalAuthenticationChecks方法完成的，如果这个void方法没有抛异常，则认为比对成功。比对密码的过程，用到了PasswordEncoder和SaltSource，密码加密和盐的概念相信不用我赘述了，它们为保障安全而设计，都是比较基础的概念。</p>
-
 <p>如果你已经被这些概念搞得晕头转向了，不妨这么理解DaoAuthenticationProvider：<strong>它获取用户提交的用户名和密码，比对其正确性，如果正确，返回一个数据库中的用户信息（假设用户信息被保存在数据库中）。</strong></p>
-
 <h3 id="userdetails与userdetailsservice">UserDetails与UserDetailsService</h3>
-
 <p>UserDetailsService只负责从特定的地方（通常是数据库）加载用户信息，仅此而已，记住这一点，可以避免走很多弯路。UserDetailsService常见的实现类有JdbcDaoImpl，InMemoryUserDetailsManager，前者从数据库加载用户，后者从内存中加载用户，也可以自己实现UserDetailsService，通常这更加灵活。我们一般都是</p>
-
-<pre><code class="language-java">public class JwtUserDetailsServiceImpl implements UserDetailsService {
-    @Override
-    public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
-        // 查询数据库，填充数据，主要是填充 username 和 password，他主要是通过这两个值判断。
-        // 同时你也可以添加扩展属性，保存值，成功后，用户数据都在这里面 
-        return null;
-    }
-}
-</code></pre>
-
-<h2 id="websecurityconfiguration">WebSecurityConfiguration</h2>
-
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-java" data-lang="java"><span style="color:#66d9ef">public</span> <span style="color:#66d9ef">class</span> <span style="color:#a6e22e">JwtUserDetailsServiceImpl</span> <span style="color:#66d9ef">implements</span> UserDetailsService <span style="color:#f92672">{</span>
+    <span style="color:#a6e22e">@Override</span>
+    <span style="color:#66d9ef">public</span> UserDetails <span style="color:#a6e22e">loadUserByUsername</span><span style="color:#f92672">(</span>String username<span style="color:#f92672">)</span> <span style="color:#66d9ef">throws</span> UsernameNotFoundException <span style="color:#f92672">{</span>
+        <span style="color:#75715e">// 查询数据库，填充数据，主要是填充 username 和 password，他主要是通过这两个值判断。
+</span><span style="color:#75715e"></span>        <span style="color:#75715e">// 同时你也可以添加扩展属性，保存值，成功后，用户数据都在这里面 
+</span><span style="color:#75715e"></span>        <span style="color:#66d9ef">return</span> <span style="color:#66d9ef">null</span><span style="color:#f92672">;</span>
+    <span style="color:#f92672">}</span>
+<span style="color:#f92672">}</span>
+</code></pre></div><h2 id="websecurityconfiguration">WebSecurityConfiguration</h2>
 <p>WebSecurityConfiguration中完成了声明springSecurityFilterChain的作用，并且最终交给DelegatingFilterProxy这个代理类，负责拦截请求（注意DelegatingFilterProxy这个类不是spring security包中的，而是存在于web包中，spring使用了代理模式来实现安全过滤的解耦）。</p>
-
 <h2 id="websecurityconfigureradapter">WebSecurityConfigurerAdapter</h2>
-
 <p>适配器模式在spring中被广泛的使用，在配置中使用Adapter的好处便是，我们可以选择性的配置想要修改的那一部分配置，而不用覆盖其他不相关的配置。WebSecurityConfigurerAdapter中我们可以选择自己想要修改的内容，来进行重写，而其提供了三个configure重载方法，是我们主要关心的</p>
-
 <p><strong>分别是对AuthenticationManagerBuilder，WebSecurity，HttpSecurity进行个性化的配置。</strong></p>
-
 <h3 id="httpsecurity">HttpSecurity</h3>
-
-<p><strong>转载地址：<a href="https://www.jianshu.com/p/6f1b129442a1">https://www.jianshu.com/p/6f1b129442a1</a></strong></p>
-
+<p><strong>转载地址：https://www.jianshu.com/p/6f1b129442a1</strong></p>
 <ol>
 <li><code>HttpSecurity</code>最终可以得到一个<code>DefaultSecurityFilterChain</code>通过的是<code>build()</code>方法</li>
 <li><code>HttpSecurity</code>维护了一个过滤器的列表，这个过滤器的列表最终放入了<code>DefaultSecurityFilterChain</code>这个过滤器链中</li>
 <li><code>HttpSecurity</code>最终提供了很多的配置，然而所有的配置也都是为了处理维护我们的过滤器列表</li>
 </ol>
-
 <p><strong>允许基于选择匹配在资源级配置基于网络的安全性</strong></p>
-
-<pre><code class="language-java"> http.authorizeRequests().antMatchers(HttpMethod.OPTIONS, &quot;/**&quot;).permitAll().anyRequest()
-                                .authenticated();
-</code></pre>
-
-<h3 id="websecurity">WebSecurity</h3>
-
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-java" data-lang="java"> http<span style="color:#f92672">.</span><span style="color:#a6e22e">authorizeRequests</span><span style="color:#f92672">().</span><span style="color:#a6e22e">antMatchers</span><span style="color:#f92672">(</span>HttpMethod<span style="color:#f92672">.</span><span style="color:#a6e22e">OPTIONS</span><span style="color:#f92672">,</span> <span style="color:#e6db74">&#34;/**&#34;</span><span style="color:#f92672">).</span><span style="color:#a6e22e">permitAll</span><span style="color:#f92672">().</span><span style="color:#a6e22e">anyRequest</span><span style="color:#f92672">()</span>
+                                <span style="color:#f92672">.</span><span style="color:#a6e22e">authenticated</span><span style="color:#f92672">();</span>
+</code></pre></div><h3 id="websecurity">WebSecurity</h3>
 <p><strong>转载地址: <a href="https://blog.csdn.net/andy_zhang2007/article/details/82111647">https://blog.csdn.net/andy_zhang2007/article/details/82111647</a></strong></p>
-
 <p><code>WebSecurity</code>是<code>Spring Security</code>的一个<code>SecurityBuilder</code>。它的任务是基于一组<code>WebSecurityConfigurer</code>构建出一个<code>Servlet Filter</code>,具体来讲就是构建一个<code>Spring Security</code>的<code>FilterChainProxy</code>实例。这个<code>FilterChainProxy</code>实现了<code>Filter</code>接口，也是通常我们所说的<code>Spring Security Filter Chain</code>,所构建的<code>FilterChainProxy</code>实例缺省会使用名称<code>springSecurityFilterChain</code>作为<code>bean</code>注册到容器，运行时处理<code>web</code>请求过程中会使用该<code>bean</code>进行安全控制。</p>
-
 <p>每个<code>FilterChainProxy</code>包装了一个<code>HttpFirewall</code>和若干个<code>SecurityFilterChain</code>, 这里每个 <code>SecurityFilterChain</code>要么对应于一个要忽略安全控制的<code>URL</code>通配符(<code>RequestMatcher</code>)；要么对应于一个要进行安全控制的<code>URL</code>通配符(<code>HttpSecurity</code>)。</p>
-
-<pre><code class="language-java">助记公式 : 1 FilterChainProxy = 1 HttpFirewall + n SecurityFilterChain
-</code></pre>
-
-<p><strong>用于影响全局安全性(配置资源，设置调试模式，通过实现自定义防火墙定义拒绝请求)的配置设置。一般用于配置全局的某些通用事物，例如静态资源等</strong></p>
-
-<pre><code class="language-java">@Override
-public void configure(WebSecurity web) throws Exception {
-    web.httpFirewall(httpFirewall);
-    web.ignoring().antMatchers(SerurityConstant.IGNORING_URL);
-}
-</code></pre>
-
-<h3 id="httpfirewall">HttpFirewall</h3>
-
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-java" data-lang="java">助记公式 <span style="color:#f92672">:</span> 1 FilterChainProxy <span style="color:#f92672">=</span> 1 HttpFirewall <span style="color:#f92672">+</span> n SecurityFilterChain
+</code></pre></div><p><strong>用于影响全局安全性(配置资源，设置调试模式，通过实现自定义防火墙定义拒绝请求)的配置设置。一般用于配置全局的某些通用事物，例如静态资源等</strong></p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-java" data-lang="java"><span style="color:#a6e22e">@Override</span>
+<span style="color:#66d9ef">public</span> <span style="color:#66d9ef">void</span> <span style="color:#a6e22e">configure</span><span style="color:#f92672">(</span>WebSecurity web<span style="color:#f92672">)</span> <span style="color:#66d9ef">throws</span> Exception <span style="color:#f92672">{</span>
+    web<span style="color:#f92672">.</span><span style="color:#a6e22e">httpFirewall</span><span style="color:#f92672">(</span>httpFirewall<span style="color:#f92672">);</span>
+    web<span style="color:#f92672">.</span><span style="color:#a6e22e">ignoring</span><span style="color:#f92672">().</span><span style="color:#a6e22e">antMatchers</span><span style="color:#f92672">(</span>SerurityConstant<span style="color:#f92672">.</span><span style="color:#a6e22e">IGNORING_URL</span><span style="color:#f92672">);</span>
+<span style="color:#f92672">}</span>
+</code></pre></div><h3 id="httpfirewall">HttpFirewall</h3>
 <p><strong>转载地址： <a href="https://blog.csdn.net/andy_zhang2007/article/details/90511688">https://blog.csdn.net/andy_zhang2007/article/details/90511688</a></strong></p>
-
 <p><code>StrictHttpFirewall</code>是<code>Spring Security Web</code>提供的一个<code>HTTP</code>防火墙(对应概念模型接口<code>HttpFirewall</code>)实现,该实现采用了严格模式，遇到任何可疑的请求，会通过抛出异常<code>RequestRejectedException</code>拒绝该请求。<code>StrictHttpFirewall</code>也是<code>Spring Security Web</code>在安全过滤器代理<code>FilterChainProxy</code>内置缺省使用的<code>HTTP</code>防火墙机制。</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-java" data-lang="java"><span style="color:#a6e22e">@Override</span>
+<span style="color:#66d9ef">public</span> <span style="color:#66d9ef">void</span> <span style="color:#a6e22e">configure</span><span style="color:#f92672">(</span>WebSecurity web<span style="color:#f92672">)</span> <span style="color:#66d9ef">throws</span> Exception <span style="color:#f92672">{</span>
+    web<span style="color:#f92672">.</span><span style="color:#a6e22e">httpFirewall</span><span style="color:#f92672">(</span>httpFirewall<span style="color:#f92672">);</span>
+    web<span style="color:#f92672">.</span><span style="color:#a6e22e">ignoring</span><span style="color:#f92672">().</span><span style="color:#a6e22e">antMatchers</span><span style="color:#f92672">(</span>SerurityConstant<span style="color:#f92672">.</span><span style="color:#a6e22e">IGNORING_URL</span><span style="color:#f92672">);</span>
+<span style="color:#f92672">}</span>
 
-<pre><code class="language-java">@Override
-public void configure(WebSecurity web) throws Exception {
-    web.httpFirewall(httpFirewall);
-    web.ignoring().antMatchers(SerurityConstant.IGNORING_URL);
-}
+<span style="color:#75715e">/**
+</span><span style="color:#75715e">* @Description: 自定义防火墙
+</span><span style="color:#75715e">* @Date: 2020-11-19 10:45:02
+</span><span style="color:#75715e">* @param {*}
+</span><span style="color:#75715e">* @return {*}
+</span><span style="color:#75715e">* @LastEditors: Do not edit
+</span><span style="color:#75715e">*/</span>
+<span style="color:#a6e22e">@Bean</span>
+<span style="color:#66d9ef">public</span> HttpFirewall <span style="color:#a6e22e">httpFirewall</span><span style="color:#f92672">()</span> <span style="color:#f92672">{</span>
+    StrictHttpFirewall firewall <span style="color:#f92672">=</span> <span style="color:#66d9ef">new</span> StrictHttpFirewall<span style="color:#f92672">();</span>
+    firewall<span style="color:#f92672">.</span><span style="color:#a6e22e">setAllowSemicolon</span><span style="color:#f92672">(</span><span style="color:#66d9ef">true</span><span style="color:#f92672">);</span>
+    firewall<span style="color:#f92672">.</span><span style="color:#a6e22e">setAllowUrlEncodedDoubleSlash</span><span style="color:#f92672">(</span><span style="color:#66d9ef">true</span><span style="color:#f92672">);</span>
+    firewall<span style="color:#f92672">.</span><span style="color:#a6e22e">setAllowUrlEncodedPercent</span><span style="color:#f92672">(</span><span style="color:#66d9ef">true</span><span style="color:#f92672">);</span>
+    firewall<span style="color:#f92672">.</span><span style="color:#a6e22e">setAllowBackSlash</span><span style="color:#f92672">(</span><span style="color:#66d9ef">true</span><span style="color:#f92672">);</span>
+    firewall<span style="color:#f92672">.</span><span style="color:#a6e22e">setAllowUrlEncodedSlash</span><span style="color:#f92672">(</span><span style="color:#66d9ef">true</span><span style="color:#f92672">);</span>
+    firewall<span style="color:#f92672">.</span><span style="color:#a6e22e">setAllowUrlEncodedPeriod</span><span style="color:#f92672">(</span><span style="color:#66d9ef">true</span><span style="color:#f92672">);</span>
+    <span style="color:#66d9ef">return</span> firewall<span style="color:#f92672">;</span>
+<span style="color:#f92672">}</span>
 
-/**
-* @Description: 自定义防火墙
-* @Date: 2020-11-19 10:45:02
-* @param {*}
-* @return {*}
-* @LastEditors: Do not edit
-*/
-@Bean
-public HttpFirewall httpFirewall() {
-    StrictHttpFirewall firewall = new StrictHttpFirewall();
-    firewall.setAllowSemicolon(true);
-    firewall.setAllowUrlEncodedDoubleSlash(true);
-    firewall.setAllowUrlEncodedPercent(true);
-    firewall.setAllowBackSlash(true);
-    firewall.setAllowUrlEncodedSlash(true);
-    firewall.setAllowUrlEncodedPeriod(true);
-    return firewall;
-}
-
-</code></pre>
-
-<h3 id="authenticationmanagerbuilder">AuthenticationManagerBuilder</h3>
-
+</code></pre></div><h3 id="authenticationmanagerbuilder">AuthenticationManagerBuilder</h3>
 <p>用于通过允许AuthenticationProvider容易地添加来建立认证机制。也就是说用来记录账号，密码，角色信息。</p>
-
-<pre><code class="language-java">@Autowired
-public void configureAuthentication(AuthenticationManagerBuilder authenticationManagerBuilder)
-                        throws Exception {             authenticationManagerBuilder.userDetailsService(userDetailsService).passwordEncoder(passwordEncoder());
-        }
-</code></pre>
-
-<h2 id="passwordencoder">PasswordEncoder</h2>
-
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-java" data-lang="java"><span style="color:#a6e22e">@Autowired</span>
+<span style="color:#66d9ef">public</span> <span style="color:#66d9ef">void</span> <span style="color:#a6e22e">configureAuthentication</span><span style="color:#f92672">(</span>AuthenticationManagerBuilder authenticationManagerBuilder<span style="color:#f92672">)</span>
+                        <span style="color:#66d9ef">throws</span> Exception <span style="color:#f92672">{</span>             authenticationManagerBuilder<span style="color:#f92672">.</span><span style="color:#a6e22e">userDetailsService</span><span style="color:#f92672">(</span>userDetailsService<span style="color:#f92672">).</span><span style="color:#a6e22e">passwordEncoder</span><span style="color:#f92672">(</span>passwordEncoder<span style="color:#f92672">());</span>
+        <span style="color:#f92672">}</span>
+</code></pre></div><h2 id="passwordencoder">PasswordEncoder</h2>
 <p>密码进行加盐处理，我们也可以在注册用户的时候，对MD5的密码进行加盐处理，提高密码。</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-java" data-lang="java"><span style="color:#75715e">/**
+</span><span style="color:#75715e">* 加密密码
+</span><span style="color:#75715e">*/</span>
+<span style="color:#66d9ef">private</span> <span style="color:#66d9ef">void</span> <span style="color:#a6e22e">encryptPassword</span><span style="color:#f92672">(</span>UserEntity userEntity<span style="color:#f92672">){</span>
+      String password <span style="color:#f92672">=</span> userEntity<span style="color:#f92672">.</span><span style="color:#a6e22e">getPassword</span><span style="color:#f92672">();</span>
+      password <span style="color:#f92672">=</span> <span style="color:#66d9ef">new</span> BCryptPasswordEncoder<span style="color:#f92672">().</span><span style="color:#a6e22e">encode</span><span style="color:#f92672">(</span>password<span style="color:#f92672">);</span>
+      userEntity<span style="color:#f92672">.</span><span style="color:#a6e22e">setPassword</span><span style="color:#f92672">(</span>password<span style="color:#f92672">);</span>
+<span style="color:#f92672">}</span>
+</code></pre></div><h1 id="授权注解">授权注解</h1>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-java" data-lang="java"><span style="color:#75715e">//开启全局方法调用权限验证
+</span><span style="color:#75715e">// 当@EnableGlobalMethodSecurity(prePostEnabled=true)的时候，@PreAuthorize @PostAuthorize才可以使用
+</span><span style="color:#75715e"></span><span style="color:#a6e22e">@EnableGlobalMethodSecurity</span><span style="color:#f92672">(</span>prePostEnabled <span style="color:#f92672">=</span> <span style="color:#66d9ef">true</span><span style="color:#f92672">)</span>
+</code></pre></div><p><strong>@PreAuthorize</strong>  方法之前调用， 我们一般都是用这个。</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-java" data-lang="java"><span style="color:#a6e22e">@Service</span>
+<span style="color:#66d9ef">public</span> <span style="color:#66d9ef">class</span> <span style="color:#a6e22e">UserServiceImpl</span> <span style="color:#66d9ef">implements</span> UserService <span style="color:#f92672">{</span>
+   <span style="color:#a6e22e">@PreAuthorize</span><span style="color:#f92672">(</span><span style="color:#e6db74">&#34;hasRole(&#39;ROLE_ADMIN&#39;)&#34;</span><span style="color:#f92672">)</span>
+   <span style="color:#a6e22e">@PreAuthorize</span><span style="color:#f92672">(</span><span style="color:#e6db74">&#34;hasAnyRole(&#39;normal&#39;,&#39;admin&#39;)&#34;</span><span style="color:#f92672">)</span>
+   <span style="color:#66d9ef">public</span> <span style="color:#66d9ef">void</span> <span style="color:#a6e22e">addUser</span><span style="color:#f92672">(</span>User user<span style="color:#f92672">)</span> <span style="color:#f92672">{</span>
+      System<span style="color:#f92672">.</span><span style="color:#a6e22e">out</span><span style="color:#f92672">.</span><span style="color:#a6e22e">println</span><span style="color:#f92672">(</span><span style="color:#e6db74">&#34;addUser................&#34;</span> <span style="color:#f92672">+</span> user<span style="color:#f92672">);</span>
+   <span style="color:#f92672">}</span>
+   <span style="color:#a6e22e">@PreAuthorize</span><span style="color:#f92672">(</span><span style="color:#e6db74">&#34;hasRole(&#39;ROLE_USER&#39;) or hasRole(&#39;ROLE_ADMIN&#39;)&#34;</span><span style="color:#f92672">)</span>
+   <span style="color:#a6e22e">@PreAuthorize</span><span style="color:#f92672">(</span><span style="color:#e6db74">&#34;hasRole(&#39;normal&#39;) AND hasRole(&#39;admin&#39;)&#34;</span><span style="color:#f92672">)</span>
+   <span style="color:#66d9ef">public</span> User <span style="color:#a6e22e">find</span><span style="color:#f92672">(</span><span style="color:#66d9ef">int</span> id<span style="color:#f92672">)</span> <span style="color:#f92672">{</span>
+      System<span style="color:#f92672">.</span><span style="color:#a6e22e">out</span><span style="color:#f92672">.</span><span style="color:#a6e22e">println</span><span style="color:#f92672">(</span><span style="color:#e6db74">&#34;find user by id.............&#34;</span> <span style="color:#f92672">+</span> id<span style="color:#f92672">);</span>
+      <span style="color:#66d9ef">return</span> <span style="color:#66d9ef">null</span><span style="color:#f92672">;</span>
+   <span style="color:#f92672">}</span>
+<span style="color:#f92672">}</span>
 
-<pre><code class="language-java">/**
-* 加密密码
-*/
-private void encryptPassword(UserEntity userEntity){
-      String password = userEntity.getPassword();
-      password = new BCryptPasswordEncoder().encode(password);
-      userEntity.setPassword(password);
-}
-</code></pre>
+</code></pre></div><div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-java" data-lang="java"><span style="color:#66d9ef">public</span> <span style="color:#66d9ef">class</span> <span style="color:#a6e22e">UserServiceImpl</span> <span style="color:#66d9ef">implements</span> UserService <span style="color:#f92672">{</span>
+   <span style="color:#75715e">/**
+</span><span style="color:#75715e">    * 限制只能查询Id小于10的用户
+</span><span style="color:#75715e">   */</span>
+   <span style="color:#a6e22e">@PreAuthorize</span><span style="color:#f92672">(</span><span style="color:#e6db74">&#34;#id&lt;10&#34;</span><span style="color:#f92672">)</span>
+   <span style="color:#66d9ef">public</span> User <span style="color:#a6e22e">find</span><span style="color:#f92672">(</span><span style="color:#66d9ef">int</span> id<span style="color:#f92672">)</span> <span style="color:#f92672">{</span>
+      System<span style="color:#f92672">.</span><span style="color:#a6e22e">out</span><span style="color:#f92672">.</span><span style="color:#a6e22e">println</span><span style="color:#f92672">(</span><span style="color:#e6db74">&#34;find user by id.........&#34;</span> <span style="color:#f92672">+</span> id<span style="color:#f92672">);</span>
+      <span style="color:#66d9ef">return</span> <span style="color:#66d9ef">null</span><span style="color:#f92672">;</span>
+   <span style="color:#f92672">}</span>
+   <span style="color:#75715e">/**
+</span><span style="color:#75715e">    * 限制只能查询自己的信息
+</span><span style="color:#75715e">    */</span>
+   <span style="color:#a6e22e">@PreAuthorize</span><span style="color:#f92672">(</span><span style="color:#e6db74">&#34;principal.username.equals(#username)&#34;</span><span style="color:#f92672">)</span>
+   <span style="color:#66d9ef">public</span> User <span style="color:#a6e22e">find</span><span style="color:#f92672">(</span>String username<span style="color:#f92672">)</span> <span style="color:#f92672">{</span>
+      System<span style="color:#f92672">.</span><span style="color:#a6e22e">out</span><span style="color:#f92672">.</span><span style="color:#a6e22e">println</span><span style="color:#f92672">(</span><span style="color:#e6db74">&#34;find user by username......&#34;</span> <span style="color:#f92672">+</span> username<span style="color:#f92672">);</span>
+      <span style="color:#66d9ef">return</span> <span style="color:#66d9ef">null</span><span style="color:#f92672">;</span>
+   <span style="color:#f92672">}</span>
+   <span style="color:#75715e">/**
+</span><span style="color:#75715e">    * 限制只能新增用户名称为abc的用户
+</span><span style="color:#75715e">    */</span>
+   <span style="color:#a6e22e">@PreAuthorize</span><span style="color:#f92672">(</span><span style="color:#e6db74">&#34;#user.name.equals(&#39;abc&#39;)&#34;</span><span style="color:#f92672">)</span>
+   <span style="color:#66d9ef">public</span> <span style="color:#66d9ef">void</span> <span style="color:#a6e22e">add</span><span style="color:#f92672">(</span>User user<span style="color:#f92672">)</span> <span style="color:#f92672">{</span>
+      System<span style="color:#f92672">.</span><span style="color:#a6e22e">out</span><span style="color:#f92672">.</span><span style="color:#a6e22e">println</span><span style="color:#f92672">(</span><span style="color:#e6db74">&#34;addUser............&#34;</span> <span style="color:#f92672">+</span> user<span style="color:#f92672">);</span>
+   <span style="color:#f92672">}</span>
+<span style="color:#f92672">}</span>
 
-<h1 id="授权注解">授权注解</h1>
+</code></pre></div><p><strong>一般我们都是基于权限进行授权,  这样更加的灵活。</strong></p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-java" data-lang="java"><span style="color:#a6e22e">@PreAuthorize</span><span style="color:#f92672">(</span><span style="color:#e6db74">&#34;hasAuthority(&#39;user:add&#39;)&#34;</span><span style="color:#f92672">)</span>
+<span style="color:#a6e22e">@PreAuthorize</span><span style="color:#f92672">(</span><span style="color:#e6db74">&#34;hasAnyAuthority(&#39;user:add&#39;,&#39;user:del&#39;)&#34;</span><span style="color:#f92672">)</span>
+<span style="color:#66d9ef">public</span> <span style="color:#66d9ef">void</span> <span style="color:#a6e22e">addUser</span><span style="color:#f92672">(</span>User user<span style="color:#f92672">)</span> <span style="color:#f92672">{</span>
+      System<span style="color:#f92672">.</span><span style="color:#a6e22e">out</span><span style="color:#f92672">.</span><span style="color:#a6e22e">println</span><span style="color:#f92672">(</span><span style="color:#e6db74">&#34;addUser................&#34;</span> <span style="color:#f92672">+</span> user<span style="color:#f92672">);</span>
+<span style="color:#f92672">}</span>
+</code></pre></div><p><strong>总结：通过扫描 preAuthorize 注解， 查看我们封装的</strong></p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-java" data-lang="java"> <span style="color:#a6e22e">@Override</span>
+    <span style="color:#66d9ef">public</span> UserDetails <span style="color:#a6e22e">loadUserByUsername</span><span style="color:#f92672">(</span>String username<span style="color:#f92672">)</span> <span style="color:#66d9ef">throws</span> UsernameNotFoundException <span style="color:#f92672">{</span>
+        QueryWrapper<span style="color:#f92672">&lt;</span>UserEntity<span style="color:#f92672">&gt;</span> queryWrapper <span style="color:#f92672">=</span> <span style="color:#66d9ef">new</span> QueryWrapper<span style="color:#f92672">&lt;</span>UserEntity<span style="color:#f92672">&gt;();</span>
+        queryWrapper<span style="color:#f92672">.</span><span style="color:#a6e22e">eq</span><span style="color:#f92672">(</span><span style="color:#e6db74">&#34;user_name&#34;</span><span style="color:#f92672">,</span> username<span style="color:#f92672">);</span>
+        UserEntity userEntity <span style="color:#f92672">=</span> userServiceImpl<span style="color:#f92672">.</span><span style="color:#a6e22e">getOne</span><span style="color:#f92672">(</span>queryWrapper<span style="color:#f92672">);</span>
+        JwtUser jwtUser <span style="color:#f92672">=</span> <span style="color:#66d9ef">null</span><span style="color:#f92672">;</span>
+        <span style="color:#66d9ef">if</span> <span style="color:#f92672">(</span>userEntity <span style="color:#f92672">!=</span> <span style="color:#66d9ef">null</span><span style="color:#f92672">)</span> <span style="color:#f92672">{</span>
+            String password <span style="color:#f92672">=</span> passwordEncoder<span style="color:#f92672">.</span><span style="color:#a6e22e">encode</span><span style="color:#f92672">(</span>userEntity<span style="color:#f92672">.</span><span style="color:#a6e22e">getPassWord</span><span style="color:#f92672">());</span>
+            <span style="color:#75715e">// 在这个方法里面，进行对 GrantedAuthority 这个对象的填充，里面就是user:add等值
+</span><span style="color:#75715e"></span>            List<span style="color:#f92672">&lt;</span>GrantedAuthority<span style="color:#f92672">&gt;</span> authorityList <span style="color:#f92672">=</span> getAuthorityList<span style="color:#f92672">(</span>userEntity<span style="color:#f92672">);</span>
 
-<pre><code class="language-java">//开启全局方法调用权限验证
-// 当@EnableGlobalMethodSecurity(prePostEnabled=true)的时候，@PreAuthorize @PostAuthorize才可以使用
-@EnableGlobalMethodSecurity(prePostEnabled = true)
-</code></pre>
-
-<p><strong>@PreAuthorize</strong>  方法之前调用， 我们一般都是用这个。</p>
-
-<pre><code class="language-java">@Service
-public class UserServiceImpl implements UserService {
-   @PreAuthorize(&quot;hasRole('ROLE_ADMIN')&quot;)
-   @PreAuthorize(&quot;hasAnyRole('normal','admin')&quot;)
-   public void addUser(User user) {
-      System.out.println(&quot;addUser................&quot; + user);
-   }
-   @PreAuthorize(&quot;hasRole('ROLE_USER') or hasRole('ROLE_ADMIN')&quot;)
-   @PreAuthorize(&quot;hasRole('normal') AND hasRole('admin')&quot;)
-   public User find(int id) {
-      System.out.println(&quot;find user by id.............&quot; + id);
-      return null;
-   }
-}
-
-</code></pre>
-
-<pre><code class="language-java">public class UserServiceImpl implements UserService {
-   /**
-    * 限制只能查询Id小于10的用户
-   */
-   @PreAuthorize(&quot;#id&lt;10&quot;)
-   public User find(int id) {
-      System.out.println(&quot;find user by id.........&quot; + id);
-      return null;
-   }
-   /**
-    * 限制只能查询自己的信息
-    */
-   @PreAuthorize(&quot;principal.username.equals(#username)&quot;)
-   public User find(String username) {
-      System.out.println(&quot;find user by username......&quot; + username);
-      return null;
-   }
-   /**
-    * 限制只能新增用户名称为abc的用户
-    */
-   @PreAuthorize(&quot;#user.name.equals('abc')&quot;)
-   public void add(User user) {
-      System.out.println(&quot;addUser............&quot; + user);
-   }
-}
-
-</code></pre>
-
-<p><strong>一般我们都是基于权限进行授权,  这样更加的灵活。</strong></p>
-
-<pre><code class="language-java">@PreAuthorize(&quot;hasAuthority('user:add')&quot;)
-@PreAuthorize(&quot;hasAnyAuthority('user:add','user:del')&quot;)
-public void addUser(User user) {
-      System.out.println(&quot;addUser................&quot; + user);
-}
-</code></pre>
-
-<p><strong>总结：通过扫描 preAuthorize 注解， 查看我们封装的</strong></p>
-
-<pre><code class="language-java"> @Override
-    public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
-        QueryWrapper&lt;UserEntity&gt; queryWrapper = new QueryWrapper&lt;UserEntity&gt;();
-        queryWrapper.eq(&quot;user_name&quot;, username);
-        UserEntity userEntity = userServiceImpl.getOne(queryWrapper);
-        JwtUser jwtUser = null;
-        if (userEntity != null) {
-            String password = passwordEncoder.encode(userEntity.getPassWord());
-            // 在这个方法里面，进行对 GrantedAuthority 这个对象的填充，里面就是user:add等值
-            List&lt;GrantedAuthority&gt; authorityList = getAuthorityList(userEntity);
-
-            QueryWrapper&lt;UserRoleEntity&gt; roleQw = new QueryWrapper&lt;UserRoleEntity&gt;();
-            roleQw.eq(&quot;fk_user_id&quot;, userEntity.getId()).select(&quot;fk_role_id&quot;, &quot;fk_user_id&quot;);
-            List&lt;UserRoleEntity&gt; userRoleList = userRoleServiceImpl.list(roleQw);
-            jwtUser = new JwtUser(username, password, 0, authorityList, userEntity.getId(), userRoleList);
-        } else {
-            log.debug(&quot;账号不存在&quot;);
-            handlerExceptionResolver.resolveException(request, response, null,
-                    new MyException(ResultCodeEnmu.NO_USER.description, ResultCodeEnmu.NO_USER.code));
-        }
-        return jwtUser;
-    }
-</code></pre>
-
-<p><strong>是否有这个字符串，如果有的话就是权限ok。</strong></p>
-
+            QueryWrapper<span style="color:#f92672">&lt;</span>UserRoleEntity<span style="color:#f92672">&gt;</span> roleQw <span style="color:#f92672">=</span> <span style="color:#66d9ef">new</span> QueryWrapper<span style="color:#f92672">&lt;</span>UserRoleEntity<span style="color:#f92672">&gt;();</span>
+            roleQw<span style="color:#f92672">.</span><span style="color:#a6e22e">eq</span><span style="color:#f92672">(</span><span style="color:#e6db74">&#34;fk_user_id&#34;</span><span style="color:#f92672">,</span> userEntity<span style="color:#f92672">.</span><span style="color:#a6e22e">getId</span><span style="color:#f92672">()).</span><span style="color:#a6e22e">select</span><span style="color:#f92672">(</span><span style="color:#e6db74">&#34;fk_role_id&#34;</span><span style="color:#f92672">,</span> <span style="color:#e6db74">&#34;fk_user_id&#34;</span><span style="color:#f92672">);</span>
+            List<span style="color:#f92672">&lt;</span>UserRoleEntity<span style="color:#f92672">&gt;</span> userRoleList <span style="color:#f92672">=</span> userRoleServiceImpl<span style="color:#f92672">.</span><span style="color:#a6e22e">list</span><span style="color:#f92672">(</span>roleQw<span style="color:#f92672">);</span>
+            jwtUser <span style="color:#f92672">=</span> <span style="color:#66d9ef">new</span> JwtUser<span style="color:#f92672">(</span>username<span style="color:#f92672">,</span> password<span style="color:#f92672">,</span> 0<span style="color:#f92672">,</span> authorityList<span style="color:#f92672">,</span> userEntity<span style="color:#f92672">.</span><span style="color:#a6e22e">getId</span><span style="color:#f92672">(),</span> userRoleList<span style="color:#f92672">);</span>
+        <span style="color:#f92672">}</span> <span style="color:#66d9ef">else</span> <span style="color:#f92672">{</span>
+            log<span style="color:#f92672">.</span><span style="color:#a6e22e">debug</span><span style="color:#f92672">(</span><span style="color:#e6db74">&#34;账号不存在&#34;</span><span style="color:#f92672">);</span>
+            handlerExceptionResolver<span style="color:#f92672">.</span><span style="color:#a6e22e">resolveException</span><span style="color:#f92672">(</span>request<span style="color:#f92672">,</span> response<span style="color:#f92672">,</span> <span style="color:#66d9ef">null</span><span style="color:#f92672">,</span>
+                    <span style="color:#66d9ef">new</span> MyException<span style="color:#f92672">(</span>ResultCodeEnmu<span style="color:#f92672">.</span><span style="color:#a6e22e">NO_USER</span><span style="color:#f92672">.</span><span style="color:#a6e22e">description</span><span style="color:#f92672">,</span> ResultCodeEnmu<span style="color:#f92672">.</span><span style="color:#a6e22e">NO_USER</span><span style="color:#f92672">.</span><span style="color:#a6e22e">code</span><span style="color:#f92672">));</span>
+        <span style="color:#f92672">}</span>
+        <span style="color:#66d9ef">return</span> jwtUser<span style="color:#f92672">;</span>
+    <span style="color:#f92672">}</span>
+</code></pre></div><p><strong>是否有这个字符串，如果有的话就是权限ok。</strong></p>
 <h1 id="自定义异常抓取">自定义异常抓取</h1>
-
 <p>如何抛出自定义异常</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-java" data-lang="java"><span style="color:#f92672">import</span> org.springframework.web.servlet.HandlerExceptionResolver<span style="color:#f92672">;</span> 
 
-<pre><code class="language-java">import org.springframework.web.servlet.HandlerExceptionResolver; 
+<span style="color:#a6e22e">@Autowired</span>
+ <span style="color:#66d9ef">private</span> HandlerExceptionResolver handlerExceptionResolver<span style="color:#f92672">;</span>
 
-@Autowired
- private HandlerExceptionResolver handlerExceptionResolver;
-
-@Override
-public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
-  handlerExceptionResolver.resolveException(request, response, null,
-                new MyException(ResultCodeEnmu.NO_USER.description, ResultCodeEnmu.NO_USER.code));  
-}
-return jwtUser;
-}
-</code></pre>
-
-<p>然后在全局异常就可以抓取这个异常</p>
-
-<pre><code class="language-java"> @ExceptionHandler(value = MyException.class)
-    public Map&lt;String, Object&gt; myExceptionHandler(HttpServletRequest req, MyException e) {
-        ResultDataUtil.ResponseDataFormatEnmu exceptionFormat = ResultDataUtil.ResponseDataFormatEnmu.RESPONSE_FORMAT_CUSTOM_EXCEPTION;
-        exceptionFormat.setMsg(getTrace(e));
-        exceptionFormat.setRequestUrl(req.getRequestURL().toString());
-        exceptionFormat.setBusinessMsg(e.getExceptionMsg());
-        exceptionFormat.setParamsObj(req.getParameterMap());
-        HashMap&lt;String, Object&gt; resopnseData = exceptionFormat.getResultData();
-        log.error(&quot;系统业务日志&quot;, getTrace(e));
-        // e.printStackTrace();
-        return resopnseData;
-    }
-</code></pre>
-
-<h2 id="preauthorize-注解的异常">@PreAuthorize 注解的异常</h2>
-
+<span style="color:#a6e22e">@Override</span>
+<span style="color:#66d9ef">public</span> UserDetails <span style="color:#a6e22e">loadUserByUsername</span><span style="color:#f92672">(</span>String username<span style="color:#f92672">)</span> <span style="color:#66d9ef">throws</span> UsernameNotFoundException <span style="color:#f92672">{</span>
+  handlerExceptionResolver<span style="color:#f92672">.</span><span style="color:#a6e22e">resolveException</span><span style="color:#f92672">(</span>request<span style="color:#f92672">,</span> response<span style="color:#f92672">,</span> <span style="color:#66d9ef">null</span><span style="color:#f92672">,</span>
+                <span style="color:#66d9ef">new</span> MyException<span style="color:#f92672">(</span>ResultCodeEnmu<span style="color:#f92672">.</span><span style="color:#a6e22e">NO_USER</span><span style="color:#f92672">.</span><span style="color:#a6e22e">description</span><span style="color:#f92672">,</span> ResultCodeEnmu<span style="color:#f92672">.</span><span style="color:#a6e22e">NO_USER</span><span style="color:#f92672">.</span><span style="color:#a6e22e">code</span><span style="color:#f92672">));</span>  
+<span style="color:#f92672">}</span>
+<span style="color:#66d9ef">return</span> jwtUser<span style="color:#f92672">;</span>
+<span style="color:#f92672">}</span>
+</code></pre></div><p>然后在全局异常就可以抓取这个异常</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-java" data-lang="java"> <span style="color:#a6e22e">@ExceptionHandler</span><span style="color:#f92672">(</span>value <span style="color:#f92672">=</span> MyException<span style="color:#f92672">.</span><span style="color:#a6e22e">class</span><span style="color:#f92672">)</span>
+    <span style="color:#66d9ef">public</span> Map<span style="color:#f92672">&lt;</span>String<span style="color:#f92672">,</span> Object<span style="color:#f92672">&gt;</span> <span style="color:#a6e22e">myExceptionHandler</span><span style="color:#f92672">(</span>HttpServletRequest req<span style="color:#f92672">,</span> MyException e<span style="color:#f92672">)</span> <span style="color:#f92672">{</span>
+        ResultDataUtil<span style="color:#f92672">.</span><span style="color:#a6e22e">ResponseDataFormatEnmu</span> exceptionFormat <span style="color:#f92672">=</span> ResultDataUtil<span style="color:#f92672">.</span><span style="color:#a6e22e">ResponseDataFormatEnmu</span><span style="color:#f92672">.</span><span style="color:#a6e22e">RESPONSE_FORMAT_CUSTOM_EXCEPTION</span><span style="color:#f92672">;</span>
+        exceptionFormat<span style="color:#f92672">.</span><span style="color:#a6e22e">setMsg</span><span style="color:#f92672">(</span>getTrace<span style="color:#f92672">(</span>e<span style="color:#f92672">));</span>
+        exceptionFormat<span style="color:#f92672">.</span><span style="color:#a6e22e">setRequestUrl</span><span style="color:#f92672">(</span>req<span style="color:#f92672">.</span><span style="color:#a6e22e">getRequestURL</span><span style="color:#f92672">().</span><span style="color:#a6e22e">toString</span><span style="color:#f92672">());</span>
+        exceptionFormat<span style="color:#f92672">.</span><span style="color:#a6e22e">setBusinessMsg</span><span style="color:#f92672">(</span>e<span style="color:#f92672">.</span><span style="color:#a6e22e">getExceptionMsg</span><span style="color:#f92672">());</span>
+        exceptionFormat<span style="color:#f92672">.</span><span style="color:#a6e22e">setParamsObj</span><span style="color:#f92672">(</span>req<span style="color:#f92672">.</span><span style="color:#a6e22e">getParameterMap</span><span style="color:#f92672">());</span>
+        HashMap<span style="color:#f92672">&lt;</span>String<span style="color:#f92672">,</span> Object<span style="color:#f92672">&gt;</span> resopnseData <span style="color:#f92672">=</span> exceptionFormat<span style="color:#f92672">.</span><span style="color:#a6e22e">getResultData</span><span style="color:#f92672">();</span>
+        log<span style="color:#f92672">.</span><span style="color:#a6e22e">error</span><span style="color:#f92672">(</span><span style="color:#e6db74">&#34;系统业务日志&#34;</span><span style="color:#f92672">,</span> getTrace<span style="color:#f92672">(</span>e<span style="color:#f92672">));</span>
+        <span style="color:#75715e">// e.printStackTrace();
+</span><span style="color:#75715e"></span>        <span style="color:#66d9ef">return</span> resopnseData<span style="color:#f92672">;</span>
+    <span style="color:#f92672">}</span>
+</code></pre></div><h2 id="preauthorize-注解的异常">@PreAuthorize 注解的异常</h2>
 <p>@PreAuthorize 注解的异常，抛出AccessDeniedException异常，不会被accessDeniedHandler捕获，而是会被全局异常捕获。</p>
-
 <h1 id="动态权限修改示例">动态权限修改示例</h1>
-
 <p><strong>说明：列子来源网上，忘记地址了。</strong></p>
-
-<pre><code class="language-java">@GetMapping(&quot;/vip/test&quot;)
-@Secured(&quot;ROLE_VIP&quot;)         // 需要ROLE_VIP权限可访问
-public String vipPath() {
-   return &quot;仅 ROLE_VIP 可看&quot;;
-}
-</code></pre>
-
-<pre><code class="language-java">@GetMapping(&quot;/vip&quot;)
-public boolean updateToVIP() {
-   // 得到当前的认证信息
-   Authentication auth = SecurityContextHolder.getContext().getAuthentication();
-   // 生成当前的所有授权
-   List&lt;GrantedAuthority&gt; updatedAuthorities = new ArrayList&lt;&gt;(auth.getAuthorities());
-   // 添加 ROLE_VIP 授权
-   updatedAuthorities.add(new SimpleGrantedAuthority(&quot;ROLE_VIP&quot;));
-   // 生成新的认证信息
-   Authentication newAuth = new UsernamePasswordAuthenticationToken(auth.getPrincipal(), auth.getCredentials(), updatedAuthorities);      
-   // 重置认证信息
-    SecurityContextHolder.getContext().setAuthentication(newAuth);
-    return true;
-}
-</code></pre>
-
-<p>假设当前你的权限只有 ROLE_USER。那么按照上面的代码：</p>
-
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-java" data-lang="java"><span style="color:#a6e22e">@GetMapping</span><span style="color:#f92672">(</span><span style="color:#e6db74">&#34;/vip/test&#34;</span><span style="color:#f92672">)</span>
+<span style="color:#a6e22e">@Secured</span><span style="color:#f92672">(</span><span style="color:#e6db74">&#34;ROLE_VIP&#34;</span><span style="color:#f92672">)</span>         <span style="color:#75715e">// 需要ROLE_VIP权限可访问
+</span><span style="color:#75715e"></span><span style="color:#66d9ef">public</span> String <span style="color:#a6e22e">vipPath</span><span style="color:#f92672">()</span> <span style="color:#f92672">{</span>
+   <span style="color:#66d9ef">return</span> <span style="color:#e6db74">&#34;仅 ROLE_VIP 可看&#34;</span><span style="color:#f92672">;</span>
+<span style="color:#f92672">}</span>
+</code></pre></div><div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-java" data-lang="java"><span style="color:#a6e22e">@GetMapping</span><span style="color:#f92672">(</span><span style="color:#e6db74">&#34;/vip&#34;</span><span style="color:#f92672">)</span>
+<span style="color:#66d9ef">public</span> <span style="color:#66d9ef">boolean</span> <span style="color:#a6e22e">updateToVIP</span><span style="color:#f92672">()</span> <span style="color:#f92672">{</span>
+   <span style="color:#75715e">// 得到当前的认证信息
+</span><span style="color:#75715e"></span>   Authentication auth <span style="color:#f92672">=</span> SecurityContextHolder<span style="color:#f92672">.</span><span style="color:#a6e22e">getContext</span><span style="color:#f92672">().</span><span style="color:#a6e22e">getAuthentication</span><span style="color:#f92672">();</span>
+   <span style="color:#75715e">// 生成当前的所有授权
+</span><span style="color:#75715e"></span>   List<span style="color:#f92672">&lt;</span>GrantedAuthority<span style="color:#f92672">&gt;</span> updatedAuthorities <span style="color:#f92672">=</span> <span style="color:#66d9ef">new</span> ArrayList<span style="color:#f92672">&lt;&gt;(</span>auth<span style="color:#f92672">.</span><span style="color:#a6e22e">getAuthorities</span><span style="color:#f92672">());</span>
+   <span style="color:#75715e">// 添加 ROLE_VIP 授权
+</span><span style="color:#75715e"></span>   updatedAuthorities<span style="color:#f92672">.</span><span style="color:#a6e22e">add</span><span style="color:#f92672">(</span><span style="color:#66d9ef">new</span> SimpleGrantedAuthority<span style="color:#f92672">(</span><span style="color:#e6db74">&#34;ROLE_VIP&#34;</span><span style="color:#f92672">));</span>
+   <span style="color:#75715e">// 生成新的认证信息
+</span><span style="color:#75715e"></span>   Authentication newAuth <span style="color:#f92672">=</span> <span style="color:#66d9ef">new</span> UsernamePasswordAuthenticationToken<span style="color:#f92672">(</span>auth<span style="color:#f92672">.</span><span style="color:#a6e22e">getPrincipal</span><span style="color:#f92672">(),</span> auth<span style="color:#f92672">.</span><span style="color:#a6e22e">getCredentials</span><span style="color:#f92672">(),</span> updatedAuthorities<span style="color:#f92672">);</span>      
+   <span style="color:#75715e">// 重置认证信息
+</span><span style="color:#75715e"></span>    SecurityContextHolder<span style="color:#f92672">.</span><span style="color:#a6e22e">getContext</span><span style="color:#f92672">().</span><span style="color:#a6e22e">setAuthentication</span><span style="color:#f92672">(</span>newAuth<span style="color:#f92672">);</span>
+    <span style="color:#66d9ef">return</span> <span style="color:#66d9ef">true</span><span style="color:#f92672">;</span>
+<span style="color:#f92672">}</span>
+</code></pre></div><p>假设当前你的权限只有 ROLE_USER。那么按照上面的代码：</p>
 <p><strong>1</strong>、直接访问 /vip/test 路径将会得到403的Response；</p>
-
 <p><strong>2</strong>、访问 /vip 获取 ROLE_VIP 授权，再访问 /vip/test 即可得到正确的Response。</p>
-
 <h1 id="自定义-filter">自定义 Filter</h1>
-
 <p><strong>说明：列子来源网上，忘记地址了。</strong></p>
-
 <p>自定义的 Filter 建议继承 GenericFilterBean，本文示例：</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-java" data-lang="java"><span style="color:#66d9ef">public</span> <span style="color:#66d9ef">class</span> <span style="color:#a6e22e">BeforeLoginFilter</span> <span style="color:#66d9ef">extends</span> GenericFilterBean <span style="color:#f92672">{</span>
 
-<pre><code class="language-java">public class BeforeLoginFilter extends GenericFilterBean {
-
-  @Override
-  public void doFilter(ServletRequest servletRequest, ServletResponse servletResponse, FilterChain filterChain) throws IOException, ServletException {
-      System.out.println(&quot;This is a filter before UsernamePasswordAuthenticationFilter.&quot;);
-      // 继续调用 Filter 链
-      filterChain.doFilter(servletRequest, servletResponse);
-  }
-}
-</code></pre>
-
-<p>配置自定义 Filter 在 Spring Security 过滤器链中的位置</p>
-
+  <span style="color:#a6e22e">@Override</span>
+  <span style="color:#66d9ef">public</span> <span style="color:#66d9ef">void</span> <span style="color:#a6e22e">doFilter</span><span style="color:#f92672">(</span>ServletRequest servletRequest<span style="color:#f92672">,</span> ServletResponse servletResponse<span style="color:#f92672">,</span> FilterChain filterChain<span style="color:#f92672">)</span> <span style="color:#66d9ef">throws</span> IOException<span style="color:#f92672">,</span> ServletException <span style="color:#f92672">{</span>
+      System<span style="color:#f92672">.</span><span style="color:#a6e22e">out</span><span style="color:#f92672">.</span><span style="color:#a6e22e">println</span><span style="color:#f92672">(</span><span style="color:#e6db74">&#34;This is a filter before UsernamePasswordAuthenticationFilter.&#34;</span><span style="color:#f92672">);</span>
+      <span style="color:#75715e">// 继续调用 Filter 链
+</span><span style="color:#75715e"></span>      filterChain<span style="color:#f92672">.</span><span style="color:#a6e22e">doFilter</span><span style="color:#f92672">(</span>servletRequest<span style="color:#f92672">,</span> servletResponse<span style="color:#f92672">);</span>
+  <span style="color:#f92672">}</span>
+<span style="color:#f92672">}</span>
+</code></pre></div><p>配置自定义 Filter 在 Spring Security 过滤器链中的位置</p>
 <p>配置很简单，本文示例：</p>
-
-<pre><code class="language-java">protected void configure(HttpSecurity http) throws Exception {
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-java" data-lang="java"><span style="color:#66d9ef">protected</span> <span style="color:#66d9ef">void</span> <span style="color:#a6e22e">configure</span><span style="color:#f92672">(</span>HttpSecurity http<span style="color:#f92672">)</span> <span style="color:#66d9ef">throws</span> Exception <span style="color:#f92672">{</span>
       http
-        .authorizeRequests()
-        .antMatchers(&quot;/&quot;).permitAll()
-        .antMatchers(&quot;/user/**&quot;).hasRole(&quot;USER&quot;)
-        .and()
-        .formLogin().loginPage(&quot;/login&quot;).defaultSuccessUrl(&quot;/user&quot;)
-        .and()
-        .logout().logoutUrl(&quot;/logout&quot;).logoutSuccessUrl(&quot;/login&quot;);
+        <span style="color:#f92672">.</span><span style="color:#a6e22e">authorizeRequests</span><span style="color:#f92672">()</span>
+        <span style="color:#f92672">.</span><span style="color:#a6e22e">antMatchers</span><span style="color:#f92672">(</span><span style="color:#e6db74">&#34;/&#34;</span><span style="color:#f92672">).</span><span style="color:#a6e22e">permitAll</span><span style="color:#f92672">()</span>
+        <span style="color:#f92672">.</span><span style="color:#a6e22e">antMatchers</span><span style="color:#f92672">(</span><span style="color:#e6db74">&#34;/user/**&#34;</span><span style="color:#f92672">).</span><span style="color:#a6e22e">hasRole</span><span style="color:#f92672">(</span><span style="color:#e6db74">&#34;USER&#34;</span><span style="color:#f92672">)</span>
+        <span style="color:#f92672">.</span><span style="color:#a6e22e">and</span><span style="color:#f92672">()</span>
+        <span style="color:#f92672">.</span><span style="color:#a6e22e">formLogin</span><span style="color:#f92672">().</span><span style="color:#a6e22e">loginPage</span><span style="color:#f92672">(</span><span style="color:#e6db74">&#34;/login&#34;</span><span style="color:#f92672">).</span><span style="color:#a6e22e">defaultSuccessUrl</span><span style="color:#f92672">(</span><span style="color:#e6db74">&#34;/user&#34;</span><span style="color:#f92672">)</span>
+        <span style="color:#f92672">.</span><span style="color:#a6e22e">and</span><span style="color:#f92672">()</span>
+        <span style="color:#f92672">.</span><span style="color:#a6e22e">logout</span><span style="color:#f92672">().</span><span style="color:#a6e22e">logoutUrl</span><span style="color:#f92672">(</span><span style="color:#e6db74">&#34;/logout&#34;</span><span style="color:#f92672">).</span><span style="color:#a6e22e">logoutSuccessUrl</span><span style="color:#f92672">(</span><span style="color:#e6db74">&#34;/login&#34;</span><span style="color:#f92672">);</span>
   
-      // 在 UsernamePasswordAuthenticationFilter 前添加 BeforeLoginFilter
-      http.addFilterBefore(new BeforeLoginFilter(),UsernamePasswordAuthenticationFilter.class);
-      // 在 CsrfFilter 后添加 AfterCsrfFilter
-      http.addFilterAfter(new AfterCsrfFilter(), CsrfFilter.class);
-  }
-</code></pre>
-
-<p>说明：<strong>HttpSecurity</strong> 有三个常用方法来配置：</p>
-
+      <span style="color:#75715e">// 在 UsernamePasswordAuthenticationFilter 前添加 BeforeLoginFilter
+</span><span style="color:#75715e"></span>      http<span style="color:#f92672">.</span><span style="color:#a6e22e">addFilterBefore</span><span style="color:#f92672">(</span><span style="color:#66d9ef">new</span> BeforeLoginFilter<span style="color:#f92672">(),</span>UsernamePasswordAuthenticationFilter<span style="color:#f92672">.</span><span style="color:#a6e22e">class</span><span style="color:#f92672">);</span>
+      <span style="color:#75715e">// 在 CsrfFilter 后添加 AfterCsrfFilter
+</span><span style="color:#75715e"></span>      http<span style="color:#f92672">.</span><span style="color:#a6e22e">addFilterAfter</span><span style="color:#f92672">(</span><span style="color:#66d9ef">new</span> AfterCsrfFilter<span style="color:#f92672">(),</span> CsrfFilter<span style="color:#f92672">.</span><span style="color:#a6e22e">class</span><span style="color:#f92672">);</span>
+  <span style="color:#f92672">}</span>
+</code></pre></div><p>说明：<strong>HttpSecurity</strong> 有三个常用方法来配置：</p>
 <ul>
 <li>addFilterBefore(Filter filter, Class&lt;? extends Filter&gt; beforeFilter) 在 beforeFilter 之前添加 filter</li>
 <li>addFilterAfter(Filter filter, Class&lt;? extends Filter&gt; afterFilter) 在 afterFilter 之后添加 filter</li>
 <li>addFilterAt(Filter filter, Class&lt;? extends Filter&gt; atFilter) 在 atFilter 相同位置添加 filter， 此 filter 不覆盖 filter</li>
 </ul>
-
 <p>通过在不同 Filter 的 doFilter() 方法中加断点调试，可以判断哪个 filter 先执行，从而判断 filter 的执行顺序 。</p>
 
 
@@ -716,6 +599,12 @@ public boolean updateToVIP() {
                     </li>
                     
                     
+                    <li class="next">
+                        <a href="/post/oauth2.0%E6%A1%86%E6%9E%B6/" data-toggle="tooltip" data-placement="top"
+                            title="OAuth2.0框架">Next
+                            Post &rarr;</a>
+                    </li>
+                    
                 </ul>
 
                 <br>
@@ -763,41 +652,35 @@ public boolean updateToVIP() {
                     </h4>
                     <ul class="catalog-body"></ul>
                     <nav id="TableOfContents">
-<ul>
-<li><a href="#认证流程">认证流程</a></li>
-<li><a href="#授权流程">授权流程</a></li>
-<li><a href="#流程图">流程图</a></li>
-<li><a href="#核心组件">核心组件</a>
-<ul>
-<li><a href="#securitycontextholder">SecurityContextHolder</a>
-<ul>
-<li><a href="#获取当前用户的信息">获取当前用户的信息</a></li>
-</ul></li>
-<li><a href="#authentication">Authentication</a></li>
-<li><a href="#spring-security是如何完成身份认证的">Spring Security是如何完成身份认证的</a></li>
-<li><a href="#authenticationmanager">AuthenticationManager</a>
-<ul>
-<li><a href="#daoauthenticationprovider">DaoAuthenticationProvider</a></li>
-<li><a href="#userdetails与userdetailsservice">UserDetails与UserDetailsService</a></li>
-</ul></li>
-<li><a href="#websecurityconfiguration">WebSecurityConfiguration</a></li>
-<li><a href="#websecurityconfigureradapter">WebSecurityConfigurerAdapter</a>
-<ul>
-<li><a href="#httpsecurity">HttpSecurity</a></li>
-<li><a href="#websecurity">WebSecurity</a></li>
-<li><a href="#httpfirewall">HttpFirewall</a></li>
-<li><a href="#authenticationmanagerbuilder">AuthenticationManagerBuilder</a></li>
-</ul></li>
-<li><a href="#passwordencoder">PasswordEncoder</a></li>
-</ul></li>
-<li><a href="#授权注解">授权注解</a></li>
-<li><a href="#自定义异常抓取">自定义异常抓取</a>
-<ul>
-<li><a href="#preauthorize-注解的异常">@PreAuthorize 注解的异常</a></li>
-</ul></li>
-<li><a href="#动态权限修改示例">动态权限修改示例</a></li>
-<li><a href="#自定义-filter">自定义 Filter</a></li>
-</ul>
+  <ul>
+    <li><a href="#securitycontextholder">SecurityContextHolder</a>
+      <ul>
+        <li><a href="#获取当前用户的信息">获取当前用户的信息</a></li>
+      </ul>
+    </li>
+    <li><a href="#authentication">Authentication</a></li>
+    <li><a href="#spring-security是如何完成身份认证的">Spring Security是如何完成身份认证的</a></li>
+    <li><a href="#authenticationmanager">AuthenticationManager</a>
+      <ul>
+        <li><a href="#daoauthenticationprovider">DaoAuthenticationProvider</a></li>
+        <li><a href="#userdetails与userdetailsservice">UserDetails与UserDetailsService</a></li>
+      </ul>
+    </li>
+    <li><a href="#websecurityconfiguration">WebSecurityConfiguration</a></li>
+    <li><a href="#websecurityconfigureradapter">WebSecurityConfigurerAdapter</a>
+      <ul>
+        <li><a href="#httpsecurity">HttpSecurity</a></li>
+        <li><a href="#websecurity">WebSecurity</a></li>
+        <li><a href="#httpfirewall">HttpFirewall</a></li>
+        <li><a href="#authenticationmanagerbuilder">AuthenticationManagerBuilder</a></li>
+      </ul>
+    </li>
+    <li><a href="#passwordencoder">PasswordEncoder</a></li>
+  </ul>
+
+  <ul>
+    <li><a href="#preauthorize-注解的异常">@PreAuthorize 注解的异常</a></li>
+  </ul>
 </nav>
                     <br>
                     <br>
@@ -822,9 +705,6 @@ public boolean updateToVIP() {
                         
                         
                         
-                        <a href="/tags/" title="">
-                            
-                        </a>
                         
                         
                         
@@ -834,101 +714,6 @@ public boolean updateToVIP() {
                         
                         
                         
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        <a href="/tags/qt" title="QT">
-                            QT
-                        </a>
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        <a href="/tags/zookeeper" title="Zookeeper">
-                            Zookeeper
-                        </a>
                         
                         
                         
@@ -968,8 +753,10 @@ public boolean updateToVIP() {
                         
                         
                         
-                        <a href="/tags/elasticsearch" title="elasticSearch">
-                            elasticSearch
+                        
+                        
+                        <a href="/tags/elasticsearch" title="elasticsearch">
+                            elasticsearch
                         </a>
                         
                         
@@ -980,9 +767,27 @@ public boolean updateToVIP() {
                         
                         
                         
-                        <a href="/tags/golang" title="golang">
-                            golang
-                        </a>
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
                         
                         
                         
@@ -1020,9 +825,21 @@ public boolean updateToVIP() {
                         
                         
                         
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
                         <a href="/tags/jvm" title="jvm">
                             jvm
                         </a>
+                        
+                        
+                        
+                        
                         
                         
                         
@@ -1046,9 +863,19 @@ public boolean updateToVIP() {
                         
                         
                         
+                        
+                        
+                        
+                        
+                        
+                        
                         <a href="/tags/mongodb" title="mongodb">
                             mongodb
                         </a>
+                        
+                        
+                        
+                        
                         
                         
                         
@@ -1059,10 +886,6 @@ public boolean updateToVIP() {
                         </a>
                         
                         
-                        
-                        <a href="/tags/mycat" title="mycat">
-                            mycat
-                        </a>
                         
                         
                         
@@ -1076,9 +899,17 @@ public boolean updateToVIP() {
                         
                         
                         
-                        <a href="/tags/nginx" title="nginx">
-                            nginx
-                        </a>
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
                         
                         
                         
@@ -1102,8 +933,22 @@ public boolean updateToVIP() {
                         
                         
                         
+                        
+                        
                         <a href="/tags/rocketmq" title="rocketmq">
                             rocketmq
+                        </a>
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        <a href="/tags/security%E6%A1%86%E6%9E%B6%E5%AD%A6%E4%B9%A0" title="security框架学习">
+                            security框架学习
                         </a>
                         
                         
@@ -1130,17 +975,11 @@ public boolean updateToVIP() {
                         
                         
                         
-                        <a href="/tags/springcloud" title="springCloud">
-                            springCloud
-                        </a>
-                        
-                        
-                        
-                        
-                        
                         <a href="/tags/springboot" title="springboot">
                             springboot
                         </a>
+                        
+                        
                         
                         
                         
@@ -1154,6 +993,9 @@ public boolean updateToVIP() {
                         
                         
                         
+                        <a href="/tags/springcloud" title="springcloud">
+                            springcloud
+                        </a>
                         
                         
                         
@@ -1179,6 +1021,33 @@ public boolean updateToVIP() {
                         
                         
                         
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        <a href="/tags/zookeeper" title="zookeeper">
+                            zookeeper
+                        </a>
                         
                         
                         
@@ -1238,6 +1107,8 @@ public boolean updateToVIP() {
                         
                         
                         
+                        
+                        
                         <a href="/tags/%E5%88%86%E5%B8%83%E5%BC%8F%E7%B3%BB%E5%88%97" title="分布式系列">
                             分布式系列
                         </a>
@@ -1257,6 +1128,10 @@ public boolean updateToVIP() {
                         
                         
                         
+                        
+                        <a href="/tags/%E5%8D%8F%E8%AE%AE%E6%A0%88" title="协议栈">
+                            协议栈
+                        </a>
                         
                         
                         
@@ -1456,6 +1331,12 @@ public boolean updateToVIP() {
                         
                         
                         
+                        
+                        
+                        
+                        
+                        
+                        
                         <a href="/tags/%E7%BD%91%E7%BB%9C%E7%BC%96%E7%A8%8B" title="网络编程">
                             网络编程
                         </a>
@@ -1479,6 +1360,10 @@ public boolean updateToVIP() {
                         
                         
                         
+                        
+                        <a href="/tags/%E8%AE%A4%E8%AF%81%E5%92%8C%E6%8E%88%E6%9D%83" title="认证和授权">
+                            认证和授权
+                        </a>
                         
                         
                         
@@ -1649,7 +1534,7 @@ public boolean updateToVIP() {
                     
                 </ul>
 		<p class="copyright text-muted">
-                    Copyright &copy;  2020
+                    Copyright &copy;  2021
                     <br>
                     <a href="https://themes.gohugo.io/hugo-theme-cleanwhite">CleanWhite Hugo Theme</a> by <a href="https://zhaohuabing.com">Huabing</a> |
                     <iframe

@@ -97,15 +97,15 @@
                     </li>
                     
                     <li>
-                        <a href="/categories/english">English</a>
+                        <a href="/categories/english">english</a>
                     </li>
                     
                     <li>
-                        <a href="/categories/life">Life</a>
+                        <a href="/categories/life">life</a>
                     </li>
                     
                     <li>
-                        <a href="/categories/tech">Tech</a>
+                        <a href="/categories/tech">tech</a>
                     </li>
                     
 
@@ -237,236 +237,198 @@
                 
                 
                 
-                
-
-<p>[TOC]</p>
-
+                <p>[TOC]</p>
 <h1 id="spring事物">spring事物</h1>
-
-<p>转载地址：<a href="https://blog.csdn.net/T2080305/article/details/82662650">https://blog.csdn.net/T2080305/article/details/82662650</a></p>
-
+<p>转载地址：https://blog.csdn.net/T2080305/article/details/82662650</p>
 <h2 id="概念">概念</h2>
-
 <p>首先程序向数据库获得Connection连接，默认情况下，这个连接是默认开启事物提交的，即执行完一条更新sql就向数据库提交一次事物。如果想多条更新sql语句处于同一个事物之中，即所有的更新sql语句执行完成，最后再向数据库提交事物，那么我们需要手动的关闭数据库的自动开启事物提交属性。</p>
-
 <ol>
-<li><p>手动关闭数据库的自动开启提交功能</p></li>
-
-<li><pre><code class="language-java">Connection.setAutoCommit(false)
-</code></pre></li>
-
-<li><p>提交事物</p></li>
-
-<li><pre><code class="language-java">Connection.commit()
-</code></pre></li>
-
-<li><p>回滚事物</p></li>
-
-<li><pre><code class="language-java">Connection.rollback()
-</code></pre></li>
+<li>
+<p>手动关闭数据库的自动开启提交功能</p>
+</li>
+<li>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-java" data-lang="java">Connection<span style="color:#f92672">.</span><span style="color:#a6e22e">setAutoCommit</span><span style="color:#f92672">(</span><span style="color:#66d9ef">false</span><span style="color:#f92672">)</span>
+</code></pre></div></li>
+<li>
+<p>提交事物</p>
+</li>
+<li>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-java" data-lang="java">Connection<span style="color:#f92672">.</span><span style="color:#a6e22e">commit</span><span style="color:#f92672">()</span>
+</code></pre></div></li>
+<li>
+<p>回滚事物</p>
+</li>
+<li>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-java" data-lang="java">Connection<span style="color:#f92672">.</span><span style="color:#a6e22e">rollback</span><span style="color:#f92672">()</span>
+</code></pre></div></li>
 </ol>
-
 <p><strong>传统jdbc对事物的处理，如果我们有多个方法需要做事物处理，那么代码中就会包含大量的上面重复代码，导致代码的冗余，也给代码的维护带来了很大的问题。有了spring之后，我们就不用再去写那些底层的代码(获取连接，事物提交，事物回滚，连接释放)。其实spring 并不是直接管理事物，而是提供了多种事物管理器，真正管理事物的任务则是交给了Jpa或者Hibernate等持久化框架的事物处理器。</strong></p>
-
 <h2 id="spring-中对事物的处理">spring 中对事物的处理</h2>
-
-<p><img src="/img/20180913102727109.png" alt="20180913102727109" /></p>
-
+<p><img src="/img/20180913102727109.png" alt="20180913102727109"></p>
 <p>从上面的图中，可以看到spring提供了一个spring-tx依赖包，这个包主要提供了事物的处理，并且提供了一个核心接口，PlatformTransactionManager，这个接口提供了三个核心的方法，根据指定的传播行为返回当前活动的事务或创建一个新的事务getTransaction(其中的参数是TransactionDefinition)，事物的提交commit,事物的回滚rollback。</p>
-
 <h2 id="spring中的7个事务传播行为">Spring中的7个事务传播行为</h2>
-
-<p><img src="/img/20180913104140880.png" alt="20180913104140880" /></p>
-
+<p><img src="/img/20180913104140880.png" alt="20180913104140880"></p>
 <p>上图中的TransactionDefinition定义了事物的传播行为和隔离级别，除了这两个属性，还提供了几个方法。</p>
-
-<pre><code class="language-java">int getPropagationBehavior(); //返回当前事物的传播行为
-int getIsolationLevel(); //返回当前事物的隔离级别
-int getTimeout(); //返回当前事物必须在多少秒内完成
-boolean isReadOnly(); //返回当前事物是否是只读，事物管理器可以根据这个值进行优化，确保事物是只读的
-String getName(); //返回当前事物的名称
-</code></pre>
-
-<table>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-java" data-lang="java"><span style="color:#66d9ef">int</span> <span style="color:#a6e22e">getPropagationBehavior</span><span style="color:#f92672">();</span> <span style="color:#75715e">//返回当前事物的传播行为
+</span><span style="color:#75715e"></span><span style="color:#66d9ef">int</span> <span style="color:#a6e22e">getIsolationLevel</span><span style="color:#f92672">();</span> <span style="color:#75715e">//返回当前事物的隔离级别
+</span><span style="color:#75715e"></span><span style="color:#66d9ef">int</span> <span style="color:#a6e22e">getTimeout</span><span style="color:#f92672">();</span> <span style="color:#75715e">//返回当前事物必须在多少秒内完成
+</span><span style="color:#75715e"></span><span style="color:#66d9ef">boolean</span> <span style="color:#a6e22e">isReadOnly</span><span style="color:#f92672">();</span> <span style="color:#75715e">//返回当前事物是否是只读，事物管理器可以根据这个值进行优化，确保事物是只读的
+</span><span style="color:#75715e"></span>String <span style="color:#a6e22e">getName</span><span style="color:#f92672">();</span> <span style="color:#75715e">//返回当前事物的名称
+</span></code></pre></div><table>
 <thead>
 <tr>
 <th><strong>事务行为</strong></th>
 <th><strong>说明</strong></th>
 </tr>
 </thead>
-
 <tbody>
 <tr>
 <td>PROPAGATION_REQUIRED</td>
 <td>支持当前事务，假设当前没有事务。就新建一个事务(这是最常见的选择，也是Spring默认的事务的传播。)</td>
 </tr>
-
 <tr>
 <td>PROPAGATION_SUPPORTS</td>
 <td>支持当前事务，假设当前没有事务，就以非事务方式运行</td>
 </tr>
-
 <tr>
 <td>PROPAGATION_MANDATORY</td>
 <td>支持当前事务，假设当前没有事务，就抛出异常</td>
 </tr>
-
 <tr>
 <td>PROPAGATION_REQUIRES_NEW</td>
 <td>新建事务，假设当前存在事务。把当前事务挂起</td>
 </tr>
-
 <tr>
 <td>PROPAGATION_NOT_SUPPORTED</td>
 <td>以非事务方式运行操作。假设当前存在事务，就把当前事务挂起</td>
 </tr>
-
 <tr>
 <td>PROPAGATION_NEVER</td>
 <td>以非事务方式运行，假设当前存在事务，则抛出异常</td>
 </tr>
-
 <tr>
 <td>PROPAGATION_NESTED</td>
 <td>如果当前存在事务，则在嵌套事务内执行。如果当前没有事务，则执行与PROPAGATION_REQUIRED类似的操作。</td>
 </tr>
 </tbody>
 </table>
-
 <h2 id="编程式事物管理和声明式事物管理">编程式事物管理和声明式事物管理</h2>
-
 <p>spring中支持的事物管理：spring支持的事物管理有编程式事物管理和声明式事物管理</p>
-
 <p>编程式事物管理：就是在具体的业务代码中嵌入事物管理的代码，也就是说在每个需要处理事物管理的业务代码中都必须额外添加事物管理的代码，整个代码显得很冗余。</p>
-
 <p>声明式事物管理：它将事务管理代码从业务方法中剥离开来，以声明的方式来实现事务管理的功能。事务管理作为一种横切关注点，可以通过AOP方法模块化。Spring通过Spring AOP框架支持声明式事务管理。</p>
-
 <p><strong>其实spring 并不是直接管理事物，而是提供了多种事物管理器，真正管理事物的任务则是交给了Jpa或者Hibernate等持久化框架的事物处理器</strong></p>
-
 <p>Spring提供了许多内置事务管理器实现（这里只列举几个常见常用的）：</p>
-
 <ol>
-<li><p>DataSourceTransactionManager：位于org.springframework.jdbc.datasource包中，数据源事务管理器，提供对单个javax.sql.DataSource事务管理，用于Spring JDBC抽象框架、iBATIS或MyBatis框架的事务管理</p></li>
-
-<li><p>JpaTransactionManager：位于org.springframework.orm.jpa包中，提供对单个javax.persistence.EntityManagerFactory事务支持，用于集成JPA实现框架时的事务管理</p></li>
-
-<li><p>HibernateTransactionManager：位于org.springframework.orm.hibernate3包中，提供对单个org.hibernate.SessionFactory事务支持，用于集成Hibernate框架时的事务管理；该事务管理器只支持Hibernate3+版本，且Spring3.0+版本只支持Hibernate 3.2+版本</p></li>
-
-<li><p>JtaTransactionManager：位于org.springframework.transaction.jta包中，提供对分布式事务管理的支持，并将事务管理委托给Java EE应用服务器事务管理器</p></li>
+<li>
+<p>DataSourceTransactionManager：位于org.springframework.jdbc.datasource包中，数据源事务管理器，提供对单个javax.sql.DataSource事务管理，用于Spring JDBC抽象框架、iBATIS或MyBatis框架的事务管理</p>
+</li>
+<li>
+<p>JpaTransactionManager：位于org.springframework.orm.jpa包中，提供对单个javax.persistence.EntityManagerFactory事务支持，用于集成JPA实现框架时的事务管理</p>
+</li>
+<li>
+<p>HibernateTransactionManager：位于org.springframework.orm.hibernate3包中，提供对单个org.hibernate.SessionFactory事务支持，用于集成Hibernate框架时的事务管理；该事务管理器只支持Hibernate3+版本，且Spring3.0+版本只支持Hibernate 3.2+版本</p>
+</li>
+<li>
+<p>JtaTransactionManager：位于org.springframework.transaction.jta包中，提供对分布式事务管理的支持，并将事务管理委托给Java EE应用服务器事务管理器</p>
+</li>
 </ol>
-
 <h2 id="spring中定义事物管理器">spring中定义事物管理器</h2>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-xml" data-lang="xml"><span style="color:#f92672">&lt;bean</span> <span style="color:#a6e22e">id=</span><span style="color:#e6db74">&#34;transactionManager&#34;</span> <span style="color:#a6e22e">class=</span><span style="color:#e6db74">&#34;org.springframework.jdbc.datasource.DataSourceTransactionManager&#34;</span><span style="color:#f92672">&gt;</span> 
+   <span style="color:#f92672">&lt;property</span> <span style="color:#a6e22e">name=</span><span style="color:#e6db74">&#34;dataSource&#34;</span> <span style="color:#a6e22e">ref=</span><span style="color:#e6db74">&#34;dataSource&#34;</span> <span style="color:#f92672">/&gt;</span> 
+<span style="color:#f92672">&lt;/bean&gt;</span> //这里是声明jdbc的事物管理器
 
-<pre><code class="language-xml">&lt;bean id=&quot;transactionManager&quot; class=&quot;org.springframework.jdbc.datasource.DataSourceTransactionManager&quot;&gt; 
-   &lt;property name=&quot;dataSource&quot; ref=&quot;dataSource&quot; /&gt; 
-&lt;/bean&gt; //这里是声明jdbc的事物管理器
-
-&lt;bean name=&quot;dataSource&quot; class=&quot;com.alibaba.druid.pool.DruidDataSource&quot; init-method=&quot;init&quot; destroy-method=&quot;close&quot;&gt;
-    &lt;property name=&quot;url&quot; value=&quot;${jdbc.url}&quot; /&gt;
-    &lt;property name=&quot;username&quot; value=&quot;${jdbc.username}&quot; /&gt;
-    &lt;property name=&quot;password&quot; value=&quot;${jdbc.password}&quot; /&gt;
-    &lt;!-- 初始化连接大小 --&gt;
-    &lt;property name=&quot;initialSize&quot; value=&quot;${jdbc.initialSize}&quot; /&gt;
-    &lt;!-- 连接池最大使用连接数量 --&gt;
-    &lt;property name=&quot;maxActive&quot; value=&quot;${jdbc.maxActive}&quot; /&gt;
-    &lt;!-- 连接池最小空闲 --&gt;
-    &lt;property name=&quot;minIdle&quot; value=&quot;${jdbc.minIdle}&quot; /&gt;
-    &lt;!-- 获取连接最大等待时间 --&gt;
-    &lt;property name=&quot;maxWait&quot; value=&quot;${jdbc.maxWait}&quot; /&gt;
-    &lt;!-- 配置间隔多久才进行一次检测，检测需要关闭的空闲连接，单位是毫秒 --&gt;
-    &lt;property name=&quot;timeBetweenEvictionRunsMillis&quot; value=&quot;${jdbc.timeBetweenEvictionRunsMillis}&quot; /&gt;
-    &lt;!-- 配置一个连接在池中最小生存的时间，单位是毫秒 --&gt;
-    &lt;property name=&quot;minEvictableIdleTimeMillis&quot; value=&quot;${jdbc.minEvictableIdleTimeMillis}&quot; /&gt;
-    &lt;property name=&quot;testWhileIdle&quot; value=&quot;${jdbc.testWhileIdle}&quot; /&gt;
-    &lt;property name=&quot;testOnBorrow&quot; value=&quot;${jdbc.testOnBorrow}&quot; /&gt;
-    &lt;property name=&quot;testOnReturn&quot; value=&quot;${jdbc.testOnReturn}&quot; /&gt;
-&lt;/bean&gt; //这里是声明了jdbc的数据源
-&lt;!-- 使用annotation注解方式配置事务 当注释中发现@Transactional时，使用id为transactionManager的事务管理器--&gt;
-&lt;!-- 如果没有设置transaction-manager的值，则spring以缺省默认的事务管理器来处理事务，默认事务管理器为第一个加载的事务管理器 --&gt;
-&lt;tx:annotation-driven transaction-manager=&quot;transactionManager&quot;/&gt;
+<span style="color:#f92672">&lt;bean</span> <span style="color:#a6e22e">name=</span><span style="color:#e6db74">&#34;dataSource&#34;</span> <span style="color:#a6e22e">class=</span><span style="color:#e6db74">&#34;com.alibaba.druid.pool.DruidDataSource&#34;</span> <span style="color:#a6e22e">init-method=</span><span style="color:#e6db74">&#34;init&#34;</span> <span style="color:#a6e22e">destroy-method=</span><span style="color:#e6db74">&#34;close&#34;</span><span style="color:#f92672">&gt;</span>
+    <span style="color:#f92672">&lt;property</span> <span style="color:#a6e22e">name=</span><span style="color:#e6db74">&#34;url&#34;</span> <span style="color:#a6e22e">value=</span><span style="color:#e6db74">&#34;${jdbc.url}&#34;</span> <span style="color:#f92672">/&gt;</span>
+    <span style="color:#f92672">&lt;property</span> <span style="color:#a6e22e">name=</span><span style="color:#e6db74">&#34;username&#34;</span> <span style="color:#a6e22e">value=</span><span style="color:#e6db74">&#34;${jdbc.username}&#34;</span> <span style="color:#f92672">/&gt;</span>
+    <span style="color:#f92672">&lt;property</span> <span style="color:#a6e22e">name=</span><span style="color:#e6db74">&#34;password&#34;</span> <span style="color:#a6e22e">value=</span><span style="color:#e6db74">&#34;${jdbc.password}&#34;</span> <span style="color:#f92672">/&gt;</span>
+    <span style="color:#75715e">&lt;!-- 初始化连接大小 --&gt;</span>
+    <span style="color:#f92672">&lt;property</span> <span style="color:#a6e22e">name=</span><span style="color:#e6db74">&#34;initialSize&#34;</span> <span style="color:#a6e22e">value=</span><span style="color:#e6db74">&#34;${jdbc.initialSize}&#34;</span> <span style="color:#f92672">/&gt;</span>
+    <span style="color:#75715e">&lt;!-- 连接池最大使用连接数量 --&gt;</span>
+    <span style="color:#f92672">&lt;property</span> <span style="color:#a6e22e">name=</span><span style="color:#e6db74">&#34;maxActive&#34;</span> <span style="color:#a6e22e">value=</span><span style="color:#e6db74">&#34;${jdbc.maxActive}&#34;</span> <span style="color:#f92672">/&gt;</span>
+    <span style="color:#75715e">&lt;!-- 连接池最小空闲 --&gt;</span>
+    <span style="color:#f92672">&lt;property</span> <span style="color:#a6e22e">name=</span><span style="color:#e6db74">&#34;minIdle&#34;</span> <span style="color:#a6e22e">value=</span><span style="color:#e6db74">&#34;${jdbc.minIdle}&#34;</span> <span style="color:#f92672">/&gt;</span>
+    <span style="color:#75715e">&lt;!-- 获取连接最大等待时间 --&gt;</span>
+    <span style="color:#f92672">&lt;property</span> <span style="color:#a6e22e">name=</span><span style="color:#e6db74">&#34;maxWait&#34;</span> <span style="color:#a6e22e">value=</span><span style="color:#e6db74">&#34;${jdbc.maxWait}&#34;</span> <span style="color:#f92672">/&gt;</span>
+    <span style="color:#75715e">&lt;!-- 配置间隔多久才进行一次检测，检测需要关闭的空闲连接，单位是毫秒 --&gt;</span>
+    <span style="color:#f92672">&lt;property</span> <span style="color:#a6e22e">name=</span><span style="color:#e6db74">&#34;timeBetweenEvictionRunsMillis&#34;</span> <span style="color:#a6e22e">value=</span><span style="color:#e6db74">&#34;${jdbc.timeBetweenEvictionRunsMillis}&#34;</span> <span style="color:#f92672">/&gt;</span>
+    <span style="color:#75715e">&lt;!-- 配置一个连接在池中最小生存的时间，单位是毫秒 --&gt;</span>
+    <span style="color:#f92672">&lt;property</span> <span style="color:#a6e22e">name=</span><span style="color:#e6db74">&#34;minEvictableIdleTimeMillis&#34;</span> <span style="color:#a6e22e">value=</span><span style="color:#e6db74">&#34;${jdbc.minEvictableIdleTimeMillis}&#34;</span> <span style="color:#f92672">/&gt;</span>
+    <span style="color:#f92672">&lt;property</span> <span style="color:#a6e22e">name=</span><span style="color:#e6db74">&#34;testWhileIdle&#34;</span> <span style="color:#a6e22e">value=</span><span style="color:#e6db74">&#34;${jdbc.testWhileIdle}&#34;</span> <span style="color:#f92672">/&gt;</span>
+    <span style="color:#f92672">&lt;property</span> <span style="color:#a6e22e">name=</span><span style="color:#e6db74">&#34;testOnBorrow&#34;</span> <span style="color:#a6e22e">value=</span><span style="color:#e6db74">&#34;${jdbc.testOnBorrow}&#34;</span> <span style="color:#f92672">/&gt;</span>
+    <span style="color:#f92672">&lt;property</span> <span style="color:#a6e22e">name=</span><span style="color:#e6db74">&#34;testOnReturn&#34;</span> <span style="color:#a6e22e">value=</span><span style="color:#e6db74">&#34;${jdbc.testOnReturn}&#34;</span> <span style="color:#f92672">/&gt;</span>
+<span style="color:#f92672">&lt;/bean&gt;</span> //这里是声明了jdbc的数据源
+<span style="color:#75715e">&lt;!-- 使用annotation注解方式配置事务 当注释中发现@Transactional时，使用id为transactionManager的事务管理器--&gt;</span>
+<span style="color:#75715e">&lt;!-- 如果没有设置transaction-manager的值，则spring以缺省默认的事务管理器来处理事务，默认事务管理器为第一个加载的事务管理器 --&gt;</span>
+<span style="color:#f92672">&lt;tx:annotation-driven</span> <span style="color:#a6e22e">transaction-manager=</span><span style="color:#e6db74">&#34;transactionManager&#34;</span><span style="color:#f92672">/&gt;</span>
 
 
-&lt;!-- spring和MyBatis完美整合，不需要mybatis的配置映射文件 --&gt;
-&lt;bean id=&quot;sqlSessionFactory&quot; class=&quot;org.mybatis.spring.SqlSessionFactoryBean&quot;&gt;
-    &lt;property name=&quot;dataSource&quot; ref=&quot;dataSource&quot; /&gt;
-    &lt;property name=&quot;configLocation&quot; value=&quot;classpath:jdbc/mybatis-config.xml&quot; /&gt;
-    &lt;!-- 自动扫描各个dao下面的Mapper.xml文件 --&gt;
-    &lt;property name=&quot;mapperLocations&quot;&gt;
-        &lt;array&gt;
-            &lt;value&gt;classpath*:user.map/*.xml&lt;/value&gt;
-            &lt;value&gt;classpath*:log.map/*.xml&lt;/value&gt;
-        &lt;/array&gt;
-    &lt;/property&gt;
-&lt;/bean&gt;
+<span style="color:#75715e">&lt;!-- spring和MyBatis完美整合，不需要mybatis的配置映射文件 --&gt;</span>
+<span style="color:#f92672">&lt;bean</span> <span style="color:#a6e22e">id=</span><span style="color:#e6db74">&#34;sqlSessionFactory&#34;</span> <span style="color:#a6e22e">class=</span><span style="color:#e6db74">&#34;org.mybatis.spring.SqlSessionFactoryBean&#34;</span><span style="color:#f92672">&gt;</span>
+    <span style="color:#f92672">&lt;property</span> <span style="color:#a6e22e">name=</span><span style="color:#e6db74">&#34;dataSource&#34;</span> <span style="color:#a6e22e">ref=</span><span style="color:#e6db74">&#34;dataSource&#34;</span> <span style="color:#f92672">/&gt;</span>
+    <span style="color:#f92672">&lt;property</span> <span style="color:#a6e22e">name=</span><span style="color:#e6db74">&#34;configLocation&#34;</span> <span style="color:#a6e22e">value=</span><span style="color:#e6db74">&#34;classpath:jdbc/mybatis-config.xml&#34;</span> <span style="color:#f92672">/&gt;</span>
+    <span style="color:#75715e">&lt;!-- 自动扫描各个dao下面的Mapper.xml文件 --&gt;</span>
+    <span style="color:#f92672">&lt;property</span> <span style="color:#a6e22e">name=</span><span style="color:#e6db74">&#34;mapperLocations&#34;</span><span style="color:#f92672">&gt;</span>
+        <span style="color:#f92672">&lt;array&gt;</span>
+            <span style="color:#f92672">&lt;value&gt;</span>classpath*:user.map/*.xml<span style="color:#f92672">&lt;/value&gt;</span>
+            <span style="color:#f92672">&lt;value&gt;</span>classpath*:log.map/*.xml<span style="color:#f92672">&lt;/value&gt;</span>
+        <span style="color:#f92672">&lt;/array&gt;</span>
+    <span style="color:#f92672">&lt;/property&gt;</span>
+<span style="color:#f92672">&lt;/bean&gt;</span>
 
-&lt;!-- mybatis 映射dao 和 mybatis sql id ,由于这里使用到了MapperScanner,所以dao不要使用注解扫描--&gt;
-&lt;bean class=&quot;org.mybatis.spring.mapper.MapperScannerConfigurer&quot;&gt;
-    &lt;!-- 使用,号配置多个dao --&gt;
-    &lt;!--&lt;property name=&quot;basePackage&quot; value=&quot;com.peop.user.dao,com.peop.question.dao,com.peop.exam.dao&quot; /&gt;--&gt;
-    &lt;property name=&quot;basePackage&quot; value=&quot;com.ctp.ghub.dao&quot; /&gt;
-    &lt;property name=&quot;sqlSessionFactoryBeanName&quot; value=&quot;sqlSessionFactory&quot;/&gt;
-&lt;/bean&gt;
-</code></pre>
-
-<p>MyBatis自动参与到spring事务管理中，无需额外配置，只要org.mybatis.spring.SqlSessionFactoryBean引用的数据源与DataSourceTransactionManager引用的数据源一致即可，否则事务管理会不起作用。</p>
-
+<span style="color:#75715e">&lt;!-- mybatis 映射dao 和 mybatis sql id ,由于这里使用到了MapperScanner,所以dao不要使用注解扫描--&gt;</span>
+<span style="color:#f92672">&lt;bean</span> <span style="color:#a6e22e">class=</span><span style="color:#e6db74">&#34;org.mybatis.spring.mapper.MapperScannerConfigurer&#34;</span><span style="color:#f92672">&gt;</span>
+    <span style="color:#75715e">&lt;!-- 使用,号配置多个dao --&gt;</span>
+    <span style="color:#75715e">&lt;!--&lt;property name=&#34;basePackage&#34; value=&#34;com.peop.user.dao,com.peop.question.dao,com.peop.exam.dao&#34; /&gt;--&gt;</span>
+    <span style="color:#f92672">&lt;property</span> <span style="color:#a6e22e">name=</span><span style="color:#e6db74">&#34;basePackage&#34;</span> <span style="color:#a6e22e">value=</span><span style="color:#e6db74">&#34;com.ctp.ghub.dao&#34;</span> <span style="color:#f92672">/&gt;</span>
+    <span style="color:#f92672">&lt;property</span> <span style="color:#a6e22e">name=</span><span style="color:#e6db74">&#34;sqlSessionFactoryBeanName&#34;</span> <span style="color:#a6e22e">value=</span><span style="color:#e6db74">&#34;sqlSessionFactory&#34;</span><span style="color:#f92672">/&gt;</span>
+<span style="color:#f92672">&lt;/bean&gt;</span>
+</code></pre></div><p>MyBatis自动参与到spring事务管理中，无需额外配置，只要org.mybatis.spring.SqlSessionFactoryBean引用的数据源与DataSourceTransactionManager引用的数据源一致即可，否则事务管理会不起作用。</p>
 <p>通过dataSource属性指定需要事务管理的单个javax.sql.DataSource对象。在幕后DataSourceTransactionManager通过调用java.sql.Connection来管理事务,而后者是通过DataSource获取到的。通过调用连接的commit()方法来提交事务。同样，事务失败时通过调用rollback()方法进行回滚。</p>
-
 <h3 id="注解的方式">注解的方式</h3>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-java" data-lang="java"><span style="color:#75715e">// 如果有事务, 那么加入事务, 没有的话新建一个(默认情况下)
+</span><span style="color:#75715e"></span><span style="color:#a6e22e">@Transactional</span><span style="color:#f92672">(</span>propagation<span style="color:#f92672">=</span>Propagation<span style="color:#f92672">.</span><span style="color:#a6e22e">REQUIRED</span><span style="color:#f92672">)</span>
 
-<pre><code class="language-java">// 如果有事务, 那么加入事务, 没有的话新建一个(默认情况下)
-@Transactional(propagation=Propagation.REQUIRED)
+<span style="color:#75715e">// 容器不为这个方法开启事务
+</span><span style="color:#75715e"></span><span style="color:#a6e22e">@Transactional</span><span style="color:#f92672">(</span>propagation<span style="color:#f92672">=</span>Propagation<span style="color:#f92672">.</span><span style="color:#a6e22e">NOT_SUPPORTED</span><span style="color:#f92672">)</span>
 
-// 容器不为这个方法开启事务
-@Transactional(propagation=Propagation.NOT_SUPPORTED)
+<span style="color:#75715e">// 不管是否存在事务,都创建一个新的事务,原来的挂起,新的执行完毕,继续执行老的事务
+</span><span style="color:#75715e"></span><span style="color:#a6e22e">@Transactional</span><span style="color:#f92672">(</span>propagation<span style="color:#f92672">=</span>Propagation<span style="color:#f92672">.</span><span style="color:#a6e22e">REQUIRES_NEW</span><span style="color:#f92672">)</span>
 
-// 不管是否存在事务,都创建一个新的事务,原来的挂起,新的执行完毕,继续执行老的事务
-@Transactional(propagation=Propagation.REQUIRES_NEW)
+<span style="color:#75715e">// 必须在一个已有的事务中执行,否则抛出异常
+</span><span style="color:#75715e"></span><span style="color:#a6e22e">@Transactional</span><span style="color:#f92672">(</span>propagation<span style="color:#f92672">=</span>Propagation<span style="color:#f92672">.</span><span style="color:#a6e22e">MANDATORY</span><span style="color:#f92672">)</span>
 
-// 必须在一个已有的事务中执行,否则抛出异常
-@Transactional(propagation=Propagation.MANDATORY)
+<span style="color:#75715e">// 必须在一个没有的事务中执行,否则抛出异常(与Propagation.MANDATORY相反)
+</span><span style="color:#75715e"></span><span style="color:#a6e22e">@Transactional</span><span style="color:#f92672">(</span>propagation<span style="color:#f92672">=</span>Propagation<span style="color:#f92672">.</span><span style="color:#a6e22e">NEVER</span><span style="color:#f92672">)</span>
 
-// 必须在一个没有的事务中执行,否则抛出异常(与Propagation.MANDATORY相反)
-@Transactional(propagation=Propagation.NEVER)
-
-// 如果其他bean调用这个方法,在其他bean中声明事务,那就用事务.如果其他bean没有声明事务,那就不用事务.
-@Transactional(propagation=Propagation.SUPPORTS)
-</code></pre>
-
-<h3 id="配置文件的方式">配置文件的方式</h3>
-
-<pre><code class="language-xml">&lt;tx:advice id=&quot;txAdvice&quot; transaction-manager=&quot;txManager&quot;&gt; 
-      &lt;tx:attributes&gt;  
-      &lt;!--设置所有匹配的方法，然后设置传播级别和事务隔离--&gt;
-           &lt;tx:method name=&quot;save*&quot; propagation=&quot;REQUIRED&quot; /&gt; 
-           &lt;tx:method name=&quot;add*&quot; propagation=&quot;REQUIRED&quot; /&gt; 
-           &lt;tx:method name=&quot;create*&quot; propagation=&quot;REQUIRED&quot; /&gt; 
-           &lt;tx:method name=&quot;insert*&quot; propagation=&quot;REQUIRED&quot; /&gt; 
-           &lt;tx:method name=&quot;update*&quot; propagation=&quot;REQUIRED&quot; /&gt; 
-           &lt;tx:method name=&quot;merge*&quot; propagation=&quot;REQUIRED&quot; /&gt; 
-           &lt;tx:method name=&quot;del*&quot; propagation=&quot;REQUIRED&quot; /&gt; 
-           &lt;tx:method name=&quot;remove*&quot; propagation=&quot;REQUIRED&quot; /&gt; 
-           &lt;tx:method name=&quot;put*&quot; propagation=&quot;REQUIRED&quot; /&gt; 
-           &lt;tx:method name=&quot;get*&quot; propagation=&quot;SUPPORTS&quot; read-only=&quot;true&quot; /&gt; 
-           &lt;tx:method name=&quot;count*&quot; propagation=&quot;SUPPORTS&quot; read-only=&quot;true&quot; /&gt; 
-          &lt;tx:method name=&quot;find*&quot; propagation=&quot;SUPPORTS&quot; read-only=&quot;true&quot; /&gt; 
-          &lt;tx:method name=&quot;list*&quot; propagation=&quot;SUPPORTS&quot; read-only=&quot;true&quot; /&gt; 
-          &lt;tx:method name=&quot;*&quot; propagation=&quot;SUPPORTS&quot; read-only=&quot;true&quot; /&gt; 
-     &lt;/tx:attributes&gt; 
-&lt;/tx:advice&gt; 
-</code></pre>
-
-<p>#redis事物管理
+<span style="color:#75715e">// 如果其他bean调用这个方法,在其他bean中声明事务,那就用事务.如果其他bean没有声明事务,那就不用事务.
+</span><span style="color:#75715e"></span><span style="color:#a6e22e">@Transactional</span><span style="color:#f92672">(</span>propagation<span style="color:#f92672">=</span>Propagation<span style="color:#f92672">.</span><span style="color:#a6e22e">SUPPORTS</span><span style="color:#f92672">)</span>
+</code></pre></div><h3 id="配置文件的方式">配置文件的方式</h3>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-xml" data-lang="xml"><span style="color:#f92672">&lt;tx:advice</span> <span style="color:#a6e22e">id=</span><span style="color:#e6db74">&#34;txAdvice&#34;</span> <span style="color:#a6e22e">transaction-manager=</span><span style="color:#e6db74">&#34;txManager&#34;</span><span style="color:#f92672">&gt;</span> 
+      <span style="color:#f92672">&lt;tx:attributes&gt;</span>  
+      <span style="color:#75715e">&lt;!--设置所有匹配的方法，然后设置传播级别和事务隔离--&gt;</span>
+           <span style="color:#f92672">&lt;tx:method</span> <span style="color:#a6e22e">name=</span><span style="color:#e6db74">&#34;save*&#34;</span> <span style="color:#a6e22e">propagation=</span><span style="color:#e6db74">&#34;REQUIRED&#34;</span> <span style="color:#f92672">/&gt;</span> 
+           <span style="color:#f92672">&lt;tx:method</span> <span style="color:#a6e22e">name=</span><span style="color:#e6db74">&#34;add*&#34;</span> <span style="color:#a6e22e">propagation=</span><span style="color:#e6db74">&#34;REQUIRED&#34;</span> <span style="color:#f92672">/&gt;</span> 
+           <span style="color:#f92672">&lt;tx:method</span> <span style="color:#a6e22e">name=</span><span style="color:#e6db74">&#34;create*&#34;</span> <span style="color:#a6e22e">propagation=</span><span style="color:#e6db74">&#34;REQUIRED&#34;</span> <span style="color:#f92672">/&gt;</span> 
+           <span style="color:#f92672">&lt;tx:method</span> <span style="color:#a6e22e">name=</span><span style="color:#e6db74">&#34;insert*&#34;</span> <span style="color:#a6e22e">propagation=</span><span style="color:#e6db74">&#34;REQUIRED&#34;</span> <span style="color:#f92672">/&gt;</span> 
+           <span style="color:#f92672">&lt;tx:method</span> <span style="color:#a6e22e">name=</span><span style="color:#e6db74">&#34;update*&#34;</span> <span style="color:#a6e22e">propagation=</span><span style="color:#e6db74">&#34;REQUIRED&#34;</span> <span style="color:#f92672">/&gt;</span> 
+           <span style="color:#f92672">&lt;tx:method</span> <span style="color:#a6e22e">name=</span><span style="color:#e6db74">&#34;merge*&#34;</span> <span style="color:#a6e22e">propagation=</span><span style="color:#e6db74">&#34;REQUIRED&#34;</span> <span style="color:#f92672">/&gt;</span> 
+           <span style="color:#f92672">&lt;tx:method</span> <span style="color:#a6e22e">name=</span><span style="color:#e6db74">&#34;del*&#34;</span> <span style="color:#a6e22e">propagation=</span><span style="color:#e6db74">&#34;REQUIRED&#34;</span> <span style="color:#f92672">/&gt;</span> 
+           <span style="color:#f92672">&lt;tx:method</span> <span style="color:#a6e22e">name=</span><span style="color:#e6db74">&#34;remove*&#34;</span> <span style="color:#a6e22e">propagation=</span><span style="color:#e6db74">&#34;REQUIRED&#34;</span> <span style="color:#f92672">/&gt;</span> 
+           <span style="color:#f92672">&lt;tx:method</span> <span style="color:#a6e22e">name=</span><span style="color:#e6db74">&#34;put*&#34;</span> <span style="color:#a6e22e">propagation=</span><span style="color:#e6db74">&#34;REQUIRED&#34;</span> <span style="color:#f92672">/&gt;</span> 
+           <span style="color:#f92672">&lt;tx:method</span> <span style="color:#a6e22e">name=</span><span style="color:#e6db74">&#34;get*&#34;</span> <span style="color:#a6e22e">propagation=</span><span style="color:#e6db74">&#34;SUPPORTS&#34;</span> <span style="color:#a6e22e">read-only=</span><span style="color:#e6db74">&#34;true&#34;</span> <span style="color:#f92672">/&gt;</span> 
+           <span style="color:#f92672">&lt;tx:method</span> <span style="color:#a6e22e">name=</span><span style="color:#e6db74">&#34;count*&#34;</span> <span style="color:#a6e22e">propagation=</span><span style="color:#e6db74">&#34;SUPPORTS&#34;</span> <span style="color:#a6e22e">read-only=</span><span style="color:#e6db74">&#34;true&#34;</span> <span style="color:#f92672">/&gt;</span> 
+          <span style="color:#f92672">&lt;tx:method</span> <span style="color:#a6e22e">name=</span><span style="color:#e6db74">&#34;find*&#34;</span> <span style="color:#a6e22e">propagation=</span><span style="color:#e6db74">&#34;SUPPORTS&#34;</span> <span style="color:#a6e22e">read-only=</span><span style="color:#e6db74">&#34;true&#34;</span> <span style="color:#f92672">/&gt;</span> 
+          <span style="color:#f92672">&lt;tx:method</span> <span style="color:#a6e22e">name=</span><span style="color:#e6db74">&#34;list*&#34;</span> <span style="color:#a6e22e">propagation=</span><span style="color:#e6db74">&#34;SUPPORTS&#34;</span> <span style="color:#a6e22e">read-only=</span><span style="color:#e6db74">&#34;true&#34;</span> <span style="color:#f92672">/&gt;</span> 
+          <span style="color:#f92672">&lt;tx:method</span> <span style="color:#a6e22e">name=</span><span style="color:#e6db74">&#34;*&#34;</span> <span style="color:#a6e22e">propagation=</span><span style="color:#e6db74">&#34;SUPPORTS&#34;</span> <span style="color:#a6e22e">read-only=</span><span style="color:#e6db74">&#34;true&#34;</span> <span style="color:#f92672">/&gt;</span> 
+     <span style="color:#f92672">&lt;/tx:attributes&gt;</span> 
+<span style="color:#f92672">&lt;/tx:advice&gt;</span> 
+</code></pre></div><p>#redis事物管理
 redis通过mulit，exec，watch等命令来实现事物功能，他将多个命令请求打包，然后一次性按顺序去执行，注意事物执行期间，服务器不会中断事物而去执行其他客户端请求命令，要等事物中的所有命令执行完毕后，才去执行其他客户端的请求命令。</p>
-
-<pre><code class="language-shell">#事物开启
-#执行 mulit命令
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-shell" data-lang="shell"><span style="color:#75715e">#事物开启</span>
+<span style="color:#75715e">#执行 mulit命令</span>
 .....................//你操作的命令放入队列
-#执行提交事物 exec
-</code></pre>
-
-<h1 id="mongodb事物">MongoDB事物</h1>
-
+<span style="color:#75715e">#执行提交事物 exec</span>
+</code></pre></div><h1 id="mongodb事物">MongoDB事物</h1>
 <p>mongodb 的事务是依靠 mongodb 连接的客户端 session 实现，事务执行的流程大致是 建立 session，通过 session startTransaction 启动事务，如果一系列事务都完成，那么 commitTransaction 完成事务操作，并结束当前事务 session；如果一系列事务中有任意事件失败， 那么 　abortTransaction 中止事务，内部将已完成的任务回退到修改之前，并结束当前事务 session。</p>
 
 
@@ -575,21 +537,18 @@ redis通过mulit，exec，watch等命令来实现事物功能，他将多个命�
                     </h4>
                     <ul class="catalog-body"></ul>
                     <nav id="TableOfContents">
-<ul>
-<li><a href="#spring事物">spring事物</a>
-<ul>
-<li><a href="#概念">概念</a></li>
-<li><a href="#spring-中对事物的处理">spring 中对事物的处理</a></li>
-<li><a href="#spring中的7个事务传播行为">Spring中的7个事务传播行为</a></li>
-<li><a href="#编程式事物管理和声明式事物管理">编程式事物管理和声明式事物管理</a></li>
-<li><a href="#spring中定义事物管理器">spring中定义事物管理器</a>
-<ul>
-<li><a href="#注解的方式">注解的方式</a></li>
-<li><a href="#配置文件的方式">配置文件的方式</a></li>
-</ul></li>
-</ul></li>
-<li><a href="#mongodb事物">MongoDB事物</a></li>
-</ul>
+  <ul>
+    <li><a href="#概念">概念</a></li>
+    <li><a href="#spring-中对事物的处理">spring 中对事物的处理</a></li>
+    <li><a href="#spring中的7个事务传播行为">Spring中的7个事务传播行为</a></li>
+    <li><a href="#编程式事物管理和声明式事物管理">编程式事物管理和声明式事物管理</a></li>
+    <li><a href="#spring中定义事物管理器">spring中定义事物管理器</a>
+      <ul>
+        <li><a href="#注解的方式">注解的方式</a></li>
+        <li><a href="#配置文件的方式">配置文件的方式</a></li>
+      </ul>
+    </li>
+  </ul>
 </nav>
                     <br>
                     <br>
@@ -614,9 +573,6 @@ redis通过mulit，exec，watch等命令来实现事物功能，他将多个命�
                         
                         
                         
-                        <a href="/tags/" title="">
-                            
-                        </a>
                         
                         
                         
@@ -626,101 +582,6 @@ redis通过mulit，exec，watch等命令来实现事物功能，他将多个命�
                         
                         
                         
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        <a href="/tags/qt" title="QT">
-                            QT
-                        </a>
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        <a href="/tags/zookeeper" title="Zookeeper">
-                            Zookeeper
-                        </a>
                         
                         
                         
@@ -760,8 +621,10 @@ redis通过mulit，exec，watch等命令来实现事物功能，他将多个命�
                         
                         
                         
-                        <a href="/tags/elasticsearch" title="elasticSearch">
-                            elasticSearch
+                        
+                        
+                        <a href="/tags/elasticsearch" title="elasticsearch">
+                            elasticsearch
                         </a>
                         
                         
@@ -772,9 +635,27 @@ redis通过mulit，exec，watch等命令来实现事物功能，他将多个命�
                         
                         
                         
-                        <a href="/tags/golang" title="golang">
-                            golang
-                        </a>
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
                         
                         
                         
@@ -812,9 +693,21 @@ redis通过mulit，exec，watch等命令来实现事物功能，他将多个命�
                         
                         
                         
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
                         <a href="/tags/jvm" title="jvm">
                             jvm
                         </a>
+                        
+                        
+                        
+                        
                         
                         
                         
@@ -838,9 +731,19 @@ redis通过mulit，exec，watch等命令来实现事物功能，他将多个命�
                         
                         
                         
+                        
+                        
+                        
+                        
+                        
+                        
                         <a href="/tags/mongodb" title="mongodb">
                             mongodb
                         </a>
+                        
+                        
+                        
+                        
                         
                         
                         
@@ -851,10 +754,6 @@ redis通过mulit，exec，watch等命令来实现事物功能，他将多个命�
                         </a>
                         
                         
-                        
-                        <a href="/tags/mycat" title="mycat">
-                            mycat
-                        </a>
                         
                         
                         
@@ -868,9 +767,17 @@ redis通过mulit，exec，watch等命令来实现事物功能，他将多个命�
                         
                         
                         
-                        <a href="/tags/nginx" title="nginx">
-                            nginx
-                        </a>
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
                         
                         
                         
@@ -894,8 +801,22 @@ redis通过mulit，exec，watch等命令来实现事物功能，他将多个命�
                         
                         
                         
+                        
+                        
                         <a href="/tags/rocketmq" title="rocketmq">
                             rocketmq
+                        </a>
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        <a href="/tags/security%E6%A1%86%E6%9E%B6%E5%AD%A6%E4%B9%A0" title="security框架学习">
+                            security框架学习
                         </a>
                         
                         
@@ -922,17 +843,11 @@ redis通过mulit，exec，watch等命令来实现事物功能，他将多个命�
                         
                         
                         
-                        <a href="/tags/springcloud" title="springCloud">
-                            springCloud
-                        </a>
-                        
-                        
-                        
-                        
-                        
                         <a href="/tags/springboot" title="springboot">
                             springboot
                         </a>
+                        
+                        
                         
                         
                         
@@ -946,6 +861,9 @@ redis通过mulit，exec，watch等命令来实现事物功能，他将多个命�
                         
                         
                         
+                        <a href="/tags/springcloud" title="springcloud">
+                            springcloud
+                        </a>
                         
                         
                         
@@ -971,6 +889,33 @@ redis通过mulit，exec，watch等命令来实现事物功能，他将多个命�
                         
                         
                         
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        <a href="/tags/zookeeper" title="zookeeper">
+                            zookeeper
+                        </a>
                         
                         
                         
@@ -1030,6 +975,8 @@ redis通过mulit，exec，watch等命令来实现事物功能，他将多个命�
                         
                         
                         
+                        
+                        
                         <a href="/tags/%E5%88%86%E5%B8%83%E5%BC%8F%E7%B3%BB%E5%88%97" title="分布式系列">
                             分布式系列
                         </a>
@@ -1049,6 +996,10 @@ redis通过mulit，exec，watch等命令来实现事物功能，他将多个命�
                         
                         
                         
+                        
+                        <a href="/tags/%E5%8D%8F%E8%AE%AE%E6%A0%88" title="协议栈">
+                            协议栈
+                        </a>
                         
                         
                         
@@ -1248,6 +1199,12 @@ redis通过mulit，exec，watch等命令来实现事物功能，他将多个命�
                         
                         
                         
+                        
+                        
+                        
+                        
+                        
+                        
                         <a href="/tags/%E7%BD%91%E7%BB%9C%E7%BC%96%E7%A8%8B" title="网络编程">
                             网络编程
                         </a>
@@ -1271,6 +1228,10 @@ redis通过mulit，exec，watch等命令来实现事物功能，他将多个命�
                         
                         
                         
+                        
+                        <a href="/tags/%E8%AE%A4%E8%AF%81%E5%92%8C%E6%8E%88%E6%9D%83" title="认证和授权">
+                            认证和授权
+                        </a>
                         
                         
                         
@@ -1441,7 +1402,7 @@ redis通过mulit，exec，watch等命令来实现事物功能，他将多个命�
                     
                 </ul>
 		<p class="copyright text-muted">
-                    Copyright &copy;  2020
+                    Copyright &copy;  2021
                     <br>
                     <a href="https://themes.gohugo.io/hugo-theme-cleanwhite">CleanWhite Hugo Theme</a> by <a href="https://zhaohuabing.com">Huabing</a> |
                     <iframe

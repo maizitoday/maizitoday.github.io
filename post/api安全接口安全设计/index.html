@@ -97,15 +97,15 @@
                     </li>
                     
                     <li>
-                        <a href="/categories/english">English</a>
+                        <a href="/categories/english">english</a>
                     </li>
                     
                     <li>
-                        <a href="/categories/life">Life</a>
+                        <a href="/categories/life">life</a>
                     </li>
                     
                     <li>
-                        <a href="/categories/tech">Tech</a>
+                        <a href="/categories/tech">tech</a>
                     </li>
                     
 
@@ -237,14 +237,9 @@
                 
                 
                 
-                
-
-<p>[TOC]</p>
-
-<p><strong>转载地址：<a href="https://blog.csdn.net/zhou920786312/article/details/95536556">https://blog.csdn.net/zhou920786312/article/details/95536556</a></strong></p>
-
+                <p>[TOC]</p>
+<p><strong>转载地址：https://blog.csdn.net/zhou920786312/article/details/95536556</strong></p>
 <h1 id="如何保证外网开放接口的安全性">如何保证外网开放接口的安全性</h1>
-
 <ol>
 <li>使用加签名方式，防止数据篡改</li>
 <li>信息加密与密钥管理</li>
@@ -252,73 +247,52 @@
 <li>使用令牌方式</li>
 <li>搭建网关实现黑名单和白名单</li>
 </ol>
-
 <h1 id="一-令牌方式搭建搭建api开放平台">一. 令牌方式搭建搭建API开放平台</h1>
-
-<p><img src="/img/20190711234839811.png" alt="20190711234839811" /></p>
-
+<p><img src="/img/20190711234839811.png" alt="20190711234839811"></p>
 <p>方案设计：</p>
-
 <ol>
 <li>第三方机构申请一个appId,通过appId去获取accessToken,每次请求获取accessToken都要把老的accessToken删掉</li>
 <li>第三方机构请求数据需要加上accessToken参数，每次业务处理中心执行业务前，先去dba持久层查看accessToken是否存在(可以把accessToken放到redis中，这样有个过期时间的效果)，存在就说明这个机构是合法，无需要登录就可以请求业务数据。不存在说明这个机构是非法的，不返回业务数据。</li>
 <li>好处：无状态设计，每次请求保证都是在我们持久层保存的机构的请求，如果有人盗用我们accessToken，可以重新申请一个新的taken.</li>
 </ol>
-
-<h1 id="二-基于oauth2-0协议方式">二.  基于OAuth2.0协议方式</h1>
-
+<h1 id="二--基于oauth20协议方式">二.  基于OAuth2.0协议方式</h1>
 <p><strong>原理</strong></p>
-
 <p>第三方授权，原理和1的令牌方式一样</p>
-
 <ol>
 <li>假设我是服务提供者A，我有开发接口，外部机构B请求A的接口必须申请自己的appid(B机构id)</li>
 <li>当B要调用A接口查某个用户信息的时候，需要对应用户授权，告诉A，我愿同意把我的信息告诉B，A生产一个授权token给B。</li>
 <li>B使用token获取某个用户的信息。</li>
 </ol>
-
 <p><strong>联合微信登录总体处理流程</strong></p>
-
 <ol>
 <li>用户同意授权，获取code</li>
 <li>通过code换取网页授权access_token</li>
 <li>通过access_token获取用户openId</li>
 <li>通过openId获取用户信息</li>
 </ol>
-
 <h1 id="三-信息加密与密钥管理">三. 信息加密与密钥管理</h1>
-
 <ol>
 <li>单向散列加密</li>
 <li>对称加密</li>
 <li>非对称加密</li>
 <li>安全密钥管理</li>
 </ol>
-
 <h2 id="非对称加密">非对称加密</h2>
-
-<p>非对称加密算法需要两个密钥：<a href="https://baike.baidu.com/item/公开密钥/7453570">公开密钥</a>（publickey:简称公钥）和私有密钥（privatekey:简称私钥）。</p>
-
+<p>非对称加密算法需要两个密钥：<a href="https://baike.baidu.com/item/%E5%85%AC%E5%BC%80%E5%AF%86%E9%92%A5/7453570">公开密钥</a>（publickey:简称公钥）和私有密钥（privatekey:简称私钥）。</p>
 <p>公钥与私钥是一对</p>
-
 <ol>
 <li>公钥对数据进行加密，只有用对应的私钥才能解密</li>
 <li>私钥对数据进行加密，只有用对应的公钥才能解密</li>
 </ol>
-
 <p>过程：</p>
-
 <ol>
-<li>甲方生成一对<a href="https://baike.baidu.com/item/密钥/101144">密钥，</a>并将公钥公开，乙方使用该甲方的公钥对机密信息进行加密后再发送给甲方；</li>
+<li>甲方生成一对<a href="https://baike.baidu.com/item/%E5%AF%86%E9%92%A5/101144">密钥，</a>并将公钥公开，乙方使用该甲方的公钥对机密信息进行加密后再发送给甲方；</li>
 <li>甲方用自己私钥对加密后的信息进行解密。</li>
 <li>甲方想要回复乙方时，使用乙方的公钥对数据进行加密</li>
 <li>乙方使用自己的私钥来进行解密。</li>
 </ol>
-
 <p>甲方只能用其私钥解密由其公钥加密后的任何信息。</p>
-
 <p><strong>特点：</strong></p>
-
 <ol>
 <li>算法强度复杂</li>
 <li>保密性比较好</li>
@@ -326,9 +300,7 @@
 <li>对称密码体制中只有一种密钥，并且是非公开的，如果要解密就得让对方知道密钥。所以保证其安全性就是保证密钥的安全，而非对称密钥体制有两种密钥，其中一个是公开的，这样就可以不需要像对称密码那样传输对方的密钥了。这样安全性就大了很多</li>
 <li>适用于：金融，支付领域</li>
 </ol>
-
-<h1 id="四-使用加签名方式-防止数据篡改">四. 使用加签名方式，防止数据篡改</h1>
-
+<h1 id="四-使用加签名方式防止数据篡改">四. 使用加签名方式，防止数据篡改</h1>
 <ol>
 <li>客户端：请求的数据分为2部分（业务参数，签名参数），签名参数=md5（业务参数）</li>
 <li>服务端： 验证md5(业务参数)是否与签名参数相同</li>
@@ -440,16 +412,9 @@
                     </h4>
                     <ul class="catalog-body"></ul>
                     <nav id="TableOfContents">
-<ul>
-<li><a href="#如何保证外网开放接口的安全性">如何保证外网开放接口的安全性</a></li>
-<li><a href="#一-令牌方式搭建搭建api开放平台">一. 令牌方式搭建搭建API开放平台</a></li>
-<li><a href="#二-基于oauth2-0协议方式">二.  基于OAuth2.0协议方式</a></li>
-<li><a href="#三-信息加密与密钥管理">三. 信息加密与密钥管理</a>
-<ul>
-<li><a href="#非对称加密">非对称加密</a></li>
-</ul></li>
-<li><a href="#四-使用加签名方式-防止数据篡改">四. 使用加签名方式，防止数据篡改</a></li>
-</ul>
+  <ul>
+    <li><a href="#非对称加密">非对称加密</a></li>
+  </ul>
 </nav>
                     <br>
                     <br>
@@ -474,9 +439,6 @@
                         
                         
                         
-                        <a href="/tags/" title="">
-                            
-                        </a>
                         
                         
                         
@@ -486,101 +448,6 @@
                         
                         
                         
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        <a href="/tags/qt" title="QT">
-                            QT
-                        </a>
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        <a href="/tags/zookeeper" title="Zookeeper">
-                            Zookeeper
-                        </a>
                         
                         
                         
@@ -620,8 +487,10 @@
                         
                         
                         
-                        <a href="/tags/elasticsearch" title="elasticSearch">
-                            elasticSearch
+                        
+                        
+                        <a href="/tags/elasticsearch" title="elasticsearch">
+                            elasticsearch
                         </a>
                         
                         
@@ -632,9 +501,27 @@
                         
                         
                         
-                        <a href="/tags/golang" title="golang">
-                            golang
-                        </a>
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
                         
                         
                         
@@ -672,9 +559,21 @@
                         
                         
                         
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
                         <a href="/tags/jvm" title="jvm">
                             jvm
                         </a>
+                        
+                        
+                        
+                        
                         
                         
                         
@@ -698,9 +597,19 @@
                         
                         
                         
+                        
+                        
+                        
+                        
+                        
+                        
                         <a href="/tags/mongodb" title="mongodb">
                             mongodb
                         </a>
+                        
+                        
+                        
+                        
                         
                         
                         
@@ -711,10 +620,6 @@
                         </a>
                         
                         
-                        
-                        <a href="/tags/mycat" title="mycat">
-                            mycat
-                        </a>
                         
                         
                         
@@ -728,9 +633,17 @@
                         
                         
                         
-                        <a href="/tags/nginx" title="nginx">
-                            nginx
-                        </a>
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
                         
                         
                         
@@ -754,8 +667,22 @@
                         
                         
                         
+                        
+                        
                         <a href="/tags/rocketmq" title="rocketmq">
                             rocketmq
+                        </a>
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        <a href="/tags/security%E6%A1%86%E6%9E%B6%E5%AD%A6%E4%B9%A0" title="security框架学习">
+                            security框架学习
                         </a>
                         
                         
@@ -782,17 +709,11 @@
                         
                         
                         
-                        <a href="/tags/springcloud" title="springCloud">
-                            springCloud
-                        </a>
-                        
-                        
-                        
-                        
-                        
                         <a href="/tags/springboot" title="springboot">
                             springboot
                         </a>
+                        
+                        
                         
                         
                         
@@ -806,6 +727,9 @@
                         
                         
                         
+                        <a href="/tags/springcloud" title="springcloud">
+                            springcloud
+                        </a>
                         
                         
                         
@@ -831,6 +755,33 @@
                         
                         
                         
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        <a href="/tags/zookeeper" title="zookeeper">
+                            zookeeper
+                        </a>
                         
                         
                         
@@ -890,6 +841,8 @@
                         
                         
                         
+                        
+                        
                         <a href="/tags/%E5%88%86%E5%B8%83%E5%BC%8F%E7%B3%BB%E5%88%97" title="分布式系列">
                             分布式系列
                         </a>
@@ -909,6 +862,10 @@
                         
                         
                         
+                        
+                        <a href="/tags/%E5%8D%8F%E8%AE%AE%E6%A0%88" title="协议栈">
+                            协议栈
+                        </a>
                         
                         
                         
@@ -1108,6 +1065,12 @@
                         
                         
                         
+                        
+                        
+                        
+                        
+                        
+                        
                         <a href="/tags/%E7%BD%91%E7%BB%9C%E7%BC%96%E7%A8%8B" title="网络编程">
                             网络编程
                         </a>
@@ -1131,6 +1094,10 @@
                         
                         
                         
+                        
+                        <a href="/tags/%E8%AE%A4%E8%AF%81%E5%92%8C%E6%8E%88%E6%9D%83" title="认证和授权">
+                            认证和授权
+                        </a>
                         
                         
                         
@@ -1301,7 +1268,7 @@
                     
                 </ul>
 		<p class="copyright text-muted">
-                    Copyright &copy;  2020
+                    Copyright &copy;  2021
                     <br>
                     <a href="https://themes.gohugo.io/hugo-theme-cleanwhite">CleanWhite Hugo Theme</a> by <a href="https://zhaohuabing.com">Huabing</a> |
                     <iframe

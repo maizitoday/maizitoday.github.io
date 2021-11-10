@@ -97,15 +97,15 @@
                     </li>
                     
                     <li>
-                        <a href="/categories/english">English</a>
+                        <a href="/categories/english">english</a>
                     </li>
                     
                     <li>
-                        <a href="/categories/life">Life</a>
+                        <a href="/categories/life">life</a>
                     </li>
                     
                     <li>
-                        <a href="/categories/tech">Tech</a>
+                        <a href="/categories/tech">tech</a>
                     </li>
                     
 
@@ -237,95 +237,72 @@
                 
                 
                 
-                
-
-<p>[TOC]</p>
-
-<p><strong>转载地址：<a href="https://www.jb51.net/article/110015.htm">https://www.jb51.net/article/110015.htm</a></strong></p>
-
+                <p>[TOC]</p>
+<p><strong>转载地址：https://www.jb51.net/article/110015.htm</strong></p>
 <h1 id="回调">回调</h1>
-
 <h2 id="回调的概念">回调的概念</h2>
-
 <p>举个例子就是，我们想要问别人一道题，我们把题跟对方说了一下，对方说好，等我做完这道题，我就告诉你，这个时候就用到了回调，因为我们并不知道对方什么时候会做完，而是对方做完了来主动找我们。</p>
-
 <h2 id="同步回调">同步回调</h2>
-
 <p>代码运行到某一个位置的时候，如果遇到了需要回调的代码，会在这里等待，等待回调结果返回后再继续执行。</p>
-
 <h2 id="异步回调">异步回调</h2>
-
 <p>代码执行到需要回调的代码的时候，并不会停下来，而是继续执行，当然可能过一会回调的结果会返回回来。</p>
-
 <h1 id="具体代码">具体代码</h1>
-
 <p>总体的代码还是很简单的，就是模拟了一个打印机，还有一个人，打印机具有打印的功能，但是打印需要时间，不能在收到任务的同时给出反馈，需要等待一段时间才能给出反馈。这个人想做的就是打印一份简历，然后知道打印的结果。这里面代码实现了这两种方式。</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-java" data-lang="java"><span style="color:#66d9ef">public</span> <span style="color:#66d9ef">interface</span> <span style="color:#a6e22e">Callback</span> <span style="color:#f92672">{</span>
+    <span style="color:#66d9ef">void</span> <span style="color:#a6e22e">printFinished</span><span style="color:#f92672">(</span>String msg<span style="color:#f92672">);</span>
+<span style="color:#f92672">}</span>
+</code></pre></div><div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-java" data-lang="java"><span style="color:#66d9ef">public</span> <span style="color:#66d9ef">class</span> <span style="color:#a6e22e">People</span> <span style="color:#f92672">{</span>
+    Printer printer <span style="color:#f92672">=</span> <span style="color:#66d9ef">new</span> Printer<span style="color:#f92672">();</span>
 
-<pre><code class="language-java">public interface Callback {
-    void printFinished(String msg);
-}
-</code></pre>
+    <span style="color:#75715e">/*
+</span><span style="color:#75715e">     * 同步回调
+</span><span style="color:#75715e">     */</span>
+    <span style="color:#66d9ef">public</span> <span style="color:#66d9ef">void</span> <span style="color:#a6e22e">goToPrintSyn</span><span style="color:#f92672">(</span>Callback callback<span style="color:#f92672">,</span> String text<span style="color:#f92672">)</span> <span style="color:#f92672">{</span>
+        printer<span style="color:#f92672">.</span><span style="color:#a6e22e">print</span><span style="color:#f92672">(</span>callback<span style="color:#f92672">,</span> text<span style="color:#f92672">);</span>
+    <span style="color:#f92672">}</span>
 
-<pre><code class="language-java">public class People {
-    Printer printer = new Printer();
+    <span style="color:#75715e">/*
+</span><span style="color:#75715e">     * 异步回调
+</span><span style="color:#75715e">     */</span>
+    <span style="color:#66d9ef">public</span> <span style="color:#66d9ef">void</span> <span style="color:#a6e22e">goToPrintASyn</span><span style="color:#f92672">(</span>Callback callback<span style="color:#f92672">,</span> String text<span style="color:#f92672">)</span> <span style="color:#f92672">{</span>
+        <span style="color:#66d9ef">new</span> Thread<span style="color:#f92672">(</span><span style="color:#66d9ef">new</span> Runnable<span style="color:#f92672">()</span> <span style="color:#f92672">{</span>
+            <span style="color:#66d9ef">public</span> <span style="color:#66d9ef">void</span> <span style="color:#a6e22e">run</span><span style="color:#f92672">()</span> <span style="color:#f92672">{</span>
+                printer<span style="color:#f92672">.</span><span style="color:#a6e22e">print</span><span style="color:#f92672">(</span>callback<span style="color:#f92672">,</span> text<span style="color:#f92672">);</span>
+            <span style="color:#f92672">}</span>
+        <span style="color:#f92672">}).</span><span style="color:#a6e22e">start</span><span style="color:#f92672">();</span>
+    <span style="color:#f92672">}</span>
+<span style="color:#f92672">}</span>
+</code></pre></div><div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-java" data-lang="java"><span style="color:#66d9ef">public</span> <span style="color:#66d9ef">class</span> <span style="color:#a6e22e">Printer</span> <span style="color:#66d9ef">implements</span> Callback <span style="color:#f92672">{</span>
+    <span style="color:#66d9ef">public</span> <span style="color:#66d9ef">void</span> <span style="color:#a6e22e">print</span><span style="color:#f92672">(</span>Callback callback<span style="color:#f92672">,</span> String text<span style="color:#f92672">)</span> <span style="color:#f92672">{</span>
+        System<span style="color:#f92672">.</span><span style="color:#a6e22e">out</span><span style="color:#f92672">.</span><span style="color:#a6e22e">println</span><span style="color:#f92672">(</span><span style="color:#e6db74">&#34;正在打印 . . . &#34;</span><span style="color:#f92672">);</span>
+        <span style="color:#66d9ef">try</span> <span style="color:#f92672">{</span>
+            Thread<span style="color:#f92672">.</span><span style="color:#a6e22e">currentThread</span><span style="color:#f92672">();</span>
+            Thread<span style="color:#f92672">.</span><span style="color:#a6e22e">sleep</span><span style="color:#f92672">(</span>3000<span style="color:#f92672">);</span><span style="color:#75715e">// 毫秒
+</span><span style="color:#75715e"></span>        <span style="color:#f92672">}</span> <span style="color:#66d9ef">catch</span> <span style="color:#f92672">(</span>Exception e<span style="color:#f92672">)</span> <span style="color:#f92672">{</span>
+        <span style="color:#f92672">}</span>
+        callback<span style="color:#f92672">.</span><span style="color:#a6e22e">printFinished</span><span style="color:#f92672">(</span><span style="color:#e6db74">&#34;打印完成&#34;</span><span style="color:#f92672">);</span>
+    <span style="color:#f92672">}</span>
 
-    /*
-     * 同步回调
-     */
-    public void goToPrintSyn(Callback callback, String text) {
-        printer.print(callback, text);
-    }
+    <span style="color:#a6e22e">@Override</span>
+    <span style="color:#66d9ef">public</span> <span style="color:#66d9ef">void</span> <span style="color:#a6e22e">printFinished</span><span style="color:#f92672">(</span>String msg<span style="color:#f92672">)</span> <span style="color:#f92672">{</span>
+        System<span style="color:#f92672">.</span><span style="color:#a6e22e">out</span><span style="color:#f92672">.</span><span style="color:#a6e22e">println</span><span style="color:#f92672">(</span><span style="color:#e6db74">&#34;打印机告诉我的消息是 ---&gt; &#34;</span> <span style="color:#f92672">+</span> msg<span style="color:#f92672">);</span>
+    <span style="color:#f92672">}</span>
 
-    /*
-     * 异步回调
-     */
-    public void goToPrintASyn(Callback callback, String text) {
-        new Thread(new Runnable() {
-            public void run() {
-                printer.print(callback, text);
-            }
-        }).start();
-    }
-}
-</code></pre>
+    <span style="color:#66d9ef">public</span> <span style="color:#66d9ef">static</span> <span style="color:#66d9ef">void</span> <span style="color:#a6e22e">main</span><span style="color:#f92672">(</span>String<span style="color:#f92672">[]</span> args<span style="color:#f92672">)</span> <span style="color:#f92672">{</span>
+        People people <span style="color:#f92672">=</span> <span style="color:#66d9ef">new</span> People<span style="color:#f92672">();</span>
+        Printer printer <span style="color:#f92672">=</span> <span style="color:#66d9ef">new</span> Printer<span style="color:#f92672">();</span>
+        System<span style="color:#f92672">.</span><span style="color:#a6e22e">out</span><span style="color:#f92672">.</span><span style="color:#a6e22e">println</span><span style="color:#f92672">(</span><span style="color:#e6db74">&#34;需要打印的内容是 ---&gt; &#34;</span> <span style="color:#f92672">+</span> <span style="color:#e6db74">&#34;打印一份简历&#34;</span><span style="color:#f92672">);</span>
+        <span style="color:#75715e">// people.goToPrintSyn(callback, &#34;打印一份简历&#34;);
+</span><span style="color:#75715e"></span>        people<span style="color:#f92672">.</span><span style="color:#a6e22e">goToPrintASyn</span><span style="color:#f92672">(</span>printer<span style="color:#f92672">,</span> <span style="color:#e6db74">&#34;打印一份简历&#34;</span><span style="color:#f92672">);</span>
+        System<span style="color:#f92672">.</span><span style="color:#a6e22e">out</span><span style="color:#f92672">.</span><span style="color:#a6e22e">println</span><span style="color:#f92672">(</span><span style="color:#e6db74">&#34;我在等待 打印机 给我反馈&#34;</span><span style="color:#f92672">);</span>
+    <span style="color:#f92672">}</span>
 
-<pre><code class="language-java">public class Printer implements Callback {
-    public void print(Callback callback, String text) {
-        System.out.println(&quot;正在打印 . . . &quot;);
-        try {
-            Thread.currentThread();
-            Thread.sleep(3000);// 毫秒
-        } catch (Exception e) {
-        }
-        callback.printFinished(&quot;打印完成&quot;);
-    }
-
-    @Override
-    public void printFinished(String msg) {
-        System.out.println(&quot;打印机告诉我的消息是 ---&gt; &quot; + msg);
-    }
-
-    public static void main(String[] args) {
-        People people = new People();
-        Printer printer = new Printer();
-        System.out.println(&quot;需要打印的内容是 ---&gt; &quot; + &quot;打印一份简历&quot;);
-        // people.goToPrintSyn(callback, &quot;打印一份简历&quot;);
-        people.goToPrintASyn(printer, &quot;打印一份简历&quot;);
-        System.out.println(&quot;我在等待 打印机 给我反馈&quot;);
-    }
-
-}
-</code></pre>
-
-<h1 id="回调和观察者模式区别">回调和观察者模式区别</h1>
-
-<p><strong>转载地址：<a href="https://zhidao.baidu.com/question/111585686.html">https://zhidao.baidu.com/question/111585686.html</a></strong></p>
-
+<span style="color:#f92672">}</span>
+</code></pre></div><h1 id="回调和观察者模式区别">回调和观察者模式区别</h1>
+<p><strong>转载地址：https://zhidao.baidu.com/question/111585686.html</strong></p>
 <p><strong>接口回调：</strong> 是Java多态的一种体现, 可以把使用某一接口的实现类创建的对象的引用, 赋给该接口声明的接口变量中, 那么该接口变量就可以调用被实现的接口中的方法, 当接口变量调用被类实现的接口中的方法时，就是通知相应的对象调用接口的方法。</p>
-
 <p><strong>观察者模式:</strong>  是将观察者和被观察的对象分离开, 当被观察的对象产生一定变化的时候, 观察者就会根据哪里产生的变化, 产生了变化, 而进行相应的处理.</p>
-
-<p><strong>备注：</strong>大部分观察着模式是用接口回调的方法来实现的.前者是一种体现, 后者是一种用前者实现的模式, 相当于后者调用前者。</p>
+<p>**备注：**大部分观察着模式是用接口回调的方法来实现的.前者是一种体现, 后者是一种用前者实现的模式, 相当于后者调用前者。</p>
 
 
                 
@@ -433,16 +410,11 @@
                     </h4>
                     <ul class="catalog-body"></ul>
                     <nav id="TableOfContents">
-<ul>
-<li><a href="#回调">回调</a>
-<ul>
-<li><a href="#回调的概念">回调的概念</a></li>
-<li><a href="#同步回调">同步回调</a></li>
-<li><a href="#异步回调">异步回调</a></li>
-</ul></li>
-<li><a href="#具体代码">具体代码</a></li>
-<li><a href="#回调和观察者模式区别">回调和观察者模式区别</a></li>
-</ul>
+  <ul>
+    <li><a href="#回调的概念">回调的概念</a></li>
+    <li><a href="#同步回调">同步回调</a></li>
+    <li><a href="#异步回调">异步回调</a></li>
+  </ul>
 </nav>
                     <br>
                     <br>
@@ -467,9 +439,6 @@
                         
                         
                         
-                        <a href="/tags/" title="">
-                            
-                        </a>
                         
                         
                         
@@ -479,101 +448,6 @@
                         
                         
                         
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        <a href="/tags/qt" title="QT">
-                            QT
-                        </a>
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        <a href="/tags/zookeeper" title="Zookeeper">
-                            Zookeeper
-                        </a>
                         
                         
                         
@@ -613,8 +487,10 @@
                         
                         
                         
-                        <a href="/tags/elasticsearch" title="elasticSearch">
-                            elasticSearch
+                        
+                        
+                        <a href="/tags/elasticsearch" title="elasticsearch">
+                            elasticsearch
                         </a>
                         
                         
@@ -625,9 +501,27 @@
                         
                         
                         
-                        <a href="/tags/golang" title="golang">
-                            golang
-                        </a>
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
                         
                         
                         
@@ -665,9 +559,21 @@
                         
                         
                         
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
                         <a href="/tags/jvm" title="jvm">
                             jvm
                         </a>
+                        
+                        
+                        
+                        
                         
                         
                         
@@ -691,9 +597,19 @@
                         
                         
                         
+                        
+                        
+                        
+                        
+                        
+                        
                         <a href="/tags/mongodb" title="mongodb">
                             mongodb
                         </a>
+                        
+                        
+                        
+                        
                         
                         
                         
@@ -704,10 +620,6 @@
                         </a>
                         
                         
-                        
-                        <a href="/tags/mycat" title="mycat">
-                            mycat
-                        </a>
                         
                         
                         
@@ -721,9 +633,17 @@
                         
                         
                         
-                        <a href="/tags/nginx" title="nginx">
-                            nginx
-                        </a>
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
                         
                         
                         
@@ -747,8 +667,22 @@
                         
                         
                         
+                        
+                        
                         <a href="/tags/rocketmq" title="rocketmq">
                             rocketmq
+                        </a>
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        <a href="/tags/security%E6%A1%86%E6%9E%B6%E5%AD%A6%E4%B9%A0" title="security框架学习">
+                            security框架学习
                         </a>
                         
                         
@@ -775,17 +709,11 @@
                         
                         
                         
-                        <a href="/tags/springcloud" title="springCloud">
-                            springCloud
-                        </a>
-                        
-                        
-                        
-                        
-                        
                         <a href="/tags/springboot" title="springboot">
                             springboot
                         </a>
+                        
+                        
                         
                         
                         
@@ -799,6 +727,9 @@
                         
                         
                         
+                        <a href="/tags/springcloud" title="springcloud">
+                            springcloud
+                        </a>
                         
                         
                         
@@ -824,6 +755,33 @@
                         
                         
                         
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        <a href="/tags/zookeeper" title="zookeeper">
+                            zookeeper
+                        </a>
                         
                         
                         
@@ -883,6 +841,8 @@
                         
                         
                         
+                        
+                        
                         <a href="/tags/%E5%88%86%E5%B8%83%E5%BC%8F%E7%B3%BB%E5%88%97" title="分布式系列">
                             分布式系列
                         </a>
@@ -902,6 +862,10 @@
                         
                         
                         
+                        
+                        <a href="/tags/%E5%8D%8F%E8%AE%AE%E6%A0%88" title="协议栈">
+                            协议栈
+                        </a>
                         
                         
                         
@@ -1101,6 +1065,12 @@
                         
                         
                         
+                        
+                        
+                        
+                        
+                        
+                        
                         <a href="/tags/%E7%BD%91%E7%BB%9C%E7%BC%96%E7%A8%8B" title="网络编程">
                             网络编程
                         </a>
@@ -1124,6 +1094,10 @@
                         
                         
                         
+                        
+                        <a href="/tags/%E8%AE%A4%E8%AF%81%E5%92%8C%E6%8E%88%E6%9D%83" title="认证和授权">
+                            认证和授权
+                        </a>
                         
                         
                         
@@ -1294,7 +1268,7 @@
                     
                 </ul>
 		<p class="copyright text-muted">
-                    Copyright &copy;  2020
+                    Copyright &copy;  2021
                     <br>
                     <a href="https://themes.gohugo.io/hugo-theme-cleanwhite">CleanWhite Hugo Theme</a> by <a href="https://zhaohuabing.com">Huabing</a> |
                     <iframe

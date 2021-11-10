@@ -97,15 +97,15 @@
                     </li>
                     
                     <li>
-                        <a href="/categories/english">English</a>
+                        <a href="/categories/english">english</a>
                     </li>
                     
                     <li>
-                        <a href="/categories/life">Life</a>
+                        <a href="/categories/life">life</a>
                     </li>
                     
                     <li>
-                        <a href="/categories/tech">Tech</a>
+                        <a href="/categories/tech">tech</a>
                     </li>
                     
 
@@ -245,322 +245,255 @@
                 
                 
                 
-                
-
-<p>[TOC]</p>
-
-<p><strong>转载地址：<a href="https://www.cnblogs.com/cenyu/p/6289209.html">https://www.cnblogs.com/cenyu/p/6289209.html</a></strong></p>
-
+                <p>[TOC]</p>
+<p><strong>转载地址：https://www.cnblogs.com/cenyu/p/6289209.html</strong></p>
 <h1 id="代理模式">代理模式</h1>
-
 <p>代理(Proxy)是一种设计模式,提供了对目标对象另外的访问方式;即通过代理对象访问目标对象.这样做的好处是:可以在目标对象实现的基础上,增强额外的功能操作,即扩展目标对象的功能.</p>
-
 <p>这里使用到编程中的一个思想:<strong>不要随意去修改别人已经写好的代码或者方法,如果需改修改,可以通过代理的方式来扩展该方法</strong>。</p>
-
 <p>举个例子来说明代理的作用:假设我们想邀请一位明星,那么并不是直接连接明星,而是联系明星的经纪人,来达到同样的目的.明星就是一个目标对象,他只要负责活动中的节目,而其他琐碎的事情就交给他的代理人(经纪人)来解决.这就是代理思想在现实中的一个例子。</p>
-
 <p><strong>代理模式的关键点是:代理对象与目标对象.代理对象是对目标对象的扩展,并会调用目标对象</strong></p>
-
 <h1 id="静态代理">静态代理</h1>
-
 <p>静态代理在使用时,需要定义接口或者父类,被代理对象与代理对象一起实现相同的接口或者是继承相同父类.</p>
-
 <h2 id="代码示例">代码示例</h2>
-
 <p>接口:IUserDao.java</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-java" data-lang="java"><span style="color:#75715e">/**
+</span><span style="color:#75715e"> * 接口
+</span><span style="color:#75715e"> */</span>
+<span style="color:#66d9ef">public</span> <span style="color:#66d9ef">interface</span> <span style="color:#a6e22e">IUserDao</span> <span style="color:#f92672">{</span>
 
-<pre><code class="language-java">/**
- * 接口
- */
-public interface IUserDao {
+    <span style="color:#66d9ef">void</span> <span style="color:#a6e22e">save</span><span style="color:#f92672">();</span>
+<span style="color:#f92672">}</span>
+</code></pre></div><p>目标对象:UserDao.java</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-java" data-lang="java"><span style="color:#75715e">/**
+</span><span style="color:#75715e"> * 接口实现
+</span><span style="color:#75715e"> * 目标对象
+</span><span style="color:#75715e"> */</span>
+<span style="color:#66d9ef">public</span> <span style="color:#66d9ef">class</span> <span style="color:#a6e22e">UserDao</span> <span style="color:#66d9ef">implements</span> IUserDao <span style="color:#f92672">{</span>
+    <span style="color:#66d9ef">public</span> <span style="color:#66d9ef">void</span> <span style="color:#a6e22e">save</span><span style="color:#f92672">()</span> <span style="color:#f92672">{</span>
+        System<span style="color:#f92672">.</span><span style="color:#a6e22e">out</span><span style="color:#f92672">.</span><span style="color:#a6e22e">println</span><span style="color:#f92672">(</span><span style="color:#e6db74">&#34;----已经保存数据!----&#34;</span><span style="color:#f92672">);</span>
+    <span style="color:#f92672">}</span>
+<span style="color:#f92672">}</span>
+</code></pre></div><p>代理对象:UserDaoProxy.java</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-java" data-lang="java"><span style="color:#75715e">/**
+</span><span style="color:#75715e"> * 代理对象,静态代理
+</span><span style="color:#75715e"> */</span>
+<span style="color:#66d9ef">public</span> <span style="color:#66d9ef">class</span> <span style="color:#a6e22e">UserDaoProxy</span> <span style="color:#66d9ef">implements</span> IUserDao<span style="color:#f92672">{</span>
+    <span style="color:#75715e">//接收保存目标对象
+</span><span style="color:#75715e"></span>    <span style="color:#66d9ef">private</span> IUserDao target<span style="color:#f92672">;</span>
+    <span style="color:#66d9ef">public</span> <span style="color:#a6e22e">UserDaoProxy</span><span style="color:#f92672">(</span>IUserDao target<span style="color:#f92672">){</span>
+        <span style="color:#66d9ef">this</span><span style="color:#f92672">.</span><span style="color:#a6e22e">target</span><span style="color:#f92672">=</span>target<span style="color:#f92672">;</span>
+    <span style="color:#f92672">}</span>
 
-    void save();
-}
-</code></pre>
+    <span style="color:#66d9ef">public</span> <span style="color:#66d9ef">void</span> <span style="color:#a6e22e">save</span><span style="color:#f92672">()</span> <span style="color:#f92672">{</span>
+        System<span style="color:#f92672">.</span><span style="color:#a6e22e">out</span><span style="color:#f92672">.</span><span style="color:#a6e22e">println</span><span style="color:#f92672">(</span><span style="color:#e6db74">&#34;开始事务...&#34;</span><span style="color:#f92672">);</span>
+        target<span style="color:#f92672">.</span><span style="color:#a6e22e">save</span><span style="color:#f92672">();</span><span style="color:#75715e">//执行目标对象的方法
+</span><span style="color:#75715e"></span>        System<span style="color:#f92672">.</span><span style="color:#a6e22e">out</span><span style="color:#f92672">.</span><span style="color:#a6e22e">println</span><span style="color:#f92672">(</span><span style="color:#e6db74">&#34;提交事务...&#34;</span><span style="color:#f92672">);</span>
+    <span style="color:#f92672">}</span>
+<span style="color:#f92672">}</span>
+</code></pre></div><p>测试类:App.java</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-java" data-lang="java"><span style="color:#75715e">/**
+</span><span style="color:#75715e"> * 测试类
+</span><span style="color:#75715e"> */</span>
+<span style="color:#66d9ef">public</span> <span style="color:#66d9ef">class</span> <span style="color:#a6e22e">App</span> <span style="color:#f92672">{</span>
+    <span style="color:#66d9ef">public</span> <span style="color:#66d9ef">static</span> <span style="color:#66d9ef">void</span> <span style="color:#a6e22e">main</span><span style="color:#f92672">(</span>String<span style="color:#f92672">[]</span> args<span style="color:#f92672">)</span> <span style="color:#f92672">{</span>
+        <span style="color:#75715e">//目标对象
+</span><span style="color:#75715e"></span>        UserDao target <span style="color:#f92672">=</span> <span style="color:#66d9ef">new</span> UserDao<span style="color:#f92672">();</span>
 
-<p>目标对象:UserDao.java</p>
+        <span style="color:#75715e">//代理对象,把目标对象传给代理对象,建立代理关系
+</span><span style="color:#75715e"></span>        UserDaoProxy proxy <span style="color:#f92672">=</span> <span style="color:#66d9ef">new</span> UserDaoProxy<span style="color:#f92672">(</span>target<span style="color:#f92672">);</span>
 
-<pre><code class="language-java">/**
- * 接口实现
- * 目标对象
- */
-public class UserDao implements IUserDao {
-    public void save() {
-        System.out.println(&quot;----已经保存数据!----&quot;);
-    }
-}
-</code></pre>
-
-<p>代理对象:UserDaoProxy.java</p>
-
-<pre><code class="language-java">/**
- * 代理对象,静态代理
- */
-public class UserDaoProxy implements IUserDao{
-    //接收保存目标对象
-    private IUserDao target;
-    public UserDaoProxy(IUserDao target){
-        this.target=target;
-    }
-
-    public void save() {
-        System.out.println(&quot;开始事务...&quot;);
-        target.save();//执行目标对象的方法
-        System.out.println(&quot;提交事务...&quot;);
-    }
-}
-</code></pre>
-
-<p>测试类:App.java</p>
-
-<pre><code class="language-java">/**
- * 测试类
- */
-public class App {
-    public static void main(String[] args) {
-        //目标对象
-        UserDao target = new UserDao();
-
-        //代理对象,把目标对象传给代理对象,建立代理关系
-        UserDaoProxy proxy = new UserDaoProxy(target);
-
-        proxy.save();//执行的是代理的方法
-    }
-}
-</code></pre>
-
-<h2 id="总结">总结</h2>
-
+        proxy<span style="color:#f92672">.</span><span style="color:#a6e22e">save</span><span style="color:#f92672">();</span><span style="color:#75715e">//执行的是代理的方法
+</span><span style="color:#75715e"></span>    <span style="color:#f92672">}</span>
+<span style="color:#f92672">}</span>
+</code></pre></div><h2 id="总结">总结</h2>
 <p>1.可以做到在不修改目标对象的功能前提下,对目标功能扩展.
 2.缺点:</p>
-
 <ul>
 <li>因为代理对象需要与目标对象实现一样的接口,所以会有很多代理类,类太多.同时,一旦接口增加方法,目标对象与代理对象都要维护.</li>
 </ul>
-
 <h1 id="动态代理">动态代理</h1>
-
 <h2 id="动态代理有以下特点">动态代理有以下特点</h2>
-
 <p>1.代理对象,不需要实现接口
 2.代理对象的生成,是利用JDK的API,动态的在内存中构建代理对象(需要我们指定创建代理对象/目标对象实现的接口的类型)
 3.动态代理也叫做:JDK代理,接口代理</p>
-
 <h2 id="jdk中生成代理对象的api">JDK中生成代理对象的API</h2>
-
 <p>JDK实现代理只需要使用newProxyInstance方法,但是该方法需要接收三个参数,完整的写法是:</p>
-
-<pre><code class="language-java">static Object newProxyInstance(ClassLoader loader, Class&lt;?&gt;[] interfaces,InvocationHandler h )
-</code></pre>
-
-<p>注意该方法是在Proxy类中是静态方法,且接收的三个参数依次为:</p>
-
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-java" data-lang="java"><span style="color:#66d9ef">static</span> Object <span style="color:#a6e22e">newProxyInstance</span><span style="color:#f92672">(</span>ClassLoader loader<span style="color:#f92672">,</span> Class<span style="color:#f92672">&lt;?&gt;[]</span> interfaces<span style="color:#f92672">,</span>InvocationHandler h <span style="color:#f92672">)</span>
+</code></pre></div><p>注意该方法是在Proxy类中是静态方法,且接收的三个参数依次为:</p>
 <ul>
 <li><code>ClassLoader loader,</code>:指定当前目标对象使用类加载器,获取加载器的方法是固定的</li>
 <li><code>Class&lt;?&gt;[] interfaces,</code>:目标对象实现的接口的类型,使用泛型方式确认类型</li>
 <li><code>InvocationHandler h</code>:事件处理,执行目标对象的方法时,会触发事件处理器的方法,会把当前执行目标对象的方法作为参数传入</li>
 </ul>
-
 <h2 id="代码示例-1">代码示例</h2>
-
 <p>接口:IUserDao.java</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-java" data-lang="java"><span style="color:#66d9ef">public</span> <span style="color:#66d9ef">interface</span> <span style="color:#a6e22e">IUserDao</span> <span style="color:#f92672">{</span>
+    <span style="color:#66d9ef">void</span> <span style="color:#a6e22e">save</span><span style="color:#f92672">();</span>
+    <span style="color:#66d9ef">void</span> <span style="color:#a6e22e">update</span><span style="color:#f92672">();</span>
+<span style="color:#f92672">}</span>
+</code></pre></div><p>目标对象:UserDao.java</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-java" data-lang="java"><span style="color:#66d9ef">public</span> <span style="color:#66d9ef">class</span> <span style="color:#a6e22e">UserDao</span> <span style="color:#66d9ef">implements</span> IUserDao <span style="color:#f92672">{</span>
 
-<pre><code class="language-java">public interface IUserDao {
-    void save();
-    void update();
-}
-</code></pre>
-
-<p>目标对象:UserDao.java</p>
-
-<pre><code class="language-java">public class UserDao implements IUserDao {
-
-    @Override
-    public void save() {
-        System.out.println(&quot;----已经保存数据!----&quot;);
-    }
+    <span style="color:#a6e22e">@Override</span>
+    <span style="color:#66d9ef">public</span> <span style="color:#66d9ef">void</span> <span style="color:#a6e22e">save</span><span style="color:#f92672">()</span> <span style="color:#f92672">{</span>
+        System<span style="color:#f92672">.</span><span style="color:#a6e22e">out</span><span style="color:#f92672">.</span><span style="color:#a6e22e">println</span><span style="color:#f92672">(</span><span style="color:#e6db74">&#34;----已经保存数据!----&#34;</span><span style="color:#f92672">);</span>
+    <span style="color:#f92672">}</span>
     
-    @Override
-    public void update() {
-        System.out.println(&quot;-----已经修改数据!-----&quot;);
-    }
+    <span style="color:#a6e22e">@Override</span>
+    <span style="color:#66d9ef">public</span> <span style="color:#66d9ef">void</span> <span style="color:#a6e22e">update</span><span style="color:#f92672">()</span> <span style="color:#f92672">{</span>
+        System<span style="color:#f92672">.</span><span style="color:#a6e22e">out</span><span style="color:#f92672">.</span><span style="color:#a6e22e">println</span><span style="color:#f92672">(</span><span style="color:#e6db74">&#34;-----已经修改数据!-----&#34;</span><span style="color:#f92672">);</span>
+    <span style="color:#f92672">}</span>
 
-}
-</code></pre>
+<span style="color:#f92672">}</span>
+</code></pre></div><p>代理工厂类</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-java" data-lang="java"><span style="color:#66d9ef">public</span> <span style="color:#66d9ef">class</span> <span style="color:#a6e22e">ProxyFactory</span> <span style="color:#f92672">{</span>
 
-<p>代理工厂类</p>
+    <span style="color:#75715e">// 维护一个目标对象
+</span><span style="color:#75715e"></span>    <span style="color:#66d9ef">private</span> Object target<span style="color:#f92672">;</span>
 
-<pre><code class="language-java">public class ProxyFactory {
+    <span style="color:#66d9ef">public</span> <span style="color:#a6e22e">ProxyFactory</span><span style="color:#f92672">(</span>Object target<span style="color:#f92672">)</span> <span style="color:#f92672">{</span>
+        <span style="color:#66d9ef">this</span><span style="color:#f92672">.</span><span style="color:#a6e22e">target</span> <span style="color:#f92672">=</span> target<span style="color:#f92672">;</span>
+    <span style="color:#f92672">}</span>
 
-    // 维护一个目标对象
-    private Object target;
-
-    public ProxyFactory(Object target) {
-        this.target = target;
-    }
-
-    // 给目标对象生成代理对象
-    public Object getProxyInstance() {
-        return Proxy.newProxyInstance(target.getClass().getClassLoader(), target.getClass().getInterfaces(),
-                new InvocationHandler() { 
-                    @Override
-                    public Object invoke(Object proxy, Method method, Object[] args) throws Throwable {
-                        System.out.println(&quot;开始事务2&quot;);
-                        // 执行目标对象方法
-                        Object returnValue = method.invoke(target, args);
-                        System.out.println(&quot;提交事务2&quot;);
+    <span style="color:#75715e">// 给目标对象生成代理对象
+</span><span style="color:#75715e"></span>    <span style="color:#66d9ef">public</span> Object <span style="color:#a6e22e">getProxyInstance</span><span style="color:#f92672">()</span> <span style="color:#f92672">{</span>
+        <span style="color:#66d9ef">return</span> Proxy<span style="color:#f92672">.</span><span style="color:#a6e22e">newProxyInstance</span><span style="color:#f92672">(</span>target<span style="color:#f92672">.</span><span style="color:#a6e22e">getClass</span><span style="color:#f92672">().</span><span style="color:#a6e22e">getClassLoader</span><span style="color:#f92672">(),</span> target<span style="color:#f92672">.</span><span style="color:#a6e22e">getClass</span><span style="color:#f92672">().</span><span style="color:#a6e22e">getInterfaces</span><span style="color:#f92672">(),</span>
+                <span style="color:#66d9ef">new</span> InvocationHandler<span style="color:#f92672">()</span> <span style="color:#f92672">{</span> 
+                    <span style="color:#a6e22e">@Override</span>
+                    <span style="color:#66d9ef">public</span> Object <span style="color:#a6e22e">invoke</span><span style="color:#f92672">(</span>Object proxy<span style="color:#f92672">,</span> Method method<span style="color:#f92672">,</span> Object<span style="color:#f92672">[]</span> args<span style="color:#f92672">)</span> <span style="color:#66d9ef">throws</span> Throwable <span style="color:#f92672">{</span>
+                        System<span style="color:#f92672">.</span><span style="color:#a6e22e">out</span><span style="color:#f92672">.</span><span style="color:#a6e22e">println</span><span style="color:#f92672">(</span><span style="color:#e6db74">&#34;开始事务2&#34;</span><span style="color:#f92672">);</span>
+                        <span style="color:#75715e">// 执行目标对象方法
+</span><span style="color:#75715e"></span>                        Object returnValue <span style="color:#f92672">=</span> method<span style="color:#f92672">.</span><span style="color:#a6e22e">invoke</span><span style="color:#f92672">(</span>target<span style="color:#f92672">,</span> args<span style="color:#f92672">);</span>
+                        System<span style="color:#f92672">.</span><span style="color:#a6e22e">out</span><span style="color:#f92672">.</span><span style="color:#a6e22e">println</span><span style="color:#f92672">(</span><span style="color:#e6db74">&#34;提交事务2&#34;</span><span style="color:#f92672">);</span>
                         
-                        System.out.println(&quot;method:-----&gt;&quot;+method);
-                        return returnValue;
-                    }
-                });
-    }
+                        System<span style="color:#f92672">.</span><span style="color:#a6e22e">out</span><span style="color:#f92672">.</span><span style="color:#a6e22e">println</span><span style="color:#f92672">(</span><span style="color:#e6db74">&#34;method:-----&gt;&#34;</span><span style="color:#f92672">+</span>method<span style="color:#f92672">);</span>
+                        <span style="color:#66d9ef">return</span> returnValue<span style="color:#f92672">;</span>
+                    <span style="color:#f92672">}</span>
+                <span style="color:#f92672">});</span>
+    <span style="color:#f92672">}</span>
 
-</code></pre>
-
-<p>测试代码</p>
-
-<pre><code class="language-java">  public static void main(String[] args) {
-        IUserDao target = new UserDao();
-        IUserDao proxy = (IUserDao) new ProxyFactory(target).getProxyInstance();
-        System.out.println(proxy.getClass());
-        proxy.save();
-        proxy.update();
-    }
-运行结果：
-class com.sun.proxy.$Proxy0
+</code></pre></div><p>测试代码</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-java" data-lang="java">  <span style="color:#66d9ef">public</span> <span style="color:#66d9ef">static</span> <span style="color:#66d9ef">void</span> <span style="color:#a6e22e">main</span><span style="color:#f92672">(</span>String<span style="color:#f92672">[]</span> args<span style="color:#f92672">)</span> <span style="color:#f92672">{</span>
+        IUserDao target <span style="color:#f92672">=</span> <span style="color:#66d9ef">new</span> UserDao<span style="color:#f92672">();</span>
+        IUserDao proxy <span style="color:#f92672">=</span> <span style="color:#f92672">(</span>IUserDao<span style="color:#f92672">)</span> <span style="color:#66d9ef">new</span> ProxyFactory<span style="color:#f92672">(</span>target<span style="color:#f92672">).</span><span style="color:#a6e22e">getProxyInstance</span><span style="color:#f92672">();</span>
+        System<span style="color:#f92672">.</span><span style="color:#a6e22e">out</span><span style="color:#f92672">.</span><span style="color:#a6e22e">println</span><span style="color:#f92672">(</span>proxy<span style="color:#f92672">.</span><span style="color:#a6e22e">getClass</span><span style="color:#f92672">());</span>
+        proxy<span style="color:#f92672">.</span><span style="color:#a6e22e">save</span><span style="color:#f92672">();</span>
+        proxy<span style="color:#f92672">.</span><span style="color:#a6e22e">update</span><span style="color:#f92672">();</span>
+    <span style="color:#f92672">}</span>
+运行结果<span style="color:#960050;background-color:#1e0010">：</span>
+<span style="color:#66d9ef">class</span> <span style="color:#a6e22e">com</span><span style="color:#f92672">.</span><span style="color:#a6e22e">sun</span><span style="color:#f92672">.</span><span style="color:#a6e22e">proxy</span><span style="color:#f92672">.</span><span style="color:#a6e22e">$Proxy0</span>
 开始事务2
-----已经保存数据!----
+<span style="color:#f92672">----</span>已经保存数据<span style="color:#f92672">!----</span>
 提交事务2
-method:-----&gt;public abstract void com.example.basedemo.proxydemo.IUserDao.save()
+method:<span style="color:#f92672">-----&gt;</span><span style="color:#66d9ef">public</span> <span style="color:#66d9ef">abstract</span> <span style="color:#66d9ef">void</span> com<span style="color:#f92672">.</span><span style="color:#a6e22e">example</span><span style="color:#f92672">.</span><span style="color:#a6e22e">basedemo</span><span style="color:#f92672">.</span><span style="color:#a6e22e">proxydemo</span><span style="color:#f92672">.</span><span style="color:#a6e22e">IUserDao</span><span style="color:#f92672">.</span><span style="color:#a6e22e">save</span><span style="color:#f92672">()</span>
 开始事务2
------已经修改数据!-----
+<span style="color:#f92672">-----</span>已经修改数据<span style="color:#f92672">!-----</span>
 提交事务2
-method:-----&gt;public abstract void com.example.basedemo.proxydemo.IUserDao.update()
-</code></pre>
-
-<p>可以看到我在IUserDao接口中，新增了一个方法， 然后，在代理类的时候直接使用， 不需要像静态代理那样还要去实现这个新的接口。</p>
-
+method:<span style="color:#f92672">-----&gt;</span><span style="color:#66d9ef">public</span> <span style="color:#66d9ef">abstract</span> <span style="color:#66d9ef">void</span> com<span style="color:#f92672">.</span><span style="color:#a6e22e">example</span><span style="color:#f92672">.</span><span style="color:#a6e22e">basedemo</span><span style="color:#f92672">.</span><span style="color:#a6e22e">proxydemo</span><span style="color:#f92672">.</span><span style="color:#a6e22e">IUserDao</span><span style="color:#f92672">.</span><span style="color:#a6e22e">update</span><span style="color:#f92672">()</span>
+</code></pre></div><p>可以看到我在IUserDao接口中，新增了一个方法， 然后，在代理类的时候直接使用， 不需要像静态代理那样还要去实现这个新的接口。</p>
 <h2 id="总结-1">总结</h2>
-
-<p>代理对象不需要实现接口,<strong>但是目标对象一定要实现接口,</strong>否则不能用动态代理。</p>
-
+<p>代理对象不需要实现接口,**但是目标对象一定要实现接口,**否则不能用动态代理。</p>
 <h1 id="cglib代理">Cglib代理</h1>
-
 <p>上面的静态代理和动态代理模式都是要求目标对象是实现一个接口的目标对象,但是有时候目标对象只是一个单独的对象,并没有实现任何的接口,这个时候就可以使用以目标对象子类的方式类实现代理,这种方法就叫做:Cglib代理</p>
-
 <p>Cglib代理,也叫作子类代理,它是在内存中构建一个子类对象从而实现对目标对象功能的扩展.</p>
-
 <ul>
 <li>JDK的动态代理有一个限制,就是使用动态代理的对象必须实现一个或多个接口,如果想代理没有实现接口的类,就可以使用Cglib实现.</li>
 <li>Cglib是一个强大的高性能的代码生成包,它可以在运行期扩展java类与实现java接口.它广泛的被许多AOP的框架使用,例如Spring AOP和synaop,为他们提供方法的interception(拦截)</li>
 <li></li>
 <li>Cglib包的底层是通过使用一个小而块的字节码处理框架ASM来转换字节码并生成新的类.不鼓励直接使用ASM,因为它要求你必须对JVM内部结构包括class文件的格式和指令集都很熟悉.</li>
 </ul>
-
 <h2 id="cglib子类代理实现方法">Cglib子类代理实现方法</h2>
-
 <ol>
-<li><p>需要引入cglib的jar文件,但是Spring的核心包中已经包括了Cglib功能,所以直接引入<code>pring-core-3.2.5.jar</code>即可.</p></li>
-
-<li><p>引入功能包后,就可以在内存中动态构建子类</p></li>
-
-<li><p>代理的类不能为final,否则报错</p></li>
-
-<li><p><strong>目标对象的方法如果为final/static,那么就不会被拦截,即不会执行目标对象额外的业务方法.</strong></p></li>
-</ol>
-
-<h2 id="代码示例-2">代码示例</h2>
-
-<p>目标对象</p>
-
-<pre><code class="language-java">public class UserService {
-    
-    public void getMsg() {
-        System.out.println(&quot;消息处理已经完成&quot;);
-    }
-    
-    public static void showMsg() {
-        System.out.println(&quot;消息展示&quot;);
-    }
-
-}
-</code></pre>
-
-<p>代理工厂</p>
-
-<pre><code class="language-java">public class CglibProxyFactory implements MethodInterceptor {
-
-     //维护目标对象
-     private Object target;
-
-     public CglibProxyFactory(Object target) {
-         this.target = target;
-     }
-
-     //给目标对象创建一个代理对象
-    public Object getProxyInstance(){
-        //1.工具类
-        Enhancer en = new Enhancer();
-        //2.设置父类
-        en.setSuperclass(target.getClass());
-        //3.设置回调函数
-        en.setCallback(this);
-        //4.创建子类(代理对象)
-        return en.create();
-
-    }
-
-    @Override
-    public Object intercept(Object arg0, Method method, Object[] args, MethodProxy arg3) throws Throwable {
-        System.out.println(&quot;开始事务...&quot;);
-
-        //执行目标对象的方法
-        Object returnValue = method.invoke(target, args);
-      
-        // 这个也可以执行方法的业务代码
-        Object returnValue2 = arg3.invokeSuper(arg0, args);
-
-        System.out.println(&quot;提交事务...&quot;);
-
-        return returnValue;
-    }
-</code></pre>
-
-<p>测试代码</p>
-
-<pre><code class="language-java">  public static void main(String[] args) {
-        //目标对象
-        UserService target = new UserService();
-
-        //代理对象
-        UserService proxy = (UserService)new CglibProxyFactory(target).getProxyInstance();
-
-        //执行代理对象的方法
-        proxy.getMsg();
-
-        System.out.println(&quot;-----------------&quot;);
-
-        proxy.showMsg();
-    }
-运行结果：
-
-开始事务...
-消息处理已经完成
-消息处理已经完成
-提交事务...
------------------
-消息展示
-</code></pre>
-
-<h2 id="总结-2">总结</h2>
-
+<li>
+<p>需要引入cglib的jar文件,但是Spring的核心包中已经包括了Cglib功能,所以直接引入<code>pring-core-3.2.5.jar</code>即可.</p>
+</li>
+<li>
+<p>引入功能包后,就可以在内存中动态构建子类</p>
+</li>
+<li>
+<p>代理的类不能为final,否则报错</p>
+</li>
+<li>
 <p><strong>目标对象的方法如果为final/static,那么就不会被拦截,即不会执行目标对象额外的业务方法.</strong></p>
+</li>
+</ol>
+<h2 id="代码示例-2">代码示例</h2>
+<p>目标对象</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-java" data-lang="java"><span style="color:#66d9ef">public</span> <span style="color:#66d9ef">class</span> <span style="color:#a6e22e">UserService</span> <span style="color:#f92672">{</span>
+    
+    <span style="color:#66d9ef">public</span> <span style="color:#66d9ef">void</span> <span style="color:#a6e22e">getMsg</span><span style="color:#f92672">()</span> <span style="color:#f92672">{</span>
+        System<span style="color:#f92672">.</span><span style="color:#a6e22e">out</span><span style="color:#f92672">.</span><span style="color:#a6e22e">println</span><span style="color:#f92672">(</span><span style="color:#e6db74">&#34;消息处理已经完成&#34;</span><span style="color:#f92672">);</span>
+    <span style="color:#f92672">}</span>
+    
+    <span style="color:#66d9ef">public</span> <span style="color:#66d9ef">static</span> <span style="color:#66d9ef">void</span> <span style="color:#a6e22e">showMsg</span><span style="color:#f92672">()</span> <span style="color:#f92672">{</span>
+        System<span style="color:#f92672">.</span><span style="color:#a6e22e">out</span><span style="color:#f92672">.</span><span style="color:#a6e22e">println</span><span style="color:#f92672">(</span><span style="color:#e6db74">&#34;消息展示&#34;</span><span style="color:#f92672">);</span>
+    <span style="color:#f92672">}</span>
 
+<span style="color:#f92672">}</span>
+</code></pre></div><p>代理工厂</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-java" data-lang="java"><span style="color:#66d9ef">public</span> <span style="color:#66d9ef">class</span> <span style="color:#a6e22e">CglibProxyFactory</span> <span style="color:#66d9ef">implements</span> MethodInterceptor <span style="color:#f92672">{</span>
+
+     <span style="color:#75715e">//维护目标对象
+</span><span style="color:#75715e"></span>     <span style="color:#66d9ef">private</span> Object target<span style="color:#f92672">;</span>
+
+     <span style="color:#66d9ef">public</span> <span style="color:#a6e22e">CglibProxyFactory</span><span style="color:#f92672">(</span>Object target<span style="color:#f92672">)</span> <span style="color:#f92672">{</span>
+         <span style="color:#66d9ef">this</span><span style="color:#f92672">.</span><span style="color:#a6e22e">target</span> <span style="color:#f92672">=</span> target<span style="color:#f92672">;</span>
+     <span style="color:#f92672">}</span>
+
+     <span style="color:#75715e">//给目标对象创建一个代理对象
+</span><span style="color:#75715e"></span>    <span style="color:#66d9ef">public</span> Object <span style="color:#a6e22e">getProxyInstance</span><span style="color:#f92672">(){</span>
+        <span style="color:#75715e">//1.工具类
+</span><span style="color:#75715e"></span>        Enhancer en <span style="color:#f92672">=</span> <span style="color:#66d9ef">new</span> Enhancer<span style="color:#f92672">();</span>
+        <span style="color:#75715e">//2.设置父类
+</span><span style="color:#75715e"></span>        en<span style="color:#f92672">.</span><span style="color:#a6e22e">setSuperclass</span><span style="color:#f92672">(</span>target<span style="color:#f92672">.</span><span style="color:#a6e22e">getClass</span><span style="color:#f92672">());</span>
+        <span style="color:#75715e">//3.设置回调函数
+</span><span style="color:#75715e"></span>        en<span style="color:#f92672">.</span><span style="color:#a6e22e">setCallback</span><span style="color:#f92672">(</span><span style="color:#66d9ef">this</span><span style="color:#f92672">);</span>
+        <span style="color:#75715e">//4.创建子类(代理对象)
+</span><span style="color:#75715e"></span>        <span style="color:#66d9ef">return</span> en<span style="color:#f92672">.</span><span style="color:#a6e22e">create</span><span style="color:#f92672">();</span>
+
+    <span style="color:#f92672">}</span>
+
+    <span style="color:#a6e22e">@Override</span>
+    <span style="color:#66d9ef">public</span> Object <span style="color:#a6e22e">intercept</span><span style="color:#f92672">(</span>Object arg0<span style="color:#f92672">,</span> Method method<span style="color:#f92672">,</span> Object<span style="color:#f92672">[]</span> args<span style="color:#f92672">,</span> MethodProxy arg3<span style="color:#f92672">)</span> <span style="color:#66d9ef">throws</span> Throwable <span style="color:#f92672">{</span>
+        System<span style="color:#f92672">.</span><span style="color:#a6e22e">out</span><span style="color:#f92672">.</span><span style="color:#a6e22e">println</span><span style="color:#f92672">(</span><span style="color:#e6db74">&#34;开始事务...&#34;</span><span style="color:#f92672">);</span>
+
+        <span style="color:#75715e">//执行目标对象的方法
+</span><span style="color:#75715e"></span>        Object returnValue <span style="color:#f92672">=</span> method<span style="color:#f92672">.</span><span style="color:#a6e22e">invoke</span><span style="color:#f92672">(</span>target<span style="color:#f92672">,</span> args<span style="color:#f92672">);</span>
+      
+        <span style="color:#75715e">// 这个也可以执行方法的业务代码
+</span><span style="color:#75715e"></span>        Object returnValue2 <span style="color:#f92672">=</span> arg3<span style="color:#f92672">.</span><span style="color:#a6e22e">invokeSuper</span><span style="color:#f92672">(</span>arg0<span style="color:#f92672">,</span> args<span style="color:#f92672">);</span>
+
+        System<span style="color:#f92672">.</span><span style="color:#a6e22e">out</span><span style="color:#f92672">.</span><span style="color:#a6e22e">println</span><span style="color:#f92672">(</span><span style="color:#e6db74">&#34;提交事务...&#34;</span><span style="color:#f92672">);</span>
+
+        <span style="color:#66d9ef">return</span> returnValue<span style="color:#f92672">;</span>
+    <span style="color:#f92672">}</span>
+</code></pre></div><p>测试代码</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-java" data-lang="java">  <span style="color:#66d9ef">public</span> <span style="color:#66d9ef">static</span> <span style="color:#66d9ef">void</span> <span style="color:#a6e22e">main</span><span style="color:#f92672">(</span>String<span style="color:#f92672">[]</span> args<span style="color:#f92672">)</span> <span style="color:#f92672">{</span>
+        <span style="color:#75715e">//目标对象
+</span><span style="color:#75715e"></span>        UserService target <span style="color:#f92672">=</span> <span style="color:#66d9ef">new</span> UserService<span style="color:#f92672">();</span>
+
+        <span style="color:#75715e">//代理对象
+</span><span style="color:#75715e"></span>        UserService proxy <span style="color:#f92672">=</span> <span style="color:#f92672">(</span>UserService<span style="color:#f92672">)</span><span style="color:#66d9ef">new</span> CglibProxyFactory<span style="color:#f92672">(</span>target<span style="color:#f92672">).</span><span style="color:#a6e22e">getProxyInstance</span><span style="color:#f92672">();</span>
+
+        <span style="color:#75715e">//执行代理对象的方法
+</span><span style="color:#75715e"></span>        proxy<span style="color:#f92672">.</span><span style="color:#a6e22e">getMsg</span><span style="color:#f92672">();</span>
+
+        System<span style="color:#f92672">.</span><span style="color:#a6e22e">out</span><span style="color:#f92672">.</span><span style="color:#a6e22e">println</span><span style="color:#f92672">(</span><span style="color:#e6db74">&#34;-----------------&#34;</span><span style="color:#f92672">);</span>
+
+        proxy<span style="color:#f92672">.</span><span style="color:#a6e22e">showMsg</span><span style="color:#f92672">();</span>
+    <span style="color:#f92672">}</span>
+运行结果<span style="color:#960050;background-color:#1e0010">：</span>
+
+开始事务<span style="color:#f92672">...</span>
+消息处理已经完成
+消息处理已经完成
+提交事务<span style="color:#f92672">...</span>
+<span style="color:#f92672">-----------------</span>
+消息展示
+</code></pre></div><h2 id="总结-2">总结</h2>
+<p><strong>目标对象的方法如果为final/static,那么就不会被拦截,即不会执行目标对象额外的业务方法.</strong></p>
 <p>在Spring的AOP编程中:</p>
-
 <p>如果加入容器的目标对象有实现接口,用JDK代理。</p>
-
 <p>如果目标对象没有实现接口,用Cglib代理。</p>
 
 
@@ -669,27 +602,23 @@ method:-----&gt;public abstract void com.example.basedemo.proxydemo.IUserDao.upd
                     </h4>
                     <ul class="catalog-body"></ul>
                     <nav id="TableOfContents">
-<ul>
-<li><a href="#代理模式">代理模式</a></li>
-<li><a href="#静态代理">静态代理</a>
-<ul>
-<li><a href="#代码示例">代码示例</a></li>
-<li><a href="#总结">总结</a></li>
-</ul></li>
-<li><a href="#动态代理">动态代理</a>
-<ul>
-<li><a href="#动态代理有以下特点">动态代理有以下特点</a></li>
-<li><a href="#jdk中生成代理对象的api">JDK中生成代理对象的API</a></li>
-<li><a href="#代码示例-1">代码示例</a></li>
-<li><a href="#总结-1">总结</a></li>
-</ul></li>
-<li><a href="#cglib代理">Cglib代理</a>
-<ul>
-<li><a href="#cglib子类代理实现方法">Cglib子类代理实现方法</a></li>
-<li><a href="#代码示例-2">代码示例</a></li>
-<li><a href="#总结-2">总结</a></li>
-</ul></li>
-</ul>
+  <ul>
+    <li><a href="#代码示例">代码示例</a></li>
+    <li><a href="#总结">总结</a></li>
+  </ul>
+
+  <ul>
+    <li><a href="#动态代理有以下特点">动态代理有以下特点</a></li>
+    <li><a href="#jdk中生成代理对象的api">JDK中生成代理对象的API</a></li>
+    <li><a href="#代码示例-1">代码示例</a></li>
+    <li><a href="#总结-1">总结</a></li>
+  </ul>
+
+  <ul>
+    <li><a href="#cglib子类代理实现方法">Cglib子类代理实现方法</a></li>
+    <li><a href="#代码示例-2">代码示例</a></li>
+    <li><a href="#总结-2">总结</a></li>
+  </ul>
 </nav>
                     <br>
                     <br>
@@ -714,9 +643,6 @@ method:-----&gt;public abstract void com.example.basedemo.proxydemo.IUserDao.upd
                         
                         
                         
-                        <a href="/tags/" title="">
-                            
-                        </a>
                         
                         
                         
@@ -726,101 +652,6 @@ method:-----&gt;public abstract void com.example.basedemo.proxydemo.IUserDao.upd
                         
                         
                         
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        <a href="/tags/qt" title="QT">
-                            QT
-                        </a>
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        <a href="/tags/zookeeper" title="Zookeeper">
-                            Zookeeper
-                        </a>
                         
                         
                         
@@ -860,8 +691,10 @@ method:-----&gt;public abstract void com.example.basedemo.proxydemo.IUserDao.upd
                         
                         
                         
-                        <a href="/tags/elasticsearch" title="elasticSearch">
-                            elasticSearch
+                        
+                        
+                        <a href="/tags/elasticsearch" title="elasticsearch">
+                            elasticsearch
                         </a>
                         
                         
@@ -872,9 +705,27 @@ method:-----&gt;public abstract void com.example.basedemo.proxydemo.IUserDao.upd
                         
                         
                         
-                        <a href="/tags/golang" title="golang">
-                            golang
-                        </a>
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
                         
                         
                         
@@ -912,9 +763,21 @@ method:-----&gt;public abstract void com.example.basedemo.proxydemo.IUserDao.upd
                         
                         
                         
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
                         <a href="/tags/jvm" title="jvm">
                             jvm
                         </a>
+                        
+                        
+                        
+                        
                         
                         
                         
@@ -938,9 +801,19 @@ method:-----&gt;public abstract void com.example.basedemo.proxydemo.IUserDao.upd
                         
                         
                         
+                        
+                        
+                        
+                        
+                        
+                        
                         <a href="/tags/mongodb" title="mongodb">
                             mongodb
                         </a>
+                        
+                        
+                        
+                        
                         
                         
                         
@@ -951,10 +824,6 @@ method:-----&gt;public abstract void com.example.basedemo.proxydemo.IUserDao.upd
                         </a>
                         
                         
-                        
-                        <a href="/tags/mycat" title="mycat">
-                            mycat
-                        </a>
                         
                         
                         
@@ -968,9 +837,17 @@ method:-----&gt;public abstract void com.example.basedemo.proxydemo.IUserDao.upd
                         
                         
                         
-                        <a href="/tags/nginx" title="nginx">
-                            nginx
-                        </a>
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
                         
                         
                         
@@ -994,8 +871,22 @@ method:-----&gt;public abstract void com.example.basedemo.proxydemo.IUserDao.upd
                         
                         
                         
+                        
+                        
                         <a href="/tags/rocketmq" title="rocketmq">
                             rocketmq
+                        </a>
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        <a href="/tags/security%E6%A1%86%E6%9E%B6%E5%AD%A6%E4%B9%A0" title="security框架学习">
+                            security框架学习
                         </a>
                         
                         
@@ -1022,17 +913,11 @@ method:-----&gt;public abstract void com.example.basedemo.proxydemo.IUserDao.upd
                         
                         
                         
-                        <a href="/tags/springcloud" title="springCloud">
-                            springCloud
-                        </a>
-                        
-                        
-                        
-                        
-                        
                         <a href="/tags/springboot" title="springboot">
                             springboot
                         </a>
+                        
+                        
                         
                         
                         
@@ -1046,6 +931,9 @@ method:-----&gt;public abstract void com.example.basedemo.proxydemo.IUserDao.upd
                         
                         
                         
+                        <a href="/tags/springcloud" title="springcloud">
+                            springcloud
+                        </a>
                         
                         
                         
@@ -1071,6 +959,33 @@ method:-----&gt;public abstract void com.example.basedemo.proxydemo.IUserDao.upd
                         
                         
                         
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        <a href="/tags/zookeeper" title="zookeeper">
+                            zookeeper
+                        </a>
                         
                         
                         
@@ -1130,6 +1045,8 @@ method:-----&gt;public abstract void com.example.basedemo.proxydemo.IUserDao.upd
                         
                         
                         
+                        
+                        
                         <a href="/tags/%E5%88%86%E5%B8%83%E5%BC%8F%E7%B3%BB%E5%88%97" title="分布式系列">
                             分布式系列
                         </a>
@@ -1149,6 +1066,10 @@ method:-----&gt;public abstract void com.example.basedemo.proxydemo.IUserDao.upd
                         
                         
                         
+                        
+                        <a href="/tags/%E5%8D%8F%E8%AE%AE%E6%A0%88" title="协议栈">
+                            协议栈
+                        </a>
                         
                         
                         
@@ -1348,6 +1269,12 @@ method:-----&gt;public abstract void com.example.basedemo.proxydemo.IUserDao.upd
                         
                         
                         
+                        
+                        
+                        
+                        
+                        
+                        
                         <a href="/tags/%E7%BD%91%E7%BB%9C%E7%BC%96%E7%A8%8B" title="网络编程">
                             网络编程
                         </a>
@@ -1371,6 +1298,10 @@ method:-----&gt;public abstract void com.example.basedemo.proxydemo.IUserDao.upd
                         
                         
                         
+                        
+                        <a href="/tags/%E8%AE%A4%E8%AF%81%E5%92%8C%E6%8E%88%E6%9D%83" title="认证和授权">
+                            认证和授权
+                        </a>
                         
                         
                         
@@ -1541,7 +1472,7 @@ method:-----&gt;public abstract void com.example.basedemo.proxydemo.IUserDao.upd
                     
                 </ul>
 		<p class="copyright text-muted">
-                    Copyright &copy;  2020
+                    Copyright &copy;  2021
                     <br>
                     <a href="https://themes.gohugo.io/hugo-theme-cleanwhite">CleanWhite Hugo Theme</a> by <a href="https://zhaohuabing.com">Huabing</a> |
                     <iframe

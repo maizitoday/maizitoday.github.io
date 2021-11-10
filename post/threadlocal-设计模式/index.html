@@ -97,15 +97,15 @@
                     </li>
                     
                     <li>
-                        <a href="/categories/english">English</a>
+                        <a href="/categories/english">english</a>
                     </li>
                     
                     <li>
-                        <a href="/categories/life">Life</a>
+                        <a href="/categories/life">life</a>
                     </li>
                     
                     <li>
-                        <a href="/categories/tech">Tech</a>
+                        <a href="/categories/tech">tech</a>
                     </li>
                     
 
@@ -237,141 +237,116 @@
                 
                 
                 
-                
-
-<p>[TOC]</p>
-
-<p><strong>转载地址：<a href="https://blog.csdn.net/pingpangkuangmo/article/details/84654393">https://blog.csdn.net/pingpangkuangmo/article/details/84654393</a></strong></p>
-
+                <p>[TOC]</p>
+<p><strong>转载地址：https://blog.csdn.net/pingpangkuangmo/article/details/84654393</strong></p>
 <h1 id="threadlocal设计模式">ThreadLocal设计模式</h1>
-
 <p>ThreadLocal设计模式使用的也很频繁，会经常在各大框架找到它们的踪影，如struts2以及最近正在看的SpringAOP等。主要作用。</p>
-
 <p>1）ThreadLocal所操作的数据是线程间不共享的。它不是用来解决多个线程竞争同一资源的多线程问题。</p>
-
 <p>2）ThreadLocal所操作的数据主要用于线程内共享数据，可以避免同一线程内函数间的传参数问题。</p>
-
 <h1 id="线程之间数据隔离">线程之间数据隔离</h1>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-java" data-lang="java"><span style="color:#66d9ef">public</span> <span style="color:#66d9ef">class</span> <span style="color:#a6e22e">ThreadLocalTest</span> <span style="color:#f92672">{</span>
 
-<pre><code class="language-java">public class ThreadLocalTest {
+    <span style="color:#66d9ef">public</span> <span style="color:#66d9ef">static</span> <span style="color:#66d9ef">void</span> <span style="color:#a6e22e">main</span><span style="color:#f92672">(</span>String<span style="color:#f92672">[]</span> args<span style="color:#f92672">)</span> <span style="color:#f92672">{</span>
+        test1<span style="color:#f92672">();</span>
+    <span style="color:#f92672">}</span>
 
-    public static void main(String[] args) {
-        test1();
-    }
+    <span style="color:#66d9ef">private</span> <span style="color:#66d9ef">static</span> <span style="color:#66d9ef">void</span> <span style="color:#a6e22e">test1</span><span style="color:#f92672">()</span> <span style="color:#f92672">{</span>
+        Thread t1 <span style="color:#f92672">=</span> <span style="color:#66d9ef">new</span> Thread<span style="color:#f92672">()</span> <span style="color:#f92672">{</span>
 
-    private static void test1() {
-        Thread t1 = new Thread() {
+            <span style="color:#a6e22e">@Override</span>
+            <span style="color:#66d9ef">public</span> <span style="color:#66d9ef">void</span> <span style="color:#a6e22e">run</span><span style="color:#f92672">()</span> <span style="color:#f92672">{</span>
+                System<span style="color:#f92672">.</span><span style="color:#a6e22e">out</span><span style="color:#f92672">.</span><span style="color:#a6e22e">println</span><span style="color:#f92672">(</span><span style="color:#66d9ef">this</span><span style="color:#f92672">.</span><span style="color:#a6e22e">getName</span><span style="color:#f92672">()</span> <span style="color:#f92672">+</span> <span style="color:#e6db74">&#34;开始值:&#34;</span> <span style="color:#f92672">+</span> ThreadUtil<span style="color:#f92672">.</span><span style="color:#a6e22e">getName</span><span style="color:#f92672">());</span>
+                ThreadUtil<span style="color:#f92672">.</span><span style="color:#a6e22e">setName</span><span style="color:#f92672">(</span><span style="color:#e6db74">&#34;线程0&#34;</span><span style="color:#f92672">);</span>
+                sleepTime<span style="color:#f92672">(</span>1000 <span style="color:#f92672">*</span> 1<span style="color:#f92672">);</span>
+                System<span style="color:#f92672">.</span><span style="color:#a6e22e">out</span><span style="color:#f92672">.</span><span style="color:#a6e22e">println</span><span style="color:#f92672">(</span><span style="color:#66d9ef">this</span><span style="color:#f92672">.</span><span style="color:#a6e22e">getName</span><span style="color:#f92672">()</span> <span style="color:#f92672">+</span> <span style="color:#e6db74">&#34;设定后:&#34;</span> <span style="color:#f92672">+</span> ThreadUtil<span style="color:#f92672">.</span><span style="color:#a6e22e">getName</span><span style="color:#f92672">());</span>
+            <span style="color:#f92672">}</span>
 
-            @Override
-            public void run() {
-                System.out.println(this.getName() + &quot;开始值:&quot; + ThreadUtil.getName());
-                ThreadUtil.setName(&quot;线程0&quot;);
-                sleepTime(1000 * 1);
-                System.out.println(this.getName() + &quot;设定后:&quot; + ThreadUtil.getName());
-            }
+        <span style="color:#f92672">};</span>
+        Thread t2 <span style="color:#f92672">=</span> <span style="color:#66d9ef">new</span> Thread<span style="color:#f92672">()</span> <span style="color:#f92672">{</span>
 
-        };
-        Thread t2 = new Thread() {
+            <span style="color:#a6e22e">@Override</span>
+            <span style="color:#66d9ef">public</span> <span style="color:#66d9ef">void</span> <span style="color:#a6e22e">run</span><span style="color:#f92672">()</span> <span style="color:#f92672">{</span>
+                sleepTime<span style="color:#f92672">(</span>1000 <span style="color:#f92672">*</span> 1<span style="color:#f92672">);</span>
+                System<span style="color:#f92672">.</span><span style="color:#a6e22e">out</span><span style="color:#f92672">.</span><span style="color:#a6e22e">println</span><span style="color:#f92672">(</span><span style="color:#66d9ef">this</span><span style="color:#f92672">.</span><span style="color:#a6e22e">getName</span><span style="color:#f92672">()</span> <span style="color:#f92672">+</span> <span style="color:#e6db74">&#34;开始值:&#34;</span> <span style="color:#f92672">+</span> ThreadUtil<span style="color:#f92672">.</span><span style="color:#a6e22e">getName</span><span style="color:#f92672">());</span>
+                ThreadUtil<span style="color:#f92672">.</span><span style="color:#a6e22e">setName</span><span style="color:#f92672">(</span><span style="color:#e6db74">&#34;线程1&#34;</span><span style="color:#f92672">);</span>
+                System<span style="color:#f92672">.</span><span style="color:#a6e22e">out</span><span style="color:#f92672">.</span><span style="color:#a6e22e">println</span><span style="color:#f92672">(</span><span style="color:#66d9ef">this</span><span style="color:#f92672">.</span><span style="color:#a6e22e">getName</span><span style="color:#f92672">()</span> <span style="color:#f92672">+</span> <span style="color:#e6db74">&#34;设定后:&#34;</span> <span style="color:#f92672">+</span> ThreadUtil<span style="color:#f92672">.</span><span style="color:#a6e22e">getName</span><span style="color:#f92672">());</span>
+            <span style="color:#f92672">}</span>
 
-            @Override
-            public void run() {
-                sleepTime(1000 * 1);
-                System.out.println(this.getName() + &quot;开始值:&quot; + ThreadUtil.getName());
-                ThreadUtil.setName(&quot;线程1&quot;);
-                System.out.println(this.getName() + &quot;设定后:&quot; + ThreadUtil.getName());
-            }
+        <span style="color:#f92672">};</span>
+        t1<span style="color:#f92672">.</span><span style="color:#a6e22e">start</span><span style="color:#f92672">();</span>
+        t2<span style="color:#f92672">.</span><span style="color:#a6e22e">start</span><span style="color:#f92672">();</span>
+    <span style="color:#f92672">}</span>
 
-        };
-        t1.start();
-        t2.start();
-    }
+    <span style="color:#66d9ef">private</span> <span style="color:#66d9ef">static</span> <span style="color:#66d9ef">void</span> <span style="color:#a6e22e">sleepTime</span><span style="color:#f92672">(</span><span style="color:#66d9ef">long</span> millis<span style="color:#f92672">)</span> <span style="color:#f92672">{</span>
+        <span style="color:#66d9ef">try</span> <span style="color:#f92672">{</span>
+            Thread<span style="color:#f92672">.</span><span style="color:#a6e22e">sleep</span><span style="color:#f92672">(</span>millis<span style="color:#f92672">);</span>
+        <span style="color:#f92672">}</span> <span style="color:#66d9ef">catch</span> <span style="color:#f92672">(</span>InterruptedException e<span style="color:#f92672">)</span> <span style="color:#f92672">{</span>
+            e<span style="color:#f92672">.</span><span style="color:#a6e22e">printStackTrace</span><span style="color:#f92672">();</span>
+        <span style="color:#f92672">}</span>
+    <span style="color:#f92672">}</span>
 
-    private static void sleepTime(long millis) {
-        try {
-            Thread.sleep(millis);
-        } catch (InterruptedException e) {
-            e.printStackTrace();
-        }
-    }
+<span style="color:#f92672">}</span>
 
-}
+</code></pre></div><div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-java" data-lang="java"><span style="color:#66d9ef">public</span> <span style="color:#66d9ef">class</span> <span style="color:#a6e22e">ThreadUtil</span> <span style="color:#f92672">{</span>
 
-</code></pre>
+    <span style="color:#66d9ef">private</span> <span style="color:#66d9ef">static</span> ThreadLocal<span style="color:#f92672">&lt;</span>String<span style="color:#f92672">&gt;</span> nameLocal <span style="color:#f92672">=</span> <span style="color:#66d9ef">new</span> ThreadLocal<span style="color:#f92672">&lt;</span>String<span style="color:#f92672">&gt;();</span>
 
-<pre><code class="language-java">public class ThreadUtil {
+    <span style="color:#66d9ef">public</span> <span style="color:#66d9ef">static</span> String <span style="color:#a6e22e">getName</span><span style="color:#f92672">()</span> <span style="color:#f92672">{</span>
+        <span style="color:#66d9ef">return</span> nameLocal<span style="color:#f92672">.</span><span style="color:#a6e22e">get</span><span style="color:#f92672">();</span>
+    <span style="color:#f92672">}</span>
 
-    private static ThreadLocal&lt;String&gt; nameLocal = new ThreadLocal&lt;String&gt;();
-
-    public static String getName() {
-        return nameLocal.get();
-    }
-
-    public static void setName(String name) {
-        nameLocal.set(name);
-    }
-}
-</code></pre>
-
-<pre><code class="language-java">Thread-0开始值:null
-Thread-1开始值:null
-Thread-1设定后:线程1
-Thread-0设定后:线程0
-</code></pre>
-
-<p>ThreadLocal完全可以这样理解，它就是操作线程数据的工具类，哪个线程调用它的get或set方法，它就会操作调用它的线程中的数据。查看源码知晓， 他是依托线程对象的。</p>
-
-<pre><code class="language-java">  public void set(T value) {
-        Thread t = Thread.currentThread();
-        ThreadLocalMap map = getMap(t);
-        if (map != null)
-            map.set(this, value);
-        else
-            createMap(t, value);
-    }
-</code></pre>
-
-<p><strong>注意：ThreadLocal对象里面存储对象ThreadLocalMap依托的是当前线程创建的Map对象，所以线程和线程之间数据是隔离的。</strong></p>
-
+    <span style="color:#66d9ef">public</span> <span style="color:#66d9ef">static</span> <span style="color:#66d9ef">void</span> <span style="color:#a6e22e">setName</span><span style="color:#f92672">(</span>String name<span style="color:#f92672">)</span> <span style="color:#f92672">{</span>
+        nameLocal<span style="color:#f92672">.</span><span style="color:#a6e22e">set</span><span style="color:#f92672">(</span>name<span style="color:#f92672">);</span>
+    <span style="color:#f92672">}</span>
+<span style="color:#f92672">}</span>
+</code></pre></div><div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-java" data-lang="java">Thread<span style="color:#f92672">-</span>0开始值<span style="color:#f92672">:</span><span style="color:#66d9ef">null</span>
+Thread<span style="color:#f92672">-</span>1开始值<span style="color:#f92672">:</span><span style="color:#66d9ef">null</span>
+Thread<span style="color:#f92672">-</span>1设定后<span style="color:#f92672">:</span>线程1
+Thread<span style="color:#f92672">-</span>0设定后<span style="color:#f92672">:</span>线程0
+</code></pre></div><p>ThreadLocal完全可以这样理解，它就是操作线程数据的工具类，哪个线程调用它的get或set方法，它就会操作调用它的线程中的数据。查看源码知晓， 他是依托线程对象的。</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-java" data-lang="java">  <span style="color:#66d9ef">public</span> <span style="color:#66d9ef">void</span> <span style="color:#a6e22e">set</span><span style="color:#f92672">(</span>T value<span style="color:#f92672">)</span> <span style="color:#f92672">{</span>
+        Thread t <span style="color:#f92672">=</span> Thread<span style="color:#f92672">.</span><span style="color:#a6e22e">currentThread</span><span style="color:#f92672">();</span>
+        ThreadLocalMap map <span style="color:#f92672">=</span> getMap<span style="color:#f92672">(</span>t<span style="color:#f92672">);</span>
+        <span style="color:#66d9ef">if</span> <span style="color:#f92672">(</span>map <span style="color:#f92672">!=</span> <span style="color:#66d9ef">null</span><span style="color:#f92672">)</span>
+            map<span style="color:#f92672">.</span><span style="color:#a6e22e">set</span><span style="color:#f92672">(</span><span style="color:#66d9ef">this</span><span style="color:#f92672">,</span> value<span style="color:#f92672">);</span>
+        <span style="color:#66d9ef">else</span>
+            createMap<span style="color:#f92672">(</span>t<span style="color:#f92672">,</span> value<span style="color:#f92672">);</span>
+    <span style="color:#f92672">}</span>
+</code></pre></div><p><strong>注意：ThreadLocal对象里面存储对象ThreadLocalMap依托的是当前线程创建的Map对象，所以线程和线程之间数据是隔离的。</strong></p>
 <h1 id="实现线程内共享数据">实现线程内共享数据</h1>
-
 <p>同理， 因为他的ThreadLocalMap是依托于线程的，那么在同一个线程中创建的Map对象，这样的话，map的值在这个线程里面就是共享的。</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-java" data-lang="java"><span style="color:#66d9ef">public</span> <span style="color:#66d9ef">class</span> <span style="color:#a6e22e">ThreadLocalTest2</span> <span style="color:#f92672">{</span>
 
-<pre><code class="language-java">public class ThreadLocalTest2 {
+    <span style="color:#66d9ef">public</span> <span style="color:#66d9ef">static</span> <span style="color:#66d9ef">void</span> <span style="color:#a6e22e">main</span><span style="color:#f92672">(</span>String<span style="color:#f92672">[]</span> args<span style="color:#f92672">)</span> <span style="color:#f92672">{</span>
+        test2<span style="color:#f92672">();</span>
+    <span style="color:#f92672">}</span>
 
-    public static void main(String[] args) {
-        test2();
-    }
+    <span style="color:#66d9ef">private</span> <span style="color:#66d9ef">static</span> <span style="color:#66d9ef">void</span> <span style="color:#a6e22e">test2</span><span style="color:#f92672">()</span> <span style="color:#f92672">{</span>
+        Thread t1 <span style="color:#f92672">=</span> <span style="color:#66d9ef">new</span> Thread<span style="color:#f92672">()</span> <span style="color:#f92672">{</span>
 
-    private static void test2() {
-        Thread t1 = new Thread() {
+            <span style="color:#a6e22e">@Override</span>
+            <span style="color:#66d9ef">public</span> <span style="color:#66d9ef">void</span> <span style="color:#a6e22e">run</span><span style="color:#f92672">()</span> <span style="color:#f92672">{</span>
+                fun1<span style="color:#f92672">();</span>
+                fun2<span style="color:#f92672">();</span>
+            <span style="color:#f92672">}</span>
 
-            @Override
-            public void run() {
-                fun1();
-                fun2();
-            }
+            <span style="color:#66d9ef">private</span> <span style="color:#66d9ef">void</span> <span style="color:#a6e22e">fun2</span><span style="color:#f92672">()</span> <span style="color:#f92672">{</span>
+                System<span style="color:#f92672">.</span><span style="color:#a6e22e">out</span><span style="color:#f92672">.</span><span style="color:#a6e22e">println</span><span style="color:#f92672">(</span><span style="color:#e6db74">&#34;在函数2中获取到当前线程的name数据为:&#34;</span> <span style="color:#f92672">+</span> ThreadUtil<span style="color:#f92672">.</span><span style="color:#a6e22e">getName</span><span style="color:#f92672">());</span>
+            <span style="color:#f92672">}</span>
 
-            private void fun2() {
-                System.out.println(&quot;在函数2中获取到当前线程的name数据为:&quot; + ThreadUtil.getName());
-            }
+            <span style="color:#66d9ef">private</span> <span style="color:#66d9ef">void</span> <span style="color:#a6e22e">fun1</span><span style="color:#f92672">()</span> <span style="color:#f92672">{</span>
+                ThreadUtil<span style="color:#f92672">.</span><span style="color:#a6e22e">setName</span><span style="color:#f92672">(</span><span style="color:#e6db74">&#34;my own name&#34;</span><span style="color:#f92672">);</span>
+                System<span style="color:#f92672">.</span><span style="color:#a6e22e">out</span><span style="color:#f92672">.</span><span style="color:#a6e22e">println</span><span style="color:#f92672">(</span><span style="color:#e6db74">&#34;函数1设置当前线程的name数据为:my own name&#34;</span><span style="color:#f92672">);</span>
+            <span style="color:#f92672">}</span>
 
-            private void fun1() {
-                ThreadUtil.setName(&quot;my own name&quot;);
-                System.out.println(&quot;函数1设置当前线程的name数据为:my own name&quot;);
-            }
+        <span style="color:#f92672">};</span>
+        t1<span style="color:#f92672">.</span><span style="color:#a6e22e">start</span><span style="color:#f92672">();</span>
+    <span style="color:#f92672">}</span>
+<span style="color:#f92672">}</span>
 
-        };
-        t1.start();
-    }
-}
-
-</code></pre>
-
-<pre><code class="language-java">函数1设置当前线程的name数据为:my own name
+</code></pre></div><div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-java" data-lang="java">函数1设置当前线程的name数据为:my own name
 在函数2中获取到当前线程的name数据为:my own name
-</code></pre>
-
-<p>这个例子太简单，然而实际情况是某个线程中几十个函数嵌套调用，如果不将线程内共享数据放进该线程的map集合中，而是将共享数据作为参数传递来传递去，将会一片混乱，杂乱无章，有些函数需要这些参数，有些函数不需要。采用ThreadLocal模式，将数据放进线程的map集合中，想要获取时随时可以通过ThreadLocal对象来获取，方便快捷。</p>
+</code></pre></div><p>这个例子太简单，然而实际情况是某个线程中几十个函数嵌套调用，如果不将线程内共享数据放进该线程的map集合中，而是将共享数据作为参数传递来传递去，将会一片混乱，杂乱无章，有些函数需要这些参数，有些函数不需要。采用ThreadLocal模式，将数据放进线程的map集合中，想要获取时随时可以通过ThreadLocal对象来获取，方便快捷。</p>
 
 
                 
@@ -420,15 +395,15 @@ Thread-0设定后:线程0
                 <ul class="pager">
                     
                     <li class="previous">
-                        <a href="/post/balking-%E8%AE%BE%E8%AE%A1%E6%A8%A1%E5%BC%8F/" data-toggle="tooltip" data-placement="top"
-                            title="balking-设计模式">&larr;
+                        <a href="/post/%E5%90%84%E6%A1%86%E6%9E%B6%E5%9C%A8%E5%B9%B6%E5%8F%91%E6%83%85%E5%86%B5%E4%B8%8B%E5%AE%9E%E4%BE%8B%E5%AF%B9%E8%B1%A1/" data-toggle="tooltip" data-placement="top"
+                            title="各框架在并发情况下实例对象">&larr;
                             Previous Post</a>
                     </li>
                     
                     
                     <li class="next">
-                        <a href="/post/guarded-suspension-%E8%AE%BE%E8%AE%A1%E6%A8%A1%E5%BC%8F/" data-toggle="tooltip" data-placement="top"
-                            title="Guarded-Suspension-设计模式">Next
+                        <a href="/post/immutable-%E8%AE%BE%E8%AE%A1%E6%A8%A1%E5%BC%8F/" data-toggle="tooltip" data-placement="top"
+                            title="immutable-设计模式">Next
                             Post &rarr;</a>
                     </li>
                     
@@ -478,13 +453,7 @@ Thread-0设定后:线程0
                         <a class="catalog-toggle" style="font-size: 24px;" href="index.html#">目录结构</a>
                     </h4>
                     <ul class="catalog-body"></ul>
-                    <nav id="TableOfContents">
-<ul>
-<li><a href="#threadlocal设计模式">ThreadLocal设计模式</a></li>
-<li><a href="#线程之间数据隔离">线程之间数据隔离</a></li>
-<li><a href="#实现线程内共享数据">实现线程内共享数据</a></li>
-</ul>
-</nav>
+                    <nav id="TableOfContents"></nav>
                     <br>
                     <br>
                     <br>
@@ -508,9 +477,6 @@ Thread-0设定后:线程0
                         
                         
                         
-                        <a href="/tags/" title="">
-                            
-                        </a>
                         
                         
                         
@@ -520,101 +486,6 @@ Thread-0设定后:线程0
                         
                         
                         
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        <a href="/tags/qt" title="QT">
-                            QT
-                        </a>
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        <a href="/tags/zookeeper" title="Zookeeper">
-                            Zookeeper
-                        </a>
                         
                         
                         
@@ -654,8 +525,10 @@ Thread-0设定后:线程0
                         
                         
                         
-                        <a href="/tags/elasticsearch" title="elasticSearch">
-                            elasticSearch
+                        
+                        
+                        <a href="/tags/elasticsearch" title="elasticsearch">
+                            elasticsearch
                         </a>
                         
                         
@@ -666,9 +539,27 @@ Thread-0设定后:线程0
                         
                         
                         
-                        <a href="/tags/golang" title="golang">
-                            golang
-                        </a>
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
                         
                         
                         
@@ -706,9 +597,21 @@ Thread-0设定后:线程0
                         
                         
                         
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
                         <a href="/tags/jvm" title="jvm">
                             jvm
                         </a>
+                        
+                        
+                        
+                        
                         
                         
                         
@@ -732,9 +635,19 @@ Thread-0设定后:线程0
                         
                         
                         
+                        
+                        
+                        
+                        
+                        
+                        
                         <a href="/tags/mongodb" title="mongodb">
                             mongodb
                         </a>
+                        
+                        
+                        
+                        
                         
                         
                         
@@ -745,10 +658,6 @@ Thread-0设定后:线程0
                         </a>
                         
                         
-                        
-                        <a href="/tags/mycat" title="mycat">
-                            mycat
-                        </a>
                         
                         
                         
@@ -762,9 +671,17 @@ Thread-0设定后:线程0
                         
                         
                         
-                        <a href="/tags/nginx" title="nginx">
-                            nginx
-                        </a>
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
                         
                         
                         
@@ -788,8 +705,22 @@ Thread-0设定后:线程0
                         
                         
                         
+                        
+                        
                         <a href="/tags/rocketmq" title="rocketmq">
                             rocketmq
+                        </a>
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        <a href="/tags/security%E6%A1%86%E6%9E%B6%E5%AD%A6%E4%B9%A0" title="security框架学习">
+                            security框架学习
                         </a>
                         
                         
@@ -816,17 +747,11 @@ Thread-0设定后:线程0
                         
                         
                         
-                        <a href="/tags/springcloud" title="springCloud">
-                            springCloud
-                        </a>
-                        
-                        
-                        
-                        
-                        
                         <a href="/tags/springboot" title="springboot">
                             springboot
                         </a>
+                        
+                        
                         
                         
                         
@@ -840,6 +765,9 @@ Thread-0设定后:线程0
                         
                         
                         
+                        <a href="/tags/springcloud" title="springcloud">
+                            springcloud
+                        </a>
                         
                         
                         
@@ -865,6 +793,33 @@ Thread-0设定后:线程0
                         
                         
                         
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        <a href="/tags/zookeeper" title="zookeeper">
+                            zookeeper
+                        </a>
                         
                         
                         
@@ -924,6 +879,8 @@ Thread-0设定后:线程0
                         
                         
                         
+                        
+                        
                         <a href="/tags/%E5%88%86%E5%B8%83%E5%BC%8F%E7%B3%BB%E5%88%97" title="分布式系列">
                             分布式系列
                         </a>
@@ -943,6 +900,10 @@ Thread-0设定后:线程0
                         
                         
                         
+                        
+                        <a href="/tags/%E5%8D%8F%E8%AE%AE%E6%A0%88" title="协议栈">
+                            协议栈
+                        </a>
                         
                         
                         
@@ -1142,6 +1103,12 @@ Thread-0设定后:线程0
                         
                         
                         
+                        
+                        
+                        
+                        
+                        
+                        
                         <a href="/tags/%E7%BD%91%E7%BB%9C%E7%BC%96%E7%A8%8B" title="网络编程">
                             网络编程
                         </a>
@@ -1165,6 +1132,10 @@ Thread-0设定后:线程0
                         
                         
                         
+                        
+                        <a href="/tags/%E8%AE%A4%E8%AF%81%E5%92%8C%E6%8E%88%E6%9D%83" title="认证和授权">
+                            认证和授权
+                        </a>
                         
                         
                         
@@ -1335,7 +1306,7 @@ Thread-0设定后:线程0
                     
                 </ul>
 		<p class="copyright text-muted">
-                    Copyright &copy;  2020
+                    Copyright &copy;  2021
                     <br>
                     <a href="https://themes.gohugo.io/hugo-theme-cleanwhite">CleanWhite Hugo Theme</a> by <a href="https://zhaohuabing.com">Huabing</a> |
                     <iframe

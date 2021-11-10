@@ -97,15 +97,15 @@
                     </li>
                     
                     <li>
-                        <a href="/categories/english">English</a>
+                        <a href="/categories/english">english</a>
                     </li>
                     
                     <li>
-                        <a href="/categories/life">Life</a>
+                        <a href="/categories/life">life</a>
                     </li>
                     
                     <li>
-                        <a href="/categories/tech">Tech</a>
+                        <a href="/categories/tech">tech</a>
                     </li>
                     
 
@@ -233,30 +233,17 @@
                 
                 
                 
-                
-
-<p>[TOC]</p>
-
+                <p>[TOC]</p>
 <p><strong>说明文章资料来源：尚硅谷韩顺平Netty视频教程（2019发布） <a href="https://www.bilibili.com/video/av76227904?p=36">https://www.bilibili.com/video/av76227904?p=36</a></strong></p>
-
 <h1 id="rpc基本介绍">RPC基本介绍</h1>
-
 <p>RPC（Remote Procedure Call）— 远程过程调用，是一个计算机通信协议。该协议允许运行于一台计算机的程序调用另一台计算机的子程序，而程序员无需额外地为这个交互作用编程</p>
-
 <p>两个或多个应用程序都分布在不同的服务器上，它们之间的调用都像是本地方法调用一样(如图)</p>
-
-<p><img src="/img/Xnip2020-05-24_09-42-21.png" alt="Xnip2020-05-24_09-42-21" /></p>
-
+<p><img src="/img/Xnip2020-05-24_09-42-21.png" alt="Xnip2020-05-24_09-42-21"></p>
 <h1 id="常见的-rpc-框架有">常见的 RPC 框架有</h1>
-
 <p>比较知名的如阿里的Dubbo、google的gRPC、Go语言的rpcx、Apache的thrift， Spring 旗下的 Spring Cloud。</p>
-
 <h1 id="rpc调用流程">RPC调用流程</h1>
-
-<p><img src="/img/Xnip2020-05-24_09-43-46.png" alt="Xnip2020-05-24_09-43-46" /></p>
-
+<p><img src="/img/Xnip2020-05-24_09-43-46.png" alt="Xnip2020-05-24_09-43-46"></p>
 <h2 id="调用流程说明">调用流程说明</h2>
-
 <ol>
 <li><strong>服务消费方(client)以本地调用方式调用服务</strong></li>
 <li>client stub 接收到调用后负责将方法、参数等封装成能够进行网络传输的消息体</li>
@@ -268,414 +255,370 @@
 <li>client stub 接收到消息并进行解码</li>
 <li><strong>服务消费方(client)得到结果</strong></li>
 </ol>
-
 <p><strong>小结：RPC 的目标就是将 2-8 这些步骤都封装起来，用户无需关心这些细节，可以像调用本地方法一样即可完成远程服务调用。</strong></p>
-
 <h1 id="使用netty编写doubbo-rpc">使用Netty编写Doubbo RPC</h1>
-
 <h2 id="思路流程">思路流程</h2>
-
-<p><img src="/img/Xnip2020-05-21_09-48-57.png" alt="Xnip2020-05-21_09-48-57" /></p>
-
+<p><img src="/img/Xnip2020-05-21_09-48-57.png" alt="Xnip2020-05-21_09-48-57"></p>
 <h2 id="具体代码如下">具体代码如下</h2>
+<h3 id="公共接口也就是要消费和提供的接口">公共接口，也就是要消费和提供的接口</h3>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-java" data-lang="java"><span style="color:#f92672">package</span> com.maizi.rpc.publicinterface<span style="color:#f92672">;</span>
 
-<h3 id="公共接口-也就是要消费和提供的接口">公共接口，也就是要消费和提供的接口</h3>
+<span style="color:#75715e">//这个是接口，是服务提供方和 服务消费方都需要
+</span><span style="color:#75715e"></span><span style="color:#66d9ef">public</span> <span style="color:#66d9ef">interface</span> <span style="color:#a6e22e">HelloService</span> <span style="color:#f92672">{</span>
 
-<pre><code class="language-java">package com.maizi.rpc.publicinterface;
+    String <span style="color:#a6e22e">hello</span><span style="color:#f92672">(</span>String mes<span style="color:#f92672">);</span>
+<span style="color:#f92672">}</span>
 
-//这个是接口，是服务提供方和 服务消费方都需要
-public interface HelloService {
-
-    String hello(String mes);
-}
-
-</code></pre>
-
-<h3 id="基础类封装">基础类封装</h3>
-
+</code></pre></div><h3 id="基础类封装">基础类封装</h3>
 <h4 id="nettyclient">NettyClient</h4>
-
-<pre><code class="language-java">package com.maizi.rpc.netty;
-
-import io.netty.bootstrap.Bootstrap;
-import io.netty.channel.ChannelInitializer;
-import io.netty.channel.ChannelOption;
-import io.netty.channel.ChannelPipeline;
-import io.netty.channel.nio.NioEventLoopGroup;
-import io.netty.channel.socket.SocketChannel;
-import io.netty.channel.socket.nio.NioSocketChannel;
-import io.netty.handler.codec.string.StringDecoder;
-import io.netty.handler.codec.string.StringEncoder;
-
-import java.lang.reflect.Proxy;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
-
-public class NettyClient {
-
-    // 创建线程池
-    private static ExecutorService executor = Executors.newFixedThreadPool(Runtime.getRuntime().availableProcessors());
-
-    private static NettyClientHandler client;
-    private int count = 0;
-
-    // 编写方法使用代理模式，获取一个代理对象
-
-    public Object getBean(final Class&lt;?&gt; serivceClass, final String providerName) {
-
-        return Proxy.newProxyInstance(Thread.currentThread().getContextClassLoader(), new Class&lt;?&gt;[] { serivceClass },
-                (proxy, method, args) -&gt; {
-
-                    System.out.println(&quot;(proxy, method, args) 进入....&quot; + (++count) + &quot; 次&quot;);
-                    // {} 部分的代码，客户端每调用一次 hello, 就会进入到该代码
-                    if (client == null) {
-                        initClient();
-                    }
-
-                    // 设置要发给服务器端的信息
-                    // providerName 协议头 args[0] 就是客户端调用api hello(???), 参数
-                    client.setPara(providerName + args[0]);
-
-                    //
-                    return executor.submit(client).get();
-
-                });
-    }
-
-    // 初始化客户端
-    private static void initClient() {
-        client = new NettyClientHandler();
-        // 创建EventLoopGroup
-        NioEventLoopGroup group = new NioEventLoopGroup();
-        Bootstrap bootstrap = new Bootstrap();
-        bootstrap.group(group).channel(NioSocketChannel.class).option(ChannelOption.TCP_NODELAY, true)
-                .handler(new ChannelInitializer&lt;SocketChannel&gt;() {
-                    @Override
-                    protected void initChannel(SocketChannel ch) throws Exception {
-                        ChannelPipeline pipeline = ch.pipeline();
-                        pipeline.addLast(new StringDecoder());
-                        pipeline.addLast(new StringEncoder());
-                        pipeline.addLast(client);
-                    }
-                });
-
-        try {
-            bootstrap.connect(&quot;127.0.0.1&quot;, 7000).sync();
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
-    }
-}
-
-</code></pre>
-
-<h4 id="nettyclienthandler">NettyClientHandler</h4>
-
-<pre><code class="language-java">package com.maizi.rpc.netty;
-
-import io.netty.channel.ChannelHandlerContext;
-import io.netty.channel.ChannelInboundHandlerAdapter;
-
-import java.util.concurrent.Callable;
-
-public class NettyClientHandler extends ChannelInboundHandlerAdapter implements Callable {
-
-    private ChannelHandlerContext context;// 上下文
-    private String result; // 返回的结果
-    private String para; // 客户端调用方法时，传入的参数
-
-    // 与服务器的连接创建后，就会被调用, 这个方法是第一个被调用(1)
-    @Override
-    public void channelActive(ChannelHandlerContext ctx) throws Exception {
-        System.out.println(&quot; channelActive 被调用  &quot;);
-        context = ctx; // 因为我们在其它方法会使用到 ctx
-    }
-
-    // 收到服务器的数据后，调用方法 (4)
-    //
-    @Override
-    public synchronized void channelRead(ChannelHandlerContext ctx, Object msg) throws Exception {
-        System.out.println(&quot; channelRead 被调用  &quot;);
-        result = msg.toString();
-        notify(); // 唤醒等待的线程
-    }
-
-    @Override
-    public void exceptionCaught(ChannelHandlerContext ctx, Throwable cause) throws Exception {
-        ctx.close();
-    }
-
-    // 被代理对象调用, 发送数据给服务器，-&gt; wait -&gt; 等待被唤醒(channelRead) -&gt; 返回结果 (3)-》5
-    @Override
-    public synchronized Object call() throws Exception {
-        System.out.println(&quot; call1 被调用  &quot;);
-        context.writeAndFlush(para);
-        // 进行wait
-        wait(); // 等待channelRead 方法获取到服务器的结果后，唤醒
-        System.out.println(&quot; call2 被调用  &quot;);
-        return result; // 服务方返回的结果
-
-    }
-
-    // (2)
-    void setPara(String para) {
-        System.out.println(&quot; setPara  &quot;);
-        this.para = para;
-    }
-}
-
-</code></pre>
-
-<h4 id="nettyserver">NettyServer</h4>
-
-<pre><code class="language-java">package com.maizi.rpc.netty;
-
-import io.netty.bootstrap.ServerBootstrap;
-import io.netty.channel.ChannelFuture;
-import io.netty.channel.ChannelInitializer;
-import io.netty.channel.ChannelPipeline;
-import io.netty.channel.EventLoopGroup;
-import io.netty.channel.nio.NioEventLoopGroup;
-import io.netty.channel.socket.SocketChannel;
-import io.netty.channel.socket.nio.NioServerSocketChannel;
-import io.netty.handler.codec.string.StringDecoder;
-import io.netty.handler.codec.string.StringEncoder;
-
-public class NettyServer {
-
-    public static void startServer(String hostName, int port) {
-        startServer0(hostName, port);
-    }
-
-    // 编写一个方法，完成对NettyServer的初始化和启动
-
-    private static void startServer0(String hostname, int port) {
-
-        EventLoopGroup bossGroup = new NioEventLoopGroup(1);
-        EventLoopGroup workerGroup = new NioEventLoopGroup();
-
-        try {
-
-            ServerBootstrap serverBootstrap = new ServerBootstrap();
-
-            serverBootstrap.group(bossGroup, workerGroup).channel(NioServerSocketChannel.class)
-                    .childHandler(new ChannelInitializer&lt;SocketChannel&gt;() {
-                        @Override
-                        protected void initChannel(SocketChannel ch) throws Exception {
-                            ChannelPipeline pipeline = ch.pipeline();
-                            pipeline.addLast(new StringDecoder());
-                            pipeline.addLast(new StringEncoder());
-                            pipeline.addLast(new NettyServerHandler()); // 业务处理器
-
-                        }
-                    }
-
-                    );
-
-            ChannelFuture channelFuture = serverBootstrap.bind(hostname, port).sync();
-            System.out.println(&quot;服务提供方开始提供服务~~&quot;);
-            channelFuture.channel().closeFuture().sync();
-
-        } catch (Exception e) {
-            e.printStackTrace();
-        } finally {
-            bossGroup.shutdownGracefully();
-            workerGroup.shutdownGracefully();
-        }
-
-    }
-}
-
-</code></pre>
-
-<h4 id="nettyserverhandler">NettyServerHandler</h4>
-
-<pre><code class="language-java">package com.maizi.rpc.netty;
-
-import com.maizi.rpc.customer.ClientBootstrap;
-import com.maizi.rpc.provider.HelloServiceImpl;
-
-import io.netty.channel.ChannelHandlerContext;
-import io.netty.channel.ChannelInboundHandlerAdapter;
-
-//服务器这边handler比较简单
-public class NettyServerHandler extends ChannelInboundHandlerAdapter {
-
-    @Override
-    public void channelRead(ChannelHandlerContext ctx, Object msg) throws Exception {
-        // 获取客户端发送的消息，并调用服务
-        System.out.println(&quot;msg=&quot; + msg);
-        // 客户端在调用服务器的api 时，我们需要定义一个协议
-        // 比如我们要求 每次发消息是都必须以某个字符串开头 &quot;HelloService#hello#你好&quot;
-        if (msg.toString().startsWith(ClientBootstrap.providerName)) {
-
-            String result = new HelloServiceImpl().hello(msg.toString().substring(msg.toString().lastIndexOf(&quot;#&quot;) + 1));
-            ctx.writeAndFlush(result);
-        }
-    }
-
-    @Override
-    public void exceptionCaught(ChannelHandlerContext ctx, Throwable cause) throws Exception {
-        ctx.close();
-    }
-}
-
-</code></pre>
-
-<h3 id="消费接口类">消费接口类</h3>
-
-<pre><code class="language-java">package com.maizi.rpc.customer;
-
-import com.maizi.rpc.netty.NettyClient;
-import com.maizi.rpc.publicinterface.HelloService;
-
-public class ClientBootstrap {
-
-    // 这里定义协议头
-    public static final String providerName = &quot;HelloService#hello#&quot;;
-
-    public static void main(String[] args) throws Exception {
-
-        // 创建一个消费者
-        NettyClient customer = new NettyClient();
-
-        // 创建代理对象
-        HelloService service = (HelloService) customer.getBean(HelloService.class, providerName);
-
-        for (;;) {
-            Thread.sleep(2 * 1000);
-            // 通过代理对象调用服务提供者的方法(服务)
-            String res = service.hello(&quot;你好 dubbo~&quot;);
-            System.out.println(&quot;调用的结果 res= &quot; + res);
-        }
-    }
-}
-
-</code></pre>
-
-<h3 id="提供接口类">提供接口类</h3>
-
-<pre><code class="language-java">package com.maizi.rpc.provider;
-
-import com.maizi.rpc.publicinterface.HelloService;
-
-public class HelloServiceImpl implements HelloService {
-
-    private static int count;
-
-    // 当有消费方调用该方法时， 就返回一个结果
-    @Override
-    public synchronized String hello(String mes) {
-        System.out.println(&quot;收到客户端消息=&quot; + mes);
-        // 根据mes 返回不同的结果
-        if (mes != null) {
-            return &quot;你好客户端, 我已经收到你的消息 [&quot; + mes + &quot;] 第&quot; + (++count) + &quot; 次&quot;;
-        } else {
-            return &quot;你好客户端, 我已经收到你的消息 &quot;;
-        }
-    }
-}
-
-</code></pre>
-
-<pre><code class="language-java">package com.maizi.rpc.provider;
-
-import com.maizi.rpc.netty.NettyServer;
-
-//ServerBootstrap 会启动一个服务提供者，就是 NettyServer
-public class ServerBootstrap {
-    public static void main(String[] args) {
-
-        // 代码代填..
-        NettyServer.startServer(&quot;127.0.0.1&quot;, 7000);
-    }
-}
-
-</code></pre>
-
-<h3 id="运行结果">运行结果</h3>
-
-<pre><code class="language-java">服务提供方开始提供服务~~
-msg=HelloService#hello#你好 dubbo~
-收到客户端消息=你好 dubbo~
-msg=HelloService#hello#你好 dubbo~
-收到客户端消息=你好 dubbo~
-msg=HelloService#hello#你好 dubbo~
-收到客户端消息=你好 dubbo~
-msg=HelloService#hello#你好 dubbo~
-收到客户端消息=你好 dubbo~
-msg=HelloService#hello#你好 dubbo~
-</code></pre>
-
-<pre><code class="language-java">(proxy, method, args) 进入....1 次
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-java" data-lang="java"><span style="color:#f92672">package</span> com.maizi.rpc.netty<span style="color:#f92672">;</span>
+
+<span style="color:#f92672">import</span> io.netty.bootstrap.Bootstrap<span style="color:#f92672">;</span>
+<span style="color:#f92672">import</span> io.netty.channel.ChannelInitializer<span style="color:#f92672">;</span>
+<span style="color:#f92672">import</span> io.netty.channel.ChannelOption<span style="color:#f92672">;</span>
+<span style="color:#f92672">import</span> io.netty.channel.ChannelPipeline<span style="color:#f92672">;</span>
+<span style="color:#f92672">import</span> io.netty.channel.nio.NioEventLoopGroup<span style="color:#f92672">;</span>
+<span style="color:#f92672">import</span> io.netty.channel.socket.SocketChannel<span style="color:#f92672">;</span>
+<span style="color:#f92672">import</span> io.netty.channel.socket.nio.NioSocketChannel<span style="color:#f92672">;</span>
+<span style="color:#f92672">import</span> io.netty.handler.codec.string.StringDecoder<span style="color:#f92672">;</span>
+<span style="color:#f92672">import</span> io.netty.handler.codec.string.StringEncoder<span style="color:#f92672">;</span>
+
+<span style="color:#f92672">import</span> java.lang.reflect.Proxy<span style="color:#f92672">;</span>
+<span style="color:#f92672">import</span> java.util.concurrent.ExecutorService<span style="color:#f92672">;</span>
+<span style="color:#f92672">import</span> java.util.concurrent.Executors<span style="color:#f92672">;</span>
+
+<span style="color:#66d9ef">public</span> <span style="color:#66d9ef">class</span> <span style="color:#a6e22e">NettyClient</span> <span style="color:#f92672">{</span>
+
+    <span style="color:#75715e">// 创建线程池
+</span><span style="color:#75715e"></span>    <span style="color:#66d9ef">private</span> <span style="color:#66d9ef">static</span> ExecutorService executor <span style="color:#f92672">=</span> Executors<span style="color:#f92672">.</span><span style="color:#a6e22e">newFixedThreadPool</span><span style="color:#f92672">(</span>Runtime<span style="color:#f92672">.</span><span style="color:#a6e22e">getRuntime</span><span style="color:#f92672">().</span><span style="color:#a6e22e">availableProcessors</span><span style="color:#f92672">());</span>
+
+    <span style="color:#66d9ef">private</span> <span style="color:#66d9ef">static</span> NettyClientHandler client<span style="color:#f92672">;</span>
+    <span style="color:#66d9ef">private</span> <span style="color:#66d9ef">int</span> count <span style="color:#f92672">=</span> 0<span style="color:#f92672">;</span>
+
+    <span style="color:#75715e">// 编写方法使用代理模式，获取一个代理对象
+</span><span style="color:#75715e"></span>
+    <span style="color:#66d9ef">public</span> Object <span style="color:#a6e22e">getBean</span><span style="color:#f92672">(</span><span style="color:#66d9ef">final</span> Class<span style="color:#f92672">&lt;?&gt;</span> serivceClass<span style="color:#f92672">,</span> <span style="color:#66d9ef">final</span> String providerName<span style="color:#f92672">)</span> <span style="color:#f92672">{</span>
+
+        <span style="color:#66d9ef">return</span> Proxy<span style="color:#f92672">.</span><span style="color:#a6e22e">newProxyInstance</span><span style="color:#f92672">(</span>Thread<span style="color:#f92672">.</span><span style="color:#a6e22e">currentThread</span><span style="color:#f92672">().</span><span style="color:#a6e22e">getContextClassLoader</span><span style="color:#f92672">(),</span> <span style="color:#66d9ef">new</span> Class<span style="color:#f92672">&lt;?&gt;[]</span> <span style="color:#f92672">{</span> serivceClass <span style="color:#f92672">},</span>
+                <span style="color:#f92672">(</span>proxy<span style="color:#f92672">,</span> method<span style="color:#f92672">,</span> args<span style="color:#f92672">)</span> <span style="color:#f92672">-&gt;</span> <span style="color:#f92672">{</span>
+
+                    System<span style="color:#f92672">.</span><span style="color:#a6e22e">out</span><span style="color:#f92672">.</span><span style="color:#a6e22e">println</span><span style="color:#f92672">(</span><span style="color:#e6db74">&#34;(proxy, method, args) 进入....&#34;</span> <span style="color:#f92672">+</span> <span style="color:#f92672">(++</span>count<span style="color:#f92672">)</span> <span style="color:#f92672">+</span> <span style="color:#e6db74">&#34; 次&#34;</span><span style="color:#f92672">);</span>
+                    <span style="color:#75715e">// {} 部分的代码，客户端每调用一次 hello, 就会进入到该代码
+</span><span style="color:#75715e"></span>                    <span style="color:#66d9ef">if</span> <span style="color:#f92672">(</span>client <span style="color:#f92672">==</span> <span style="color:#66d9ef">null</span><span style="color:#f92672">)</span> <span style="color:#f92672">{</span>
+                        initClient<span style="color:#f92672">();</span>
+                    <span style="color:#f92672">}</span>
+
+                    <span style="color:#75715e">// 设置要发给服务器端的信息
+</span><span style="color:#75715e"></span>                    <span style="color:#75715e">// providerName 协议头 args[0] 就是客户端调用api hello(???), 参数
+</span><span style="color:#75715e"></span>                    client<span style="color:#f92672">.</span><span style="color:#a6e22e">setPara</span><span style="color:#f92672">(</span>providerName <span style="color:#f92672">+</span> args<span style="color:#f92672">[</span>0<span style="color:#f92672">]);</span>
+
+                    <span style="color:#75715e">//
+</span><span style="color:#75715e"></span>                    <span style="color:#66d9ef">return</span> executor<span style="color:#f92672">.</span><span style="color:#a6e22e">submit</span><span style="color:#f92672">(</span>client<span style="color:#f92672">).</span><span style="color:#a6e22e">get</span><span style="color:#f92672">();</span>
+
+                <span style="color:#f92672">});</span>
+    <span style="color:#f92672">}</span>
+
+    <span style="color:#75715e">// 初始化客户端
+</span><span style="color:#75715e"></span>    <span style="color:#66d9ef">private</span> <span style="color:#66d9ef">static</span> <span style="color:#66d9ef">void</span> <span style="color:#a6e22e">initClient</span><span style="color:#f92672">()</span> <span style="color:#f92672">{</span>
+        client <span style="color:#f92672">=</span> <span style="color:#66d9ef">new</span> NettyClientHandler<span style="color:#f92672">();</span>
+        <span style="color:#75715e">// 创建EventLoopGroup
+</span><span style="color:#75715e"></span>        NioEventLoopGroup group <span style="color:#f92672">=</span> <span style="color:#66d9ef">new</span> NioEventLoopGroup<span style="color:#f92672">();</span>
+        Bootstrap bootstrap <span style="color:#f92672">=</span> <span style="color:#66d9ef">new</span> Bootstrap<span style="color:#f92672">();</span>
+        bootstrap<span style="color:#f92672">.</span><span style="color:#a6e22e">group</span><span style="color:#f92672">(</span>group<span style="color:#f92672">).</span><span style="color:#a6e22e">channel</span><span style="color:#f92672">(</span>NioSocketChannel<span style="color:#f92672">.</span><span style="color:#a6e22e">class</span><span style="color:#f92672">).</span><span style="color:#a6e22e">option</span><span style="color:#f92672">(</span>ChannelOption<span style="color:#f92672">.</span><span style="color:#a6e22e">TCP_NODELAY</span><span style="color:#f92672">,</span> <span style="color:#66d9ef">true</span><span style="color:#f92672">)</span>
+                <span style="color:#f92672">.</span><span style="color:#a6e22e">handler</span><span style="color:#f92672">(</span><span style="color:#66d9ef">new</span> ChannelInitializer<span style="color:#f92672">&lt;</span>SocketChannel<span style="color:#f92672">&gt;()</span> <span style="color:#f92672">{</span>
+                    <span style="color:#a6e22e">@Override</span>
+                    <span style="color:#66d9ef">protected</span> <span style="color:#66d9ef">void</span> <span style="color:#a6e22e">initChannel</span><span style="color:#f92672">(</span>SocketChannel ch<span style="color:#f92672">)</span> <span style="color:#66d9ef">throws</span> Exception <span style="color:#f92672">{</span>
+                        ChannelPipeline pipeline <span style="color:#f92672">=</span> ch<span style="color:#f92672">.</span><span style="color:#a6e22e">pipeline</span><span style="color:#f92672">();</span>
+                        pipeline<span style="color:#f92672">.</span><span style="color:#a6e22e">addLast</span><span style="color:#f92672">(</span><span style="color:#66d9ef">new</span> StringDecoder<span style="color:#f92672">());</span>
+                        pipeline<span style="color:#f92672">.</span><span style="color:#a6e22e">addLast</span><span style="color:#f92672">(</span><span style="color:#66d9ef">new</span> StringEncoder<span style="color:#f92672">());</span>
+                        pipeline<span style="color:#f92672">.</span><span style="color:#a6e22e">addLast</span><span style="color:#f92672">(</span>client<span style="color:#f92672">);</span>
+                    <span style="color:#f92672">}</span>
+                <span style="color:#f92672">});</span>
+
+        <span style="color:#66d9ef">try</span> <span style="color:#f92672">{</span>
+            bootstrap<span style="color:#f92672">.</span><span style="color:#a6e22e">connect</span><span style="color:#f92672">(</span><span style="color:#e6db74">&#34;127.0.0.1&#34;</span><span style="color:#f92672">,</span> 7000<span style="color:#f92672">).</span><span style="color:#a6e22e">sync</span><span style="color:#f92672">();</span>
+        <span style="color:#f92672">}</span> <span style="color:#66d9ef">catch</span> <span style="color:#f92672">(</span>Exception e<span style="color:#f92672">)</span> <span style="color:#f92672">{</span>
+            e<span style="color:#f92672">.</span><span style="color:#a6e22e">printStackTrace</span><span style="color:#f92672">();</span>
+        <span style="color:#f92672">}</span>
+    <span style="color:#f92672">}</span>
+<span style="color:#f92672">}</span>
+
+</code></pre></div><h4 id="nettyclienthandler">NettyClientHandler</h4>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-java" data-lang="java"><span style="color:#f92672">package</span> com.maizi.rpc.netty<span style="color:#f92672">;</span>
+
+<span style="color:#f92672">import</span> io.netty.channel.ChannelHandlerContext<span style="color:#f92672">;</span>
+<span style="color:#f92672">import</span> io.netty.channel.ChannelInboundHandlerAdapter<span style="color:#f92672">;</span>
+
+<span style="color:#f92672">import</span> java.util.concurrent.Callable<span style="color:#f92672">;</span>
+
+<span style="color:#66d9ef">public</span> <span style="color:#66d9ef">class</span> <span style="color:#a6e22e">NettyClientHandler</span> <span style="color:#66d9ef">extends</span> ChannelInboundHandlerAdapter <span style="color:#66d9ef">implements</span> Callable <span style="color:#f92672">{</span>
+
+    <span style="color:#66d9ef">private</span> ChannelHandlerContext context<span style="color:#f92672">;</span><span style="color:#75715e">// 上下文
+</span><span style="color:#75715e"></span>    <span style="color:#66d9ef">private</span> String result<span style="color:#f92672">;</span> <span style="color:#75715e">// 返回的结果
+</span><span style="color:#75715e"></span>    <span style="color:#66d9ef">private</span> String para<span style="color:#f92672">;</span> <span style="color:#75715e">// 客户端调用方法时，传入的参数
+</span><span style="color:#75715e"></span>
+    <span style="color:#75715e">// 与服务器的连接创建后，就会被调用, 这个方法是第一个被调用(1)
+</span><span style="color:#75715e"></span>    <span style="color:#a6e22e">@Override</span>
+    <span style="color:#66d9ef">public</span> <span style="color:#66d9ef">void</span> <span style="color:#a6e22e">channelActive</span><span style="color:#f92672">(</span>ChannelHandlerContext ctx<span style="color:#f92672">)</span> <span style="color:#66d9ef">throws</span> Exception <span style="color:#f92672">{</span>
+        System<span style="color:#f92672">.</span><span style="color:#a6e22e">out</span><span style="color:#f92672">.</span><span style="color:#a6e22e">println</span><span style="color:#f92672">(</span><span style="color:#e6db74">&#34; channelActive 被调用  &#34;</span><span style="color:#f92672">);</span>
+        context <span style="color:#f92672">=</span> ctx<span style="color:#f92672">;</span> <span style="color:#75715e">// 因为我们在其它方法会使用到 ctx
+</span><span style="color:#75715e"></span>    <span style="color:#f92672">}</span>
+
+    <span style="color:#75715e">// 收到服务器的数据后，调用方法 (4)
+</span><span style="color:#75715e"></span>    <span style="color:#75715e">//
+</span><span style="color:#75715e"></span>    <span style="color:#a6e22e">@Override</span>
+    <span style="color:#66d9ef">public</span> <span style="color:#66d9ef">synchronized</span> <span style="color:#66d9ef">void</span> <span style="color:#a6e22e">channelRead</span><span style="color:#f92672">(</span>ChannelHandlerContext ctx<span style="color:#f92672">,</span> Object msg<span style="color:#f92672">)</span> <span style="color:#66d9ef">throws</span> Exception <span style="color:#f92672">{</span>
+        System<span style="color:#f92672">.</span><span style="color:#a6e22e">out</span><span style="color:#f92672">.</span><span style="color:#a6e22e">println</span><span style="color:#f92672">(</span><span style="color:#e6db74">&#34; channelRead 被调用  &#34;</span><span style="color:#f92672">);</span>
+        result <span style="color:#f92672">=</span> msg<span style="color:#f92672">.</span><span style="color:#a6e22e">toString</span><span style="color:#f92672">();</span>
+        notify<span style="color:#f92672">();</span> <span style="color:#75715e">// 唤醒等待的线程
+</span><span style="color:#75715e"></span>    <span style="color:#f92672">}</span>
+
+    <span style="color:#a6e22e">@Override</span>
+    <span style="color:#66d9ef">public</span> <span style="color:#66d9ef">void</span> <span style="color:#a6e22e">exceptionCaught</span><span style="color:#f92672">(</span>ChannelHandlerContext ctx<span style="color:#f92672">,</span> Throwable cause<span style="color:#f92672">)</span> <span style="color:#66d9ef">throws</span> Exception <span style="color:#f92672">{</span>
+        ctx<span style="color:#f92672">.</span><span style="color:#a6e22e">close</span><span style="color:#f92672">();</span>
+    <span style="color:#f92672">}</span>
+
+    <span style="color:#75715e">// 被代理对象调用, 发送数据给服务器，-&gt; wait -&gt; 等待被唤醒(channelRead) -&gt; 返回结果 (3)-》5
+</span><span style="color:#75715e"></span>    <span style="color:#a6e22e">@Override</span>
+    <span style="color:#66d9ef">public</span> <span style="color:#66d9ef">synchronized</span> Object <span style="color:#a6e22e">call</span><span style="color:#f92672">()</span> <span style="color:#66d9ef">throws</span> Exception <span style="color:#f92672">{</span>
+        System<span style="color:#f92672">.</span><span style="color:#a6e22e">out</span><span style="color:#f92672">.</span><span style="color:#a6e22e">println</span><span style="color:#f92672">(</span><span style="color:#e6db74">&#34; call1 被调用  &#34;</span><span style="color:#f92672">);</span>
+        context<span style="color:#f92672">.</span><span style="color:#a6e22e">writeAndFlush</span><span style="color:#f92672">(</span>para<span style="color:#f92672">);</span>
+        <span style="color:#75715e">// 进行wait
+</span><span style="color:#75715e"></span>        wait<span style="color:#f92672">();</span> <span style="color:#75715e">// 等待channelRead 方法获取到服务器的结果后，唤醒
+</span><span style="color:#75715e"></span>        System<span style="color:#f92672">.</span><span style="color:#a6e22e">out</span><span style="color:#f92672">.</span><span style="color:#a6e22e">println</span><span style="color:#f92672">(</span><span style="color:#e6db74">&#34; call2 被调用  &#34;</span><span style="color:#f92672">);</span>
+        <span style="color:#66d9ef">return</span> result<span style="color:#f92672">;</span> <span style="color:#75715e">// 服务方返回的结果
+</span><span style="color:#75715e"></span>
+    <span style="color:#f92672">}</span>
+
+    <span style="color:#75715e">// (2)
+</span><span style="color:#75715e"></span>    <span style="color:#66d9ef">void</span> <span style="color:#a6e22e">setPara</span><span style="color:#f92672">(</span>String para<span style="color:#f92672">)</span> <span style="color:#f92672">{</span>
+        System<span style="color:#f92672">.</span><span style="color:#a6e22e">out</span><span style="color:#f92672">.</span><span style="color:#a6e22e">println</span><span style="color:#f92672">(</span><span style="color:#e6db74">&#34; setPara  &#34;</span><span style="color:#f92672">);</span>
+        <span style="color:#66d9ef">this</span><span style="color:#f92672">.</span><span style="color:#a6e22e">para</span> <span style="color:#f92672">=</span> para<span style="color:#f92672">;</span>
+    <span style="color:#f92672">}</span>
+<span style="color:#f92672">}</span>
+
+</code></pre></div><h4 id="nettyserver">NettyServer</h4>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-java" data-lang="java"><span style="color:#f92672">package</span> com.maizi.rpc.netty<span style="color:#f92672">;</span>
+
+<span style="color:#f92672">import</span> io.netty.bootstrap.ServerBootstrap<span style="color:#f92672">;</span>
+<span style="color:#f92672">import</span> io.netty.channel.ChannelFuture<span style="color:#f92672">;</span>
+<span style="color:#f92672">import</span> io.netty.channel.ChannelInitializer<span style="color:#f92672">;</span>
+<span style="color:#f92672">import</span> io.netty.channel.ChannelPipeline<span style="color:#f92672">;</span>
+<span style="color:#f92672">import</span> io.netty.channel.EventLoopGroup<span style="color:#f92672">;</span>
+<span style="color:#f92672">import</span> io.netty.channel.nio.NioEventLoopGroup<span style="color:#f92672">;</span>
+<span style="color:#f92672">import</span> io.netty.channel.socket.SocketChannel<span style="color:#f92672">;</span>
+<span style="color:#f92672">import</span> io.netty.channel.socket.nio.NioServerSocketChannel<span style="color:#f92672">;</span>
+<span style="color:#f92672">import</span> io.netty.handler.codec.string.StringDecoder<span style="color:#f92672">;</span>
+<span style="color:#f92672">import</span> io.netty.handler.codec.string.StringEncoder<span style="color:#f92672">;</span>
+
+<span style="color:#66d9ef">public</span> <span style="color:#66d9ef">class</span> <span style="color:#a6e22e">NettyServer</span> <span style="color:#f92672">{</span>
+
+    <span style="color:#66d9ef">public</span> <span style="color:#66d9ef">static</span> <span style="color:#66d9ef">void</span> <span style="color:#a6e22e">startServer</span><span style="color:#f92672">(</span>String hostName<span style="color:#f92672">,</span> <span style="color:#66d9ef">int</span> port<span style="color:#f92672">)</span> <span style="color:#f92672">{</span>
+        startServer0<span style="color:#f92672">(</span>hostName<span style="color:#f92672">,</span> port<span style="color:#f92672">);</span>
+    <span style="color:#f92672">}</span>
+
+    <span style="color:#75715e">// 编写一个方法，完成对NettyServer的初始化和启动
+</span><span style="color:#75715e"></span>
+    <span style="color:#66d9ef">private</span> <span style="color:#66d9ef">static</span> <span style="color:#66d9ef">void</span> <span style="color:#a6e22e">startServer0</span><span style="color:#f92672">(</span>String hostname<span style="color:#f92672">,</span> <span style="color:#66d9ef">int</span> port<span style="color:#f92672">)</span> <span style="color:#f92672">{</span>
+
+        EventLoopGroup bossGroup <span style="color:#f92672">=</span> <span style="color:#66d9ef">new</span> NioEventLoopGroup<span style="color:#f92672">(</span>1<span style="color:#f92672">);</span>
+        EventLoopGroup workerGroup <span style="color:#f92672">=</span> <span style="color:#66d9ef">new</span> NioEventLoopGroup<span style="color:#f92672">();</span>
+
+        <span style="color:#66d9ef">try</span> <span style="color:#f92672">{</span>
+
+            ServerBootstrap serverBootstrap <span style="color:#f92672">=</span> <span style="color:#66d9ef">new</span> ServerBootstrap<span style="color:#f92672">();</span>
+
+            serverBootstrap<span style="color:#f92672">.</span><span style="color:#a6e22e">group</span><span style="color:#f92672">(</span>bossGroup<span style="color:#f92672">,</span> workerGroup<span style="color:#f92672">).</span><span style="color:#a6e22e">channel</span><span style="color:#f92672">(</span>NioServerSocketChannel<span style="color:#f92672">.</span><span style="color:#a6e22e">class</span><span style="color:#f92672">)</span>
+                    <span style="color:#f92672">.</span><span style="color:#a6e22e">childHandler</span><span style="color:#f92672">(</span><span style="color:#66d9ef">new</span> ChannelInitializer<span style="color:#f92672">&lt;</span>SocketChannel<span style="color:#f92672">&gt;()</span> <span style="color:#f92672">{</span>
+                        <span style="color:#a6e22e">@Override</span>
+                        <span style="color:#66d9ef">protected</span> <span style="color:#66d9ef">void</span> <span style="color:#a6e22e">initChannel</span><span style="color:#f92672">(</span>SocketChannel ch<span style="color:#f92672">)</span> <span style="color:#66d9ef">throws</span> Exception <span style="color:#f92672">{</span>
+                            ChannelPipeline pipeline <span style="color:#f92672">=</span> ch<span style="color:#f92672">.</span><span style="color:#a6e22e">pipeline</span><span style="color:#f92672">();</span>
+                            pipeline<span style="color:#f92672">.</span><span style="color:#a6e22e">addLast</span><span style="color:#f92672">(</span><span style="color:#66d9ef">new</span> StringDecoder<span style="color:#f92672">());</span>
+                            pipeline<span style="color:#f92672">.</span><span style="color:#a6e22e">addLast</span><span style="color:#f92672">(</span><span style="color:#66d9ef">new</span> StringEncoder<span style="color:#f92672">());</span>
+                            pipeline<span style="color:#f92672">.</span><span style="color:#a6e22e">addLast</span><span style="color:#f92672">(</span><span style="color:#66d9ef">new</span> NettyServerHandler<span style="color:#f92672">());</span> <span style="color:#75715e">// 业务处理器
+</span><span style="color:#75715e"></span>
+                        <span style="color:#f92672">}</span>
+                    <span style="color:#f92672">}</span>
+
+                    <span style="color:#f92672">);</span>
+
+            ChannelFuture channelFuture <span style="color:#f92672">=</span> serverBootstrap<span style="color:#f92672">.</span><span style="color:#a6e22e">bind</span><span style="color:#f92672">(</span>hostname<span style="color:#f92672">,</span> port<span style="color:#f92672">).</span><span style="color:#a6e22e">sync</span><span style="color:#f92672">();</span>
+            System<span style="color:#f92672">.</span><span style="color:#a6e22e">out</span><span style="color:#f92672">.</span><span style="color:#a6e22e">println</span><span style="color:#f92672">(</span><span style="color:#e6db74">&#34;服务提供方开始提供服务~~&#34;</span><span style="color:#f92672">);</span>
+            channelFuture<span style="color:#f92672">.</span><span style="color:#a6e22e">channel</span><span style="color:#f92672">().</span><span style="color:#a6e22e">closeFuture</span><span style="color:#f92672">().</span><span style="color:#a6e22e">sync</span><span style="color:#f92672">();</span>
+
+        <span style="color:#f92672">}</span> <span style="color:#66d9ef">catch</span> <span style="color:#f92672">(</span>Exception e<span style="color:#f92672">)</span> <span style="color:#f92672">{</span>
+            e<span style="color:#f92672">.</span><span style="color:#a6e22e">printStackTrace</span><span style="color:#f92672">();</span>
+        <span style="color:#f92672">}</span> <span style="color:#66d9ef">finally</span> <span style="color:#f92672">{</span>
+            bossGroup<span style="color:#f92672">.</span><span style="color:#a6e22e">shutdownGracefully</span><span style="color:#f92672">();</span>
+            workerGroup<span style="color:#f92672">.</span><span style="color:#a6e22e">shutdownGracefully</span><span style="color:#f92672">();</span>
+        <span style="color:#f92672">}</span>
+
+    <span style="color:#f92672">}</span>
+<span style="color:#f92672">}</span>
+
+</code></pre></div><h4 id="nettyserverhandler">NettyServerHandler</h4>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-java" data-lang="java"><span style="color:#f92672">package</span> com.maizi.rpc.netty<span style="color:#f92672">;</span>
+
+<span style="color:#f92672">import</span> com.maizi.rpc.customer.ClientBootstrap<span style="color:#f92672">;</span>
+<span style="color:#f92672">import</span> com.maizi.rpc.provider.HelloServiceImpl<span style="color:#f92672">;</span>
+
+<span style="color:#f92672">import</span> io.netty.channel.ChannelHandlerContext<span style="color:#f92672">;</span>
+<span style="color:#f92672">import</span> io.netty.channel.ChannelInboundHandlerAdapter<span style="color:#f92672">;</span>
+
+<span style="color:#75715e">//服务器这边handler比较简单
+</span><span style="color:#75715e"></span><span style="color:#66d9ef">public</span> <span style="color:#66d9ef">class</span> <span style="color:#a6e22e">NettyServerHandler</span> <span style="color:#66d9ef">extends</span> ChannelInboundHandlerAdapter <span style="color:#f92672">{</span>
+
+    <span style="color:#a6e22e">@Override</span>
+    <span style="color:#66d9ef">public</span> <span style="color:#66d9ef">void</span> <span style="color:#a6e22e">channelRead</span><span style="color:#f92672">(</span>ChannelHandlerContext ctx<span style="color:#f92672">,</span> Object msg<span style="color:#f92672">)</span> <span style="color:#66d9ef">throws</span> Exception <span style="color:#f92672">{</span>
+        <span style="color:#75715e">// 获取客户端发送的消息，并调用服务
+</span><span style="color:#75715e"></span>        System<span style="color:#f92672">.</span><span style="color:#a6e22e">out</span><span style="color:#f92672">.</span><span style="color:#a6e22e">println</span><span style="color:#f92672">(</span><span style="color:#e6db74">&#34;msg=&#34;</span> <span style="color:#f92672">+</span> msg<span style="color:#f92672">);</span>
+        <span style="color:#75715e">// 客户端在调用服务器的api 时，我们需要定义一个协议
+</span><span style="color:#75715e"></span>        <span style="color:#75715e">// 比如我们要求 每次发消息是都必须以某个字符串开头 &#34;HelloService#hello#你好&#34;
+</span><span style="color:#75715e"></span>        <span style="color:#66d9ef">if</span> <span style="color:#f92672">(</span>msg<span style="color:#f92672">.</span><span style="color:#a6e22e">toString</span><span style="color:#f92672">().</span><span style="color:#a6e22e">startsWith</span><span style="color:#f92672">(</span>ClientBootstrap<span style="color:#f92672">.</span><span style="color:#a6e22e">providerName</span><span style="color:#f92672">))</span> <span style="color:#f92672">{</span>
+
+            String result <span style="color:#f92672">=</span> <span style="color:#66d9ef">new</span> HelloServiceImpl<span style="color:#f92672">().</span><span style="color:#a6e22e">hello</span><span style="color:#f92672">(</span>msg<span style="color:#f92672">.</span><span style="color:#a6e22e">toString</span><span style="color:#f92672">().</span><span style="color:#a6e22e">substring</span><span style="color:#f92672">(</span>msg<span style="color:#f92672">.</span><span style="color:#a6e22e">toString</span><span style="color:#f92672">().</span><span style="color:#a6e22e">lastIndexOf</span><span style="color:#f92672">(</span><span style="color:#e6db74">&#34;#&#34;</span><span style="color:#f92672">)</span> <span style="color:#f92672">+</span> 1<span style="color:#f92672">));</span>
+            ctx<span style="color:#f92672">.</span><span style="color:#a6e22e">writeAndFlush</span><span style="color:#f92672">(</span>result<span style="color:#f92672">);</span>
+        <span style="color:#f92672">}</span>
+    <span style="color:#f92672">}</span>
+
+    <span style="color:#a6e22e">@Override</span>
+    <span style="color:#66d9ef">public</span> <span style="color:#66d9ef">void</span> <span style="color:#a6e22e">exceptionCaught</span><span style="color:#f92672">(</span>ChannelHandlerContext ctx<span style="color:#f92672">,</span> Throwable cause<span style="color:#f92672">)</span> <span style="color:#66d9ef">throws</span> Exception <span style="color:#f92672">{</span>
+        ctx<span style="color:#f92672">.</span><span style="color:#a6e22e">close</span><span style="color:#f92672">();</span>
+    <span style="color:#f92672">}</span>
+<span style="color:#f92672">}</span>
+
+</code></pre></div><h3 id="消费接口类">消费接口类</h3>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-java" data-lang="java"><span style="color:#f92672">package</span> com.maizi.rpc.customer<span style="color:#f92672">;</span>
+
+<span style="color:#f92672">import</span> com.maizi.rpc.netty.NettyClient<span style="color:#f92672">;</span>
+<span style="color:#f92672">import</span> com.maizi.rpc.publicinterface.HelloService<span style="color:#f92672">;</span>
+
+<span style="color:#66d9ef">public</span> <span style="color:#66d9ef">class</span> <span style="color:#a6e22e">ClientBootstrap</span> <span style="color:#f92672">{</span>
+
+    <span style="color:#75715e">// 这里定义协议头
+</span><span style="color:#75715e"></span>    <span style="color:#66d9ef">public</span> <span style="color:#66d9ef">static</span> <span style="color:#66d9ef">final</span> String providerName <span style="color:#f92672">=</span> <span style="color:#e6db74">&#34;HelloService#hello#&#34;</span><span style="color:#f92672">;</span>
+
+    <span style="color:#66d9ef">public</span> <span style="color:#66d9ef">static</span> <span style="color:#66d9ef">void</span> <span style="color:#a6e22e">main</span><span style="color:#f92672">(</span>String<span style="color:#f92672">[]</span> args<span style="color:#f92672">)</span> <span style="color:#66d9ef">throws</span> Exception <span style="color:#f92672">{</span>
+
+        <span style="color:#75715e">// 创建一个消费者
+</span><span style="color:#75715e"></span>        NettyClient customer <span style="color:#f92672">=</span> <span style="color:#66d9ef">new</span> NettyClient<span style="color:#f92672">();</span>
+
+        <span style="color:#75715e">// 创建代理对象
+</span><span style="color:#75715e"></span>        HelloService service <span style="color:#f92672">=</span> <span style="color:#f92672">(</span>HelloService<span style="color:#f92672">)</span> customer<span style="color:#f92672">.</span><span style="color:#a6e22e">getBean</span><span style="color:#f92672">(</span>HelloService<span style="color:#f92672">.</span><span style="color:#a6e22e">class</span><span style="color:#f92672">,</span> providerName<span style="color:#f92672">);</span>
+
+        <span style="color:#66d9ef">for</span> <span style="color:#f92672">(;;)</span> <span style="color:#f92672">{</span>
+            Thread<span style="color:#f92672">.</span><span style="color:#a6e22e">sleep</span><span style="color:#f92672">(</span>2 <span style="color:#f92672">*</span> 1000<span style="color:#f92672">);</span>
+            <span style="color:#75715e">// 通过代理对象调用服务提供者的方法(服务)
+</span><span style="color:#75715e"></span>            String res <span style="color:#f92672">=</span> service<span style="color:#f92672">.</span><span style="color:#a6e22e">hello</span><span style="color:#f92672">(</span><span style="color:#e6db74">&#34;你好 dubbo~&#34;</span><span style="color:#f92672">);</span>
+            System<span style="color:#f92672">.</span><span style="color:#a6e22e">out</span><span style="color:#f92672">.</span><span style="color:#a6e22e">println</span><span style="color:#f92672">(</span><span style="color:#e6db74">&#34;调用的结果 res= &#34;</span> <span style="color:#f92672">+</span> res<span style="color:#f92672">);</span>
+        <span style="color:#f92672">}</span>
+    <span style="color:#f92672">}</span>
+<span style="color:#f92672">}</span>
+
+</code></pre></div><h3 id="提供接口类">提供接口类</h3>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-java" data-lang="java"><span style="color:#f92672">package</span> com.maizi.rpc.provider<span style="color:#f92672">;</span>
+
+<span style="color:#f92672">import</span> com.maizi.rpc.publicinterface.HelloService<span style="color:#f92672">;</span>
+
+<span style="color:#66d9ef">public</span> <span style="color:#66d9ef">class</span> <span style="color:#a6e22e">HelloServiceImpl</span> <span style="color:#66d9ef">implements</span> HelloService <span style="color:#f92672">{</span>
+
+    <span style="color:#66d9ef">private</span> <span style="color:#66d9ef">static</span> <span style="color:#66d9ef">int</span> count<span style="color:#f92672">;</span>
+
+    <span style="color:#75715e">// 当有消费方调用该方法时， 就返回一个结果
+</span><span style="color:#75715e"></span>    <span style="color:#a6e22e">@Override</span>
+    <span style="color:#66d9ef">public</span> <span style="color:#66d9ef">synchronized</span> String <span style="color:#a6e22e">hello</span><span style="color:#f92672">(</span>String mes<span style="color:#f92672">)</span> <span style="color:#f92672">{</span>
+        System<span style="color:#f92672">.</span><span style="color:#a6e22e">out</span><span style="color:#f92672">.</span><span style="color:#a6e22e">println</span><span style="color:#f92672">(</span><span style="color:#e6db74">&#34;收到客户端消息=&#34;</span> <span style="color:#f92672">+</span> mes<span style="color:#f92672">);</span>
+        <span style="color:#75715e">// 根据mes 返回不同的结果
+</span><span style="color:#75715e"></span>        <span style="color:#66d9ef">if</span> <span style="color:#f92672">(</span>mes <span style="color:#f92672">!=</span> <span style="color:#66d9ef">null</span><span style="color:#f92672">)</span> <span style="color:#f92672">{</span>
+            <span style="color:#66d9ef">return</span> <span style="color:#e6db74">&#34;你好客户端, 我已经收到你的消息 [&#34;</span> <span style="color:#f92672">+</span> mes <span style="color:#f92672">+</span> <span style="color:#e6db74">&#34;] 第&#34;</span> <span style="color:#f92672">+</span> <span style="color:#f92672">(++</span>count<span style="color:#f92672">)</span> <span style="color:#f92672">+</span> <span style="color:#e6db74">&#34; 次&#34;</span><span style="color:#f92672">;</span>
+        <span style="color:#f92672">}</span> <span style="color:#66d9ef">else</span> <span style="color:#f92672">{</span>
+            <span style="color:#66d9ef">return</span> <span style="color:#e6db74">&#34;你好客户端, 我已经收到你的消息 &#34;</span><span style="color:#f92672">;</span>
+        <span style="color:#f92672">}</span>
+    <span style="color:#f92672">}</span>
+<span style="color:#f92672">}</span>
+
+</code></pre></div><div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-java" data-lang="java"><span style="color:#f92672">package</span> com.maizi.rpc.provider<span style="color:#f92672">;</span>
+
+<span style="color:#f92672">import</span> com.maizi.rpc.netty.NettyServer<span style="color:#f92672">;</span>
+
+<span style="color:#75715e">//ServerBootstrap 会启动一个服务提供者，就是 NettyServer
+</span><span style="color:#75715e"></span><span style="color:#66d9ef">public</span> <span style="color:#66d9ef">class</span> <span style="color:#a6e22e">ServerBootstrap</span> <span style="color:#f92672">{</span>
+    <span style="color:#66d9ef">public</span> <span style="color:#66d9ef">static</span> <span style="color:#66d9ef">void</span> <span style="color:#a6e22e">main</span><span style="color:#f92672">(</span>String<span style="color:#f92672">[]</span> args<span style="color:#f92672">)</span> <span style="color:#f92672">{</span>
+
+        <span style="color:#75715e">// 代码代填..
+</span><span style="color:#75715e"></span>        NettyServer<span style="color:#f92672">.</span><span style="color:#a6e22e">startServer</span><span style="color:#f92672">(</span><span style="color:#e6db74">&#34;127.0.0.1&#34;</span><span style="color:#f92672">,</span> 7000<span style="color:#f92672">);</span>
+    <span style="color:#f92672">}</span>
+<span style="color:#f92672">}</span>
+
+</code></pre></div><h3 id="运行结果">运行结果</h3>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-java" data-lang="java">服务提供方开始提供服务<span style="color:#f92672">~~</span>
+msg<span style="color:#f92672">=</span>HelloService<span style="color:#960050;background-color:#1e0010">#</span>hello<span style="color:#960050;background-color:#1e0010">#</span>你好 dubbo<span style="color:#f92672">~</span>
+收到客户端消息<span style="color:#f92672">=</span>你好 dubbo<span style="color:#f92672">~</span>
+msg<span style="color:#f92672">=</span>HelloService<span style="color:#960050;background-color:#1e0010">#</span>hello<span style="color:#960050;background-color:#1e0010">#</span>你好 dubbo<span style="color:#f92672">~</span>
+收到客户端消息<span style="color:#f92672">=</span>你好 dubbo<span style="color:#f92672">~</span>
+msg<span style="color:#f92672">=</span>HelloService<span style="color:#960050;background-color:#1e0010">#</span>hello<span style="color:#960050;background-color:#1e0010">#</span>你好 dubbo<span style="color:#f92672">~</span>
+收到客户端消息<span style="color:#f92672">=</span>你好 dubbo<span style="color:#f92672">~</span>
+msg<span style="color:#f92672">=</span>HelloService<span style="color:#960050;background-color:#1e0010">#</span>hello<span style="color:#960050;background-color:#1e0010">#</span>你好 dubbo<span style="color:#f92672">~</span>
+收到客户端消息<span style="color:#f92672">=</span>你好 dubbo<span style="color:#f92672">~</span>
+msg<span style="color:#f92672">=</span>HelloService<span style="color:#960050;background-color:#1e0010">#</span>hello<span style="color:#960050;background-color:#1e0010">#</span>你好 dubbo<span style="color:#f92672">~</span>
+</code></pre></div><div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-java" data-lang="java"><span style="color:#f92672">(</span>proxy<span style="color:#f92672">,</span> method<span style="color:#f92672">,</span> args<span style="color:#f92672">)</span> 进入<span style="color:#f92672">....</span><span style="color:#a6e22e">1</span> 次
  channelActive 被调用  
  setPara  
  call1 被调用  
  channelRead 被调用  
  call2 被调用  
-调用的结果 res= 你好客户端, 我已经收到你的消息 [你好 dubbo~] 第1 次
-(proxy, method, args) 进入....2 次
+调用的结果 res<span style="color:#f92672">=</span> 你好客户端<span style="color:#f92672">,</span> 我已经收到你的消息 <span style="color:#f92672">[</span>你好 dubbo<span style="color:#f92672">~]</span> 第1 <span style="color:#a6e22e">次</span>
+<span style="color:#f92672">(</span>proxy<span style="color:#f92672">,</span> method<span style="color:#f92672">,</span> args<span style="color:#f92672">)</span> 进入<span style="color:#f92672">....</span><span style="color:#a6e22e">2</span> 次
  setPara  
  call1 被调用  
  channelRead 被调用  
  call2 被调用  
-调用的结果 res= 你好客户端, 我已经收到你的消息 [你好 dubbo~] 第2 次
-(proxy, method, args) 进入....3 次
+调用的结果 res<span style="color:#f92672">=</span> 你好客户端<span style="color:#f92672">,</span> 我已经收到你的消息 <span style="color:#f92672">[</span>你好 dubbo<span style="color:#f92672">~]</span> 第2 <span style="color:#a6e22e">次</span>
+<span style="color:#f92672">(</span>proxy<span style="color:#f92672">,</span> method<span style="color:#f92672">,</span> args<span style="color:#f92672">)</span> 进入<span style="color:#f92672">....</span><span style="color:#a6e22e">3</span> 次
  setPara  
  call1 被调用  
  channelRead 被调用  
  call2 被调用  
-调用的结果 res= 你好客户端, 我已经收到你的消息 [你好 dubbo~] 第3 次
-</code></pre>
-
-<h1 id="总结">总结</h1>
-
+调用的结果 res<span style="color:#f92672">=</span> 你好客户端<span style="color:#f92672">,</span> 我已经收到你的消息 <span style="color:#f92672">[</span>你好 dubbo<span style="color:#f92672">~]</span> 第3 次
+</code></pre></div><h1 id="总结">总结</h1>
 <p>通过代理，执行公共接口的方法。</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-java" data-lang="java">
+    <span style="color:#66d9ef">public</span> Object <span style="color:#a6e22e">getBean</span><span style="color:#f92672">(</span><span style="color:#66d9ef">final</span> Class<span style="color:#f92672">&lt;?&gt;</span> serivceClass<span style="color:#f92672">,</span> <span style="color:#66d9ef">final</span> String providerName<span style="color:#f92672">)</span> <span style="color:#f92672">{</span>
 
-<pre><code class="language-java">
-    public Object getBean(final Class&lt;?&gt; serivceClass, final String providerName) {
+        <span style="color:#66d9ef">return</span> Proxy<span style="color:#f92672">.</span><span style="color:#a6e22e">newProxyInstance</span><span style="color:#f92672">(</span>Thread<span style="color:#f92672">.</span><span style="color:#a6e22e">currentThread</span><span style="color:#f92672">().</span><span style="color:#a6e22e">getContextClassLoader</span><span style="color:#f92672">(),</span> <span style="color:#66d9ef">new</span> Class<span style="color:#f92672">&lt;?&gt;[]</span> <span style="color:#f92672">{</span> serivceClass <span style="color:#f92672">},</span>
+                <span style="color:#f92672">(</span>proxy<span style="color:#f92672">,</span> method<span style="color:#f92672">,</span> args<span style="color:#f92672">)</span> <span style="color:#f92672">-&gt;</span> <span style="color:#f92672">{</span>
 
-        return Proxy.newProxyInstance(Thread.currentThread().getContextClassLoader(), new Class&lt;?&gt;[] { serivceClass },
-                (proxy, method, args) -&gt; {
+                    System<span style="color:#f92672">.</span><span style="color:#a6e22e">out</span><span style="color:#f92672">.</span><span style="color:#a6e22e">println</span><span style="color:#f92672">(</span><span style="color:#e6db74">&#34;(proxy, method, args) 进入....&#34;</span> <span style="color:#f92672">+</span> <span style="color:#f92672">(++</span>count<span style="color:#f92672">)</span> <span style="color:#f92672">+</span> <span style="color:#e6db74">&#34; 次&#34;</span><span style="color:#f92672">);</span>
+                    <span style="color:#75715e">// {} 部分的代码，客户端每调用一次 hello, 就会进入到该代码
+</span><span style="color:#75715e"></span>                    <span style="color:#66d9ef">if</span> <span style="color:#f92672">(</span>client <span style="color:#f92672">==</span> <span style="color:#66d9ef">null</span><span style="color:#f92672">)</span> <span style="color:#f92672">{</span>
+                        initClient<span style="color:#f92672">();</span>
+                    <span style="color:#f92672">}</span>
 
-                    System.out.println(&quot;(proxy, method, args) 进入....&quot; + (++count) + &quot; 次&quot;);
-                    // {} 部分的代码，客户端每调用一次 hello, 就会进入到该代码
-                    if (client == null) {
-                        initClient();
-                    }
+                    <span style="color:#75715e">// 设置要发给服务器端的信息
+</span><span style="color:#75715e"></span>                    <span style="color:#75715e">// providerName 协议头 args[0] 就是客户端调用api hello(???), 参数
+</span><span style="color:#75715e"></span>                    client<span style="color:#f92672">.</span><span style="color:#a6e22e">setPara</span><span style="color:#f92672">(</span>providerName <span style="color:#f92672">+</span> args<span style="color:#f92672">[</span>0<span style="color:#f92672">]);</span>
 
-                    // 设置要发给服务器端的信息
-                    // providerName 协议头 args[0] 就是客户端调用api hello(???), 参数
-                    client.setPara(providerName + args[0]);
+                    <span style="color:#75715e">//
+</span><span style="color:#75715e"></span>                    <span style="color:#66d9ef">return</span> executor<span style="color:#f92672">.</span><span style="color:#a6e22e">submit</span><span style="color:#f92672">(</span>client<span style="color:#f92672">).</span><span style="color:#a6e22e">get</span><span style="color:#f92672">();</span>
 
-                    //
-                    return executor.submit(client).get();
+                <span style="color:#f92672">});</span>
+    <span style="color:#f92672">}</span>
+</code></pre></div><p>同时，实现Callable接口，</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-java" data-lang="java"><span style="color:#66d9ef">public</span> <span style="color:#66d9ef">class</span> <span style="color:#a6e22e">NettyClientHandler</span> <span style="color:#66d9ef">extends</span> ChannelInboundHandlerAdapter <span style="color:#66d9ef">implements</span> Callable <span style="color:#f92672">{</span>
+</code></pre></div><p>回调下面的call方法。</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-java" data-lang="java"> <span style="color:#75715e">// 被代理对象调用, 发送数据给服务器，-&gt; wait -&gt; 等待被唤醒(channelRead) -&gt; 返回结果 (3)-》5
+</span><span style="color:#75715e"></span>    <span style="color:#a6e22e">@Override</span>
+    <span style="color:#66d9ef">public</span> <span style="color:#66d9ef">synchronized</span> Object <span style="color:#a6e22e">call</span><span style="color:#f92672">()</span> <span style="color:#66d9ef">throws</span> Exception <span style="color:#f92672">{</span>
+        System<span style="color:#f92672">.</span><span style="color:#a6e22e">out</span><span style="color:#f92672">.</span><span style="color:#a6e22e">println</span><span style="color:#f92672">(</span><span style="color:#e6db74">&#34; call1 被调用  &#34;</span><span style="color:#f92672">);</span>
+        context<span style="color:#f92672">.</span><span style="color:#a6e22e">writeAndFlush</span><span style="color:#f92672">(</span>para<span style="color:#f92672">);</span>
+        <span style="color:#75715e">// 进行wait
+</span><span style="color:#75715e"></span>        wait<span style="color:#f92672">();</span> <span style="color:#75715e">// 等待channelRead 方法获取到服务器的结果后，唤醒
+</span><span style="color:#75715e"></span>        System<span style="color:#f92672">.</span><span style="color:#a6e22e">out</span><span style="color:#f92672">.</span><span style="color:#a6e22e">println</span><span style="color:#f92672">(</span><span style="color:#e6db74">&#34; call2 被调用  &#34;</span><span style="color:#f92672">);</span>
+        <span style="color:#66d9ef">return</span> result<span style="color:#f92672">;</span> <span style="color:#75715e">// 服务方返回的结果
+</span><span style="color:#75715e"></span>
+    <span style="color:#f92672">}</span>
 
-                });
-    }
-</code></pre>
-
-<p>同时，实现Callable接口，</p>
-
-<pre><code class="language-java">public class NettyClientHandler extends ChannelInboundHandlerAdapter implements Callable {
-</code></pre>
-
-<p>回调下面的call方法。</p>
-
-<pre><code class="language-java"> // 被代理对象调用, 发送数据给服务器，-&gt; wait -&gt; 等待被唤醒(channelRead) -&gt; 返回结果 (3)-》5
-    @Override
-    public synchronized Object call() throws Exception {
-        System.out.println(&quot; call1 被调用  &quot;);
-        context.writeAndFlush(para);
-        // 进行wait
-        wait(); // 等待channelRead 方法获取到服务器的结果后，唤醒
-        System.out.println(&quot; call2 被调用  &quot;);
-        return result; // 服务方返回的结果
-
-    }
-
-</code></pre>
-
+</code></pre></div>
 
                 
                 
@@ -782,33 +725,22 @@ msg=HelloService#hello#你好 dubbo~
                     </h4>
                     <ul class="catalog-body"></ul>
                     <nav id="TableOfContents">
-<ul>
-<li><a href="#rpc基本介绍">RPC基本介绍</a></li>
-<li><a href="#常见的-rpc-框架有">常见的 RPC 框架有</a></li>
-<li><a href="#rpc调用流程">RPC调用流程</a>
-<ul>
-<li><a href="#调用流程说明">调用流程说明</a></li>
-</ul></li>
-<li><a href="#使用netty编写doubbo-rpc">使用Netty编写Doubbo RPC</a>
-<ul>
-<li><a href="#思路流程">思路流程</a></li>
-<li><a href="#具体代码如下">具体代码如下</a>
-<ul>
-<li><a href="#公共接口-也就是要消费和提供的接口">公共接口，也就是要消费和提供的接口</a></li>
-<li><a href="#基础类封装">基础类封装</a>
-<ul>
-<li><a href="#nettyclient">NettyClient</a></li>
-<li><a href="#nettyclienthandler">NettyClientHandler</a></li>
-<li><a href="#nettyserver">NettyServer</a></li>
-<li><a href="#nettyserverhandler">NettyServerHandler</a></li>
-</ul></li>
-<li><a href="#消费接口类">消费接口类</a></li>
-<li><a href="#提供接口类">提供接口类</a></li>
-<li><a href="#运行结果">运行结果</a></li>
-</ul></li>
-</ul></li>
-<li><a href="#总结">总结</a></li>
-</ul>
+  <ul>
+    <li><a href="#调用流程说明">调用流程说明</a></li>
+  </ul>
+
+  <ul>
+    <li><a href="#思路流程">思路流程</a></li>
+    <li><a href="#具体代码如下">具体代码如下</a>
+      <ul>
+        <li><a href="#公共接口也就是要消费和提供的接口">公共接口，也就是要消费和提供的接口</a></li>
+        <li><a href="#基础类封装">基础类封装</a></li>
+        <li><a href="#消费接口类">消费接口类</a></li>
+        <li><a href="#提供接口类">提供接口类</a></li>
+        <li><a href="#运行结果">运行结果</a></li>
+      </ul>
+    </li>
+  </ul>
 </nav>
                     <br>
                     <br>
@@ -833,9 +765,6 @@ msg=HelloService#hello#你好 dubbo~
                         
                         
                         
-                        <a href="/tags/" title="">
-                            
-                        </a>
                         
                         
                         
@@ -845,101 +774,6 @@ msg=HelloService#hello#你好 dubbo~
                         
                         
                         
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        <a href="/tags/qt" title="QT">
-                            QT
-                        </a>
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        <a href="/tags/zookeeper" title="Zookeeper">
-                            Zookeeper
-                        </a>
                         
                         
                         
@@ -979,8 +813,10 @@ msg=HelloService#hello#你好 dubbo~
                         
                         
                         
-                        <a href="/tags/elasticsearch" title="elasticSearch">
-                            elasticSearch
+                        
+                        
+                        <a href="/tags/elasticsearch" title="elasticsearch">
+                            elasticsearch
                         </a>
                         
                         
@@ -991,9 +827,27 @@ msg=HelloService#hello#你好 dubbo~
                         
                         
                         
-                        <a href="/tags/golang" title="golang">
-                            golang
-                        </a>
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
                         
                         
                         
@@ -1031,9 +885,21 @@ msg=HelloService#hello#你好 dubbo~
                         
                         
                         
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
                         <a href="/tags/jvm" title="jvm">
                             jvm
                         </a>
+                        
+                        
+                        
+                        
                         
                         
                         
@@ -1057,9 +923,19 @@ msg=HelloService#hello#你好 dubbo~
                         
                         
                         
+                        
+                        
+                        
+                        
+                        
+                        
                         <a href="/tags/mongodb" title="mongodb">
                             mongodb
                         </a>
+                        
+                        
+                        
+                        
                         
                         
                         
@@ -1070,10 +946,6 @@ msg=HelloService#hello#你好 dubbo~
                         </a>
                         
                         
-                        
-                        <a href="/tags/mycat" title="mycat">
-                            mycat
-                        </a>
                         
                         
                         
@@ -1087,9 +959,17 @@ msg=HelloService#hello#你好 dubbo~
                         
                         
                         
-                        <a href="/tags/nginx" title="nginx">
-                            nginx
-                        </a>
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
                         
                         
                         
@@ -1113,8 +993,22 @@ msg=HelloService#hello#你好 dubbo~
                         
                         
                         
+                        
+                        
                         <a href="/tags/rocketmq" title="rocketmq">
                             rocketmq
+                        </a>
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        <a href="/tags/security%E6%A1%86%E6%9E%B6%E5%AD%A6%E4%B9%A0" title="security框架学习">
+                            security框架学习
                         </a>
                         
                         
@@ -1141,17 +1035,11 @@ msg=HelloService#hello#你好 dubbo~
                         
                         
                         
-                        <a href="/tags/springcloud" title="springCloud">
-                            springCloud
-                        </a>
-                        
-                        
-                        
-                        
-                        
                         <a href="/tags/springboot" title="springboot">
                             springboot
                         </a>
+                        
+                        
                         
                         
                         
@@ -1165,6 +1053,9 @@ msg=HelloService#hello#你好 dubbo~
                         
                         
                         
+                        <a href="/tags/springcloud" title="springcloud">
+                            springcloud
+                        </a>
                         
                         
                         
@@ -1190,6 +1081,33 @@ msg=HelloService#hello#你好 dubbo~
                         
                         
                         
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        <a href="/tags/zookeeper" title="zookeeper">
+                            zookeeper
+                        </a>
                         
                         
                         
@@ -1249,6 +1167,8 @@ msg=HelloService#hello#你好 dubbo~
                         
                         
                         
+                        
+                        
                         <a href="/tags/%E5%88%86%E5%B8%83%E5%BC%8F%E7%B3%BB%E5%88%97" title="分布式系列">
                             分布式系列
                         </a>
@@ -1268,6 +1188,10 @@ msg=HelloService#hello#你好 dubbo~
                         
                         
                         
+                        
+                        <a href="/tags/%E5%8D%8F%E8%AE%AE%E6%A0%88" title="协议栈">
+                            协议栈
+                        </a>
                         
                         
                         
@@ -1467,6 +1391,12 @@ msg=HelloService#hello#你好 dubbo~
                         
                         
                         
+                        
+                        
+                        
+                        
+                        
+                        
                         <a href="/tags/%E7%BD%91%E7%BB%9C%E7%BC%96%E7%A8%8B" title="网络编程">
                             网络编程
                         </a>
@@ -1490,6 +1420,10 @@ msg=HelloService#hello#你好 dubbo~
                         
                         
                         
+                        
+                        <a href="/tags/%E8%AE%A4%E8%AF%81%E5%92%8C%E6%8E%88%E6%9D%83" title="认证和授权">
+                            认证和授权
+                        </a>
                         
                         
                         
@@ -1660,7 +1594,7 @@ msg=HelloService#hello#你好 dubbo~
                     
                 </ul>
 		<p class="copyright text-muted">
-                    Copyright &copy;  2020
+                    Copyright &copy;  2021
                     <br>
                     <a href="https://themes.gohugo.io/hugo-theme-cleanwhite">CleanWhite Hugo Theme</a> by <a href="https://zhaohuabing.com">Huabing</a> |
                     <iframe

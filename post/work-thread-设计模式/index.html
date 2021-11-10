@@ -97,15 +97,15 @@
                     </li>
                     
                     <li>
-                        <a href="/categories/english">English</a>
+                        <a href="/categories/english">english</a>
                     </li>
                     
                     <li>
-                        <a href="/categories/life">Life</a>
+                        <a href="/categories/life">life</a>
                     </li>
                     
                     <li>
-                        <a href="/categories/tech">Tech</a>
+                        <a href="/categories/tech">tech</a>
                     </li>
                     
 
@@ -241,158 +241,132 @@
                 
                 
                 
-                
-
-<p>[TOC]</p>
-
-<p><strong>转载：<a href="https://blog.csdn.net/weixin_33997389/article/details/88809045">https://blog.csdn.net/weixin_33997389/article/details/88809045</a></strong></p>
-
+                <p>[TOC]</p>
+<p><strong>转载：https://blog.csdn.net/weixin_33997389/article/details/88809045</strong></p>
 <h1 id="概述">概述</h1>
-
 <p>Work Thread模式和Thread-Per-Message模式类似，Thread-Per-Message每次都创建一个新的线程处理请求，而Work Thread模式预先会创建一个线程池（Thread Pool），每次从线程池中取出线程处理请求。</p>
-
 <h1 id="代码示例">代码示例</h1>
-
 <h2 id="request请求类">Request请求类</h2>
-
-<pre><code class="language-java">public class Request {
-    private final String name;
-    private final int number;
-    private static final Random random = new Random();
-    public Request(String name, int number) {
-        this.name = name;
-        this.number = number;
-    }
-    public void execute() {
-        System.out.println(Thread.currentThread().getName() + &quot; executes &quot; + this);
-        try {
-            Thread.sleep(random.nextInt(1000));
-        } catch (InterruptedException e) {
-        }
-    }
-    public String toString() {
-        return &quot;[ Request from &quot; + name + &quot; No.&quot; + number + &quot; ]&quot;;
-    }
-}
-
-
-</code></pre>
-
-<h2 id="clientthread">ClientThread</h2>
-
-<pre><code class="language-java">public class ClientThread extends Thread {
-    private final Channel channel;
-    private static final Random random = new Random();
-    public ClientThread(String name, Channel channel) {
-        super(name);
-        this.channel = channel;
-    }
-    public void run() {
-        try {
-            for (int i = 0; true; i++) {
-                Request request = new Request(getName(), i);
-                channel.putRequest(request);
-                Thread.sleep(random.nextInt(1000));
-            }
-        } catch (InterruptedException e) {
-        }
-    }
-}
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-java" data-lang="java"><span style="color:#66d9ef">public</span> <span style="color:#66d9ef">class</span> <span style="color:#a6e22e">Request</span> <span style="color:#f92672">{</span>
+    <span style="color:#66d9ef">private</span> <span style="color:#66d9ef">final</span> String name<span style="color:#f92672">;</span>
+    <span style="color:#66d9ef">private</span> <span style="color:#66d9ef">final</span> <span style="color:#66d9ef">int</span> number<span style="color:#f92672">;</span>
+    <span style="color:#66d9ef">private</span> <span style="color:#66d9ef">static</span> <span style="color:#66d9ef">final</span> Random random <span style="color:#f92672">=</span> <span style="color:#66d9ef">new</span> Random<span style="color:#f92672">();</span>
+    <span style="color:#66d9ef">public</span> <span style="color:#a6e22e">Request</span><span style="color:#f92672">(</span>String name<span style="color:#f92672">,</span> <span style="color:#66d9ef">int</span> number<span style="color:#f92672">)</span> <span style="color:#f92672">{</span>
+        <span style="color:#66d9ef">this</span><span style="color:#f92672">.</span><span style="color:#a6e22e">name</span> <span style="color:#f92672">=</span> name<span style="color:#f92672">;</span>
+        <span style="color:#66d9ef">this</span><span style="color:#f92672">.</span><span style="color:#a6e22e">number</span> <span style="color:#f92672">=</span> number<span style="color:#f92672">;</span>
+    <span style="color:#f92672">}</span>
+    <span style="color:#66d9ef">public</span> <span style="color:#66d9ef">void</span> <span style="color:#a6e22e">execute</span><span style="color:#f92672">()</span> <span style="color:#f92672">{</span>
+        System<span style="color:#f92672">.</span><span style="color:#a6e22e">out</span><span style="color:#f92672">.</span><span style="color:#a6e22e">println</span><span style="color:#f92672">(</span>Thread<span style="color:#f92672">.</span><span style="color:#a6e22e">currentThread</span><span style="color:#f92672">().</span><span style="color:#a6e22e">getName</span><span style="color:#f92672">()</span> <span style="color:#f92672">+</span> <span style="color:#e6db74">&#34; executes &#34;</span> <span style="color:#f92672">+</span> <span style="color:#66d9ef">this</span><span style="color:#f92672">);</span>
+        <span style="color:#66d9ef">try</span> <span style="color:#f92672">{</span>
+            Thread<span style="color:#f92672">.</span><span style="color:#a6e22e">sleep</span><span style="color:#f92672">(</span>random<span style="color:#f92672">.</span><span style="color:#a6e22e">nextInt</span><span style="color:#f92672">(</span>1000<span style="color:#f92672">));</span>
+        <span style="color:#f92672">}</span> <span style="color:#66d9ef">catch</span> <span style="color:#f92672">(</span>InterruptedException e<span style="color:#f92672">)</span> <span style="color:#f92672">{</span>
+        <span style="color:#f92672">}</span>
+    <span style="color:#f92672">}</span>
+    <span style="color:#66d9ef">public</span> String <span style="color:#a6e22e">toString</span><span style="color:#f92672">()</span> <span style="color:#f92672">{</span>
+        <span style="color:#66d9ef">return</span> <span style="color:#e6db74">&#34;[ Request from &#34;</span> <span style="color:#f92672">+</span> name <span style="color:#f92672">+</span> <span style="color:#e6db74">&#34; No.&#34;</span> <span style="color:#f92672">+</span> number <span style="color:#f92672">+</span> <span style="color:#e6db74">&#34; ]&#34;</span><span style="color:#f92672">;</span>
+    <span style="color:#f92672">}</span>
+<span style="color:#f92672">}</span>
 
 
-</code></pre>
+</code></pre></div><h2 id="clientthread">ClientThread</h2>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-java" data-lang="java"><span style="color:#66d9ef">public</span> <span style="color:#66d9ef">class</span> <span style="color:#a6e22e">ClientThread</span> <span style="color:#66d9ef">extends</span> Thread <span style="color:#f92672">{</span>
+    <span style="color:#66d9ef">private</span> <span style="color:#66d9ef">final</span> Channel channel<span style="color:#f92672">;</span>
+    <span style="color:#66d9ef">private</span> <span style="color:#66d9ef">static</span> <span style="color:#66d9ef">final</span> Random random <span style="color:#f92672">=</span> <span style="color:#66d9ef">new</span> Random<span style="color:#f92672">();</span>
+    <span style="color:#66d9ef">public</span> <span style="color:#a6e22e">ClientThread</span><span style="color:#f92672">(</span>String name<span style="color:#f92672">,</span> Channel channel<span style="color:#f92672">)</span> <span style="color:#f92672">{</span>
+        <span style="color:#66d9ef">super</span><span style="color:#f92672">(</span>name<span style="color:#f92672">);</span>
+        <span style="color:#66d9ef">this</span><span style="color:#f92672">.</span><span style="color:#a6e22e">channel</span> <span style="color:#f92672">=</span> channel<span style="color:#f92672">;</span>
+    <span style="color:#f92672">}</span>
+    <span style="color:#66d9ef">public</span> <span style="color:#66d9ef">void</span> <span style="color:#a6e22e">run</span><span style="color:#f92672">()</span> <span style="color:#f92672">{</span>
+        <span style="color:#66d9ef">try</span> <span style="color:#f92672">{</span>
+            <span style="color:#66d9ef">for</span> <span style="color:#f92672">(</span><span style="color:#66d9ef">int</span> i <span style="color:#f92672">=</span> 0<span style="color:#f92672">;</span> <span style="color:#66d9ef">true</span><span style="color:#f92672">;</span> i<span style="color:#f92672">++)</span> <span style="color:#f92672">{</span>
+                Request request <span style="color:#f92672">=</span> <span style="color:#66d9ef">new</span> Request<span style="color:#f92672">(</span>getName<span style="color:#f92672">(),</span> i<span style="color:#f92672">);</span>
+                channel<span style="color:#f92672">.</span><span style="color:#a6e22e">putRequest</span><span style="color:#f92672">(</span>request<span style="color:#f92672">);</span>
+                Thread<span style="color:#f92672">.</span><span style="color:#a6e22e">sleep</span><span style="color:#f92672">(</span>random<span style="color:#f92672">.</span><span style="color:#a6e22e">nextInt</span><span style="color:#f92672">(</span>1000<span style="color:#f92672">));</span>
+            <span style="color:#f92672">}</span>
+        <span style="color:#f92672">}</span> <span style="color:#66d9ef">catch</span> <span style="color:#f92672">(</span>InterruptedException e<span style="color:#f92672">)</span> <span style="color:#f92672">{</span>
+        <span style="color:#f92672">}</span>
+    <span style="color:#f92672">}</span>
+<span style="color:#f92672">}</span>
 
-<h2 id="workerthread">WorkerThread</h2>
 
-<pre><code class="language-java">public class WorkerThread extends Thread {
-    private final Channel channel;
-    public WorkerThread(String name, Channel channel) {
-        super(name);
-        this.channel = channel;
-    }
-    public void run() {
-        while (true) {
-            Request request = channel.takeRequest();
-            request.execute();
-        }
-    }
-}
-</code></pre>
+</code></pre></div><h2 id="workerthread">WorkerThread</h2>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-java" data-lang="java"><span style="color:#66d9ef">public</span> <span style="color:#66d9ef">class</span> <span style="color:#a6e22e">WorkerThread</span> <span style="color:#66d9ef">extends</span> Thread <span style="color:#f92672">{</span>
+    <span style="color:#66d9ef">private</span> <span style="color:#66d9ef">final</span> Channel channel<span style="color:#f92672">;</span>
+    <span style="color:#66d9ef">public</span> <span style="color:#a6e22e">WorkerThread</span><span style="color:#f92672">(</span>String name<span style="color:#f92672">,</span> Channel channel<span style="color:#f92672">)</span> <span style="color:#f92672">{</span>
+        <span style="color:#66d9ef">super</span><span style="color:#f92672">(</span>name<span style="color:#f92672">);</span>
+        <span style="color:#66d9ef">this</span><span style="color:#f92672">.</span><span style="color:#a6e22e">channel</span> <span style="color:#f92672">=</span> channel<span style="color:#f92672">;</span>
+    <span style="color:#f92672">}</span>
+    <span style="color:#66d9ef">public</span> <span style="color:#66d9ef">void</span> <span style="color:#a6e22e">run</span><span style="color:#f92672">()</span> <span style="color:#f92672">{</span>
+        <span style="color:#66d9ef">while</span> <span style="color:#f92672">(</span><span style="color:#66d9ef">true</span><span style="color:#f92672">)</span> <span style="color:#f92672">{</span>
+            Request request <span style="color:#f92672">=</span> channel<span style="color:#f92672">.</span><span style="color:#a6e22e">takeRequest</span><span style="color:#f92672">();</span>
+            request<span style="color:#f92672">.</span><span style="color:#a6e22e">execute</span><span style="color:#f92672">();</span>
+        <span style="color:#f92672">}</span>
+    <span style="color:#f92672">}</span>
+<span style="color:#f92672">}</span>
+</code></pre></div><h2 id="channel">Channel</h2>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-java" data-lang="java"><span style="color:#66d9ef">public</span> <span style="color:#66d9ef">class</span> <span style="color:#a6e22e">Channel</span> <span style="color:#f92672">{</span>
+    <span style="color:#66d9ef">private</span> <span style="color:#66d9ef">static</span> <span style="color:#66d9ef">final</span> <span style="color:#66d9ef">int</span> MAX_REQUEST <span style="color:#f92672">=</span> 100<span style="color:#f92672">;</span> <span style="color:#75715e">// 最大请求数
+</span><span style="color:#75715e"></span>    <span style="color:#66d9ef">private</span> <span style="color:#66d9ef">volatile</span>  Queue<span style="color:#f92672">&lt;</span>Request<span style="color:#f92672">&gt;</span> requestQueue<span style="color:#f92672">;</span> 
+    <span style="color:#66d9ef">private</span> <span style="color:#66d9ef">final</span> WorkerThread<span style="color:#f92672">[]</span> threadPool<span style="color:#f92672">;</span>
 
-<h2 id="channel">Channel</h2>
+    <span style="color:#66d9ef">public</span> <span style="color:#a6e22e">Channel</span><span style="color:#f92672">(</span><span style="color:#66d9ef">int</span> threads<span style="color:#f92672">)</span> <span style="color:#f92672">{</span>
+        <span style="color:#66d9ef">this</span><span style="color:#f92672">.</span><span style="color:#a6e22e">requestQueue</span> <span style="color:#f92672">=</span> <span style="color:#66d9ef">new</span> LinkedList<span style="color:#f92672">&lt;&gt;();</span>
+        threadPool <span style="color:#f92672">=</span> <span style="color:#66d9ef">new</span> WorkerThread<span style="color:#f92672">[</span>threads<span style="color:#f92672">];</span>
+        <span style="color:#66d9ef">for</span> <span style="color:#f92672">(</span><span style="color:#66d9ef">int</span> i <span style="color:#f92672">=</span> 0<span style="color:#f92672">;</span> i <span style="color:#f92672">&lt;</span> threadPool<span style="color:#f92672">.</span><span style="color:#a6e22e">length</span><span style="color:#f92672">;</span> i<span style="color:#f92672">++)</span> <span style="color:#f92672">{</span>
+            threadPool<span style="color:#f92672">[</span>i<span style="color:#f92672">]</span> <span style="color:#f92672">=</span> <span style="color:#66d9ef">new</span> WorkerThread<span style="color:#f92672">(</span><span style="color:#e6db74">&#34;Worker-&#34;</span> <span style="color:#f92672">+</span> i<span style="color:#f92672">,</span> <span style="color:#66d9ef">this</span><span style="color:#f92672">);</span>
+        <span style="color:#f92672">}</span>
+    <span style="color:#f92672">}</span>
 
-<pre><code class="language-java">public class Channel {
-    private static final int MAX_REQUEST = 100; // 最大请求数
-    private volatile  Queue&lt;Request&gt; requestQueue; 
-    private final WorkerThread[] threadPool;
+    <span style="color:#66d9ef">public</span> <span style="color:#66d9ef">void</span> <span style="color:#a6e22e">startWorkers</span><span style="color:#f92672">()</span> <span style="color:#f92672">{</span>
+        <span style="color:#66d9ef">for</span> <span style="color:#f92672">(</span><span style="color:#66d9ef">int</span> i <span style="color:#f92672">=</span> 0<span style="color:#f92672">;</span> i <span style="color:#f92672">&lt;</span> threadPool<span style="color:#f92672">.</span><span style="color:#a6e22e">length</span><span style="color:#f92672">;</span> i<span style="color:#f92672">++)</span> <span style="color:#f92672">{</span>
+            threadPool<span style="color:#f92672">[</span>i<span style="color:#f92672">].</span><span style="color:#a6e22e">start</span><span style="color:#f92672">();</span>
+        <span style="color:#f92672">}</span>
+    <span style="color:#f92672">}</span>
 
-    public Channel(int threads) {
-        this.requestQueue = new LinkedList&lt;&gt;();
-        threadPool = new WorkerThread[threads];
-        for (int i = 0; i &lt; threadPool.length; i++) {
-            threadPool[i] = new WorkerThread(&quot;Worker-&quot; + i, this);
-        }
-    }
+    <span style="color:#66d9ef">public</span> <span style="color:#66d9ef">synchronized</span> <span style="color:#66d9ef">void</span> <span style="color:#a6e22e">putRequest</span><span style="color:#f92672">(</span>Request request<span style="color:#f92672">)</span> <span style="color:#f92672">{</span>
+        requestQueue<span style="color:#f92672">.</span><span style="color:#a6e22e">offer</span><span style="color:#f92672">(</span>request<span style="color:#f92672">);</span>
+        notifyAll<span style="color:#f92672">();</span>
+    <span style="color:#f92672">}</span>
 
-    public void startWorkers() {
-        for (int i = 0; i &lt; threadPool.length; i++) {
-            threadPool[i].start();
-        }
-    }
-
-    public synchronized void putRequest(Request request) {
-        requestQueue.offer(request);
-        notifyAll();
-    }
-
-    public synchronized Request takeRequest() {
-        while (null == requestQueue.peek()) {
-            try {
-                wait();
-            } catch (InterruptedException e) {
-            }
-        }
-        Request request = requestQueue.remove();
-        notifyAll();
-        return request;
-    }
-}
-</code></pre>
-
-<h2 id="main">Main</h2>
-
-<pre><code class="language-java">public class Main {
-    public static void main(String[] args) {
-        Channel channel = new Channel(5);
-        channel.startWorkers();
-        new ClientThread(&quot;Alice&quot;, channel).start();
-        new ClientThread(&quot;Bobby&quot;, channel).start();
-        new ClientThread(&quot;Chris&quot;, channel).start();
-    }
-}
-</code></pre>
-
-<h2 id="运行结果">运行结果</h2>
-
-<pre><code class="language-java">Worker-2 executes [ Request from Chris No.0 ]
-Worker-4 executes [ Request from Alice No.0 ]
-Worker-3 executes [ Request from Bobby No.0 ]
-Worker-0 executes [ Request from Alice No.1 ]
-Worker-0 executes [ Request from Chris No.1 ]
-Worker-1 executes [ Request from Chris No.2 ]
-Worker-2 executes [ Request from Chris No.3 ]
-Worker-3 executes [ Request from Bobby No.1 ]
-Worker-1 executes [ Request from Alice No.2 ]
-Worker-0 executes [ Request from Chris No.4 ]
-Worker-4 executes [ Request from Alice No.3 ]
-Worker-0 executes [ Request from Bobby No.2 ]
-Worker-4 executes [ Request from Alice No.4 ]
-Worker-2 executes [ Request from Bobby No.3 ]
-Worker-0 executes [ Request from Bobby No.4 ]
-</code></pre>
-
-<h2 id="总结">总结</h2>
-
+    <span style="color:#66d9ef">public</span> <span style="color:#66d9ef">synchronized</span> Request <span style="color:#a6e22e">takeRequest</span><span style="color:#f92672">()</span> <span style="color:#f92672">{</span>
+        <span style="color:#66d9ef">while</span> <span style="color:#f92672">(</span><span style="color:#66d9ef">null</span> <span style="color:#f92672">==</span> requestQueue<span style="color:#f92672">.</span><span style="color:#a6e22e">peek</span><span style="color:#f92672">())</span> <span style="color:#f92672">{</span>
+            <span style="color:#66d9ef">try</span> <span style="color:#f92672">{</span>
+                wait<span style="color:#f92672">();</span>
+            <span style="color:#f92672">}</span> <span style="color:#66d9ef">catch</span> <span style="color:#f92672">(</span>InterruptedException e<span style="color:#f92672">)</span> <span style="color:#f92672">{</span>
+            <span style="color:#f92672">}</span>
+        <span style="color:#f92672">}</span>
+        Request request <span style="color:#f92672">=</span> requestQueue<span style="color:#f92672">.</span><span style="color:#a6e22e">remove</span><span style="color:#f92672">();</span>
+        notifyAll<span style="color:#f92672">();</span>
+        <span style="color:#66d9ef">return</span> request<span style="color:#f92672">;</span>
+    <span style="color:#f92672">}</span>
+<span style="color:#f92672">}</span>
+</code></pre></div><h2 id="main">Main</h2>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-java" data-lang="java"><span style="color:#66d9ef">public</span> <span style="color:#66d9ef">class</span> <span style="color:#a6e22e">Main</span> <span style="color:#f92672">{</span>
+    <span style="color:#66d9ef">public</span> <span style="color:#66d9ef">static</span> <span style="color:#66d9ef">void</span> <span style="color:#a6e22e">main</span><span style="color:#f92672">(</span>String<span style="color:#f92672">[]</span> args<span style="color:#f92672">)</span> <span style="color:#f92672">{</span>
+        Channel channel <span style="color:#f92672">=</span> <span style="color:#66d9ef">new</span> Channel<span style="color:#f92672">(</span>5<span style="color:#f92672">);</span>
+        channel<span style="color:#f92672">.</span><span style="color:#a6e22e">startWorkers</span><span style="color:#f92672">();</span>
+        <span style="color:#66d9ef">new</span> ClientThread<span style="color:#f92672">(</span><span style="color:#e6db74">&#34;Alice&#34;</span><span style="color:#f92672">,</span> channel<span style="color:#f92672">).</span><span style="color:#a6e22e">start</span><span style="color:#f92672">();</span>
+        <span style="color:#66d9ef">new</span> ClientThread<span style="color:#f92672">(</span><span style="color:#e6db74">&#34;Bobby&#34;</span><span style="color:#f92672">,</span> channel<span style="color:#f92672">).</span><span style="color:#a6e22e">start</span><span style="color:#f92672">();</span>
+        <span style="color:#66d9ef">new</span> ClientThread<span style="color:#f92672">(</span><span style="color:#e6db74">&#34;Chris&#34;</span><span style="color:#f92672">,</span> channel<span style="color:#f92672">).</span><span style="color:#a6e22e">start</span><span style="color:#f92672">();</span>
+    <span style="color:#f92672">}</span>
+<span style="color:#f92672">}</span>
+</code></pre></div><h2 id="运行结果">运行结果</h2>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-java" data-lang="java">Worker<span style="color:#f92672">-</span>2 executes <span style="color:#f92672">[</span> Request from Chris No<span style="color:#f92672">.</span><span style="color:#a6e22e">0</span> <span style="color:#f92672">]</span>
+Worker<span style="color:#f92672">-</span>4 executes <span style="color:#f92672">[</span> Request from Alice No<span style="color:#f92672">.</span><span style="color:#a6e22e">0</span> <span style="color:#f92672">]</span>
+Worker<span style="color:#f92672">-</span>3 executes <span style="color:#f92672">[</span> Request from Bobby No<span style="color:#f92672">.</span><span style="color:#a6e22e">0</span> <span style="color:#f92672">]</span>
+Worker<span style="color:#f92672">-</span>0 executes <span style="color:#f92672">[</span> Request from Alice No<span style="color:#f92672">.</span><span style="color:#a6e22e">1</span> <span style="color:#f92672">]</span>
+Worker<span style="color:#f92672">-</span>0 executes <span style="color:#f92672">[</span> Request from Chris No<span style="color:#f92672">.</span><span style="color:#a6e22e">1</span> <span style="color:#f92672">]</span>
+Worker<span style="color:#f92672">-</span>1 executes <span style="color:#f92672">[</span> Request from Chris No<span style="color:#f92672">.</span><span style="color:#a6e22e">2</span> <span style="color:#f92672">]</span>
+Worker<span style="color:#f92672">-</span>2 executes <span style="color:#f92672">[</span> Request from Chris No<span style="color:#f92672">.</span><span style="color:#a6e22e">3</span> <span style="color:#f92672">]</span>
+Worker<span style="color:#f92672">-</span>3 executes <span style="color:#f92672">[</span> Request from Bobby No<span style="color:#f92672">.</span><span style="color:#a6e22e">1</span> <span style="color:#f92672">]</span>
+Worker<span style="color:#f92672">-</span>1 executes <span style="color:#f92672">[</span> Request from Alice No<span style="color:#f92672">.</span><span style="color:#a6e22e">2</span> <span style="color:#f92672">]</span>
+Worker<span style="color:#f92672">-</span>0 executes <span style="color:#f92672">[</span> Request from Chris No<span style="color:#f92672">.</span><span style="color:#a6e22e">4</span> <span style="color:#f92672">]</span>
+Worker<span style="color:#f92672">-</span>4 executes <span style="color:#f92672">[</span> Request from Alice No<span style="color:#f92672">.</span><span style="color:#a6e22e">3</span> <span style="color:#f92672">]</span>
+Worker<span style="color:#f92672">-</span>0 executes <span style="color:#f92672">[</span> Request from Bobby No<span style="color:#f92672">.</span><span style="color:#a6e22e">2</span> <span style="color:#f92672">]</span>
+Worker<span style="color:#f92672">-</span>4 executes <span style="color:#f92672">[</span> Request from Alice No<span style="color:#f92672">.</span><span style="color:#a6e22e">4</span> <span style="color:#f92672">]</span>
+Worker<span style="color:#f92672">-</span>2 executes <span style="color:#f92672">[</span> Request from Bobby No<span style="color:#f92672">.</span><span style="color:#a6e22e">3</span> <span style="color:#f92672">]</span>
+Worker<span style="color:#f92672">-</span>0 executes <span style="color:#f92672">[</span> Request from Bobby No<span style="color:#f92672">.</span><span style="color:#a6e22e">4</span> <span style="color:#f92672">]</span>
+</code></pre></div><h2 id="总结">总结</h2>
 <p>可以看到， 这里的线程池就是开启几条线程在不停的进行循环， 同时，进行生产者和消费者的模式一个演示处理。</p>
 
 
@@ -501,19 +475,15 @@ Worker-0 executes [ Request from Bobby No.4 ]
                     </h4>
                     <ul class="catalog-body"></ul>
                     <nav id="TableOfContents">
-<ul>
-<li><a href="#概述">概述</a></li>
-<li><a href="#代码示例">代码示例</a>
-<ul>
-<li><a href="#request请求类">Request请求类</a></li>
-<li><a href="#clientthread">ClientThread</a></li>
-<li><a href="#workerthread">WorkerThread</a></li>
-<li><a href="#channel">Channel</a></li>
-<li><a href="#main">Main</a></li>
-<li><a href="#运行结果">运行结果</a></li>
-<li><a href="#总结">总结</a></li>
-</ul></li>
-</ul>
+  <ul>
+    <li><a href="#request请求类">Request请求类</a></li>
+    <li><a href="#clientthread">ClientThread</a></li>
+    <li><a href="#workerthread">WorkerThread</a></li>
+    <li><a href="#channel">Channel</a></li>
+    <li><a href="#main">Main</a></li>
+    <li><a href="#运行结果">运行结果</a></li>
+    <li><a href="#总结">总结</a></li>
+  </ul>
 </nav>
                     <br>
                     <br>
@@ -538,9 +508,6 @@ Worker-0 executes [ Request from Bobby No.4 ]
                         
                         
                         
-                        <a href="/tags/" title="">
-                            
-                        </a>
                         
                         
                         
@@ -550,101 +517,6 @@ Worker-0 executes [ Request from Bobby No.4 ]
                         
                         
                         
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        <a href="/tags/qt" title="QT">
-                            QT
-                        </a>
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        <a href="/tags/zookeeper" title="Zookeeper">
-                            Zookeeper
-                        </a>
                         
                         
                         
@@ -684,8 +556,10 @@ Worker-0 executes [ Request from Bobby No.4 ]
                         
                         
                         
-                        <a href="/tags/elasticsearch" title="elasticSearch">
-                            elasticSearch
+                        
+                        
+                        <a href="/tags/elasticsearch" title="elasticsearch">
+                            elasticsearch
                         </a>
                         
                         
@@ -696,9 +570,27 @@ Worker-0 executes [ Request from Bobby No.4 ]
                         
                         
                         
-                        <a href="/tags/golang" title="golang">
-                            golang
-                        </a>
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
                         
                         
                         
@@ -736,9 +628,21 @@ Worker-0 executes [ Request from Bobby No.4 ]
                         
                         
                         
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
                         <a href="/tags/jvm" title="jvm">
                             jvm
                         </a>
+                        
+                        
+                        
+                        
                         
                         
                         
@@ -762,9 +666,19 @@ Worker-0 executes [ Request from Bobby No.4 ]
                         
                         
                         
+                        
+                        
+                        
+                        
+                        
+                        
                         <a href="/tags/mongodb" title="mongodb">
                             mongodb
                         </a>
+                        
+                        
+                        
+                        
                         
                         
                         
@@ -775,10 +689,6 @@ Worker-0 executes [ Request from Bobby No.4 ]
                         </a>
                         
                         
-                        
-                        <a href="/tags/mycat" title="mycat">
-                            mycat
-                        </a>
                         
                         
                         
@@ -792,9 +702,17 @@ Worker-0 executes [ Request from Bobby No.4 ]
                         
                         
                         
-                        <a href="/tags/nginx" title="nginx">
-                            nginx
-                        </a>
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
                         
                         
                         
@@ -818,8 +736,22 @@ Worker-0 executes [ Request from Bobby No.4 ]
                         
                         
                         
+                        
+                        
                         <a href="/tags/rocketmq" title="rocketmq">
                             rocketmq
+                        </a>
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        <a href="/tags/security%E6%A1%86%E6%9E%B6%E5%AD%A6%E4%B9%A0" title="security框架学习">
+                            security框架学习
                         </a>
                         
                         
@@ -846,17 +778,11 @@ Worker-0 executes [ Request from Bobby No.4 ]
                         
                         
                         
-                        <a href="/tags/springcloud" title="springCloud">
-                            springCloud
-                        </a>
-                        
-                        
-                        
-                        
-                        
                         <a href="/tags/springboot" title="springboot">
                             springboot
                         </a>
+                        
+                        
                         
                         
                         
@@ -870,6 +796,9 @@ Worker-0 executes [ Request from Bobby No.4 ]
                         
                         
                         
+                        <a href="/tags/springcloud" title="springcloud">
+                            springcloud
+                        </a>
                         
                         
                         
@@ -895,6 +824,33 @@ Worker-0 executes [ Request from Bobby No.4 ]
                         
                         
                         
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        <a href="/tags/zookeeper" title="zookeeper">
+                            zookeeper
+                        </a>
                         
                         
                         
@@ -954,6 +910,8 @@ Worker-0 executes [ Request from Bobby No.4 ]
                         
                         
                         
+                        
+                        
                         <a href="/tags/%E5%88%86%E5%B8%83%E5%BC%8F%E7%B3%BB%E5%88%97" title="分布式系列">
                             分布式系列
                         </a>
@@ -973,6 +931,10 @@ Worker-0 executes [ Request from Bobby No.4 ]
                         
                         
                         
+                        
+                        <a href="/tags/%E5%8D%8F%E8%AE%AE%E6%A0%88" title="协议栈">
+                            协议栈
+                        </a>
                         
                         
                         
@@ -1172,6 +1134,12 @@ Worker-0 executes [ Request from Bobby No.4 ]
                         
                         
                         
+                        
+                        
+                        
+                        
+                        
+                        
                         <a href="/tags/%E7%BD%91%E7%BB%9C%E7%BC%96%E7%A8%8B" title="网络编程">
                             网络编程
                         </a>
@@ -1195,6 +1163,10 @@ Worker-0 executes [ Request from Bobby No.4 ]
                         
                         
                         
+                        
+                        <a href="/tags/%E8%AE%A4%E8%AF%81%E5%92%8C%E6%8E%88%E6%9D%83" title="认证和授权">
+                            认证和授权
+                        </a>
                         
                         
                         
@@ -1365,7 +1337,7 @@ Worker-0 executes [ Request from Bobby No.4 ]
                     
                 </ul>
 		<p class="copyright text-muted">
-                    Copyright &copy;  2020
+                    Copyright &copy;  2021
                     <br>
                     <a href="https://themes.gohugo.io/hugo-theme-cleanwhite">CleanWhite Hugo Theme</a> by <a href="https://zhaohuabing.com">Huabing</a> |
                     <iframe

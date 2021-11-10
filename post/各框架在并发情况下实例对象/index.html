@@ -97,15 +97,15 @@
                     </li>
                     
                     <li>
-                        <a href="/categories/english">English</a>
+                        <a href="/categories/english">english</a>
                     </li>
                     
                     <li>
-                        <a href="/categories/life">Life</a>
+                        <a href="/categories/life">life</a>
                     </li>
                     
                     <li>
-                        <a href="/categories/tech">Tech</a>
+                        <a href="/categories/tech">tech</a>
                     </li>
                     
 
@@ -241,80 +241,54 @@
                 
                 
                 
-                
-
-<p>[TOC]</p>
-
+                <p>[TOC]</p>
 <h1 id="servlet">servlet</h1>
-
-<p>原文链接：<a href="https://blog.csdn.net/hym740639005/article/details/81278258">https://blog.csdn.net/hym740639005/article/details/81278258</a></p>
-
+<p>原文链接：https://blog.csdn.net/hym740639005/article/details/81278258</p>
 <p>因为servlet是多线程的，而servlet的生命周期又web容器进行管理（Tomcat）。当客服端对servlet第一次进行请求时候，服务器（tomcat）会对根据web.xml文件进行实例化这个serlvet（所以web.xml中不能出现任何错误）。当用户再对该serlvet进行请求时候，不会再对该serlvet进行实例了。这里都是共享一个servlet对象（为单例模式）。这样会导致出现的状况是，多个线程进行请求同一个serlvet时候，只要对serlvet的实例变量进行操作时候，这时候会导致了该实例变量时候，会出现数据不一致的状况。这样会导致一系列的安全问题。</p>
-
 <p><strong>总结：servlet  不是线程安全的</strong></p>
-
 <h1 id="struts1">struts1</h1>
-
 <p>对于struts1 ，当第一次**.do的请求过来时，在内存中的actionmapping中找到相对应的action，然后new出这个action放在缓存中，当第二次一样的请求过来时，还是找的这个action，所以对于struts1来说，action是单实例的 ，只有一个，如果在action中定义变量，就要非常小心了，因为并发问题，可能带来灾难性的后果，也不是不可以，我们可以加锁达到同步，只是在性能上就要折衷了。</p>
-
 <p><strong>总结：struts1  不是线程安全的</strong></p>
-
 <h1 id="struts2">struts2</h1>
-
 <p>struts2 在struts1的基础上做了改进 ，对于struts2 ，每次请求过来都会new一个新的action ， 所以说struts2的action是线程安全的 ， 但同时也带来一个问题，每次都new一个action ，这样action的实例太多 ， 在性能方面还是存在一定的缺陷的。</p>
-
 <p><strong>总结：struts2  是线程安全的</strong></p>
-
 <h1 id="spring-mvc-controller">Spring MVC Controller</h1>
-
-<p>原文链接：<a href="https://blog.csdn.net/billy0707/article/details/54583577">https://blog.csdn.net/billy0707/article/details/54583577</a></p>
-
+<p>原文链接：https://blog.csdn.net/billy0707/article/details/54583577</p>
 <p><strong>Spring MVC默认是单例模式</strong>，Controller、Service、Dao都是单例所以在使用不当存在一定的安全隐患。Controller单例模式的好处在与：</p>
-
 <ol>
-<li><p>提高性能，不用每次创建Controller实例，减少了对象创建和垃圾收集的时间 。</p></li>
-
-<li><p>没多例的必要
+<li>
+<p>提高性能，不用每次创建Controller实例，减少了对象创建和垃圾收集的时间 。</p>
+</li>
+<li>
+<p>没多例的必要
 由于只有一个Controller的实例，当多个线程同时调用它的时候，它的成员变量就不是线程安全的。
-当然在大多数情况下，我们根本不需要Controller考虑线程安全的问题，除非在类中声明了成员变量。因此Spring MVC的Contrller在编码时，尽量避免使用实例变量。如果一定要使用实例变量，则可以改用以下方式：</p></li>
-</ol>
-
+当然在大多数情况下，我们根本不需要Controller考虑线程安全的问题，除非在类中声明了成员变量。因此Spring MVC的Contrller在编码时，尽量避免使用实例变量。如果一定要使用实例变量，则可以改用以下方式：</p>
 <p>a. Controller中声明 scope=”prototype”，即设置为多例模式</p>
-
-<p>b. 在Controller中使用ThreadLocal变量,如：private ThreadLocal<Integer> count = new ThreadLocal<Integer>();</p>
-
+<p>b. 在Controller中使用ThreadLocal变量,如：private ThreadLocal<!-- raw HTML omitted --> count = new ThreadLocal<!-- raw HTML omitted -->();</p>
+</li>
+</ol>
 <h2 id="spring单例模式为什么可以支持多线程并发">spring单例模式为什么可以支持多线程并发？</h2>
-
-<p>原文链接：<a href="https://blog.csdn.net/csj50/article/details/83016508">https://blog.csdn.net/csj50/article/details/83016508</a></p>
-
+<p>原文链接：https://blog.csdn.net/csj50/article/details/83016508</p>
 <ol>
 <li>spring单例模式是指，在内存中只实例化一个类的对象</li>
 <li>类的变量有线程安全的问题，就是有get和set方法的类成员属性。执行单例对象的方法不会有线程安全的问题
 因为方法是磁盘上的一段代码，每个线程在执行这段代码的时候，会自己去内存申请临时变量</li>
 </ol>
-
 <h3 id="为什么局部变量不会受多线程影响">为什么局部变量不会受多线程影响？</h3>
-
 <ol>
 <li>对于那些会以多线程运行的单例类，例如Web应用中的Servlet，每个方法中对局部变量的操作都是在线程自己独立的内存区域内完成的，所以是线程安全的</li>
 <li>局部变量不会受多线程影响</li>
 <li>成员变量会受到多线程影响</li>
 <li>对于成员变量的操作，可以使用ThreadLocal来保证线程安全</li>
 </ol>
-
 <h3 id="jvm是如何实现线程的独立内存空间">JVM是如何实现线程的独立内存空间？</h3>
-
 <p>Java中的栈</p>
-
 <ol>
 <li>每当启用一个线程时，JVM就为他分配一个Java栈，栈是以帧为单位保存当前线程的运行状态。某个线程正在执行的方法称为当前方法，当前方法使用的栈帧称为当前帧，当前方法所属的类称为当前类，当前类的常量池称为当前常量池。当线程执行一个方法时，它会跟踪当前常量池。</li>
 <li>每当线程调用一个Java方法时，JVM就会在该线程对应的栈中压入一个帧，这个帧自然就成了当前帧。当执行这个方法时，它使用这个帧来存储参数、局部变量、中间运算结果等等。</li>
-<li>Java栈上的所有数据都是私有的。任何线程都不能访问另一个线程的栈数据。所以我们不用考虑多线程情况下栈数据访问同步的情况。
-<br /></li>
+<li>Java栈上的所有数据都是私有的。任何线程都不能访问另一个线程的栈数据。所以我们不用考虑多线程情况下栈数据访问同步的情况。</li>
 </ol>
-
 <h2 id="serviec-为什么是线程安全的">Serviec 为什么是线程安全的</h2>
-
 <p>你没搞清楚线程安全是什么意思。userService本身并不是线程安全的，你在userController里修改userService吗？只是调用userService里的方法吧？方法都是线程安全的，多线程调用一个实例的方法，会在内存中复制变量，所以只要你不在userConstroller里修改userService这个实例就没问题。</p>
 
 
@@ -371,8 +345,8 @@
                     
                     
                     <li class="next">
-                        <a href="/post/immutable-%E8%AE%BE%E8%AE%A1%E6%A8%A1%E5%BC%8F/" data-toggle="tooltip" data-placement="top"
-                            title="immutable-设计模式">Next
+                        <a href="/post/threadlocal-%E8%AE%BE%E8%AE%A1%E6%A8%A1%E5%BC%8F/" data-toggle="tooltip" data-placement="top"
+                            title="ThreadLocal-设计模式">Next
                             Post &rarr;</a>
                     </li>
                     
@@ -423,20 +397,15 @@
                     </h4>
                     <ul class="catalog-body"></ul>
                     <nav id="TableOfContents">
-<ul>
-<li><a href="#servlet">servlet</a></li>
-<li><a href="#struts1">struts1</a></li>
-<li><a href="#struts2">struts2</a></li>
-<li><a href="#spring-mvc-controller">Spring MVC Controller</a>
-<ul>
-<li><a href="#spring单例模式为什么可以支持多线程并发">spring单例模式为什么可以支持多线程并发？</a>
-<ul>
-<li><a href="#为什么局部变量不会受多线程影响">为什么局部变量不会受多线程影响？</a></li>
-<li><a href="#jvm是如何实现线程的独立内存空间">JVM是如何实现线程的独立内存空间？</a></li>
-</ul></li>
-<li><a href="#serviec-为什么是线程安全的">Serviec 为什么是线程安全的</a></li>
-</ul></li>
-</ul>
+  <ul>
+    <li><a href="#spring单例模式为什么可以支持多线程并发">spring单例模式为什么可以支持多线程并发？</a>
+      <ul>
+        <li><a href="#为什么局部变量不会受多线程影响">为什么局部变量不会受多线程影响？</a></li>
+        <li><a href="#jvm是如何实现线程的独立内存空间">JVM是如何实现线程的独立内存空间？</a></li>
+      </ul>
+    </li>
+    <li><a href="#serviec-为什么是线程安全的">Serviec 为什么是线程安全的</a></li>
+  </ul>
 </nav>
                     <br>
                     <br>
@@ -461,9 +430,6 @@
                         
                         
                         
-                        <a href="/tags/" title="">
-                            
-                        </a>
                         
                         
                         
@@ -473,101 +439,6 @@
                         
                         
                         
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        <a href="/tags/qt" title="QT">
-                            QT
-                        </a>
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        <a href="/tags/zookeeper" title="Zookeeper">
-                            Zookeeper
-                        </a>
                         
                         
                         
@@ -607,8 +478,10 @@
                         
                         
                         
-                        <a href="/tags/elasticsearch" title="elasticSearch">
-                            elasticSearch
+                        
+                        
+                        <a href="/tags/elasticsearch" title="elasticsearch">
+                            elasticsearch
                         </a>
                         
                         
@@ -619,9 +492,27 @@
                         
                         
                         
-                        <a href="/tags/golang" title="golang">
-                            golang
-                        </a>
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
                         
                         
                         
@@ -659,9 +550,21 @@
                         
                         
                         
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
                         <a href="/tags/jvm" title="jvm">
                             jvm
                         </a>
+                        
+                        
+                        
+                        
                         
                         
                         
@@ -685,9 +588,19 @@
                         
                         
                         
+                        
+                        
+                        
+                        
+                        
+                        
                         <a href="/tags/mongodb" title="mongodb">
                             mongodb
                         </a>
+                        
+                        
+                        
+                        
                         
                         
                         
@@ -698,10 +611,6 @@
                         </a>
                         
                         
-                        
-                        <a href="/tags/mycat" title="mycat">
-                            mycat
-                        </a>
                         
                         
                         
@@ -715,9 +624,17 @@
                         
                         
                         
-                        <a href="/tags/nginx" title="nginx">
-                            nginx
-                        </a>
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
                         
                         
                         
@@ -741,8 +658,22 @@
                         
                         
                         
+                        
+                        
                         <a href="/tags/rocketmq" title="rocketmq">
                             rocketmq
+                        </a>
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        <a href="/tags/security%E6%A1%86%E6%9E%B6%E5%AD%A6%E4%B9%A0" title="security框架学习">
+                            security框架学习
                         </a>
                         
                         
@@ -769,17 +700,11 @@
                         
                         
                         
-                        <a href="/tags/springcloud" title="springCloud">
-                            springCloud
-                        </a>
-                        
-                        
-                        
-                        
-                        
                         <a href="/tags/springboot" title="springboot">
                             springboot
                         </a>
+                        
+                        
                         
                         
                         
@@ -793,6 +718,9 @@
                         
                         
                         
+                        <a href="/tags/springcloud" title="springcloud">
+                            springcloud
+                        </a>
                         
                         
                         
@@ -818,6 +746,33 @@
                         
                         
                         
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        <a href="/tags/zookeeper" title="zookeeper">
+                            zookeeper
+                        </a>
                         
                         
                         
@@ -877,6 +832,8 @@
                         
                         
                         
+                        
+                        
                         <a href="/tags/%E5%88%86%E5%B8%83%E5%BC%8F%E7%B3%BB%E5%88%97" title="分布式系列">
                             分布式系列
                         </a>
@@ -896,6 +853,10 @@
                         
                         
                         
+                        
+                        <a href="/tags/%E5%8D%8F%E8%AE%AE%E6%A0%88" title="协议栈">
+                            协议栈
+                        </a>
                         
                         
                         
@@ -1095,6 +1056,12 @@
                         
                         
                         
+                        
+                        
+                        
+                        
+                        
+                        
                         <a href="/tags/%E7%BD%91%E7%BB%9C%E7%BC%96%E7%A8%8B" title="网络编程">
                             网络编程
                         </a>
@@ -1118,6 +1085,10 @@
                         
                         
                         
+                        
+                        <a href="/tags/%E8%AE%A4%E8%AF%81%E5%92%8C%E6%8E%88%E6%9D%83" title="认证和授权">
+                            认证和授权
+                        </a>
                         
                         
                         
@@ -1288,7 +1259,7 @@
                     
                 </ul>
 		<p class="copyright text-muted">
-                    Copyright &copy;  2020
+                    Copyright &copy;  2021
                     <br>
                     <a href="https://themes.gohugo.io/hugo-theme-cleanwhite">CleanWhite Hugo Theme</a> by <a href="https://zhaohuabing.com">Huabing</a> |
                     <iframe

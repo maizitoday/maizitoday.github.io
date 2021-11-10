@@ -97,15 +97,15 @@
                     </li>
                     
                     <li>
-                        <a href="/categories/english">English</a>
+                        <a href="/categories/english">english</a>
                     </li>
                     
                     <li>
-                        <a href="/categories/life">Life</a>
+                        <a href="/categories/life">life</a>
                     </li>
                     
                     <li>
-                        <a href="/categories/tech">Tech</a>
+                        <a href="/categories/tech">tech</a>
                     </li>
                     
 
@@ -237,142 +237,121 @@
                 
                 
                 
-                
+                <h1 id="globalexceptionhandler">GlobalExceptionHandler</h1>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-java" data-lang="java"><span style="color:#f92672">package</span> com.example.basedemo.globexception<span style="color:#f92672">;</span>
+<span style="color:#75715e">/*
+</span><span style="color:#75715e"> * @Description: 请输入....
+</span><span style="color:#75715e"> * @Author: 麦子
+</span><span style="color:#75715e"> * @Date: 2019-06-24 10:52:09
+</span><span style="color:#75715e"> * @LastEditTime: 2019-06-24 10:54:04
+</span><span style="color:#75715e"> * @LastEditors: 麦子
+</span><span style="color:#75715e"> */</span>
 
-<h1 id="globalexceptionhandler">GlobalExceptionHandler</h1>
+<span style="color:#f92672">import</span> java.util.HashMap<span style="color:#f92672">;</span>
+<span style="color:#f92672">import</span> java.util.Map<span style="color:#f92672">;</span>
 
-<pre><code class="language-java">package com.example.basedemo.globexception;
-/*
- * @Description: 请输入....
- * @Author: 麦子
- * @Date: 2019-06-24 10:52:09
- * @LastEditTime: 2019-06-24 10:54:04
- * @LastEditors: 麦子
- */
+<span style="color:#f92672">import</span> javax.servlet.http.HttpServletRequest<span style="color:#f92672">;</span>
 
-import java.util.HashMap;
-import java.util.Map;
+<span style="color:#f92672">import</span> org.springframework.web.bind.annotation.ControllerAdvice<span style="color:#f92672">;</span>
+<span style="color:#f92672">import</span> org.springframework.web.bind.annotation.ExceptionHandler<span style="color:#f92672">;</span>
+<span style="color:#f92672">import</span> org.springframework.web.bind.annotation.ResponseBody<span style="color:#f92672">;</span>
+<span style="color:#f92672">import</span> org.springframework.web.servlet.ModelAndView<span style="color:#f92672">;</span>
 
-import javax.servlet.http.HttpServletRequest;
+<span style="color:#a6e22e">@ControllerAdvice</span>
+<span style="color:#66d9ef">public</span> <span style="color:#66d9ef">class</span> <span style="color:#a6e22e">GlobalExceptionHandler</span> <span style="color:#f92672">{</span>
 
-import org.springframework.web.bind.annotation.ControllerAdvice;
-import org.springframework.web.bind.annotation.ExceptionHandler;
-import org.springframework.web.bind.annotation.ResponseBody;
-import org.springframework.web.servlet.ModelAndView;
+    <span style="color:#66d9ef">public</span> <span style="color:#66d9ef">static</span> <span style="color:#66d9ef">final</span> String DEFAULT_ERROR_VIEW <span style="color:#f92672">=</span> <span style="color:#e6db74">&#34;errorPrompt&#34;</span><span style="color:#f92672">;</span>
+    <span style="color:#75715e">/***
+</span><span style="color:#75715e">     * 页面错误
+</span><span style="color:#75715e">     * @param req
+</span><span style="color:#75715e">     * @param e
+</span><span style="color:#75715e">     * @return
+</span><span style="color:#75715e">     * @throws Exception
+</span><span style="color:#75715e">     */</span>
+    <span style="color:#a6e22e">@ExceptionHandler</span><span style="color:#f92672">(</span>value <span style="color:#f92672">=</span> MyPageException<span style="color:#f92672">.</span><span style="color:#a6e22e">class</span><span style="color:#f92672">)</span>
+    <span style="color:#66d9ef">public</span> ModelAndView <span style="color:#a6e22e">businessExceptionHandler</span><span style="color:#f92672">(</span>HttpServletRequest req<span style="color:#f92672">,</span> MyPageException e<span style="color:#f92672">){</span>
+        ModelAndView mav <span style="color:#f92672">=</span> <span style="color:#66d9ef">new</span> ModelAndView<span style="color:#f92672">();</span>
+        mav<span style="color:#f92672">.</span><span style="color:#a6e22e">addObject</span><span style="color:#f92672">(</span><span style="color:#e6db74">&#34;msg&#34;</span><span style="color:#f92672">,</span> e<span style="color:#f92672">.</span><span style="color:#a6e22e">getExceptionMsg</span><span style="color:#f92672">());</span>
+        mav<span style="color:#f92672">.</span><span style="color:#a6e22e">addObject</span><span style="color:#f92672">(</span><span style="color:#e6db74">&#34;code&#34;</span><span style="color:#f92672">,</span> 410<span style="color:#f92672">);</span>
+        mav<span style="color:#f92672">.</span><span style="color:#a6e22e">setViewName</span><span style="color:#f92672">(</span>DEFAULT_ERROR_VIEW<span style="color:#f92672">);</span>
+        <span style="color:#66d9ef">return</span> mav<span style="color:#f92672">;</span>
+    <span style="color:#f92672">}</span>
 
-@ControllerAdvice
-public class GlobalExceptionHandler {
-
-    public static final String DEFAULT_ERROR_VIEW = &quot;errorPrompt&quot;;
-    /***
-     * 页面错误
-     * @param req
-     * @param e
-     * @return
-     * @throws Exception
-     */
-    @ExceptionHandler(value = MyPageException.class)
-    public ModelAndView businessExceptionHandler(HttpServletRequest req, MyPageException e){
-        ModelAndView mav = new ModelAndView();
-        mav.addObject(&quot;msg&quot;, e.getExceptionMsg());
-        mav.addObject(&quot;code&quot;, 410);
-        mav.setViewName(DEFAULT_ERROR_VIEW);
-        return mav;
-    }
-
-    /***
-     * JSON 格式错误
-     * @param req
-     * @param e
-     * @return
-     */
-    @ExceptionHandler(value = MyJsonException.class)
-    @ResponseBody
-    public Map&lt;String, Object&gt; jsonExceptionHandler(HttpServletRequest req, MyJsonException e) {
-        Map&lt;String, Object&gt; re = new HashMap&lt;String, Object&gt;();
-        re.put(&quot;code&quot;,e.getCount());
-        re.put(&quot;msg&quot;, e.getExceptionMsg());
-        return re;
-    }
+    <span style="color:#75715e">/***
+</span><span style="color:#75715e">     * JSON 格式错误
+</span><span style="color:#75715e">     * @param req
+</span><span style="color:#75715e">     * @param e
+</span><span style="color:#75715e">     * @return
+</span><span style="color:#75715e">     */</span>
+    <span style="color:#a6e22e">@ExceptionHandler</span><span style="color:#f92672">(</span>value <span style="color:#f92672">=</span> MyJsonException<span style="color:#f92672">.</span><span style="color:#a6e22e">class</span><span style="color:#f92672">)</span>
+    <span style="color:#a6e22e">@ResponseBody</span>
+    <span style="color:#66d9ef">public</span> Map<span style="color:#f92672">&lt;</span>String<span style="color:#f92672">,</span> Object<span style="color:#f92672">&gt;</span> <span style="color:#a6e22e">jsonExceptionHandler</span><span style="color:#f92672">(</span>HttpServletRequest req<span style="color:#f92672">,</span> MyJsonException e<span style="color:#f92672">)</span> <span style="color:#f92672">{</span>
+        Map<span style="color:#f92672">&lt;</span>String<span style="color:#f92672">,</span> Object<span style="color:#f92672">&gt;</span> re <span style="color:#f92672">=</span> <span style="color:#66d9ef">new</span> HashMap<span style="color:#f92672">&lt;</span>String<span style="color:#f92672">,</span> Object<span style="color:#f92672">&gt;();</span>
+        re<span style="color:#f92672">.</span><span style="color:#a6e22e">put</span><span style="color:#f92672">(</span><span style="color:#e6db74">&#34;code&#34;</span><span style="color:#f92672">,</span>e<span style="color:#f92672">.</span><span style="color:#a6e22e">getCount</span><span style="color:#f92672">());</span>
+        re<span style="color:#f92672">.</span><span style="color:#a6e22e">put</span><span style="color:#f92672">(</span><span style="color:#e6db74">&#34;msg&#34;</span><span style="color:#f92672">,</span> e<span style="color:#f92672">.</span><span style="color:#a6e22e">getExceptionMsg</span><span style="color:#f92672">());</span>
+        <span style="color:#66d9ef">return</span> re<span style="color:#f92672">;</span>
+    <span style="color:#f92672">}</span>
     
-}
-</code></pre>
+<span style="color:#f92672">}</span>
+</code></pre></div><h1 id="myjsonexception">MyJsonException</h1>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-java" data-lang="java">
+<span style="color:#a6e22e">@Data</span>
+<span style="color:#a6e22e">@NoArgsConstructor</span>
+<span style="color:#a6e22e">@AllArgsConstructor</span>
+<span style="color:#66d9ef">public</span> <span style="color:#66d9ef">class</span> <span style="color:#a6e22e">MyJsonException</span> <span style="color:#66d9ef">extends</span> Exception <span style="color:#f92672">{</span>
+    <span style="color:#66d9ef">private</span> String exceptionMsg<span style="color:#f92672">;</span>
+    <span style="color:#66d9ef">private</span> <span style="color:#66d9ef">int</span> count<span style="color:#f92672">;</span>
+<span style="color:#f92672">}</span>
+</code></pre></div><h1 id="mypageexception">MyPageException</h1>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-java" data-lang="java"><span style="color:#a6e22e">@Data</span>
+<span style="color:#a6e22e">@NoArgsConstructor</span>
+<span style="color:#a6e22e">@AllArgsConstructor</span>
+<span style="color:#66d9ef">public</span> <span style="color:#66d9ef">class</span> <span style="color:#a6e22e">MyPageException</span>  <span style="color:#66d9ef">extends</span> Exception<span style="color:#f92672">{</span>
+    <span style="color:#66d9ef">private</span> String exceptionMsg<span style="color:#f92672">;</span>
+    <span style="color:#66d9ef">private</span> <span style="color:#66d9ef">int</span> code<span style="color:#f92672">;</span>
+<span style="color:#f92672">}</span>
+</code></pre></div><h1 id="loginservice">LoginService</h1>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-java" data-lang="java"><span style="color:#a6e22e">@Service</span>
+<span style="color:#66d9ef">public</span> <span style="color:#66d9ef">class</span> <span style="color:#a6e22e">LoginService</span> <span style="color:#f92672">{</span>
 
-<h1 id="myjsonexception">MyJsonException</h1>
-
-<pre><code class="language-java">
-@Data
-@NoArgsConstructor
-@AllArgsConstructor
-public class MyJsonException extends Exception {
-    private String exceptionMsg;
-    private int count;
-}
-</code></pre>
-
-<h1 id="mypageexception">MyPageException</h1>
-
-<pre><code class="language-java">@Data
-@NoArgsConstructor
-@AllArgsConstructor
-public class MyPageException  extends Exception{
-    private String exceptionMsg;
-    private int code;
-}
-</code></pre>
-
-<h1 id="loginservice">LoginService</h1>
-
-<pre><code class="language-java">@Service
-public class LoginService {
-
-    public String showException() throws MyJsonException {
-        throw  new MyJsonException(&quot;json错误异常&quot;,504);
-    }
+    <span style="color:#66d9ef">public</span> String <span style="color:#a6e22e">showException</span><span style="color:#f92672">()</span> <span style="color:#66d9ef">throws</span> MyJsonException <span style="color:#f92672">{</span>
+        <span style="color:#66d9ef">throw</span>  <span style="color:#66d9ef">new</span> MyJsonException<span style="color:#f92672">(</span><span style="color:#e6db74">&#34;json错误异常&#34;</span><span style="color:#f92672">,</span>504<span style="color:#f92672">);</span>
+    <span style="color:#f92672">}</span>
     
-}
-</code></pre>
-
-<h1 id="logincontroller">LoginController</h1>
-
-<pre><code class="language-java">@Controller
-public class LoginController {
+<span style="color:#f92672">}</span>
+</code></pre></div><h1 id="logincontroller">LoginController</h1>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-java" data-lang="java"><span style="color:#a6e22e">@Controller</span>
+<span style="color:#66d9ef">public</span> <span style="color:#66d9ef">class</span> <span style="color:#a6e22e">LoginController</span> <span style="color:#f92672">{</span>
 
 
-    @Autowired
-    private LoginService loginService;
+    <span style="color:#a6e22e">@Autowired</span>
+    <span style="color:#66d9ef">private</span> LoginService loginService<span style="color:#f92672">;</span>
 
-    @RequestMapping(&quot;loginView&quot;)
-    public ModelAndView  loginView() throws MyPageException {
-        throw  new MyPageException(&quot;page页面错误异常&quot;,404);
-    }
+    <span style="color:#a6e22e">@RequestMapping</span><span style="color:#f92672">(</span><span style="color:#e6db74">&#34;loginView&#34;</span><span style="color:#f92672">)</span>
+    <span style="color:#66d9ef">public</span> ModelAndView  <span style="color:#a6e22e">loginView</span><span style="color:#f92672">()</span> <span style="color:#66d9ef">throws</span> MyPageException <span style="color:#f92672">{</span>
+        <span style="color:#66d9ef">throw</span>  <span style="color:#66d9ef">new</span> MyPageException<span style="color:#f92672">(</span><span style="color:#e6db74">&#34;page页面错误异常&#34;</span><span style="color:#f92672">,</span>404<span style="color:#f92672">);</span>
+    <span style="color:#f92672">}</span>
 
-    @RequestMapping(&quot;loginJson&quot;)
-    @ResponseBody
-    public String  loginJson() throws MyJsonException {
-        return loginService.showException();
-    }
-}
-</code></pre>
-
-<h1 id="errorprompt-ftl">errorPrompt.ftl</h1>
-
-<pre><code class="language-html">&lt;!DOCTYPE html&gt;
-&lt;html lang=&quot;en&quot;&gt;
-&lt;head&gt;
-    &lt;meta charset=&quot;UTF-8&quot;&gt;
-    &lt;title&gt;错误页面&lt;/title&gt;
-&lt;/head&gt;
-&lt;body&gt;
-&lt;h1&gt;${code}&lt;/h1&gt;
-&lt;h1&gt;${msg}&lt;/h1&gt;
-&lt;/body&gt;
-&lt;/html&gt;
-</code></pre>
-
-<h1 id="运行结果如下">运行结果如下</h1>
-
-<p><img src="/img/Xnip2019-06-24_12-04-32.png" alt="Xnip2019-06-24_12-04-32" /></p>
+    <span style="color:#a6e22e">@RequestMapping</span><span style="color:#f92672">(</span><span style="color:#e6db74">&#34;loginJson&#34;</span><span style="color:#f92672">)</span>
+    <span style="color:#a6e22e">@ResponseBody</span>
+    <span style="color:#66d9ef">public</span> String  <span style="color:#a6e22e">loginJson</span><span style="color:#f92672">()</span> <span style="color:#66d9ef">throws</span> MyJsonException <span style="color:#f92672">{</span>
+        <span style="color:#66d9ef">return</span> loginService<span style="color:#f92672">.</span><span style="color:#a6e22e">showException</span><span style="color:#f92672">();</span>
+    <span style="color:#f92672">}</span>
+<span style="color:#f92672">}</span>
+</code></pre></div><h1 id="errorpromptftl">errorPrompt.ftl</h1>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-html" data-lang="html"><span style="color:#75715e">&lt;!DOCTYPE html&gt;</span>
+&lt;<span style="color:#f92672">html</span> <span style="color:#a6e22e">lang</span><span style="color:#f92672">=</span><span style="color:#e6db74">&#34;en&#34;</span>&gt;
+&lt;<span style="color:#f92672">head</span>&gt;
+    &lt;<span style="color:#f92672">meta</span> <span style="color:#a6e22e">charset</span><span style="color:#f92672">=</span><span style="color:#e6db74">&#34;UTF-8&#34;</span>&gt;
+    &lt;<span style="color:#f92672">title</span>&gt;错误页面&lt;/<span style="color:#f92672">title</span>&gt;
+&lt;/<span style="color:#f92672">head</span>&gt;
+&lt;<span style="color:#f92672">body</span>&gt;
+&lt;<span style="color:#f92672">h1</span>&gt;${code}&lt;/<span style="color:#f92672">h1</span>&gt;
+&lt;<span style="color:#f92672">h1</span>&gt;${msg}&lt;/<span style="color:#f92672">h1</span>&gt;
+&lt;/<span style="color:#f92672">body</span>&gt;
+&lt;/<span style="color:#f92672">html</span>&gt;
+</code></pre></div><h1 id="运行结果如下">运行结果如下</h1>
+<p><img src="/img/Xnip2019-06-24_12-04-32.png" alt="Xnip2019-06-24_12-04-32"></p>
 
 
                 
@@ -479,17 +458,7 @@ public class LoginController {
                         <a class="catalog-toggle" style="font-size: 24px;" href="index.html#">目录结构</a>
                     </h4>
                     <ul class="catalog-body"></ul>
-                    <nav id="TableOfContents">
-<ul>
-<li><a href="#globalexceptionhandler">GlobalExceptionHandler</a></li>
-<li><a href="#myjsonexception">MyJsonException</a></li>
-<li><a href="#mypageexception">MyPageException</a></li>
-<li><a href="#loginservice">LoginService</a></li>
-<li><a href="#logincontroller">LoginController</a></li>
-<li><a href="#errorprompt-ftl">errorPrompt.ftl</a></li>
-<li><a href="#运行结果如下">运行结果如下</a></li>
-</ul>
-</nav>
+                    <nav id="TableOfContents"></nav>
                     <br>
                     <br>
                     <br>
@@ -513,9 +482,6 @@ public class LoginController {
                         
                         
                         
-                        <a href="/tags/" title="">
-                            
-                        </a>
                         
                         
                         
@@ -525,101 +491,6 @@ public class LoginController {
                         
                         
                         
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        <a href="/tags/qt" title="QT">
-                            QT
-                        </a>
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        <a href="/tags/zookeeper" title="Zookeeper">
-                            Zookeeper
-                        </a>
                         
                         
                         
@@ -659,8 +530,10 @@ public class LoginController {
                         
                         
                         
-                        <a href="/tags/elasticsearch" title="elasticSearch">
-                            elasticSearch
+                        
+                        
+                        <a href="/tags/elasticsearch" title="elasticsearch">
+                            elasticsearch
                         </a>
                         
                         
@@ -671,9 +544,27 @@ public class LoginController {
                         
                         
                         
-                        <a href="/tags/golang" title="golang">
-                            golang
-                        </a>
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
                         
                         
                         
@@ -711,9 +602,21 @@ public class LoginController {
                         
                         
                         
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
                         <a href="/tags/jvm" title="jvm">
                             jvm
                         </a>
+                        
+                        
+                        
+                        
                         
                         
                         
@@ -737,9 +640,19 @@ public class LoginController {
                         
                         
                         
+                        
+                        
+                        
+                        
+                        
+                        
                         <a href="/tags/mongodb" title="mongodb">
                             mongodb
                         </a>
+                        
+                        
+                        
+                        
                         
                         
                         
@@ -750,10 +663,6 @@ public class LoginController {
                         </a>
                         
                         
-                        
-                        <a href="/tags/mycat" title="mycat">
-                            mycat
-                        </a>
                         
                         
                         
@@ -767,9 +676,17 @@ public class LoginController {
                         
                         
                         
-                        <a href="/tags/nginx" title="nginx">
-                            nginx
-                        </a>
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
                         
                         
                         
@@ -793,8 +710,22 @@ public class LoginController {
                         
                         
                         
+                        
+                        
                         <a href="/tags/rocketmq" title="rocketmq">
                             rocketmq
+                        </a>
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        <a href="/tags/security%E6%A1%86%E6%9E%B6%E5%AD%A6%E4%B9%A0" title="security框架学习">
+                            security框架学习
                         </a>
                         
                         
@@ -821,17 +752,11 @@ public class LoginController {
                         
                         
                         
-                        <a href="/tags/springcloud" title="springCloud">
-                            springCloud
-                        </a>
-                        
-                        
-                        
-                        
-                        
                         <a href="/tags/springboot" title="springboot">
                             springboot
                         </a>
+                        
+                        
                         
                         
                         
@@ -845,6 +770,9 @@ public class LoginController {
                         
                         
                         
+                        <a href="/tags/springcloud" title="springcloud">
+                            springcloud
+                        </a>
                         
                         
                         
@@ -870,6 +798,33 @@ public class LoginController {
                         
                         
                         
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        <a href="/tags/zookeeper" title="zookeeper">
+                            zookeeper
+                        </a>
                         
                         
                         
@@ -929,6 +884,8 @@ public class LoginController {
                         
                         
                         
+                        
+                        
                         <a href="/tags/%E5%88%86%E5%B8%83%E5%BC%8F%E7%B3%BB%E5%88%97" title="分布式系列">
                             分布式系列
                         </a>
@@ -948,6 +905,10 @@ public class LoginController {
                         
                         
                         
+                        
+                        <a href="/tags/%E5%8D%8F%E8%AE%AE%E6%A0%88" title="协议栈">
+                            协议栈
+                        </a>
                         
                         
                         
@@ -1147,6 +1108,12 @@ public class LoginController {
                         
                         
                         
+                        
+                        
+                        
+                        
+                        
+                        
                         <a href="/tags/%E7%BD%91%E7%BB%9C%E7%BC%96%E7%A8%8B" title="网络编程">
                             网络编程
                         </a>
@@ -1170,6 +1137,10 @@ public class LoginController {
                         
                         
                         
+                        
+                        <a href="/tags/%E8%AE%A4%E8%AF%81%E5%92%8C%E6%8E%88%E6%9D%83" title="认证和授权">
+                            认证和授权
+                        </a>
                         
                         
                         
@@ -1340,7 +1311,7 @@ public class LoginController {
                     
                 </ul>
 		<p class="copyright text-muted">
-                    Copyright &copy;  2020
+                    Copyright &copy;  2021
                     <br>
                     <a href="https://themes.gohugo.io/hugo-theme-cleanwhite">CleanWhite Hugo Theme</a> by <a href="https://zhaohuabing.com">Huabing</a> |
                     <iframe

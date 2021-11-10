@@ -97,15 +97,15 @@
                     </li>
                     
                     <li>
-                        <a href="/categories/english">English</a>
+                        <a href="/categories/english">english</a>
                     </li>
                     
                     <li>
-                        <a href="/categories/life">Life</a>
+                        <a href="/categories/life">life</a>
                     </li>
                     
                     <li>
-                        <a href="/categories/tech">Tech</a>
+                        <a href="/categories/tech">tech</a>
                     </li>
                     
 
@@ -237,351 +237,313 @@
                 
                 
                 
-                
-
-<p>[TOC]</p>
-
-<p><strong>转载地址：<a href="https://blog.csdn.net/MOTUI/article/details/52792146">https://blog.csdn.net/MOTUI/article/details/52792146</a></strong></p>
-
+                <p>[TOC]</p>
+<p><strong>转载地址：https://blog.csdn.net/MOTUI/article/details/52792146</strong></p>
 <h1 id="nio-服务器端">NIO 服务器端</h1>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-java" data-lang="java"><span style="color:#f92672">package</span> maizi.nio<span style="color:#f92672">;</span>
 
-<pre><code class="language-java">package maizi.nio;
+<span style="color:#f92672">import</span> java.io.IOException<span style="color:#f92672">;</span>
+<span style="color:#f92672">import</span> java.net.InetSocketAddress<span style="color:#f92672">;</span>
+<span style="color:#f92672">import</span> java.nio.channels.SelectionKey<span style="color:#f92672">;</span>
+<span style="color:#f92672">import</span> java.nio.channels.Selector<span style="color:#f92672">;</span>
+<span style="color:#f92672">import</span> java.nio.channels.ServerSocketChannel<span style="color:#f92672">;</span>
+<span style="color:#f92672">import</span> java.nio.channels.SocketChannel<span style="color:#f92672">;</span>
+<span style="color:#f92672">import</span> java.util.ArrayList<span style="color:#f92672">;</span>
+<span style="color:#f92672">import</span> java.util.Iterator<span style="color:#f92672">;</span>
+<span style="color:#f92672">import</span> java.util.List<span style="color:#f92672">;</span>
+<span style="color:#f92672">import</span> java.util.Set<span style="color:#f92672">;</span>
 
-import java.io.IOException;
-import java.net.InetSocketAddress;
-import java.nio.channels.SelectionKey;
-import java.nio.channels.Selector;
-import java.nio.channels.ServerSocketChannel;
-import java.nio.channels.SocketChannel;
-import java.util.ArrayList;
-import java.util.Iterator;
-import java.util.List;
-import java.util.Set;
+<span style="color:#75715e">/**
+</span><span style="color:#75715e"> * NIO 服务器端
+</span><span style="color:#75715e"> * 
+</span><span style="color:#75715e"> * @author MOTUI
+</span><span style="color:#75715e"> * 
+</span><span style="color:#75715e"> */</span>
+<span style="color:#66d9ef">public</span> <span style="color:#66d9ef">class</span> <span style="color:#a6e22e">NIOServerSocket</span> <span style="color:#f92672">{</span>
 
-/**
- * NIO 服务器端
- * 
- * @author MOTUI
- * 
- */
-public class NIOServerSocket {
+    <span style="color:#75715e">// 存储SelectionKey的队列
+</span><span style="color:#75715e"></span>    <span style="color:#66d9ef">private</span> <span style="color:#66d9ef">static</span> List<span style="color:#f92672">&lt;</span>SelectionKey<span style="color:#f92672">&gt;</span> writeQueen <span style="color:#f92672">=</span> <span style="color:#66d9ef">new</span> ArrayList<span style="color:#f92672">&lt;</span>SelectionKey<span style="color:#f92672">&gt;();</span>
+    <span style="color:#66d9ef">private</span> <span style="color:#66d9ef">static</span> Selector selector <span style="color:#f92672">=</span> <span style="color:#66d9ef">null</span><span style="color:#f92672">;</span>
 
-    // 存储SelectionKey的队列
-    private static List&lt;SelectionKey&gt; writeQueen = new ArrayList&lt;SelectionKey&gt;();
-    private static Selector selector = null;
+    <span style="color:#75715e">// 添加SelectionKey到队列
+</span><span style="color:#75715e"></span>    <span style="color:#66d9ef">public</span> <span style="color:#66d9ef">static</span> <span style="color:#66d9ef">void</span> <span style="color:#a6e22e">addWriteQueen</span><span style="color:#f92672">(</span>SelectionKey key<span style="color:#f92672">)</span> <span style="color:#f92672">{</span>
+        <span style="color:#66d9ef">synchronized</span> <span style="color:#f92672">(</span>writeQueen<span style="color:#f92672">)</span> <span style="color:#f92672">{</span>
+            writeQueen<span style="color:#f92672">.</span><span style="color:#a6e22e">add</span><span style="color:#f92672">(</span>key<span style="color:#f92672">);</span>
+            <span style="color:#75715e">// 唤醒主线程
+</span><span style="color:#75715e"></span>            selector<span style="color:#f92672">.</span><span style="color:#a6e22e">wakeup</span><span style="color:#f92672">();</span>
+        <span style="color:#f92672">}</span>
+    <span style="color:#f92672">}</span>
 
-    // 添加SelectionKey到队列
-    public static void addWriteQueen(SelectionKey key) {
-        synchronized (writeQueen) {
-            writeQueen.add(key);
-            // 唤醒主线程
-            selector.wakeup();
-        }
-    }
+    <span style="color:#66d9ef">public</span> <span style="color:#66d9ef">static</span> <span style="color:#66d9ef">void</span> <span style="color:#a6e22e">main</span><span style="color:#f92672">(</span>String<span style="color:#f92672">[]</span> args<span style="color:#f92672">)</span> <span style="color:#66d9ef">throws</span> IOException <span style="color:#f92672">{</span>
 
-    public static void main(String[] args) throws IOException {
+        <span style="color:#75715e">// 1.创建ServerSocketChannel
+</span><span style="color:#75715e"></span>        ServerSocketChannel serverSocketChannel <span style="color:#f92672">=</span> ServerSocketChannel<span style="color:#f92672">.</span><span style="color:#a6e22e">open</span><span style="color:#f92672">();</span>
+        <span style="color:#75715e">// 2.绑定端口
+</span><span style="color:#75715e"></span>        serverSocketChannel<span style="color:#f92672">.</span><span style="color:#a6e22e">bind</span><span style="color:#f92672">(</span><span style="color:#66d9ef">new</span> InetSocketAddress<span style="color:#f92672">(</span>8989<span style="color:#f92672">));</span>
+        <span style="color:#75715e">// 3.设置为非阻塞
+</span><span style="color:#75715e"></span>        serverSocketChannel<span style="color:#f92672">.</span><span style="color:#a6e22e">configureBlocking</span><span style="color:#f92672">(</span><span style="color:#66d9ef">false</span><span style="color:#f92672">);</span>
+        <span style="color:#75715e">// 4.创建通道选择器
+</span><span style="color:#75715e"></span>        selector <span style="color:#f92672">=</span> Selector<span style="color:#f92672">.</span><span style="color:#a6e22e">open</span><span style="color:#f92672">();</span>
 
-        // 1.创建ServerSocketChannel
-        ServerSocketChannel serverSocketChannel = ServerSocketChannel.open();
-        // 2.绑定端口
-        serverSocketChannel.bind(new InetSocketAddress(8989));
-        // 3.设置为非阻塞
-        serverSocketChannel.configureBlocking(false);
-        // 4.创建通道选择器
-        selector = Selector.open();
+        <span style="color:#75715e">/*
+</span><span style="color:#75715e">         * 5.注册事件类型
+</span><span style="color:#75715e">         * 
+</span><span style="color:#75715e">         * sel:通道选择器 ops:事件类型 ==&gt;SelectionKey:包装类，包含事件类型和通道本身。四个常量类型表示四种事件类型
+</span><span style="color:#75715e">         * SelectionKey.OP_ACCEPT 获取报文 SelectionKey.OP_CONNECT 连接 SelectionKey.OP_READ 读
+</span><span style="color:#75715e">         * SelectionKey.OP_WRITE 写
+</span><span style="color:#75715e">         */</span>
+        serverSocketChannel<span style="color:#f92672">.</span><span style="color:#a6e22e">register</span><span style="color:#f92672">(</span>selector<span style="color:#f92672">,</span> SelectionKey<span style="color:#f92672">.</span><span style="color:#a6e22e">OP_ACCEPT</span><span style="color:#f92672">);</span>
 
-        /*
-         * 5.注册事件类型
-         * 
-         * sel:通道选择器 ops:事件类型 ==&gt;SelectionKey:包装类，包含事件类型和通道本身。四个常量类型表示四种事件类型
-         * SelectionKey.OP_ACCEPT 获取报文 SelectionKey.OP_CONNECT 连接 SelectionKey.OP_READ 读
-         * SelectionKey.OP_WRITE 写
-         */
-        serverSocketChannel.register(selector, SelectionKey.OP_ACCEPT);
+        <span style="color:#66d9ef">while</span> <span style="color:#f92672">(</span><span style="color:#66d9ef">true</span><span style="color:#f92672">)</span> <span style="color:#f92672">{</span>
+            System<span style="color:#f92672">.</span><span style="color:#a6e22e">out</span><span style="color:#f92672">.</span><span style="color:#a6e22e">println</span><span style="color:#f92672">(</span><span style="color:#e6db74">&#34;服务器端：正在监听8989端口&#34;</span><span style="color:#f92672">);</span>
+            <span style="color:#75715e">// 6.获取可用I/O通道,获得有多少可用的通道
+</span><span style="color:#75715e"></span>            <span style="color:#66d9ef">int</span> num <span style="color:#f92672">=</span> selector<span style="color:#f92672">.</span><span style="color:#a6e22e">select</span><span style="color:#f92672">();</span>
+            <span style="color:#66d9ef">if</span> <span style="color:#f92672">(</span>num <span style="color:#f92672">&gt;</span> 0<span style="color:#f92672">)</span> <span style="color:#f92672">{</span> <span style="color:#75715e">// 判断是否存在可用的通道
+</span><span style="color:#75715e"></span>                <span style="color:#75715e">// 获得所有的keys
+</span><span style="color:#75715e"></span>                Set<span style="color:#f92672">&lt;</span>SelectionKey<span style="color:#f92672">&gt;</span> selectedKeys <span style="color:#f92672">=</span> selector<span style="color:#f92672">.</span><span style="color:#a6e22e">selectedKeys</span><span style="color:#f92672">();</span>
+                <span style="color:#75715e">// 使用iterator遍历所有的keys
+</span><span style="color:#75715e"></span>                Iterator<span style="color:#f92672">&lt;</span>SelectionKey<span style="color:#f92672">&gt;</span> iterator <span style="color:#f92672">=</span> selectedKeys<span style="color:#f92672">.</span><span style="color:#a6e22e">iterator</span><span style="color:#f92672">();</span>
+                <span style="color:#75715e">// 迭代遍历当前I/O通道
+</span><span style="color:#75715e"></span>                <span style="color:#66d9ef">while</span> <span style="color:#f92672">(</span>iterator<span style="color:#f92672">.</span><span style="color:#a6e22e">hasNext</span><span style="color:#f92672">())</span> <span style="color:#f92672">{</span>
+                    <span style="color:#75715e">// 获得当前key
+</span><span style="color:#75715e"></span>                    SelectionKey key <span style="color:#f92672">=</span> iterator<span style="color:#f92672">.</span><span style="color:#a6e22e">next</span><span style="color:#f92672">();</span>
+                    <span style="color:#75715e">// 调用iterator的remove()方法，并不是移除当前I/O通道，标识当前I/O通道已经处理。
+</span><span style="color:#75715e"></span>                    iterator<span style="color:#f92672">.</span><span style="color:#a6e22e">remove</span><span style="color:#f92672">();</span>
+                    <span style="color:#75715e">// 判断事件类型，做对应的处理
+</span><span style="color:#75715e"></span>                    <span style="color:#66d9ef">if</span> <span style="color:#f92672">(</span>key<span style="color:#f92672">.</span><span style="color:#a6e22e">isAcceptable</span><span style="color:#f92672">())</span> <span style="color:#f92672">{</span>
+                        ServerSocketChannel ssChannel <span style="color:#f92672">=</span> <span style="color:#f92672">(</span>ServerSocketChannel<span style="color:#f92672">)</span> key<span style="color:#f92672">.</span><span style="color:#a6e22e">channel</span><span style="color:#f92672">();</span>
+                        SocketChannel socketChannel <span style="color:#f92672">=</span> ssChannel<span style="color:#f92672">.</span><span style="color:#a6e22e">accept</span><span style="color:#f92672">();</span>
 
-        while (true) {
-            System.out.println(&quot;服务器端：正在监听8989端口&quot;);
-            // 6.获取可用I/O通道,获得有多少可用的通道
-            int num = selector.select();
-            if (num &gt; 0) { // 判断是否存在可用的通道
-                // 获得所有的keys
-                Set&lt;SelectionKey&gt; selectedKeys = selector.selectedKeys();
-                // 使用iterator遍历所有的keys
-                Iterator&lt;SelectionKey&gt; iterator = selectedKeys.iterator();
-                // 迭代遍历当前I/O通道
-                while (iterator.hasNext()) {
-                    // 获得当前key
-                    SelectionKey key = iterator.next();
-                    // 调用iterator的remove()方法，并不是移除当前I/O通道，标识当前I/O通道已经处理。
-                    iterator.remove();
-                    // 判断事件类型，做对应的处理
-                    if (key.isAcceptable()) {
-                        ServerSocketChannel ssChannel = (ServerSocketChannel) key.channel();
-                        SocketChannel socketChannel = ssChannel.accept();
+                        System<span style="color:#f92672">.</span><span style="color:#a6e22e">out</span><span style="color:#f92672">.</span><span style="color:#a6e22e">println</span><span style="color:#f92672">(</span><span style="color:#e6db74">&#34;处理请求：&#34;</span> <span style="color:#f92672">+</span> socketChannel<span style="color:#f92672">.</span><span style="color:#a6e22e">getRemoteAddress</span><span style="color:#f92672">());</span>
 
-                        System.out.println(&quot;处理请求：&quot; + socketChannel.getRemoteAddress());
+                        <span style="color:#75715e">// 获取客户端的数据
+</span><span style="color:#75715e"></span>                        <span style="color:#75715e">// 设置非阻塞状态
+</span><span style="color:#75715e"></span>                        socketChannel<span style="color:#f92672">.</span><span style="color:#a6e22e">configureBlocking</span><span style="color:#f92672">(</span><span style="color:#66d9ef">false</span><span style="color:#f92672">);</span>
+                        <span style="color:#75715e">// 注册到selector(通道选择器)
+</span><span style="color:#75715e"></span>                        socketChannel<span style="color:#f92672">.</span><span style="color:#a6e22e">register</span><span style="color:#f92672">(</span>selector<span style="color:#f92672">,</span> SelectionKey<span style="color:#f92672">.</span><span style="color:#a6e22e">OP_READ</span><span style="color:#f92672">);</span>
 
-                        // 获取客户端的数据
-                        // 设置非阻塞状态
-                        socketChannel.configureBlocking(false);
-                        // 注册到selector(通道选择器)
-                        socketChannel.register(selector, SelectionKey.OP_READ);
+                    <span style="color:#f92672">}</span> <span style="color:#66d9ef">else</span> <span style="color:#66d9ef">if</span> <span style="color:#f92672">(</span>key<span style="color:#f92672">.</span><span style="color:#a6e22e">isReadable</span><span style="color:#f92672">())</span> <span style="color:#f92672">{</span>
+                        <span style="color:#75715e">// 取消读事件的监控   注意1号代码
+</span><span style="color:#75715e"></span>                        key<span style="color:#f92672">.</span><span style="color:#a6e22e">cancel</span><span style="color:#f92672">();</span>
+                        <span style="color:#75715e">// 调用读操作工具类
+</span><span style="color:#75715e"></span>                        RequestProcessor<span style="color:#f92672">.</span><span style="color:#a6e22e">ProcessorRequest</span><span style="color:#f92672">(</span>key<span style="color:#f92672">);</span>
+                    <span style="color:#f92672">}</span> <span style="color:#66d9ef">else</span> <span style="color:#66d9ef">if</span> <span style="color:#f92672">(</span>key<span style="color:#f92672">.</span><span style="color:#a6e22e">isWritable</span><span style="color:#f92672">())</span> <span style="color:#f92672">{</span>
+                        <span style="color:#75715e">// 取消读事件的监控
+</span><span style="color:#75715e"></span>                        key<span style="color:#f92672">.</span><span style="color:#a6e22e">cancel</span><span style="color:#f92672">();</span>
+                        <span style="color:#75715e">// 调用写操作工具类
+</span><span style="color:#75715e"></span>                        ResponeProcessor<span style="color:#f92672">.</span><span style="color:#a6e22e">ProcessorRespone</span><span style="color:#f92672">(</span>key<span style="color:#f92672">);</span>
+                    <span style="color:#f92672">}</span>
+                <span style="color:#f92672">}</span>
+            <span style="color:#f92672">}</span> <span style="color:#66d9ef">else</span> <span style="color:#f92672">{</span>
+                <span style="color:#66d9ef">synchronized</span> <span style="color:#f92672">(</span>writeQueen<span style="color:#f92672">)</span> <span style="color:#f92672">{</span>
+                    <span style="color:#66d9ef">while</span> <span style="color:#f92672">(</span>writeQueen<span style="color:#f92672">.</span><span style="color:#a6e22e">size</span><span style="color:#f92672">()</span> <span style="color:#f92672">&gt;</span> 0<span style="color:#f92672">)</span> <span style="color:#f92672">{</span>
+                        SelectionKey key <span style="color:#f92672">=</span> writeQueen<span style="color:#f92672">.</span><span style="color:#a6e22e">remove</span><span style="color:#f92672">(</span>0<span style="color:#f92672">);</span>
+                        <span style="color:#75715e">// 注册写事件
+</span><span style="color:#75715e"></span>                        SocketChannel channel <span style="color:#f92672">=</span> <span style="color:#f92672">(</span>SocketChannel<span style="color:#f92672">)</span> key<span style="color:#f92672">.</span><span style="color:#a6e22e">channel</span><span style="color:#f92672">();</span>
+                        Object attachment <span style="color:#f92672">=</span> key<span style="color:#f92672">.</span><span style="color:#a6e22e">attachment</span><span style="color:#f92672">();</span>
+                        channel<span style="color:#f92672">.</span><span style="color:#a6e22e">register</span><span style="color:#f92672">(</span>selector<span style="color:#f92672">,</span> SelectionKey<span style="color:#f92672">.</span><span style="color:#a6e22e">OP_WRITE</span><span style="color:#f92672">,</span> attachment<span style="color:#f92672">);</span>
+                    <span style="color:#f92672">}</span>
+                <span style="color:#f92672">}</span>
+            <span style="color:#f92672">}</span>
+        <span style="color:#f92672">}</span>
+    <span style="color:#f92672">}</span>
+<span style="color:#f92672">}</span>
+</code></pre></div><h1 id="读操作的工具类">读操作的工具类</h1>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-java" data-lang="java"><span style="color:#f92672">package</span> maizi.nio<span style="color:#f92672">;</span>
 
-                    } else if (key.isReadable()) {
-                        // 取消读事件的监控   注意1号代码
-                        key.cancel();
-                        // 调用读操作工具类
-                        RequestProcessor.ProcessorRequest(key);
-                    } else if (key.isWritable()) {
-                        // 取消读事件的监控
-                        key.cancel();
-                        // 调用写操作工具类
-                        ResponeProcessor.ProcessorRespone(key);
-                    }
-                }
-            } else {
-                synchronized (writeQueen) {
-                    while (writeQueen.size() &gt; 0) {
-                        SelectionKey key = writeQueen.remove(0);
-                        // 注册写事件
-                        SocketChannel channel = (SocketChannel) key.channel();
-                        Object attachment = key.attachment();
-                        channel.register(selector, SelectionKey.OP_WRITE, attachment);
-                    }
-                }
-            }
-        }
-    }
-}
-</code></pre>
+<span style="color:#f92672">import</span> java.io.ByteArrayOutputStream<span style="color:#f92672">;</span>
+<span style="color:#f92672">import</span> java.io.IOException<span style="color:#f92672">;</span>
+<span style="color:#f92672">import</span> java.nio.ByteBuffer<span style="color:#f92672">;</span>
+<span style="color:#f92672">import</span> java.nio.channels.SelectionKey<span style="color:#f92672">;</span>
+<span style="color:#f92672">import</span> java.nio.channels.SocketChannel<span style="color:#f92672">;</span>
+<span style="color:#f92672">import</span> java.util.concurrent.ExecutorService<span style="color:#f92672">;</span>
+<span style="color:#f92672">import</span> java.util.concurrent.Executors<span style="color:#f92672">;</span>
 
-<h1 id="读操作的工具类">读操作的工具类</h1>
+<span style="color:#75715e">/**
+</span><span style="color:#75715e"> * 读操作的工具类
+</span><span style="color:#75715e"> * 
+</span><span style="color:#75715e"> * @author MOTUI
+</span><span style="color:#75715e"> *
+</span><span style="color:#75715e"> */</span>
+<span style="color:#66d9ef">public</span> <span style="color:#66d9ef">class</span> <span style="color:#a6e22e">RequestProcessor</span> <span style="color:#f92672">{</span>
 
-<pre><code class="language-java">package maizi.nio;
+    <span style="color:#75715e">// 构造线程池
+</span><span style="color:#75715e"></span>    <span style="color:#66d9ef">private</span> <span style="color:#66d9ef">static</span> ExecutorService executorService <span style="color:#f92672">=</span> Executors<span style="color:#f92672">.</span><span style="color:#a6e22e">newFixedThreadPool</span><span style="color:#f92672">(</span>10<span style="color:#f92672">);</span>
 
-import java.io.ByteArrayOutputStream;
-import java.io.IOException;
-import java.nio.ByteBuffer;
-import java.nio.channels.SelectionKey;
-import java.nio.channels.SocketChannel;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
+    <span style="color:#66d9ef">public</span> <span style="color:#66d9ef">static</span> <span style="color:#66d9ef">void</span> <span style="color:#a6e22e">ProcessorRequest</span><span style="color:#f92672">(</span><span style="color:#66d9ef">final</span> SelectionKey key<span style="color:#f92672">)</span> <span style="color:#f92672">{</span>
+        <span style="color:#75715e">// 获得线程并执行
+</span><span style="color:#75715e"></span>        executorService<span style="color:#f92672">.</span><span style="color:#a6e22e">submit</span><span style="color:#f92672">(</span><span style="color:#66d9ef">new</span> Runnable<span style="color:#f92672">()</span> <span style="color:#f92672">{</span>
 
-/**
- * 读操作的工具类
- * 
- * @author MOTUI
- *
- */
-public class RequestProcessor {
+            <span style="color:#a6e22e">@Override</span>
+            <span style="color:#66d9ef">public</span> <span style="color:#66d9ef">void</span> <span style="color:#a6e22e">run</span><span style="color:#f92672">()</span> <span style="color:#f92672">{</span>
+                <span style="color:#66d9ef">try</span> <span style="color:#f92672">{</span>
+                    SocketChannel readChannel <span style="color:#f92672">=</span> <span style="color:#f92672">(</span>SocketChannel<span style="color:#f92672">)</span> key<span style="color:#f92672">.</span><span style="color:#a6e22e">channel</span><span style="color:#f92672">();</span>
+                    <span style="color:#75715e">// I/O读数据操作
+</span><span style="color:#75715e"></span>                    ByteBuffer buffer <span style="color:#f92672">=</span> ByteBuffer<span style="color:#f92672">.</span><span style="color:#a6e22e">allocate</span><span style="color:#f92672">(</span>1024<span style="color:#f92672">);</span>
+                    ByteArrayOutputStream baos <span style="color:#f92672">=</span> <span style="color:#66d9ef">new</span> ByteArrayOutputStream<span style="color:#f92672">();</span>
+                    <span style="color:#66d9ef">int</span> len <span style="color:#f92672">=</span> 0<span style="color:#f92672">;</span>
+                    <span style="color:#66d9ef">while</span> <span style="color:#f92672">(</span><span style="color:#66d9ef">true</span><span style="color:#f92672">)</span> <span style="color:#f92672">{</span>
+                        buffer<span style="color:#f92672">.</span><span style="color:#a6e22e">clear</span><span style="color:#f92672">();</span>
+                        len <span style="color:#f92672">=</span> readChannel<span style="color:#f92672">.</span><span style="color:#a6e22e">read</span><span style="color:#f92672">(</span>buffer<span style="color:#f92672">);</span>
+                        <span style="color:#66d9ef">if</span> <span style="color:#f92672">(</span>len <span style="color:#f92672">==</span> <span style="color:#f92672">-</span>1<span style="color:#f92672">)</span>
+                            <span style="color:#66d9ef">break</span><span style="color:#f92672">;</span>
+                        buffer<span style="color:#f92672">.</span><span style="color:#a6e22e">flip</span><span style="color:#f92672">();</span>
+                        <span style="color:#66d9ef">while</span> <span style="color:#f92672">(</span>buffer<span style="color:#f92672">.</span><span style="color:#a6e22e">hasRemaining</span><span style="color:#f92672">())</span> <span style="color:#f92672">{</span>
+                            baos<span style="color:#f92672">.</span><span style="color:#a6e22e">write</span><span style="color:#f92672">(</span>buffer<span style="color:#f92672">.</span><span style="color:#a6e22e">get</span><span style="color:#f92672">());</span>
+                        <span style="color:#f92672">}</span>
+                    <span style="color:#f92672">}</span>
+                    System<span style="color:#f92672">.</span><span style="color:#a6e22e">out</span><span style="color:#f92672">.</span><span style="color:#a6e22e">println</span><span style="color:#f92672">(</span><span style="color:#e6db74">&#34;服务器端接收到的数据：&#34;</span> <span style="color:#f92672">+</span> <span style="color:#66d9ef">new</span> String<span style="color:#f92672">(</span>baos<span style="color:#f92672">.</span><span style="color:#a6e22e">toByteArray</span><span style="color:#f92672">()));</span>
 
-    // 构造线程池
-    private static ExecutorService executorService = Executors.newFixedThreadPool(10);
+                    <span style="color:#75715e">// 将数据添加到key中
+</span><span style="color:#75715e"></span>                    key<span style="color:#f92672">.</span><span style="color:#a6e22e">attach</span><span style="color:#f92672">(</span>baos<span style="color:#f92672">);</span>
+                    <span style="color:#75715e">// 将注册写操作添加到队列中
+</span><span style="color:#75715e"></span>                    NIOServerSocket<span style="color:#f92672">.</span><span style="color:#a6e22e">addWriteQueen</span><span style="color:#f92672">(</span>key<span style="color:#f92672">);</span>
 
-    public static void ProcessorRequest(final SelectionKey key) {
-        // 获得线程并执行
-        executorService.submit(new Runnable() {
+                <span style="color:#f92672">}</span> <span style="color:#66d9ef">catch</span> <span style="color:#f92672">(</span>IOException e<span style="color:#f92672">)</span> <span style="color:#f92672">{</span>
+                    e<span style="color:#f92672">.</span><span style="color:#a6e22e">printStackTrace</span><span style="color:#f92672">();</span>
+                <span style="color:#f92672">}</span>
+            <span style="color:#f92672">}</span>
+        <span style="color:#f92672">});</span>
+    <span style="color:#f92672">}</span>
+<span style="color:#f92672">}</span>
+</code></pre></div><h1 id="写操作工具类">写操作工具类</h1>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-java" data-lang="java"><span style="color:#f92672">package</span> maizi.nio<span style="color:#f92672">;</span>
 
-            @Override
-            public void run() {
-                try {
-                    SocketChannel readChannel = (SocketChannel) key.channel();
-                    // I/O读数据操作
-                    ByteBuffer buffer = ByteBuffer.allocate(1024);
-                    ByteArrayOutputStream baos = new ByteArrayOutputStream();
-                    int len = 0;
-                    while (true) {
-                        buffer.clear();
-                        len = readChannel.read(buffer);
-                        if (len == -1)
-                            break;
-                        buffer.flip();
-                        while (buffer.hasRemaining()) {
-                            baos.write(buffer.get());
-                        }
-                    }
-                    System.out.println(&quot;服务器端接收到的数据：&quot; + new String(baos.toByteArray()));
+<span style="color:#f92672">import</span> java.io.ByteArrayOutputStream<span style="color:#f92672">;</span>
+<span style="color:#f92672">import</span> java.io.IOException<span style="color:#f92672">;</span>
+<span style="color:#f92672">import</span> java.nio.ByteBuffer<span style="color:#f92672">;</span>
+<span style="color:#f92672">import</span> java.nio.channels.SelectionKey<span style="color:#f92672">;</span>
+<span style="color:#f92672">import</span> java.nio.channels.SocketChannel<span style="color:#f92672">;</span>
+<span style="color:#f92672">import</span> java.util.concurrent.ExecutorService<span style="color:#f92672">;</span>
+<span style="color:#f92672">import</span> java.util.concurrent.Executors<span style="color:#f92672">;</span>
 
-                    // 将数据添加到key中
-                    key.attach(baos);
-                    // 将注册写操作添加到队列中
-                    NIOServerSocket.addWriteQueen(key);
+<span style="color:#75715e">/**
+</span><span style="color:#75715e"> * 写操作工具类
+</span><span style="color:#75715e"> * 
+</span><span style="color:#75715e"> * @author MOTUI
+</span><span style="color:#75715e"> *
+</span><span style="color:#75715e"> */</span>
+<span style="color:#66d9ef">public</span> <span style="color:#66d9ef">class</span> <span style="color:#a6e22e">ResponeProcessor</span> <span style="color:#f92672">{</span>
+    <span style="color:#75715e">// 构造线程池
+</span><span style="color:#75715e"></span>    <span style="color:#66d9ef">private</span> <span style="color:#66d9ef">static</span> ExecutorService executorService <span style="color:#f92672">=</span> Executors<span style="color:#f92672">.</span><span style="color:#a6e22e">newFixedThreadPool</span><span style="color:#f92672">(</span>10<span style="color:#f92672">);</span>
 
-                } catch (IOException e) {
-                    e.printStackTrace();
-                }
-            }
-        });
-    }
-}
-</code></pre>
+    <span style="color:#66d9ef">public</span> <span style="color:#66d9ef">static</span> <span style="color:#66d9ef">void</span> <span style="color:#a6e22e">ProcessorRespone</span><span style="color:#f92672">(</span><span style="color:#66d9ef">final</span> SelectionKey key<span style="color:#f92672">)</span> <span style="color:#f92672">{</span>
+        <span style="color:#75715e">// 拿到线程并执行
+</span><span style="color:#75715e"></span>        executorService<span style="color:#f92672">.</span><span style="color:#a6e22e">submit</span><span style="color:#f92672">(</span><span style="color:#66d9ef">new</span> Runnable<span style="color:#f92672">()</span> <span style="color:#f92672">{</span>
+            <span style="color:#a6e22e">@Override</span>
+            <span style="color:#66d9ef">public</span> <span style="color:#66d9ef">void</span> <span style="color:#a6e22e">run</span><span style="color:#f92672">()</span> <span style="color:#f92672">{</span>
+                <span style="color:#66d9ef">try</span> <span style="color:#f92672">{</span>
+                    <span style="color:#75715e">// 写操作
+</span><span style="color:#75715e"></span>                    SocketChannel writeChannel <span style="color:#f92672">=</span> <span style="color:#f92672">(</span>SocketChannel<span style="color:#f92672">)</span> key<span style="color:#f92672">.</span><span style="color:#a6e22e">channel</span><span style="color:#f92672">();</span>
+                    <span style="color:#75715e">// 拿到客户端传递的数据
+</span><span style="color:#75715e"></span>                    ByteArrayOutputStream attachment <span style="color:#f92672">=</span> <span style="color:#f92672">(</span>ByteArrayOutputStream<span style="color:#f92672">)</span> key<span style="color:#f92672">.</span><span style="color:#a6e22e">attachment</span><span style="color:#f92672">();</span>
 
-<h1 id="写操作工具类">写操作工具类</h1>
+                    System<span style="color:#f92672">.</span><span style="color:#a6e22e">out</span><span style="color:#f92672">.</span><span style="color:#a6e22e">println</span><span style="color:#f92672">(</span><span style="color:#e6db74">&#34;客户端发送来的数据：&#34;</span> <span style="color:#f92672">+</span> <span style="color:#66d9ef">new</span> String<span style="color:#f92672">(</span>attachment<span style="color:#f92672">.</span><span style="color:#a6e22e">toByteArray</span><span style="color:#f92672">()));</span>
 
-<pre><code class="language-java">package maizi.nio;
+                    ByteBuffer buffer <span style="color:#f92672">=</span> ByteBuffer<span style="color:#f92672">.</span><span style="color:#a6e22e">allocate</span><span style="color:#f92672">(</span>1024<span style="color:#f92672">);</span>
+                    String message <span style="color:#f92672">=</span> <span style="color:#e6db74">&#34;你好，我好，大家好！！&#34;</span><span style="color:#f92672">;</span>
+                    buffer<span style="color:#f92672">.</span><span style="color:#a6e22e">put</span><span style="color:#f92672">(</span>message<span style="color:#f92672">.</span><span style="color:#a6e22e">getBytes</span><span style="color:#f92672">());</span>
+                    buffer<span style="color:#f92672">.</span><span style="color:#a6e22e">flip</span><span style="color:#f92672">();</span>
+                    writeChannel<span style="color:#f92672">.</span><span style="color:#a6e22e">write</span><span style="color:#f92672">(</span>buffer<span style="color:#f92672">);</span>
+                    writeChannel<span style="color:#f92672">.</span><span style="color:#a6e22e">close</span><span style="color:#f92672">();</span>
+                <span style="color:#f92672">}</span> <span style="color:#66d9ef">catch</span> <span style="color:#f92672">(</span>IOException e<span style="color:#f92672">)</span> <span style="color:#f92672">{</span>
+                    e<span style="color:#f92672">.</span><span style="color:#a6e22e">printStackTrace</span><span style="color:#f92672">();</span>
+                <span style="color:#f92672">}</span>
+            <span style="color:#f92672">}</span>
+        <span style="color:#f92672">});</span>
+    <span style="color:#f92672">}</span>
+<span style="color:#f92672">}</span>
+</code></pre></div><h1 id="nio-客户端">NIO 客户端</h1>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-java" data-lang="java"><span style="color:#f92672">package</span> maizi.nio<span style="color:#f92672">;</span>
 
-import java.io.ByteArrayOutputStream;
-import java.io.IOException;
-import java.nio.ByteBuffer;
-import java.nio.channels.SelectionKey;
-import java.nio.channels.SocketChannel;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
+<span style="color:#f92672">import</span> java.io.ByteArrayOutputStream<span style="color:#f92672">;</span>
+<span style="color:#f92672">import</span> java.io.IOException<span style="color:#f92672">;</span>
+<span style="color:#f92672">import</span> java.net.InetSocketAddress<span style="color:#f92672">;</span>
+<span style="color:#f92672">import</span> java.nio.ByteBuffer<span style="color:#f92672">;</span>
+<span style="color:#f92672">import</span> java.nio.channels.SocketChannel<span style="color:#f92672">;</span>
 
-/**
- * 写操作工具类
- * 
- * @author MOTUI
- *
- */
-public class ResponeProcessor {
-    // 构造线程池
-    private static ExecutorService executorService = Executors.newFixedThreadPool(10);
+<span style="color:#75715e">/**
+</span><span style="color:#75715e"> * NIO 客户端
+</span><span style="color:#75715e"> */</span>
+<span style="color:#66d9ef">public</span> <span style="color:#66d9ef">class</span> <span style="color:#a6e22e">NIOClientSocket</span> <span style="color:#f92672">{</span>
 
-    public static void ProcessorRespone(final SelectionKey key) {
-        // 拿到线程并执行
-        executorService.submit(new Runnable() {
-            @Override
-            public void run() {
-                try {
-                    // 写操作
-                    SocketChannel writeChannel = (SocketChannel) key.channel();
-                    // 拿到客户端传递的数据
-                    ByteArrayOutputStream attachment = (ByteArrayOutputStream) key.attachment();
+    <span style="color:#66d9ef">public</span> <span style="color:#66d9ef">static</span> <span style="color:#66d9ef">void</span> <span style="color:#a6e22e">main</span><span style="color:#f92672">(</span>String<span style="color:#f92672">[]</span> args<span style="color:#f92672">)</span> <span style="color:#66d9ef">throws</span> IOException <span style="color:#f92672">{</span>
+        <span style="color:#75715e">// 使用线程模拟用户 并发访问
+</span><span style="color:#75715e"></span>        <span style="color:#66d9ef">for</span> <span style="color:#f92672">(</span><span style="color:#66d9ef">int</span> i <span style="color:#f92672">=</span> 0<span style="color:#f92672">;</span> i <span style="color:#f92672">&lt;</span> 2<span style="color:#f92672">;</span> i<span style="color:#f92672">++)</span> <span style="color:#f92672">{</span>
+            <span style="color:#66d9ef">new</span> Thread<span style="color:#f92672">()</span> <span style="color:#f92672">{</span>
+                <span style="color:#66d9ef">public</span> <span style="color:#66d9ef">void</span> <span style="color:#a6e22e">run</span><span style="color:#f92672">()</span> <span style="color:#f92672">{</span>
+                    <span style="color:#66d9ef">try</span> <span style="color:#f92672">{</span>
+                        <span style="color:#75715e">// 1.创建SocketChannel
+</span><span style="color:#75715e"></span>                        SocketChannel socketChannel <span style="color:#f92672">=</span> SocketChannel<span style="color:#f92672">.</span><span style="color:#a6e22e">open</span><span style="color:#f92672">();</span>
+                        <span style="color:#75715e">// 2.连接服务器
+</span><span style="color:#75715e"></span>                        socketChannel<span style="color:#f92672">.</span><span style="color:#a6e22e">connect</span><span style="color:#f92672">(</span><span style="color:#66d9ef">new</span> InetSocketAddress<span style="color:#f92672">(</span><span style="color:#e6db74">&#34;127.0.0.1&#34;</span><span style="color:#f92672">,</span> 8989<span style="color:#f92672">));</span>
 
-                    System.out.println(&quot;客户端发送来的数据：&quot; + new String(attachment.toByteArray()));
+                        <span style="color:#75715e">// 写数据
+</span><span style="color:#75715e"></span>                        String msg <span style="color:#f92672">=</span> <span style="color:#e6db74">&#34;我是客户端&#34;</span> <span style="color:#f92672">+</span> Thread<span style="color:#f92672">.</span><span style="color:#a6e22e">currentThread</span><span style="color:#f92672">().</span><span style="color:#a6e22e">getId</span><span style="color:#f92672">();</span>
+                        ByteBuffer buffer <span style="color:#f92672">=</span> ByteBuffer<span style="color:#f92672">.</span><span style="color:#a6e22e">allocate</span><span style="color:#f92672">(</span>1024<span style="color:#f92672">);</span>
+                        buffer<span style="color:#f92672">.</span><span style="color:#a6e22e">put</span><span style="color:#f92672">(</span>msg<span style="color:#f92672">.</span><span style="color:#a6e22e">getBytes</span><span style="color:#f92672">());</span>
+                        buffer<span style="color:#f92672">.</span><span style="color:#a6e22e">flip</span><span style="color:#f92672">();</span>
+                        socketChannel<span style="color:#f92672">.</span><span style="color:#a6e22e">write</span><span style="color:#f92672">(</span>buffer<span style="color:#f92672">);</span>
+                        socketChannel<span style="color:#f92672">.</span><span style="color:#a6e22e">shutdownOutput</span><span style="color:#f92672">();</span>
 
-                    ByteBuffer buffer = ByteBuffer.allocate(1024);
-                    String message = &quot;你好，我好，大家好！！&quot;;
-                    buffer.put(message.getBytes());
-                    buffer.flip();
-                    writeChannel.write(buffer);
-                    writeChannel.close();
-                } catch (IOException e) {
-                    e.printStackTrace();
-                }
-            }
-        });
-    }
-}
-</code></pre>
+                        <span style="color:#75715e">// 读数据
+</span><span style="color:#75715e"></span>                        ByteArrayOutputStream bos <span style="color:#f92672">=</span> <span style="color:#66d9ef">new</span> ByteArrayOutputStream<span style="color:#f92672">();</span>
+                        <span style="color:#66d9ef">int</span> len <span style="color:#f92672">=</span> 0<span style="color:#f92672">;</span>
+                        <span style="color:#66d9ef">while</span> <span style="color:#f92672">(</span><span style="color:#66d9ef">true</span><span style="color:#f92672">)</span> <span style="color:#f92672">{</span>
+                            buffer<span style="color:#f92672">.</span><span style="color:#a6e22e">clear</span><span style="color:#f92672">();</span>
+                            len <span style="color:#f92672">=</span> socketChannel<span style="color:#f92672">.</span><span style="color:#a6e22e">read</span><span style="color:#f92672">(</span>buffer<span style="color:#f92672">);</span>
+                            <span style="color:#66d9ef">if</span> <span style="color:#f92672">(</span>len <span style="color:#f92672">==</span> <span style="color:#f92672">-</span>1<span style="color:#f92672">)</span>
+                                <span style="color:#66d9ef">break</span><span style="color:#f92672">;</span>
+                            buffer<span style="color:#f92672">.</span><span style="color:#a6e22e">flip</span><span style="color:#f92672">();</span>
+                            <span style="color:#66d9ef">while</span> <span style="color:#f92672">(</span>buffer<span style="color:#f92672">.</span><span style="color:#a6e22e">hasRemaining</span><span style="color:#f92672">())</span> <span style="color:#f92672">{</span>
+                                bos<span style="color:#f92672">.</span><span style="color:#a6e22e">write</span><span style="color:#f92672">(</span>buffer<span style="color:#f92672">.</span><span style="color:#a6e22e">get</span><span style="color:#f92672">());</span>
+                            <span style="color:#f92672">}</span>
+                        <span style="color:#f92672">}</span>
 
-<h1 id="nio-客户端">NIO 客户端</h1>
+                        System<span style="color:#f92672">.</span><span style="color:#a6e22e">out</span><span style="color:#f92672">.</span><span style="color:#a6e22e">println</span><span style="color:#f92672">(</span><span style="color:#e6db74">&#34;客户端收到:&#34;</span> <span style="color:#f92672">+</span> <span style="color:#66d9ef">new</span> String<span style="color:#f92672">(</span>bos<span style="color:#f92672">.</span><span style="color:#a6e22e">toByteArray</span><span style="color:#f92672">()));</span>
 
-<pre><code class="language-java">package maizi.nio;
-
-import java.io.ByteArrayOutputStream;
-import java.io.IOException;
-import java.net.InetSocketAddress;
-import java.nio.ByteBuffer;
-import java.nio.channels.SocketChannel;
-
-/**
- * NIO 客户端
- */
-public class NIOClientSocket {
-
-    public static void main(String[] args) throws IOException {
-        // 使用线程模拟用户 并发访问
-        for (int i = 0; i &lt; 2; i++) {
-            new Thread() {
-                public void run() {
-                    try {
-                        // 1.创建SocketChannel
-                        SocketChannel socketChannel = SocketChannel.open();
-                        // 2.连接服务器
-                        socketChannel.connect(new InetSocketAddress(&quot;127.0.0.1&quot;, 8989));
-
-                        // 写数据
-                        String msg = &quot;我是客户端&quot; + Thread.currentThread().getId();
-                        ByteBuffer buffer = ByteBuffer.allocate(1024);
-                        buffer.put(msg.getBytes());
-                        buffer.flip();
-                        socketChannel.write(buffer);
-                        socketChannel.shutdownOutput();
-
-                        // 读数据
-                        ByteArrayOutputStream bos = new ByteArrayOutputStream();
-                        int len = 0;
-                        while (true) {
-                            buffer.clear();
-                            len = socketChannel.read(buffer);
-                            if (len == -1)
-                                break;
-                            buffer.flip();
-                            while (buffer.hasRemaining()) {
-                                bos.write(buffer.get());
-                            }
-                        }
-
-                        System.out.println(&quot;客户端收到:&quot; + new String(bos.toByteArray()));
-
-                        socketChannel.close();
-                    } catch (IOException e) {
-                        e.printStackTrace();
-                    }
-                };
-            }.start();
-        }
-    }
-}
-</code></pre>
-
-<h1 id="注意">注意</h1>
-
-<h2 id="注意1号代码-说明">注意1号代码&ndash;&gt;说明</h2>
-
+                        socketChannel<span style="color:#f92672">.</span><span style="color:#a6e22e">close</span><span style="color:#f92672">();</span>
+                    <span style="color:#f92672">}</span> <span style="color:#66d9ef">catch</span> <span style="color:#f92672">(</span>IOException e<span style="color:#f92672">)</span> <span style="color:#f92672">{</span>
+                        e<span style="color:#f92672">.</span><span style="color:#a6e22e">printStackTrace</span><span style="color:#f92672">();</span>
+                    <span style="color:#f92672">}</span>
+                <span style="color:#f92672">};</span>
+            <span style="color:#f92672">}.</span><span style="color:#a6e22e">start</span><span style="color:#f92672">();</span>
+        <span style="color:#f92672">}</span>
+    <span style="color:#f92672">}</span>
+<span style="color:#f92672">}</span>
+</code></pre></div><h1 id="注意">注意</h1>
+<h2 id="注意1号代码--说明">注意1号代码&ndash;&gt;说明</h2>
 <p>在主线程中，读操作会执行多次。因为在子线程没有执行结束，主线程认为读操作没有结束（在通道选择器中读操作的管道一直存在），会一直开启新的线程去执行读操作，这样就会产生严重的错误。产生这种问题的原因是我们将读操作交给子线程去处理，<strong>主线程依然对此通道保留监控，所以会一直执行读操作</strong>，我们取消主线程对此通道的监控。将服务器端代码稍作修改.所以需要 添加</p>
-
-<pre><code class="language-java">key.cancel()
-</code></pre>
-
-<h1 id="总结">总结</h1>
-
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-java" data-lang="java">key<span style="color:#f92672">.</span><span style="color:#a6e22e">cancel</span><span style="color:#f92672">()</span>
+</code></pre></div><h1 id="总结">总结</h1>
 <p>对于NIO的多线程网络编程：NIO也是使用的阻塞I/O,使用了通道选择器进行选择就绪的通道进行处理I/O，达到非阻塞的目的。</p>
-
 <h2 id="编程思路">编程思路</h2>
-
-<pre><code class="language-java"> 1.创建ServerSocketChannel
- 2.绑定端口
- 3.设置为非阻塞
- 4.创建通道选择器
- 5.注册事件类型
- 6.获取可用I/O通道,获得有多少可用的通道
- 7.将耗时的读写操作开启子线程去处理
- 8.将注册写操作交给主线程处理
-</code></pre>
-
-<p><strong>重点是7、8两步，如何将注册操作交给主线程处理。</strong></p>
-
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-java" data-lang="java"> 1<span style="color:#f92672">.</span><span style="color:#a6e22e">创建ServerSocketChannel</span>
+ 2<span style="color:#f92672">.</span><span style="color:#a6e22e">绑定端口</span>
+ 3<span style="color:#f92672">.</span><span style="color:#a6e22e">设置为非阻塞</span>
+ 4<span style="color:#f92672">.</span><span style="color:#a6e22e">创建通道选择器</span>
+ 5<span style="color:#f92672">.</span><span style="color:#a6e22e">注册事件类型</span>
+ 6<span style="color:#f92672">.</span><span style="color:#a6e22e">获取可用I</span><span style="color:#f92672">/</span>O通道<span style="color:#f92672">,</span>获得有多少可用的通道
+ 7<span style="color:#f92672">.</span><span style="color:#a6e22e">将耗时的读写操作开启子线程去处理</span>
+ 8<span style="color:#f92672">.</span><span style="color:#a6e22e">将注册写操作交给主线程处理</span>
+</code></pre></div><p><strong>重点是7、8两步，如何将注册操作交给主线程处理。</strong></p>
 <h2 id="执行流程">执行流程</h2>
-
-<h3 id="1-启动testservicesocketchannel-服务器-加载服务器端中的代码">1.  启动TestServiceSocketChannel（服务器），加载服务器端中的代码</h3>
-
-<pre><code class="language-java">进入到第一个while（true）{
-    停留到int num = selector.select();查询是否有可用通道
-}
-</code></pre>
-
-<h3 id="2-启动testclientsocketchannel-客户端-加载客户端中的代码">2.   启动TestClientSocketChannel（客户端），加载客户端中的代码</h3>
-
-<h3 id="3-这时客户端有可用的通道">3.   这时客户端有可用的通道</h3>
-
+<h3 id="1--启动testservicesocketchannel服务器加载服务器端中的代码">1.  启动TestServiceSocketChannel（服务器），加载服务器端中的代码</h3>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-java" data-lang="java">进入到第一个while<span style="color:#960050;background-color:#1e0010">（</span><span style="color:#66d9ef">true</span><span style="color:#960050;background-color:#1e0010">）</span><span style="color:#f92672">{</span>
+    停留到int num <span style="color:#f92672">=</span> selector<span style="color:#f92672">.</span><span style="color:#a6e22e">select</span><span style="color:#f92672">();</span>查询是否有可用通道
+<span style="color:#f92672">}</span>
+</code></pre></div><h3 id="2---启动testclientsocketchannel客户端加载客户端中的代码">2.   启动TestClientSocketChannel（客户端），加载客户端中的代码</h3>
+<h3 id="3---这时客户端有可用的通道">3.   这时客户端有可用的通道</h3>
 <ol>
-<li><code>java
-开始向下执行进入下个while（true）循环，然后将这个iterator.remove(); 标记移除，以为这个请已经被处理，（防止高并发时进行重复处理）
-</code></li>
+<li>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-java" data-lang="java">开始向下执行进入下个while<span style="color:#960050;background-color:#1e0010">（</span><span style="color:#66d9ef">true</span><span style="color:#960050;background-color:#1e0010">）</span>循环<span style="color:#960050;background-color:#1e0010">，</span>然后将这个iterator<span style="color:#f92672">.</span><span style="color:#a6e22e">remove</span><span style="color:#f92672">();</span> 标记移除<span style="color:#960050;background-color:#1e0010">，</span>以为这个请已经被处理<span style="color:#960050;background-color:#1e0010">，（</span>防止高并发时进行重复处理<span style="color:#960050;background-color:#1e0010">）</span>
+</code></pre></div></li>
 </ol>
-
-<h3 id="4-判断当前时间类型并进行处理">4.   判断当前时间类型并进行处理</h3>
-
-<p><strong>a：</strong>key.isAcceptable()，key.channeal拿到一个通道，并用通道接收报文请求，然后进行通道设置为非阻塞的，然后再将读操作注入到通道里。执行完毕后，此时跳出当前while（iterator.hasNext()因为此时测试的环境是一个线程，如果是多个线程则进行循环处理</p>
-
-<p><strong>b：</strong>因为在步骤1中已经将读取所以进行判断后会进入else if(key.isReadable()){这里边，进入后会将key.cancel();(会将这个key做上标记)调用RequestProcess.request(key);这个类中的方法进行读操作。此时，服务器端的主线程会阻塞。因为此时已经没有要处理的通道或者说是key的时间</p>
-
-<p><strong>c：</strong>进入读操作后，执行代码并将从客户端接受到数据，防止到key的附件中key.attach(bos);然后调用服务器端的TestServiceSocketChannel.addWriteQueen(key);方法，将可以存入WriteQueen集合中，存入后会将已经 阻塞的主线程 进行唤醒（selector.wakeup();）</p>
-
-<p><strong>d：</strong>唤醒主线程后，以为此时已经有了所对象，会进行注册写入事件和从客户端读取到的数据 放入通道，进行写入操作.进行判断if(key.isWritable())取消key的写标记，调用写方法ResponseProcess.response(key);将写入数据传到客户端，释放通道，完成响应。</p>
+<h3 id="4---判断当前时间类型并进行处理">4.   判断当前时间类型并进行处理</h3>
+<p>**a：**key.isAcceptable()，key.channeal拿到一个通道，并用通道接收报文请求，然后进行通道设置为非阻塞的，然后再将读操作注入到通道里。执行完毕后，此时跳出当前while（iterator.hasNext()因为此时测试的环境是一个线程，如果是多个线程则进行循环处理</p>
+<p>**b：**因为在步骤1中已经将读取所以进行判断后会进入else if(key.isReadable()){这里边，进入后会将key.cancel();(会将这个key做上标记)调用RequestProcess.request(key);这个类中的方法进行读操作。此时，服务器端的主线程会阻塞。因为此时已经没有要处理的通道或者说是key的时间</p>
+<p>**c：**进入读操作后，执行代码并将从客户端接受到数据，防止到key的附件中key.attach(bos);然后调用服务器端的TestServiceSocketChannel.addWriteQueen(key);方法，将可以存入WriteQueen集合中，存入后会将已经 阻塞的主线程 进行唤醒（selector.wakeup();）</p>
+<p>**d：**唤醒主线程后，以为此时已经有了所对象，会进行注册写入事件和从客户端读取到的数据 放入通道，进行写入操作.进行判断if(key.isWritable())取消key的写标记，调用写方法ResponseProcess.response(key);将写入数据传到客户端，释放通道，完成响应。</p>
 
 
                 
@@ -689,27 +651,21 @@ public class NIOClientSocket {
                     </h4>
                     <ul class="catalog-body"></ul>
                     <nav id="TableOfContents">
-<ul>
-<li><a href="#nio-服务器端">NIO 服务器端</a></li>
-<li><a href="#读操作的工具类">读操作的工具类</a></li>
-<li><a href="#写操作工具类">写操作工具类</a></li>
-<li><a href="#nio-客户端">NIO 客户端</a></li>
-<li><a href="#注意">注意</a>
-<ul>
-<li><a href="#注意1号代码-说明">注意1号代码&ndash;&gt;说明</a></li>
-</ul></li>
-<li><a href="#总结">总结</a>
-<ul>
-<li><a href="#编程思路">编程思路</a></li>
-<li><a href="#执行流程">执行流程</a>
-<ul>
-<li><a href="#1-启动testservicesocketchannel-服务器-加载服务器端中的代码">1.  启动TestServiceSocketChannel（服务器），加载服务器端中的代码</a></li>
-<li><a href="#2-启动testclientsocketchannel-客户端-加载客户端中的代码">2.   启动TestClientSocketChannel（客户端），加载客户端中的代码</a></li>
-<li><a href="#3-这时客户端有可用的通道">3.   这时客户端有可用的通道</a></li>
-<li><a href="#4-判断当前时间类型并进行处理">4.   判断当前时间类型并进行处理</a></li>
-</ul></li>
-</ul></li>
-</ul>
+  <ul>
+    <li><a href="#注意1号代码--说明">注意1号代码&ndash;&gt;说明</a></li>
+  </ul>
+
+  <ul>
+    <li><a href="#编程思路">编程思路</a></li>
+    <li><a href="#执行流程">执行流程</a>
+      <ul>
+        <li><a href="#1--启动testservicesocketchannel服务器加载服务器端中的代码">1.  启动TestServiceSocketChannel（服务器），加载服务器端中的代码</a></li>
+        <li><a href="#2---启动testclientsocketchannel客户端加载客户端中的代码">2.   启动TestClientSocketChannel（客户端），加载客户端中的代码</a></li>
+        <li><a href="#3---这时客户端有可用的通道">3.   这时客户端有可用的通道</a></li>
+        <li><a href="#4---判断当前时间类型并进行处理">4.   判断当前时间类型并进行处理</a></li>
+      </ul>
+    </li>
+  </ul>
 </nav>
                     <br>
                     <br>
@@ -734,9 +690,6 @@ public class NIOClientSocket {
                         
                         
                         
-                        <a href="/tags/" title="">
-                            
-                        </a>
                         
                         
                         
@@ -746,101 +699,6 @@ public class NIOClientSocket {
                         
                         
                         
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        <a href="/tags/qt" title="QT">
-                            QT
-                        </a>
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        <a href="/tags/zookeeper" title="Zookeeper">
-                            Zookeeper
-                        </a>
                         
                         
                         
@@ -880,8 +738,10 @@ public class NIOClientSocket {
                         
                         
                         
-                        <a href="/tags/elasticsearch" title="elasticSearch">
-                            elasticSearch
+                        
+                        
+                        <a href="/tags/elasticsearch" title="elasticsearch">
+                            elasticsearch
                         </a>
                         
                         
@@ -892,9 +752,27 @@ public class NIOClientSocket {
                         
                         
                         
-                        <a href="/tags/golang" title="golang">
-                            golang
-                        </a>
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
                         
                         
                         
@@ -932,9 +810,21 @@ public class NIOClientSocket {
                         
                         
                         
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
                         <a href="/tags/jvm" title="jvm">
                             jvm
                         </a>
+                        
+                        
+                        
+                        
                         
                         
                         
@@ -958,9 +848,19 @@ public class NIOClientSocket {
                         
                         
                         
+                        
+                        
+                        
+                        
+                        
+                        
                         <a href="/tags/mongodb" title="mongodb">
                             mongodb
                         </a>
+                        
+                        
+                        
+                        
                         
                         
                         
@@ -971,10 +871,6 @@ public class NIOClientSocket {
                         </a>
                         
                         
-                        
-                        <a href="/tags/mycat" title="mycat">
-                            mycat
-                        </a>
                         
                         
                         
@@ -988,9 +884,17 @@ public class NIOClientSocket {
                         
                         
                         
-                        <a href="/tags/nginx" title="nginx">
-                            nginx
-                        </a>
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
                         
                         
                         
@@ -1014,8 +918,22 @@ public class NIOClientSocket {
                         
                         
                         
+                        
+                        
                         <a href="/tags/rocketmq" title="rocketmq">
                             rocketmq
+                        </a>
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        <a href="/tags/security%E6%A1%86%E6%9E%B6%E5%AD%A6%E4%B9%A0" title="security框架学习">
+                            security框架学习
                         </a>
                         
                         
@@ -1042,17 +960,11 @@ public class NIOClientSocket {
                         
                         
                         
-                        <a href="/tags/springcloud" title="springCloud">
-                            springCloud
-                        </a>
-                        
-                        
-                        
-                        
-                        
                         <a href="/tags/springboot" title="springboot">
                             springboot
                         </a>
+                        
+                        
                         
                         
                         
@@ -1066,6 +978,9 @@ public class NIOClientSocket {
                         
                         
                         
+                        <a href="/tags/springcloud" title="springcloud">
+                            springcloud
+                        </a>
                         
                         
                         
@@ -1091,6 +1006,33 @@ public class NIOClientSocket {
                         
                         
                         
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        <a href="/tags/zookeeper" title="zookeeper">
+                            zookeeper
+                        </a>
                         
                         
                         
@@ -1150,6 +1092,8 @@ public class NIOClientSocket {
                         
                         
                         
+                        
+                        
                         <a href="/tags/%E5%88%86%E5%B8%83%E5%BC%8F%E7%B3%BB%E5%88%97" title="分布式系列">
                             分布式系列
                         </a>
@@ -1169,6 +1113,10 @@ public class NIOClientSocket {
                         
                         
                         
+                        
+                        <a href="/tags/%E5%8D%8F%E8%AE%AE%E6%A0%88" title="协议栈">
+                            协议栈
+                        </a>
                         
                         
                         
@@ -1368,6 +1316,12 @@ public class NIOClientSocket {
                         
                         
                         
+                        
+                        
+                        
+                        
+                        
+                        
                         <a href="/tags/%E7%BD%91%E7%BB%9C%E7%BC%96%E7%A8%8B" title="网络编程">
                             网络编程
                         </a>
@@ -1391,6 +1345,10 @@ public class NIOClientSocket {
                         
                         
                         
+                        
+                        <a href="/tags/%E8%AE%A4%E8%AF%81%E5%92%8C%E6%8E%88%E6%9D%83" title="认证和授权">
+                            认证和授权
+                        </a>
                         
                         
                         
@@ -1561,7 +1519,7 @@ public class NIOClientSocket {
                     
                 </ul>
 		<p class="copyright text-muted">
-                    Copyright &copy;  2020
+                    Copyright &copy;  2021
                     <br>
                     <a href="https://themes.gohugo.io/hugo-theme-cleanwhite">CleanWhite Hugo Theme</a> by <a href="https://zhaohuabing.com">Huabing</a> |
                     <iframe

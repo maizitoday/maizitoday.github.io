@@ -97,15 +97,15 @@
                     </li>
                     
                     <li>
-                        <a href="/categories/english">English</a>
+                        <a href="/categories/english">english</a>
                     </li>
                     
                     <li>
-                        <a href="/categories/life">Life</a>
+                        <a href="/categories/life">life</a>
                     </li>
                     
                     <li>
-                        <a href="/categories/tech">Tech</a>
+                        <a href="/categories/tech">tech</a>
                     </li>
                     
 
@@ -237,108 +237,91 @@
                 
                 
                 
-                
-
-<p>[TOC]</p>
-
+                <p>[TOC]</p>
 <p>实现多数据源的配置。</p>
-
 <h1 id="配置数据源">配置数据源</h1>
-
-<pre><code class="language-java">@Configuration
-@MapperScan(basePackages = &quot;com.example.moredatademo.mysqlmapper&quot;, sqlSessionTemplateRef  = &quot;mysqlSqlSessionTemplate&quot;)
-public class MysqlDataSourceConfig {
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-java" data-lang="java"><span style="color:#a6e22e">@Configuration</span>
+<span style="color:#a6e22e">@MapperScan</span><span style="color:#f92672">(</span>basePackages <span style="color:#f92672">=</span> <span style="color:#e6db74">&#34;com.example.moredatademo.mysqlmapper&#34;</span><span style="color:#f92672">,</span> sqlSessionTemplateRef  <span style="color:#f92672">=</span> <span style="color:#e6db74">&#34;mysqlSqlSessionTemplate&#34;</span><span style="color:#f92672">)</span>
+<span style="color:#66d9ef">public</span> <span style="color:#66d9ef">class</span> <span style="color:#a6e22e">MysqlDataSourceConfig</span> <span style="color:#f92672">{</span>
     
-    @Bean(name = &quot;mySqlDataSource&quot;)
-    @ConfigurationProperties(prefix = &quot;spring.datasource.mysqlone&quot;)
-    @Primary
-    public DataSource mySqlDataSource() {
-        DataSource dataSource = DruidDataSourceBuilder.create().build();
-        return dataSource;
-    }
+    <span style="color:#a6e22e">@Bean</span><span style="color:#f92672">(</span>name <span style="color:#f92672">=</span> <span style="color:#e6db74">&#34;mySqlDataSource&#34;</span><span style="color:#f92672">)</span>
+    <span style="color:#a6e22e">@ConfigurationProperties</span><span style="color:#f92672">(</span>prefix <span style="color:#f92672">=</span> <span style="color:#e6db74">&#34;spring.datasource.mysqlone&#34;</span><span style="color:#f92672">)</span>
+    <span style="color:#a6e22e">@Primary</span>
+    <span style="color:#66d9ef">public</span> DataSource <span style="color:#a6e22e">mySqlDataSource</span><span style="color:#f92672">()</span> <span style="color:#f92672">{</span>
+        DataSource dataSource <span style="color:#f92672">=</span> DruidDataSourceBuilder<span style="color:#f92672">.</span><span style="color:#a6e22e">create</span><span style="color:#f92672">().</span><span style="color:#a6e22e">build</span><span style="color:#f92672">();</span>
+        <span style="color:#66d9ef">return</span> dataSource<span style="color:#f92672">;</span>
+    <span style="color:#f92672">}</span>
 
 
-    @Bean(name = &quot;mysqlSqlSessionFactory&quot;)
-    @Primary /*此处必须在主数据库的数据源配置上加上@Primary*/
-    public SqlSessionFactory mysqlSqlSessionFactory(@Qualifier(&quot;mySqlDataSource&quot;) DataSource dataSource) throws Exception {
-        SqlSessionFactoryBean bean = new SqlSessionFactoryBean();
-        bean.setDataSource(dataSource);
-        /*加载mybatis全局配置文件*/
-        // bean.setConfigLocation(new PathMatchingResourcePatternResolver().getResource(&quot;classpath:mybatis/mybatis-config.xml&quot;));
-        /*加载所有的mapper.xml映射文件*/
-        bean.setMapperLocations(new PathMatchingResourcePatternResolver().getResources(&quot;classpath:mybatis/mapper/mysql/*.xml&quot;));
-        return bean.getObject();
-    }
+    <span style="color:#a6e22e">@Bean</span><span style="color:#f92672">(</span>name <span style="color:#f92672">=</span> <span style="color:#e6db74">&#34;mysqlSqlSessionFactory&#34;</span><span style="color:#f92672">)</span>
+    <span style="color:#a6e22e">@Primary</span> <span style="color:#75715e">/*此处必须在主数据库的数据源配置上加上@Primary*/</span>
+    <span style="color:#66d9ef">public</span> SqlSessionFactory <span style="color:#a6e22e">mysqlSqlSessionFactory</span><span style="color:#f92672">(</span><span style="color:#a6e22e">@Qualifier</span><span style="color:#f92672">(</span><span style="color:#e6db74">&#34;mySqlDataSource&#34;</span><span style="color:#f92672">)</span> DataSource dataSource<span style="color:#f92672">)</span> <span style="color:#66d9ef">throws</span> Exception <span style="color:#f92672">{</span>
+        SqlSessionFactoryBean bean <span style="color:#f92672">=</span> <span style="color:#66d9ef">new</span> SqlSessionFactoryBean<span style="color:#f92672">();</span>
+        bean<span style="color:#f92672">.</span><span style="color:#a6e22e">setDataSource</span><span style="color:#f92672">(</span>dataSource<span style="color:#f92672">);</span>
+        <span style="color:#75715e">/*加载mybatis全局配置文件*/</span>
+        <span style="color:#75715e">// bean.setConfigLocation(new PathMatchingResourcePatternResolver().getResource(&#34;classpath:mybatis/mybatis-config.xml&#34;));
+</span><span style="color:#75715e"></span>        <span style="color:#75715e">/*加载所有的mapper.xml映射文件*/</span>
+        bean<span style="color:#f92672">.</span><span style="color:#a6e22e">setMapperLocations</span><span style="color:#f92672">(</span><span style="color:#66d9ef">new</span> PathMatchingResourcePatternResolver<span style="color:#f92672">().</span><span style="color:#a6e22e">getResources</span><span style="color:#f92672">(</span><span style="color:#e6db74">&#34;classpath:mybatis/mapper/mysql/*.xml&#34;</span><span style="color:#f92672">));</span>
+        <span style="color:#66d9ef">return</span> bean<span style="color:#f92672">.</span><span style="color:#a6e22e">getObject</span><span style="color:#f92672">();</span>
+    <span style="color:#f92672">}</span>
 
-    @Bean(name = &quot;mysqlTransactionManager&quot;)
-    @Primary
-    public DataSourceTransactionManager mysqlTransactionManager(@Qualifier(&quot;mySqlDataSource&quot;) DataSource dataSource) {
-        return new DataSourceTransactionManager(dataSource);
-    }
+    <span style="color:#a6e22e">@Bean</span><span style="color:#f92672">(</span>name <span style="color:#f92672">=</span> <span style="color:#e6db74">&#34;mysqlTransactionManager&#34;</span><span style="color:#f92672">)</span>
+    <span style="color:#a6e22e">@Primary</span>
+    <span style="color:#66d9ef">public</span> DataSourceTransactionManager <span style="color:#a6e22e">mysqlTransactionManager</span><span style="color:#f92672">(</span><span style="color:#a6e22e">@Qualifier</span><span style="color:#f92672">(</span><span style="color:#e6db74">&#34;mySqlDataSource&#34;</span><span style="color:#f92672">)</span> DataSource dataSource<span style="color:#f92672">)</span> <span style="color:#f92672">{</span>
+        <span style="color:#66d9ef">return</span> <span style="color:#66d9ef">new</span> DataSourceTransactionManager<span style="color:#f92672">(</span>dataSource<span style="color:#f92672">);</span>
+    <span style="color:#f92672">}</span>
 
-    @Bean(name = &quot;mysqlSqlSessionTemplate&quot;)
-    @Primary
-    public SqlSessionTemplate mysqlSqlSessionTemplate(@Qualifier(&quot;mysqlSqlSessionFactory&quot;) SqlSessionFactory sqlSessionFactory) throws Exception {
-        return new SqlSessionTemplate(sqlSessionFactory);
-    }
+    <span style="color:#a6e22e">@Bean</span><span style="color:#f92672">(</span>name <span style="color:#f92672">=</span> <span style="color:#e6db74">&#34;mysqlSqlSessionTemplate&#34;</span><span style="color:#f92672">)</span>
+    <span style="color:#a6e22e">@Primary</span>
+    <span style="color:#66d9ef">public</span> SqlSessionTemplate <span style="color:#a6e22e">mysqlSqlSessionTemplate</span><span style="color:#f92672">(</span><span style="color:#a6e22e">@Qualifier</span><span style="color:#f92672">(</span><span style="color:#e6db74">&#34;mysqlSqlSessionFactory&#34;</span><span style="color:#f92672">)</span> SqlSessionFactory sqlSessionFactory<span style="color:#f92672">)</span> <span style="color:#66d9ef">throws</span> Exception <span style="color:#f92672">{</span>
+        <span style="color:#66d9ef">return</span> <span style="color:#66d9ef">new</span> SqlSessionTemplate<span style="color:#f92672">(</span>sqlSessionFactory<span style="color:#f92672">);</span>
+    <span style="color:#f92672">}</span>
 
-}
-</code></pre>
+<span style="color:#f92672">}</span>
+</code></pre></div><p>另外一个同上，修改对应的名字就好。</p>
+<h1 id="applicationyml">application.yml</h1>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-yaml" data-lang="yaml">
+<span style="color:#f92672">spring</span>:
+  <span style="color:#f92672">datasource</span>:
+    <span style="color:#f92672">type</span>: <span style="color:#ae81ff">com.alibaba.druid.pool.DruidDataSource    </span>
+    <span style="color:#75715e">#主数据源配置</span>
+    <span style="color:#f92672">mysqlone</span>:
+      <span style="color:#f92672">driver-class-name</span>: <span style="color:#ae81ff">com.mysql.jdbc.Driver</span>
+      <span style="color:#f92672">url</span>: <span style="color:#ae81ff">jdbc:mysql://localhost:3306/work?useUnicode=true&amp;characterEncoding=utf-8</span>
+      <span style="color:#f92672">username</span>: <span style="color:#ae81ff">root</span>
+      <span style="color:#f92672">password</span>: <span style="color:#ae81ff">123456</span>
+    <span style="color:#f92672">oracleone</span>:
+      <span style="color:#f92672">driver-class-name</span>: <span style="color:#ae81ff">oracle.jdbc.driver.OracleDriver</span>
+      <span style="color:#f92672">url</span>: <span style="color:#ae81ff">jdbc:oracle:thin:@localhost:49161:xe</span>
+      <span style="color:#f92672">username</span>: <span style="color:#ae81ff">system</span>
+      <span style="color:#f92672">password</span>: <span style="color:#ae81ff">oracle</span>
 
-<p>另外一个同上，修改对应的名字就好。</p>
+<span style="color:#f92672">logging</span>:
+  <span style="color:#f92672">level</span>:
+    <span style="color:#f92672">com.example.moredatademo.mysqlmapper</span>: <span style="color:#ae81ff">debug</span>
+</code></pre></div><h1 id="其余相关代码">其余相关代码</h1>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-java" data-lang="java">
+<span style="color:#66d9ef">public</span> <span style="color:#66d9ef">interface</span> <span style="color:#a6e22e">SchoolXmlMapper</span> <span style="color:#f92672">{</span>
+    <span style="color:#66d9ef">public</span> School <span style="color:#a6e22e">getSchoolById</span><span style="color:#f92672">(</span>Integer id<span style="color:#f92672">);</span>
 
-<h1 id="application-yml">application.yml</h1>
-
-<pre><code class="language-yaml">
-spring:
-  datasource:
-    type: com.alibaba.druid.pool.DruidDataSource    
-    #主数据源配置
-    mysqlone:
-      driver-class-name: com.mysql.jdbc.Driver
-      url: jdbc:mysql://localhost:3306/work?useUnicode=true&amp;characterEncoding=utf-8
-      username: root
-      password: 123456
-    oracleone:
-      driver-class-name: oracle.jdbc.driver.OracleDriver
-      url: jdbc:oracle:thin:@localhost:49161:xe
-      username: system
-      password: oracle
-
-logging:
-  level:
-    com.example.moredatademo.mysqlmapper: debug
-</code></pre>
-
-<h1 id="其余相关代码">其余相关代码</h1>
-
-<pre><code class="language-java">
-public interface SchoolXmlMapper {
-    public School getSchoolById(Integer id);
-
-    public void updateById(HashMap&lt;String,Object&gt; map);
+    <span style="color:#66d9ef">public</span> <span style="color:#66d9ef">void</span> <span style="color:#a6e22e">updateById</span><span style="color:#f92672">(</span>HashMap<span style="color:#f92672">&lt;</span>String<span style="color:#f92672">,</span>Object<span style="color:#f92672">&gt;</span> map<span style="color:#f92672">);</span>
     
-}
-</code></pre>
-
-<pre><code class="language-xml">&lt;?xml version=&quot;1.0&quot; encoding=&quot;UTF-8&quot; ?&gt;
-&lt;!DOCTYPE mapper PUBLIC &quot;-//mybatis.org//DTD Mapper 3.0//EN&quot; &quot;http://mybatis.org/dtd/mybatis-3-mapper.dtd&quot;&gt;
-&lt;mapper namespace=&quot;com.example.moredatademo.mysqlmapper.SchoolXmlMapper&quot;&gt;
+<span style="color:#f92672">}</span>
+</code></pre></div><div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-xml" data-lang="xml"><span style="color:#75715e">&lt;?xml version=&#34;1.0&#34; encoding=&#34;UTF-8&#34; ?&gt;</span>
+<span style="color:#75715e">&lt;!DOCTYPE mapper PUBLIC &#34;-//mybatis.org//DTD Mapper 3.0//EN&#34; &#34;http://mybatis.org/dtd/mybatis-3-mapper.dtd&#34;&gt;</span>
+<span style="color:#f92672">&lt;mapper</span> <span style="color:#a6e22e">namespace=</span><span style="color:#e6db74">&#34;com.example.moredatademo.mysqlmapper.SchoolXmlMapper&#34;</span><span style="color:#f92672">&gt;</span>
     
-    &lt;select id=&quot;getSchoolById&quot; resultType=&quot;com.example.moredatademo.mysqlmapper.School&quot;&gt;
+    <span style="color:#f92672">&lt;select</span> <span style="color:#a6e22e">id=</span><span style="color:#e6db74">&#34;getSchoolById&#34;</span> <span style="color:#a6e22e">resultType=</span><span style="color:#e6db74">&#34;com.example.moredatademo.mysqlmapper.School&#34;</span><span style="color:#f92672">&gt;</span>
          select * from school where id=#{id}
-    &lt;/select&gt;
+    <span style="color:#f92672">&lt;/select&gt;</span>
 
-   &lt;update id=&quot;updateById&quot; parameterType=&quot;Map&quot;&gt;
+   <span style="color:#f92672">&lt;update</span> <span style="color:#a6e22e">id=</span><span style="color:#e6db74">&#34;updateById&#34;</span> <span style="color:#a6e22e">parameterType=</span><span style="color:#e6db74">&#34;Map&#34;</span><span style="color:#f92672">&gt;</span>
        update school SET  name = #{name} , address = #{address} WHERE id = #{id}
-   &lt;/update&gt;
+   <span style="color:#f92672">&lt;/update&gt;</span>
 
-&lt;/mapper&gt;
-</code></pre>
-
-<h1 id="注意">注意</h1>
-
-<p>@*Transactional*这个注解在多数据源中支持事物处理。</p>
+<span style="color:#f92672">&lt;/mapper&gt;</span>
+</code></pre></div><h1 id="注意">注意</h1>
+<p>@<em>Transactional</em>这个注解在多数据源中支持事物处理。</p>
 
 
                 
@@ -445,14 +428,7 @@ public interface SchoolXmlMapper {
                         <a class="catalog-toggle" style="font-size: 24px;" href="index.html#">目录结构</a>
                     </h4>
                     <ul class="catalog-body"></ul>
-                    <nav id="TableOfContents">
-<ul>
-<li><a href="#配置数据源">配置数据源</a></li>
-<li><a href="#application-yml">application.yml</a></li>
-<li><a href="#其余相关代码">其余相关代码</a></li>
-<li><a href="#注意">注意</a></li>
-</ul>
-</nav>
+                    <nav id="TableOfContents"></nav>
                     <br>
                     <br>
                     <br>
@@ -476,9 +452,6 @@ public interface SchoolXmlMapper {
                         
                         
                         
-                        <a href="/tags/" title="">
-                            
-                        </a>
                         
                         
                         
@@ -488,101 +461,6 @@ public interface SchoolXmlMapper {
                         
                         
                         
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        <a href="/tags/qt" title="QT">
-                            QT
-                        </a>
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        <a href="/tags/zookeeper" title="Zookeeper">
-                            Zookeeper
-                        </a>
                         
                         
                         
@@ -622,8 +500,10 @@ public interface SchoolXmlMapper {
                         
                         
                         
-                        <a href="/tags/elasticsearch" title="elasticSearch">
-                            elasticSearch
+                        
+                        
+                        <a href="/tags/elasticsearch" title="elasticsearch">
+                            elasticsearch
                         </a>
                         
                         
@@ -634,9 +514,27 @@ public interface SchoolXmlMapper {
                         
                         
                         
-                        <a href="/tags/golang" title="golang">
-                            golang
-                        </a>
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
                         
                         
                         
@@ -674,9 +572,21 @@ public interface SchoolXmlMapper {
                         
                         
                         
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
                         <a href="/tags/jvm" title="jvm">
                             jvm
                         </a>
+                        
+                        
+                        
+                        
                         
                         
                         
@@ -700,9 +610,19 @@ public interface SchoolXmlMapper {
                         
                         
                         
+                        
+                        
+                        
+                        
+                        
+                        
                         <a href="/tags/mongodb" title="mongodb">
                             mongodb
                         </a>
+                        
+                        
+                        
+                        
                         
                         
                         
@@ -713,10 +633,6 @@ public interface SchoolXmlMapper {
                         </a>
                         
                         
-                        
-                        <a href="/tags/mycat" title="mycat">
-                            mycat
-                        </a>
                         
                         
                         
@@ -730,9 +646,17 @@ public interface SchoolXmlMapper {
                         
                         
                         
-                        <a href="/tags/nginx" title="nginx">
-                            nginx
-                        </a>
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
                         
                         
                         
@@ -756,8 +680,22 @@ public interface SchoolXmlMapper {
                         
                         
                         
+                        
+                        
                         <a href="/tags/rocketmq" title="rocketmq">
                             rocketmq
+                        </a>
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        <a href="/tags/security%E6%A1%86%E6%9E%B6%E5%AD%A6%E4%B9%A0" title="security框架学习">
+                            security框架学习
                         </a>
                         
                         
@@ -784,17 +722,11 @@ public interface SchoolXmlMapper {
                         
                         
                         
-                        <a href="/tags/springcloud" title="springCloud">
-                            springCloud
-                        </a>
-                        
-                        
-                        
-                        
-                        
                         <a href="/tags/springboot" title="springboot">
                             springboot
                         </a>
+                        
+                        
                         
                         
                         
@@ -808,6 +740,9 @@ public interface SchoolXmlMapper {
                         
                         
                         
+                        <a href="/tags/springcloud" title="springcloud">
+                            springcloud
+                        </a>
                         
                         
                         
@@ -833,6 +768,33 @@ public interface SchoolXmlMapper {
                         
                         
                         
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        <a href="/tags/zookeeper" title="zookeeper">
+                            zookeeper
+                        </a>
                         
                         
                         
@@ -892,6 +854,8 @@ public interface SchoolXmlMapper {
                         
                         
                         
+                        
+                        
                         <a href="/tags/%E5%88%86%E5%B8%83%E5%BC%8F%E7%B3%BB%E5%88%97" title="分布式系列">
                             分布式系列
                         </a>
@@ -911,6 +875,10 @@ public interface SchoolXmlMapper {
                         
                         
                         
+                        
+                        <a href="/tags/%E5%8D%8F%E8%AE%AE%E6%A0%88" title="协议栈">
+                            协议栈
+                        </a>
                         
                         
                         
@@ -1110,6 +1078,12 @@ public interface SchoolXmlMapper {
                         
                         
                         
+                        
+                        
+                        
+                        
+                        
+                        
                         <a href="/tags/%E7%BD%91%E7%BB%9C%E7%BC%96%E7%A8%8B" title="网络编程">
                             网络编程
                         </a>
@@ -1133,6 +1107,10 @@ public interface SchoolXmlMapper {
                         
                         
                         
+                        
+                        <a href="/tags/%E8%AE%A4%E8%AF%81%E5%92%8C%E6%8E%88%E6%9D%83" title="认证和授权">
+                            认证和授权
+                        </a>
                         
                         
                         
@@ -1303,7 +1281,7 @@ public interface SchoolXmlMapper {
                     
                 </ul>
 		<p class="copyright text-muted">
-                    Copyright &copy;  2020
+                    Copyright &copy;  2021
                     <br>
                     <a href="https://themes.gohugo.io/hugo-theme-cleanwhite">CleanWhite Hugo Theme</a> by <a href="https://zhaohuabing.com">Huabing</a> |
                     <iframe

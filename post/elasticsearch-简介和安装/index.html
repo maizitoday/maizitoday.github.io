@@ -97,15 +97,15 @@
                     </li>
                     
                     <li>
-                        <a href="/categories/english">English</a>
+                        <a href="/categories/english">english</a>
                     </li>
                     
                     <li>
-                        <a href="/categories/life">Life</a>
+                        <a href="/categories/life">life</a>
                     </li>
                     
                     <li>
-                        <a href="/categories/tech">Tech</a>
+                        <a href="/categories/tech">tech</a>
                     </li>
                     
 
@@ -204,6 +204,10 @@
                             kibana安装
                         </a>
                         
+                        <a class="tag" href="/tags/elasticsearch%E7%9B%B8%E5%85%B3%E6%A6%82%E5%BF%B5" title="elasticSearch相关概念">
+                            elasticSearch相关概念
+                        </a>
+                        
                     </div>
                     <h1>ElasticSearch-入门</h1>
                     <h2 class="subheading"></h2>
@@ -241,155 +245,113 @@
                 
                 
                 
-                
-
-<p>[TOC]</p>
-
-<p><strong>说明：本文来自于<a href="https://www.bilibili.com/video/av64033816/?p=1&gt;视频讲解">https://www.bilibili.com/video/av64033816/?p=1&gt;视频讲解</a></strong></p>
-
-<p><strong>官方文档：<a href="https://www.elastic.co/guide/en/elasticsearch/reference/6.0/getting-started.html">https://www.elastic.co/guide/en/elasticsearch/reference/6.0/getting-started.html</a> 版本6.8.3</strong></p>
-
+                <p>[TOC]</p>
+<p><strong>说明：本文来自于https://www.bilibili.com/video/av64033816/?p=1&gt;视频讲解</strong></p>
+<p><strong>官方文档：https://www.elastic.co/guide/en/elasticsearch/reference/6.0/getting-started.html 版本6.8.3</strong></p>
 <h1 id="简介">简介</h1>
-
 <p>ElasticSearch是一个基于Apache Luncene的开源的搜索引擎。无论在开源还是专有领域，Lucene可以被认为是迄今为止最先进，性能最好的，功能最齐全的搜索引擎库。</p>
-
 <p>Elasticsearch是一个分布式的文档(document)<strong>存储引擎</strong>。它可以实时存储并检索复杂数据结构——序列化的JSON文档。换言说，一旦文档被存储在Elasticsearch中，它就可以在集群的任一节点上被检索。它的<strong>搜索存储功</strong>能主要是 Lucene 提供的，Lucene 相当于其存储引擎，它在之上封装了索引，查询，以及分布式相关的接口。</p>
-
 <h2 id="使用场景">使用场景</h2>
-
 <p>Elasticsearch是当今最流行的分布式搜索引擎，首先介绍下使用场景，比如：</p>
-
 <h3 id="全文检索">全文检索</h3>
-
 <p>比如找到与搜索词项(term)最相关的维基百科文章。</p>
-
 <h3 id="聚合">聚合</h3>
-
 <p>比如在广告网络中，可视化的搜索词项的竞价直方图。它允许你在数据上生成复杂的分析统计。它很像SQL中的 GROUP BY 但是功能更强大。</p>
-
 <h3 id="地理空间api">地理空间API</h3>
-
 <p>比如在顺风车平台，匹配最近的司机和乘客。</p>
-
 <h2 id="特点">特点</h2>
-
 <ol>
 <li>分布式的实时文件存储，<strong>每个字段都被索引并可被搜索</strong>。</li>
 <li>分布式实时分析搜索引擎，做不规则查询。</li>
 <li>可以扩展到上百台服务器，处理PB级结构化或非结构化数据。</li>
 <li>通过简单的RESTFul API来隐藏Lucene的复杂性，从而让全文搜索变的简单。</li>
 </ol>
-
 <p>他相当于一个单独的服务器，</p>
-
 <h2 id="es能做什么">ES能做什么</h2>
-
 <p>全文检索(全部字段), 模糊查询(搜索),数据分析(提供分析语法，列如聚合)</p>
-
 <h2 id="es-的基本组件">ES 的基本组件</h2>
-
-<h3 id="索引-index">索引（index）</h3>
-
+<h3 id="索引index">索引（index）</h3>
 <p>文档容器可理解为索引是具有类似属性的文档集合，类似表且索引名须为小写字母；<strong>相当于mysql中的数据库</strong></p>
-
-<h3 id="类型-type">类型（type）</h3>
-
+<h3 id="类型type">类型（type）</h3>
 <p>类型是索引内部的逻辑分区，其意义完全取决于用户需求，一个索引内部可定义一个或多个类型，类型就是其拥有相同的域的文档的预定义,建议一个索引只存一类数据；<strong>相当于mysql中的Tables</strong></p>
-
-<h3 id="文档-document">文档（document）</h3>
-
+<h3 id="文档document">文档（document）</h3>
 <p>文档是lucene索引的搜索原子单位，它包含了一个或多个域。是域的容器；
 每个域的组成部分：一个名字，一个或多个值。拥有多个值的域，通常称为‘多值域’；<strong>相当于mysql中的Rows</strong></p>
-
-<h3 id="映射-mapping">映射（mapping）</h3>
-
+<h3 id="映射mapping">映射（mapping）</h3>
 <p>原始内容存储为文档需要事先分析（如何切词，哪些可以过滤等）分析完后要定义这个分析，定义这个分析后让它怎么去根据这个定义去搜索实现，这个过程就叫映射；
 例如：切词、过滤掉某些词等。除此之外ES还为映射提供了诸如将域中的内容排序等功能；</p>
-
 <p><strong>这个mapping有点类似我们定义MySQL的数据库表结构的时候，需要指定每个字段的名字，其数据类型一样。</strong></p>
-
 <p><strong>mapping的目的就是定制化你的字段类型，按照你自己的要求。</strong></p>
-
-<pre><code class="language-json"># 设置postdate数据类型
-PUT test
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-json" data-lang="json"><span style="color:#960050;background-color:#1e0010">#</span> <span style="color:#960050;background-color:#1e0010">设置postdate数据类型</span>
+<span style="color:#960050;background-color:#1e0010">PUT</span> <span style="color:#960050;background-color:#1e0010">test</span>
 {
-  &quot;mappings&quot;:{
-    &quot;my&quot;:{
-      &quot;properties&quot;: {
-        &quot;postdate&quot;:{
-          &quot;type&quot;:&quot;date&quot;,
-          &quot;format&quot;: &quot;yyyy-MM-dd HH:mm:ss||yyyy-MM-dd||epoch_millis&quot;
+  <span style="color:#f92672">&#34;mappings&#34;</span>:{
+    <span style="color:#f92672">&#34;my&#34;</span>:{
+      <span style="color:#f92672">&#34;properties&#34;</span>: {
+        <span style="color:#f92672">&#34;postdate&#34;</span>:{
+          <span style="color:#f92672">&#34;type&#34;</span>:<span style="color:#e6db74">&#34;date&#34;</span>,
+          <span style="color:#f92672">&#34;format&#34;</span>: <span style="color:#e6db74">&#34;yyyy-MM-dd HH:mm:ss||yyyy-MM-dd||epoch_millis&#34;</span>
         }
       }
     }
   }
 }
 
-# 添加数据
-PUT test/my/1
+<span style="color:#960050;background-color:#1e0010">#</span> <span style="color:#960050;background-color:#1e0010">添加数据</span>
+<span style="color:#960050;background-color:#1e0010">PUT</span> <span style="color:#960050;background-color:#1e0010">test/my/</span><span style="color:#ae81ff">1</span>
 {
-  &quot;postdate&quot;:&quot;2018-01-13&quot;
+  <span style="color:#f92672">&#34;postdate&#34;</span>:<span style="color:#e6db74">&#34;2018-01-13&#34;</span>
 }
-PUT test/my/2
+<span style="color:#960050;background-color:#1e0010">PUT</span> <span style="color:#960050;background-color:#1e0010">test/my/</span><span style="color:#ae81ff">2</span>
 {
-  &quot;postdate&quot;:&quot;2018-01-01 00:01:05&quot;
+  <span style="color:#f92672">&#34;postdate&#34;</span>:<span style="color:#e6db74">&#34;2018-01-01 00:01:05&#34;</span>
 }
-PUT test/my/3
+<span style="color:#960050;background-color:#1e0010">PUT</span> <span style="color:#960050;background-color:#1e0010">test/my/</span><span style="color:#ae81ff">3</span>
 {
-  &quot;postdate&quot;:&quot;1420077400001&quot;
+  <span style="color:#f92672">&#34;postdate&#34;</span>:<span style="color:#e6db74">&#34;1420077400001&#34;</span>
 }
-</code></pre>
-
-<h1 id="elasticsearch安装成功">elasticSearch安装成功</h1>
-
+</code></pre></div><h1 id="elasticsearch安装成功">elasticSearch安装成功</h1>
 <p><a href="http://localhost:9200/">http://localhost:9200/</a></p>
-
-<pre><code class="language-json">{
-    &quot;name&quot;: &quot;qLcpGmb&quot;,
-    &quot;cluster_name&quot;: &quot;docker-cluster&quot;,
-    &quot;cluster_uuid&quot;: &quot;4MXOww8BSS-y46oN1cXkdA&quot;,
-    &quot;version&quot;: {
-        &quot;number&quot;: &quot;6.8.3&quot;,
-        &quot;build_flavor&quot;: &quot;default&quot;,
-        &quot;build_type&quot;: &quot;docker&quot;,
-        &quot;build_hash&quot;: &quot;0c48c0e&quot;,
-        &quot;build_date&quot;: &quot;2019-08-29T19:05:24.312154Z&quot;,
-        &quot;build_snapshot&quot;: false,
-        &quot;lucene_version&quot;: &quot;7.7.0&quot;,
-        &quot;minimum_wire_compatibility_version&quot;: &quot;5.6.0&quot;,
-        &quot;minimum_index_compatibility_version&quot;: &quot;5.0.0&quot;
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-json" data-lang="json">{
+    <span style="color:#f92672">&#34;name&#34;</span>: <span style="color:#e6db74">&#34;qLcpGmb&#34;</span>,
+    <span style="color:#f92672">&#34;cluster_name&#34;</span>: <span style="color:#e6db74">&#34;docker-cluster&#34;</span>,
+    <span style="color:#f92672">&#34;cluster_uuid&#34;</span>: <span style="color:#e6db74">&#34;4MXOww8BSS-y46oN1cXkdA&#34;</span>,
+    <span style="color:#f92672">&#34;version&#34;</span>: {
+        <span style="color:#f92672">&#34;number&#34;</span>: <span style="color:#e6db74">&#34;6.8.3&#34;</span>,
+        <span style="color:#f92672">&#34;build_flavor&#34;</span>: <span style="color:#e6db74">&#34;default&#34;</span>,
+        <span style="color:#f92672">&#34;build_type&#34;</span>: <span style="color:#e6db74">&#34;docker&#34;</span>,
+        <span style="color:#f92672">&#34;build_hash&#34;</span>: <span style="color:#e6db74">&#34;0c48c0e&#34;</span>,
+        <span style="color:#f92672">&#34;build_date&#34;</span>: <span style="color:#e6db74">&#34;2019-08-29T19:05:24.312154Z&#34;</span>,
+        <span style="color:#f92672">&#34;build_snapshot&#34;</span>: <span style="color:#66d9ef">false</span>,
+        <span style="color:#f92672">&#34;lucene_version&#34;</span>: <span style="color:#e6db74">&#34;7.7.0&#34;</span>,
+        <span style="color:#f92672">&#34;minimum_wire_compatibility_version&#34;</span>: <span style="color:#e6db74">&#34;5.6.0&#34;</span>,
+        <span style="color:#f92672">&#34;minimum_index_compatibility_version&#34;</span>: <span style="color:#e6db74">&#34;5.0.0&#34;</span>
     },
-    &quot;tagline&quot;: &quot;You Know, for Search&quot;
+    <span style="color:#f92672">&#34;tagline&#34;</span>: <span style="color:#e6db74">&#34;You Know, for Search&#34;</span>
 }
-</code></pre>
-
-<h1 id="kibana-crud">kibana-CRUD</h1>
-
-<pre><code class="language-json">
-#新增
-POST my_inde/doc/3
+</code></pre></div><h1 id="kibana-crud">kibana-CRUD</h1>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-json" data-lang="json">
+<span style="color:#960050;background-color:#1e0010">#新增</span>
+<span style="color:#960050;background-color:#1e0010">POST</span> <span style="color:#960050;background-color:#1e0010">my_inde/doc/</span><span style="color:#ae81ff">3</span>
 {
-  &quot;name&quot;: &quot;maizi-today&quot;,
-  &quot;age&quot;: 18
+  <span style="color:#f92672">&#34;name&#34;</span>: <span style="color:#e6db74">&#34;maizi-today&#34;</span>,
+  <span style="color:#f92672">&#34;age&#34;</span>: <span style="color:#ae81ff">18</span>
 }
 
-#删
-DELETE my_inde/doc/3
+<span style="color:#960050;background-color:#1e0010">#删</span>
+<span style="color:#960050;background-color:#1e0010">DELETE</span> <span style="color:#960050;background-color:#1e0010">my_inde/doc/</span><span style="color:#ae81ff">3</span>
 
-#查
-GET my_inde/_search
+<span style="color:#960050;background-color:#1e0010">#查</span>
+<span style="color:#960050;background-color:#1e0010">GET</span> <span style="color:#960050;background-color:#1e0010">my_inde/_search</span>
 
 
-#改
-PUT my_inde/doc/1
+<span style="color:#960050;background-color:#1e0010">#改</span>
+<span style="color:#960050;background-color:#1e0010">PUT</span> <span style="color:#960050;background-color:#1e0010">my_inde/doc/</span><span style="color:#ae81ff">1</span>
 {
-  &quot;name&quot;: &quot;maizi-today&quot;,
-  &quot;age&quot;: 180
+  <span style="color:#f92672">&#34;name&#34;</span>: <span style="color:#e6db74">&#34;maizi-today&#34;</span>,
+  <span style="color:#f92672">&#34;age&#34;</span>: <span style="color:#ae81ff">180</span>
 }
-</code></pre>
-
-<h1 id="注意">注意</h1>
-
+</code></pre></div><h1 id="注意">注意</h1>
 <p>docker安装上面服务，请查看<strong>Dockerfile安装常用环境</strong>文章。</p>
 
 
@@ -439,8 +401,8 @@ PUT my_inde/doc/1
                 <ul class="pager">
                     
                     <li class="previous">
-                        <a href="/post/mongodb%E7%B3%BB%E5%88%97-gridfs%E5%88%86%E5%B8%83%E5%BC%8F%E6%96%87%E4%BB%B6%E7%B3%BB%E7%BB%9F/" data-toggle="tooltip" data-placement="top"
-                            title="mongodb-GridFS分布式文件系统">&larr;
+                        <a href="/post/mongodb%E7%B3%BB%E5%88%97-aggregation-pipeline%E8%81%9A%E5%90%88/" data-toggle="tooltip" data-placement="top"
+                            title="mongodb-aggregation pipeline聚合">&larr;
                             Previous Post</a>
                     </li>
                     
@@ -498,29 +460,25 @@ PUT my_inde/doc/1
                     </h4>
                     <ul class="catalog-body"></ul>
                     <nav id="TableOfContents">
-<ul>
-<li><a href="#简介">简介</a>
-<ul>
-<li><a href="#使用场景">使用场景</a>
-<ul>
-<li><a href="#全文检索">全文检索</a></li>
-<li><a href="#聚合">聚合</a></li>
-<li><a href="#地理空间api">地理空间API</a></li>
-</ul></li>
-<li><a href="#特点">特点</a></li>
-<li><a href="#es能做什么">ES能做什么</a></li>
-<li><a href="#es-的基本组件">ES 的基本组件</a>
-<ul>
-<li><a href="#索引-index">索引（index）</a></li>
-<li><a href="#类型-type">类型（type）</a></li>
-<li><a href="#文档-document">文档（document）</a></li>
-<li><a href="#映射-mapping">映射（mapping）</a></li>
-</ul></li>
-</ul></li>
-<li><a href="#elasticsearch安装成功">elasticSearch安装成功</a></li>
-<li><a href="#kibana-crud">kibana-CRUD</a></li>
-<li><a href="#注意">注意</a></li>
-</ul>
+  <ul>
+    <li><a href="#使用场景">使用场景</a>
+      <ul>
+        <li><a href="#全文检索">全文检索</a></li>
+        <li><a href="#聚合">聚合</a></li>
+        <li><a href="#地理空间api">地理空间API</a></li>
+      </ul>
+    </li>
+    <li><a href="#特点">特点</a></li>
+    <li><a href="#es能做什么">ES能做什么</a></li>
+    <li><a href="#es-的基本组件">ES 的基本组件</a>
+      <ul>
+        <li><a href="#索引index">索引（index）</a></li>
+        <li><a href="#类型type">类型（type）</a></li>
+        <li><a href="#文档document">文档（document）</a></li>
+        <li><a href="#映射mapping">映射（mapping）</a></li>
+      </ul>
+    </li>
+  </ul>
 </nav>
                     <br>
                     <br>
@@ -545,9 +503,6 @@ PUT my_inde/doc/1
                         
                         
                         
-                        <a href="/tags/" title="">
-                            
-                        </a>
                         
                         
                         
@@ -557,101 +512,6 @@ PUT my_inde/doc/1
                         
                         
                         
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        <a href="/tags/qt" title="QT">
-                            QT
-                        </a>
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        <a href="/tags/zookeeper" title="Zookeeper">
-                            Zookeeper
-                        </a>
                         
                         
                         
@@ -691,8 +551,10 @@ PUT my_inde/doc/1
                         
                         
                         
-                        <a href="/tags/elasticsearch" title="elasticSearch">
-                            elasticSearch
+                        
+                        
+                        <a href="/tags/elasticsearch" title="elasticsearch">
+                            elasticsearch
                         </a>
                         
                         
@@ -703,9 +565,27 @@ PUT my_inde/doc/1
                         
                         
                         
-                        <a href="/tags/golang" title="golang">
-                            golang
-                        </a>
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
                         
                         
                         
@@ -743,9 +623,21 @@ PUT my_inde/doc/1
                         
                         
                         
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
                         <a href="/tags/jvm" title="jvm">
                             jvm
                         </a>
+                        
+                        
+                        
+                        
                         
                         
                         
@@ -769,9 +661,19 @@ PUT my_inde/doc/1
                         
                         
                         
+                        
+                        
+                        
+                        
+                        
+                        
                         <a href="/tags/mongodb" title="mongodb">
                             mongodb
                         </a>
+                        
+                        
+                        
+                        
                         
                         
                         
@@ -782,10 +684,6 @@ PUT my_inde/doc/1
                         </a>
                         
                         
-                        
-                        <a href="/tags/mycat" title="mycat">
-                            mycat
-                        </a>
                         
                         
                         
@@ -799,9 +697,17 @@ PUT my_inde/doc/1
                         
                         
                         
-                        <a href="/tags/nginx" title="nginx">
-                            nginx
-                        </a>
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
                         
                         
                         
@@ -825,8 +731,22 @@ PUT my_inde/doc/1
                         
                         
                         
+                        
+                        
                         <a href="/tags/rocketmq" title="rocketmq">
                             rocketmq
+                        </a>
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        <a href="/tags/security%E6%A1%86%E6%9E%B6%E5%AD%A6%E4%B9%A0" title="security框架学习">
+                            security框架学习
                         </a>
                         
                         
@@ -853,17 +773,11 @@ PUT my_inde/doc/1
                         
                         
                         
-                        <a href="/tags/springcloud" title="springCloud">
-                            springCloud
-                        </a>
-                        
-                        
-                        
-                        
-                        
                         <a href="/tags/springboot" title="springboot">
                             springboot
                         </a>
+                        
+                        
                         
                         
                         
@@ -877,6 +791,9 @@ PUT my_inde/doc/1
                         
                         
                         
+                        <a href="/tags/springcloud" title="springcloud">
+                            springcloud
+                        </a>
                         
                         
                         
@@ -902,6 +819,33 @@ PUT my_inde/doc/1
                         
                         
                         
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        <a href="/tags/zookeeper" title="zookeeper">
+                            zookeeper
+                        </a>
                         
                         
                         
@@ -961,6 +905,8 @@ PUT my_inde/doc/1
                         
                         
                         
+                        
+                        
                         <a href="/tags/%E5%88%86%E5%B8%83%E5%BC%8F%E7%B3%BB%E5%88%97" title="分布式系列">
                             分布式系列
                         </a>
@@ -980,6 +926,10 @@ PUT my_inde/doc/1
                         
                         
                         
+                        
+                        <a href="/tags/%E5%8D%8F%E8%AE%AE%E6%A0%88" title="协议栈">
+                            协议栈
+                        </a>
                         
                         
                         
@@ -1179,6 +1129,12 @@ PUT my_inde/doc/1
                         
                         
                         
+                        
+                        
+                        
+                        
+                        
+                        
                         <a href="/tags/%E7%BD%91%E7%BB%9C%E7%BC%96%E7%A8%8B" title="网络编程">
                             网络编程
                         </a>
@@ -1202,6 +1158,10 @@ PUT my_inde/doc/1
                         
                         
                         
+                        
+                        <a href="/tags/%E8%AE%A4%E8%AF%81%E5%92%8C%E6%8E%88%E6%9D%83" title="认证和授权">
+                            认证和授权
+                        </a>
                         
                         
                         
@@ -1372,7 +1332,7 @@ PUT my_inde/doc/1
                     
                 </ul>
 		<p class="copyright text-muted">
-                    Copyright &copy;  2020
+                    Copyright &copy;  2021
                     <br>
                     <a href="https://themes.gohugo.io/hugo-theme-cleanwhite">CleanWhite Hugo Theme</a> by <a href="https://zhaohuabing.com">Huabing</a> |
                     <iframe

@@ -22,9 +22,9 @@
     
 
     
-    <meta name="description" content="麦子，程序员, 开源爱好者，生活探险家 | 这里是 麦子 的博客，与你一起发现更大的世界。">
-    <meta property="og:description" content="麦子，程序员, 开源爱好者，生活探险家 | 这里是 麦子 的博客，与你一起发现更大的世界。" />
-    <meta property="twitter:description" content="麦子，程序员, 开源爱好者，生活探险家 | 这里是 麦子 的博客，与你一起发现更大的世界。" />
+    <meta name="description" content="可以对数据监控，清洗，格式化处理">
+    <meta property="og:description" content="可以对数据监控，清洗，格式化处理" />
+    <meta property="twitter:description" content="可以对数据监控，清洗，格式化处理" />
     
 
     
@@ -97,15 +97,15 @@
                     </li>
                     
                     <li>
-                        <a href="/categories/english">English</a>
+                        <a href="/categories/english">english</a>
                     </li>
                     
                     <li>
-                        <a href="/categories/life">Life</a>
+                        <a href="/categories/life">life</a>
                     </li>
                     
                     <li>
-                        <a href="/categories/tech">Tech</a>
+                        <a href="/categories/tech">tech</a>
                     </li>
                     
 
@@ -237,192 +237,114 @@
                 
                 
                 
-                
-
-<p>[TOC]</p>
-
-<p><strong>说明：本文来自于<a href="https://www.bilibili.com/video/av64033816/?p=1&gt;视频讲解">https://www.bilibili.com/video/av64033816/?p=1&gt;视频讲解</a></strong></p>
-
-<p><strong>转载地址：<a href="https://www.cnblogs.com/jingmoxukong/p/8118791.html">https://www.cnblogs.com/jingmoxukong/p/8118791.html</a></strong></p>
-
-<p><strong>官方文档：<a href="https://www.elastic.co/guide/en/logstash/current/index.html">https://www.elastic.co/guide/en/logstash/current/index.html</a> 版本6.8.3</strong></p>
-
-<p><strong>中文文档：<a href="https://www.kancloud.cn/aiyinsi-tan/logstash/849604">https://www.kancloud.cn/aiyinsi-tan/logstash/849604</a></strong></p>
-
+                <p>[TOC]</p>
+<p><strong>说明：本文来自于https://www.bilibili.com/video/av64033816/?p=1&gt;视频讲解</strong></p>
+<p><strong>转载地址：https://www.cnblogs.com/jingmoxukong/p/8118791.html</strong></p>
+<p><strong>官方文档：https://www.elastic.co/guide/en/logstash/current/index.html 版本6.8.3</strong></p>
+<p><strong>中文文档：https://www.kancloud.cn/aiyinsi-tan/logstash/849604</strong></p>
 <h1 id="简介">简介</h1>
-
 <p>Logstash可以动态的将不同来源的数据进行归一并将格式化的数据存储到你选择的位置。对你的所有做数据清洗和大众化处理，踩踏做数据分析和可视化。Logstash 是插件式管理模式，在输入、过滤、输出以及编码过程中都可以使用插件进行定制。Logstash 社区有超过 200 种可用插件。</p>
-
 <p><strong>Logstash 可以传输和处理你的日志、事务或其他数据。</strong></p>
-
 <p><strong>搜集数据&mdash;&gt;过滤数据&mdash;&gt;处理数据。</strong></p>
-
-<p><img src="/img/Xnip2019-09-23_22-01-06.png" alt="Xnip2019-09-23_22-01-06" /></p>
-
+<p><img src="/img/Xnip2019-09-23_22-01-06.png" alt="Xnip2019-09-23_22-01-06"></p>
 <p>根据提供的不同的插件， 我们可以用来做<strong>分析，监控，警报</strong>等。</p>
-
 <h1 id="常用用途流程">常用用途流程</h1>
-
-<p><img src="/img/Xnip2019-09-23_22-05-29.png" alt="Xnip2019-09-23_22-05-29" /></p>
-
+<p><img src="/img/Xnip2019-09-23_22-05-29.png" alt="Xnip2019-09-23_22-05-29"></p>
 <p>通过从数据库或者文件中，收集好数据， 然后放到了Logstash中对数据进行清洗，这里的清洗包括对数据的过滤，数据的格式化等，最后存入到ES中。</p>
-
 <p>同时如上面的划线地方， 他也可以监控ES，mysql中的sql语句或者是数据的变化， 然后把变化的数据发送到存储库中。</p>
-
 <h2 id="如何处理日志">如何处理日志</h2>
-
-<p><img src="/img/Xnip2019-09-23_22-19-18.png" alt="Xnip2019-09-23_22-19-18" /></p>
-
+<p><img src="/img/Xnip2019-09-23_22-19-18.png" alt="Xnip2019-09-23_22-19-18"></p>
 <p>读取每一条日志， 然后产生一个event事件，这个事件放入到队列中，然后在filter中进行过滤，最后输出。 内部是已event来进行处理的。</p>
-
-<p><strong>在实际应用场景中，通常输入、输出、过滤器不止一个。</strong>Logstash 的这三个元素都使用插件式管理方式，用户可以根据应用需要，灵活的选用各阶段需要的插件，并组合使用。</p>
-
+<p>**在实际应用场景中，通常输入、输出、过滤器不止一个。**Logstash 的这三个元素都使用插件式管理方式，用户可以根据应用需要，灵活的选用各阶段需要的插件，并组合使用。</p>
 <h1 id="配置文件理解">配置文件理解</h1>
-
-<p><img src="/img/Xnip2019-09-25_17-50-22.png" alt="Xnip2019-09-25_17-50-22" /></p>
-
-<h2 id="pipelines-yml">pipelines.yml</h2>
-
+<p><img src="/img/Xnip2019-09-25_17-50-22.png" alt="Xnip2019-09-25_17-50-22"></p>
+<h2 id="pipelinesyml">pipelines.yml</h2>
 <p>Logstash 在 6.0 推出了 multiple pipeline 的解决方案，即在一个 logstash 实例中可以同时进行多个独立数据流程的处理工作。如下可以配置两个配置文件获取数据源。</p>
-
-<pre><code>pipeline.id: nginx
+<pre tabindex="0"><code>pipeline.id: nginx
 path.config: &quot;/usr/share/logstash/config/logstash-nginx.conf&quot;
 
 pipeline.id: Tomcat
 path.config: &quot;/usr/share/logstash/config/logstash-Tomcat.conf&quot;
-</code></pre>
-
-<h2 id="logstash-yml">logstash.yml</h2>
-
+</code></pre><h2 id="logstashyml">logstash.yml</h2>
 <p>logstash 的默认启动配置文件。虽然可以通过指定命令行参数的方式，来控制 logstash 的运行方式，但显然这么做很麻烦。建议通过指定配置文件的方式，来控制 logstash 运行，启动命令如下：</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-shell" data-lang="shell">bin/logstash -f logstash.conf
+</code></pre></div><p>我在搭建环境的时候，直接把里面的都给屏蔽掉了。</p>
+<h2 id="logstashconf">logstash.conf</h2>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-json" data-lang="json"><span style="color:#960050;background-color:#1e0010">#</span> <span style="color:#960050;background-color:#1e0010">input</span>{
+<span style="color:#960050;background-color:#1e0010">#</span>     <span style="color:#960050;background-color:#1e0010">file{</span>
+<span style="color:#960050;background-color:#1e0010">#</span>         <span style="color:#960050;background-color:#1e0010">path</span> <span style="color:#960050;background-color:#1e0010">=&gt;</span> <span style="color:#960050;background-color:#1e0010">[</span><span style="color:#f92672">&#34;/rmc.log&#34;</span><span style="color:#960050;background-color:#1e0010">]</span>
+<span style="color:#960050;background-color:#1e0010">#</span>         <span style="color:#960050;background-color:#1e0010">start_position</span> <span style="color:#960050;background-color:#1e0010">=&gt;</span> <span style="color:#960050;background-color:#1e0010">beginning</span>
+<span style="color:#960050;background-color:#1e0010">#</span>         <span style="color:#960050;background-color:#1e0010">sincedb_path</span> <span style="color:#960050;background-color:#1e0010">=&gt;</span> <span style="color:#e6db74">&#34;/dev/null&#34;</span>
+<span style="color:#960050;background-color:#1e0010">#</span>     }
+<span style="color:#960050;background-color:#1e0010">#</span> <span style="color:#960050;background-color:#1e0010">}</span>
 
-<pre><code class="language-shell">bin/logstash -f logstash.conf
-</code></pre>
-
-<p>我在搭建环境的时候，直接把里面的都给屏蔽掉了。</p>
-
-<h2 id="logstash-conf">logstash.conf</h2>
-
-<pre><code class="language-json"># input{
-#     file{
-#         path =&gt; [&quot;/rmc.log&quot;]
-#         start_position =&gt; beginning
-#         sincedb_path =&gt; &quot;/dev/null&quot;
-#     }
-# }
-
-input{
-  tcp {
-        port =&gt; &quot;6666&quot;
-        mode =&gt; &quot;server&quot;
+<span style="color:#960050;background-color:#1e0010">input</span>{
+  <span style="color:#960050;background-color:#1e0010">tcp</span> <span style="color:#960050;background-color:#1e0010">{</span>
+        <span style="color:#960050;background-color:#1e0010">port</span> <span style="color:#960050;background-color:#1e0010">=&gt;</span> <span style="color:#f92672">&#34;6666&#34;</span>
+        <span style="color:#960050;background-color:#1e0010">mode</span> <span style="color:#960050;background-color:#1e0010">=&gt;</span> <span style="color:#e6db74">&#34;server&#34;</span>
     }
-}
+<span style="color:#960050;background-color:#1e0010">}</span>
  
-output {
-  elasticsearch {
-    hosts =&gt; [&quot;http://192.168.1.100:9200&quot;]
-    id =&gt; &quot;my_plugin_id&quot;
-    index =&gt; &quot;viewdata-%{+YYYY.MM.dd}&quot;
-    #user =&gt; &quot;elastic&quot;
-    #password =&gt; &quot;changeme&quot;
+<span style="color:#960050;background-color:#1e0010">output</span> {
+  <span style="color:#960050;background-color:#1e0010">elasticsearch</span> <span style="color:#960050;background-color:#1e0010">{</span>
+    <span style="color:#960050;background-color:#1e0010">hosts</span> <span style="color:#960050;background-color:#1e0010">=&gt;</span> <span style="color:#960050;background-color:#1e0010">[</span><span style="color:#f92672">&#34;http://192.168.1.100:9200&#34;</span><span style="color:#960050;background-color:#1e0010">]</span>
+    <span style="color:#960050;background-color:#1e0010">id</span> <span style="color:#960050;background-color:#1e0010">=&gt;</span> <span style="color:#e6db74">&#34;my_plugin_id&#34;</span>
+    <span style="color:#960050;background-color:#1e0010">index</span> <span style="color:#960050;background-color:#1e0010">=&gt;</span> <span style="color:#e6db74">&#34;viewdata-%{+YYYY.MM.dd}&#34;</span>
+    <span style="color:#960050;background-color:#1e0010">#user</span> <span style="color:#960050;background-color:#1e0010">=&gt;</span> <span style="color:#e6db74">&#34;elastic&#34;</span>
+    <span style="color:#960050;background-color:#1e0010">#password</span> <span style="color:#960050;background-color:#1e0010">=&gt;</span> <span style="color:#e6db74">&#34;changeme&#34;</span>
   }
-  stdout {
-        codec =&gt; rubydebug
+  <span style="color:#960050;background-color:#1e0010">stdout</span> {
+        <span style="color:#960050;background-color:#1e0010">codec</span> <span style="color:#960050;background-color:#1e0010">=&gt;</span> <span style="color:#960050;background-color:#1e0010">rubydebug</span>
     }
-}
+<span style="color:#960050;background-color:#1e0010">}</span>
 
-#nc 192.168.1.100 6666 &lt; /var/log/nginx/access.log
-如此，在另一台机子上不需要搭建Logstash， 用脚本就好了,持续收集数据。 
-同时很多日志框架可以通过TCP和UDP进行通信处理。 
-</code></pre>
-
-<h3 id="input">input</h3>
-
+<span style="color:#960050;background-color:#1e0010">#nc</span> <span style="color:#ae81ff">192.168</span><span style="color:#960050;background-color:#1e0010">.</span><span style="color:#ae81ff">1.100</span> <span style="color:#ae81ff">6666</span> <span style="color:#960050;background-color:#1e0010">&lt;</span> <span style="color:#960050;background-color:#1e0010">/var/log/nginx/access.log</span>
+<span style="color:#960050;background-color:#1e0010">如此，在另一台机子上不需要搭建Logstash，</span> <span style="color:#960050;background-color:#1e0010">用脚本就好了,持续收集数据。</span> 
+<span style="color:#960050;background-color:#1e0010">同时很多日志框架可以通过TCP和UDP进行通信处理。</span> 
+</code></pre></div><h3 id="input">input</h3>
 <p>Logstash 支持各种输入选择 ，可以在同一时间从众多常用来源捕捉事件。能够以连续的流式传输方式，轻松地从您的日志、指标、Web 应用、数据存储以及各种 AWS 服务采集数据。</p>
-
 <h4 id="常用-input-插件">常用 input 插件</h4>
-
 <h4 id="file">file</h4>
-
 <p>从文件系统上的文件读取，就像UNIX命令 <code>tail -0F</code> 一样</p>
-
 <h4 id="syslog">syslog</h4>
-
 <p>在众所周知的端口514上侦听系统日志消息，并根据RFC3164格式进行解析</p>
-
 <h4 id="redis">redis</h4>
-
 <p>从redis服务器读取，使用redis通道和redis列表。 Redis经常用作集中式Logstash安装中的“代理”，它将来自远程Logstash“托运人”的Logstash事件排队。</p>
-
 <h4 id="beats">beats</h4>
-
 <p>处理由Filebeat发送的事件。</p>
-
 <h3 id="filter">filter</h3>
-
 <p>过滤器是Logstash管道中的中间处理设备。如果符合特定条件，您可以将条件过滤器组合在一起，对事件执行操作。</p>
-
 <h4 id="常用-filter-插件">常用 filter 插件</h4>
-
 <h4 id="grok">grok</h4>
-
 <p>解析和结构任意文本。 Grok目前是Logstash中将非结构化日志数据解析为结构化和可查询的最佳方法。</p>
-
 <h4 id="mutate">mutate</h4>
-
 <p>对事件字段执行一般转换。您可以重命名，删除，替换和修改事件中的字段。</p>
-
 <h4 id="drop">drop</h4>
-
 <p>完全放弃一个事件，例如调试事件。</p>
-
 <h4 id="clone">clone</h4>
-
 <p>制作一个事件的副本，可能会添加或删除字段。</p>
-
 <h4 id="geoip">geoip</h4>
-
 <p>添加有关IP地址的地理位置的信息（也可以在Kibana中显示惊人的图表！）</p>
-
 <h3 id="output">output</h3>
-
 <p>输出是Logstash管道的最后阶段。一个事件可以<strong>通过多个输出</strong>，但是一旦所有输出处理完成，事件就完成了执行。</p>
-
 <h4 id="elasticsearch">elasticsearch</h4>
-
 <p>将事件数据发送给 Elasticsearch（推荐模式）。</p>
-
 <h4 id="file-1">file</h4>
-
 <p>将事件数据写入文件或磁盘。</p>
-
 <h4 id="graphite">graphite</h4>
-
-<p>将事件数据发送给 graphite（一个流行的开源工具，存储和绘制指标。 <a href="http://graphite.readthedocs.io/en/latest/）。">http://graphite.readthedocs.io/en/latest/）。</a></p>
-
+<p>将事件数据发送给 graphite（一个流行的开源工具，存储和绘制指标。 <a href="http://graphite.readthedocs.io/en/latest/">http://graphite.readthedocs.io/en/latest/</a>）。</p>
 <h4 id="statsd">statsd</h4>
-
 <p>将事件数据发送到 statsd （这是一种侦听统计数据的服务，如计数器和定时器，通过UDP发送并将聚合发送到一个或多个可插入的后端服务）。</p>
-
 <h2 id="注意">注意</h2>
-
 <p>编写配置文件的时候， 一定要注意里面的格式或者空格， 不然运行错误。 多个插件配置按顺序执行。</p>
-
 <p>对于我们的一些日志框架， 可以通过TCP和UDP来进行采集处理。</p>
-
-<h2 id="jvm-options">jvm.options</h2>
-
+<h2 id="jvmoptions">jvm.options</h2>
 <p>logstash 的 JVM 配置文件。</p>
-
-<h2 id="startup-options-linux"><strong>startup.options</strong> (Linux)</h2>
-
+<h2 id="startupoptions-linux"><strong>startup.options</strong> (Linux)</h2>
 <p>包含系统安装脚本在 <code>/usr/share/logstash/bin</code> 中使用的选项为您的系统构建适当的启动脚本。安装 Logstash 软件包时，系统安装脚本将在安装过程结束时执行，并使用 <code>startup.options</code> 中指定的设置来设置用户，组，服务名称和服务描述等选项。</p>
-
 <h1 id="filebeat">Filebeat</h1>
-
 <p>他是安装在服务器上面的， 所以可以收集任何机子上的日志文件， mysql的，redis的等都可以。 比如收集查询慢的SQL语句等。</p>
-
-<pre><code class="language-shell">sudo yum install filebeat
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-shell" data-lang="shell">sudo yum install filebeat
 
 curl -L -O https://artifacts.elastic.co/downloads/beats/filebeat/filebeat-7.3.2-linux-x86_64.tar.gz
 tar xzvf filebeat-7.3.2-linux-x86_64.tar.gz
@@ -432,59 +354,54 @@ nohup ./filebeat -e &gt; filebeat.log &amp;
 停止
 ps -ef |grep filebeat
 kill -9  进程号
-</code></pre>
-
-<h2 id="filebeat-yml">filebeat.yml</h2>
-
+</code></pre></div><h2 id="filebeatyml">filebeat.yml</h2>
 <p>配置Nginx，把nginx日志中的access.log上传到logstash中</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-yml" data-lang="yml"><span style="color:#75715e">#=========================== Filebeat inputs =============================</span>
+<span style="color:#f92672">filebeat.inputs</span>:
+- <span style="color:#f92672">type</span>: <span style="color:#ae81ff">log</span>
 
-<pre><code class="language-yml">#=========================== Filebeat inputs =============================
-filebeat.inputs:
-- type: log
+  <span style="color:#75715e"># Change to true to enable this input configuration.</span>
+  <span style="color:#f92672">enabled</span>: <span style="color:#66d9ef">true</span>
 
-  # Change to true to enable this input configuration.
-  enabled: true
+  <span style="color:#75715e"># Paths that should be crawled and fetched. Glob based paths.</span>
+  <span style="color:#f92672">paths</span>:
+    - <span style="color:#ae81ff">/var/log/nginx/access.log</span>
+    <span style="color:#75715e">#- c:\programdata\elasticsearch\logs\*</span>
+<span style="color:#75715e">#============================= Filebeat modules ===============================</span>
 
-  # Paths that should be crawled and fetched. Glob based paths.
-  paths:
-    - /var/log/nginx/access.log
-    #- c:\programdata\elasticsearch\logs\*
-#============================= Filebeat modules ===============================
+<span style="color:#f92672">filebeat.config.modules</span>:
+  <span style="color:#75715e"># Glob pattern for configuration loading</span>
+  <span style="color:#f92672">path</span>: <span style="color:#ae81ff">${path.config}/modules.d/*.yml</span>
 
-filebeat.config.modules:
-  # Glob pattern for configuration loading
-  path: ${path.config}/modules.d/*.yml
+  <span style="color:#75715e"># Set to true to enable config reloading</span>
+  <span style="color:#f92672">reload.enabled</span>: <span style="color:#66d9ef">false</span>
 
-  # Set to true to enable config reloading
-  reload.enabled: false
+  <span style="color:#75715e"># Period on which files under path should be checked for changes</span>
+  <span style="color:#75715e">#reload.period: 10s</span>
+<span style="color:#75715e">#==================== Elasticsearch template setting ==========================</span>
 
-  # Period on which files under path should be checked for changes
-  #reload.period: 10s
-#==================== Elasticsearch template setting ==========================
-
-setup.template.settings:
-  index.number_of_shards: 1
-  #index.codec: best_compression
-  #_source.enabled: false
+<span style="color:#f92672">setup.template.settings</span>:
+  <span style="color:#f92672">index.number_of_shards</span>: <span style="color:#ae81ff">1</span>
+  <span style="color:#75715e">#index.codec: best_compression</span>
+  <span style="color:#75715e">#_source.enabled: false</span>
   
-#============================== Kibana =====================================
+<span style="color:#75715e">#============================== Kibana =====================================</span>
 
-# Starting with Beats version 6.0.0, the dashboards are loaded via the Kibana API.
-# This requires a Kibana endpoint configuration.
-setup.kibana:
+<span style="color:#75715e"># Starting with Beats version 6.0.0, the dashboards are loaded via the Kibana API.</span>
+<span style="color:#75715e"># This requires a Kibana endpoint configuration.</span>
+<span style="color:#f92672">setup.kibana</span>:
 
 
-#----------------------------- Logstash output --------------------------------
-output.logstash:
-  hosts: [&quot;192.168.1.100:5044&quot;]
-#================================ Processors =====================================
+<span style="color:#75715e">#----------------------------- Logstash output --------------------------------</span>
+<span style="color:#f92672">output.logstash</span>:
+  <span style="color:#f92672">hosts</span>: [<span style="color:#e6db74">&#34;192.168.1.100:5044&#34;</span>]
+<span style="color:#75715e">#================================ Processors =====================================</span>
 
-# Configure processors to enhance or manipulate events generated by the beat.
-processors:
-  - add_host_metadata: ~
-  - add_cloud_metadata: ~
-</code></pre>
-
+<span style="color:#75715e"># Configure processors to enhance or manipulate events generated by the beat.</span>
+<span style="color:#f92672">processors</span>:
+  - <span style="color:#f92672">add_host_metadata</span>: <span style="color:#ae81ff">~</span>
+  - <span style="color:#f92672">add_cloud_metadata</span>: <span style="color:#ae81ff">~</span>
+</code></pre></div>
 
                 
                 
@@ -591,52 +508,28 @@ processors:
                     </h4>
                     <ul class="catalog-body"></ul>
                     <nav id="TableOfContents">
-<ul>
-<li><a href="#简介">简介</a></li>
-<li><a href="#常用用途流程">常用用途流程</a>
-<ul>
-<li><a href="#如何处理日志">如何处理日志</a></li>
-</ul></li>
-<li><a href="#配置文件理解">配置文件理解</a>
-<ul>
-<li><a href="#pipelines-yml">pipelines.yml</a></li>
-<li><a href="#logstash-yml">logstash.yml</a></li>
-<li><a href="#logstash-conf">logstash.conf</a>
-<ul>
-<li><a href="#input">input</a>
-<ul>
-<li><a href="#常用-input-插件">常用 input 插件</a></li>
-<li><a href="#file">file</a></li>
-<li><a href="#syslog">syslog</a></li>
-<li><a href="#redis">redis</a></li>
-<li><a href="#beats">beats</a></li>
-</ul></li>
-<li><a href="#filter">filter</a>
-<ul>
-<li><a href="#常用-filter-插件">常用 filter 插件</a></li>
-<li><a href="#grok">grok</a></li>
-<li><a href="#mutate">mutate</a></li>
-<li><a href="#drop">drop</a></li>
-<li><a href="#clone">clone</a></li>
-<li><a href="#geoip">geoip</a></li>
-</ul></li>
-<li><a href="#output">output</a>
-<ul>
-<li><a href="#elasticsearch">elasticsearch</a></li>
-<li><a href="#file-1">file</a></li>
-<li><a href="#graphite">graphite</a></li>
-<li><a href="#statsd">statsd</a></li>
-</ul></li>
-</ul></li>
-<li><a href="#注意">注意</a></li>
-<li><a href="#jvm-options">jvm.options</a></li>
-<li><a href="#startup-options-linux"><strong>startup.options</strong> (Linux)</a></li>
-</ul></li>
-<li><a href="#filebeat">Filebeat</a>
-<ul>
-<li><a href="#filebeat-yml">filebeat.yml</a></li>
-</ul></li>
-</ul>
+  <ul>
+    <li><a href="#如何处理日志">如何处理日志</a></li>
+  </ul>
+
+  <ul>
+    <li><a href="#pipelinesyml">pipelines.yml</a></li>
+    <li><a href="#logstashyml">logstash.yml</a></li>
+    <li><a href="#logstashconf">logstash.conf</a>
+      <ul>
+        <li><a href="#input">input</a></li>
+        <li><a href="#filter">filter</a></li>
+        <li><a href="#output">output</a></li>
+      </ul>
+    </li>
+    <li><a href="#注意">注意</a></li>
+    <li><a href="#jvmoptions">jvm.options</a></li>
+    <li><a href="#startupoptions-linux"><strong>startup.options</strong> (Linux)</a></li>
+  </ul>
+
+  <ul>
+    <li><a href="#filebeatyml">filebeat.yml</a></li>
+  </ul>
 </nav>
                     <br>
                     <br>
@@ -661,9 +554,6 @@ processors:
                         
                         
                         
-                        <a href="/tags/" title="">
-                            
-                        </a>
                         
                         
                         
@@ -673,101 +563,6 @@ processors:
                         
                         
                         
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        <a href="/tags/qt" title="QT">
-                            QT
-                        </a>
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        <a href="/tags/zookeeper" title="Zookeeper">
-                            Zookeeper
-                        </a>
                         
                         
                         
@@ -807,8 +602,10 @@ processors:
                         
                         
                         
-                        <a href="/tags/elasticsearch" title="elasticSearch">
-                            elasticSearch
+                        
+                        
+                        <a href="/tags/elasticsearch" title="elasticsearch">
+                            elasticsearch
                         </a>
                         
                         
@@ -819,9 +616,27 @@ processors:
                         
                         
                         
-                        <a href="/tags/golang" title="golang">
-                            golang
-                        </a>
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
                         
                         
                         
@@ -859,9 +674,21 @@ processors:
                         
                         
                         
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
                         <a href="/tags/jvm" title="jvm">
                             jvm
                         </a>
+                        
+                        
+                        
+                        
                         
                         
                         
@@ -885,9 +712,19 @@ processors:
                         
                         
                         
+                        
+                        
+                        
+                        
+                        
+                        
                         <a href="/tags/mongodb" title="mongodb">
                             mongodb
                         </a>
+                        
+                        
+                        
+                        
                         
                         
                         
@@ -898,10 +735,6 @@ processors:
                         </a>
                         
                         
-                        
-                        <a href="/tags/mycat" title="mycat">
-                            mycat
-                        </a>
                         
                         
                         
@@ -915,9 +748,17 @@ processors:
                         
                         
                         
-                        <a href="/tags/nginx" title="nginx">
-                            nginx
-                        </a>
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
                         
                         
                         
@@ -941,8 +782,22 @@ processors:
                         
                         
                         
+                        
+                        
                         <a href="/tags/rocketmq" title="rocketmq">
                             rocketmq
+                        </a>
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        <a href="/tags/security%E6%A1%86%E6%9E%B6%E5%AD%A6%E4%B9%A0" title="security框架学习">
+                            security框架学习
                         </a>
                         
                         
@@ -969,17 +824,11 @@ processors:
                         
                         
                         
-                        <a href="/tags/springcloud" title="springCloud">
-                            springCloud
-                        </a>
-                        
-                        
-                        
-                        
-                        
                         <a href="/tags/springboot" title="springboot">
                             springboot
                         </a>
+                        
+                        
                         
                         
                         
@@ -993,6 +842,9 @@ processors:
                         
                         
                         
+                        <a href="/tags/springcloud" title="springcloud">
+                            springcloud
+                        </a>
                         
                         
                         
@@ -1018,6 +870,33 @@ processors:
                         
                         
                         
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        <a href="/tags/zookeeper" title="zookeeper">
+                            zookeeper
+                        </a>
                         
                         
                         
@@ -1077,6 +956,8 @@ processors:
                         
                         
                         
+                        
+                        
                         <a href="/tags/%E5%88%86%E5%B8%83%E5%BC%8F%E7%B3%BB%E5%88%97" title="分布式系列">
                             分布式系列
                         </a>
@@ -1096,6 +977,10 @@ processors:
                         
                         
                         
+                        
+                        <a href="/tags/%E5%8D%8F%E8%AE%AE%E6%A0%88" title="协议栈">
+                            协议栈
+                        </a>
                         
                         
                         
@@ -1295,6 +1180,12 @@ processors:
                         
                         
                         
+                        
+                        
+                        
+                        
+                        
+                        
                         <a href="/tags/%E7%BD%91%E7%BB%9C%E7%BC%96%E7%A8%8B" title="网络编程">
                             网络编程
                         </a>
@@ -1318,6 +1209,10 @@ processors:
                         
                         
                         
+                        
+                        <a href="/tags/%E8%AE%A4%E8%AF%81%E5%92%8C%E6%8E%88%E6%9D%83" title="认证和授权">
+                            认证和授权
+                        </a>
                         
                         
                         
@@ -1488,7 +1383,7 @@ processors:
                     
                 </ul>
 		<p class="copyright text-muted">
-                    Copyright &copy;  2020
+                    Copyright &copy;  2021
                     <br>
                     <a href="https://themes.gohugo.io/hugo-theme-cleanwhite">CleanWhite Hugo Theme</a> by <a href="https://zhaohuabing.com">Huabing</a> |
                     <iframe

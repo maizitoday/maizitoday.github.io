@@ -97,15 +97,15 @@
                     </li>
                     
                     <li>
-                        <a href="/categories/english">English</a>
+                        <a href="/categories/english">english</a>
                     </li>
                     
                     <li>
-                        <a href="/categories/life">Life</a>
+                        <a href="/categories/life">life</a>
                     </li>
                     
                     <li>
-                        <a href="/categories/tech">Tech</a>
+                        <a href="/categories/tech">tech</a>
                     </li>
                     
 
@@ -237,131 +237,100 @@
                 
                 
                 
-                
-
-<p>[TOC]</p>
-
+                <p>[TOC]</p>
 <p><strong>转载地址：<a href="https://blog.csdn.net/liuweixiao520/article/details/78174368">https://blog.csdn.net/liuweixiao520/article/details/78174368</a></strong></p>
-
-<h1 id="pom-xml">pom.xml</h1>
-
-<pre><code class="language-xml">&lt;dependency&gt;
-			&lt;groupId&gt;net.sf.dozer&lt;/groupId&gt;
-			&lt;artifactId&gt;dozer&lt;/artifactId&gt;
-			&lt;version&gt;5.4.0&lt;/version&gt;
-&lt;/dependency&gt;
-</code></pre>
-
-<p>如果使用的事springboot集成的<strong>spring-boot-starter-dozer</strong>，需要去加载固定的xml。这里demo就使用上面的，不使用集成的。</p>
-
+<h1 id="pomxml">pom.xml</h1>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-xml" data-lang="xml"><span style="color:#f92672">&lt;dependency&gt;</span>
+			<span style="color:#f92672">&lt;groupId&gt;</span>net.sf.dozer<span style="color:#f92672">&lt;/groupId&gt;</span>
+			<span style="color:#f92672">&lt;artifactId&gt;</span>dozer<span style="color:#f92672">&lt;/artifactId&gt;</span>
+			<span style="color:#f92672">&lt;version&gt;</span>5.4.0<span style="color:#f92672">&lt;/version&gt;</span>
+<span style="color:#f92672">&lt;/dependency&gt;</span>
+</code></pre></div><p>如果使用的事springboot集成的<strong>spring-boot-starter-dozer</strong>，需要去加载固定的xml。这里demo就使用上面的，不使用集成的。</p>
 <h1 id="dozerbeanmapperconfigure">DozerBeanMapperConfigure</h1>
-
 <p>注入bean</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-java" data-lang="java"><span style="color:#a6e22e">@Configuration</span>
+<span style="color:#66d9ef">public</span> <span style="color:#66d9ef">class</span> <span style="color:#a6e22e">DozerBeanMapperConfigure</span> <span style="color:#f92672">{</span>
+    <span style="color:#a6e22e">@Bean</span>
+    <span style="color:#66d9ef">public</span> DozerBeanMapper <span style="color:#a6e22e">mapper</span><span style="color:#f92672">()</span> <span style="color:#f92672">{</span>
+        <span style="color:#75715e">// 这里没有加载&#34;classpath:dozer-mappings/*.xml&#34;
+</span><span style="color:#75715e"></span>        DozerBeanMapper mapper <span style="color:#f92672">=</span> <span style="color:#66d9ef">new</span> DozerBeanMapper<span style="color:#f92672">();</span> 
+        <span style="color:#66d9ef">return</span> mapper<span style="color:#f92672">;</span>
+    <span style="color:#f92672">}</span>
+<span style="color:#f92672">}</span>
+</code></pre></div><h1 id="sourcebean">SourceBean</h1>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-java" data-lang="java"><span style="color:#a6e22e">@Data</span>
+<span style="color:#a6e22e">@AllArgsConstructor</span>
+<span style="color:#a6e22e">@NoArgsConstructor</span>
+<span style="color:#a6e22e">@ToString</span>
+<span style="color:#66d9ef">public</span> <span style="color:#66d9ef">class</span> <span style="color:#a6e22e">SourceBean</span> <span style="color:#f92672">{</span>
+    <span style="color:#a6e22e">@Mapping</span><span style="color:#f92672">(</span><span style="color:#e6db74">&#34;pk&#34;</span><span style="color:#f92672">)</span>
+    <span style="color:#66d9ef">private</span> <span style="color:#66d9ef">int</span> id<span style="color:#f92672">;</span>
 
-<pre><code class="language-java">@Configuration
-public class DozerBeanMapperConfigure {
-    @Bean
-    public DozerBeanMapper mapper() {
-        // 这里没有加载&quot;classpath:dozer-mappings/*.xml&quot;
-        DozerBeanMapper mapper = new DozerBeanMapper(); 
-        return mapper;
-    }
-}
-</code></pre>
+    <span style="color:#66d9ef">private</span> String name<span style="color:#f92672">;</span>
 
-<h1 id="sourcebean">SourceBean</h1>
+    <span style="color:#a6e22e">@Mapping</span><span style="color:#f92672">(</span><span style="color:#e6db74">&#34;binaryData&#34;</span><span style="color:#f92672">)</span>
+    <span style="color:#66d9ef">private</span> String data<span style="color:#f92672">;</span>
+<span style="color:#f92672">}</span>
+</code></pre></div><h1 id="targetbean">TargetBean</h1>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-java" data-lang="java"><span style="color:#a6e22e">@Data</span>
+<span style="color:#a6e22e">@ToString</span>
+<span style="color:#a6e22e">@AllArgsConstructor</span>
+<span style="color:#a6e22e">@NoArgsConstructor</span>
+<span style="color:#66d9ef">public</span> <span style="color:#66d9ef">class</span> <span style="color:#a6e22e">TargetBean</span> <span style="color:#f92672">{</span>
+    <span style="color:#66d9ef">private</span> String pk<span style="color:#f92672">;</span>
 
-<pre><code class="language-java">@Data
-@AllArgsConstructor
-@NoArgsConstructor
-@ToString
-public class SourceBean {
-    @Mapping(&quot;pk&quot;)
-    private int id;
+    <span style="color:#66d9ef">private</span> String name<span style="color:#f92672">;</span>
 
-    private String name;
+    <span style="color:#66d9ef">private</span> String binaryData<span style="color:#f92672">;</span>
+<span style="color:#f92672">}</span>
+</code></pre></div><h1 id="dtocontroller">DtoController</h1>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-java" data-lang="java"><span style="color:#a6e22e">@RestController</span>
+<span style="color:#66d9ef">public</span> <span style="color:#66d9ef">class</span> <span style="color:#a6e22e">DtoController</span> <span style="color:#f92672">{</span>
 
-    @Mapping(&quot;binaryData&quot;)
-    private String data;
-}
-</code></pre>
-
-<h1 id="targetbean">TargetBean</h1>
-
-<pre><code class="language-java">@Data
-@ToString
-@AllArgsConstructor
-@NoArgsConstructor
-public class TargetBean {
-    private String pk;
-
-    private String name;
-
-    private String binaryData;
-}
-</code></pre>
-
-<h1 id="dtocontroller">DtoController</h1>
-
-<pre><code class="language-java">@RestController
-public class DtoController {
-
-    @Autowired
-    private Mapper mapper;
+    <span style="color:#a6e22e">@Autowired</span>
+    <span style="color:#66d9ef">private</span> Mapper mapper<span style="color:#f92672">;</span>
  
-    @GetMapping(value=&quot;dto&quot;)
-    public void dtoHanler() {
-        TargetBean targetBean = new TargetBean();
-		SourceBean sourceBean = new SourceBean(1, &quot;小强&quot;, &quot;1989&quot;);
-		mapper.map(sourceBean, targetBean);
-        System.out.println(targetBean);
-        System.out.println(sourceBean);
-    }
+    <span style="color:#a6e22e">@GetMapping</span><span style="color:#f92672">(</span>value<span style="color:#f92672">=</span><span style="color:#e6db74">&#34;dto&#34;</span><span style="color:#f92672">)</span>
+    <span style="color:#66d9ef">public</span> <span style="color:#66d9ef">void</span> <span style="color:#a6e22e">dtoHanler</span><span style="color:#f92672">()</span> <span style="color:#f92672">{</span>
+        TargetBean targetBean <span style="color:#f92672">=</span> <span style="color:#66d9ef">new</span> TargetBean<span style="color:#f92672">();</span>
+		SourceBean sourceBean <span style="color:#f92672">=</span> <span style="color:#66d9ef">new</span> SourceBean<span style="color:#f92672">(</span>1<span style="color:#f92672">,</span> <span style="color:#e6db74">&#34;小强&#34;</span><span style="color:#f92672">,</span> <span style="color:#e6db74">&#34;1989&#34;</span><span style="color:#f92672">);</span>
+		mapper<span style="color:#f92672">.</span><span style="color:#a6e22e">map</span><span style="color:#f92672">(</span>sourceBean<span style="color:#f92672">,</span> targetBean<span style="color:#f92672">);</span>
+        System<span style="color:#f92672">.</span><span style="color:#a6e22e">out</span><span style="color:#f92672">.</span><span style="color:#a6e22e">println</span><span style="color:#f92672">(</span>targetBean<span style="color:#f92672">);</span>
+        System<span style="color:#f92672">.</span><span style="color:#a6e22e">out</span><span style="color:#f92672">.</span><span style="color:#a6e22e">println</span><span style="color:#f92672">(</span>sourceBean<span style="color:#f92672">);</span>
+    <span style="color:#f92672">}</span>
 
-}
-</code></pre>
-
-<h1 id="运行结果">运行结果</h1>
-
-<pre><code class="language-java">TargetBean(pk=1, name=小强, binaryData=1989)
-SourceBean(id=1, name=小强, data=1989)
-</code></pre>
-
-<h1 id="复杂用xml方式">复杂用xml方式</h1>
-
+<span style="color:#f92672">}</span>
+</code></pre></div><h1 id="运行结果">运行结果</h1>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-java" data-lang="java">TargetBean<span style="color:#f92672">(</span>pk<span style="color:#f92672">=</span>1<span style="color:#f92672">,</span> name<span style="color:#f92672">=</span>小强<span style="color:#f92672">,</span> binaryData<span style="color:#f92672">=</span>1989<span style="color:#f92672">)</span>
+SourceBean<span style="color:#f92672">(</span>id<span style="color:#f92672">=</span>1<span style="color:#f92672">,</span> name<span style="color:#f92672">=</span>小强<span style="color:#f92672">,</span> data<span style="color:#f92672">=</span>1989<span style="color:#f92672">)</span>
+</code></pre></div><h1 id="复杂用xml方式">复杂用xml方式</h1>
 <p>此种方式最简便，但是官方中只有一个注释@Mapping，因此只能应对简便的映射关系，意思是如果想要使用更复杂的映射，就只能使用xml配置，或者API方式，<strong>官方极力推荐使用XML方式</strong></p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-java" data-lang="java"><span style="color:#a6e22e">@Configuration</span>
+<span style="color:#66d9ef">public</span> <span style="color:#66d9ef">class</span> <span style="color:#a6e22e">DozerBeanMapperConfigure</span> <span style="color:#f92672">{</span>
 
-<pre><code class="language-java">@Configuration
-public class DozerBeanMapperConfigure {
+    <span style="color:#a6e22e">@Bean</span>
+    <span style="color:#66d9ef">public</span> DozerBeanMapper <span style="color:#a6e22e">mapper</span><span style="color:#f92672">()</span> <span style="color:#f92672">{</span>
+        DozerBeanMapper mapper <span style="color:#f92672">=</span> <span style="color:#66d9ef">new</span> DozerBeanMapper<span style="color:#f92672">();</span>
+        mapper<span style="color:#f92672">.</span><span style="color:#a6e22e">setMappingFiles</span><span style="color:#f92672">(</span>Arrays<span style="color:#f92672">.</span><span style="color:#a6e22e">asList</span><span style="color:#f92672">(</span><span style="color:#e6db74">&#34;mapping/UserMapping.xml&#34;</span><span style="color:#f92672">));</span>
+        <span style="color:#66d9ef">return</span> mapper<span style="color:#f92672">;</span>
+    <span style="color:#f92672">}</span>
 
-    @Bean
-    public DozerBeanMapper mapper() {
-        DozerBeanMapper mapper = new DozerBeanMapper();
-        mapper.setMappingFiles(Arrays.asList(&quot;mapping/UserMapping.xml&quot;));
-        return mapper;
-    }
-
-}
-</code></pre>
-
-<pre><code class="language-xml">&lt;?xml version=&quot;1.0&quot; encoding=&quot;UTF-8&quot;?&gt;
-&lt;mappings xmlns=&quot;http://dozer.sourceforge.net&quot;
-          xmlns:xsi=&quot;http://www.w3.org/2001/XMLSchema-instance&quot;
-          xsi:schemaLocation=&quot;http://dozer.sourceforge.net
-          http://dozer.sourceforge.net/schema/beanmapping.xsd&quot;&gt;
-    &lt;mapping&gt;
-        &lt;class-a map-null=&quot;false&quot;&gt;com.example.springboot.Entity.User&lt;/class-a&gt;
-        &lt;class-b map-null=&quot;false&quot;&gt;com.example.springboot.EntityVo.UserVo&lt;/class-b&gt;
-        &lt;field&gt;
-            &lt;a&gt;teacher.name&lt;/a&gt;
-            &lt;b&gt;teacherName&lt;/b&gt;
-        &lt;/field&gt;
-    &lt;/mapping&gt;
- &lt;/mappings&gt;
-</code></pre>
-
-<h1 id="常用开发">常用开发</h1>
-
+<span style="color:#f92672">}</span>
+</code></pre></div><div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-xml" data-lang="xml"><span style="color:#75715e">&lt;?xml version=&#34;1.0&#34; encoding=&#34;UTF-8&#34;?&gt;</span>
+<span style="color:#f92672">&lt;mappings</span> <span style="color:#a6e22e">xmlns=</span><span style="color:#e6db74">&#34;http://dozer.sourceforge.net&#34;</span>
+          <span style="color:#a6e22e">xmlns:xsi=</span><span style="color:#e6db74">&#34;http://www.w3.org/2001/XMLSchema-instance&#34;</span>
+          <span style="color:#a6e22e">xsi:schemaLocation=</span><span style="color:#e6db74">&#34;http://dozer.sourceforge.net
+</span><span style="color:#e6db74">          http://dozer.sourceforge.net/schema/beanmapping.xsd&#34;</span><span style="color:#f92672">&gt;</span>
+    <span style="color:#f92672">&lt;mapping&gt;</span>
+        <span style="color:#f92672">&lt;class-a</span> <span style="color:#a6e22e">map-null=</span><span style="color:#e6db74">&#34;false&#34;</span><span style="color:#f92672">&gt;</span>com.example.springboot.Entity.User<span style="color:#f92672">&lt;/class-a&gt;</span>
+        <span style="color:#f92672">&lt;class-b</span> <span style="color:#a6e22e">map-null=</span><span style="color:#e6db74">&#34;false&#34;</span><span style="color:#f92672">&gt;</span>com.example.springboot.EntityVo.UserVo<span style="color:#f92672">&lt;/class-b&gt;</span>
+        <span style="color:#f92672">&lt;field&gt;</span>
+            <span style="color:#f92672">&lt;a&gt;</span>teacher.name<span style="color:#f92672">&lt;/a&gt;</span>
+            <span style="color:#f92672">&lt;b&gt;</span>teacherName<span style="color:#f92672">&lt;/b&gt;</span>
+        <span style="color:#f92672">&lt;/field&gt;</span>
+    <span style="color:#f92672">&lt;/mapping&gt;</span>
+ <span style="color:#f92672">&lt;/mappings&gt;</span>
+</code></pre></div><h1 id="常用开发">常用开发</h1>
 <p>我们在mybatis中的时候， 可以用DTO的这个类直接继承数据库的对应的实体类， 然后如果有需要多的字段或者是需要改变字段来对应前端的话，我们就可以使用@Mapper这个注解来对应前台显示字段，同时又屏蔽了数据库结构。</p>
 
 
@@ -469,18 +438,7 @@ public class DozerBeanMapperConfigure {
                         <a class="catalog-toggle" style="font-size: 24px;" href="index.html#">目录结构</a>
                     </h4>
                     <ul class="catalog-body"></ul>
-                    <nav id="TableOfContents">
-<ul>
-<li><a href="#pom-xml">pom.xml</a></li>
-<li><a href="#dozerbeanmapperconfigure">DozerBeanMapperConfigure</a></li>
-<li><a href="#sourcebean">SourceBean</a></li>
-<li><a href="#targetbean">TargetBean</a></li>
-<li><a href="#dtocontroller">DtoController</a></li>
-<li><a href="#运行结果">运行结果</a></li>
-<li><a href="#复杂用xml方式">复杂用xml方式</a></li>
-<li><a href="#常用开发">常用开发</a></li>
-</ul>
-</nav>
+                    <nav id="TableOfContents"></nav>
                     <br>
                     <br>
                     <br>
@@ -504,9 +462,6 @@ public class DozerBeanMapperConfigure {
                         
                         
                         
-                        <a href="/tags/" title="">
-                            
-                        </a>
                         
                         
                         
@@ -516,101 +471,6 @@ public class DozerBeanMapperConfigure {
                         
                         
                         
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        <a href="/tags/qt" title="QT">
-                            QT
-                        </a>
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        <a href="/tags/zookeeper" title="Zookeeper">
-                            Zookeeper
-                        </a>
                         
                         
                         
@@ -650,8 +510,10 @@ public class DozerBeanMapperConfigure {
                         
                         
                         
-                        <a href="/tags/elasticsearch" title="elasticSearch">
-                            elasticSearch
+                        
+                        
+                        <a href="/tags/elasticsearch" title="elasticsearch">
+                            elasticsearch
                         </a>
                         
                         
@@ -662,9 +524,27 @@ public class DozerBeanMapperConfigure {
                         
                         
                         
-                        <a href="/tags/golang" title="golang">
-                            golang
-                        </a>
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
                         
                         
                         
@@ -702,9 +582,21 @@ public class DozerBeanMapperConfigure {
                         
                         
                         
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
                         <a href="/tags/jvm" title="jvm">
                             jvm
                         </a>
+                        
+                        
+                        
+                        
                         
                         
                         
@@ -728,9 +620,19 @@ public class DozerBeanMapperConfigure {
                         
                         
                         
+                        
+                        
+                        
+                        
+                        
+                        
                         <a href="/tags/mongodb" title="mongodb">
                             mongodb
                         </a>
+                        
+                        
+                        
+                        
                         
                         
                         
@@ -741,10 +643,6 @@ public class DozerBeanMapperConfigure {
                         </a>
                         
                         
-                        
-                        <a href="/tags/mycat" title="mycat">
-                            mycat
-                        </a>
                         
                         
                         
@@ -758,9 +656,17 @@ public class DozerBeanMapperConfigure {
                         
                         
                         
-                        <a href="/tags/nginx" title="nginx">
-                            nginx
-                        </a>
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
                         
                         
                         
@@ -784,8 +690,22 @@ public class DozerBeanMapperConfigure {
                         
                         
                         
+                        
+                        
                         <a href="/tags/rocketmq" title="rocketmq">
                             rocketmq
+                        </a>
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        <a href="/tags/security%E6%A1%86%E6%9E%B6%E5%AD%A6%E4%B9%A0" title="security框架学习">
+                            security框架学习
                         </a>
                         
                         
@@ -812,17 +732,11 @@ public class DozerBeanMapperConfigure {
                         
                         
                         
-                        <a href="/tags/springcloud" title="springCloud">
-                            springCloud
-                        </a>
-                        
-                        
-                        
-                        
-                        
                         <a href="/tags/springboot" title="springboot">
                             springboot
                         </a>
+                        
+                        
                         
                         
                         
@@ -836,6 +750,9 @@ public class DozerBeanMapperConfigure {
                         
                         
                         
+                        <a href="/tags/springcloud" title="springcloud">
+                            springcloud
+                        </a>
                         
                         
                         
@@ -861,6 +778,33 @@ public class DozerBeanMapperConfigure {
                         
                         
                         
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        <a href="/tags/zookeeper" title="zookeeper">
+                            zookeeper
+                        </a>
                         
                         
                         
@@ -920,6 +864,8 @@ public class DozerBeanMapperConfigure {
                         
                         
                         
+                        
+                        
                         <a href="/tags/%E5%88%86%E5%B8%83%E5%BC%8F%E7%B3%BB%E5%88%97" title="分布式系列">
                             分布式系列
                         </a>
@@ -939,6 +885,10 @@ public class DozerBeanMapperConfigure {
                         
                         
                         
+                        
+                        <a href="/tags/%E5%8D%8F%E8%AE%AE%E6%A0%88" title="协议栈">
+                            协议栈
+                        </a>
                         
                         
                         
@@ -1138,6 +1088,12 @@ public class DozerBeanMapperConfigure {
                         
                         
                         
+                        
+                        
+                        
+                        
+                        
+                        
                         <a href="/tags/%E7%BD%91%E7%BB%9C%E7%BC%96%E7%A8%8B" title="网络编程">
                             网络编程
                         </a>
@@ -1161,6 +1117,10 @@ public class DozerBeanMapperConfigure {
                         
                         
                         
+                        
+                        <a href="/tags/%E8%AE%A4%E8%AF%81%E5%92%8C%E6%8E%88%E6%9D%83" title="认证和授权">
+                            认证和授权
+                        </a>
                         
                         
                         
@@ -1331,7 +1291,7 @@ public class DozerBeanMapperConfigure {
                     
                 </ul>
 		<p class="copyright text-muted">
-                    Copyright &copy;  2020
+                    Copyright &copy;  2021
                     <br>
                     <a href="https://themes.gohugo.io/hugo-theme-cleanwhite">CleanWhite Hugo Theme</a> by <a href="https://zhaohuabing.com">Huabing</a> |
                     <iframe

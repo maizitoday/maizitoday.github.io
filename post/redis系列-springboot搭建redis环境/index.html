@@ -97,15 +97,15 @@
                     </li>
                     
                     <li>
-                        <a href="/categories/english">English</a>
+                        <a href="/categories/english">english</a>
                     </li>
                     
                     <li>
-                        <a href="/categories/life">Life</a>
+                        <a href="/categories/life">life</a>
                     </li>
                     
                     <li>
-                        <a href="/categories/tech">Tech</a>
+                        <a href="/categories/tech">tech</a>
                     </li>
                     
 
@@ -241,76 +241,62 @@
                 
                 
                 
-                
+                <p>官方文档：<a href="https://docs.spring.io/spring-data/data-redis/docs/current/reference/html/#why-spring-redis">https://docs.spring.io/spring-data/data-redis/docs/current/reference/html/#why-spring-redis</a></p>
+<h1 id="pomxml">pom.xml</h1>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-xml" data-lang="xml"><span style="color:#f92672">&lt;dependency&gt;</span>
+    <span style="color:#f92672">&lt;groupId&gt;</span>org.springframework.boot<span style="color:#f92672">&lt;/groupId&gt;</span>
+    <span style="color:#f92672">&lt;artifactId&gt;</span>spring-boot-starter-data-redis-reactive<span style="color:#f92672">&lt;/artifactId&gt;</span>
+    <span style="color:#f92672">&lt;scope&gt;</span>compile<span style="color:#f92672">&lt;/scope&gt;</span>
+<span style="color:#f92672">&lt;/dependency&gt;</span>  
 
-<p>官方文档：<a href="https://docs.spring.io/spring-data/data-redis/docs/current/reference/html/#why-spring-redis">https://docs.spring.io/spring-data/data-redis/docs/current/reference/html/#why-spring-redis</a></p>
+<span style="color:#75715e">&lt;!--springboot2.X默认使用lettuce连接池，需要引入commons-pool2--&gt;</span>
+<span style="color:#f92672">&lt;dependency&gt;</span>
+    <span style="color:#f92672">&lt;groupId&gt;</span>org.apache.commons<span style="color:#f92672">&lt;/groupId&gt;</span>
+    <span style="color:#f92672">&lt;artifactId&gt;</span>commons-pool2<span style="color:#f92672">&lt;/artifactId&gt;</span>
+<span style="color:#f92672">&lt;/dependency&gt;</span> 
 
-<h1 id="pom-xml">pom.xml</h1>
+<span style="color:#f92672">&lt;dependency&gt;</span>
+    <span style="color:#f92672">&lt;groupId&gt;</span>com.alibaba<span style="color:#f92672">&lt;/groupId&gt;</span>
+    <span style="color:#f92672">&lt;artifactId&gt;</span>fastjson<span style="color:#f92672">&lt;/artifactId&gt;</span>
+    <span style="color:#f92672">&lt;version&gt;</span>1.2.54<span style="color:#f92672">&lt;/version&gt;</span>
+<span style="color:#f92672">&lt;/dependency&gt;</span>
+</code></pre></div><h1 id="applicationyml">application.yml</h1>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-yml" data-lang="yml"><span style="color:#f92672">spring</span>:
+  <span style="color:#f92672">redis</span>:
+    <span style="color:#f92672">host</span>: <span style="color:#ae81ff">127.0.0.1</span>
+    <span style="color:#f92672">port</span>: <span style="color:#ae81ff">6379</span>
+    <span style="color:#f92672">lettuce</span>:
+      <span style="color:#f92672">pool</span>:
+        <span style="color:#f92672">max-active</span>: <span style="color:#ae81ff">200</span> <span style="color:#75715e">#连接池最大连接数（使用负值表示没有限制）</span>
+        <span style="color:#f92672">max-idle</span>: <span style="color:#ae81ff">20</span> <span style="color:#75715e"># 连接池中的最大空闲连接</span>
+        <span style="color:#f92672">min-idle</span>: <span style="color:#ae81ff">5</span> <span style="color:#75715e">#连接池中的最小空闲连接</span>
+        <span style="color:#f92672">max-wait</span>: <span style="color:#ae81ff">1000</span> <span style="color:#75715e"># 连接池最大阻塞等待时间（使用负值表示没有限制）</span>
+</code></pre></div><h1 id="springapplication">SpringApplication</h1>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-java" data-lang="java"><span style="color:#960050;background-color:#1e0010">#</span>通过它可以对数据库<span style="color:#960050;background-color:#1e0010">（</span>redis<span style="color:#f92672">)</span>进行操作<span style="color:#960050;background-color:#1e0010">。</span>基本的实现为CrudRepository<span style="color:#960050;background-color:#1e0010">。</span>类似Mybatis<span style="color:#f92672">-</span>plus的CRUD快捷
+<span style="color:#a6e22e">@EnableRedisRepositories</span>
+<span style="color:#a6e22e">@SpringBootApplication</span>
+<span style="color:#66d9ef">public</span> <span style="color:#66d9ef">class</span> <span style="color:#a6e22e">DemoApplication</span> <span style="color:#f92672">{</span>
 
-<pre><code class="language-xml">&lt;dependency&gt;
-    &lt;groupId&gt;org.springframework.boot&lt;/groupId&gt;
-    &lt;artifactId&gt;spring-boot-starter-data-redis-reactive&lt;/artifactId&gt;
-    &lt;scope&gt;compile&lt;/scope&gt;
-&lt;/dependency&gt;  
+	<span style="color:#66d9ef">public</span> <span style="color:#66d9ef">static</span> <span style="color:#66d9ef">void</span> <span style="color:#a6e22e">main</span><span style="color:#f92672">(</span>String<span style="color:#f92672">[]</span> args<span style="color:#f92672">)</span> <span style="color:#f92672">{</span>
+		SpringApplication<span style="color:#f92672">.</span><span style="color:#a6e22e">run</span><span style="color:#f92672">(</span>DemoApplication<span style="color:#f92672">.</span><span style="color:#a6e22e">class</span><span style="color:#f92672">,</span> args<span style="color:#f92672">);</span>
+	<span style="color:#f92672">}</span>
 
-&lt;!--springboot2.X默认使用lettuce连接池，需要引入commons-pool2--&gt;
-&lt;dependency&gt;
-    &lt;groupId&gt;org.apache.commons&lt;/groupId&gt;
-    &lt;artifactId&gt;commons-pool2&lt;/artifactId&gt;
-&lt;/dependency&gt; 
-
-&lt;dependency&gt;
-    &lt;groupId&gt;com.alibaba&lt;/groupId&gt;
-    &lt;artifactId&gt;fastjson&lt;/artifactId&gt;
-    &lt;version&gt;1.2.54&lt;/version&gt;
-&lt;/dependency&gt;
-</code></pre>
-
-<h1 id="application-yml">application.yml</h1>
-
-<pre><code class="language-yml">spring:
-  redis:
-    host: 127.0.0.1
-    port: 6379
-    lettuce:
-      pool:
-        max-active: 200 #连接池最大连接数（使用负值表示没有限制）
-        max-idle: 20 # 连接池中的最大空闲连接
-        min-idle: 5 #连接池中的最小空闲连接
-        max-wait: 1000 # 连接池最大阻塞等待时间（使用负值表示没有限制）
-</code></pre>
-
-<h1 id="springapplication">SpringApplication</h1>
-
-<pre><code class="language-java">#通过它可以对数据库（redis)进行操作。基本的实现为CrudRepository。类似Mybatis-plus的CRUD快捷
-@EnableRedisRepositories
-@SpringBootApplication
-public class DemoApplication {
-
-	public static void main(String[] args) {
-		SpringApplication.run(DemoApplication.class, args);
-	}
-
-}
-</code></pre>
-
-<h1 id="mycontroller">MyController</h1>
-
-<pre><code class="language-java">@RestController
-public class MyController {
+<span style="color:#f92672">}</span>
+</code></pre></div><h1 id="mycontroller">MyController</h1>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-java" data-lang="java"><span style="color:#a6e22e">@RestController</span>
+<span style="color:#66d9ef">public</span> <span style="color:#66d9ef">class</span> <span style="color:#a6e22e">MyController</span> <span style="color:#f92672">{</span>
     
-    @Autowired
-    private StringRedisTemplate redisTemplate;
+    <span style="color:#a6e22e">@Autowired</span>
+    <span style="color:#66d9ef">private</span> StringRedisTemplate redisTemplate<span style="color:#f92672">;</span>
    
-    @GetMapping(value = &quot;showMsg&quot;)
-    public String showMsg() {
-        String val = redisTemplate.opsForValue().get(&quot;maizi&quot;);
-        System.out.println(val);
-        return &quot;hello controller&quot;;
-    }
-}
-</code></pre>
-
+    <span style="color:#a6e22e">@GetMapping</span><span style="color:#f92672">(</span>value <span style="color:#f92672">=</span> <span style="color:#e6db74">&#34;showMsg&#34;</span><span style="color:#f92672">)</span>
+    <span style="color:#66d9ef">public</span> String <span style="color:#a6e22e">showMsg</span><span style="color:#f92672">()</span> <span style="color:#f92672">{</span>
+        String val <span style="color:#f92672">=</span> redisTemplate<span style="color:#f92672">.</span><span style="color:#a6e22e">opsForValue</span><span style="color:#f92672">().</span><span style="color:#a6e22e">get</span><span style="color:#f92672">(</span><span style="color:#e6db74">&#34;maizi&#34;</span><span style="color:#f92672">);</span>
+        System<span style="color:#f92672">.</span><span style="color:#a6e22e">out</span><span style="color:#f92672">.</span><span style="color:#a6e22e">println</span><span style="color:#f92672">(</span>val<span style="color:#f92672">);</span>
+        <span style="color:#66d9ef">return</span> <span style="color:#e6db74">&#34;hello controller&#34;</span><span style="color:#f92672">;</span>
+    <span style="color:#f92672">}</span>
+<span style="color:#f92672">}</span>
+</code></pre></div>
 
                 
                 
@@ -416,14 +402,7 @@ public class MyController {
                         <a class="catalog-toggle" style="font-size: 24px;" href="index.html#">目录结构</a>
                     </h4>
                     <ul class="catalog-body"></ul>
-                    <nav id="TableOfContents">
-<ul>
-<li><a href="#pom-xml">pom.xml</a></li>
-<li><a href="#application-yml">application.yml</a></li>
-<li><a href="#springapplication">SpringApplication</a></li>
-<li><a href="#mycontroller">MyController</a></li>
-</ul>
-</nav>
+                    <nav id="TableOfContents"></nav>
                     <br>
                     <br>
                     <br>
@@ -447,9 +426,6 @@ public class MyController {
                         
                         
                         
-                        <a href="/tags/" title="">
-                            
-                        </a>
                         
                         
                         
@@ -459,101 +435,6 @@ public class MyController {
                         
                         
                         
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        <a href="/tags/qt" title="QT">
-                            QT
-                        </a>
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        <a href="/tags/zookeeper" title="Zookeeper">
-                            Zookeeper
-                        </a>
                         
                         
                         
@@ -593,8 +474,10 @@ public class MyController {
                         
                         
                         
-                        <a href="/tags/elasticsearch" title="elasticSearch">
-                            elasticSearch
+                        
+                        
+                        <a href="/tags/elasticsearch" title="elasticsearch">
+                            elasticsearch
                         </a>
                         
                         
@@ -605,9 +488,27 @@ public class MyController {
                         
                         
                         
-                        <a href="/tags/golang" title="golang">
-                            golang
-                        </a>
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
                         
                         
                         
@@ -645,9 +546,21 @@ public class MyController {
                         
                         
                         
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
                         <a href="/tags/jvm" title="jvm">
                             jvm
                         </a>
+                        
+                        
+                        
+                        
                         
                         
                         
@@ -671,9 +584,19 @@ public class MyController {
                         
                         
                         
+                        
+                        
+                        
+                        
+                        
+                        
                         <a href="/tags/mongodb" title="mongodb">
                             mongodb
                         </a>
+                        
+                        
+                        
+                        
                         
                         
                         
@@ -684,10 +607,6 @@ public class MyController {
                         </a>
                         
                         
-                        
-                        <a href="/tags/mycat" title="mycat">
-                            mycat
-                        </a>
                         
                         
                         
@@ -701,9 +620,17 @@ public class MyController {
                         
                         
                         
-                        <a href="/tags/nginx" title="nginx">
-                            nginx
-                        </a>
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
                         
                         
                         
@@ -727,8 +654,22 @@ public class MyController {
                         
                         
                         
+                        
+                        
                         <a href="/tags/rocketmq" title="rocketmq">
                             rocketmq
+                        </a>
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        <a href="/tags/security%E6%A1%86%E6%9E%B6%E5%AD%A6%E4%B9%A0" title="security框架学习">
+                            security框架学习
                         </a>
                         
                         
@@ -755,17 +696,11 @@ public class MyController {
                         
                         
                         
-                        <a href="/tags/springcloud" title="springCloud">
-                            springCloud
-                        </a>
-                        
-                        
-                        
-                        
-                        
                         <a href="/tags/springboot" title="springboot">
                             springboot
                         </a>
+                        
+                        
                         
                         
                         
@@ -779,6 +714,9 @@ public class MyController {
                         
                         
                         
+                        <a href="/tags/springcloud" title="springcloud">
+                            springcloud
+                        </a>
                         
                         
                         
@@ -804,6 +742,33 @@ public class MyController {
                         
                         
                         
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        <a href="/tags/zookeeper" title="zookeeper">
+                            zookeeper
+                        </a>
                         
                         
                         
@@ -863,6 +828,8 @@ public class MyController {
                         
                         
                         
+                        
+                        
                         <a href="/tags/%E5%88%86%E5%B8%83%E5%BC%8F%E7%B3%BB%E5%88%97" title="分布式系列">
                             分布式系列
                         </a>
@@ -882,6 +849,10 @@ public class MyController {
                         
                         
                         
+                        
+                        <a href="/tags/%E5%8D%8F%E8%AE%AE%E6%A0%88" title="协议栈">
+                            协议栈
+                        </a>
                         
                         
                         
@@ -1081,6 +1052,12 @@ public class MyController {
                         
                         
                         
+                        
+                        
+                        
+                        
+                        
+                        
                         <a href="/tags/%E7%BD%91%E7%BB%9C%E7%BC%96%E7%A8%8B" title="网络编程">
                             网络编程
                         </a>
@@ -1104,6 +1081,10 @@ public class MyController {
                         
                         
                         
+                        
+                        <a href="/tags/%E8%AE%A4%E8%AF%81%E5%92%8C%E6%8E%88%E6%9D%83" title="认证和授权">
+                            认证和授权
+                        </a>
                         
                         
                         
@@ -1274,7 +1255,7 @@ public class MyController {
                     
                 </ul>
 		<p class="copyright text-muted">
-                    Copyright &copy;  2020
+                    Copyright &copy;  2021
                     <br>
                     <a href="https://themes.gohugo.io/hugo-theme-cleanwhite">CleanWhite Hugo Theme</a> by <a href="https://zhaohuabing.com">Huabing</a> |
                     <iframe

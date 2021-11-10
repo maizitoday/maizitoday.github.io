@@ -97,15 +97,15 @@
                     </li>
                     
                     <li>
-                        <a href="/categories/english">English</a>
+                        <a href="/categories/english">english</a>
                     </li>
                     
                     <li>
-                        <a href="/categories/life">Life</a>
+                        <a href="/categories/life">life</a>
                     </li>
                     
                     <li>
-                        <a href="/categories/tech">Tech</a>
+                        <a href="/categories/tech">tech</a>
                     </li>
                     
 
@@ -237,71 +237,45 @@
                 
                 
                 
-                
-
-<p>[TOC]</p>
-
-<p><strong>转载地址：<a href="https://blog.csdn.net/weixin_40654252/article/details/86472179">https://blog.csdn.net/weixin_40654252/article/details/86472179</a></strong></p>
-
+                <p>[TOC]</p>
+<p><strong>转载地址：https://blog.csdn.net/weixin_40654252/article/details/86472179</strong></p>
 <h1 id="关闭centos自带防火墙">关闭CentOS自带防火墙</h1>
-
-<pre><code class="language-shell">systemctl disable firewalld
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-shell" data-lang="shell">systemctl disable firewalld
 systemctl stop firewalld
-</code></pre>
-
-<h1 id="安装-etcd-和-kubernetes-软件">安装 etcd 和 kubernetes 软件</h1>
-
+</code></pre></div><h1 id="安装-etcd-和-kubernetes-软件">安装 etcd 和 kubernetes 软件</h1>
 <p><strong>会自动安装docker软件</strong></p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-shell" data-lang="shell">yum -y install etcd kubernetes
 
-<pre><code class="language-shell">yum -y install etcd kubernetes
-
-#修改下面配置文件
+<span style="color:#75715e">#修改下面配置文件</span>
 vim /etc/sysconfig/docker
-OPTIONS='--selinux-enabled=false --insecure-registry gcr.io'
+OPTIONS<span style="color:#f92672">=</span><span style="color:#e6db74">&#39;--selinux-enabled=false --insecure-registry gcr.io&#39;</span>
 
-#修改下面配置文件
+<span style="color:#75715e">#修改下面配置文件</span>
 vim /etc/kubernetes/apiserver
-KUBE_ADMISSION_CONTROL=&quot;--admission-control=NamespaceLifecycle,NamespaceExists,LimitRanger,SecurityContextDeny,ResourceQuota&quot;
-</code></pre>
-
-<h1 id="启动所有服务">启动所有服务</h1>
-
-<pre><code class="language-shell">systemctl start etcd docker kube-apiserver kube-controller-manager kube-scheduler kubelet kube-proxy
-</code></pre>
-
-<p>用命令查看k8s是否已经运行</p>
-
-<pre><code class="language-shell">[root@localhost parallels]# kubectl cluster-info
+KUBE_ADMISSION_CONTROL<span style="color:#f92672">=</span><span style="color:#e6db74">&#34;--admission-control=NamespaceLifecycle,NamespaceExists,LimitRanger,SecurityContextDeny,ResourceQuota&#34;</span>
+</code></pre></div><h1 id="启动所有服务">启动所有服务</h1>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-shell" data-lang="shell">systemctl start etcd docker kube-apiserver kube-controller-manager kube-scheduler kubelet kube-proxy
+</code></pre></div><p>用命令查看k8s是否已经运行</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-shell" data-lang="shell"><span style="color:#f92672">[</span>root@localhost parallels<span style="color:#f92672">]</span><span style="color:#75715e"># kubectl cluster-info</span>
 Kubernetes master is running at http://localhost:8080
-</code></pre>
-
-<p>至此一个单机版kubernetes集群就安装启动完成了</p>
-
-<h1 id="docker-k8s服务启动命令">docker，k8s服务启动命令</h1>
-
-<pre><code class="language-shell">#关闭 
+</code></pre></div><p>至此一个单机版kubernetes集群就安装启动完成了</p>
+<h1 id="dockerk8s服务启动命令">docker，k8s服务启动命令</h1>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-shell" data-lang="shell"><span style="color:#75715e">#关闭 </span>
 systemctl stop docker
-#启动  
+<span style="color:#75715e">#启动  </span>
 systemctl start docker  
-#开机启动
+<span style="color:#75715e">#开机启动</span>
 systemctl enable docker
 
-#查看运行状态
+<span style="color:#75715e">#查看运行状态</span>
 systemctl status kubelet
 systemctl status docker
-</code></pre>
-
-<h1 id="错误">错误</h1>
-
-<pre><code class="language-java">Job for kube-apiserver.service failed because the control process exited with error code. See &quot;systemctl status kube-apiserver.service&quot; and &quot;journalctl -xe&quot; for details.
-</code></pre>
-
-<p>我这里的原因是：端口被占用，修改端口号</p>
-
-<pre><code class="language-shell">vi /etc/kubernetes/apiserver 
-KUBE_API_PORT=&quot;--port=18080&quot;
-</code></pre>
-
+</code></pre></div><h1 id="错误">错误</h1>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-java" data-lang="java">Job <span style="color:#66d9ef">for</span> kube<span style="color:#f92672">-</span>apiserver<span style="color:#f92672">.</span><span style="color:#a6e22e">service</span> failed because the control process exited with error code<span style="color:#f92672">.</span> See <span style="color:#e6db74">&#34;systemctl status kube-apiserver.service&#34;</span> and <span style="color:#e6db74">&#34;journalctl -xe&#34;</span> <span style="color:#66d9ef">for</span> details<span style="color:#f92672">.</span>
+</code></pre></div><p>我这里的原因是：端口被占用，修改端口号</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-shell" data-lang="shell">vi /etc/kubernetes/apiserver 
+KUBE_API_PORT<span style="color:#f92672">=</span><span style="color:#e6db74">&#34;--port=18080&#34;</span>
+</code></pre></div>
 
                 
                 
@@ -407,15 +381,7 @@ KUBE_API_PORT=&quot;--port=18080&quot;
                         <a class="catalog-toggle" style="font-size: 24px;" href="index.html#">目录结构</a>
                     </h4>
                     <ul class="catalog-body"></ul>
-                    <nav id="TableOfContents">
-<ul>
-<li><a href="#关闭centos自带防火墙">关闭CentOS自带防火墙</a></li>
-<li><a href="#安装-etcd-和-kubernetes-软件">安装 etcd 和 kubernetes 软件</a></li>
-<li><a href="#启动所有服务">启动所有服务</a></li>
-<li><a href="#docker-k8s服务启动命令">docker，k8s服务启动命令</a></li>
-<li><a href="#错误">错误</a></li>
-</ul>
-</nav>
+                    <nav id="TableOfContents"></nav>
                     <br>
                     <br>
                     <br>
@@ -439,9 +405,6 @@ KUBE_API_PORT=&quot;--port=18080&quot;
                         
                         
                         
-                        <a href="/tags/" title="">
-                            
-                        </a>
                         
                         
                         
@@ -451,101 +414,6 @@ KUBE_API_PORT=&quot;--port=18080&quot;
                         
                         
                         
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        <a href="/tags/qt" title="QT">
-                            QT
-                        </a>
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        <a href="/tags/zookeeper" title="Zookeeper">
-                            Zookeeper
-                        </a>
                         
                         
                         
@@ -585,8 +453,10 @@ KUBE_API_PORT=&quot;--port=18080&quot;
                         
                         
                         
-                        <a href="/tags/elasticsearch" title="elasticSearch">
-                            elasticSearch
+                        
+                        
+                        <a href="/tags/elasticsearch" title="elasticsearch">
+                            elasticsearch
                         </a>
                         
                         
@@ -597,9 +467,27 @@ KUBE_API_PORT=&quot;--port=18080&quot;
                         
                         
                         
-                        <a href="/tags/golang" title="golang">
-                            golang
-                        </a>
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
                         
                         
                         
@@ -637,9 +525,21 @@ KUBE_API_PORT=&quot;--port=18080&quot;
                         
                         
                         
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
                         <a href="/tags/jvm" title="jvm">
                             jvm
                         </a>
+                        
+                        
+                        
+                        
                         
                         
                         
@@ -663,9 +563,19 @@ KUBE_API_PORT=&quot;--port=18080&quot;
                         
                         
                         
+                        
+                        
+                        
+                        
+                        
+                        
                         <a href="/tags/mongodb" title="mongodb">
                             mongodb
                         </a>
+                        
+                        
+                        
+                        
                         
                         
                         
@@ -676,10 +586,6 @@ KUBE_API_PORT=&quot;--port=18080&quot;
                         </a>
                         
                         
-                        
-                        <a href="/tags/mycat" title="mycat">
-                            mycat
-                        </a>
                         
                         
                         
@@ -693,9 +599,17 @@ KUBE_API_PORT=&quot;--port=18080&quot;
                         
                         
                         
-                        <a href="/tags/nginx" title="nginx">
-                            nginx
-                        </a>
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
                         
                         
                         
@@ -719,8 +633,22 @@ KUBE_API_PORT=&quot;--port=18080&quot;
                         
                         
                         
+                        
+                        
                         <a href="/tags/rocketmq" title="rocketmq">
                             rocketmq
+                        </a>
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        <a href="/tags/security%E6%A1%86%E6%9E%B6%E5%AD%A6%E4%B9%A0" title="security框架学习">
+                            security框架学习
                         </a>
                         
                         
@@ -747,17 +675,11 @@ KUBE_API_PORT=&quot;--port=18080&quot;
                         
                         
                         
-                        <a href="/tags/springcloud" title="springCloud">
-                            springCloud
-                        </a>
-                        
-                        
-                        
-                        
-                        
                         <a href="/tags/springboot" title="springboot">
                             springboot
                         </a>
+                        
+                        
                         
                         
                         
@@ -771,6 +693,9 @@ KUBE_API_PORT=&quot;--port=18080&quot;
                         
                         
                         
+                        <a href="/tags/springcloud" title="springcloud">
+                            springcloud
+                        </a>
                         
                         
                         
@@ -796,6 +721,33 @@ KUBE_API_PORT=&quot;--port=18080&quot;
                         
                         
                         
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        <a href="/tags/zookeeper" title="zookeeper">
+                            zookeeper
+                        </a>
                         
                         
                         
@@ -855,6 +807,8 @@ KUBE_API_PORT=&quot;--port=18080&quot;
                         
                         
                         
+                        
+                        
                         <a href="/tags/%E5%88%86%E5%B8%83%E5%BC%8F%E7%B3%BB%E5%88%97" title="分布式系列">
                             分布式系列
                         </a>
@@ -874,6 +828,10 @@ KUBE_API_PORT=&quot;--port=18080&quot;
                         
                         
                         
+                        
+                        <a href="/tags/%E5%8D%8F%E8%AE%AE%E6%A0%88" title="协议栈">
+                            协议栈
+                        </a>
                         
                         
                         
@@ -1073,6 +1031,12 @@ KUBE_API_PORT=&quot;--port=18080&quot;
                         
                         
                         
+                        
+                        
+                        
+                        
+                        
+                        
                         <a href="/tags/%E7%BD%91%E7%BB%9C%E7%BC%96%E7%A8%8B" title="网络编程">
                             网络编程
                         </a>
@@ -1096,6 +1060,10 @@ KUBE_API_PORT=&quot;--port=18080&quot;
                         
                         
                         
+                        
+                        <a href="/tags/%E8%AE%A4%E8%AF%81%E5%92%8C%E6%8E%88%E6%9D%83" title="认证和授权">
+                            认证和授权
+                        </a>
                         
                         
                         
@@ -1266,7 +1234,7 @@ KUBE_API_PORT=&quot;--port=18080&quot;
                     
                 </ul>
 		<p class="copyright text-muted">
-                    Copyright &copy;  2020
+                    Copyright &copy;  2021
                     <br>
                     <a href="https://themes.gohugo.io/hugo-theme-cleanwhite">CleanWhite Hugo Theme</a> by <a href="https://zhaohuabing.com">Huabing</a> |
                     <iframe

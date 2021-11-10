@@ -97,15 +97,15 @@
                     </li>
                     
                     <li>
-                        <a href="/categories/english">English</a>
+                        <a href="/categories/english">english</a>
                     </li>
                     
                     <li>
-                        <a href="/categories/life">Life</a>
+                        <a href="/categories/life">life</a>
                     </li>
                     
                     <li>
-                        <a href="/categories/tech">Tech</a>
+                        <a href="/categories/tech">tech</a>
                     </li>
                     
 
@@ -237,439 +237,395 @@
                 
                 
                 
-                
-
-<p>[TOC]</p>
-
-<p><strong>转载地址：<a href="https://www.jianshu.com/p/6130557eccfb">https://www.jianshu.com/p/6130557eccfb</a></strong></p>
-
-<h1 id="blockingqueue-自定义阻塞队列">BlockingQueue（自定义阻塞队列）</h1>
-
+                <p>[TOC]</p>
+<p><strong>转载地址：https://www.jianshu.com/p/6130557eccfb</strong></p>
+<h1 id="blockingqueue自定义阻塞队列">BlockingQueue（自定义阻塞队列）</h1>
 <p>这个类通过一个队列，设置为一个生产者和消费者的模式，先开始等待任务过来， 也就是直接wait。然后等任务放入到队列中的时候， 然后在唤醒等待的几个线程，唤醒后，获取到任务， 然后进行执行。</p>
-
 <p>需要注意， notifyAll不是马上就进行唤醒了。 下面代码需要主要，不一定就是放入一个任务， 那边就能获取到一个任务出来， 有可能是放入了多个任务后， 那边才被唤醒，然后一次拿出来的。</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-java" data-lang="java"><span style="color:#f92672">import</span> java.util.LinkedList<span style="color:#f92672">;</span>
+<span style="color:#f92672">import</span> java.util.List<span style="color:#f92672">;</span>
 
-<pre><code class="language-java">import java.util.LinkedList;
-import java.util.List;
+<span style="color:#66d9ef">public</span> <span style="color:#66d9ef">class</span> <span style="color:#a6e22e">BlockingQueue</span><span style="color:#f92672">&lt;</span>T<span style="color:#f92672">&gt;</span> <span style="color:#f92672">{</span>
+    <span style="color:#75715e">/**
+</span><span style="color:#75715e">     * 使用链表实现一个阻塞队列(数据结构定义数据存储和获取方式，
+</span><span style="color:#75715e">       所以只要满足这两点，阻塞队列可以用链表，也可以使用数组等来实现)
+</span><span style="color:#75715e">     */</span>
+    <span style="color:#66d9ef">private</span> <span style="color:#66d9ef">volatile</span> List<span style="color:#f92672">&lt;</span>T<span style="color:#f92672">&gt;</span> queue <span style="color:#f92672">=</span> <span style="color:#66d9ef">new</span> LinkedList<span style="color:#f92672">();</span>
+    <span style="color:#75715e">/**
+</span><span style="color:#75715e">     * limit用来限制提交任务的最大数，默认10
+</span><span style="color:#75715e">     */</span>
+    <span style="color:#66d9ef">private</span> <span style="color:#66d9ef">int</span> limit <span style="color:#f92672">=</span> 10<span style="color:#f92672">;</span>
 
-public class BlockingQueue&lt;T&gt; {
-    /**
-     * 使用链表实现一个阻塞队列(数据结构定义数据存储和获取方式，
-       所以只要满足这两点，阻塞队列可以用链表，也可以使用数组等来实现)
-     */
-    private volatile List&lt;T&gt; queue = new LinkedList();
-    /**
-     * limit用来限制提交任务的最大数，默认10
-     */
-    private int limit = 10;
+    <span style="color:#66d9ef">public</span> <span style="color:#a6e22e">BlockingQueue</span><span style="color:#f92672">(</span><span style="color:#66d9ef">int</span> limit<span style="color:#f92672">)</span> <span style="color:#f92672">{</span>
+        <span style="color:#66d9ef">this</span><span style="color:#f92672">.</span><span style="color:#a6e22e">limit</span> <span style="color:#f92672">=</span> limit<span style="color:#f92672">;</span>
+    <span style="color:#f92672">}</span>
 
-    public BlockingQueue(int limit) {
-        this.limit = limit;
-    }
+    <span style="color:#75715e">/**
+</span><span style="color:#75715e">     *
+</span><span style="color:#75715e">     * @param item enqueue是一个同步方法，当任务到达上限，便会调用wait方法进行阻塞，
+</span><span style="color:#75715e">        否则将任务放入队列中，并唤醒dequeue()任务线程
+</span><span style="color:#75715e">     */</span>
+    <span style="color:#66d9ef">public</span> <span style="color:#66d9ef">synchronized</span> <span style="color:#66d9ef">void</span> <span style="color:#a6e22e">enqueue</span><span style="color:#f92672">(</span>T item<span style="color:#f92672">)</span> <span style="color:#f92672">{</span>
+        <span style="color:#66d9ef">while</span> <span style="color:#f92672">(</span><span style="color:#66d9ef">this</span><span style="color:#f92672">.</span><span style="color:#a6e22e">queue</span><span style="color:#f92672">.</span><span style="color:#a6e22e">size</span><span style="color:#f92672">()</span> <span style="color:#f92672">==</span> <span style="color:#66d9ef">this</span><span style="color:#f92672">.</span><span style="color:#a6e22e">limit</span><span style="color:#f92672">)</span> <span style="color:#f92672">{</span>
+            <span style="color:#66d9ef">try</span> <span style="color:#f92672">{</span>
+                <span style="color:#66d9ef">this</span><span style="color:#f92672">.</span><span style="color:#a6e22e">wait</span><span style="color:#f92672">();</span>
+            <span style="color:#f92672">}</span> <span style="color:#66d9ef">catch</span> <span style="color:#f92672">(</span>InterruptedException e<span style="color:#f92672">)</span> <span style="color:#f92672">{</span>
+                e<span style="color:#f92672">.</span><span style="color:#a6e22e">printStackTrace</span><span style="color:#f92672">();</span>
+            <span style="color:#f92672">}</span>
+        <span style="color:#f92672">}</span>
+        <span style="color:#66d9ef">if</span> <span style="color:#f92672">(</span><span style="color:#66d9ef">this</span><span style="color:#f92672">.</span><span style="color:#a6e22e">queue</span><span style="color:#f92672">.</span><span style="color:#a6e22e">size</span><span style="color:#f92672">()</span> <span style="color:#f92672">&lt;=</span> limit<span style="color:#f92672">)</span> <span style="color:#f92672">{</span>
+            <span style="color:#66d9ef">this</span><span style="color:#f92672">.</span><span style="color:#a6e22e">notifyAll</span><span style="color:#f92672">();</span>
+        <span style="color:#f92672">}</span>
+        <span style="color:#66d9ef">this</span><span style="color:#f92672">.</span><span style="color:#a6e22e">queue</span><span style="color:#f92672">.</span><span style="color:#a6e22e">add</span><span style="color:#f92672">(</span>item<span style="color:#f92672">);</span>
+        <span style="color:#66d9ef">try</span> <span style="color:#f92672">{</span>
+            Thread<span style="color:#f92672">.</span><span style="color:#a6e22e">sleep</span><span style="color:#f92672">(</span>1_000<span style="color:#f92672">);</span>
+        <span style="color:#f92672">}</span> <span style="color:#66d9ef">catch</span> <span style="color:#f92672">(</span>InterruptedException e<span style="color:#f92672">)</span> <span style="color:#f92672">{</span>
+            e<span style="color:#f92672">.</span><span style="color:#a6e22e">printStackTrace</span><span style="color:#f92672">();</span>
+        <span style="color:#f92672">}</span>
+    <span style="color:#f92672">}</span>
 
-    /**
-     *
-     * @param item enqueue是一个同步方法，当任务到达上限，便会调用wait方法进行阻塞，
-        否则将任务放入队列中，并唤醒dequeue()任务线程
-     */
-    public synchronized void enqueue(T item) {
-        while (this.queue.size() == this.limit) {
-            try {
-                this.wait();
-            } catch (InterruptedException e) {
-                e.printStackTrace();
-            }
-        }
-        if (this.queue.size() &lt;= limit) {
-            this.notifyAll();
-        }
-        this.queue.add(item);
-        try {
-            Thread.sleep(1_000);
-        } catch (InterruptedException e) {
-            e.printStackTrace();
-        }
-    }
+    <span style="color:#75715e">/**
+</span><span style="color:#75715e">     *
+</span><span style="color:#75715e">     * dequeue也是一个同步方法，当队列中没有任务时便会调用wait方法进入阻塞，
+</span><span style="color:#75715e">        当任务到达最大容量是唤醒其他dequeue()线程 ，并出列一个任务。
+</span><span style="color:#75715e">     */</span>
+    <span style="color:#66d9ef">public</span> <span style="color:#66d9ef">synchronized</span> T <span style="color:#a6e22e">dequeue</span><span style="color:#f92672">()</span> <span style="color:#f92672">{</span>
+        <span style="color:#66d9ef">while</span> <span style="color:#f92672">(</span><span style="color:#66d9ef">this</span><span style="color:#f92672">.</span><span style="color:#a6e22e">queue</span><span style="color:#f92672">.</span><span style="color:#a6e22e">size</span><span style="color:#f92672">()</span> <span style="color:#f92672">==</span> 0<span style="color:#f92672">)</span> <span style="color:#f92672">{</span>
+            <span style="color:#66d9ef">try</span> <span style="color:#f92672">{</span>
+                <span style="color:#66d9ef">this</span><span style="color:#f92672">.</span><span style="color:#a6e22e">wait</span><span style="color:#f92672">();</span>
+            <span style="color:#f92672">}</span> <span style="color:#66d9ef">catch</span> <span style="color:#f92672">(</span>InterruptedException e<span style="color:#f92672">)</span> <span style="color:#f92672">{</span>
+                e<span style="color:#f92672">.</span><span style="color:#a6e22e">printStackTrace</span><span style="color:#f92672">();</span>
+            <span style="color:#f92672">}</span>
+        <span style="color:#f92672">}</span>
+        <span style="color:#66d9ef">if</span> <span style="color:#f92672">(</span><span style="color:#66d9ef">this</span><span style="color:#f92672">.</span><span style="color:#a6e22e">queue</span><span style="color:#f92672">.</span><span style="color:#a6e22e">size</span><span style="color:#f92672">()</span> <span style="color:#f92672">==</span> <span style="color:#66d9ef">this</span><span style="color:#f92672">.</span><span style="color:#a6e22e">limit</span><span style="color:#f92672">)</span> <span style="color:#f92672">{</span>
+            <span style="color:#66d9ef">this</span><span style="color:#f92672">.</span><span style="color:#a6e22e">notifyAll</span><span style="color:#f92672">();</span>
+        <span style="color:#f92672">}</span>
+        T t <span style="color:#f92672">=</span> <span style="color:#66d9ef">this</span><span style="color:#f92672">.</span><span style="color:#a6e22e">queue</span><span style="color:#f92672">.</span><span style="color:#a6e22e">remove</span><span style="color:#f92672">(</span>0<span style="color:#f92672">);</span>
+        <span style="color:#66d9ef">return</span> t<span style="color:#f92672">;</span>
+    <span style="color:#f92672">}</span>
 
-    /**
-     *
-     * dequeue也是一个同步方法，当队列中没有任务时便会调用wait方法进入阻塞，
-        当任务到达最大容量是唤醒其他dequeue()线程 ，并出列一个任务。
-     */
-    public synchronized T dequeue() {
-        while (this.queue.size() == 0) {
-            try {
-                this.wait();
-            } catch (InterruptedException e) {
-                e.printStackTrace();
-            }
-        }
-        if (this.queue.size() == this.limit) {
-            this.notifyAll();
-        }
-        T t = this.queue.remove(0);
-        return t;
-    }
-
-    public synchronized int size() {
-        return queue.size();
-    }
-}
-</code></pre>
-
-<h1 id="poolthread">PoolThread</h1>
-
+    <span style="color:#66d9ef">public</span> <span style="color:#66d9ef">synchronized</span> <span style="color:#66d9ef">int</span> <span style="color:#a6e22e">size</span><span style="color:#f92672">()</span> <span style="color:#f92672">{</span>
+        <span style="color:#66d9ef">return</span> queue<span style="color:#f92672">.</span><span style="color:#a6e22e">size</span><span style="color:#f92672">();</span>
+    <span style="color:#f92672">}</span>
+<span style="color:#f92672">}</span>
+</code></pre></div><h1 id="poolthread">PoolThread</h1>
 <p>取出一个任务，进行任务业务代码具体执行。</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-java" data-lang="java"><span style="color:#66d9ef">public</span> <span style="color:#66d9ef">class</span> <span style="color:#a6e22e">PoolThread</span> <span style="color:#66d9ef">extends</span> Thread <span style="color:#f92672">{</span>
 
-<pre><code class="language-java">public class PoolThread extends Thread {
+    <span style="color:#66d9ef">private</span> BlockingQueue<span style="color:#f92672">&lt;</span>MyWork<span style="color:#f92672">&gt;</span> taskQueue <span style="color:#f92672">=</span> <span style="color:#66d9ef">null</span><span style="color:#f92672">;</span>
 
-    private BlockingQueue&lt;MyWork&gt; taskQueue = null;
+    <span style="color:#66d9ef">private</span> <span style="color:#66d9ef">boolean</span> isStopped <span style="color:#f92672">=</span> <span style="color:#66d9ef">false</span><span style="color:#f92672">;</span>
 
-    private boolean isStopped = false;
+    <span style="color:#66d9ef">public</span> <span style="color:#a6e22e">PoolThread</span><span style="color:#f92672">(</span>BlockingQueue<span style="color:#f92672">&lt;</span>MyWork<span style="color:#f92672">&gt;</span> taskQueue<span style="color:#f92672">)</span> <span style="color:#f92672">{</span>
+        <span style="color:#66d9ef">this</span><span style="color:#f92672">.</span><span style="color:#a6e22e">taskQueue</span> <span style="color:#f92672">=</span> taskQueue<span style="color:#f92672">;</span>
+    <span style="color:#f92672">}</span>
 
-    public PoolThread(BlockingQueue&lt;MyWork&gt; taskQueue) {
-        this.taskQueue = taskQueue;
-    }
+    <span style="color:#66d9ef">public</span> <span style="color:#66d9ef">void</span> <span style="color:#a6e22e">run</span><span style="color:#f92672">()</span> <span style="color:#f92672">{</span>
+        <span style="color:#75715e">// 这里通过判断线程没有被中断的判断， 进行线程的死循环。
+</span><span style="color:#75715e"></span>        <span style="color:#66d9ef">while</span> <span style="color:#f92672">(!</span>isStopped<span style="color:#f92672">()</span> <span style="color:#f92672">&amp;&amp;</span> <span style="color:#f92672">!</span>Thread<span style="color:#f92672">.</span><span style="color:#a6e22e">currentThread</span><span style="color:#f92672">().</span><span style="color:#a6e22e">isInterrupted</span><span style="color:#f92672">())</span> <span style="color:#f92672">{</span>
+            <span style="color:#66d9ef">try</span> <span style="color:#f92672">{</span>
+                <span style="color:#75715e">// 从任务队列获取任务并执行
+</span><span style="color:#75715e"></span>                MyWork myWork <span style="color:#f92672">=</span> <span style="color:#f92672">(</span>MyWork<span style="color:#f92672">)</span> taskQueue<span style="color:#f92672">.</span><span style="color:#a6e22e">dequeue</span><span style="color:#f92672">();</span>
+                myWork<span style="color:#f92672">.</span><span style="color:#a6e22e">work</span><span style="color:#f92672">();</span>
+            <span style="color:#f92672">}</span> <span style="color:#66d9ef">catch</span> <span style="color:#f92672">(</span>Exception e<span style="color:#f92672">)</span> <span style="color:#f92672">{</span>
+                isStopped <span style="color:#f92672">=</span> <span style="color:#66d9ef">true</span><span style="color:#f92672">;</span>
+                <span style="color:#66d9ef">break</span><span style="color:#f92672">;</span>
+            <span style="color:#f92672">}</span>
+            System<span style="color:#f92672">.</span><span style="color:#a6e22e">out</span><span style="color:#f92672">.</span><span style="color:#a6e22e">println</span><span style="color:#f92672">(</span><span style="color:#e6db74">&#34;当前线程状态:--&gt;&#34;</span><span style="color:#f92672">+</span>Thread<span style="color:#f92672">.</span><span style="color:#a6e22e">currentThread</span><span style="color:#f92672">().</span><span style="color:#a6e22e">getState</span><span style="color:#f92672">());</span>
+        <span style="color:#f92672">}</span>
+    <span style="color:#f92672">}</span>
 
-    public void run() {
-        // 这里通过判断线程没有被中断的判断， 进行线程的死循环。
-        while (!isStopped() &amp;&amp; !Thread.currentThread().isInterrupted()) {
-            try {
-                // 从任务队列获取任务并执行
-                MyWork myWork = (MyWork) taskQueue.dequeue();
-                myWork.work();
-            } catch (Exception e) {
-                isStopped = true;
-                break;
-            }
-            System.out.println(&quot;当前线程状态:--&gt;&quot;+Thread.currentThread().getState());
-        }
-    }
+    <span style="color:#66d9ef">public</span> <span style="color:#66d9ef">synchronized</span> <span style="color:#66d9ef">void</span> <span style="color:#a6e22e">doStop</span><span style="color:#f92672">()</span> <span style="color:#f92672">{</span>
+        isStopped <span style="color:#f92672">=</span> <span style="color:#66d9ef">true</span><span style="color:#f92672">;</span>
+        <span style="color:#66d9ef">this</span><span style="color:#f92672">.</span><span style="color:#a6e22e">interrupt</span><span style="color:#f92672">();</span>
+    <span style="color:#f92672">}</span>
 
-    public synchronized void doStop() {
-        isStopped = true;
-        this.interrupt();
-    }
-
-    public synchronized boolean isStopped() {
-        return isStopped;
-    }
-}
-</code></pre>
-
-<h1 id="threadpool">ThreadPool</h1>
-
+    <span style="color:#66d9ef">public</span> <span style="color:#66d9ef">synchronized</span> <span style="color:#66d9ef">boolean</span> <span style="color:#a6e22e">isStopped</span><span style="color:#f92672">()</span> <span style="color:#f92672">{</span>
+        <span style="color:#66d9ef">return</span> isStopped<span style="color:#f92672">;</span>
+    <span style="color:#f92672">}</span>
+<span style="color:#f92672">}</span>
+</code></pre></div><h1 id="threadpool">ThreadPool</h1>
 <p>初始化线程容器， 启动具体的多少条线程。然后启动线程， 线程去获取自定义队列中的任务，在任务那边的拿取时候，会进行wait的等待，直到从任务容器中拿到任务，然后在进行执行任务具体业务代码。</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-java" data-lang="java"><span style="color:#66d9ef">public</span> <span style="color:#66d9ef">class</span> <span style="color:#a6e22e">ThreadPool</span> <span style="color:#66d9ef">implements</span> Service <span style="color:#f92672">{</span>
 
-<pre><code class="language-java">public class ThreadPool implements Service {
+    <span style="color:#75715e">/**
+</span><span style="color:#75715e">     * 任务队列，用来存储提交的任务
+</span><span style="color:#75715e">     */</span>
+    <span style="color:#66d9ef">private</span> BlockingQueue<span style="color:#f92672">&lt;</span>MyWork<span style="color:#f92672">&gt;</span> taskQueue <span style="color:#f92672">=</span> <span style="color:#66d9ef">null</span><span style="color:#f92672">;</span>
 
-    /**
-     * 任务队列，用来存储提交的任务
-     */
-    private BlockingQueue&lt;MyWork&gt; taskQueue = null;
+    <span style="color:#75715e">/**
+</span><span style="color:#75715e">     * 线程池中存储线程的容器。
+</span><span style="color:#75715e">     */</span>
+    <span style="color:#66d9ef">private</span> Queue<span style="color:#f92672">&lt;</span>PoolThread<span style="color:#f92672">&gt;</span> threads <span style="color:#f92672">=</span> <span style="color:#66d9ef">new</span> ArrayDeque<span style="color:#f92672">&lt;</span>PoolThread<span style="color:#f92672">&gt;();</span>
 
-    /**
-     * 线程池中存储线程的容器。
-     */
-    private Queue&lt;PoolThread&gt; threads = new ArrayDeque&lt;PoolThread&gt;();
+    <span style="color:#66d9ef">private</span> <span style="color:#66d9ef">boolean</span> isShutdown <span style="color:#f92672">=</span> <span style="color:#66d9ef">false</span><span style="color:#f92672">;</span>
 
-    private boolean isShutdown = false;
+    <span style="color:#66d9ef">public</span> <span style="color:#a6e22e">ThreadPool</span><span style="color:#f92672">(</span><span style="color:#66d9ef">final</span> <span style="color:#66d9ef">int</span> initSize<span style="color:#f92672">,</span> <span style="color:#66d9ef">final</span> <span style="color:#66d9ef">int</span> maxNoOfTasks<span style="color:#f92672">)</span> <span style="color:#f92672">{</span>
+        taskQueue <span style="color:#f92672">=</span> <span style="color:#66d9ef">new</span> BlockingQueue<span style="color:#f92672">&lt;</span>MyWork<span style="color:#f92672">&gt;(</span>maxNoOfTasks<span style="color:#f92672">);</span>
 
-    public ThreadPool(final int initSize, final int maxNoOfTasks) {
-        taskQueue = new BlockingQueue&lt;MyWork&gt;(maxNoOfTasks);
+        <span style="color:#75715e">// 初始化线程池
+</span><span style="color:#75715e"></span>        <span style="color:#66d9ef">for</span> <span style="color:#f92672">(</span><span style="color:#66d9ef">int</span> i <span style="color:#f92672">=</span> 0<span style="color:#f92672">;</span> i <span style="color:#f92672">&lt;</span> initSize<span style="color:#f92672">;</span> i<span style="color:#f92672">++)</span> <span style="color:#f92672">{</span>
+            threads<span style="color:#f92672">.</span><span style="color:#a6e22e">add</span><span style="color:#f92672">(</span><span style="color:#66d9ef">new</span> PoolThread<span style="color:#f92672">(</span>taskQueue<span style="color:#f92672">));</span>
+        <span style="color:#f92672">}</span>
 
-        // 初始化线程池
-        for (int i = 0; i &lt; initSize; i++) {
-            threads.add(new PoolThread(taskQueue));
-        }
+        <span style="color:#75715e">// 启动线程池线程
+</span><span style="color:#75715e"></span>        threads<span style="color:#f92672">.</span><span style="color:#a6e22e">forEach</span><span style="color:#f92672">(</span>thread <span style="color:#f92672">-&gt;</span> thread<span style="color:#f92672">.</span><span style="color:#a6e22e">start</span><span style="color:#f92672">());</span>
+    <span style="color:#f92672">}</span>
 
-        // 启动线程池线程
-        threads.forEach(thread -&gt; thread.start());
-    }
+    <span style="color:#a6e22e">@Override</span>
+    <span style="color:#66d9ef">public</span> <span style="color:#66d9ef">synchronized</span> <span style="color:#66d9ef">void</span> <span style="color:#a6e22e">execute</span><span style="color:#f92672">(</span>MyWork task<span style="color:#f92672">)</span> <span style="color:#f92672">{</span>
+        <span style="color:#66d9ef">if</span> <span style="color:#f92672">(</span><span style="color:#66d9ef">this</span><span style="color:#f92672">.</span><span style="color:#a6e22e">isShutdown</span><span style="color:#f92672">())</span> <span style="color:#f92672">{</span>
+            <span style="color:#66d9ef">throw</span> <span style="color:#66d9ef">new</span> IllegalStateException<span style="color:#f92672">(</span><span style="color:#e6db74">&#34;ThreadPool is stopped&#34;</span><span style="color:#f92672">);</span>
+        <span style="color:#f92672">}</span>
+        <span style="color:#75715e">// 任务入列
+</span><span style="color:#75715e"></span>        taskQueue<span style="color:#f92672">.</span><span style="color:#a6e22e">enqueue</span><span style="color:#f92672">(</span>task<span style="color:#f92672">);</span>
+    <span style="color:#f92672">}</span>
 
-    @Override
-    public synchronized void execute(MyWork task) {
-        if (this.isShutdown()) {
-            throw new IllegalStateException(&quot;ThreadPool is stopped&quot;);
-        }
-        // 任务入列
-        taskQueue.enqueue(task);
-    }
+    <span style="color:#a6e22e">@Override</span>
+    <span style="color:#66d9ef">public</span> <span style="color:#66d9ef">void</span> <span style="color:#a6e22e">execute</span><span style="color:#f92672">(</span>List<span style="color:#f92672">&lt;</span>MyWork<span style="color:#f92672">&gt;</span> myWorkList<span style="color:#f92672">)</span> <span style="color:#f92672">{</span>
+        <span style="color:#66d9ef">if</span> <span style="color:#f92672">(</span><span style="color:#66d9ef">this</span><span style="color:#f92672">.</span><span style="color:#a6e22e">isShutdown</span><span style="color:#f92672">())</span> <span style="color:#f92672">{</span>
+            <span style="color:#66d9ef">throw</span> <span style="color:#66d9ef">new</span> IllegalStateException<span style="color:#f92672">(</span><span style="color:#e6db74">&#34;ThreadPool is stopped&#34;</span><span style="color:#f92672">);</span>
+        <span style="color:#f92672">}</span>
+        <span style="color:#75715e">// 任务入列
+</span><span style="color:#75715e"></span>        <span style="color:#66d9ef">if</span><span style="color:#f92672">(</span>myWorkList <span style="color:#f92672">!=</span> <span style="color:#66d9ef">null</span> <span style="color:#f92672">&amp;&amp;</span> myWorkList<span style="color:#f92672">.</span><span style="color:#a6e22e">size</span><span style="color:#f92672">()</span> <span style="color:#f92672">&gt;</span> 0<span style="color:#f92672">)</span> <span style="color:#f92672">{</span>
+            <span style="color:#66d9ef">for</span> <span style="color:#f92672">(</span>MyWork myWork <span style="color:#f92672">:</span> myWorkList<span style="color:#f92672">)</span> <span style="color:#f92672">{</span>
+                taskQueue<span style="color:#f92672">.</span><span style="color:#a6e22e">enqueue</span><span style="color:#f92672">(</span>myWork<span style="color:#f92672">);</span>
+            <span style="color:#f92672">}</span>
+        <span style="color:#f92672">}</span>
+    <span style="color:#f92672">}</span>
 
-    @Override
-    public void execute(List&lt;MyWork&gt; myWorkList) {
-        if (this.isShutdown()) {
-            throw new IllegalStateException(&quot;ThreadPool is stopped&quot;);
-        }
-        // 任务入列
-        if(myWorkList != null &amp;&amp; myWorkList.size() &gt; 0) {
-            for (MyWork myWork : myWorkList) {
-                taskQueue.enqueue(myWork);
-            }
-        }
-    }
+    <span style="color:#a6e22e">@Override</span>
+    <span style="color:#66d9ef">public</span> <span style="color:#66d9ef">synchronized</span> <span style="color:#66d9ef">void</span> <span style="color:#a6e22e">shutdown</span><span style="color:#f92672">()</span> <span style="color:#f92672">{</span>
+        <span style="color:#66d9ef">this</span><span style="color:#f92672">.</span><span style="color:#a6e22e">isShutdown</span> <span style="color:#f92672">=</span> <span style="color:#66d9ef">true</span><span style="color:#f92672">;</span>
+        threads<span style="color:#f92672">.</span><span style="color:#a6e22e">forEach</span><span style="color:#f92672">(</span>thread <span style="color:#f92672">-&gt;</span> thread<span style="color:#f92672">.</span><span style="color:#a6e22e">doStop</span><span style="color:#f92672">());</span>
+    <span style="color:#f92672">}</span>
 
-    @Override
-    public synchronized void shutdown() {
-        this.isShutdown = true;
-        threads.forEach(thread -&gt; thread.doStop());
-    }
-
-    @Override
-    public boolean isShutdown() {
-        return isShutdown;
-    }
+    <span style="color:#a6e22e">@Override</span>
+    <span style="color:#66d9ef">public</span> <span style="color:#66d9ef">boolean</span> <span style="color:#a6e22e">isShutdown</span><span style="color:#f92672">()</span> <span style="color:#f92672">{</span>
+        <span style="color:#66d9ef">return</span> isShutdown<span style="color:#f92672">;</span>
+    <span style="color:#f92672">}</span>
 
     
-}
-</code></pre>
+<span style="color:#f92672">}</span>
+</code></pre></div><h1 id="service">Service</h1>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-java" data-lang="java"><span style="color:#66d9ef">public</span> <span style="color:#66d9ef">interface</span> <span style="color:#a6e22e">Service</span> <span style="color:#f92672">{</span>
 
-<h1 id="service">Service</h1>
+    <span style="color:#75715e">// 关闭线程池
+</span><span style="color:#75715e"></span>    <span style="color:#66d9ef">void</span> <span style="color:#a6e22e">shutdown</span><span style="color:#f92672">();</span>
 
-<pre><code class="language-java">public interface Service {
+    <span style="color:#75715e">// 查看线程池是否已经被shutdown
+</span><span style="color:#75715e"></span>    <span style="color:#66d9ef">boolean</span> <span style="color:#a6e22e">isShutdown</span><span style="color:#f92672">();</span>
 
-    // 关闭线程池
-    void shutdown();
+    <span style="color:#75715e">// 提交任务到线程池
+</span><span style="color:#75715e"></span>    <span style="color:#66d9ef">void</span> <span style="color:#a6e22e">execute</span><span style="color:#f92672">(</span>MyWork myWork<span style="color:#f92672">);</span>
 
-    // 查看线程池是否已经被shutdown
-    boolean isShutdown();
+    <span style="color:#75715e">// 提交任务到线程池
+</span><span style="color:#75715e"></span>    <span style="color:#66d9ef">void</span> <span style="color:#a6e22e">execute</span><span style="color:#f92672">(</span>List<span style="color:#f92672">&lt;</span>MyWork<span style="color:#f92672">&gt;</span> myWorkList<span style="color:#f92672">);</span>
 
-    // 提交任务到线程池
-    void execute(MyWork myWork);
+<span style="color:#f92672">}</span>
+</code></pre></div><h1 id="mywork抽象任务类">MyWork(抽象任务类)</h1>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-java" data-lang="java"><span style="color:#66d9ef">public</span> <span style="color:#66d9ef">abstract</span> <span style="color:#66d9ef">class</span> <span style="color:#a6e22e">MyWork</span> <span style="color:#f92672">{</span>
 
-    // 提交任务到线程池
-    void execute(List&lt;MyWork&gt; myWorkList);
+    <span style="color:#66d9ef">private</span> <span style="color:#66d9ef">void</span> <span style="color:#a6e22e">beforeWork</span><span style="color:#f92672">()</span> <span style="color:#f92672">{</span>
+        System<span style="color:#f92672">.</span><span style="color:#a6e22e">out</span><span style="color:#f92672">.</span><span style="color:#a6e22e">println</span><span style="color:#f92672">(</span><span style="color:#e6db74">&#34;-----------------------&gt;&#34;</span><span style="color:#f92672">+</span>Thread<span style="color:#f92672">.</span><span style="color:#a6e22e">currentThread</span><span style="color:#f92672">().</span><span style="color:#a6e22e">getName</span><span style="color:#f92672">()</span> <span style="color:#f92672">+</span> <span style="color:#e6db74">&#34; 开始工作&#34;</span><span style="color:#f92672">);</span>
+    <span style="color:#f92672">}</span>
 
-}
-</code></pre>
+    <span style="color:#66d9ef">public</span> <span style="color:#66d9ef">void</span> <span style="color:#a6e22e">work</span><span style="color:#f92672">(){</span>
+        beforeWork<span style="color:#f92672">();</span>
+        doWork<span style="color:#f92672">();</span>
+        afterWork<span style="color:#f92672">();</span>
+    <span style="color:#f92672">}</span>
 
-<h1 id="mywork-抽象任务类">MyWork(抽象任务类)</h1>
-
-<pre><code class="language-java">public abstract class MyWork {
-
-    private void beforeWork() {
-        System.out.println(&quot;-----------------------&gt;&quot;+Thread.currentThread().getName() + &quot; 开始工作&quot;);
-    }
-
-    public void work(){
-        beforeWork();
-        doWork();
-        afterWork();
-    }
-
-    protected abstract void doWork();
+    <span style="color:#66d9ef">protected</span> <span style="color:#66d9ef">abstract</span> <span style="color:#66d9ef">void</span> <span style="color:#a6e22e">doWork</span><span style="color:#f92672">();</span>
        
 
-    private void afterWork() {
-        System.out.println(&quot;-----------------------&gt;&quot;+Thread.currentThread().getName() + &quot; 结束工作&quot;);
-    }
+    <span style="color:#66d9ef">private</span> <span style="color:#66d9ef">void</span> <span style="color:#a6e22e">afterWork</span><span style="color:#f92672">()</span> <span style="color:#f92672">{</span>
+        System<span style="color:#f92672">.</span><span style="color:#a6e22e">out</span><span style="color:#f92672">.</span><span style="color:#a6e22e">println</span><span style="color:#f92672">(</span><span style="color:#e6db74">&#34;-----------------------&gt;&#34;</span><span style="color:#f92672">+</span>Thread<span style="color:#f92672">.</span><span style="color:#a6e22e">currentThread</span><span style="color:#f92672">().</span><span style="color:#a6e22e">getName</span><span style="color:#f92672">()</span> <span style="color:#f92672">+</span> <span style="color:#e6db74">&#34; 结束工作&#34;</span><span style="color:#f92672">);</span>
+    <span style="color:#f92672">}</span>
        
-}
-</code></pre>
+<span style="color:#f92672">}</span>
+</code></pre></div><h2 id="playwork">PlayWork</h2>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-java" data-lang="java"><span style="color:#66d9ef">public</span> <span style="color:#66d9ef">class</span> <span style="color:#a6e22e">PlayWork</span> <span style="color:#66d9ef">extends</span> MyWork <span style="color:#f92672">{</span>
 
-<h2 id="playwork">PlayWork</h2>
+    <span style="color:#66d9ef">private</span>  String name<span style="color:#f92672">;</span>
 
-<pre><code class="language-java">public class PlayWork extends MyWork {
+    <span style="color:#66d9ef">public</span> <span style="color:#a6e22e">PlayWork</span><span style="color:#f92672">(</span>String name<span style="color:#f92672">)</span> <span style="color:#f92672">{</span>
+        <span style="color:#66d9ef">this</span><span style="color:#f92672">.</span><span style="color:#a6e22e">name</span> <span style="color:#f92672">=</span> name<span style="color:#f92672">;</span>
+    <span style="color:#f92672">}</span>
 
-    private  String name;
-
-    public PlayWork(String name) {
-        this.name = name;
-    }
-
-    @Override
-    public void doWork() {
-        System.out.println(this.name+&quot;-&gt; 夺取冠军&quot;);
-    }
+    <span style="color:#a6e22e">@Override</span>
+    <span style="color:#66d9ef">public</span> <span style="color:#66d9ef">void</span> <span style="color:#a6e22e">doWork</span><span style="color:#f92672">()</span> <span style="color:#f92672">{</span>
+        System<span style="color:#f92672">.</span><span style="color:#a6e22e">out</span><span style="color:#f92672">.</span><span style="color:#a6e22e">println</span><span style="color:#f92672">(</span><span style="color:#66d9ef">this</span><span style="color:#f92672">.</span><span style="color:#a6e22e">name</span><span style="color:#f92672">+</span><span style="color:#e6db74">&#34;-&gt; 夺取冠军&#34;</span><span style="color:#f92672">);</span>
+    <span style="color:#f92672">}</span>
     
     
-}
-</code></pre>
+<span style="color:#f92672">}</span>
+</code></pre></div><h2 id="teacherwork">TeacherWork</h2>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-java" data-lang="java"><span style="color:#66d9ef">public</span> <span style="color:#66d9ef">class</span> <span style="color:#a6e22e">TeacherWork</span> <span style="color:#66d9ef">extends</span> MyWork <span style="color:#f92672">{</span>
 
-<h2 id="teacherwork">TeacherWork</h2>
+    <span style="color:#66d9ef">private</span> String name<span style="color:#f92672">;</span>
 
-<pre><code class="language-java">public class TeacherWork extends MyWork {
+    <span style="color:#66d9ef">public</span> <span style="color:#a6e22e">TeacherWork</span><span style="color:#f92672">(</span>String name<span style="color:#f92672">)</span> <span style="color:#f92672">{</span>
+        <span style="color:#66d9ef">this</span><span style="color:#f92672">.</span><span style="color:#a6e22e">name</span> <span style="color:#f92672">=</span> name<span style="color:#f92672">;</span>
+    <span style="color:#f92672">}</span>
 
-    private String name;
+    <span style="color:#a6e22e">@Override</span>
+    <span style="color:#66d9ef">public</span> <span style="color:#66d9ef">void</span> <span style="color:#a6e22e">doWork</span><span style="color:#f92672">()</span> <span style="color:#f92672">{</span>
+        System<span style="color:#f92672">.</span><span style="color:#a6e22e">out</span><span style="color:#f92672">.</span><span style="color:#a6e22e">println</span><span style="color:#f92672">(</span><span style="color:#66d9ef">this</span><span style="color:#f92672">.</span><span style="color:#a6e22e">name</span> <span style="color:#f92672">+</span> <span style="color:#e6db74">&#34;-&gt; 教书&#34;</span><span style="color:#f92672">);</span>
+    <span style="color:#f92672">}</span>
 
-    public TeacherWork(String name) {
-        this.name = name;
-    }
+<span style="color:#f92672">}</span>
+</code></pre></div><h2 id="studentwork">StudentWork</h2>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-java" data-lang="java"><span style="color:#66d9ef">public</span> <span style="color:#66d9ef">class</span> <span style="color:#a6e22e">StudentWork</span> <span style="color:#66d9ef">extends</span> MyWork  <span style="color:#f92672">{</span>
 
-    @Override
-    public void doWork() {
-        System.out.println(this.name + &quot;-&gt; 教书&quot;);
-    }
+    <span style="color:#66d9ef">private</span>  String name<span style="color:#f92672">;</span>
 
-}
-</code></pre>
+    <span style="color:#66d9ef">public</span> <span style="color:#a6e22e">StudentWork</span><span style="color:#f92672">(</span>String name<span style="color:#f92672">)</span> <span style="color:#f92672">{</span>
+        <span style="color:#66d9ef">this</span><span style="color:#f92672">.</span><span style="color:#a6e22e">name</span> <span style="color:#f92672">=</span> name<span style="color:#f92672">;</span>
+    <span style="color:#f92672">}</span>
 
-<h2 id="studentwork">StudentWork</h2>
-
-<pre><code class="language-java">public class StudentWork extends MyWork  {
-
-    private  String name;
-
-    public StudentWork(String name) {
-        this.name = name;
-    }
-
-    @Override
-    public void doWork() {
-        System.out.println(this.name+&quot;-&gt; 读书&quot;);
-    }
+    <span style="color:#a6e22e">@Override</span>
+    <span style="color:#66d9ef">public</span> <span style="color:#66d9ef">void</span> <span style="color:#a6e22e">doWork</span><span style="color:#f92672">()</span> <span style="color:#f92672">{</span>
+        System<span style="color:#f92672">.</span><span style="color:#a6e22e">out</span><span style="color:#f92672">.</span><span style="color:#a6e22e">println</span><span style="color:#f92672">(</span><span style="color:#66d9ef">this</span><span style="color:#f92672">.</span><span style="color:#a6e22e">name</span><span style="color:#f92672">+</span><span style="color:#e6db74">&#34;-&gt; 读书&#34;</span><span style="color:#f92672">);</span>
+    <span style="color:#f92672">}</span>
     
-}
-</code></pre>
+<span style="color:#f92672">}</span>
+</code></pre></div><h1 id="threadpooltest">ThreadPoolTest</h1>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-java" data-lang="java">
+<span style="color:#66d9ef">public</span> <span style="color:#66d9ef">class</span> <span style="color:#a6e22e">ThreadPoolTest</span> <span style="color:#f92672">{</span>
 
-<h1 id="threadpooltest">ThreadPoolTest</h1>
+    <span style="color:#66d9ef">public</span> <span style="color:#66d9ef">static</span> <span style="color:#66d9ef">void</span> <span style="color:#a6e22e">main</span><span style="color:#f92672">(</span>String<span style="color:#f92672">[]</span> args<span style="color:#f92672">)</span> <span style="color:#f92672">{</span>
 
-<pre><code class="language-java">
-public class ThreadPoolTest {
+        <span style="color:#75715e">// 1. 启动5条线程， 从队列里面去获取任务， 如果没有任务的话，就进行wait等待。
+</span><span style="color:#75715e"></span>        <span style="color:#66d9ef">final</span> ThreadPool threadPool <span style="color:#f92672">=</span> <span style="color:#66d9ef">new</span> ThreadPool<span style="color:#f92672">(</span>5<span style="color:#f92672">,</span> 20<span style="color:#f92672">);</span>
 
-    public static void main(String[] args) {
+        List<span style="color:#f92672">&lt;</span>MyWork<span style="color:#f92672">&gt;</span> workers <span style="color:#f92672">=</span> <span style="color:#66d9ef">new</span> ArrayList<span style="color:#f92672">&lt;&gt;();</span>
 
-        // 1. 启动5条线程， 从队列里面去获取任务， 如果没有任务的话，就进行wait等待。
-        final ThreadPool threadPool = new ThreadPool(5, 20);
+        <span style="color:#66d9ef">for</span> <span style="color:#f92672">(</span><span style="color:#66d9ef">int</span> i <span style="color:#f92672">=</span> 1<span style="color:#f92672">;</span> i <span style="color:#f92672">&lt;=</span> 5<span style="color:#f92672">;</span> i<span style="color:#f92672">++)</span> <span style="color:#f92672">{</span>
+            MyWork studentWork <span style="color:#f92672">=</span> <span style="color:#66d9ef">new</span> StudentWork<span style="color:#f92672">(</span>i <span style="color:#f92672">+</span> <span style="color:#e6db74">&#34;号小明同学&#34;</span><span style="color:#f92672">);</span>
+            workers<span style="color:#f92672">.</span><span style="color:#a6e22e">add</span><span style="color:#f92672">(</span>studentWork<span style="color:#f92672">);</span>
+        <span style="color:#f92672">}</span>
 
-        List&lt;MyWork&gt; workers = new ArrayList&lt;&gt;();
+        <span style="color:#66d9ef">for</span> <span style="color:#f92672">(</span><span style="color:#66d9ef">int</span> i <span style="color:#f92672">=</span> 1<span style="color:#f92672">;</span> i <span style="color:#f92672">&lt;=</span> 5<span style="color:#f92672">;</span> i<span style="color:#f92672">++)</span> <span style="color:#f92672">{</span>
+            MyWork teacherWork <span style="color:#f92672">=</span> <span style="color:#66d9ef">new</span> TeacherWork<span style="color:#f92672">(</span>i <span style="color:#f92672">+</span> <span style="color:#e6db74">&#34;号高老师&#34;</span><span style="color:#f92672">);</span>
+            workers<span style="color:#f92672">.</span><span style="color:#a6e22e">add</span><span style="color:#f92672">(</span>teacherWork<span style="color:#f92672">);</span>
+        <span style="color:#f92672">}</span>
 
-        for (int i = 1; i &lt;= 5; i++) {
-            MyWork studentWork = new StudentWork(i + &quot;号小明同学&quot;);
-            workers.add(studentWork);
-        }
-
-        for (int i = 1; i &lt;= 5; i++) {
-            MyWork teacherWork = new TeacherWork(i + &quot;号高老师&quot;);
-            workers.add(teacherWork);
-        }
-
-        for (int i = 1; i &lt;= 5; i++) {
-            MyWork playWork = new PlayWork(i + &quot;号太空易&quot;);
-            workers.add(playWork);
-        }
+        <span style="color:#66d9ef">for</span> <span style="color:#f92672">(</span><span style="color:#66d9ef">int</span> i <span style="color:#f92672">=</span> 1<span style="color:#f92672">;</span> i <span style="color:#f92672">&lt;=</span> 5<span style="color:#f92672">;</span> i<span style="color:#f92672">++)</span> <span style="color:#f92672">{</span>
+            MyWork playWork <span style="color:#f92672">=</span> <span style="color:#66d9ef">new</span> PlayWork<span style="color:#f92672">(</span>i <span style="color:#f92672">+</span> <span style="color:#e6db74">&#34;号太空易&#34;</span><span style="color:#f92672">);</span>
+            workers<span style="color:#f92672">.</span><span style="color:#a6e22e">add</span><span style="color:#f92672">(</span>playWork<span style="color:#f92672">);</span>
+        <span style="color:#f92672">}</span>
         
-        // 添加任务
-        threadPool.execute(workers);
-    }
+        <span style="color:#75715e">// 添加任务
+</span><span style="color:#75715e"></span>        threadPool<span style="color:#f92672">.</span><span style="color:#a6e22e">execute</span><span style="color:#f92672">(</span>workers<span style="color:#f92672">);</span>
+    <span style="color:#f92672">}</span>
 
-}
-</code></pre>
+<span style="color:#f92672">}</span>
+</code></pre></div><h1 id="运行结果">运行结果</h1>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-java" data-lang="java"><span style="color:#f92672">-----------------------&gt;</span>Thread<span style="color:#f92672">-</span>4 开始工作
+1号小明同学<span style="color:#f92672">-&gt;</span> 读书
+<span style="color:#f92672">-----------------------&gt;</span>Thread<span style="color:#f92672">-</span>4 结束工作
+当前线程状态:<span style="color:#f92672">--&gt;</span>RUNNABLE
+<span style="color:#f92672">-----------------------&gt;</span>Thread<span style="color:#f92672">-</span>3 开始工作
+2号小明同学<span style="color:#f92672">-&gt;</span> 读书
+<span style="color:#f92672">-----------------------&gt;</span>Thread<span style="color:#f92672">-</span>3 结束工作
+当前线程状态:<span style="color:#f92672">--&gt;</span>RUNNABLE
+<span style="color:#f92672">-----------------------&gt;</span>Thread<span style="color:#f92672">-</span>2 开始工作
+3号小明同学<span style="color:#f92672">-&gt;</span> 读书
+<span style="color:#f92672">-----------------------&gt;</span>Thread<span style="color:#f92672">-</span>2 结束工作
+当前线程状态:<span style="color:#f92672">--&gt;</span>RUNNABLE
+<span style="color:#f92672">-----------------------&gt;</span>Thread<span style="color:#f92672">-</span>1 开始工作
+4号小明同学<span style="color:#f92672">-&gt;</span> 读书
+<span style="color:#f92672">-----------------------&gt;</span>Thread<span style="color:#f92672">-</span>1 结束工作
+当前线程状态:<span style="color:#f92672">--&gt;</span>RUNNABLE
+<span style="color:#f92672">-----------------------&gt;</span>Thread<span style="color:#f92672">-</span>0 开始工作
+5号小明同学<span style="color:#f92672">-&gt;</span> 读书
+<span style="color:#f92672">-----------------------&gt;</span>Thread<span style="color:#f92672">-</span>0 结束工作
+当前线程状态:<span style="color:#f92672">--&gt;</span>RUNNABLE
+<span style="color:#f92672">-----------------------&gt;</span>Thread<span style="color:#f92672">-</span>0 开始工作
+<span style="color:#f92672">-----------------------&gt;</span>Thread<span style="color:#f92672">-</span>3 开始工作
+<span style="color:#f92672">-----------------------&gt;</span>Thread<span style="color:#f92672">-</span>2 开始工作
+3号高老师<span style="color:#f92672">-&gt;</span> 教书
+<span style="color:#f92672">-----------------------&gt;</span>Thread<span style="color:#f92672">-</span>2 结束工作
+<span style="color:#f92672">-----------------------&gt;</span>Thread<span style="color:#f92672">-</span>1 开始工作
+2号高老师<span style="color:#f92672">-&gt;</span> 教书
+<span style="color:#f92672">-----------------------&gt;</span>Thread<span style="color:#f92672">-</span>1 结束工作
+当前线程状态:<span style="color:#f92672">--&gt;</span>RUNNABLE
+当前线程状态:<span style="color:#f92672">--&gt;</span>RUNNABLE
+4号高老师<span style="color:#f92672">-&gt;</span> 教书
+<span style="color:#f92672">-----------------------&gt;</span>Thread<span style="color:#f92672">-</span>3 结束工作
+当前线程状态:<span style="color:#f92672">--&gt;</span>RUNNABLE
+<span style="color:#f92672">-----------------------&gt;</span>Thread<span style="color:#f92672">-</span>3 开始工作
+<span style="color:#f92672">-----------------------&gt;</span>Thread<span style="color:#f92672">-</span>4 开始工作
+5号高老师<span style="color:#f92672">-&gt;</span> 教书
+<span style="color:#f92672">-----------------------&gt;</span>Thread<span style="color:#f92672">-</span>4 结束工作
+当前线程状态:<span style="color:#f92672">--&gt;</span>RUNNABLE
+<span style="color:#f92672">-----------------------&gt;</span>Thread<span style="color:#f92672">-</span>4 开始工作
+4号太空易<span style="color:#f92672">-&gt;</span> 夺取冠军
+<span style="color:#f92672">-----------------------&gt;</span>Thread<span style="color:#f92672">-</span>4 结束工作
+当前线程状态:<span style="color:#f92672">--&gt;</span>RUNNABLE
+<span style="color:#f92672">-----------------------&gt;</span>Thread<span style="color:#f92672">-</span>4 开始工作
+5号太空易<span style="color:#f92672">-&gt;</span> 夺取冠军
+<span style="color:#f92672">-----------------------&gt;</span>Thread<span style="color:#f92672">-</span>4 结束工作
+当前线程状态:<span style="color:#f92672">--&gt;</span>RUNNABLE
+1号高老师<span style="color:#f92672">-&gt;</span> 教书
+<span style="color:#f92672">-----------------------&gt;</span>Thread<span style="color:#f92672">-</span>0 结束工作
+当前线程状态:<span style="color:#f92672">--&gt;</span>RUNNABLE
+3号太空易<span style="color:#f92672">-&gt;</span> 夺取冠军
+<span style="color:#f92672">-----------------------&gt;</span>Thread<span style="color:#f92672">-</span>3 结束工作
+当前线程状态:<span style="color:#f92672">--&gt;</span>RUNNABLE
+<span style="color:#f92672">-----------------------&gt;</span>Thread<span style="color:#f92672">-</span>2 开始工作
+2号太空易<span style="color:#f92672">-&gt;</span> 夺取冠军
+<span style="color:#f92672">-----------------------&gt;</span>Thread<span style="color:#f92672">-</span>2 结束工作
+当前线程状态:<span style="color:#f92672">--&gt;</span>RUNNABLE
+<span style="color:#f92672">-----------------------&gt;</span>Thread<span style="color:#f92672">-</span>1 开始工作
+1号太空易<span style="color:#f92672">-&gt;</span> 夺取冠军
+<span style="color:#f92672">-----------------------&gt;</span>Thread<span style="color:#f92672">-</span>1 结束工作
+当前线程状态:<span style="color:#f92672">--&gt;</span>RUNNABLE
 
-<h1 id="运行结果">运行结果</h1>
-
-<pre><code class="language-java">-----------------------&gt;Thread-4 开始工作
-1号小明同学-&gt; 读书
------------------------&gt;Thread-4 结束工作
-当前线程状态:--&gt;RUNNABLE
------------------------&gt;Thread-3 开始工作
-2号小明同学-&gt; 读书
------------------------&gt;Thread-3 结束工作
-当前线程状态:--&gt;RUNNABLE
------------------------&gt;Thread-2 开始工作
-3号小明同学-&gt; 读书
------------------------&gt;Thread-2 结束工作
-当前线程状态:--&gt;RUNNABLE
------------------------&gt;Thread-1 开始工作
-4号小明同学-&gt; 读书
------------------------&gt;Thread-1 结束工作
-当前线程状态:--&gt;RUNNABLE
------------------------&gt;Thread-0 开始工作
-5号小明同学-&gt; 读书
------------------------&gt;Thread-0 结束工作
-当前线程状态:--&gt;RUNNABLE
------------------------&gt;Thread-0 开始工作
------------------------&gt;Thread-3 开始工作
------------------------&gt;Thread-2 开始工作
-3号高老师-&gt; 教书
------------------------&gt;Thread-2 结束工作
------------------------&gt;Thread-1 开始工作
-2号高老师-&gt; 教书
------------------------&gt;Thread-1 结束工作
-当前线程状态:--&gt;RUNNABLE
-当前线程状态:--&gt;RUNNABLE
-4号高老师-&gt; 教书
------------------------&gt;Thread-3 结束工作
-当前线程状态:--&gt;RUNNABLE
------------------------&gt;Thread-3 开始工作
------------------------&gt;Thread-4 开始工作
-5号高老师-&gt; 教书
------------------------&gt;Thread-4 结束工作
-当前线程状态:--&gt;RUNNABLE
------------------------&gt;Thread-4 开始工作
-4号太空易-&gt; 夺取冠军
------------------------&gt;Thread-4 结束工作
-当前线程状态:--&gt;RUNNABLE
------------------------&gt;Thread-4 开始工作
-5号太空易-&gt; 夺取冠军
------------------------&gt;Thread-4 结束工作
-当前线程状态:--&gt;RUNNABLE
-1号高老师-&gt; 教书
------------------------&gt;Thread-0 结束工作
-当前线程状态:--&gt;RUNNABLE
-3号太空易-&gt; 夺取冠军
------------------------&gt;Thread-3 结束工作
-当前线程状态:--&gt;RUNNABLE
------------------------&gt;Thread-2 开始工作
-2号太空易-&gt; 夺取冠军
------------------------&gt;Thread-2 结束工作
-当前线程状态:--&gt;RUNNABLE
------------------------&gt;Thread-1 开始工作
-1号太空易-&gt; 夺取冠军
------------------------&gt;Thread-1 结束工作
-当前线程状态:--&gt;RUNNABLE
-
-</code></pre>
-
-<h1 id="自动扩容线程数">自动扩容线程数</h1>
-
+</code></pre></div><h1 id="自动扩容线程数">自动扩容线程数</h1>
 <p>新增两个控制线程池线程数量的参数。线程池自动扩充时最大的线程池数量max，线程池空闲时需要释放线程但是也要维护一定数量的活跃线程数量或者核心数量core。有了这init , max , core三个参数就能很好的控制线程池中线程数量，三者之间的关系init &lt;= core &lt;= max。</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-java" data-lang="java"> <span style="color:#66d9ef">public</span> <span style="color:#a6e22e">ThreadPool</span><span style="color:#f92672">(</span><span style="color:#66d9ef">final</span> <span style="color:#66d9ef">int</span> activeCount<span style="color:#f92672">,</span> <span style="color:#66d9ef">final</span> <span style="color:#66d9ef">int</span> maxNoOfTasks<span style="color:#f92672">)</span> <span style="color:#f92672">{</span>
+        <span style="color:#66d9ef">this</span><span style="color:#f92672">.</span><span style="color:#a6e22e">activeCount</span> <span style="color:#f92672">=</span> activeCount<span style="color:#f92672">;</span>
+        taskQueue <span style="color:#f92672">=</span> <span style="color:#66d9ef">new</span> BlockingQueue<span style="color:#f92672">&lt;</span>MyWork<span style="color:#f92672">&gt;(</span>maxNoOfTasks<span style="color:#f92672">);</span>
 
-<pre><code class="language-java"> public ThreadPool(final int activeCount, final int maxNoOfTasks) {
-        this.activeCount = activeCount;
-        taskQueue = new BlockingQueue&lt;MyWork&gt;(maxNoOfTasks);
+        <span style="color:#75715e">// 初始化线程池
+</span><span style="color:#75715e"></span>        <span style="color:#66d9ef">for</span> <span style="color:#f92672">(</span><span style="color:#66d9ef">int</span> i <span style="color:#f92672">=</span> 0<span style="color:#f92672">;</span> i <span style="color:#f92672">&lt;</span> initSize<span style="color:#f92672">;</span> i<span style="color:#f92672">++)</span> <span style="color:#f92672">{</span>
+            threads<span style="color:#f92672">.</span><span style="color:#a6e22e">add</span><span style="color:#f92672">(</span><span style="color:#66d9ef">new</span> PoolThread<span style="color:#f92672">(</span>taskQueue<span style="color:#f92672">,</span>i<span style="color:#f92672">));</span>
+        <span style="color:#f92672">}</span>
 
-        // 初始化线程池
-        for (int i = 0; i &lt; initSize; i++) {
-            threads.add(new PoolThread(taskQueue,i));
-        }
+        <span style="color:#75715e">// 如果初始化的线程，没有到达活跃的线程数，继续添加
+</span><span style="color:#75715e"></span>        <span style="color:#66d9ef">if</span> <span style="color:#f92672">(</span>initSize <span style="color:#f92672">&lt;</span> activeCount<span style="color:#f92672">)</span> <span style="color:#f92672">{</span>
+            <span style="color:#66d9ef">for</span> <span style="color:#f92672">(</span><span style="color:#66d9ef">int</span> i <span style="color:#f92672">=</span> initSize<span style="color:#f92672">;</span> i <span style="color:#f92672">&lt;</span> activeCount<span style="color:#f92672">;</span> i<span style="color:#f92672">++)</span> <span style="color:#f92672">{</span>
+                threads<span style="color:#f92672">.</span><span style="color:#a6e22e">add</span><span style="color:#f92672">(</span><span style="color:#66d9ef">new</span> PoolThread<span style="color:#f92672">(</span>taskQueue<span style="color:#f92672">,</span>i<span style="color:#f92672">));</span>
+            <span style="color:#f92672">}</span>
+        <span style="color:#f92672">}</span>
+        <span style="color:#75715e">// 启动线程池线程
+</span><span style="color:#75715e"></span>        threads<span style="color:#f92672">.</span><span style="color:#a6e22e">forEach</span><span style="color:#f92672">(</span>thread <span style="color:#f92672">-&gt;</span> thread<span style="color:#f92672">.</span><span style="color:#a6e22e">start</span><span style="color:#f92672">());</span>
+    <span style="color:#f92672">}</span>
+</code></pre></div><p>任务取出来，完成后， 保留2条存活的线程。</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-java" data-lang="java"><span style="color:#66d9ef">public</span> <span style="color:#66d9ef">void</span> <span style="color:#a6e22e">run</span><span style="color:#f92672">()</span> <span style="color:#f92672">{</span>
+        System<span style="color:#f92672">.</span><span style="color:#a6e22e">out</span><span style="color:#f92672">.</span><span style="color:#a6e22e">println</span><span style="color:#f92672">(</span><span style="color:#e6db74">&#34;----&gt;&#34;</span> <span style="color:#f92672">+</span> ativeThread<span style="color:#f92672">);</span>
+        <span style="color:#75715e">// 这里通过判断线程没有被中断的判断， 进行线程的死循环。
+</span><span style="color:#75715e"></span>        <span style="color:#66d9ef">while</span> <span style="color:#f92672">(!</span>isStopped<span style="color:#f92672">()</span> <span style="color:#f92672">&amp;&amp;</span> <span style="color:#f92672">!</span>Thread<span style="color:#f92672">.</span><span style="color:#a6e22e">currentThread</span><span style="color:#f92672">().</span><span style="color:#a6e22e">isInterrupted</span><span style="color:#f92672">())</span> <span style="color:#f92672">{</span>
+            <span style="color:#66d9ef">try</span> <span style="color:#f92672">{</span>
+                <span style="color:#75715e">// 从任务队列获取任务并执行
+</span><span style="color:#75715e"></span>                MyWork myWork <span style="color:#f92672">=</span> <span style="color:#f92672">(</span>MyWork<span style="color:#f92672">)</span> taskQueue<span style="color:#f92672">.</span><span style="color:#a6e22e">dequeue</span><span style="color:#f92672">();</span>
+                myWork<span style="color:#f92672">.</span><span style="color:#a6e22e">work</span><span style="color:#f92672">();</span>
+            <span style="color:#f92672">}</span> <span style="color:#66d9ef">catch</span> <span style="color:#f92672">(</span>Exception e<span style="color:#f92672">)</span> <span style="color:#f92672">{</span>
+                isStopped <span style="color:#f92672">=</span> <span style="color:#66d9ef">true</span><span style="color:#f92672">;</span>
+                <span style="color:#66d9ef">break</span><span style="color:#f92672">;</span>
+            <span style="color:#f92672">}</span>
+            <span style="color:#75715e">// 当拿出一个任务完成后， 最后默认保存2条存活线程，在wait中。 
+</span><span style="color:#75715e"></span>            System<span style="color:#f92672">.</span><span style="color:#a6e22e">out</span><span style="color:#f92672">.</span><span style="color:#a6e22e">println</span><span style="color:#f92672">(</span><span style="color:#e6db74">&#34;队列当前数:--&gt;&#34;</span> <span style="color:#f92672">+</span> <span style="color:#66d9ef">this</span><span style="color:#f92672">.</span><span style="color:#a6e22e">taskQueue</span><span style="color:#f92672">.</span><span style="color:#a6e22e">size</span><span style="color:#f92672">());</span>
+            <span style="color:#66d9ef">if</span> <span style="color:#f92672">(</span>threadCount <span style="color:#f92672">-</span> ativeThread <span style="color:#f92672">&gt;</span> 2<span style="color:#f92672">)</span> <span style="color:#f92672">{</span>
+                doStop<span style="color:#f92672">();</span>
+            <span style="color:#f92672">}</span>
 
-        // 如果初始化的线程，没有到达活跃的线程数，继续添加
-        if (initSize &lt; activeCount) {
-            for (int i = initSize; i &lt; activeCount; i++) {
-                threads.add(new PoolThread(taskQueue,i));
-            }
-        }
-        // 启动线程池线程
-        threads.forEach(thread -&gt; thread.start());
-    }
-</code></pre>
-
-<p>任务取出来，完成后， 保留2条存活的线程。</p>
-
-<pre><code class="language-java">public void run() {
-        System.out.println(&quot;----&gt;&quot; + ativeThread);
-        // 这里通过判断线程没有被中断的判断， 进行线程的死循环。
-        while (!isStopped() &amp;&amp; !Thread.currentThread().isInterrupted()) {
-            try {
-                // 从任务队列获取任务并执行
-                MyWork myWork = (MyWork) taskQueue.dequeue();
-                myWork.work();
-            } catch (Exception e) {
-                isStopped = true;
-                break;
-            }
-            // 当拿出一个任务完成后， 最后默认保存2条存活线程，在wait中。 
-            System.out.println(&quot;队列当前数:--&gt;&quot; + this.taskQueue.size());
-            if (threadCount - ativeThread &gt; 2) {
-                doStop();
-            }
-
-        }
-        System.out.println(Thread.currentThread().getName() + &quot; 线程已经退出&quot;);
-    }
-</code></pre>
-
+        <span style="color:#f92672">}</span>
+        System<span style="color:#f92672">.</span><span style="color:#a6e22e">out</span><span style="color:#f92672">.</span><span style="color:#a6e22e">println</span><span style="color:#f92672">(</span>Thread<span style="color:#f92672">.</span><span style="color:#a6e22e">currentThread</span><span style="color:#f92672">().</span><span style="color:#a6e22e">getName</span><span style="color:#f92672">()</span> <span style="color:#f92672">+</span> <span style="color:#e6db74">&#34; 线程已经退出&#34;</span><span style="color:#f92672">);</span>
+    <span style="color:#f92672">}</span>
+</code></pre></div>
 
                 
                 
@@ -776,21 +732,11 @@ public class ThreadPoolTest {
                     </h4>
                     <ul class="catalog-body"></ul>
                     <nav id="TableOfContents">
-<ul>
-<li><a href="#blockingqueue-自定义阻塞队列">BlockingQueue（自定义阻塞队列）</a></li>
-<li><a href="#poolthread">PoolThread</a></li>
-<li><a href="#threadpool">ThreadPool</a></li>
-<li><a href="#service">Service</a></li>
-<li><a href="#mywork-抽象任务类">MyWork(抽象任务类)</a>
-<ul>
-<li><a href="#playwork">PlayWork</a></li>
-<li><a href="#teacherwork">TeacherWork</a></li>
-<li><a href="#studentwork">StudentWork</a></li>
-</ul></li>
-<li><a href="#threadpooltest">ThreadPoolTest</a></li>
-<li><a href="#运行结果">运行结果</a></li>
-<li><a href="#自动扩容线程数">自动扩容线程数</a></li>
-</ul>
+  <ul>
+    <li><a href="#playwork">PlayWork</a></li>
+    <li><a href="#teacherwork">TeacherWork</a></li>
+    <li><a href="#studentwork">StudentWork</a></li>
+  </ul>
 </nav>
                     <br>
                     <br>
@@ -815,9 +761,6 @@ public class ThreadPoolTest {
                         
                         
                         
-                        <a href="/tags/" title="">
-                            
-                        </a>
                         
                         
                         
@@ -827,101 +770,6 @@ public class ThreadPoolTest {
                         
                         
                         
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        <a href="/tags/qt" title="QT">
-                            QT
-                        </a>
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        <a href="/tags/zookeeper" title="Zookeeper">
-                            Zookeeper
-                        </a>
                         
                         
                         
@@ -961,8 +809,10 @@ public class ThreadPoolTest {
                         
                         
                         
-                        <a href="/tags/elasticsearch" title="elasticSearch">
-                            elasticSearch
+                        
+                        
+                        <a href="/tags/elasticsearch" title="elasticsearch">
+                            elasticsearch
                         </a>
                         
                         
@@ -973,9 +823,27 @@ public class ThreadPoolTest {
                         
                         
                         
-                        <a href="/tags/golang" title="golang">
-                            golang
-                        </a>
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
                         
                         
                         
@@ -1013,9 +881,21 @@ public class ThreadPoolTest {
                         
                         
                         
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
                         <a href="/tags/jvm" title="jvm">
                             jvm
                         </a>
+                        
+                        
+                        
+                        
                         
                         
                         
@@ -1039,9 +919,19 @@ public class ThreadPoolTest {
                         
                         
                         
+                        
+                        
+                        
+                        
+                        
+                        
                         <a href="/tags/mongodb" title="mongodb">
                             mongodb
                         </a>
+                        
+                        
+                        
+                        
                         
                         
                         
@@ -1052,10 +942,6 @@ public class ThreadPoolTest {
                         </a>
                         
                         
-                        
-                        <a href="/tags/mycat" title="mycat">
-                            mycat
-                        </a>
                         
                         
                         
@@ -1069,9 +955,17 @@ public class ThreadPoolTest {
                         
                         
                         
-                        <a href="/tags/nginx" title="nginx">
-                            nginx
-                        </a>
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
                         
                         
                         
@@ -1095,8 +989,22 @@ public class ThreadPoolTest {
                         
                         
                         
+                        
+                        
                         <a href="/tags/rocketmq" title="rocketmq">
                             rocketmq
+                        </a>
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        <a href="/tags/security%E6%A1%86%E6%9E%B6%E5%AD%A6%E4%B9%A0" title="security框架学习">
+                            security框架学习
                         </a>
                         
                         
@@ -1123,17 +1031,11 @@ public class ThreadPoolTest {
                         
                         
                         
-                        <a href="/tags/springcloud" title="springCloud">
-                            springCloud
-                        </a>
-                        
-                        
-                        
-                        
-                        
                         <a href="/tags/springboot" title="springboot">
                             springboot
                         </a>
+                        
+                        
                         
                         
                         
@@ -1147,6 +1049,9 @@ public class ThreadPoolTest {
                         
                         
                         
+                        <a href="/tags/springcloud" title="springcloud">
+                            springcloud
+                        </a>
                         
                         
                         
@@ -1172,6 +1077,33 @@ public class ThreadPoolTest {
                         
                         
                         
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        <a href="/tags/zookeeper" title="zookeeper">
+                            zookeeper
+                        </a>
                         
                         
                         
@@ -1231,6 +1163,8 @@ public class ThreadPoolTest {
                         
                         
                         
+                        
+                        
                         <a href="/tags/%E5%88%86%E5%B8%83%E5%BC%8F%E7%B3%BB%E5%88%97" title="分布式系列">
                             分布式系列
                         </a>
@@ -1250,6 +1184,10 @@ public class ThreadPoolTest {
                         
                         
                         
+                        
+                        <a href="/tags/%E5%8D%8F%E8%AE%AE%E6%A0%88" title="协议栈">
+                            协议栈
+                        </a>
                         
                         
                         
@@ -1449,6 +1387,12 @@ public class ThreadPoolTest {
                         
                         
                         
+                        
+                        
+                        
+                        
+                        
+                        
                         <a href="/tags/%E7%BD%91%E7%BB%9C%E7%BC%96%E7%A8%8B" title="网络编程">
                             网络编程
                         </a>
@@ -1472,6 +1416,10 @@ public class ThreadPoolTest {
                         
                         
                         
+                        
+                        <a href="/tags/%E8%AE%A4%E8%AF%81%E5%92%8C%E6%8E%88%E6%9D%83" title="认证和授权">
+                            认证和授权
+                        </a>
                         
                         
                         
@@ -1642,7 +1590,7 @@ public class ThreadPoolTest {
                     
                 </ul>
 		<p class="copyright text-muted">
-                    Copyright &copy;  2020
+                    Copyright &copy;  2021
                     <br>
                     <a href="https://themes.gohugo.io/hugo-theme-cleanwhite">CleanWhite Hugo Theme</a> by <a href="https://zhaohuabing.com">Huabing</a> |
                     <iframe

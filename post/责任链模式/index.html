@@ -97,15 +97,15 @@
                     </li>
                     
                     <li>
-                        <a href="/categories/english">English</a>
+                        <a href="/categories/english">english</a>
                     </li>
                     
                     <li>
-                        <a href="/categories/life">Life</a>
+                        <a href="/categories/life">life</a>
                     </li>
                     
                     <li>
-                        <a href="/categories/tech">Tech</a>
+                        <a href="/categories/tech">tech</a>
                     </li>
                     
 
@@ -237,83 +237,65 @@
                 
                 
                 
-                
-
-<p>[TOC]</p>
-
+                <p>[TOC]</p>
 <p><strong>记录来源：《设计模式之禅》作者：秦小波</strong></p>
-
 <h1 id="定义">定义</h1>
-
 <p>使多个对象都有机会处理请求，从而避免了请求的发送者和接受者之间的耦合关 系。将这些对象连成一条链，并沿着这条链传递该请求，直到有对象处理它为止。</p>
-
 <p>责任链模式的重点是在“链”上，由一条链去处理相似的请求在链中决定谁来处理这个请 求，并返回相应的结果，</p>
-
 <h1 id="核心抽象代码">核心抽象代码</h1>
-
 <p>责任链模式的核心在“链”上，“链”是由多个处理者ConcreteHandler组成的，我们先来看 抽象Handler类，</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-java" data-lang="java"><span style="color:#f92672">package</span> com.zrl<span style="color:#f92672">;</span>
+<span style="color:#75715e">/*
+</span><span style="color:#75715e"> * @Description: 请输入....
+</span><span style="color:#75715e"> * @Author: 麦子
+</span><span style="color:#75715e"> * @Date: 2020-04-11 09:07:48
+</span><span style="color:#75715e"> * @LastEditTime: 2020-04-11 09:14:17
+</span><span style="color:#75715e"> * @LastEditors: 麦子
+</span><span style="color:#75715e"> */</span>
 
-<pre><code class="language-java">package com.zrl;
-/*
- * @Description: 请输入....
- * @Author: 麦子
- * @Date: 2020-04-11 09:07:48
- * @LastEditTime: 2020-04-11 09:14:17
- * @LastEditors: 麦子
- */
+<span style="color:#66d9ef">public</span> <span style="color:#66d9ef">abstract</span> <span style="color:#66d9ef">class</span> <span style="color:#a6e22e">Handler</span> <span style="color:#f92672">{</span>
 
-public abstract class Handler {
+    <span style="color:#75715e">// 每个处理者都必须对请求做出处理
+</span><span style="color:#75715e"></span>    <span style="color:#66d9ef">private</span> Handler nextHandler<span style="color:#f92672">;</span>
 
-    // 每个处理者都必须对请求做出处理
-    private Handler nextHandler;
+    <span style="color:#66d9ef">public</span> <span style="color:#66d9ef">final</span> Response <span style="color:#a6e22e">handleMessage</span><span style="color:#f92672">(</span>Request request<span style="color:#f92672">)</span> <span style="color:#f92672">{</span>
+        Response response <span style="color:#f92672">=</span> <span style="color:#66d9ef">null</span><span style="color:#f92672">;</span>
+        <span style="color:#75715e">// 判断是否是自己的处理级别
+</span><span style="color:#75715e"></span>        <span style="color:#66d9ef">if</span> <span style="color:#f92672">(</span><span style="color:#66d9ef">this</span><span style="color:#f92672">.</span><span style="color:#a6e22e">getHandlerLevel</span><span style="color:#f92672">().</span><span style="color:#a6e22e">equals</span><span style="color:#f92672">(</span>request<span style="color:#f92672">.</span><span style="color:#a6e22e">getRequestLevel</span><span style="color:#f92672">()))</span> <span style="color:#f92672">{</span>
+            response <span style="color:#f92672">=</span> <span style="color:#66d9ef">this</span><span style="color:#f92672">.</span><span style="color:#a6e22e">echo</span><span style="color:#f92672">(</span>request<span style="color:#f92672">);</span>
+        <span style="color:#f92672">}</span> <span style="color:#66d9ef">else</span> <span style="color:#f92672">{</span>
+            <span style="color:#75715e">// 不属于自己的处理级别
+</span><span style="color:#75715e"></span>            <span style="color:#75715e">// 判断是否有下一个处理者
+</span><span style="color:#75715e"></span>            <span style="color:#66d9ef">if</span> <span style="color:#f92672">(</span><span style="color:#66d9ef">this</span><span style="color:#f92672">.</span><span style="color:#a6e22e">nextHandler</span> <span style="color:#f92672">!=</span> <span style="color:#66d9ef">null</span><span style="color:#f92672">)</span> <span style="color:#f92672">{</span>
 
-    public final Response handleMessage(Request request) {
-        Response response = null;
-        // 判断是否是自己的处理级别
-        if (this.getHandlerLevel().equals(request.getRequestLevel())) {
-            response = this.echo(request);
-        } else {
-            // 不属于自己的处理级别
-            // 判断是否有下一个处理者
-            if (this.nextHandler != null) {
+                response <span style="color:#f92672">=</span> <span style="color:#66d9ef">this</span><span style="color:#f92672">.</span><span style="color:#a6e22e">nextHandler</span><span style="color:#f92672">.</span><span style="color:#a6e22e">handleMessage</span><span style="color:#f92672">(</span>request<span style="color:#f92672">);</span> <span style="color:#75715e">// 这里直接采用了递归进行处理
+</span><span style="color:#75715e"></span>            <span style="color:#f92672">}</span> <span style="color:#66d9ef">else</span> <span style="color:#f92672">{</span>
+                <span style="color:#75715e">// 没有适当的处理者，业务自行处理
+</span><span style="color:#75715e"></span>            <span style="color:#f92672">}</span>
+        <span style="color:#f92672">}</span>
+        <span style="color:#66d9ef">return</span> response<span style="color:#f92672">;</span>
 
-                response = this.nextHandler.handleMessage(request); // 这里直接采用了递归进行处理
-            } else {
-                // 没有适当的处理者，业务自行处理
-            }
-        }
-        return response;
+    <span style="color:#f92672">}</span>
 
-    }
+    <span style="color:#75715e">// 设置下一个处理者是谁
+</span><span style="color:#75715e"></span>    <span style="color:#66d9ef">public</span> <span style="color:#66d9ef">void</span> <span style="color:#a6e22e">setNext</span><span style="color:#f92672">(</span>Handler _handler<span style="color:#f92672">)</span> <span style="color:#f92672">{</span>
 
-    // 设置下一个处理者是谁
-    public void setNext(Handler _handler) {
+        <span style="color:#66d9ef">this</span><span style="color:#f92672">.</span><span style="color:#a6e22e">nextHandler</span> <span style="color:#f92672">=</span> _handler<span style="color:#f92672">;</span>
+    <span style="color:#f92672">}</span>
 
-        this.nextHandler = _handler;
-    }
+    <span style="color:#75715e">// 每个处理者都有一个处理级别
+</span><span style="color:#75715e"></span>    <span style="color:#66d9ef">protected</span> <span style="color:#66d9ef">abstract</span> Level <span style="color:#a6e22e">getHandlerLevel</span><span style="color:#f92672">();</span>
 
-    // 每个处理者都有一个处理级别
-    protected abstract Level getHandlerLevel();
-
-    // 每个处理者都必须实现处理任务
-    protected abstract Response echo(Request request);
-}
-</code></pre>
-
-<h2 id="说明">说明</h2>
-
+    <span style="color:#75715e">// 每个处理者都必须实现处理任务
+</span><span style="color:#75715e"></span>    <span style="color:#66d9ef">protected</span> <span style="color:#66d9ef">abstract</span> Response <span style="color:#a6e22e">echo</span><span style="color:#f92672">(</span>Request request<span style="color:#f92672">);</span>
+<span style="color:#f92672">}</span>
+</code></pre></div><h2 id="说明">说明</h2>
 <p>在责任链模式中一个请求发送到链中后，前一节点消费部分消息，然后交由后续 节点继续处理，最终可以有处理结果也可以没有处理结果，读者可以不用理会什么纯的、不 纯的责任链模式。<strong>同时，请读者注意handlerMessage方法前的final关键字，</strong></p>
-
 <h1 id="优点">优点</h1>
-
 <p>责任链模式非常显著的优点是将请求和处理分开。请求者可以不用知道是谁处理的，处 理者可以不用知道请求的全貌（例如在J2EE项目开发中，可以剥离出无状态Bean由责任链处 理），两者解耦，提高系统的灵活性。</p>
-
 <h1 id="缺点">缺点</h1>
-
 <p>责任链有两个非常显著的缺点：一是性能问题，每个请求都是从链头遍历到链尾，特别 是在链比较长的时候，性能是一个非常大的问题。二是调试不很方便，特别是链条比较长， 环节比较多的时候，由于采用了类似递归的方式，调试的时候逻辑可能比较复杂。</p>
-
 <h1 id="注意事项">注意事项</h1>
-
 <p>链中节点数量需要控制，避免出现超长链的情况，一般的做法是在Handler中设置一个 最大节点数量，在setNext方法中判断是否已经是超过其阈值，超过则不允许该链建立，避免 无意识地破坏系统性能。</p>
 
 
@@ -422,16 +404,9 @@ public abstract class Handler {
                     </h4>
                     <ul class="catalog-body"></ul>
                     <nav id="TableOfContents">
-<ul>
-<li><a href="#定义">定义</a></li>
-<li><a href="#核心抽象代码">核心抽象代码</a>
-<ul>
-<li><a href="#说明">说明</a></li>
-</ul></li>
-<li><a href="#优点">优点</a></li>
-<li><a href="#缺点">缺点</a></li>
-<li><a href="#注意事项">注意事项</a></li>
-</ul>
+  <ul>
+    <li><a href="#说明">说明</a></li>
+  </ul>
 </nav>
                     <br>
                     <br>
@@ -456,9 +431,6 @@ public abstract class Handler {
                         
                         
                         
-                        <a href="/tags/" title="">
-                            
-                        </a>
                         
                         
                         
@@ -468,101 +440,6 @@ public abstract class Handler {
                         
                         
                         
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        <a href="/tags/qt" title="QT">
-                            QT
-                        </a>
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        <a href="/tags/zookeeper" title="Zookeeper">
-                            Zookeeper
-                        </a>
                         
                         
                         
@@ -602,8 +479,10 @@ public abstract class Handler {
                         
                         
                         
-                        <a href="/tags/elasticsearch" title="elasticSearch">
-                            elasticSearch
+                        
+                        
+                        <a href="/tags/elasticsearch" title="elasticsearch">
+                            elasticsearch
                         </a>
                         
                         
@@ -614,9 +493,27 @@ public abstract class Handler {
                         
                         
                         
-                        <a href="/tags/golang" title="golang">
-                            golang
-                        </a>
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
                         
                         
                         
@@ -654,9 +551,21 @@ public abstract class Handler {
                         
                         
                         
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
                         <a href="/tags/jvm" title="jvm">
                             jvm
                         </a>
+                        
+                        
+                        
+                        
                         
                         
                         
@@ -680,9 +589,19 @@ public abstract class Handler {
                         
                         
                         
+                        
+                        
+                        
+                        
+                        
+                        
                         <a href="/tags/mongodb" title="mongodb">
                             mongodb
                         </a>
+                        
+                        
+                        
+                        
                         
                         
                         
@@ -693,10 +612,6 @@ public abstract class Handler {
                         </a>
                         
                         
-                        
-                        <a href="/tags/mycat" title="mycat">
-                            mycat
-                        </a>
                         
                         
                         
@@ -710,9 +625,17 @@ public abstract class Handler {
                         
                         
                         
-                        <a href="/tags/nginx" title="nginx">
-                            nginx
-                        </a>
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
                         
                         
                         
@@ -736,8 +659,22 @@ public abstract class Handler {
                         
                         
                         
+                        
+                        
                         <a href="/tags/rocketmq" title="rocketmq">
                             rocketmq
+                        </a>
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        <a href="/tags/security%E6%A1%86%E6%9E%B6%E5%AD%A6%E4%B9%A0" title="security框架学习">
+                            security框架学习
                         </a>
                         
                         
@@ -764,17 +701,11 @@ public abstract class Handler {
                         
                         
                         
-                        <a href="/tags/springcloud" title="springCloud">
-                            springCloud
-                        </a>
-                        
-                        
-                        
-                        
-                        
                         <a href="/tags/springboot" title="springboot">
                             springboot
                         </a>
+                        
+                        
                         
                         
                         
@@ -788,6 +719,9 @@ public abstract class Handler {
                         
                         
                         
+                        <a href="/tags/springcloud" title="springcloud">
+                            springcloud
+                        </a>
                         
                         
                         
@@ -813,6 +747,33 @@ public abstract class Handler {
                         
                         
                         
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        <a href="/tags/zookeeper" title="zookeeper">
+                            zookeeper
+                        </a>
                         
                         
                         
@@ -872,6 +833,8 @@ public abstract class Handler {
                         
                         
                         
+                        
+                        
                         <a href="/tags/%E5%88%86%E5%B8%83%E5%BC%8F%E7%B3%BB%E5%88%97" title="分布式系列">
                             分布式系列
                         </a>
@@ -891,6 +854,10 @@ public abstract class Handler {
                         
                         
                         
+                        
+                        <a href="/tags/%E5%8D%8F%E8%AE%AE%E6%A0%88" title="协议栈">
+                            协议栈
+                        </a>
                         
                         
                         
@@ -1090,6 +1057,12 @@ public abstract class Handler {
                         
                         
                         
+                        
+                        
+                        
+                        
+                        
+                        
                         <a href="/tags/%E7%BD%91%E7%BB%9C%E7%BC%96%E7%A8%8B" title="网络编程">
                             网络编程
                         </a>
@@ -1113,6 +1086,10 @@ public abstract class Handler {
                         
                         
                         
+                        
+                        <a href="/tags/%E8%AE%A4%E8%AF%81%E5%92%8C%E6%8E%88%E6%9D%83" title="认证和授权">
+                            认证和授权
+                        </a>
                         
                         
                         
@@ -1283,7 +1260,7 @@ public abstract class Handler {
                     
                 </ul>
 		<p class="copyright text-muted">
-                    Copyright &copy;  2020
+                    Copyright &copy;  2021
                     <br>
                     <a href="https://themes.gohugo.io/hugo-theme-cleanwhite">CleanWhite Hugo Theme</a> by <a href="https://zhaohuabing.com">Huabing</a> |
                     <iframe

@@ -97,15 +97,15 @@
                     </li>
                     
                     <li>
-                        <a href="/categories/english">English</a>
+                        <a href="/categories/english">english</a>
                     </li>
                     
                     <li>
-                        <a href="/categories/life">Life</a>
+                        <a href="/categories/life">life</a>
                     </li>
                     
                     <li>
-                        <a href="/categories/tech">Tech</a>
+                        <a href="/categories/tech">tech</a>
                     </li>
                     
 
@@ -241,130 +241,97 @@
                 
                 
                 
-                
-
-<p>[TOC]</p>
-
+                <p>[TOC]</p>
 <p><strong>说明： 本学习主要对尚硅谷周阳大神《SpringCloud视频》记录，以下文字来源这个视频PPT</strong></p>
-
-<p><strong>说明： 版本springboot2.14</strong>   <strong><spring-cloud.version>Greenwich.SR1</spring-cloud.version></strong></p>
-
+<p><strong>说明： 版本springboot2.14</strong>   <strong>&lt;spring-cloud.version&gt;Greenwich.SR1&lt;/spring-cloud.version&gt;</strong></p>
 <h1 id="ribbon是什么">Ribbon是什么</h1>
-
-<p>Spring Cloud Ribbon是基于Netflix Ribbon实现的一套<strong><em>客户端</em></strong> 负载均衡的工具。</p>
-
+<p>Spring Cloud Ribbon是基于Netflix Ribbon实现的一套<em><strong>客户端</strong></em> 负载均衡的工具。</p>
 <p>简单的说，Ribbon是Netflix发布的开源项目，主要功能是提供客户端的软件负载均衡算法，将Netflix的中间层服务连接在一起。Ribbon客户端组件提供一系列完善的配置项如连接超时，重试等。简单的说，就是在配置文件中列出Load Balancer（简称LB）后面所有的机器，Ribbon会自动的帮助你基于某种规则（如简单轮询，随机连接等）去连接这些机器。我们也很容易使用Ribbon实现自定义的负载均衡算法。</p>
-
 <h1 id="配置ribbon服务">配置Ribbon服务</h1>
-
 <p>总结：Ribbon其实就是一个软<strong>负载均衡的客户端组件</strong></p>
-
 <p>他可以和其他所需请求的客户端结合使用，和eureka结合只是其中的一个实例。</p>
-
-<h2 id="pom-xml文件修改">pom.xml文件修改</h2>
-
+<h2 id="pomxml文件修改">pom.xml文件修改</h2>
 <p>在需要调用的微服务的工程加入以下：</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-xml" data-lang="xml"><span style="color:#f92672">&lt;dependency&gt;</span>
+			<span style="color:#f92672">&lt;groupId&gt;</span>org.springframework.cloud<span style="color:#f92672">&lt;/groupId&gt;</span>
+			<span style="color:#f92672">&lt;artifactId&gt;</span>spring-cloud-starter-netflix-ribbon<span style="color:#f92672">&lt;/artifactId&gt;</span>
+			<span style="color:#f92672">&lt;version&gt;</span>2.1.1.RELEASE<span style="color:#f92672">&lt;/version&gt;</span>
+		<span style="color:#f92672">&lt;/dependency&gt;</span>
 
-<pre><code class="language-xml">&lt;dependency&gt;
-			&lt;groupId&gt;org.springframework.cloud&lt;/groupId&gt;
-			&lt;artifactId&gt;spring-cloud-starter-netflix-ribbon&lt;/artifactId&gt;
-			&lt;version&gt;2.1.1.RELEASE&lt;/version&gt;
-		&lt;/dependency&gt;
+		<span style="color:#f92672">&lt;dependency&gt;</span>
+			<span style="color:#f92672">&lt;groupId&gt;</span>org.springframework.cloud<span style="color:#f92672">&lt;/groupId&gt;</span>
+			<span style="color:#f92672">&lt;artifactId&gt;</span>spring-cloud-starter-netflix-eureka-client<span style="color:#f92672">&lt;/artifactId&gt;</span>
+			<span style="color:#f92672">&lt;version&gt;</span>2.1.1.RELEASE<span style="color:#f92672">&lt;/version&gt;</span>
+<span style="color:#f92672">&lt;/dependency&gt;</span>
+</code></pre></div><h2 id="applicationyml">application.yml</h2>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-yaml" data-lang="yaml"><span style="color:#f92672">server</span>:
+  <span style="color:#f92672">port</span>: <span style="color:#ae81ff">9001</span>
 
-		&lt;dependency&gt;
-			&lt;groupId&gt;org.springframework.cloud&lt;/groupId&gt;
-			&lt;artifactId&gt;spring-cloud-starter-netflix-eureka-client&lt;/artifactId&gt;
-			&lt;version&gt;2.1.1.RELEASE&lt;/version&gt;
-&lt;/dependency&gt;
-</code></pre>
+<span style="color:#f92672">eureka</span>:
+  <span style="color:#f92672">client</span>:
+    <span style="color:#f92672">register-with-eureka</span>: <span style="color:#66d9ef">false</span><span style="color:#75715e">#false表示不向注册中心注册自己,这个也是和提供者的一个区别，这里只是做消费</span>
+    <span style="color:#f92672">service-url</span>:
+      <span style="color:#f92672">defaultZone</span>: <span style="color:#ae81ff">http://eureka5001.com:5001/eureka,http://eureka5002.com:5002/eureka,http://eureka5003.com:5003/eureka</span>
+</code></pre></div><h2 id="加入loadbalanced注解">加入@LoadBalanced注解</h2>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-java" data-lang="java"><span style="color:#75715e">/***
+</span><span style="color:#75715e"> * boot --&gt;spring   applicationContext.xml --- @Configuration配置   ConfigBean = applicationContext.xml
+</span><span style="color:#75715e"> */</span>
+<span style="color:#a6e22e">@Configuration</span>
+<span style="color:#66d9ef">public</span> <span style="color:#66d9ef">class</span> <span style="color:#a6e22e">RestTemplateConfig</span> <span style="color:#f92672">{</span>  
+	<span style="color:#a6e22e">@Bean</span>
+	<span style="color:#a6e22e">@LoadBalanced</span>
+	<span style="color:#66d9ef">public</span> RestTemplate <span style="color:#a6e22e">getRestTemplate</span><span style="color:#f92672">()</span> <span style="color:#f92672">{</span>
+		<span style="color:#66d9ef">return</span> <span style="color:#66d9ef">new</span> RestTemplate<span style="color:#f92672">();</span>
+	<span style="color:#f92672">}</span>
 
-<h2 id="application-yml">application.yml</h2>
-
-<pre><code class="language-yaml">server:
-  port: 9001
-
-eureka:
-  client:
-    register-with-eureka: false#false表示不向注册中心注册自己,这个也是和提供者的一个区别，这里只是做消费
-    service-url:
-      defaultZone: http://eureka5001.com:5001/eureka,http://eureka5002.com:5002/eureka,http://eureka5003.com:5003/eureka
-</code></pre>
-
-<h2 id="加入-loadbalanced注解">加入@LoadBalanced注解</h2>
-
-<pre><code class="language-java">/***
- * boot --&gt;spring   applicationContext.xml --- @Configuration配置   ConfigBean = applicationContext.xml
- */
-@Configuration
-public class RestTemplateConfig {  
-	@Bean
-	@LoadBalanced
-	public RestTemplate getRestTemplate() {
-		return new RestTemplate();
-	}
-
-	@Bean
-	public IRule myRule()
-	{
-		//return new RoundRobinRule(); //达到的目的，用我们重新选择的随机算法替代默认的轮询。
-		return new RandomRule();//随机
-	}
-}
-</code></pre>
-
-<h2 id="集群provide">集群provide</h2>
-
-<p><img src="/img/19-1.png" alt="19-1" /></p>
-
+	<span style="color:#a6e22e">@Bean</span>
+	<span style="color:#66d9ef">public</span> IRule <span style="color:#a6e22e">myRule</span><span style="color:#f92672">()</span>
+	<span style="color:#f92672">{</span>
+		<span style="color:#75715e">//return new RoundRobinRule(); //达到的目的，用我们重新选择的随机算法替代默认的轮询。
+</span><span style="color:#75715e"></span>		<span style="color:#66d9ef">return</span> <span style="color:#66d9ef">new</span> RandomRule<span style="color:#f92672">();</span><span style="color:#75715e">//随机
+</span><span style="color:#75715e"></span>	<span style="color:#f92672">}</span>
+<span style="color:#f92672">}</span>
+</code></pre></div><h2 id="集群provide">集群provide</h2>
+<p><img src="/img/19-1.png" alt="19-1"></p>
 <h2 id="applicationname调用provide">applicationName调用provide</h2>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-java" data-lang="java"><span style="color:#a6e22e">@RestController</span>
+<span style="color:#66d9ef">public</span> <span style="color:#66d9ef">class</span> <span style="color:#a6e22e">ConsumerController</span> <span style="color:#f92672">{</span>
 
-<pre><code class="language-java">@RestController
-public class ConsumerController {
+    <span style="color:#a6e22e">@Autowired</span>
+    <span style="color:#66d9ef">private</span> RestTemplate restTemplate<span style="color:#f92672">;</span>
 
-    @Autowired
-    private RestTemplate restTemplate;
+    <span style="color:#66d9ef">private</span> <span style="color:#66d9ef">static</span> <span style="color:#66d9ef">final</span> String  URL <span style="color:#f92672">=</span> <span style="color:#e6db74">&#34;http://PROVIDE-DATA/&#34;</span><span style="color:#f92672">;</span>
 
-    private static final String  URL = &quot;http://PROVIDE-DATA/&quot;;
+    <span style="color:#a6e22e">@RequestMapping</span><span style="color:#f92672">(</span><span style="color:#e6db74">&#34;getData&#34;</span><span style="color:#f92672">)</span>
+    <span style="color:#66d9ef">private</span> MaiziUser <span style="color:#a6e22e">getData</span><span style="color:#f92672">()</span>
+    <span style="color:#f92672">{</span>
+        <span style="color:#66d9ef">return</span> restTemplate<span style="color:#f92672">.</span><span style="color:#a6e22e">getForObject</span><span style="color:#f92672">(</span>URL<span style="color:#f92672">+</span> <span style="color:#e6db74">&#34;provide&#34;</span><span style="color:#f92672">,</span>MaiziUser<span style="color:#f92672">.</span><span style="color:#a6e22e">class</span><span style="color:#f92672">);</span>
+    <span style="color:#f92672">}</span>
+<span style="color:#f92672">}</span>
+</code></pre></div><h1 id="自定义负载均衡算法">自定义负载均衡算法</h1>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-java" data-lang="java"><span style="color:#a6e22e">@SpringBootApplication</span>
+<span style="color:#75715e">//在启动该微服务的时候就能去加载我们的自定义Ribbon配置类，从而使配置生效
+</span><span style="color:#75715e"></span><span style="color:#a6e22e">@RibbonClient</span><span style="color:#f92672">(</span>name<span style="color:#f92672">=</span><span style="color:#e6db74">&#34;PROVIDE-DATA&#34;</span><span style="color:#f92672">,</span>configuration<span style="color:#f92672">=</span> MySelfRule<span style="color:#f92672">.</span><span style="color:#a6e22e">class</span><span style="color:#f92672">)</span>
+<span style="color:#66d9ef">public</span> <span style="color:#66d9ef">class</span> <span style="color:#a6e22e">ConsumerApplication</span> <span style="color:#f92672">{</span>
 
-    @RequestMapping(&quot;getData&quot;)
-    private MaiziUser getData()
-    {
-        return restTemplate.getForObject(URL+ &quot;provide&quot;,MaiziUser.class);
-    }
-}
-</code></pre>
-
-<h1 id="自定义负载均衡算法">自定义负载均衡算法</h1>
-
-<pre><code class="language-java">@SpringBootApplication
-//在启动该微服务的时候就能去加载我们的自定义Ribbon配置类，从而使配置生效
-@RibbonClient(name=&quot;PROVIDE-DATA&quot;,configuration= MySelfRule.class)
-public class ConsumerApplication {
-
-	public static void main(String[] args) {
-		SpringApplication.run(ConsumerApplication.class, args);
-	}
-}
-</code></pre>
-
-<p>需要注意 MySelfRule 这个类的路径不能和@ComponentScan这个注解在同一路径。(注：没有测试这个问题)</p>
-
-<pre><code class="language-java">@Configuration
-public class MySelfRule {
-    @Bean
-    public IRule myRule()
-    {
-        //return new RandomRule();// Ribbon默认是轮询，我自定义为随机
-        return new RoundRobinRule();//  轮询
-        //return new RandomRule_ZY();// 我自定义为每台机器5次
-    }
-}
-// 如何自定义可以参考RoundRobinRule这个类
-</code></pre>
-
-<h1 id="已经提供的负载均衡算法">已经提供的负载均衡算法</h1>
-
-<p><img src="/img/19-2.png" alt="19-2" /></p>
+	<span style="color:#66d9ef">public</span> <span style="color:#66d9ef">static</span> <span style="color:#66d9ef">void</span> <span style="color:#a6e22e">main</span><span style="color:#f92672">(</span>String<span style="color:#f92672">[]</span> args<span style="color:#f92672">)</span> <span style="color:#f92672">{</span>
+		SpringApplication<span style="color:#f92672">.</span><span style="color:#a6e22e">run</span><span style="color:#f92672">(</span>ConsumerApplication<span style="color:#f92672">.</span><span style="color:#a6e22e">class</span><span style="color:#f92672">,</span> args<span style="color:#f92672">);</span>
+	<span style="color:#f92672">}</span>
+<span style="color:#f92672">}</span>
+</code></pre></div><p>需要注意 MySelfRule 这个类的路径不能和@ComponentScan这个注解在同一路径。(注：没有测试这个问题)</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-java" data-lang="java"><span style="color:#a6e22e">@Configuration</span>
+<span style="color:#66d9ef">public</span> <span style="color:#66d9ef">class</span> <span style="color:#a6e22e">MySelfRule</span> <span style="color:#f92672">{</span>
+    <span style="color:#a6e22e">@Bean</span>
+    <span style="color:#66d9ef">public</span> IRule <span style="color:#a6e22e">myRule</span><span style="color:#f92672">()</span>
+    <span style="color:#f92672">{</span>
+        <span style="color:#75715e">//return new RandomRule();// Ribbon默认是轮询，我自定义为随机
+</span><span style="color:#75715e"></span>        <span style="color:#66d9ef">return</span> <span style="color:#66d9ef">new</span> RoundRobinRule<span style="color:#f92672">();</span><span style="color:#75715e">//  轮询
+</span><span style="color:#75715e"></span>        <span style="color:#75715e">//return new RandomRule_ZY();// 我自定义为每台机器5次
+</span><span style="color:#75715e"></span>    <span style="color:#f92672">}</span>
+<span style="color:#f92672">}</span>
+<span style="color:#75715e">// 如何自定义可以参考RoundRobinRule这个类
+</span></code></pre></div><h1 id="已经提供的负载均衡算法">已经提供的负载均衡算法</h1>
+<p><img src="/img/19-2.png" alt="19-2"></p>
 
 
                 
@@ -472,19 +439,13 @@ public class MySelfRule {
                     </h4>
                     <ul class="catalog-body"></ul>
                     <nav id="TableOfContents">
-<ul>
-<li><a href="#ribbon是什么">Ribbon是什么</a></li>
-<li><a href="#配置ribbon服务">配置Ribbon服务</a>
-<ul>
-<li><a href="#pom-xml文件修改">pom.xml文件修改</a></li>
-<li><a href="#application-yml">application.yml</a></li>
-<li><a href="#加入-loadbalanced注解">加入@LoadBalanced注解</a></li>
-<li><a href="#集群provide">集群provide</a></li>
-<li><a href="#applicationname调用provide">applicationName调用provide</a></li>
-</ul></li>
-<li><a href="#自定义负载均衡算法">自定义负载均衡算法</a></li>
-<li><a href="#已经提供的负载均衡算法">已经提供的负载均衡算法</a></li>
-</ul>
+  <ul>
+    <li><a href="#pomxml文件修改">pom.xml文件修改</a></li>
+    <li><a href="#applicationyml">application.yml</a></li>
+    <li><a href="#加入loadbalanced注解">加入@LoadBalanced注解</a></li>
+    <li><a href="#集群provide">集群provide</a></li>
+    <li><a href="#applicationname调用provide">applicationName调用provide</a></li>
+  </ul>
 </nav>
                     <br>
                     <br>
@@ -509,9 +470,6 @@ public class MySelfRule {
                         
                         
                         
-                        <a href="/tags/" title="">
-                            
-                        </a>
                         
                         
                         
@@ -521,101 +479,6 @@ public class MySelfRule {
                         
                         
                         
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        <a href="/tags/qt" title="QT">
-                            QT
-                        </a>
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        <a href="/tags/zookeeper" title="Zookeeper">
-                            Zookeeper
-                        </a>
                         
                         
                         
@@ -655,8 +518,10 @@ public class MySelfRule {
                         
                         
                         
-                        <a href="/tags/elasticsearch" title="elasticSearch">
-                            elasticSearch
+                        
+                        
+                        <a href="/tags/elasticsearch" title="elasticsearch">
+                            elasticsearch
                         </a>
                         
                         
@@ -667,9 +532,27 @@ public class MySelfRule {
                         
                         
                         
-                        <a href="/tags/golang" title="golang">
-                            golang
-                        </a>
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
                         
                         
                         
@@ -707,9 +590,21 @@ public class MySelfRule {
                         
                         
                         
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
                         <a href="/tags/jvm" title="jvm">
                             jvm
                         </a>
+                        
+                        
+                        
+                        
                         
                         
                         
@@ -733,9 +628,19 @@ public class MySelfRule {
                         
                         
                         
+                        
+                        
+                        
+                        
+                        
+                        
                         <a href="/tags/mongodb" title="mongodb">
                             mongodb
                         </a>
+                        
+                        
+                        
+                        
                         
                         
                         
@@ -746,10 +651,6 @@ public class MySelfRule {
                         </a>
                         
                         
-                        
-                        <a href="/tags/mycat" title="mycat">
-                            mycat
-                        </a>
                         
                         
                         
@@ -763,9 +664,17 @@ public class MySelfRule {
                         
                         
                         
-                        <a href="/tags/nginx" title="nginx">
-                            nginx
-                        </a>
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
                         
                         
                         
@@ -789,8 +698,22 @@ public class MySelfRule {
                         
                         
                         
+                        
+                        
                         <a href="/tags/rocketmq" title="rocketmq">
                             rocketmq
+                        </a>
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        <a href="/tags/security%E6%A1%86%E6%9E%B6%E5%AD%A6%E4%B9%A0" title="security框架学习">
+                            security框架学习
                         </a>
                         
                         
@@ -817,17 +740,11 @@ public class MySelfRule {
                         
                         
                         
-                        <a href="/tags/springcloud" title="springCloud">
-                            springCloud
-                        </a>
-                        
-                        
-                        
-                        
-                        
                         <a href="/tags/springboot" title="springboot">
                             springboot
                         </a>
+                        
+                        
                         
                         
                         
@@ -841,6 +758,9 @@ public class MySelfRule {
                         
                         
                         
+                        <a href="/tags/springcloud" title="springcloud">
+                            springcloud
+                        </a>
                         
                         
                         
@@ -866,6 +786,33 @@ public class MySelfRule {
                         
                         
                         
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        <a href="/tags/zookeeper" title="zookeeper">
+                            zookeeper
+                        </a>
                         
                         
                         
@@ -925,6 +872,8 @@ public class MySelfRule {
                         
                         
                         
+                        
+                        
                         <a href="/tags/%E5%88%86%E5%B8%83%E5%BC%8F%E7%B3%BB%E5%88%97" title="分布式系列">
                             分布式系列
                         </a>
@@ -944,6 +893,10 @@ public class MySelfRule {
                         
                         
                         
+                        
+                        <a href="/tags/%E5%8D%8F%E8%AE%AE%E6%A0%88" title="协议栈">
+                            协议栈
+                        </a>
                         
                         
                         
@@ -1143,6 +1096,12 @@ public class MySelfRule {
                         
                         
                         
+                        
+                        
+                        
+                        
+                        
+                        
                         <a href="/tags/%E7%BD%91%E7%BB%9C%E7%BC%96%E7%A8%8B" title="网络编程">
                             网络编程
                         </a>
@@ -1166,6 +1125,10 @@ public class MySelfRule {
                         
                         
                         
+                        
+                        <a href="/tags/%E8%AE%A4%E8%AF%81%E5%92%8C%E6%8E%88%E6%9D%83" title="认证和授权">
+                            认证和授权
+                        </a>
                         
                         
                         
@@ -1336,7 +1299,7 @@ public class MySelfRule {
                     
                 </ul>
 		<p class="copyright text-muted">
-                    Copyright &copy;  2020
+                    Copyright &copy;  2021
                     <br>
                     <a href="https://themes.gohugo.io/hugo-theme-cleanwhite">CleanWhite Hugo Theme</a> by <a href="https://zhaohuabing.com">Huabing</a> |
                     <iframe

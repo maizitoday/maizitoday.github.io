@@ -97,15 +97,15 @@
                     </li>
                     
                     <li>
-                        <a href="/categories/english">English</a>
+                        <a href="/categories/english">english</a>
                     </li>
                     
                     <li>
-                        <a href="/categories/life">Life</a>
+                        <a href="/categories/life">life</a>
                     </li>
                     
                     <li>
-                        <a href="/categories/tech">Tech</a>
+                        <a href="/categories/tech">tech</a>
                     </li>
                     
 
@@ -233,128 +233,133 @@
                 
                 
                 
-                
-
-<p>[TOC]</p>
-
+                <p>[TOC]</p>
 <p><strong>说明文章资料来源：尚硅谷韩顺平Netty视频教程（2019发布） <a href="https://www.bilibili.com/video/av76227904?p=36">https://www.bilibili.com/video/av76227904?p=36</a></strong></p>
-
 <h1 id="基本说明">基本说明</h1>
-
-<p>1) netty 的组件设计：Netty 的主要组件有 Channel、EventLoop、ChannelFuture、ChannelHandler、ChannelPipe 等</p>
-
-<p>2) ChannelHandler 充当了处理入站和出站数据的应用程序逻辑的容器。例如，实现 ChannelInboundHandler 接口（或 ChannelInboundHandlerAdapter），你就可以接收入站事件和数据，这些数据会被业务逻辑处理。当要给客户端 发 送 响 应 时 ， 也 可 以 从 ChannelInboundHandler 冲 刷 数 据 。 业 务 逻 辑 通 常 写 在 一 个 或 者 多 个 ChannelInboundHandler 中。ChannelOutboundHandler 原理一样，只不过它是用来处理出站数据的</p>
-
-<p>3) <strong>ChannelPipeline 提供了 ChannelHandler 链的容器</strong>。以客户端应用程序为例，如果事件的运动方向是从客户端到 服务端的， <strong>那么我们称这些事件为出站的</strong>， 即客户端发送给服务端的数据会通过 pipeline 中的一系列 ChannelOutboundHandler，并被这些 Handler 处理，<strong>反之则称为入站的</strong></p>
-
-<p><img src="/img/Xnip2020-04-03_15-06-50.png" alt="Xnip2020-04-03_15-06-50" /></p>
-
-<h1 id="编码解码器">编码解码器</h1>
-
-<p>1) 当 Netty 发送或者接受一个消息的时候，就将会发生一次数据转换。入站消息会被解码：从字节转换为另一种 格式（比如 java 对象）；如果是出站消息，它会被编码成字节。</p>
-
-<p>2) Netty 提供一系列实用的编解码器，<strong>他们都实现了 ChannelInboundHadnler 或者 ChannelOutboundHandler 接口。 在这些类中，channelRead 方法已经被重写了</strong>。以入站为例，对于每个从入站 Channel 读取的消息，这个方法会 被调用。随后，它将调用由解码器所提供的 decode()方法进行解码，并将已经解码的字节转发给 ChannelPipeline 中的下一个 ChannelInboundHandler。</p>
-
-<h2 id="解码器-bytetomessagedecoder">解码器-ByteToMessageDecoder</h2>
-
-<p>1) 关系继承图</p>
-
-<p><img src="/img/Xnip2020-04-03_15-26-44.png" alt="Xnip2020-04-03_15-26-44" /></p>
-
-<p>可以看到他也是一个入站的ChannelInboundHandler，所以可以放到ChannelPipeline容器中。</p>
-
-<pre><code class="language-java">// 获取到 pipeline
-ChannelPipeline pipeline = ch.pipeline();
-// 向 pipeline 加入解码器
-pipeline.addLast(&quot;decoder&quot;, new StringDecoder());
-// 向 pipeline 加入编码器
-pipeline.addLast(&quot;encoder&quot;, new StringEncoder());
-// 加入自己的业务处理 handler
-pipeline.addLast(new GroupChatServerHandler());
-</code></pre>
-
-<p>2) 由于不可能知道远程节点是否会一次性发送一个完整的信息，tcp 有可能出现粘包拆包的问题，这个类会对入 站数据进行缓冲，直到它准备好被处理.</p>
-
-<p>3) 一个关于 ByteToMessageDecoder 实例分析</p>
-
-<p><img src="/img/Xnip2020-04-03_15-29-48.png" alt="Xnip2020-04-03_15-29-48" /></p>
-
-<h2 id="netty-的-handler-链的调用机制">Netty 的 handler 链的调用机制</h2>
-
-<p>实例要求:</p>
-
-<p>1) 使用自定义的编码器和解码器来说明 Netty 的 handler 调用机制</p>
-
-<p>​     客户端发送 long -&gt; 服务器</p>
-
-<p>​     服务端发送 long -&gt; 客户端</p>
-
-<p>2) 案例演示</p>
-
-<p><img src="/img/Xnip2020-04-03_15-35-11.png" alt="Xnip2020-04-03_15-35-11" /></p>
-
-<p><strong>说明</strong></p>
-
-<p>可以看到ChannelPipeline这个容器里面都是说有的入站和出站的所有的Handler，也就是所有的业务逻辑进行<strong>队列形式</strong>的排序。</p>
-
-<p>3) 结论</p>
-
-<p>不论解码器 handler 还是 编码器 handler 即接收的消息类型必须与待处理的消息类型一致，否则该 handler 不 会被执行</p>
-
-<p>在解码器 进行数据解码时，需要判断 缓存区(ByteBuf)的数据是否足够 ，否则接收到的结果会期望结果可能 不一致</p>
-
-<h2 id="解码器-replayingdecoder">解码器-ReplayingDecoder</h2>
-
-<p>1) public abstract class ReplayingDecoder<S> extends ByteToMessageDecoder</p>
-
-<p>2) ReplayingDecoder 扩展了 ByteToMessageDecoder 类，使用这个类，我们不必调用 readableBytes()方法。参数 S 指定了用户状态管理的类型，其中 Void 代表不需要状态管理</p>
-
-<p>3) 应用实例：使用 ReplayingDecoder 编写解码器，对前面的案例进行简化 [案例演示]</p>
-
-<pre><code class="language-java">import java.util.List;
-
-import io.netty.buffer.ByteBuf;
-import io.netty.channel.ChannelHandlerContext;
-import io.netty.handler.codec.ReplayingDecoder;
-
-/*
- * @Description: 请输入....
- * @Author: 麦子
- * @Date: 2020-03-20 14:18:09
- * @LastEditTime: 2020-04-03 15:54:01
- * @LastEditors: 麦子
- */
-public class App extends ReplayingDecoder&lt;Void&gt; {
-
-    @Override
-    protected void decode(ChannelHandlerContext ctx, ByteBuf in, List&lt;Object&gt; out) throws Exception {
-        System.out.println(&quot;MyByteToLongDecoder2 被调用&quot;); 
-        //在 ReplayingDecoder 不需要判断数据是否足够读取，内部会进行处理判断
-        out.add(in.readLong());
-    }
- 
-}
-</code></pre>
-
-<p>4) ReplayingDecoder 使用方便，但它也有一些局限性：</p>
-
 <ol>
-<li><p>并 不 是 所 有 的 ByteBuf 操 作 都 被 支 持 ， 如 果 调 用 了 一 个 不 被 支 持 的 方 法 ， 将 会 抛 出 一 个 UnsupportedOperationException。</p></li>
-
-<li><p>ReplayingDecoder 在某些情况下可能稍慢于 ByteToMessageDecoder， 例如网络缓慢并且消息格式复杂时， 消息会被拆成了多个碎片，速度变慢</p></li>
+<li>
+<p>netty 的组件设计：Netty 的主要组件有 Channel、EventLoop、ChannelFuture、ChannelHandler、ChannelPipe 等</p>
+</li>
+<li>
+<p>ChannelHandler 充当了处理入站和出站数据的应用程序逻辑的容器。例如，实现 ChannelInboundHandler 接口（或 ChannelInboundHandlerAdapter），你就可以接收入站事件和数据，这些数据会被业务逻辑处理。当要给客户端 发 送 响 应 时 ， 也 可 以 从 ChannelInboundHandler 冲 刷 数 据 。 业 务 逻 辑 通 常 写 在 一 个 或 者 多 个 ChannelInboundHandler 中。ChannelOutboundHandler 原理一样，只不过它是用来处理出站数据的</p>
+</li>
+<li>
+<p><strong>ChannelPipeline 提供了 ChannelHandler 链的容器</strong>。以客户端应用程序为例，如果事件的运动方向是从客户端到 服务端的， <strong>那么我们称这些事件为出站的</strong>， 即客户端发送给服务端的数据会通过 pipeline 中的一系列 ChannelOutboundHandler，并被这些 Handler 处理，<strong>反之则称为入站的</strong></p>
+</li>
 </ol>
+<p><img src="/img/Xnip2020-04-03_15-06-50.png" alt="Xnip2020-04-03_15-06-50"></p>
+<h1 id="编码解码器">编码解码器</h1>
+<ol>
+<li>
+<p>当 Netty 发送或者接受一个消息的时候，就将会发生一次数据转换。入站消息会被解码：从字节转换为另一种 格式（比如 java 对象）；如果是出站消息，它会被编码成字节。</p>
+</li>
+<li>
+<p>Netty 提供一系列实用的编解码器，<strong>他们都实现了 ChannelInboundHadnler 或者 ChannelOutboundHandler 接口。 在这些类中，channelRead 方法已经被重写了</strong>。以入站为例，对于每个从入站 Channel 读取的消息，这个方法会 被调用。随后，它将调用由解码器所提供的 decode()方法进行解码，并将已经解码的字节转发给 ChannelPipeline 中的下一个 ChannelInboundHandler。</p>
+</li>
+</ol>
+<h2 id="解码器-bytetomessagedecoder">解码器-ByteToMessageDecoder</h2>
+<ol>
+<li>关系继承图</li>
+</ol>
+<p><img src="/img/Xnip2020-04-03_15-26-44.png" alt="Xnip2020-04-03_15-26-44"></p>
+<p>可以看到他也是一个入站的ChannelInboundHandler，所以可以放到ChannelPipeline容器中。</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-java" data-lang="java"><span style="color:#75715e">// 获取到 pipeline
+</span><span style="color:#75715e"></span>ChannelPipeline pipeline <span style="color:#f92672">=</span> ch<span style="color:#f92672">.</span><span style="color:#a6e22e">pipeline</span><span style="color:#f92672">();</span>
+<span style="color:#75715e">// 向 pipeline 加入解码器
+</span><span style="color:#75715e"></span>pipeline<span style="color:#f92672">.</span><span style="color:#a6e22e">addLast</span><span style="color:#f92672">(</span><span style="color:#e6db74">&#34;decoder&#34;</span><span style="color:#f92672">,</span> <span style="color:#66d9ef">new</span> StringDecoder<span style="color:#f92672">());</span>
+<span style="color:#75715e">// 向 pipeline 加入编码器
+</span><span style="color:#75715e"></span>pipeline<span style="color:#f92672">.</span><span style="color:#a6e22e">addLast</span><span style="color:#f92672">(</span><span style="color:#e6db74">&#34;encoder&#34;</span><span style="color:#f92672">,</span> <span style="color:#66d9ef">new</span> StringEncoder<span style="color:#f92672">());</span>
+<span style="color:#75715e">// 加入自己的业务处理 handler
+</span><span style="color:#75715e"></span>pipeline<span style="color:#f92672">.</span><span style="color:#a6e22e">addLast</span><span style="color:#f92672">(</span><span style="color:#66d9ef">new</span> GroupChatServerHandler<span style="color:#f92672">());</span>
+</code></pre></div><ol start="2">
+<li>
+<p>由于不可能知道远程节点是否会一次性发送一个完整的信息，tcp 有可能出现粘包拆包的问题，这个类会对入 站数据进行缓冲，直到它准备好被处理.</p>
+</li>
+<li>
+<p>一个关于 ByteToMessageDecoder 实例分析</p>
+</li>
+</ol>
+<p><img src="/img/Xnip2020-04-03_15-29-48.png" alt="Xnip2020-04-03_15-29-48"></p>
+<h2 id="netty-的-handler-链的调用机制">Netty 的 handler 链的调用机制</h2>
+<p>实例要求:</p>
+<ol>
+<li>使用自定义的编码器和解码器来说明 Netty 的 handler 调用机制</li>
+</ol>
+<p>​     客户端发送 long -&gt; 服务器</p>
+<p>​     服务端发送 long -&gt; 客户端</p>
+<ol start="2">
+<li>案例演示</li>
+</ol>
+<p><img src="/img/Xnip2020-04-03_15-35-11.png" alt="Xnip2020-04-03_15-35-11"></p>
+<p><strong>说明</strong></p>
+<p>可以看到ChannelPipeline这个容器里面都是说有的入站和出站的所有的Handler，也就是所有的业务逻辑进行<strong>队列形式</strong>的排序。</p>
+<ol start="3">
+<li>结论</li>
+</ol>
+<p>不论解码器 handler 还是 编码器 handler 即接收的消息类型必须与待处理的消息类型一致，否则该 handler 不 会被执行</p>
+<p>在解码器 进行数据解码时，需要判断 缓存区(ByteBuf)的数据是否足够 ，否则接收到的结果会期望结果可能 不一致</p>
+<h2 id="解码器-replayingdecoder">解码器-ReplayingDecoder</h2>
+<ol>
+<li>
+<p>public abstract class ReplayingDecoder<!-- raw HTML omitted --> extends ByteToMessageDecoder</p>
+</li>
+<li>
+<p>ReplayingDecoder 扩展了 ByteToMessageDecoder 类，使用这个类，我们不必调用 readableBytes()方法。参数 S 指定了用户状态管理的类型，其中 Void 代表不需要状态管理</p>
+</li>
+<li>
+<p>应用实例：使用 ReplayingDecoder 编写解码器，对前面的案例进行简化 [案例演示]</p>
+</li>
+</ol>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-java" data-lang="java"><span style="color:#f92672">import</span> java.util.List<span style="color:#f92672">;</span>
 
+<span style="color:#f92672">import</span> io.netty.buffer.ByteBuf<span style="color:#f92672">;</span>
+<span style="color:#f92672">import</span> io.netty.channel.ChannelHandlerContext<span style="color:#f92672">;</span>
+<span style="color:#f92672">import</span> io.netty.handler.codec.ReplayingDecoder<span style="color:#f92672">;</span>
+
+<span style="color:#75715e">/*
+</span><span style="color:#75715e"> * @Description: 请输入....
+</span><span style="color:#75715e"> * @Author: 麦子
+</span><span style="color:#75715e"> * @Date: 2020-03-20 14:18:09
+</span><span style="color:#75715e"> * @LastEditTime: 2020-04-03 15:54:01
+</span><span style="color:#75715e"> * @LastEditors: 麦子
+</span><span style="color:#75715e"> */</span>
+<span style="color:#66d9ef">public</span> <span style="color:#66d9ef">class</span> <span style="color:#a6e22e">App</span> <span style="color:#66d9ef">extends</span> ReplayingDecoder<span style="color:#f92672">&lt;</span>Void<span style="color:#f92672">&gt;</span> <span style="color:#f92672">{</span>
+
+    <span style="color:#a6e22e">@Override</span>
+    <span style="color:#66d9ef">protected</span> <span style="color:#66d9ef">void</span> <span style="color:#a6e22e">decode</span><span style="color:#f92672">(</span>ChannelHandlerContext ctx<span style="color:#f92672">,</span> ByteBuf in<span style="color:#f92672">,</span> List<span style="color:#f92672">&lt;</span>Object<span style="color:#f92672">&gt;</span> out<span style="color:#f92672">)</span> <span style="color:#66d9ef">throws</span> Exception <span style="color:#f92672">{</span>
+        System<span style="color:#f92672">.</span><span style="color:#a6e22e">out</span><span style="color:#f92672">.</span><span style="color:#a6e22e">println</span><span style="color:#f92672">(</span><span style="color:#e6db74">&#34;MyByteToLongDecoder2 被调用&#34;</span><span style="color:#f92672">);</span> 
+        <span style="color:#75715e">//在 ReplayingDecoder 不需要判断数据是否足够读取，内部会进行处理判断
+</span><span style="color:#75715e"></span>        out<span style="color:#f92672">.</span><span style="color:#a6e22e">add</span><span style="color:#f92672">(</span>in<span style="color:#f92672">.</span><span style="color:#a6e22e">readLong</span><span style="color:#f92672">());</span>
+    <span style="color:#f92672">}</span>
+ 
+<span style="color:#f92672">}</span>
+</code></pre></div><ol start="4">
+<li>ReplayingDecoder 使用方便，但它也有一些局限性：</li>
+</ol>
+<ol>
+<li>
+<p>并 不 是 所 有 的 ByteBuf 操 作 都 被 支 持 ， 如 果 调 用 了 一 个 不 被 支 持 的 方 法 ， 将 会 抛 出 一 个 UnsupportedOperationException。</p>
+</li>
+<li>
+<p>ReplayingDecoder 在某些情况下可能稍慢于 ByteToMessageDecoder， 例如网络缓慢并且消息格式复杂时， 消息会被拆成了多个碎片，速度变慢</p>
+</li>
+</ol>
 <h2 id="其它编解码器">其它编解码器</h2>
-
-<p>1) LineBasedFrameDecoder：这个类在 Netty 内部也有使用，它使用行尾控制字符（\n 或者\r\n）作为分隔符来解 析数据。</p>
-
-<p>2) DelimiterBasedFrameDecoder：使用自定义的特殊字符作为消息的分隔符。</p>
-
-<p>3) HttpObjectDecoder：一个 HTTP 数据的解码器</p>
-
-<p>4) LengthFieldBasedFrameDecoder：通过指定长度来标识整包消息， 这样就可以自动的处理黏包和半包消息。</p>
-
-<p><img src="/img/Xnip2020-04-03_15-56-20.png" alt="Xnip2020-04-03_15-56-20" /></p>
+<ol>
+<li>
+<p>LineBasedFrameDecoder：这个类在 Netty 内部也有使用，它使用行尾控制字符（\n 或者\r\n）作为分隔符来解 析数据。</p>
+</li>
+<li>
+<p>DelimiterBasedFrameDecoder：使用自定义的特殊字符作为消息的分隔符。</p>
+</li>
+<li>
+<p>HttpObjectDecoder：一个 HTTP 数据的解码器</p>
+</li>
+<li>
+<p>LengthFieldBasedFrameDecoder：通过指定长度来标识整包消息， 这样就可以自动的处理黏包和半包消息。</p>
+</li>
+</ol>
+<p><img src="/img/Xnip2020-04-03_15-56-20.png" alt="Xnip2020-04-03_15-56-20"></p>
 
 
                 
@@ -462,16 +467,12 @@ public class App extends ReplayingDecoder&lt;Void&gt; {
                     </h4>
                     <ul class="catalog-body"></ul>
                     <nav id="TableOfContents">
-<ul>
-<li><a href="#基本说明">基本说明</a></li>
-<li><a href="#编码解码器">编码解码器</a>
-<ul>
-<li><a href="#解码器-bytetomessagedecoder">解码器-ByteToMessageDecoder</a></li>
-<li><a href="#netty-的-handler-链的调用机制">Netty 的 handler 链的调用机制</a></li>
-<li><a href="#解码器-replayingdecoder">解码器-ReplayingDecoder</a></li>
-<li><a href="#其它编解码器">其它编解码器</a></li>
-</ul></li>
-</ul>
+  <ul>
+    <li><a href="#解码器-bytetomessagedecoder">解码器-ByteToMessageDecoder</a></li>
+    <li><a href="#netty-的-handler-链的调用机制">Netty 的 handler 链的调用机制</a></li>
+    <li><a href="#解码器-replayingdecoder">解码器-ReplayingDecoder</a></li>
+    <li><a href="#其它编解码器">其它编解码器</a></li>
+  </ul>
 </nav>
                     <br>
                     <br>
@@ -496,9 +497,6 @@ public class App extends ReplayingDecoder&lt;Void&gt; {
                         
                         
                         
-                        <a href="/tags/" title="">
-                            
-                        </a>
                         
                         
                         
@@ -508,101 +506,6 @@ public class App extends ReplayingDecoder&lt;Void&gt; {
                         
                         
                         
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        <a href="/tags/qt" title="QT">
-                            QT
-                        </a>
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        <a href="/tags/zookeeper" title="Zookeeper">
-                            Zookeeper
-                        </a>
                         
                         
                         
@@ -642,8 +545,10 @@ public class App extends ReplayingDecoder&lt;Void&gt; {
                         
                         
                         
-                        <a href="/tags/elasticsearch" title="elasticSearch">
-                            elasticSearch
+                        
+                        
+                        <a href="/tags/elasticsearch" title="elasticsearch">
+                            elasticsearch
                         </a>
                         
                         
@@ -654,9 +559,27 @@ public class App extends ReplayingDecoder&lt;Void&gt; {
                         
                         
                         
-                        <a href="/tags/golang" title="golang">
-                            golang
-                        </a>
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
                         
                         
                         
@@ -694,9 +617,21 @@ public class App extends ReplayingDecoder&lt;Void&gt; {
                         
                         
                         
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
                         <a href="/tags/jvm" title="jvm">
                             jvm
                         </a>
+                        
+                        
+                        
+                        
                         
                         
                         
@@ -720,9 +655,19 @@ public class App extends ReplayingDecoder&lt;Void&gt; {
                         
                         
                         
+                        
+                        
+                        
+                        
+                        
+                        
                         <a href="/tags/mongodb" title="mongodb">
                             mongodb
                         </a>
+                        
+                        
+                        
+                        
                         
                         
                         
@@ -733,10 +678,6 @@ public class App extends ReplayingDecoder&lt;Void&gt; {
                         </a>
                         
                         
-                        
-                        <a href="/tags/mycat" title="mycat">
-                            mycat
-                        </a>
                         
                         
                         
@@ -750,9 +691,17 @@ public class App extends ReplayingDecoder&lt;Void&gt; {
                         
                         
                         
-                        <a href="/tags/nginx" title="nginx">
-                            nginx
-                        </a>
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
                         
                         
                         
@@ -776,8 +725,22 @@ public class App extends ReplayingDecoder&lt;Void&gt; {
                         
                         
                         
+                        
+                        
                         <a href="/tags/rocketmq" title="rocketmq">
                             rocketmq
+                        </a>
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        <a href="/tags/security%E6%A1%86%E6%9E%B6%E5%AD%A6%E4%B9%A0" title="security框架学习">
+                            security框架学习
                         </a>
                         
                         
@@ -804,17 +767,11 @@ public class App extends ReplayingDecoder&lt;Void&gt; {
                         
                         
                         
-                        <a href="/tags/springcloud" title="springCloud">
-                            springCloud
-                        </a>
-                        
-                        
-                        
-                        
-                        
                         <a href="/tags/springboot" title="springboot">
                             springboot
                         </a>
+                        
+                        
                         
                         
                         
@@ -828,6 +785,9 @@ public class App extends ReplayingDecoder&lt;Void&gt; {
                         
                         
                         
+                        <a href="/tags/springcloud" title="springcloud">
+                            springcloud
+                        </a>
                         
                         
                         
@@ -853,6 +813,33 @@ public class App extends ReplayingDecoder&lt;Void&gt; {
                         
                         
                         
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        <a href="/tags/zookeeper" title="zookeeper">
+                            zookeeper
+                        </a>
                         
                         
                         
@@ -912,6 +899,8 @@ public class App extends ReplayingDecoder&lt;Void&gt; {
                         
                         
                         
+                        
+                        
                         <a href="/tags/%E5%88%86%E5%B8%83%E5%BC%8F%E7%B3%BB%E5%88%97" title="分布式系列">
                             分布式系列
                         </a>
@@ -931,6 +920,10 @@ public class App extends ReplayingDecoder&lt;Void&gt; {
                         
                         
                         
+                        
+                        <a href="/tags/%E5%8D%8F%E8%AE%AE%E6%A0%88" title="协议栈">
+                            协议栈
+                        </a>
                         
                         
                         
@@ -1130,6 +1123,12 @@ public class App extends ReplayingDecoder&lt;Void&gt; {
                         
                         
                         
+                        
+                        
+                        
+                        
+                        
+                        
                         <a href="/tags/%E7%BD%91%E7%BB%9C%E7%BC%96%E7%A8%8B" title="网络编程">
                             网络编程
                         </a>
@@ -1153,6 +1152,10 @@ public class App extends ReplayingDecoder&lt;Void&gt; {
                         
                         
                         
+                        
+                        <a href="/tags/%E8%AE%A4%E8%AF%81%E5%92%8C%E6%8E%88%E6%9D%83" title="认证和授权">
+                            认证和授权
+                        </a>
                         
                         
                         
@@ -1323,7 +1326,7 @@ public class App extends ReplayingDecoder&lt;Void&gt; {
                     
                 </ul>
 		<p class="copyright text-muted">
-                    Copyright &copy;  2020
+                    Copyright &copy;  2021
                     <br>
                     <a href="https://themes.gohugo.io/hugo-theme-cleanwhite">CleanWhite Hugo Theme</a> by <a href="https://zhaohuabing.com">Huabing</a> |
                     <iframe

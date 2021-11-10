@@ -97,15 +97,15 @@
                     </li>
                     
                     <li>
-                        <a href="/categories/english">English</a>
+                        <a href="/categories/english">english</a>
                     </li>
                     
                     <li>
-                        <a href="/categories/life">Life</a>
+                        <a href="/categories/life">life</a>
                     </li>
                     
                     <li>
-                        <a href="/categories/tech">Tech</a>
+                        <a href="/categories/tech">tech</a>
                     </li>
                     
 
@@ -233,119 +233,110 @@
                 
                 
                 
-                
-
-<p>[TOC]</p>
-
-<p><strong>好的资料：<a href="http://www.tianshouzhi.com/api/tutorials/rocketmq/50">http://www.tianshouzhi.com/api/tutorials/rocketmq/50</a></strong></p>
-
+                <p>[TOC]</p>
+<p><strong>好的资料：http://www.tianshouzhi.com/api/tutorials/rocketmq/50</strong></p>
 <h1 id="producer">Producer</h1>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-java" data-lang="java"><span style="color:#f92672">package</span> com.maizi.rocketmqclient<span style="color:#f92672">;</span>
+<span style="color:#75715e">/*
+</span><span style="color:#75715e"> * @Description  : 请输入....
+</span><span style="color:#75715e"> * @Author       : 麦子
+</span><span style="color:#75715e"> * @Date         : 2020-05-12 17:33:39
+</span><span style="color:#75715e"> * @FilePath     : /rocketMq/rocketmqclient/src/main/java/com/maizi/rocketmqclient/Producer.java
+</span><span style="color:#75715e"> * @LastEditTime : 2020-05-12 18:55:17
+</span><span style="color:#75715e"> * @LastEditors  : Do not edit
+</span><span style="color:#75715e"> */</span>
 
-<pre><code class="language-java">package com.maizi.rocketmqclient;
-/*
- * @Description  : 请输入....
- * @Author       : 麦子
- * @Date         : 2020-05-12 17:33:39
- * @FilePath     : /rocketMq/rocketmqclient/src/main/java/com/maizi/rocketmqclient/Producer.java
- * @LastEditTime : 2020-05-12 18:55:17
- * @LastEditors  : Do not edit
- */
+<span style="color:#f92672">import</span> org.apache.rocketmq.client.exception.MQBrokerException<span style="color:#f92672">;</span>
+<span style="color:#f92672">import</span> org.apache.rocketmq.client.exception.MQClientException<span style="color:#f92672">;</span>
+<span style="color:#f92672">import</span> org.apache.rocketmq.client.producer.DefaultMQProducer<span style="color:#f92672">;</span>
+<span style="color:#f92672">import</span> org.apache.rocketmq.client.producer.SendResult<span style="color:#f92672">;</span>
+<span style="color:#f92672">import</span> org.apache.rocketmq.common.message.Message<span style="color:#f92672">;</span>
+<span style="color:#f92672">import</span> org.apache.rocketmq.remoting.exception.RemotingException<span style="color:#f92672">;</span>
 
-import org.apache.rocketmq.client.exception.MQBrokerException;
-import org.apache.rocketmq.client.exception.MQClientException;
-import org.apache.rocketmq.client.producer.DefaultMQProducer;
-import org.apache.rocketmq.client.producer.SendResult;
-import org.apache.rocketmq.common.message.Message;
-import org.apache.rocketmq.remoting.exception.RemotingException;
+<span style="color:#66d9ef">public</span> <span style="color:#66d9ef">class</span> <span style="color:#a6e22e">Producer</span> <span style="color:#f92672">{</span>
 
-public class Producer {
+    <span style="color:#66d9ef">public</span> <span style="color:#66d9ef">static</span> <span style="color:#66d9ef">void</span> <span style="color:#a6e22e">main</span><span style="color:#f92672">(</span>String<span style="color:#f92672">[]</span> args<span style="color:#f92672">)</span>
+            <span style="color:#66d9ef">throws</span> MQClientException<span style="color:#f92672">,</span> RemotingException<span style="color:#f92672">,</span> MQBrokerException<span style="color:#f92672">,</span> InterruptedException <span style="color:#f92672">{</span>
+        <span style="color:#75715e">// 创建一个消息生产者，并设置一个消息生产者组
+</span><span style="color:#75715e"></span>        DefaultMQProducer producer <span style="color:#f92672">=</span> <span style="color:#66d9ef">new</span> DefaultMQProducer<span style="color:#f92672">(</span><span style="color:#e6db74">&#34;maizi_producer_group&#34;</span><span style="color:#f92672">);</span>
 
-    public static void main(String[] args)
-            throws MQClientException, RemotingException, MQBrokerException, InterruptedException {
-        // 创建一个消息生产者，并设置一个消息生产者组
-        DefaultMQProducer producer = new DefaultMQProducer(&quot;maizi_producer_group&quot;);
+        <span style="color:#75715e">// 指定 NameServer 地址
+</span><span style="color:#75715e"></span>        <span style="color:#75715e">// producer.setSendMsgTimeout(6000);
+</span><span style="color:#75715e"></span>        producer<span style="color:#f92672">.</span><span style="color:#a6e22e">setNamesrvAddr</span><span style="color:#f92672">(</span><span style="color:#e6db74">&#34;192.168.0.2:9876&#34;</span><span style="color:#f92672">);</span>
 
-        // 指定 NameServer 地址
-        // producer.setSendMsgTimeout(6000);
-        producer.setNamesrvAddr(&quot;192.168.0.2:9876&quot;);
+        <span style="color:#75715e">// 初始化 Producer，整个应用生命周期内只需要初始化一次
+</span><span style="color:#75715e"></span>        producer<span style="color:#f92672">.</span><span style="color:#a6e22e">start</span><span style="color:#f92672">();</span>
 
-        // 初始化 Producer，整个应用生命周期内只需要初始化一次
-        producer.start();
+        <span style="color:#66d9ef">for</span> <span style="color:#f92672">(</span><span style="color:#66d9ef">int</span> i <span style="color:#f92672">=</span> 0<span style="color:#f92672">;</span> i <span style="color:#f92672">&lt;</span> 10<span style="color:#f92672">;</span> i<span style="color:#f92672">++)</span> <span style="color:#f92672">{</span>
+            <span style="color:#75715e">// 创建一条消息对象，指定其主题、标签和消息内容
+</span><span style="color:#75715e"></span>            Message msg <span style="color:#f92672">=</span> <span style="color:#66d9ef">new</span> Message<span style="color:#f92672">(</span><span style="color:#e6db74">&#34;topic_maizi_example_java&#34;</span> <span style="color:#75715e">/* 消息主题名 */</span><span style="color:#f92672">,</span> <span style="color:#e6db74">&#34;TagA&#34;</span> <span style="color:#75715e">/* 消息标签 */</span><span style="color:#f92672">,</span>
+                    <span style="color:#f92672">(</span><span style="color:#e6db74">&#34;Hello Java demo RocketMQ &#34;</span> <span style="color:#f92672">+</span> i<span style="color:#f92672">).</span><span style="color:#a6e22e">getBytes</span><span style="color:#f92672">()</span> <span style="color:#75715e">/* 消息内容 */</span>
+            <span style="color:#f92672">);</span>
+            SendResult sendResult <span style="color:#f92672">=</span> producer<span style="color:#f92672">.</span><span style="color:#a6e22e">send</span><span style="color:#f92672">(</span>msg<span style="color:#f92672">);</span>
+            System<span style="color:#f92672">.</span><span style="color:#a6e22e">out</span><span style="color:#f92672">.</span><span style="color:#a6e22e">println</span><span style="color:#f92672">(</span>sendResult<span style="color:#f92672">);</span>
+        <span style="color:#f92672">}</span>
+        <span style="color:#75715e">// 一旦生产者实例不再被使用则将其关闭，包括清理资源，关闭网络连接等
+</span><span style="color:#75715e"></span>        <span style="color:#75715e">// 把这个隐掉后，才控制台才可以看到你的生产组
+</span><span style="color:#75715e"></span>        <span style="color:#75715e">// producer.shutdown(); // 自动将这个组删掉了
+</span><span style="color:#75715e"></span>    <span style="color:#f92672">}</span>
 
-        for (int i = 0; i &lt; 10; i++) {
-            // 创建一条消息对象，指定其主题、标签和消息内容
-            Message msg = new Message(&quot;topic_maizi_example_java&quot; /* 消息主题名 */, &quot;TagA&quot; /* 消息标签 */,
-                    (&quot;Hello Java demo RocketMQ &quot; + i).getBytes() /* 消息内容 */
-            );
-            SendResult sendResult = producer.send(msg);
-            System.out.println(sendResult);
-        }
-        // 一旦生产者实例不再被使用则将其关闭，包括清理资源，关闭网络连接等
-        // 把这个隐掉后，才控制台才可以看到你的生产组
-        // producer.shutdown(); // 自动将这个组删掉了
-    }
+<span style="color:#f92672">}</span>
 
-}
+</code></pre></div><h1 id="consumer">Consumer</h1>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-java" data-lang="java"><span style="color:#f92672">package</span> com.maizi.rocketmqclient<span style="color:#f92672">;</span>
+<span style="color:#75715e">/*
+</span><span style="color:#75715e"> * @Description  : 请输入....
+</span><span style="color:#75715e"> * @Author       : 麦子
+</span><span style="color:#75715e"> * @Date         : 2020-05-12 19:01:47
+</span><span style="color:#75715e"> * @FilePath     : /rocketMq/rocketmqclient/src/main/java/com/maizi/rocketmqclient/Consumer.java
+</span><span style="color:#75715e"> * @LastEditTime : 2020-05-14 09:01:19
+</span><span style="color:#75715e"> * @LastEditors  : Do not edit
+</span><span style="color:#75715e"> */</span>
 
-</code></pre>
+<span style="color:#f92672">import</span> java.util.List<span style="color:#f92672">;</span>
 
-<h1 id="consumer">Consumer</h1>
+<span style="color:#f92672">import</span> org.apache.rocketmq.client.consumer.DefaultMQPushConsumer<span style="color:#f92672">;</span>
+<span style="color:#f92672">import</span> org.apache.rocketmq.client.consumer.listener.ConsumeConcurrentlyContext<span style="color:#f92672">;</span>
+<span style="color:#f92672">import</span> org.apache.rocketmq.client.consumer.listener.ConsumeConcurrentlyStatus<span style="color:#f92672">;</span>
+<span style="color:#f92672">import</span> org.apache.rocketmq.client.consumer.listener.MessageListenerConcurrently<span style="color:#f92672">;</span>
+<span style="color:#f92672">import</span> org.apache.rocketmq.client.exception.MQClientException<span style="color:#f92672">;</span>
+<span style="color:#f92672">import</span> org.apache.rocketmq.common.consumer.ConsumeFromWhere<span style="color:#f92672">;</span>
+<span style="color:#f92672">import</span> org.apache.rocketmq.common.message.MessageExt<span style="color:#f92672">;</span>
 
-<pre><code class="language-java">package com.maizi.rocketmqclient;
-/*
- * @Description  : 请输入....
- * @Author       : 麦子
- * @Date         : 2020-05-12 19:01:47
- * @FilePath     : /rocketMq/rocketmqclient/src/main/java/com/maizi/rocketmqclient/Consumer.java
- * @LastEditTime : 2020-05-14 09:01:19
- * @LastEditors  : Do not edit
- */
+<span style="color:#f92672">import</span> cn.hutool.core.date.DateUtil<span style="color:#f92672">;</span>
 
-import java.util.List;
+<span style="color:#66d9ef">public</span> <span style="color:#66d9ef">class</span> <span style="color:#a6e22e">Consumer</span> <span style="color:#f92672">{</span>
 
-import org.apache.rocketmq.client.consumer.DefaultMQPushConsumer;
-import org.apache.rocketmq.client.consumer.listener.ConsumeConcurrentlyContext;
-import org.apache.rocketmq.client.consumer.listener.ConsumeConcurrentlyStatus;
-import org.apache.rocketmq.client.consumer.listener.MessageListenerConcurrently;
-import org.apache.rocketmq.client.exception.MQClientException;
-import org.apache.rocketmq.common.consumer.ConsumeFromWhere;
-import org.apache.rocketmq.common.message.MessageExt;
+    <span style="color:#66d9ef">public</span> <span style="color:#66d9ef">static</span> <span style="color:#66d9ef">void</span> <span style="color:#a6e22e">main</span><span style="color:#f92672">(</span>String<span style="color:#f92672">[]</span> args<span style="color:#f92672">)</span> <span style="color:#66d9ef">throws</span> MQClientException <span style="color:#f92672">{</span>
+        <span style="color:#75715e">// 创建一个消息消费者，并设置一个消息消费者组
+</span><span style="color:#75715e"></span>        DefaultMQPushConsumer consumer <span style="color:#f92672">=</span> <span style="color:#66d9ef">new</span> DefaultMQPushConsumer<span style="color:#f92672">(</span><span style="color:#e6db74">&#34;maizi_producer_group&#34;</span><span style="color:#f92672">);</span>
+        <span style="color:#75715e">// 指定 NameServer 地址
+</span><span style="color:#75715e"></span>        consumer<span style="color:#f92672">.</span><span style="color:#a6e22e">setNamesrvAddr</span><span style="color:#f92672">(</span><span style="color:#e6db74">&#34;192.168.0.2:9876&#34;</span><span style="color:#f92672">);</span>
+        <span style="color:#75715e">// 设置 Consumer 第一次启动时从队列头部开始消费还是队列尾部开始消费
+</span><span style="color:#75715e"></span>        consumer<span style="color:#f92672">.</span><span style="color:#a6e22e">setConsumeFromWhere</span><span style="color:#f92672">(</span>ConsumeFromWhere<span style="color:#f92672">.</span><span style="color:#a6e22e">CONSUME_FROM_FIRST_OFFSET</span><span style="color:#f92672">);</span>
+        <span style="color:#75715e">// 订阅指定 Topic 下的所有消息
+</span><span style="color:#75715e"></span>        consumer<span style="color:#f92672">.</span><span style="color:#a6e22e">subscribe</span><span style="color:#f92672">(</span><span style="color:#e6db74">&#34;topic_maizi_example_java&#34;</span><span style="color:#f92672">,</span> <span style="color:#e6db74">&#34;*&#34;</span><span style="color:#f92672">);</span>
 
-import cn.hutool.core.date.DateUtil;
+        <span style="color:#75715e">// 注册消息监听器
+</span><span style="color:#75715e"></span>        consumer<span style="color:#f92672">.</span><span style="color:#a6e22e">registerMessageListener</span><span style="color:#f92672">(</span><span style="color:#66d9ef">new</span> MessageListenerConcurrently<span style="color:#f92672">()</span> <span style="color:#f92672">{</span>
+            <span style="color:#66d9ef">public</span> ConsumeConcurrentlyStatus <span style="color:#a6e22e">consumeMessage</span><span style="color:#f92672">(</span>List<span style="color:#f92672">&lt;</span>MessageExt<span style="color:#f92672">&gt;</span> list<span style="color:#f92672">,</span> ConsumeConcurrentlyContext context<span style="color:#f92672">)</span> <span style="color:#f92672">{</span>
+                <span style="color:#75715e">// 默认 list 里只有一条消息，可以通过设置参数来批量接收消息
+</span><span style="color:#75715e"></span>                <span style="color:#66d9ef">if</span> <span style="color:#f92672">(</span>list <span style="color:#f92672">!=</span> <span style="color:#66d9ef">null</span><span style="color:#f92672">)</span> <span style="color:#f92672">{</span>
+                    <span style="color:#66d9ef">for</span> <span style="color:#f92672">(</span>MessageExt ext <span style="color:#f92672">:</span> list<span style="color:#f92672">)</span> <span style="color:#f92672">{</span>
+                        System<span style="color:#f92672">.</span><span style="color:#a6e22e">out</span><span style="color:#f92672">.</span><span style="color:#a6e22e">println</span><span style="color:#f92672">(</span>DateUtil<span style="color:#f92672">.</span><span style="color:#a6e22e">now</span><span style="color:#f92672">()</span> <span style="color:#f92672">+</span> <span style="color:#66d9ef">new</span> String<span style="color:#f92672">(</span>ext<span style="color:#f92672">.</span><span style="color:#a6e22e">getBody</span><span style="color:#f92672">()));</span>
+                    <span style="color:#f92672">}</span>
+                <span style="color:#f92672">}</span>
+                <span style="color:#66d9ef">return</span> ConsumeConcurrentlyStatus<span style="color:#f92672">.</span><span style="color:#a6e22e">CONSUME_SUCCESS</span><span style="color:#f92672">;</span>
+            <span style="color:#f92672">}</span>
+        <span style="color:#f92672">});</span>
 
-public class Consumer {
+        <span style="color:#75715e">// 消费者对象在使用之前必须要调用 start 初始化
+</span><span style="color:#75715e"></span>        consumer<span style="color:#f92672">.</span><span style="color:#a6e22e">start</span><span style="color:#f92672">();</span>
+        System<span style="color:#f92672">.</span><span style="color:#a6e22e">out</span><span style="color:#f92672">.</span><span style="color:#a6e22e">println</span><span style="color:#f92672">(</span><span style="color:#e6db74">&#34;消息消费者已启动&#34;</span><span style="color:#f92672">);</span>
+    <span style="color:#f92672">}</span>
 
-    public static void main(String[] args) throws MQClientException {
-        // 创建一个消息消费者，并设置一个消息消费者组
-        DefaultMQPushConsumer consumer = new DefaultMQPushConsumer(&quot;maizi_producer_group&quot;);
-        // 指定 NameServer 地址
-        consumer.setNamesrvAddr(&quot;192.168.0.2:9876&quot;);
-        // 设置 Consumer 第一次启动时从队列头部开始消费还是队列尾部开始消费
-        consumer.setConsumeFromWhere(ConsumeFromWhere.CONSUME_FROM_FIRST_OFFSET);
-        // 订阅指定 Topic 下的所有消息
-        consumer.subscribe(&quot;topic_maizi_example_java&quot;, &quot;*&quot;);
-
-        // 注册消息监听器
-        consumer.registerMessageListener(new MessageListenerConcurrently() {
-            public ConsumeConcurrentlyStatus consumeMessage(List&lt;MessageExt&gt; list, ConsumeConcurrentlyContext context) {
-                // 默认 list 里只有一条消息，可以通过设置参数来批量接收消息
-                if (list != null) {
-                    for (MessageExt ext : list) {
-                        System.out.println(DateUtil.now() + new String(ext.getBody()));
-                    }
-                }
-                return ConsumeConcurrentlyStatus.CONSUME_SUCCESS;
-            }
-        });
-
-        // 消费者对象在使用之前必须要调用 start 初始化
-        consumer.start();
-        System.out.println(&quot;消息消费者已启动&quot;);
-    }
-
-}
-</code></pre>
-
+<span style="color:#f92672">}</span>
+</code></pre></div>
 
                 
                 
@@ -451,12 +442,7 @@ public class Consumer {
                         <a class="catalog-toggle" style="font-size: 24px;" href="index.html#">目录结构</a>
                     </h4>
                     <ul class="catalog-body"></ul>
-                    <nav id="TableOfContents">
-<ul>
-<li><a href="#producer">Producer</a></li>
-<li><a href="#consumer">Consumer</a></li>
-</ul>
-</nav>
+                    <nav id="TableOfContents"></nav>
                     <br>
                     <br>
                     <br>
@@ -480,9 +466,6 @@ public class Consumer {
                         
                         
                         
-                        <a href="/tags/" title="">
-                            
-                        </a>
                         
                         
                         
@@ -492,101 +475,6 @@ public class Consumer {
                         
                         
                         
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        <a href="/tags/qt" title="QT">
-                            QT
-                        </a>
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        <a href="/tags/zookeeper" title="Zookeeper">
-                            Zookeeper
-                        </a>
                         
                         
                         
@@ -626,8 +514,10 @@ public class Consumer {
                         
                         
                         
-                        <a href="/tags/elasticsearch" title="elasticSearch">
-                            elasticSearch
+                        
+                        
+                        <a href="/tags/elasticsearch" title="elasticsearch">
+                            elasticsearch
                         </a>
                         
                         
@@ -638,9 +528,27 @@ public class Consumer {
                         
                         
                         
-                        <a href="/tags/golang" title="golang">
-                            golang
-                        </a>
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
                         
                         
                         
@@ -678,9 +586,21 @@ public class Consumer {
                         
                         
                         
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
                         <a href="/tags/jvm" title="jvm">
                             jvm
                         </a>
+                        
+                        
+                        
+                        
                         
                         
                         
@@ -704,9 +624,19 @@ public class Consumer {
                         
                         
                         
+                        
+                        
+                        
+                        
+                        
+                        
                         <a href="/tags/mongodb" title="mongodb">
                             mongodb
                         </a>
+                        
+                        
+                        
+                        
                         
                         
                         
@@ -717,10 +647,6 @@ public class Consumer {
                         </a>
                         
                         
-                        
-                        <a href="/tags/mycat" title="mycat">
-                            mycat
-                        </a>
                         
                         
                         
@@ -734,9 +660,17 @@ public class Consumer {
                         
                         
                         
-                        <a href="/tags/nginx" title="nginx">
-                            nginx
-                        </a>
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
                         
                         
                         
@@ -760,8 +694,22 @@ public class Consumer {
                         
                         
                         
+                        
+                        
                         <a href="/tags/rocketmq" title="rocketmq">
                             rocketmq
+                        </a>
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        <a href="/tags/security%E6%A1%86%E6%9E%B6%E5%AD%A6%E4%B9%A0" title="security框架学习">
+                            security框架学习
                         </a>
                         
                         
@@ -788,17 +736,11 @@ public class Consumer {
                         
                         
                         
-                        <a href="/tags/springcloud" title="springCloud">
-                            springCloud
-                        </a>
-                        
-                        
-                        
-                        
-                        
                         <a href="/tags/springboot" title="springboot">
                             springboot
                         </a>
+                        
+                        
                         
                         
                         
@@ -812,6 +754,9 @@ public class Consumer {
                         
                         
                         
+                        <a href="/tags/springcloud" title="springcloud">
+                            springcloud
+                        </a>
                         
                         
                         
@@ -837,6 +782,33 @@ public class Consumer {
                         
                         
                         
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        <a href="/tags/zookeeper" title="zookeeper">
+                            zookeeper
+                        </a>
                         
                         
                         
@@ -896,6 +868,8 @@ public class Consumer {
                         
                         
                         
+                        
+                        
                         <a href="/tags/%E5%88%86%E5%B8%83%E5%BC%8F%E7%B3%BB%E5%88%97" title="分布式系列">
                             分布式系列
                         </a>
@@ -915,6 +889,10 @@ public class Consumer {
                         
                         
                         
+                        
+                        <a href="/tags/%E5%8D%8F%E8%AE%AE%E6%A0%88" title="协议栈">
+                            协议栈
+                        </a>
                         
                         
                         
@@ -1114,6 +1092,12 @@ public class Consumer {
                         
                         
                         
+                        
+                        
+                        
+                        
+                        
+                        
                         <a href="/tags/%E7%BD%91%E7%BB%9C%E7%BC%96%E7%A8%8B" title="网络编程">
                             网络编程
                         </a>
@@ -1137,6 +1121,10 @@ public class Consumer {
                         
                         
                         
+                        
+                        <a href="/tags/%E8%AE%A4%E8%AF%81%E5%92%8C%E6%8E%88%E6%9D%83" title="认证和授权">
+                            认证和授权
+                        </a>
                         
                         
                         
@@ -1307,7 +1295,7 @@ public class Consumer {
                     
                 </ul>
 		<p class="copyright text-muted">
-                    Copyright &copy;  2020
+                    Copyright &copy;  2021
                     <br>
                     <a href="https://themes.gohugo.io/hugo-theme-cleanwhite">CleanWhite Hugo Theme</a> by <a href="https://zhaohuabing.com">Huabing</a> |
                     <iframe

@@ -97,15 +97,15 @@
                     </li>
                     
                     <li>
-                        <a href="/categories/english">English</a>
+                        <a href="/categories/english">english</a>
                     </li>
                     
                     <li>
-                        <a href="/categories/life">Life</a>
+                        <a href="/categories/life">life</a>
                     </li>
                     
                     <li>
-                        <a href="/categories/tech">Tech</a>
+                        <a href="/categories/tech">tech</a>
                     </li>
                     
 
@@ -237,181 +237,123 @@
                 
                 
                 
-                
-
-<p>[TOC]</p>
-
+                <p>[TOC]</p>
 <p><strong>转载地址：<a href="https://blog.csdn.net/jack__frost/article/details/71512404">https://blog.csdn.net/jack__frost/article/details/71512404</a></strong></p>
-
-<p><strong>好文：<a href="https://juejin.im/post/6844903545607553037">https://juejin.im/post/6844903545607553037</a></strong></p>
-
+<p><strong>好文：https://juejin.im/post/6844903545607553037</strong></p>
 <h1 id="明确搜索优化的整体思路">明确搜索优化的整体思路</h1>
-
 <p>索引优化，查询优化，查询缓存，服务器设置优化，操作系统和硬件优化，应用层面优化（web服务器，缓存）等等。对于一个整体项目而言只有这些齐头并进，才能实现mysql高性能。</p>
-
 <h1 id="查询优化的因素">查询优化的因素</h1>
-
 <h2 id="是否向数据库请求了不需要的数据">是否向数据库请求了不需要的数据</h2>
-
 <p>也就是说不要轻易使用select * from ，能明确多少数据就查多少个。</p>
-
 <h2 id="mysql是否扫描额外的纪录">mysql是否扫描额外的纪录</h2>
-
 <p>查询是否扫描了过多的数据。最简单的衡量查询开销三个指标如下：响应时间；扫描的行数；返回的行数。</p>
-
 <p>没有哪个指标能够完美地衡量查询的开销，但它们大致反映了mysql在内部执行查询时需要多少数据，并可以推算出查询运行的时间。</p>
-
 <p><strong>这三个指标都会记录到mysql的慢日志中，所以检查慢日志记录是找出扫描行数过多的查询的好办法。</strong></p>
-
 <h3 id="响应时间">响应时间</h3>
-
 <p>是两个部分之和：服务时间和排队时间。服务时间是指数据库处理这个查询真正花了多长时间。 排队时间是指服务器因为等待某些资源而没有真正执行查询的时间。—可能是等io操作完成，也可能是等待行锁，等等。</p>
-
 <h3 id="扫描的行数和返回的行数">扫描的行数和返回的行数</h3>
-
 <p>：分析查询时，查看该查询扫描的行数是非常有帮助的。这在一定程度上能够说明该查询找到需要的数据的效率高不高。</p>
-
 <h3 id="扫描的行数和访问类型">扫描的行数和访问类型</h3>
-
 <p>在<strong>expain</strong>语句中的type列反应了访问类型。访问类型有很多种，从全表扫描（ALL）到索引扫描（index）到范围扫描（）到唯一索引查询到常数引用等。这里列的这些，速度由慢到快，扫描的行数也是从小到大。</p>
-
 <p><strong>如果发现查询需要扫描大量的数据但只返回少数的行，那么通常可以尝试下面的技巧去优化它：</strong></p>
-
 <ol>
 <li>使用索引覆盖扫描。</li>
 <li>改变库表结构。例如使用单独的汇总表。</li>
 <li>重写这个复杂的查询。让mysql优化器能够以更优化的方式执行这个查询。</li>
 </ol>
-
 <h2 id="查询的流程">查询的流程</h2>
-
-<p><img src="/img/cb39a58ccf17cc1b96db94010b9cd47e955c83e4.png" alt="cb39a58ccf17cc1b96db94010b9cd47e955c83e4" /></p>
-
+<p><img src="/img/cb39a58ccf17cc1b96db94010b9cd47e955c83e4.png" alt="cb39a58ccf17cc1b96db94010b9cd47e955c83e4"></p>
 <h1 id="优化查询前的几个工具">优化查询前的几个工具</h1>
-
 <h2 id="查看mysql整体状态">查看MySQL整体状态</h2>
-
-<pre><code class="language-sql">Mysql&gt; show status; ——显示状态信息（扩展show status like ‘XXX’）
-Mysql&gt;show variables ——显示系统变量（扩展show variables like ‘XXX’）
-Mysql&gt;show innodb status ——显示InnoDB存储引擎的状态
-Mysql&gt;show processlist ——查看当前SQL执行，包括执行状态、是否锁表等
-</code></pre>
-
-<pre><code class="language-shell">Shell&gt; mysqladmin variables -u username -p password——显示系统变量
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-sql" data-lang="sql">Mysql<span style="color:#f92672">&gt;</span> <span style="color:#66d9ef">show</span> status; <span style="color:#960050;background-color:#1e0010">——显示状态信息（扩展</span><span style="color:#66d9ef">show</span> status <span style="color:#66d9ef">like</span> <span style="color:#960050;background-color:#1e0010">‘</span>XXX<span style="color:#960050;background-color:#1e0010">’）</span>
+Mysql<span style="color:#f92672">&gt;</span><span style="color:#66d9ef">show</span> variables <span style="color:#960050;background-color:#1e0010">——显示系统变量（扩展</span><span style="color:#66d9ef">show</span> variables <span style="color:#66d9ef">like</span> <span style="color:#960050;background-color:#1e0010">‘</span>XXX<span style="color:#960050;background-color:#1e0010">’）</span>
+Mysql<span style="color:#f92672">&gt;</span><span style="color:#66d9ef">show</span> innodb status <span style="color:#960050;background-color:#1e0010">——显示</span>InnoDB存储引擎的状态
+Mysql<span style="color:#f92672">&gt;</span><span style="color:#66d9ef">show</span> processlist <span style="color:#960050;background-color:#1e0010">——查看当前</span>SQL执行<span style="color:#960050;background-color:#1e0010">，包括执行状态、是否锁表等</span>
+</code></pre></div><div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-shell" data-lang="shell">Shell&gt; mysqladmin variables -u username -p password——显示系统变量
 Shell&gt; mysqladmin extended-status -u username -p password——显示状态信息
-Shell&gt; mysqld –verbose –help [|more #逐行显示] 查看状态变量及帮助：
-</code></pre>
+Shell&gt; mysqld –verbose –help <span style="color:#f92672">[</span>|more <span style="color:#75715e">#逐行显示] 查看状态变量及帮助：</span>
+</code></pre></div><h2 id="慢查询">慢查询</h2>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-shell" data-lang="shell"><span style="color:#75715e"># 查看慢查日志是否开启</span>
+SHOW VARIABLES  LIKE <span style="color:#e6db74">&#39;slow_query_log&#39;</span>;
+SET GLOBAL slow_query_log<span style="color:#f92672">=</span>on;
 
-<h2 id="慢查询">慢查询</h2>
+<span style="color:#75715e"># 查看是否没有使用索引的查询记录</span>
+SHOW VARIABLES LIKE <span style="color:#e6db74">&#39;log%&#39;</span>;
+<span style="color:#75715e"># 开启所有查询都记录下来</span>
+SET GLOBAL log_queries_not_using_indexes<span style="color:#f92672">=</span>on;
 
-<pre><code class="language-shell"># 查看慢查日志是否开启
-SHOW VARIABLES  LIKE 'slow_query_log';
-SET GLOBAL slow_query_log=on;
+<span style="color:#75715e">#查看执行多长时间的语句记录下来。</span>
+SHOW VARIABLES LIKE <span style="color:#e6db74">&#39;long_query_time&#39;</span>;
+<span style="color:#75715e">#这个地方设置后，需要重新开启一个终端才可以看到效果</span>
+set global long_query_time<span style="color:#f92672">=</span>0;
 
-# 查看是否没有使用索引的查询记录
-SHOW VARIABLES LIKE 'log%';
-# 开启所有查询都记录下来
-SET GLOBAL log_queries_not_using_indexes=on;
+<span style="color:#75715e">#查看慢日志的具体文件</span>
+SHOW  VARIABLES LIKE <span style="color:#e6db74">&#39;slow%&#39;</span>
+</code></pre></div><h3 id="查询日志格式">查询日志格式</h3>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-shell" data-lang="shell"><span style="color:#75715e">#查看慢日志的具体文件</span>
+SHOW  VARIABLES LIKE <span style="color:#e6db74">&#39;slow%&#39;</span>
 
-#查看执行多长时间的语句记录下来。
-SHOW VARIABLES LIKE 'long_query_time';
-#这个地方设置后，需要重新开启一个终端才可以看到效果
-set global long_query_time=0;
-
-#查看慢日志的具体文件
-SHOW  VARIABLES LIKE 'slow%'
-</code></pre>
-
-<h3 id="查询日志格式">查询日志格式</h3>
-
-<pre><code class="language-shell">#查看慢日志的具体文件
-SHOW  VARIABLES LIKE 'slow%'
-
-SET timestamp=1558163795;
-/* ApplicationName=DataGrip 2017.2.2 */ SET SQL_SELECT_LIMIT=12;
-# User@Host: root[root] @  [172.17.0.1]  Id:    78
-# Query_time: 0.000247  Lock_time: 0.000102 Rows_sent: 1  Rows_examined: 2
-SET timestamp=1558163795;
-/* ApplicationName=DataGrip 2017.2.2 */ SELECT * FROM work.PDMAN_DB_VERSION WHERE DB_VERSION = 'v1.0.4';
-</code></pre>
-
-<h3 id="开启慢查询日志">开启慢查询日志</h3>
-
+SET timestamp<span style="color:#f92672">=</span>1558163795;
+/* ApplicationName<span style="color:#f92672">=</span>DataGrip 2017.2.2 */ SET SQL_SELECT_LIMIT<span style="color:#f92672">=</span>12;
+<span style="color:#75715e"># User@Host: root[root] @  [172.17.0.1]  Id:    78</span>
+<span style="color:#75715e"># Query_time: 0.000247  Lock_time: 0.000102 Rows_sent: 1  Rows_examined: 2</span>
+SET timestamp<span style="color:#f92672">=</span>1558163795;
+/* ApplicationName<span style="color:#f92672">=</span>DataGrip 2017.2.2 */ SELECT * FROM work.PDMAN_DB_VERSION WHERE DB_VERSION <span style="color:#f92672">=</span> <span style="color:#e6db74">&#39;v1.0.4&#39;</span>;
+</code></pre></div><h3 id="开启慢查询日志">开启慢查询日志</h3>
 <h4 id="配置文件修改">配置文件修改</h4>
-
 <p>配置文件修改，在配置文件my.cnf或my.ini中在[mysqld]一行下面加入两个配置参数。</p>
-
-<pre><code class="language-shell">log-slow-queries={自己想存放的日志路径}/slow-query.log
-long_query_time=10 //表示查询超过10秒才记录；
-</code></pre>
-
-<p>注：log-slow-queries参数为慢查询日志存放的位置，一般这个目录要有mysql的运行帐号的可写权限，一般都将这个目录设置为mysql的数据存放目录；</p>
-
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-shell" data-lang="shell">log-slow-queries<span style="color:#f92672">={</span>自己想存放的日志路径<span style="color:#f92672">}</span>/slow-query.log
+long_query_time<span style="color:#f92672">=</span><span style="color:#ae81ff">10</span> //表示查询超过10秒才记录；
+</code></pre></div><p>注：log-slow-queries参数为慢查询日志存放的位置，一般这个目录要有mysql的运行帐号的可写权限，一般都将这个目录设置为mysql的数据存放目录；</p>
 <h4 id="查看日志启动状态">查看日志启动状态</h4>
-
-<pre><code class="language-sql">show variables like “slow%”;
-</code></pre>
-
-<table>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-sql" data-lang="sql"><span style="color:#66d9ef">show</span> variables <span style="color:#66d9ef">like</span> <span style="color:#960050;background-color:#1e0010">“</span>slow<span style="color:#f92672">%</span><span style="color:#960050;background-color:#1e0010">”</span>;
+</code></pre></div><table>
 <thead>
 <tr>
 <th>slow_launch_time</th>
 <th>2</th>
 </tr>
 </thead>
-
 <tbody>
 <tr>
 <td>slow_query_log</td>
 <td>OFF</td>
 </tr>
-
 <tr>
 <td>slow_query_log_file</td>
 <td>/var/lib/mysql/63c0513730d7-slow.log</td>
 </tr>
 </tbody>
 </table>
-
 <h4 id="设置慢日志开启">设置慢日志开启</h4>
-
-<pre><code class="language-sql">set global slow_query_log = ON;
-</code></pre>
-
-<table>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-sql" data-lang="sql"><span style="color:#66d9ef">set</span> <span style="color:#66d9ef">global</span> slow_query_log <span style="color:#f92672">=</span> <span style="color:#66d9ef">ON</span>;
+</code></pre></div><table>
 <thead>
 <tr>
 <th>slow_launch_time</th>
 <th>2</th>
 </tr>
 </thead>
-
 <tbody>
 <tr>
 <td>slow_query_log</td>
 <td>ON</td>
 </tr>
-
 <tr>
 <td>slow_query_log_file</td>
 <td>/var/lib/mysql/63c0513730d7-slow.log</td>
 </tr>
 </tbody>
 </table>
-
-<h4 id="查询long-query-time-的值">查询long_query_time 的值</h4>
-
-<pre><code class="language-sql">show variables like “long%”;
-</code></pre>
-
-<table>
+<h4 id="查询long_query_time-的值">查询long_query_time 的值</h4>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-sql" data-lang="sql"><span style="color:#66d9ef">show</span> variables <span style="color:#66d9ef">like</span> <span style="color:#960050;background-color:#1e0010">“</span>long<span style="color:#f92672">%</span><span style="color:#960050;background-color:#1e0010">”</span>;
+</code></pre></div><table>
 <thead>
 <tr>
 <th>long_query_time</th>
 <th>10.000000</th>
 </tr>
 </thead>
-
 <tbody>
 <tr>
 <td></td>
@@ -419,15 +361,10 @@ long_query_time=10 //表示查询超过10秒才记录；
 </tr>
 </tbody>
 </table>
-
 <h3 id="explain查询分析">explain查询分析</h3>
-
-<p><img src="/img/5-19-3.png" alt="5-19-3" /></p>
-
-<p><img src="/img/5-19-4.png" alt="5-19-4" /></p>
-
+<p><img src="/img/5-19-3.png" alt="5-19-3"></p>
+<p><img src="/img/5-19-4.png" alt="5-19-4"></p>
 <p>使用 EXPLAIN 关键字可以模拟优化器执行SQL查询语句，通过explain命令可以得到:</p>
-
 <ol>
 <li>表的读取顺序</li>
 <li>数据读取操作的操作类型</li>
@@ -436,14 +373,10 @@ long_query_time=10 //表示查询超过10秒才记录；
 <li>表之间的引用</li>
 <li>每张表有多少行被优化器查询</li>
 </ol>
-
 <p>示例如下：</p>
-
-<pre><code class="language-sql">ALTER TABLE school.student add index age_index (age); // 添加索引 
-explain select * from school.student where age = 5;
-</code></pre>
-
-<table>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-sql" data-lang="sql"><span style="color:#66d9ef">ALTER</span> <span style="color:#66d9ef">TABLE</span> school.student <span style="color:#66d9ef">add</span> <span style="color:#66d9ef">index</span> age_index (age); <span style="color:#f92672">//</span> <span style="color:#960050;background-color:#1e0010">添加索引</span> 
+<span style="color:#66d9ef">explain</span> <span style="color:#66d9ef">select</span> <span style="color:#f92672">*</span> <span style="color:#66d9ef">from</span> school.student <span style="color:#66d9ef">where</span> age <span style="color:#f92672">=</span> <span style="color:#ae81ff">5</span>;
+</code></pre></div><table>
 <thead>
 <tr>
 <th>select_type</th>
@@ -459,7 +392,6 @@ explain select * from school.student where age = 5;
 <th>Extra</th>
 </tr>
 </thead>
-
 <tbody>
 <tr>
 <td>SIMPLE</td>
@@ -476,11 +408,8 @@ explain select * from school.student where age = 5;
 </tr>
 </tbody>
 </table>
-
-<h4 id="select-type">select_type</h4>
-
+<h4 id="select_type">select_type</h4>
 <p>查询中每个select子句的类型，</p>
-
 <ol>
 <li>SIMPLE(简单SELECT,不使用UNION或子查询等)</li>
 <li>PRIMARY(查询中若包含任何复杂的子部分,最外层的select被标记为PRIMARY)</li>
@@ -490,49 +419,28 @@ explain select * from school.student where age = 5;
 <li>SUBQUERY(子查询中的第一个SELECT)</li>
 <li>DEPENDENT SUBQUERY(子查询中的第一个SELECT，取决于外面的查询)</li>
 <li>DERIVED(派生表的SELECT, FROM子句的子查询)</li>
-<li>UNCACHEABLE SUBQUERY(一个子查询的结果不能被缓存，必须重新评估外链接的第一行)
-<br /></li>
+<li>UNCACHEABLE SUBQUERY(一个子查询的结果不能被缓存，必须重新评估外链接的第一行)</li>
 </ol>
-
 <h4 id="table">Table</h4>
-
 <p>显示这一行的数据是关于哪张表的。</p>
-
-<h4 id="type-这是最重要的字段之一">type：这是最重要的字段之一</h4>
-
+<h4 id="type这是最重要的字段之一">type：这是最重要的字段之一</h4>
 <p>显示查询使用了何种类型。从最好到最差的连接类型为NULL、system、const、eq_ref、ref、range、index和ALL。</p>
-
 <h5 id="null">NULL</h5>
-
 <p>MySQL在优化过程中分解语句，执行时甚至不用访问表或索引，例如从一个索引列里选取最小值可以通过单独索引查找完成。</p>
-
-<h5 id="system-const">system、const</h5>
-
+<h5 id="systemconst">system、const</h5>
 <p>可以将查询的变量转为常量. 如id=1; id为 主键或唯一键。当MySQL对查询某部分进行优化，并转换为一个常量时，使用这些类型访问。如将主键置于where列表中，MySQL就能将该查询转换为一个常量,system是const类型的特例，当查询的表只有一行的情况下，使用system。</p>
-
-<h5 id="eq-ref">eq_ref</h5>
-
+<h5 id="eq_ref">eq_ref</h5>
 <p>访问索引,返回某单一行的数据.(通常在联接时出现，查询使用的索引为主键或惟一键)。类似ref，区别就在使用的索引是唯一索引，对于每个索引键值，表中只有一条记录匹配，简单来说，就是多表连接中使用primary key或者 unique key作为关联条件。</p>
-
 <h5 id="ref">ref</h5>
-
 <p>访问索引,返回某个值的数据.(可以返回多行) 通常使用=时发生。表示上述表的连接匹配条件，即哪些列或常量被用于查找索引列上的值。</p>
-
 <h5 id="range">range</h5>
-
 <p>这个连接类型使用索引返回一个范围中的行，比如使用&gt;或&lt;查找东西，并且该字段上建有索引时发生的情况(注:不一定好于index)。只检索给定范围的行，使用一个索引来选择行。</p>
-
 <h5 id="index">index</h5>
-
 <p>以索引的顺序进行全表扫描，优点是不用排序,缺点是还要全表扫描。index与ALL区别为index类型只遍历索引树。</p>
-
 <h5 id="all">ALL</h5>
-
 <p>全表扫描，应该尽量避免。 MySQL将遍历全表以找到匹配的行。</p>
-
 <h5 id="总结">总结</h5>
-
-<pre><code class="language-tex">type：表的连接类型，其值，性能由高到底排列如下：
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-tex" data-lang="tex">type：表的连接类型，其值，性能由高到底排列如下：
 system：表只有一行记录，相当于系统表
 const：通过索引一次就找到，只匹配一行数据
 eq_ref：唯一性索引扫描，对于每个索引键，表中只有一条记录与之匹配。常用于主键或唯一索引扫描
@@ -540,92 +448,50 @@ ref：非唯一性索引扫描，返回匹配某个单独值的所有行。用�
 range：只检索给定范围的行，使用一个索引来选择行。一般使用between、&gt;、&lt;情况
 index：只遍历索引树
 ALL：全表扫描，性能最差
-</code></pre>
-
-<p>注：前<strong>5</strong>种情况都是理想情况的索引使用情况。通常优化至少到<strong>range</strong>级别，最好能优化到 <strong>ref</strong></p>
-
-<h4 id="possible-keys">possible_keys</h4>
-
+</code></pre></div><p>注：前<strong>5</strong>种情况都是理想情况的索引使用情况。通常优化至少到<strong>range</strong>级别，最好能优化到 <strong>ref</strong></p>
+<h4 id="possible_keys">possible_keys</h4>
 <p>显示可能应用在这张表中的索引。如果为空，没有可能的索引。可以为相关的域从WHERE语句中选择一个合适的语句。如果该列是NULL，则没有相关的索引。在这种情况下，可以通过检查WHERE子句看是否它引用某些列或适合索引的列来提高你的查询性能。如果是这样，创造一个适当的索引并且再次用EXPLAIN检查查询。</p>
-
 <h4 id="key">key</h4>
-
 <p>实际使用的索引。如果为NULL，则没有使用索引。</p>
-
-<h4 id="key-len">key_len</h4>
-
+<h4 id="key_len">key_len</h4>
 <p>在不损失精确性的情况下，长度越短越好。表示索引中使用的字节数，可通过该列计算查询中使用的索引的长度（key_len显示的值为索引字段的最大可能长度，并非实际使用长度，即key_len是根据表定义计算而得，不是通过表内检索出的）。</p>
-
 <h4 id="ref-1">ref</h4>
-
 <p>显示索引的哪一列被使用了，如果可能的话，是一个常数。</p>
-
 <h4 id="rows">rows</h4>
-
 <p>MySQL认为必须检索的用来返回请求数据的行数，表示MySQL根据表统计信息及索引选用情况，估算的找到所需的记录所需要读取的行数。</p>
-
-<h4 id="extra-关于mysql如何解析查询的额外信息">Extra：关于MYSQL如何解析查询的额外信息</h4>
-
-<p><strong>好文：<a href="https://blog.csdn.net/xiaojie_570/article/details/82344373">https://blog.csdn.net/xiaojie_570/article/details/82344373</a></strong></p>
-
+<h4 id="extra关于mysql如何解析查询的额外信息">Extra：关于MYSQL如何解析查询的额外信息</h4>
+<p><strong>好文：https://blog.csdn.net/xiaojie_570/article/details/82344373</strong></p>
 <h5 id="using-index">using index</h5>
-
 <p>只用到索引,可以避免访问表.。表示查询在索引树中就可查找所需数据, 不用扫描表数据文件, <strong>往往说明性能不错</strong>。</p>
-
 <h5 id="using-where">using where</h5>
-
 <p>使用到where来过虑数据. 不是所有的where clause都要显示using where. 如以=方式访问索引.</p>
-
 <h5 id="using-tmporary">using tmporary</h5>
-
 <p>查询有使用临时表, 一般出现于排序, 分组和多表 join 的情况, 查询效率不高, <strong>建议优化</strong>.</p>
-
 <h5 id="using-filesort">using filesort</h5>
-
 <p>用到额外的排序. (当使用order by v1,而没用到索引时,就会使用额外的排序)。MySQL中无法利用索引完成的排序操作称为“文件排序”</p>
-
-<h5 id="range-checked-for-eache-record-index-map-n">range checked for eache record(index map:N)</h5>
-
+<h5 id="range-checked-for-eache-recordindex-mapn">range checked for eache record(index map:N)</h5>
 <p>没有好的索引.</p>
-
 <h5 id="using-join-buffer">Using join buffer</h5>
-
 <p>改值强调了在获取连接条件时没有使用索引，并且需要连接缓冲区来存储中间结果。<strong>如果出现了这个值，那应该注意，根据查询的具体情况可能需要添加索引来改进能。</strong></p>
-
 <h5 id="impossible-where">Impossible where</h5>
-
 <p>这个值强调了where语句会导致没有符合条件的行。</p>
-
 <h5 id="extra-是-null-表示回表">Extra 是 null 表示回表</h5>
-
 <p>Extra列的NULL表示进行了回表查询。</p>
-
-<p><img src="/img/Xnip2020-09-19_20-33-28.png" alt="" /></p>
-
+<p><img src="/img/Xnip2020-09-19_20-33-28.png" alt=""></p>
 <h2 id="profiling查询分析">profiling查询分析</h2>
-
 <p>通过慢日志查询可以知道哪些SQL语句执行效率低下，通过explain我们可以得知SQL语句的具体执行情况，索引使用等，还可以结合show命令查看执行状态。</p>
-
 <p>如果觉得explain的信息不够详细，可以同通过profiling命令得到更准确的SQL执行消耗系统资源的信息。</p>
-
 <h3 id="打开profiling查询分析">打开profiling查询分析</h3>
-
 <p>profiling默认是关闭的。可以通过以下语句进行处理查看：</p>
-
-<pre><code class="language-sql">select @@profiling;  // 查看 
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-sql" data-lang="sql"><span style="color:#66d9ef">select</span> <span style="color:#f92672">@@</span>profiling;  <span style="color:#f92672">//</span> <span style="color:#960050;background-color:#1e0010">查看</span> 
  
-set profiling = 1;  //  打开 
+<span style="color:#66d9ef">set</span> profiling <span style="color:#f92672">=</span> <span style="color:#ae81ff">1</span>;  <span style="color:#f92672">//</span>  <span style="color:#960050;background-color:#1e0010">打开</span> 
 
-select * from school.student where age = 5; // 写几条sql
+<span style="color:#66d9ef">select</span> <span style="color:#f92672">*</span> <span style="color:#66d9ef">from</span> school.student <span style="color:#66d9ef">where</span> age <span style="color:#f92672">=</span> <span style="color:#ae81ff">5</span>; <span style="color:#f92672">//</span> <span style="color:#960050;background-color:#1e0010">写几条</span><span style="color:#66d9ef">sql</span>
 
-</code></pre>
-
-<p>进行查看具体sql信息如下：</p>
-
-<pre><code class="language-sql">show profiles; //  然后查看最近SQL，可以得到被执行的SQL语句的时间和ID
-</code></pre>
-
-<table>
+</code></pre></div><p>进行查看具体sql信息如下：</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-sql" data-lang="sql"><span style="color:#66d9ef">show</span> profiles; <span style="color:#f92672">//</span>  <span style="color:#960050;background-color:#1e0010">然后查看最近</span><span style="color:#66d9ef">SQL</span><span style="color:#960050;background-color:#1e0010">，可以得到被执行的</span>SQL语句的时间和ID
+</code></pre></div><table>
 <thead>
 <tr>
 <th>12</th>
@@ -633,86 +499,72 @@ select * from school.student where age = 5; // 写几条sql
 <th>select * from school.student where age = 5</th>
 </tr>
 </thead>
-
 <tbody>
 <tr>
 <td>13</td>
 <td>3.035E-4</td>
 <td>SHOW WARNINGS</td>
 </tr>
-
 <tr>
 <td>14</td>
 <td>5.885E-4</td>
 <td>SHOW WARNINGS</td>
 </tr>
-
 <tr>
 <td>15</td>
 <td>2.7525E-4</td>
 <td>show profiles\G</td>
 </tr>
-
 <tr>
 <td>16</td>
 <td>3.92E-4</td>
 <td>SHOW WARNINGS</td>
 </tr>
-
 <tr>
 <td>17</td>
 <td>1.9925E-4</td>
 <td>show profiles\G</td>
 </tr>
-
 <tr>
 <td>18</td>
 <td>3.375E-4</td>
 <td>SHOW WARNINGS</td>
 </tr>
-
 <tr>
 <td>19</td>
 <td>2.365E-4</td>
 <td>SHOW WARNINGS</td>
 </tr>
-
 <tr>
 <td>20</td>
 <td>2.83E-4</td>
 <td>SHOW WARNINGS</td>
 </tr>
-
 <tr>
 <td>21</td>
 <td>3.31E-4</td>
 <td>SHOW WARNINGS</td>
 </tr>
-
 <tr>
 <td>22</td>
 <td>3.36E-4</td>
 <td>SHOW WARNINGS</td>
 </tr>
-
 <tr>
 <td>23</td>
 <td>3.1E-4</td>
 <td>SHOW WARNINGS</td>
 </tr>
-
 <tr>
 <td>24</td>
 <td>0.00100725</td>
 <td>SHOW WARNINGS</td>
 </tr>
-
 <tr>
 <td>25</td>
 <td>2.9525E-4</td>
 <td>SHOW WARNINGS</td>
 </tr>
-
 <tr>
 <td>26</td>
 <td>3.77E-4</td>
@@ -720,94 +572,75 @@ select * from school.student where age = 5; // 写几条sql
 </tr>
 </tbody>
 </table>
-
-<pre><code class="language-sql">show profile for query 12;  // 得到对应SQL语句执行的详细信息
-</code></pre>
-
-<table>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-sql" data-lang="sql"><span style="color:#66d9ef">show</span> profile <span style="color:#66d9ef">for</span> query <span style="color:#ae81ff">12</span>;  <span style="color:#f92672">//</span> <span style="color:#960050;background-color:#1e0010">得到对应</span>SQL语句执行的详细信息
+</code></pre></div><table>
 <thead>
 <tr>
 <th>starting</th>
 <th>0.000084</th>
 </tr>
 </thead>
-
 <tbody>
 <tr>
 <td>Executing hook on transaction</td>
 <td>0.000011</td>
 </tr>
-
 <tr>
 <td>starting</td>
 <td>0.000016</td>
 </tr>
-
 <tr>
 <td>checking permissions</td>
 <td>0.000013</td>
 </tr>
-
 <tr>
 <td>Opening tables</td>
 <td>0.000072</td>
 </tr>
-
 <tr>
 <td>init</td>
 <td>0.000023</td>
 </tr>
-
 <tr>
 <td>System lock</td>
 <td>0.000037</td>
 </tr>
-
 <tr>
 <td>optimizing</td>
 <td>0.000027</td>
 </tr>
-
 <tr>
 <td>statistics</td>
 <td>0.000127</td>
 </tr>
-
 <tr>
 <td>preparing</td>
 <td>0.000037</td>
 </tr>
-
 <tr>
 <td>executing</td>
 <td>0.000091</td>
 </tr>
-
 <tr>
 <td>end</td>
 <td>0.000018</td>
 </tr>
-
 <tr>
 <td>query end</td>
 <td>0.000014</td>
 </tr>
-
 <tr>
 <td>waiting for handler commit</td>
 <td>0.000027</td>
 </tr>
-
 <tr>
 <td>closing tables</td>
 <td>0.000062</td>
 </tr>
-
 <tr>
 <td>freeing items</td>
 <td>0.000283</td>
 </tr>
-
 <tr>
 <td>cleaning up</td>
 <td>0.000049</td>
@@ -921,71 +754,33 @@ select * from school.student where age = 5; // 写几条sql
                     </h4>
                     <ul class="catalog-body"></ul>
                     <nav id="TableOfContents">
-<ul>
-<li><a href="#明确搜索优化的整体思路">明确搜索优化的整体思路</a></li>
-<li><a href="#查询优化的因素">查询优化的因素</a>
-<ul>
-<li><a href="#是否向数据库请求了不需要的数据">是否向数据库请求了不需要的数据</a></li>
-<li><a href="#mysql是否扫描额外的纪录">mysql是否扫描额外的纪录</a>
-<ul>
-<li><a href="#响应时间">响应时间</a></li>
-<li><a href="#扫描的行数和返回的行数">扫描的行数和返回的行数</a></li>
-<li><a href="#扫描的行数和访问类型">扫描的行数和访问类型</a></li>
-</ul></li>
-<li><a href="#查询的流程">查询的流程</a></li>
-</ul></li>
-<li><a href="#优化查询前的几个工具">优化查询前的几个工具</a>
-<ul>
-<li><a href="#查看mysql整体状态">查看MySQL整体状态</a></li>
-<li><a href="#慢查询">慢查询</a>
-<ul>
-<li><a href="#查询日志格式">查询日志格式</a></li>
-<li><a href="#开启慢查询日志">开启慢查询日志</a>
-<ul>
-<li><a href="#配置文件修改">配置文件修改</a></li>
-<li><a href="#查看日志启动状态">查看日志启动状态</a></li>
-<li><a href="#设置慢日志开启">设置慢日志开启</a></li>
-<li><a href="#查询long-query-time-的值">查询long_query_time 的值</a></li>
-</ul></li>
-<li><a href="#explain查询分析">explain查询分析</a>
-<ul>
-<li><a href="#select-type">select_type</a></li>
-<li><a href="#table">Table</a></li>
-<li><a href="#type-这是最重要的字段之一">type：这是最重要的字段之一</a>
-<ul>
-<li><a href="#null">NULL</a></li>
-<li><a href="#system-const">system、const</a></li>
-<li><a href="#eq-ref">eq_ref</a></li>
-<li><a href="#ref">ref</a></li>
-<li><a href="#range">range</a></li>
-<li><a href="#index">index</a></li>
-<li><a href="#all">ALL</a></li>
-<li><a href="#总结">总结</a></li>
-</ul></li>
-<li><a href="#possible-keys">possible_keys</a></li>
-<li><a href="#key">key</a></li>
-<li><a href="#key-len">key_len</a></li>
-<li><a href="#ref-1">ref</a></li>
-<li><a href="#rows">rows</a></li>
-<li><a href="#extra-关于mysql如何解析查询的额外信息">Extra：关于MYSQL如何解析查询的额外信息</a>
-<ul>
-<li><a href="#using-index">using index</a></li>
-<li><a href="#using-where">using where</a></li>
-<li><a href="#using-tmporary">using tmporary</a></li>
-<li><a href="#using-filesort">using filesort</a></li>
-<li><a href="#range-checked-for-eache-record-index-map-n">range checked for eache record(index map:N)</a></li>
-<li><a href="#using-join-buffer">Using join buffer</a></li>
-<li><a href="#impossible-where">Impossible where</a></li>
-<li><a href="#extra-是-null-表示回表">Extra 是 null 表示回表</a></li>
-</ul></li>
-</ul></li>
-</ul></li>
-<li><a href="#profiling查询分析">profiling查询分析</a>
-<ul>
-<li><a href="#打开profiling查询分析">打开profiling查询分析</a></li>
-</ul></li>
-</ul></li>
-</ul>
+  <ul>
+    <li><a href="#是否向数据库请求了不需要的数据">是否向数据库请求了不需要的数据</a></li>
+    <li><a href="#mysql是否扫描额外的纪录">mysql是否扫描额外的纪录</a>
+      <ul>
+        <li><a href="#响应时间">响应时间</a></li>
+        <li><a href="#扫描的行数和返回的行数">扫描的行数和返回的行数</a></li>
+        <li><a href="#扫描的行数和访问类型">扫描的行数和访问类型</a></li>
+      </ul>
+    </li>
+    <li><a href="#查询的流程">查询的流程</a></li>
+  </ul>
+
+  <ul>
+    <li><a href="#查看mysql整体状态">查看MySQL整体状态</a></li>
+    <li><a href="#慢查询">慢查询</a>
+      <ul>
+        <li><a href="#查询日志格式">查询日志格式</a></li>
+        <li><a href="#开启慢查询日志">开启慢查询日志</a></li>
+        <li><a href="#explain查询分析">explain查询分析</a></li>
+      </ul>
+    </li>
+    <li><a href="#profiling查询分析">profiling查询分析</a>
+      <ul>
+        <li><a href="#打开profiling查询分析">打开profiling查询分析</a></li>
+      </ul>
+    </li>
+  </ul>
 </nav>
                     <br>
                     <br>
@@ -1010,9 +805,6 @@ select * from school.student where age = 5; // 写几条sql
                         
                         
                         
-                        <a href="/tags/" title="">
-                            
-                        </a>
                         
                         
                         
@@ -1022,101 +814,6 @@ select * from school.student where age = 5; // 写几条sql
                         
                         
                         
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        <a href="/tags/qt" title="QT">
-                            QT
-                        </a>
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        <a href="/tags/zookeeper" title="Zookeeper">
-                            Zookeeper
-                        </a>
                         
                         
                         
@@ -1156,8 +853,10 @@ select * from school.student where age = 5; // 写几条sql
                         
                         
                         
-                        <a href="/tags/elasticsearch" title="elasticSearch">
-                            elasticSearch
+                        
+                        
+                        <a href="/tags/elasticsearch" title="elasticsearch">
+                            elasticsearch
                         </a>
                         
                         
@@ -1168,9 +867,27 @@ select * from school.student where age = 5; // 写几条sql
                         
                         
                         
-                        <a href="/tags/golang" title="golang">
-                            golang
-                        </a>
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
                         
                         
                         
@@ -1208,9 +925,21 @@ select * from school.student where age = 5; // 写几条sql
                         
                         
                         
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
                         <a href="/tags/jvm" title="jvm">
                             jvm
                         </a>
+                        
+                        
+                        
+                        
                         
                         
                         
@@ -1234,9 +963,19 @@ select * from school.student where age = 5; // 写几条sql
                         
                         
                         
+                        
+                        
+                        
+                        
+                        
+                        
                         <a href="/tags/mongodb" title="mongodb">
                             mongodb
                         </a>
+                        
+                        
+                        
+                        
                         
                         
                         
@@ -1247,10 +986,6 @@ select * from school.student where age = 5; // 写几条sql
                         </a>
                         
                         
-                        
-                        <a href="/tags/mycat" title="mycat">
-                            mycat
-                        </a>
                         
                         
                         
@@ -1264,9 +999,17 @@ select * from school.student where age = 5; // 写几条sql
                         
                         
                         
-                        <a href="/tags/nginx" title="nginx">
-                            nginx
-                        </a>
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
                         
                         
                         
@@ -1290,8 +1033,22 @@ select * from school.student where age = 5; // 写几条sql
                         
                         
                         
+                        
+                        
                         <a href="/tags/rocketmq" title="rocketmq">
                             rocketmq
+                        </a>
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        <a href="/tags/security%E6%A1%86%E6%9E%B6%E5%AD%A6%E4%B9%A0" title="security框架学习">
+                            security框架学习
                         </a>
                         
                         
@@ -1318,17 +1075,11 @@ select * from school.student where age = 5; // 写几条sql
                         
                         
                         
-                        <a href="/tags/springcloud" title="springCloud">
-                            springCloud
-                        </a>
-                        
-                        
-                        
-                        
-                        
                         <a href="/tags/springboot" title="springboot">
                             springboot
                         </a>
+                        
+                        
                         
                         
                         
@@ -1342,6 +1093,9 @@ select * from school.student where age = 5; // 写几条sql
                         
                         
                         
+                        <a href="/tags/springcloud" title="springcloud">
+                            springcloud
+                        </a>
                         
                         
                         
@@ -1367,6 +1121,33 @@ select * from school.student where age = 5; // 写几条sql
                         
                         
                         
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        <a href="/tags/zookeeper" title="zookeeper">
+                            zookeeper
+                        </a>
                         
                         
                         
@@ -1426,6 +1207,8 @@ select * from school.student where age = 5; // 写几条sql
                         
                         
                         
+                        
+                        
                         <a href="/tags/%E5%88%86%E5%B8%83%E5%BC%8F%E7%B3%BB%E5%88%97" title="分布式系列">
                             分布式系列
                         </a>
@@ -1445,6 +1228,10 @@ select * from school.student where age = 5; // 写几条sql
                         
                         
                         
+                        
+                        <a href="/tags/%E5%8D%8F%E8%AE%AE%E6%A0%88" title="协议栈">
+                            协议栈
+                        </a>
                         
                         
                         
@@ -1644,6 +1431,12 @@ select * from school.student where age = 5; // 写几条sql
                         
                         
                         
+                        
+                        
+                        
+                        
+                        
+                        
                         <a href="/tags/%E7%BD%91%E7%BB%9C%E7%BC%96%E7%A8%8B" title="网络编程">
                             网络编程
                         </a>
@@ -1667,6 +1460,10 @@ select * from school.student where age = 5; // 写几条sql
                         
                         
                         
+                        
+                        <a href="/tags/%E8%AE%A4%E8%AF%81%E5%92%8C%E6%8E%88%E6%9D%83" title="认证和授权">
+                            认证和授权
+                        </a>
                         
                         
                         
@@ -1837,7 +1634,7 @@ select * from school.student where age = 5; // 写几条sql
                     
                 </ul>
 		<p class="copyright text-muted">
-                    Copyright &copy;  2020
+                    Copyright &copy;  2021
                     <br>
                     <a href="https://themes.gohugo.io/hugo-theme-cleanwhite">CleanWhite Hugo Theme</a> by <a href="https://zhaohuabing.com">Huabing</a> |
                     <iframe

@@ -97,15 +97,15 @@
                     </li>
                     
                     <li>
-                        <a href="/categories/english">English</a>
+                        <a href="/categories/english">english</a>
                     </li>
                     
                     <li>
-                        <a href="/categories/life">Life</a>
+                        <a href="/categories/life">life</a>
                     </li>
                     
                     <li>
-                        <a href="/categories/tech">Tech</a>
+                        <a href="/categories/tech">tech</a>
                     </li>
                     
 
@@ -237,99 +237,56 @@
                 
                 
                 
-                
-
-<p>[TOC]</p>
-
-<p><strong>转载地址：<a href="https://cloud.tencent.com/developer/article/1176391">https://cloud.tencent.com/developer/article/1176391</a></strong></p>
-
+                <p>[TOC]</p>
+<p><strong>转载地址：https://cloud.tencent.com/developer/article/1176391</strong></p>
 <h1 id="常用数据结构">常用数据结构</h1>
-
 <p>最近在整理数据结构方面的知识, 系统化看了下Java中常用数据结构, 突发奇想用动画来绘制数据流转过程.主要基于jdk8, 可能会有些特性与jdk7之前不相同, 例如LinkedList LinkedHashMap中的双向列表不再是回环的.HashMap中的单链表是尾插, 而不是头插入等等, 后文不再赘叙这些差异, 本文目录结构如下:</p>
-
-<p><img src="/img/yj68k14kc6.png" alt="yj68k14kc6" /></p>
-
+<p><img src="/img/yj68k14kc6.png" alt="yj68k14kc6"></p>
 <h1 id="linkedlist">LinkedList</h1>
-
 <p>经典的双链表结构, 适用于乱序插入, 删除. 指定序列操作则性能不如ArrayList, 这也是其数据结构决定的.</p>
-
 <p><strong>add(E) / addLast(E)</strong></p>
-
-<p><img src="/img/2holc02bsm.gif" alt="2holc02bsm" /></p>
-
+<p><img src="/img/2holc02bsm.gif" alt="2holc02bsm"></p>
 <p><strong>add(index, E)</strong></p>
-
 <p>这边有个小的优化, 他会先判断index是靠近队头还是队尾, 来确定从哪个方向遍历链入.</p>
-
-<pre><code class="language-java"> 1         if (index &lt; (size &gt;&gt; 1)) {
- 2             Node&lt;E&gt; x = first;
- 3             for (int i = 0; i &lt; index; i++)
- 4                 x = x.next;
- 5             return x;
- 6         } else {
- 7             Node&lt;E&gt; x = last;
- 8             for (int i = size - 1; i &gt; index; i--)
- 9                 x = x.prev;
-10             return x;
-11         }
-</code></pre>
-
-<p><img src="/img/xj3z64jt57.gif" alt="xj3z64jt57" /></p>
-
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-java" data-lang="java"> 1         <span style="color:#a6e22e">if</span> <span style="color:#f92672">(</span>index <span style="color:#f92672">&lt;</span> <span style="color:#f92672">(</span>size <span style="color:#f92672">&gt;&gt;</span> 1<span style="color:#f92672">))</span> <span style="color:#f92672">{</span>
+ 2             Node<span style="color:#f92672">&lt;</span>E<span style="color:#f92672">&gt;</span> x <span style="color:#f92672">=</span> first<span style="color:#f92672">;</span>
+ 3             <span style="color:#a6e22e">for</span> <span style="color:#f92672">(</span><span style="color:#66d9ef">int</span> i <span style="color:#f92672">=</span> 0<span style="color:#f92672">;</span> i <span style="color:#f92672">&lt;</span> index<span style="color:#f92672">;</span> i<span style="color:#f92672">++)</span>
+ 4                 x <span style="color:#f92672">=</span> x<span style="color:#f92672">.</span><span style="color:#a6e22e">next</span><span style="color:#f92672">;</span>
+ 5             <span style="color:#66d9ef">return</span> x<span style="color:#f92672">;</span>
+ 6         <span style="color:#f92672">}</span> <span style="color:#66d9ef">else</span> <span style="color:#f92672">{</span>
+ 7             Node<span style="color:#f92672">&lt;</span>E<span style="color:#f92672">&gt;</span> x <span style="color:#f92672">=</span> last<span style="color:#f92672">;</span>
+ 8             <span style="color:#a6e22e">for</span> <span style="color:#f92672">(</span><span style="color:#66d9ef">int</span> i <span style="color:#f92672">=</span> size <span style="color:#f92672">-</span> 1<span style="color:#f92672">;</span> i <span style="color:#f92672">&gt;</span> index<span style="color:#f92672">;</span> i<span style="color:#f92672">--)</span>
+ 9                 x <span style="color:#f92672">=</span> x<span style="color:#f92672">.</span><span style="color:#a6e22e">prev</span><span style="color:#f92672">;</span>
+10             <span style="color:#66d9ef">return</span> x<span style="color:#f92672">;</span>
+11         <span style="color:#f92672">}</span>
+</code></pre></div><p><img src="/img/xj3z64jt57.gif" alt="xj3z64jt57"></p>
 <p><strong>靠队尾</strong></p>
-
-<p><img src="/img/a22arknnkj.gif" alt="a22arknnkj" /></p>
-
+<p><img src="/img/a22arknnkj.gif" alt="a22arknnkj"></p>
 <p><strong>get(index)</strong></p>
-
 <p>也是会先判断index, 不过性能依然不好, 这也是为什么<strong>不推荐用for(int i = 0; i &lt; lengh; i++)的方式遍历linkedlist</strong>, 而是使用iterator的方式遍历.</p>
-
-<p><img src="/img/yzkdb62o21.gif" alt="yzkdb62o21" /></p>
-
-<p><img src="/img/1q3fjvb89p.gif" alt="1q3fjvb89p" /></p>
-
+<p><img src="/img/yzkdb62o21.gif" alt="yzkdb62o21"></p>
+<p><img src="/img/1q3fjvb89p.gif" alt="1q3fjvb89p"></p>
 <p><strong>remove(E)</strong></p>
-
-<p><img src="/img/x8uk4w5o3i.gif" alt="x8uk4w5o3i" /></p>
-
+<p><img src="/img/x8uk4w5o3i.gif" alt="x8uk4w5o3i"></p>
 <h1 id="arraylist">ArrayList</h1>
-
 <p>底层就是一个数组, 因此按序查找快, 乱序插入, 删除因为涉及到后面元素移位所以性能慢.</p>
-
 <p><strong>add(index, E)</strong></p>
-
-<p><img src="/img/q3cwygwwdt.gif" alt="q3cwygwwdt" /></p>
-
+<p><img src="/img/q3cwygwwdt.gif" alt="q3cwygwwdt"></p>
 <p><strong>扩容</strong></p>
-
 <p>一般默认容量是10, 扩容后, 会length*1.5.</p>
-
-<p><img src="/img/q69k6mpbep.gif" alt="q69k6mpbep" /></p>
-
+<p><img src="/img/q69k6mpbep.gif" alt="q69k6mpbep"></p>
 <p><strong>remove(E)</strong></p>
-
 <p>循环遍历数组, 判断E是否equals当前元素, 删除性能不如LinkedList.</p>
-
-<p><img src="/img/b29ecw9auz.gif" alt="b29ecw9auz" /></p>
-
+<p><img src="/img/b29ecw9auz.gif" alt="b29ecw9auz"></p>
 <h1 id="stack">Stack</h1>
-
 <p>经典的数据结构, 底层也是数组, 继承自Vector, 先进后出FILO, 默认new Stack()容量为10, 超出自动扩容.</p>
-
 <p><strong>push(E)</strong></p>
-
-<p><img src="/img/ymleja3oww.gif" alt="ymleja3oww" /></p>
-
+<p><img src="/img/ymleja3oww.gif" alt="ymleja3oww"></p>
 <p><strong>pop()</strong></p>
-
-<p><img src="/img/ecfixsi4m3.gif" alt="ecfixsi4m3" /></p>
-
+<p><img src="/img/ecfixsi4m3.gif" alt="ecfixsi4m3"></p>
 <h2 id="后缀表达式">后缀表达式</h2>
-
 <p>Stack的一个典型应用就是计算表达式如 9 + (3 - 1) * 3 + 10 / 2, 计算机将中缀表达式转为后缀表达式, 再对后缀表达式进行计算.</p>
-
 <p><strong>中缀转后缀</strong></p>
-
 <ul>
 <li>数字直接输出</li>
 <li>栈为空时，遇到运算符，直接入栈</li>
@@ -338,202 +295,149 @@
 <li>遇到运算符(加减乘除)：弹出所有优先级大于或者等于该运算符的栈顶元素，然后将该运算符入栈</li>
 <li>最终将栈中的元素依次出栈，输出。</li>
 </ul>
-
-<p><img src="/img/a16eeu3xhj.gif" alt="a16eeu3xhj" /></p>
-
+<p><img src="/img/a16eeu3xhj.gif" alt="a16eeu3xhj"></p>
 <p><strong>计算后缀表达</strong></p>
-
 <ul>
 <li>遇到数字时，将数字压入堆栈</li>
 <li>遇到运算符时，弹出栈顶的两个数，用运算符对它们做相应的计算, 并将结果入栈</li>
 <li>重复上述过程直到表达式最右端</li>
 <li>运算得出的值即为表达式的结果</li>
 </ul>
-
-<p><img src="/img/k3ae78doc2.gif" alt="k3ae78doc2" /></p>
-
+<p><img src="/img/k3ae78doc2.gif" alt="k3ae78doc2"></p>
 <h1 id="队列">队列</h1>
-
 <p>与Stack的区别在于, Stack的删除与添加都在队尾进行, 而Queue删除在队头, 添加在队尾.</p>
-
 <p><strong>ArrayBlockingQueue</strong></p>
-
 <p>生产消费者中常用的阻塞有界队列, FIFO.</p>
-
 <p><strong>put(E)</strong></p>
-
-<p><img src="/img/xoq16yl3wo.gif" alt="xoq16yl3wo" /></p>
-
+<p><img src="/img/xoq16yl3wo.gif" alt="xoq16yl3wo"></p>
 <p><strong>put(E) 队列满了</strong></p>
-
-<pre><code class="language-java">1         final ReentrantLock lock = this.lock;
-2         lock.lockInterruptibly();
-3         try {
-4             while (count == items.length)
-5                 notFull.await();
-6             enqueue(e);
-7         } finally {
-8             lock.unlock();
-9         }
-</code></pre>
-
-<p><img src="/img/atl9jks3vf.gif" alt="atl9jks3vf" /></p>
-
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-java" data-lang="java">1         <span style="color:#66d9ef">final</span> ReentrantLock lock <span style="color:#f92672">=</span> <span style="color:#66d9ef">this</span><span style="color:#f92672">.</span><span style="color:#a6e22e">lock</span><span style="color:#f92672">;</span>
+2         lock<span style="color:#f92672">.</span><span style="color:#a6e22e">lockInterruptibly</span><span style="color:#f92672">();</span>
+3         <span style="color:#66d9ef">try</span> <span style="color:#f92672">{</span>
+4             <span style="color:#a6e22e">while</span> <span style="color:#f92672">(</span>count <span style="color:#f92672">==</span> items<span style="color:#f92672">.</span><span style="color:#a6e22e">length</span><span style="color:#f92672">)</span>
+5                 notFull<span style="color:#f92672">.</span><span style="color:#a6e22e">await</span><span style="color:#f92672">();</span>
+6             <span style="color:#a6e22e">enqueue</span><span style="color:#f92672">(</span>e<span style="color:#f92672">);</span>
+7         <span style="color:#f92672">}</span> <span style="color:#66d9ef">finally</span> <span style="color:#f92672">{</span>
+8             lock<span style="color:#f92672">.</span><span style="color:#a6e22e">unlock</span><span style="color:#f92672">();</span>
+9         <span style="color:#f92672">}</span>
+</code></pre></div><p><img src="/img/atl9jks3vf.gif" alt="atl9jks3vf"></p>
 <p><strong>take()</strong></p>
-
 <p>当元素被取出后, 并没有对数组后面的元素位移, 而是更新takeIndex来指向下一个元素.</p>
-
 <p>takeIndex是一个环形的增长, 当移动到队列尾部时, 会指向0, 再次循环.</p>
-
-<pre><code class="language-java"> 1     private E dequeue() {
- 2         // assert lock.getHoldCount() == 1;
- 3         // assert items[takeIndex] != null;
- 4         final Object[] items = this.items;
- 5         @SuppressWarnings(&quot;unchecked&quot;)
- 6         E x = (E) items[takeIndex];
- 7         items[takeIndex] = null;
- 8         if (++takeIndex == items.length)
- 9             takeIndex = 0;
-10         count--;
-11         if (itrs != null)
-12             itrs.elementDequeued();
-13         notFull.signal();
-14         return x;
-15     }
-</code></pre>
-
-<p><img src="/img/mo1m7ug1mx.gif" alt="mo1m7ug1mx" /></p>
-
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-java" data-lang="java"> 1     <span style="color:#66d9ef">private</span> E <span style="color:#a6e22e">dequeue</span><span style="color:#f92672">()</span> <span style="color:#f92672">{</span>
+ 2         <span style="color:#75715e">// assert lock.getHoldCount() == 1;
+</span><span style="color:#75715e"></span> 3         <span style="color:#75715e">// assert items[takeIndex] != null;
+</span><span style="color:#75715e"></span> 4         <span style="color:#66d9ef">final</span> Object<span style="color:#f92672">[]</span> items <span style="color:#f92672">=</span> <span style="color:#66d9ef">this</span><span style="color:#f92672">.</span><span style="color:#a6e22e">items</span><span style="color:#f92672">;</span>
+ 5         <span style="color:#a6e22e">@SuppressWarnings</span><span style="color:#f92672">(</span><span style="color:#e6db74">&#34;unchecked&#34;</span><span style="color:#f92672">)</span>
+ 6         E x <span style="color:#f92672">=</span> <span style="color:#f92672">(</span>E<span style="color:#f92672">)</span> items<span style="color:#f92672">[</span>takeIndex<span style="color:#f92672">];</span>
+ 7         items<span style="color:#f92672">[</span>takeIndex<span style="color:#f92672">]</span> <span style="color:#f92672">=</span> <span style="color:#66d9ef">null</span><span style="color:#f92672">;</span>
+ 8         <span style="color:#a6e22e">if</span> <span style="color:#f92672">(++</span>takeIndex <span style="color:#f92672">==</span> items<span style="color:#f92672">.</span><span style="color:#a6e22e">length</span><span style="color:#f92672">)</span>
+ 9             takeIndex <span style="color:#f92672">=</span> 0<span style="color:#f92672">;</span>
+10         count<span style="color:#f92672">--;</span>
+11         <span style="color:#a6e22e">if</span> <span style="color:#f92672">(</span>itrs <span style="color:#f92672">!=</span> <span style="color:#66d9ef">null</span><span style="color:#f92672">)</span>
+12             itrs<span style="color:#f92672">.</span><span style="color:#a6e22e">elementDequeued</span><span style="color:#f92672">();</span>
+13         notFull<span style="color:#f92672">.</span><span style="color:#a6e22e">signal</span><span style="color:#f92672">();</span>
+14         <span style="color:#66d9ef">return</span> x<span style="color:#f92672">;</span>
+15     <span style="color:#f92672">}</span>
+</code></pre></div><p><img src="/img/mo1m7ug1mx.gif" alt="mo1m7ug1mx"></p>
 <h1 id="hashmap">HashMap</h1>
-
 <p>最常用的哈希表, 面试的童鞋必备知识了, 内部通过数组 + 单链表的方式实现. <strong>jdk8中引入了红黑树对长度 &gt; 8的链表进行优化, 我们另外篇幅再讲.</strong></p>
-
 <p><strong>put(K, V)</strong></p>
-
-<p><img src="/img/tk96xx9h2p.gif" alt="tk96xx9h2p" /></p>
-
+<p><img src="/img/tk96xx9h2p.gif" alt="tk96xx9h2p"></p>
 <p><strong>put(K, V) 相同hash值</strong></p>
-
-<p><img src="/img/3u111c6ubw.gif" alt="3u111c6ubw" /></p>
-
+<p><img src="/img/3u111c6ubw.gif" alt="3u111c6ubw"></p>
 <p><strong>resize 动态扩容</strong></p>
-
 <p>当map中元素超出设定的阈值后, 会进行resize (length * 2)操作, 扩容过程中对元素一通操作, 并放置到新的位置.具体操作如下:</p>
-
 <ul>
 <li>在jdk7中对所有元素直接rehash, 并放到新的位置.</li>
-<li>在jdk8中判断元素原hash值新增的bit位是0还是1, 0则索引不变, 1则索引变成&rdquo;原索引 + oldTable.length&rdquo;.</li>
+<li>在jdk8中判断元素原hash值新增的bit位是0还是1, 0则索引不变, 1则索引变成&quot;原索引 + oldTable.length&quot;.</li>
 </ul>
-
-<pre><code class="language-javascript"> 1     //定义两条链
- 2     //原来的hash值新增的bit为0的链，头部和尾部
- 3     Node&lt;K,V&gt; loHead = null, loTail = null;
- 4     //原来的hash值新增的bit为1的链，头部和尾部
- 5     Node&lt;K,V&gt; hiHead = null, hiTail = null;
- 6     Node&lt;K,V&gt; next;
- 7     //循环遍历出链条链
- 8     do {
- 9         next = e.next;
-10         if ((e.hash &amp; oldCap) == 0) {
-11             if (loTail == null)
-12                 loHead = e;
-13             else
-14                 loTail.next = e;
-15             loTail = e;
-16         }
-17         else {
-18             if (hiTail == null)
-19                 hiHead = e;
-20             else
-21                 hiTail.next = e;
-22             hiTail = e;
-23         }
-24     } while ((e = next) != null);
-25     //扩容前后位置不变的链
-26     if (loTail != null) {
-27         loTail.next = null;
-28         newTab[j] = loHead;
-29     }
-30     //扩容后位置加上原数组长度的链
-31     if (hiTail != null) {
-32         hiTail.next = null;
-33         newTab[j + oldCap] = hiHead;
-34     }
-</code></pre>
-
-<p><img src="/img/1mvofg5zxp.gif" alt="1mvofg5zxp" /></p>
-
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-javascript" data-lang="javascript"> <span style="color:#ae81ff">1</span>     <span style="color:#75715e">//定义两条链
+</span><span style="color:#75715e"></span> <span style="color:#ae81ff">2</span>     <span style="color:#75715e">//原来的hash值新增的bit为0的链，头部和尾部
+</span><span style="color:#75715e"></span> <span style="color:#ae81ff">3</span>     <span style="color:#a6e22e">Node</span><span style="color:#f92672">&lt;</span><span style="color:#a6e22e">K</span>,<span style="color:#a6e22e">V</span><span style="color:#f92672">&gt;</span> <span style="color:#a6e22e">loHead</span> <span style="color:#f92672">=</span> <span style="color:#66d9ef">null</span>, <span style="color:#a6e22e">loTail</span> <span style="color:#f92672">=</span> <span style="color:#66d9ef">null</span>;
+ <span style="color:#ae81ff">4</span>     <span style="color:#75715e">//原来的hash值新增的bit为1的链，头部和尾部
+</span><span style="color:#75715e"></span> <span style="color:#ae81ff">5</span>     <span style="color:#a6e22e">Node</span><span style="color:#f92672">&lt;</span><span style="color:#a6e22e">K</span>,<span style="color:#a6e22e">V</span><span style="color:#f92672">&gt;</span> <span style="color:#a6e22e">hiHead</span> <span style="color:#f92672">=</span> <span style="color:#66d9ef">null</span>, <span style="color:#a6e22e">hiTail</span> <span style="color:#f92672">=</span> <span style="color:#66d9ef">null</span>;
+ <span style="color:#ae81ff">6</span>     <span style="color:#a6e22e">Node</span><span style="color:#f92672">&lt;</span><span style="color:#a6e22e">K</span>,<span style="color:#a6e22e">V</span><span style="color:#f92672">&gt;</span> <span style="color:#a6e22e">next</span>;
+ <span style="color:#ae81ff">7</span>     <span style="color:#75715e">//循环遍历出链条链
+</span><span style="color:#75715e"></span> <span style="color:#ae81ff">8</span>     <span style="color:#66d9ef">do</span> {
+ <span style="color:#ae81ff">9</span>         <span style="color:#a6e22e">next</span> <span style="color:#f92672">=</span> <span style="color:#a6e22e">e</span>.<span style="color:#a6e22e">next</span>;
+<span style="color:#ae81ff">10</span>         <span style="color:#66d9ef">if</span> ((<span style="color:#a6e22e">e</span>.<span style="color:#a6e22e">hash</span> <span style="color:#f92672">&amp;</span> <span style="color:#a6e22e">oldCap</span>) <span style="color:#f92672">==</span> <span style="color:#ae81ff">0</span>) {
+<span style="color:#ae81ff">11</span>             <span style="color:#66d9ef">if</span> (<span style="color:#a6e22e">loTail</span> <span style="color:#f92672">==</span> <span style="color:#66d9ef">null</span>)
+<span style="color:#ae81ff">12</span>                 <span style="color:#a6e22e">loHead</span> <span style="color:#f92672">=</span> <span style="color:#a6e22e">e</span>;
+<span style="color:#ae81ff">13</span>             <span style="color:#66d9ef">else</span>
+<span style="color:#ae81ff">14</span>                 <span style="color:#a6e22e">loTail</span>.<span style="color:#a6e22e">next</span> <span style="color:#f92672">=</span> <span style="color:#a6e22e">e</span>;
+<span style="color:#ae81ff">15</span>             <span style="color:#a6e22e">loTail</span> <span style="color:#f92672">=</span> <span style="color:#a6e22e">e</span>;
+<span style="color:#ae81ff">16</span>         }
+<span style="color:#ae81ff">17</span>         <span style="color:#66d9ef">else</span> {
+<span style="color:#ae81ff">18</span>             <span style="color:#66d9ef">if</span> (<span style="color:#a6e22e">hiTail</span> <span style="color:#f92672">==</span> <span style="color:#66d9ef">null</span>)
+<span style="color:#ae81ff">19</span>                 <span style="color:#a6e22e">hiHead</span> <span style="color:#f92672">=</span> <span style="color:#a6e22e">e</span>;
+<span style="color:#ae81ff">20</span>             <span style="color:#66d9ef">else</span>
+<span style="color:#ae81ff">21</span>                 <span style="color:#a6e22e">hiTail</span>.<span style="color:#a6e22e">next</span> <span style="color:#f92672">=</span> <span style="color:#a6e22e">e</span>;
+<span style="color:#ae81ff">22</span>             <span style="color:#a6e22e">hiTail</span> <span style="color:#f92672">=</span> <span style="color:#a6e22e">e</span>;
+<span style="color:#ae81ff">23</span>         }
+<span style="color:#ae81ff">24</span>     } <span style="color:#66d9ef">while</span> ((<span style="color:#a6e22e">e</span> <span style="color:#f92672">=</span> <span style="color:#a6e22e">next</span>) <span style="color:#f92672">!=</span> <span style="color:#66d9ef">null</span>);
+<span style="color:#ae81ff">25</span>     <span style="color:#75715e">//扩容前后位置不变的链
+</span><span style="color:#75715e"></span><span style="color:#ae81ff">26</span>     <span style="color:#66d9ef">if</span> (<span style="color:#a6e22e">loTail</span> <span style="color:#f92672">!=</span> <span style="color:#66d9ef">null</span>) {
+<span style="color:#ae81ff">27</span>         <span style="color:#a6e22e">loTail</span>.<span style="color:#a6e22e">next</span> <span style="color:#f92672">=</span> <span style="color:#66d9ef">null</span>;
+<span style="color:#ae81ff">28</span>         <span style="color:#a6e22e">newTab</span>[<span style="color:#a6e22e">j</span>] <span style="color:#f92672">=</span> <span style="color:#a6e22e">loHead</span>;
+<span style="color:#ae81ff">29</span>     }
+<span style="color:#ae81ff">30</span>     <span style="color:#75715e">//扩容后位置加上原数组长度的链
+</span><span style="color:#75715e"></span><span style="color:#ae81ff">31</span>     <span style="color:#66d9ef">if</span> (<span style="color:#a6e22e">hiTail</span> <span style="color:#f92672">!=</span> <span style="color:#66d9ef">null</span>) {
+<span style="color:#ae81ff">32</span>         <span style="color:#a6e22e">hiTail</span>.<span style="color:#a6e22e">next</span> <span style="color:#f92672">=</span> <span style="color:#66d9ef">null</span>;
+<span style="color:#ae81ff">33</span>         <span style="color:#a6e22e">newTab</span>[<span style="color:#a6e22e">j</span> <span style="color:#f92672">+</span> <span style="color:#a6e22e">oldCap</span>] <span style="color:#f92672">=</span> <span style="color:#a6e22e">hiHead</span>;
+<span style="color:#ae81ff">34</span>     }
+</code></pre></div><p><img src="/img/1mvofg5zxp.gif" alt="1mvofg5zxp"></p>
 <h1 id="linkedhashmap">LinkedHashMap</h1>
-
 <p>继承自HashMap, 底层额外维护了一个双向链表来维持数据有序. 可以通过设置accessOrder来实现FIFO(插入有序)或者LRU(访问有序)缓存.</p>
-
 <p><strong>put(K, V)</strong></p>
-
-<p><img src="/img/x48x1g7owu.gif" alt="x48x1g7owu" /></p>
-
+<p><img src="/img/x48x1g7owu.gif" alt="x48x1g7owu"></p>
 <p><strong>get(K)</strong></p>
-
 <p>accessOrder为false的时候, 直接返回元素就行了, 不需要调整位置.</p>
-
 <p>accessOrder为true的时候, 需要将最近访问的元素, 放置到队尾.</p>
-
-<p><img src="/img/17ewxojyix.gif" alt="17ewxojyix" /></p>
-
+<p><img src="/img/17ewxojyix.gif" alt="17ewxojyix"></p>
 <p><strong>removeEldestEntry 删除最老的元素</strong></p>
-
-<p><img src="/img/f6429m91lm.gif" alt="f6429m91lm" /></p>
-
+<p><img src="/img/f6429m91lm.gif" alt="f6429m91lm"></p>
 <h1 id="集合类相关总结">集合类相关总结</h1>
-
-<p>转载：<a href="https://www.jianshu.com/p/0c2d5376fae9">https://www.jianshu.com/p/0c2d5376fae9</a></p>
-
-<p>转载：<a href="https://blog.csdn.net/u011497622/article/details/81284192">https://blog.csdn.net/u011497622/article/details/81284192</a></p>
-
-<pre><code class="language-dart">Collection 
-├─List
-│  ├─ArrayList
-│  ├─LinkedList
-│  ├─Vector
-│ 
-├─Set
-│  ├─HashSet
-│  ├─TreeSet
+<p>转载：https://www.jianshu.com/p/0c2d5376fae9</p>
+<p>转载：https://blog.csdn.net/u011497622/article/details/81284192</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-dart" data-lang="dart">Collection 
+<span style="color:#960050;background-color:#1e0010">├─</span>List
+<span style="color:#960050;background-color:#1e0010">│</span>  <span style="color:#960050;background-color:#1e0010">├─</span>ArrayList
+<span style="color:#960050;background-color:#1e0010">│</span>  <span style="color:#960050;background-color:#1e0010">├─</span>LinkedList
+<span style="color:#960050;background-color:#1e0010">│</span>  <span style="color:#960050;background-color:#1e0010">├─</span>Vector
+<span style="color:#960050;background-color:#1e0010">│</span> 
+<span style="color:#960050;background-color:#1e0010">├─</span>Set
+<span style="color:#960050;background-color:#1e0010">│</span>  <span style="color:#960050;background-color:#1e0010">├─</span>HashSet
+<span style="color:#960050;background-color:#1e0010">│</span>  <span style="color:#960050;background-color:#1e0010">├─</span>TreeSet
 
 Map
-├─HashMap
-├─TreeMap
-├─LinkedHashMap
-├─ConcurrentHashMap
-</code></pre>
-
-<table>
+<span style="color:#960050;background-color:#1e0010">├─</span>HashMap
+<span style="color:#960050;background-color:#1e0010">├─</span>TreeMap
+<span style="color:#960050;background-color:#1e0010">├─</span>LinkedHashMap
+<span style="color:#960050;background-color:#1e0010">├─</span>ConcurrentHashMap
+</code></pre></div><table>
 <thead>
 <tr>
-<th align="center">类</th>
-<th align="left">说明</th>
+<th style="text-align:center">类</th>
+<th style="text-align:left">说明</th>
 </tr>
 </thead>
-
 <tbody>
 <tr>
-<td align="center">List</td>
-<td align="left">可存储相同的值（确切讲是a.equals(b)时，二者都可存储）。我们会挑选适宜连续存储的ArrayList和链式存储的LinkedList进行介绍。</td>
+<td style="text-align:center">List</td>
+<td style="text-align:left">可存储相同的值（确切讲是a.equals(b)时，二者都可存储）。我们会挑选适宜连续存储的ArrayList和链式存储的LinkedList进行介绍。</td>
 </tr>
-
 <tr>
-<td align="center">Set</td>
-<td align="left">不可存储相同值。挑选线程不安全的HashSet和线程安全的ConcurrentHashSet进行介绍。</td>
+<td style="text-align:center">Set</td>
+<td style="text-align:left">不可存储相同值。挑选线程不安全的HashSet和线程安全的ConcurrentHashSet进行介绍。</td>
 </tr>
-
 <tr>
-<td align="center">Map</td>
-<td align="left">存储key-value形式的数据。挑选线程不安全的HashMap和线程安全的ConcurrentHashMap进行介绍。</td>
+<td style="text-align:center">Map</td>
+<td style="text-align:left">存储key-value形式的数据。挑选线程不安全的HashMap和线程安全的ConcurrentHashMap进行介绍。</td>
 </tr>
 </tbody>
 </table>
-
 <h2 id="list">List</h2>
-
 <table>
 <thead>
 <tr>
@@ -542,20 +446,17 @@ Map
 <th>说明</th>
 </tr>
 </thead>
-
 <tbody>
 <tr>
 <td>ArrayList</td>
 <td>使用数组进行缓存，好处的遍历快，缺点的插入/删除中间元素比较慢</td>
 <td></td>
 </tr>
-
 <tr>
 <td>LinkedList</td>
 <td>使用双链表的结构，LinkedList是双向链表，即同时保有前驱节点和后驱节点，支持正向遍历和反向遍历。</td>
 <td>ArrayList和LinkedList比较**分析，中间插入元素LinkedList较好，因为 ArrayList 使用数组，是连续的内存，所以遍历会比较快。</td>
 </tr>
-
 <tr>
 <td>Vector</td>
 <td>Vector**的数据结果和实现跟ArrayList差不多，主要的区别是操作数据的方法都加了synchronized关键字修饰，它是线程安全的，也牺牲了些性能，慎用。</td>
@@ -563,9 +464,7 @@ Map
 </tr>
 </tbody>
 </table>
-
 <h2 id="map">Map</h2>
-
 <table>
 <thead>
 <tr>
@@ -574,20 +473,17 @@ Map
 <th></th>
 </tr>
 </thead>
-
 <tbody>
 <tr>
 <td>LinkedHashMap</td>
 <td>LinkedHashMap**继承了HashMap，数据结果和HashMap一样，但增加了双向列表的结果，用来记录插入的顺序，结果如下</td>
 <td></td>
 </tr>
-
 <tr>
 <td>TreeMap</td>
 <td>使用红-黑树结果，具有元素排序功能</td>
 <td></td>
 </tr>
-
 <tr>
 <td>ConcurrentHashMap</td>
 <td>ConcurrentHashMap是线程安全的HashMap，在JDK8中，ConcurrentHashMap为进一步优化多线程下的并发性能，不再采用分段锁对分桶进行保护，而是采用CAS操作（Compare And Set）。这个改变在思想上很像是乐观锁与悲观锁。</td>
@@ -595,9 +491,7 @@ Map
 </tr>
 </tbody>
 </table>
-
 <h2 id="set">SET</h2>
-
 <table>
 <thead>
 <tr>
@@ -606,20 +500,17 @@ Map
 <th></th>
 </tr>
 </thead>
-
 <tbody>
 <tr>
 <td>HashSet</td>
 <td>使用HashMap来保存对象</td>
 <td></td>
 </tr>
-
 <tr>
 <td>TreeSet</td>
 <td>默认使用TreeMap的key来保存元素，具有排序功能</td>
 <td></td>
 </tr>
-
 <tr>
 <td></td>
 <td></td>
@@ -734,24 +625,15 @@ Map
                     </h4>
                     <ul class="catalog-body"></ul>
                     <nav id="TableOfContents">
-<ul>
-<li><a href="#常用数据结构">常用数据结构</a></li>
-<li><a href="#linkedlist">LinkedList</a></li>
-<li><a href="#arraylist">ArrayList</a></li>
-<li><a href="#stack">Stack</a>
-<ul>
-<li><a href="#后缀表达式">后缀表达式</a></li>
-</ul></li>
-<li><a href="#队列">队列</a></li>
-<li><a href="#hashmap">HashMap</a></li>
-<li><a href="#linkedhashmap">LinkedHashMap</a></li>
-<li><a href="#集合类相关总结">集合类相关总结</a>
-<ul>
-<li><a href="#list">List</a></li>
-<li><a href="#map">Map</a></li>
-<li><a href="#set">SET</a></li>
-</ul></li>
-</ul>
+  <ul>
+    <li><a href="#后缀表达式">后缀表达式</a></li>
+  </ul>
+
+  <ul>
+    <li><a href="#list">List</a></li>
+    <li><a href="#map">Map</a></li>
+    <li><a href="#set">SET</a></li>
+  </ul>
 </nav>
                     <br>
                     <br>
@@ -776,9 +658,6 @@ Map
                         
                         
                         
-                        <a href="/tags/" title="">
-                            
-                        </a>
                         
                         
                         
@@ -788,101 +667,6 @@ Map
                         
                         
                         
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        <a href="/tags/qt" title="QT">
-                            QT
-                        </a>
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        <a href="/tags/zookeeper" title="Zookeeper">
-                            Zookeeper
-                        </a>
                         
                         
                         
@@ -922,8 +706,10 @@ Map
                         
                         
                         
-                        <a href="/tags/elasticsearch" title="elasticSearch">
-                            elasticSearch
+                        
+                        
+                        <a href="/tags/elasticsearch" title="elasticsearch">
+                            elasticsearch
                         </a>
                         
                         
@@ -934,9 +720,27 @@ Map
                         
                         
                         
-                        <a href="/tags/golang" title="golang">
-                            golang
-                        </a>
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
                         
                         
                         
@@ -974,9 +778,21 @@ Map
                         
                         
                         
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
                         <a href="/tags/jvm" title="jvm">
                             jvm
                         </a>
+                        
+                        
+                        
+                        
                         
                         
                         
@@ -1000,9 +816,19 @@ Map
                         
                         
                         
+                        
+                        
+                        
+                        
+                        
+                        
                         <a href="/tags/mongodb" title="mongodb">
                             mongodb
                         </a>
+                        
+                        
+                        
+                        
                         
                         
                         
@@ -1013,10 +839,6 @@ Map
                         </a>
                         
                         
-                        
-                        <a href="/tags/mycat" title="mycat">
-                            mycat
-                        </a>
                         
                         
                         
@@ -1030,9 +852,17 @@ Map
                         
                         
                         
-                        <a href="/tags/nginx" title="nginx">
-                            nginx
-                        </a>
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
                         
                         
                         
@@ -1056,8 +886,22 @@ Map
                         
                         
                         
+                        
+                        
                         <a href="/tags/rocketmq" title="rocketmq">
                             rocketmq
+                        </a>
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        <a href="/tags/security%E6%A1%86%E6%9E%B6%E5%AD%A6%E4%B9%A0" title="security框架学习">
+                            security框架学习
                         </a>
                         
                         
@@ -1084,17 +928,11 @@ Map
                         
                         
                         
-                        <a href="/tags/springcloud" title="springCloud">
-                            springCloud
-                        </a>
-                        
-                        
-                        
-                        
-                        
                         <a href="/tags/springboot" title="springboot">
                             springboot
                         </a>
+                        
+                        
                         
                         
                         
@@ -1108,6 +946,9 @@ Map
                         
                         
                         
+                        <a href="/tags/springcloud" title="springcloud">
+                            springcloud
+                        </a>
                         
                         
                         
@@ -1133,6 +974,33 @@ Map
                         
                         
                         
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        <a href="/tags/zookeeper" title="zookeeper">
+                            zookeeper
+                        </a>
                         
                         
                         
@@ -1192,6 +1060,8 @@ Map
                         
                         
                         
+                        
+                        
                         <a href="/tags/%E5%88%86%E5%B8%83%E5%BC%8F%E7%B3%BB%E5%88%97" title="分布式系列">
                             分布式系列
                         </a>
@@ -1211,6 +1081,10 @@ Map
                         
                         
                         
+                        
+                        <a href="/tags/%E5%8D%8F%E8%AE%AE%E6%A0%88" title="协议栈">
+                            协议栈
+                        </a>
                         
                         
                         
@@ -1410,6 +1284,12 @@ Map
                         
                         
                         
+                        
+                        
+                        
+                        
+                        
+                        
                         <a href="/tags/%E7%BD%91%E7%BB%9C%E7%BC%96%E7%A8%8B" title="网络编程">
                             网络编程
                         </a>
@@ -1433,6 +1313,10 @@ Map
                         
                         
                         
+                        
+                        <a href="/tags/%E8%AE%A4%E8%AF%81%E5%92%8C%E6%8E%88%E6%9D%83" title="认证和授权">
+                            认证和授权
+                        </a>
                         
                         
                         
@@ -1603,7 +1487,7 @@ Map
                     
                 </ul>
 		<p class="copyright text-muted">
-                    Copyright &copy;  2020
+                    Copyright &copy;  2021
                     <br>
                     <a href="https://themes.gohugo.io/hugo-theme-cleanwhite">CleanWhite Hugo Theme</a> by <a href="https://zhaohuabing.com">Huabing</a> |
                     <iframe

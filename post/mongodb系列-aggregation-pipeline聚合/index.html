@@ -97,15 +97,15 @@
                     </li>
                     
                     <li>
-                        <a href="/categories/english">English</a>
+                        <a href="/categories/english">english</a>
                     </li>
                     
                     <li>
-                        <a href="/categories/life">Life</a>
+                        <a href="/categories/life">life</a>
                     </li>
                     
                     <li>
-                        <a href="/categories/tech">Tech</a>
+                        <a href="/categories/tech">tech</a>
                     </li>
                     
 
@@ -241,161 +241,111 @@
                 
                 
                 
-                
-
-<p>[TOC]</p>
-
+                <p>[TOC]</p>
 <p><strong>说明：本文来自于<a href="https://www.bilibili.com/video/av36394924/?p=2">https://www.bilibili.com/video/av36394924/?p=2</a>视频讲解</strong></p>
-
 <p><strong>官方文档：<a href="https://docs.mongodb.com/manual/reference/operator/aggregation/sample/">https://docs.mongodb.com/manual/reference/operator/aggregation/sample/</a>  4.2版本</strong></p>
-
 <h1 id="aggregation-pipeline-简介">aggregation pipeline 简介</h1>
-
 <h2 id="管道模型">管道模型</h2>
-
 <p>后面操作的数据源来自前面的一个操作</p>
-
 <h2 id="用来做什么">用来做什么</h2>
-
 <p>做聚合操作, 分组操作， 但是更加的强大。 <strong>可以跨机器查询。</strong></p>
-
 <h1 id="常用聚合管道">常用聚合管道</h1>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-sql" data-lang="sql"><span style="color:#960050;background-color:#1e0010">规范：</span>
+db.collection.<span style="color:#66d9ef">aggregate</span>( [ <span style="color:#960050;background-color:#1e0010">{</span> <span style="color:#f92672">&lt;</span>stage<span style="color:#f92672">&gt;</span> <span style="color:#960050;background-color:#1e0010">}</span>, ... ] )
 
-<pre><code class="language-sql">规范：
-db.collection.aggregate( [ { &lt;stage&gt; }, ... ] )
-
-db.orders.explain().aggregate(
+db.orders.<span style="color:#66d9ef">explain</span>().<span style="color:#66d9ef">aggregate</span>(
   [
-   { $match: { status: &quot;A&quot; } },
-   { $group: { _id: &quot;$cust_id&quot;, total: { $sum: &quot;$amount&quot; } } },
-   { $sort: { total: -1 } }
+   <span style="color:#960050;background-color:#1e0010">{</span> <span style="color:#960050;background-color:#1e0010">$</span><span style="color:#66d9ef">match</span>: <span style="color:#960050;background-color:#1e0010">{</span> status: <span style="color:#e6db74">&#34;A&#34;</span> <span style="color:#960050;background-color:#1e0010">}</span> <span style="color:#960050;background-color:#1e0010">}</span>,
+   <span style="color:#960050;background-color:#1e0010">{</span> <span style="color:#960050;background-color:#1e0010">$</span><span style="color:#66d9ef">group</span>: <span style="color:#960050;background-color:#1e0010">{</span> _id: <span style="color:#e6db74">&#34;$cust_id&#34;</span>, total: <span style="color:#960050;background-color:#1e0010">{</span> <span style="color:#960050;background-color:#1e0010">$</span><span style="color:#66d9ef">sum</span>: <span style="color:#e6db74">&#34;$amount&#34;</span> <span style="color:#960050;background-color:#1e0010">}</span> <span style="color:#960050;background-color:#1e0010">}</span> <span style="color:#960050;background-color:#1e0010">}</span>,
+   <span style="color:#960050;background-color:#1e0010">{</span> <span style="color:#960050;background-color:#1e0010">$</span>sort: <span style="color:#960050;background-color:#1e0010">{</span> total: <span style="color:#f92672">-</span><span style="color:#ae81ff">1</span> <span style="color:#960050;background-color:#1e0010">}</span> <span style="color:#960050;background-color:#1e0010">}</span>
   ],
-  {
-    #可选的。允许写入临时文件。设置为时true，聚合操作可以将数据写入_tmp目录中的 dbPath子目录。
-    allowDiskUse: true 
-   }
+  <span style="color:#960050;background-color:#1e0010">{</span>
+    <span style="color:#f92672">#</span><span style="color:#960050;background-color:#1e0010">可选的。允许写入临时文件。设置为时</span><span style="color:#66d9ef">true</span><span style="color:#960050;background-color:#1e0010">，聚合操作可以将数据写入</span>_tmp目录中的 dbPath子目录<span style="color:#960050;background-color:#1e0010">。</span>
+    allowDiskUse: <span style="color:#66d9ef">true</span> 
+   <span style="color:#960050;background-color:#1e0010">}</span>
 )
-</code></pre>
-
-<h2 id="project">$project</h2>
-
+</code></pre></div><h2 id="project">$project</h2>
 <p>相当于我们sql中的select， 确定你需要返回哪几个字段</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-sql" data-lang="sql"><span style="color:#960050;background-color:#1e0010">规范：</span>
+<span style="color:#960050;background-color:#1e0010">{</span> <span style="color:#960050;background-color:#1e0010">$</span>project: <span style="color:#960050;background-color:#1e0010">{</span> <span style="color:#f92672">&lt;</span>specification(s)<span style="color:#f92672">&gt;</span> <span style="color:#960050;background-color:#1e0010">}</span> <span style="color:#960050;background-color:#1e0010">}</span>
 
-<pre><code class="language-sql">规范：
-{ $project: { &lt;specification(s)&gt; } }
-
-db.books.aggregate( [ { $project : { title : 1 , author : 1 } } ] )
-</code></pre>
-
-<h2 id="match">$match</h2>
-
+db.books.<span style="color:#66d9ef">aggregate</span>( [ <span style="color:#960050;background-color:#1e0010">{</span> <span style="color:#960050;background-color:#1e0010">$</span>project : <span style="color:#960050;background-color:#1e0010">{</span> title : <span style="color:#ae81ff">1</span> , author : <span style="color:#ae81ff">1</span> <span style="color:#960050;background-color:#1e0010">}</span> <span style="color:#960050;background-color:#1e0010">}</span> ] )
+</code></pre></div><h2 id="match">$match</h2>
 <p>相当于我们sql中的where</p>
-
-<pre><code class="language-sql">规范：
-{ $match: { &lt;query&gt; } }
-</code></pre>
-
-<h2 id="limit">$limit</h2>
-
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-sql" data-lang="sql"><span style="color:#960050;background-color:#1e0010">规范：</span>
+<span style="color:#960050;background-color:#1e0010">{</span> <span style="color:#960050;background-color:#1e0010">$</span><span style="color:#66d9ef">match</span>: <span style="color:#960050;background-color:#1e0010">{</span> <span style="color:#f92672">&lt;</span>query<span style="color:#f92672">&gt;</span> <span style="color:#960050;background-color:#1e0010">}</span> <span style="color:#960050;background-color:#1e0010">}</span>
+</code></pre></div><h2 id="limit">$limit</h2>
 <p>相当于我们sql中的limit</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-sql" data-lang="sql"><span style="color:#960050;background-color:#1e0010">规范：</span>
+<span style="color:#960050;background-color:#1e0010">{</span> <span style="color:#960050;background-color:#1e0010">$</span><span style="color:#66d9ef">limit</span>: <span style="color:#f92672">&lt;</span>positive integer<span style="color:#f92672">&gt;</span> <span style="color:#960050;background-color:#1e0010">}</span>
 
-<pre><code class="language-sql">规范：
-{ $limit: &lt;positive integer&gt; }
-
-db.article.aggregate(
-    { $limit : 5 }
+db.article.<span style="color:#66d9ef">aggregate</span>(
+    <span style="color:#960050;background-color:#1e0010">{</span> <span style="color:#960050;background-color:#1e0010">$</span><span style="color:#66d9ef">limit</span> : <span style="color:#ae81ff">5</span> <span style="color:#960050;background-color:#1e0010">}</span>
 );
-</code></pre>
-
-<h2 id="skip">$skip</h2>
-
+</code></pre></div><h2 id="skip">$skip</h2>
 <p>也相当于我们sql中的limit</p>
-
 <h2 id="unwind">$unwind</h2>
-
 <p>将数据拆解成每一个document</p>
-
 <h2 id="group">$group</h2>
-
 <p>这个是分组计算的</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-sql" data-lang="sql"><span style="color:#960050;background-color:#1e0010">规范：</span>
+<span style="color:#960050;background-color:#1e0010">{</span> <span style="color:#960050;background-color:#1e0010">$</span><span style="color:#66d9ef">group</span>: <span style="color:#960050;background-color:#1e0010">{</span> _id: <span style="color:#f92672">&lt;</span>expression<span style="color:#f92672">&gt;</span>, <span style="color:#f92672">&lt;</span>field1<span style="color:#f92672">&gt;</span>: <span style="color:#960050;background-color:#1e0010">{</span> <span style="color:#f92672">&lt;</span>accumulator1<span style="color:#f92672">&gt;</span> : <span style="color:#f92672">&lt;</span>expression1<span style="color:#f92672">&gt;</span> <span style="color:#960050;background-color:#1e0010">}</span>, ... <span style="color:#960050;background-color:#1e0010">}</span> <span style="color:#960050;background-color:#1e0010">}</span>
 
-<pre><code class="language-sql">规范：
-{ $group: { _id: &lt;expression&gt;, &lt;field1&gt;: { &lt;accumulator1&gt; : &lt;expression1&gt; }, ... } }
-
-db.books.aggregate(
+db.books.<span style="color:#66d9ef">aggregate</span>(
    [
-     { $group : { _id : &quot;$author&quot;, books: { $sum: &quot;$price&quot; } } }
+     <span style="color:#960050;background-color:#1e0010">{</span> <span style="color:#960050;background-color:#1e0010">$</span><span style="color:#66d9ef">group</span> : <span style="color:#960050;background-color:#1e0010">{</span> _id : <span style="color:#e6db74">&#34;$author&#34;</span>, books: <span style="color:#960050;background-color:#1e0010">{</span> <span style="color:#960050;background-color:#1e0010">$</span><span style="color:#66d9ef">sum</span>: <span style="color:#e6db74">&#34;$price&#34;</span> <span style="color:#960050;background-color:#1e0010">}</span> <span style="color:#960050;background-color:#1e0010">}</span> <span style="color:#960050;background-color:#1e0010">}</span>
    ]
 )
 
-author这个值用来分组， books这个值就是新的字段
-</code></pre>
-
-<h3 id="注意">注意</h3>
-
+author这个值用来分组<span style="color:#960050;background-color:#1e0010">，</span> books这个值就是新的字段
+</code></pre></div><h3 id="注意">注意</h3>
 <p>该<a href="https://docs.mongodb.com/manual/reference/operator/aggregation/group/#pipe._S_group"><code>$group</code></a>阶段的RAM限制为100兆字节。默认情况下，如果阶段超出此限制，<a href="https://docs.mongodb.com/manual/reference/operator/aggregation/group/#pipe._S_group"><code>$group</code></a>将产生错误。但是，要允许处理大型数据集，请将<a href="https://docs.mongodb.com/manual/reference/method/db.collection.aggregate/#db.collection.aggregate"><code>allowDiskUse</code></a>选项设置 <code>true</code>为启用<a href="https://docs.mongodb.com/manual/reference/operator/aggregation/group/#pipe._S_group"><code>$group</code></a>操作以写入临时文件。</p>
-
 <h2 id="ample">$ample</h2>
-
 <p>随机选择文档</p>
-
 <h2 id="sort">$sort</h2>
-
 <p>排序</p>
-
 <h2 id="lookup">$lookup</h2>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-sql" data-lang="sql"><span style="color:#960050;background-color:#1e0010">规范：</span>
+<span style="color:#960050;background-color:#1e0010">{</span>
+   <span style="color:#960050;background-color:#1e0010">$</span>lookup:
+     <span style="color:#960050;background-color:#1e0010">{</span>
+       <span style="color:#66d9ef">from</span>: <span style="color:#f92672">&lt;</span>collection <span style="color:#66d9ef">to</span> <span style="color:#66d9ef">join</span><span style="color:#f92672">&gt;</span>, 
+       localField: <span style="color:#f92672">&lt;</span>field <span style="color:#66d9ef">from</span> the <span style="color:#66d9ef">input</span> documents<span style="color:#f92672">&gt;</span>,
+       foreignField: <span style="color:#f92672">&lt;</span>field <span style="color:#66d9ef">from</span> the documents <span style="color:#66d9ef">of</span> the <span style="color:#e6db74">&#34;from&#34;</span> collection<span style="color:#f92672">&gt;</span>,
+       <span style="color:#66d9ef">as</span>: <span style="color:#f92672">&lt;</span><span style="color:#66d9ef">output</span> array field<span style="color:#f92672">&gt;</span>
+     <span style="color:#960050;background-color:#1e0010">}</span>
+<span style="color:#960050;background-color:#1e0010">}</span>
 
-<pre><code class="language-sql">规范：
-{
-   $lookup:
-     {
-       from: &lt;collection to join&gt;, 
-       localField: &lt;field from the input documents&gt;,
-       foreignField: &lt;field from the documents of the &quot;from&quot; collection&gt;,
-       as: &lt;output array field&gt;
-     }
-}
-
-#相当于一个左关联
-db.orders.aggregate([
-   {
-     $lookup:
-       {
-         from: &quot;inventory&quot;,
-         localField: &quot;item&quot;,
-         foreignField: &quot;sku&quot;,
-         as: &quot;inventory_docs&quot;
-       }
-  }
+<span style="color:#f92672">#</span><span style="color:#960050;background-color:#1e0010">相当于一个左关联</span>
+db.orders.<span style="color:#66d9ef">aggregate</span>([
+   <span style="color:#960050;background-color:#1e0010">{</span>
+     <span style="color:#960050;background-color:#1e0010">$</span>lookup:
+       <span style="color:#960050;background-color:#1e0010">{</span>
+         <span style="color:#66d9ef">from</span>: <span style="color:#e6db74">&#34;inventory&#34;</span>,
+         localField: <span style="color:#e6db74">&#34;item&#34;</span>,
+         foreignField: <span style="color:#e6db74">&#34;sku&#34;</span>,
+         <span style="color:#66d9ef">as</span>: <span style="color:#e6db74">&#34;inventory_docs&#34;</span>
+       <span style="color:#960050;background-color:#1e0010">}</span>
+  <span style="color:#960050;background-color:#1e0010">}</span>
 ])
 
-SELECT *, inventory_docs  FROM orders
-                          WHERE inventory_docs IN
-                                (SELECT * FROM inventory WHERE sku= orders.item);
-</code></pre>
-
-<p>sql中的join操作， 表关联</p>
-
+<span style="color:#66d9ef">SELECT</span> <span style="color:#f92672">*</span>, inventory_docs  <span style="color:#66d9ef">FROM</span> orders
+                          <span style="color:#66d9ef">WHERE</span> inventory_docs <span style="color:#66d9ef">IN</span>
+                                (<span style="color:#66d9ef">SELECT</span> <span style="color:#f92672">*</span> <span style="color:#66d9ef">FROM</span> inventory <span style="color:#66d9ef">WHERE</span> sku<span style="color:#f92672">=</span> orders.item);
+</code></pre></div><p>sql中的join操作， 表关联</p>
 <h2 id="out">$out</h2>
-
 <p>将最后的结果指定到collection中， 因为前面的查询都是临时结果， 没有序列化处理。</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-sql" data-lang="sql"><span style="color:#960050;background-color:#1e0010">规范：</span>
+<span style="color:#960050;background-color:#1e0010">{</span> <span style="color:#960050;background-color:#1e0010">$</span><span style="color:#66d9ef">out</span>: <span style="color:#e6db74">&#34;&lt;output-collection&gt;&#34;</span> <span style="color:#960050;background-color:#1e0010">}</span>
 
-<pre><code class="language-sql">规范：
-{ $out: &quot;&lt;output-collection&gt;&quot; }
-
-db.books.aggregate( [
-                      { $group : { _id : &quot;$author&quot;, books: { $push: &quot;$title&quot; } } },
-                      { $out : &quot;authors&quot; }
+db.books.<span style="color:#66d9ef">aggregate</span>( [
+                      <span style="color:#960050;background-color:#1e0010">{</span> <span style="color:#960050;background-color:#1e0010">$</span><span style="color:#66d9ef">group</span> : <span style="color:#960050;background-color:#1e0010">{</span> _id : <span style="color:#e6db74">&#34;$author&#34;</span>, books: <span style="color:#960050;background-color:#1e0010">{</span> <span style="color:#960050;background-color:#1e0010">$</span>push: <span style="color:#e6db74">&#34;$title&#34;</span> <span style="color:#960050;background-color:#1e0010">}</span> <span style="color:#960050;background-color:#1e0010">}</span> <span style="color:#960050;background-color:#1e0010">}</span>,
+                      <span style="color:#960050;background-color:#1e0010">{</span> <span style="color:#960050;background-color:#1e0010">$</span><span style="color:#66d9ef">out</span> : <span style="color:#e6db74">&#34;authors&#34;</span> <span style="color:#960050;background-color:#1e0010">}</span>
                   ] )
-这样就把books的结果集序列化到了 authors的collection中了。
-</code></pre>
-
-<h2 id="indexstats">$indexStats</h2>
-
+<span style="color:#960050;background-color:#1e0010">这样就把</span>books的结果集序列化到了 authors的collection中了<span style="color:#960050;background-color:#1e0010">。</span>
+</code></pre></div><h2 id="indexstats">$indexStats</h2>
 <p>查询过程中的索引情况</p>
-
 <h2 id="redact">$redact</h2>
-
 <p>决定内嵌文档是否keep保留</p>
 
 
@@ -445,15 +395,15 @@ db.books.aggregate( [
                 <ul class="pager">
                     
                     <li class="previous">
-                        <a href="/post/mongodb%E7%B3%BB%E5%88%97-%E5%AD%98%E5%82%A8%E5%BC%95%E6%93%8E/" data-toggle="tooltip" data-placement="top"
-                            title="mongodb-存储引擎">&larr;
+                        <a href="/post/mongodb%E7%B3%BB%E5%88%97-gridfs%E5%88%86%E5%B8%83%E5%BC%8F%E6%96%87%E4%BB%B6%E7%B3%BB%E7%BB%9F/" data-toggle="tooltip" data-placement="top"
+                            title="mongodb-GridFS分布式文件系统">&larr;
                             Previous Post</a>
                     </li>
                     
                     
                     <li class="next">
-                        <a href="/post/mongodb%E7%B3%BB%E5%88%97-gridfs%E5%88%86%E5%B8%83%E5%BC%8F%E6%96%87%E4%BB%B6%E7%B3%BB%E7%BB%9F/" data-toggle="tooltip" data-placement="top"
-                            title="mongodb-GridFS分布式文件系统">Next
+                        <a href="/post/elasticsearch-%E7%AE%80%E4%BB%8B%E5%92%8C%E5%AE%89%E8%A3%85/" data-toggle="tooltip" data-placement="top"
+                            title="ElasticSearch-入门">Next
                             Post &rarr;</a>
                     </li>
                     
@@ -504,31 +454,29 @@ db.books.aggregate( [
                     </h4>
                     <ul class="catalog-body"></ul>
                     <nav id="TableOfContents">
-<ul>
-<li><a href="#aggregation-pipeline-简介">aggregation pipeline 简介</a>
-<ul>
-<li><a href="#管道模型">管道模型</a></li>
-<li><a href="#用来做什么">用来做什么</a></li>
-</ul></li>
-<li><a href="#常用聚合管道">常用聚合管道</a>
-<ul>
-<li><a href="#project">$project</a></li>
-<li><a href="#match">$match</a></li>
-<li><a href="#limit">$limit</a></li>
-<li><a href="#skip">$skip</a></li>
-<li><a href="#unwind">$unwind</a></li>
-<li><a href="#group">$group</a>
-<ul>
-<li><a href="#注意">注意</a></li>
-</ul></li>
-<li><a href="#ample">$ample</a></li>
-<li><a href="#sort">$sort</a></li>
-<li><a href="#lookup">$lookup</a></li>
-<li><a href="#out">$out</a></li>
-<li><a href="#indexstats">$indexStats</a></li>
-<li><a href="#redact">$redact</a></li>
-</ul></li>
-</ul>
+  <ul>
+    <li><a href="#管道模型">管道模型</a></li>
+    <li><a href="#用来做什么">用来做什么</a></li>
+  </ul>
+
+  <ul>
+    <li><a href="#project">$project</a></li>
+    <li><a href="#match">$match</a></li>
+    <li><a href="#limit">$limit</a></li>
+    <li><a href="#skip">$skip</a></li>
+    <li><a href="#unwind">$unwind</a></li>
+    <li><a href="#group">$group</a>
+      <ul>
+        <li><a href="#注意">注意</a></li>
+      </ul>
+    </li>
+    <li><a href="#ample">$ample</a></li>
+    <li><a href="#sort">$sort</a></li>
+    <li><a href="#lookup">$lookup</a></li>
+    <li><a href="#out">$out</a></li>
+    <li><a href="#indexstats">$indexStats</a></li>
+    <li><a href="#redact">$redact</a></li>
+  </ul>
 </nav>
                     <br>
                     <br>
@@ -553,9 +501,6 @@ db.books.aggregate( [
                         
                         
                         
-                        <a href="/tags/" title="">
-                            
-                        </a>
                         
                         
                         
@@ -565,101 +510,6 @@ db.books.aggregate( [
                         
                         
                         
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        <a href="/tags/qt" title="QT">
-                            QT
-                        </a>
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        <a href="/tags/zookeeper" title="Zookeeper">
-                            Zookeeper
-                        </a>
                         
                         
                         
@@ -699,8 +549,10 @@ db.books.aggregate( [
                         
                         
                         
-                        <a href="/tags/elasticsearch" title="elasticSearch">
-                            elasticSearch
+                        
+                        
+                        <a href="/tags/elasticsearch" title="elasticsearch">
+                            elasticsearch
                         </a>
                         
                         
@@ -711,9 +563,27 @@ db.books.aggregate( [
                         
                         
                         
-                        <a href="/tags/golang" title="golang">
-                            golang
-                        </a>
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
                         
                         
                         
@@ -751,9 +621,21 @@ db.books.aggregate( [
                         
                         
                         
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
                         <a href="/tags/jvm" title="jvm">
                             jvm
                         </a>
+                        
+                        
+                        
+                        
                         
                         
                         
@@ -777,9 +659,19 @@ db.books.aggregate( [
                         
                         
                         
+                        
+                        
+                        
+                        
+                        
+                        
                         <a href="/tags/mongodb" title="mongodb">
                             mongodb
                         </a>
+                        
+                        
+                        
+                        
                         
                         
                         
@@ -790,10 +682,6 @@ db.books.aggregate( [
                         </a>
                         
                         
-                        
-                        <a href="/tags/mycat" title="mycat">
-                            mycat
-                        </a>
                         
                         
                         
@@ -807,9 +695,17 @@ db.books.aggregate( [
                         
                         
                         
-                        <a href="/tags/nginx" title="nginx">
-                            nginx
-                        </a>
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
                         
                         
                         
@@ -833,8 +729,22 @@ db.books.aggregate( [
                         
                         
                         
+                        
+                        
                         <a href="/tags/rocketmq" title="rocketmq">
                             rocketmq
+                        </a>
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        <a href="/tags/security%E6%A1%86%E6%9E%B6%E5%AD%A6%E4%B9%A0" title="security框架学习">
+                            security框架学习
                         </a>
                         
                         
@@ -861,17 +771,11 @@ db.books.aggregate( [
                         
                         
                         
-                        <a href="/tags/springcloud" title="springCloud">
-                            springCloud
-                        </a>
-                        
-                        
-                        
-                        
-                        
                         <a href="/tags/springboot" title="springboot">
                             springboot
                         </a>
+                        
+                        
                         
                         
                         
@@ -885,6 +789,9 @@ db.books.aggregate( [
                         
                         
                         
+                        <a href="/tags/springcloud" title="springcloud">
+                            springcloud
+                        </a>
                         
                         
                         
@@ -910,6 +817,33 @@ db.books.aggregate( [
                         
                         
                         
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        <a href="/tags/zookeeper" title="zookeeper">
+                            zookeeper
+                        </a>
                         
                         
                         
@@ -969,6 +903,8 @@ db.books.aggregate( [
                         
                         
                         
+                        
+                        
                         <a href="/tags/%E5%88%86%E5%B8%83%E5%BC%8F%E7%B3%BB%E5%88%97" title="分布式系列">
                             分布式系列
                         </a>
@@ -988,6 +924,10 @@ db.books.aggregate( [
                         
                         
                         
+                        
+                        <a href="/tags/%E5%8D%8F%E8%AE%AE%E6%A0%88" title="协议栈">
+                            协议栈
+                        </a>
                         
                         
                         
@@ -1187,6 +1127,12 @@ db.books.aggregate( [
                         
                         
                         
+                        
+                        
+                        
+                        
+                        
+                        
                         <a href="/tags/%E7%BD%91%E7%BB%9C%E7%BC%96%E7%A8%8B" title="网络编程">
                             网络编程
                         </a>
@@ -1210,6 +1156,10 @@ db.books.aggregate( [
                         
                         
                         
+                        
+                        <a href="/tags/%E8%AE%A4%E8%AF%81%E5%92%8C%E6%8E%88%E6%9D%83" title="认证和授权">
+                            认证和授权
+                        </a>
                         
                         
                         
@@ -1380,7 +1330,7 @@ db.books.aggregate( [
                     
                 </ul>
 		<p class="copyright text-muted">
-                    Copyright &copy;  2020
+                    Copyright &copy;  2021
                     <br>
                     <a href="https://themes.gohugo.io/hugo-theme-cleanwhite">CleanWhite Hugo Theme</a> by <a href="https://zhaohuabing.com">Huabing</a> |
                     <iframe

@@ -97,15 +97,15 @@
                     </li>
                     
                     <li>
-                        <a href="/categories/english">English</a>
+                        <a href="/categories/english">english</a>
                     </li>
                     
                     <li>
-                        <a href="/categories/life">Life</a>
+                        <a href="/categories/life">life</a>
                     </li>
                     
                     <li>
-                        <a href="/categories/tech">Tech</a>
+                        <a href="/categories/tech">tech</a>
                     </li>
                     
 
@@ -237,121 +237,78 @@
                 
                 
                 
-                
-
-<p>[TOC]</p>
-
+                <p>[TOC]</p>
 <p><strong>说明：以下文字来源网络各相关面试题目收集</strong></p>
-
 <h1 id="锁的框架包">锁的框架包</h1>
-
-<p><img src="/img/20170211102428481.png" alt="20170211102428481" /></p>
-
+<p><img src="/img/20170211102428481.png" alt="20170211102428481"></p>
 <h1 id="并发包相关知识点">并发包相关知识点</h1>
-
-<p><a href="/img/Java并发体系知识导图笔记.xmind">Java并发体系知识导图笔记.xmind</a></p>
-
+<p><a href="/img/Java%E5%B9%B6%E5%8F%91%E4%BD%93%E7%B3%BB%E7%9F%A5%E8%AF%86%E5%AF%BC%E5%9B%BE%E7%AC%94%E8%AE%B0.xmind">Java并发体系知识导图笔记.xmind</a></p>
 <h1 id="synchronized-相-关-问-题">Synchronized 相 关 问 题</h1>
-
-<h2 id="问题-一-synchronized用过吗-其原理是什么">问题 一 ： Synchronized用过吗，其原理是什么？</h2>
-
+<h2 id="问题-一--synchronized用过吗其原理是什么">问题 一 ： Synchronized用过吗，其原理是什么？</h2>
 <p>Synchronized是由JVM实现的一种实现互斥同步的一种方式，如果你查看被Synchronized修饰过的程序块编译后的字节码，会发现，被Synchronized修饰过的程序块，在编译前后被编译器生成了monitorenter 和 monitorexit 两 个 字 节 码 指 令 。</p>
-
 <p>这两个指令是什么意思呢？</p>
-
 <p>在 虚 拟 机 执 行 到 monitorenter 指 令 时 ， 首 先 要 尝 试 获 取 对 象 的 锁 ：如果这个对象没有锁定，或者当前线程已经拥有了这个对象的锁，把锁的计数器+1 ； 当 执 行 monitorexit 指 令 时 将 锁 计 数 器-1 ； 当 计 数 器为0时，锁就被释放了。如果获取对象失败了，那当前线程就要阻塞等待，直到对象锁被另外一个线程释放为止。</p>
-
 <p><strong>Java中Synchronize通过在对象头设置标记，达到了获取锁和释放锁的目的。</strong></p>
-
-<h2 id="问题二-你刚才提到获取对象的锁-这个-锁-到底是什么-如何确定对象的锁">问题二：你刚才提到获取对象的锁，这个“锁”到底是什么？如何确定对象的锁？</h2>
-
+<h2 id="问题二你刚才提到获取对象的锁这个锁到底是什么如何确定对象的锁">问题二：你刚才提到获取对象的锁，这个“锁”到底是什么？如何确定对象的锁？</h2>
 <p>“ 锁 ” 的 本 质 其 实 是 monitorenter 和 monitorexit 字 节 码 指 令 的 一个Reference类型的参数，即要锁定和解锁的对象。我们知道，使用Synchronized可以修饰不同的对象，因此，对应的对象锁可以这么确定。</p>
-
 <ol>
-<li><p>如果Synchronized明确指定了锁对象，比如Synchronized （ 变 量名 ） 、 Synchronized(this)等，说明加解锁对象为该对象。</p></li>
-
-<li><p>如果没有明确指定：若Synchronized修饰的方法为非静态方法，表示此方法对应的对象为锁对象；若Synchronized</p></li>
-</ol>
-
+<li>
+<p>如果Synchronized明确指定了锁对象，比如Synchronized （ 变 量名 ） 、 Synchronized(this)等，说明加解锁对象为该对象。</p>
+</li>
+<li>
+<p>如果没有明确指定：若Synchronized修饰的方法为非静态方法，表示此方法对应的对象为锁对象；若Synchronized</p>
 <p>修饰的方法为静态方法，则表示此方法对应的类对象为锁对象。</p>
-
+</li>
+</ol>
 <p><strong>注意，当一个对象被锁住时，对象里面所有用Synchronized修饰的方法都将产生堵塞，而对象里非Synchronized修饰的方法可正常被调用，不受锁影响。</strong></p>
-
-<h2 id="问题三-什么是可重入性-为什么说synchronized是可重入锁">问题三：什么是可重入性，为什么说Synchronized是可重入锁？</h2>
-
+<h2 id="问题三什么是可重入性为什么说synchronized是可重入锁">问题三：什么是可重入性，为什么说Synchronized是可重入锁？</h2>
 <p>可重入性是锁的一个基本要求，是为了解决自己锁死自己的情况。</p>
-
 <p>一个类中的同步方法调用另一个同步方法，假Synchronized不支持重入，进入method2方法时当前线程获得锁，method2方法里面执行method1时当前线程又要去尝试获取锁，这时如果不支持重入，它就要等释放，把自己阻塞，导致自己锁死自己。</p>
-
 <p>对Synchronized来说，可重入性是显而易见的，刚才提到，在执行monitorenter 指 令 时 ， 如 果 这 个 对 象 没 有 锁 定 ， 或 者 当 前 线 程 已 经 拥有了这个对象的锁（而不是已拥有了锁则不能继续获取），就把锁的计数器+1 ， 其 实 本 质 上 就 通 过 这 种 方 式 实 现 了 可 重 入 性 。</p>
-
-<h2 id="问题-四-jvm-对java的原生锁做了哪些优化">问题 四 ： JVM 对Java的原生锁做了哪些优化？</h2>
-
+<h2 id="问题-四--jvm-对java的原生锁做了哪些优化">问题 四 ： JVM 对Java的原生锁做了哪些优化？</h2>
 <p>一种优化是使用自旋锁，即在把线程进行阻塞操作之前先让线程自旋等待一段时间，可能在等待期间其他线程已经解锁，这时就无需再让线程执行阻塞操作，避免了用户态到内核态的切换。以及加入的CAS。</p>
-
-<h2 id="问题五-为什么说synchronized-是-非-公-平-锁">问题五：为什么说Synchronized 是 非 公 平 锁 ？</h2>
-
+<h2 id="问题五为什么说synchronized-是-非-公-平-锁-">问题五：为什么说Synchronized 是 非 公 平 锁 ？</h2>
 <p>非公平主要表现在获取锁的行为上，并非是按照申请锁的时间前后给等待线程分配锁的，每当锁被释放后，任何一个线程都有机会竞争到锁，这样做的目的是为了提高执行性能，缺点是可能会产生线程饥饿现象。</p>
-
-<h2 id="问题六-为什么说synchronized是一个悲观锁-乐观锁的实现原理又是什么-什么是cas-它-有-什-么-特-性">问题六：为什么说Synchronized是一个悲观锁？乐观锁的实现原理又是什么？什么是CAS ， 它 有 什 么 特 性 ？</h2>
-
+<h2 id="问题六为什么说synchronized是一个悲观锁乐观锁的实现原理又是什么什么是cas--它-有-什-么-特-性-">问题六：为什么说Synchronized是一个悲观锁？乐观锁的实现原理又是什么？什么是CAS ， 它 有 什 么 特 性 ？</h2>
 <p>Synchronized显然是一个悲观锁，因为它的并发策略是悲观的：</p>
-
-<pre><code>不管是否会产生竞争，任何的数据操作都必须要加锁、用户态核心态转换、维护锁计数器和检查是否有被阻塞的线程需要被唤醒等操作。
-</code></pre>
-
-<p>随着硬件指令集的发展，我们可以使用基于冲突检测的乐观并发策略。先进行操作，如果没有其他线程征用数据，那操作就成功了；</p>
-
+<pre tabindex="0"><code>不管是否会产生竞争，任何的数据操作都必须要加锁、用户态核心态转换、维护锁计数器和检查是否有被阻塞的线程需要被唤醒等操作。
+</code></pre><p>随着硬件指令集的发展，我们可以使用基于冲突检测的乐观并发策略。先进行操作，如果没有其他线程征用数据，那操作就成功了；</p>
 <p>如果共享数据有征用，产生了冲突，那就再进行其他的补偿措施。这种乐观的并发策略的许多实现不需要线程挂起，所以被称为非阻塞同步。</p>
-
-<p><strong>乐观锁的核心算法是CAS （ Compareand Swap ， 比 较 并 交 换 ） ， 它 涉及到三个操作数：内存值、预期值、新值。当且仅当预期值和内存值相等时才将内存值修改为新值。</strong>这样处理的逻辑是，首先检查某块内存的值是否跟之前我读取时的一样，如不一样则表示期间此内存值已经被别的线程更改过，舍弃本次操作，否则说明期间没有其他线程对此内存值操作，可以把新值设置给此块内存。</p>
-
+<p>**乐观锁的核心算法是CAS （ Compareand Swap ， 比 较 并 交 换 ） ， 它 涉及到三个操作数：内存值、预期值、新值。当且仅当预期值和内存值相等时才将内存值修改为新值。**这样处理的逻辑是，首先检查某块内存的值是否跟之前我读取时的一样，如不一样则表示期间此内存值已经被别的线程更改过，舍弃本次操作，否则说明期间没有其他线程对此内存值操作，可以把新值设置给此块内存。</p>
 <p>CAS具有原子性，它的原子性由CPU硬件指令实现保证，即使用JNI调用Native方法调用由C++编 写 的 硬 件 级 别 指 令 ， JDK中提供了Unsafe类执行这些操作。</p>
-
-<h2 id="问题七-乐观锁一定就是好的吗">问题七：乐观锁一定就是好的吗？</h2>
-
+<h2 id="问题七乐观锁一定就是好的吗">问题七：乐观锁一定就是好的吗？</h2>
 <p>乐观锁避免了悲观锁独占对象的现象，同时也提高了并发性能，但它也有缺点：</p>
-
 <ol>
 <li>乐观锁只能保证一个共享变量的原子操作。如果多一个或几个变量，乐观锁将变得力不从心，但互斥锁能轻易解决，不管对象数量多少及对象颗粒度大小。</li>
 <li>长时间自旋可能导致开销大。假如CAS长时间不成功而一直自旋，会给CPU带来很大的开销。</li>
 <li>ABA问 题 。 CAS的核心思想是通过比对内存值与预期值是否一样而判断内存值是否被改过，但这个判断逻辑不严谨，假如内存值原来是A，后来被一条线程改为B， 最 后 又 被 改 成 了A， 则CAS认为此内存值并没有发生改变，但实际上是有被其他线程改过的，这种情况对依赖过程值的情景的运算结果影响很大。解决的思路是引入版本号，每次变量更新都把版本号加一。</li>
 </ol>
-
 <h1 id="可重入锁reentrantlock-及-其-他-显-式-锁-相-关-问-题">可重入锁ReentrantLock 及 其 他 显 式 锁 相 关 问 题</h1>
-
-<h2 id="问题一-跟synchronized相比-可重入锁reentrantlock其实现原理有什么不同">问题一：跟Synchronized相比，可重入锁ReentrantLock其实现原理有什么不同？</h2>
-
+<h2 id="问题一跟synchronized相比可重入锁reentrantlock其实现原理有什么不同">问题一：跟Synchronized相比，可重入锁ReentrantLock其实现原理有什么不同？</h2>
 <p>其实，锁的实现原理基本是为了达到一个目的：<strong>让所有的线程都能看到某种标记。当然分布式锁也是一样的道理。</strong></p>
-
 <p>Synchronized通过在对象头中设置标记实现了这一目的，是一种JVM原生的锁实现方式，而ReentrantLock以及所有的基于Lock接口的实现类，都是通过用一个volitile修饰的int型变量，并保证每个线程都能拥有对该int的可见性和原子修改，其本质是基于所谓的AQS框架。</p>
-
-<h2 id="问题二-那么请谈谈aqs-框-架-是-怎-么-回-事-儿">问题二：那么请谈谈AQS 框 架 是 怎 么 回 事 儿 ？</h2>
-
+<h2 id="问题二那么请谈谈aqs-框-架-是-怎-么-回-事-儿-">问题二：那么请谈谈AQS 框 架 是 怎 么 回 事 儿 ？</h2>
 <p>AQS （ AbstractQueuedSynchronizer类）是一个用来构建锁和同步器的框架，各种Lock包中的锁（常用的有ReentrantLock 、ReadWriteLock ） ， 以 及 其 他 如Semaphore 、 CountDownLatch ， 甚至是早期的FutureTask等，都是基于AQS 来 构 建 。</p>
-
 <p>框架流程：</p>
-
 <ol>
-<li><p>AQS在内部定义了一个volatile int state变量，表示同步状态：当线程调用lock方法时，如果state=0 ， 说 明 没 有 任 何 线 程 占 有 共 享 资 源的锁，可以获得锁并将state=1 ； 如 果state=1 ， 则 说 明 有 线 程 目 前 正 在使用共享变量，其他线程必须加入同步队列进行等待。</p></li>
+<li>
+<p>AQS在内部定义了一个volatile int state变量，表示同步状态：当线程调用lock方法时，如果state=0 ， 说 明 没 有 任 何 线 程 占 有 共 享 资 源的锁，可以获得锁并将state=1 ； 如 果state=1 ， 则 说 明 有 线 程 目 前 正 在使用共享变量，其他线程必须加入同步队列进行等待。</p>
+</li>
+<li>
+<p>AQS通过Node内部类构成的一个双向链表结构的同步队列，来完成线程获取锁的排队工作，当有线程获取锁失败后，就被添加到队列末尾。</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-java" data-lang="java">Node类是对要访问同步代码的线程的封装<span style="color:#960050;background-color:#1e0010">，</span>包含了线程本身及其状态叫waitStatus <span style="color:#960050;background-color:#1e0010">（</span> 有 五 种 不 同取值<span style="color:#960050;background-color:#1e0010">，</span>分别表示 是否被阻塞<span style="color:#960050;background-color:#1e0010">，</span>是否等待唤醒<span style="color:#960050;background-color:#1e0010">，</span>是否已经被取消等<span style="color:#960050;background-color:#1e0010">），</span>每个Node结点关联其prev结点和next结点<span style="color:#960050;background-color:#1e0010">，</span>方便线程释放锁后快速唤醒下一个在等待的线程<span style="color:#960050;background-color:#1e0010">，</span>是一个FIFO的过程<span style="color:#960050;background-color:#1e0010">。</span>
 
-<li><p>AQS通过Node内部类构成的一个双向链表结构的同步队列，来完成线程获取锁的排队工作，当有线程获取锁失败后，就被添加到队列末尾。</p></li>
+Node类 有 两 个 常 量 <span style="color:#960050;background-color:#1e0010">，</span> SHARED和EXCLUSIVE <span style="color:#960050;background-color:#1e0010">，</span> 分 别 代 表 共 享 模 式 和 独占模式<span style="color:#960050;background-color:#1e0010">。</span>所谓共享模式是一个锁允许多条线程同时操作<span style="color:#960050;background-color:#1e0010">（</span>信号量Semaphore就是基于AQS的共享模式实现的<span style="color:#960050;background-color:#1e0010">），</span>独占模式是同一个时间段只能有一个线程对共享资源进行操作<span style="color:#960050;background-color:#1e0010">，</span>多余的请求线程需要排队等待<span style="color:#960050;background-color:#1e0010">（</span>如ReentranLock <span style="color:#960050;background-color:#1e0010">）</span> <span style="color:#960050;background-color:#1e0010">。</span>
+</code></pre></div></li>
+<li>
+<p>AQS通过内部类ConditionObject构建等待队列（可有多个），当Condition调用wait()方法后，线程将会加入等待队列中，而当Condition调用signal()方法后，线程将从等待队列转移动同步队列中进行锁竞争。</p>
+</li>
+<li>
+<p>AQS和Condition各自维护了不同的队列，在使用Lock和Condition的时候，其实就是两个队列的互相移动。</p>
+</li>
 </ol>
-
-<pre><code class="language-java">   Node类是对要访问同步代码的线程的封装，包含了线程本身及其状态叫waitStatus （ 有 五 种 不 同取值，分别表示 是否被阻塞，是否等待唤醒，是否已经被取消等），每个Node结点关联其prev结点和next结点，方便线程释放锁后快速唤醒下一个在等待的线程，是一个FIFO的过程。
-   
-   Node类 有 两 个 常 量 ， SHARED和EXCLUSIVE ， 分 别 代 表 共 享 模 式 和 独占模式。所谓共享模式是一个锁允许多条线程同时操作（信号量Semaphore就是基于AQS的共享模式实现的），独占模式是同一个时间段只能有一个线程对共享资源进行操作，多余的请求线程需要排队等待（如ReentranLock ） 。
-</code></pre>
-
-<ol>
-<li>AQS通过内部类ConditionObject构建等待队列（可有多个），当Condition调用wait()方法后，线程将会加入等待队列中，而当Condition调用signal()方法后，线程将从等待队列转移动同步队列中进行锁竞争。</li>
-<li>AQS和Condition各自维护了不同的队列，在使用Lock和Condition的时候，其实就是两个队列的互相移动。</li>
-</ol>
-
-<h2 id="问题三-请尽可能详尽地对比下synchronized和reentrantlock的异同">问题三：请尽可能详尽地对比下Synchronized和ReentrantLock的异同。</h2>
-
+<h2 id="问题三请尽可能详尽地对比下synchronized和reentrantlock的异同">问题三：请尽可能详尽地对比下Synchronized和ReentrantLock的异同。</h2>
 <p>ReentrantLock 是Lock的实现类，是一个互斥的同步锁。从 功 能 角 度 ， ReentrantLock比Synchronized的同步操作更精细（因为可以像普通对象一样使用），甚至实现Synchronized没有的高级功能，如：</p>
-
 <ol>
 <li>等待可中断：当持有锁的线程长期不释放锁的时候，正在等待的线程可以选择放弃等待，对处理执行时间非常长的同步块很有用。</li>
 <li>带超时的获取锁尝试：在指定的时间范围内获取锁，如果时间到了仍然无法获取则返回。</li>
@@ -359,254 +316,186 @@
 <li>可以响应中断请求：与Synchronized不同，当获取到锁的线程被中断时，能够响应中断，中断异常将会被抛出，同时锁会被释放。</li>
 <li>可以实现公平锁。</li>
 </ol>
-
 <p><strong>从 锁 释 放 角 度</strong> ， Synchronized在JVM层面上实现的，不但可以通过一些监控工具监控Synchronized的锁定，而且在代码执行出现异常时 ， JVM会自动释放锁定；但是使用Lock则 不 行 ， Lock是通过代码实现的，要保证锁定一定会被释放，就必须将unLock()放到finally{} 中 。</p>
-
 <p><strong>从 性 能 角 度</strong> ， Synchronized早期实现比较低效，对比ReentrantLock ， 大 多 数 场 景 性 能 都 相 差 较 大 。但是在</p>
-
 <p>Java6中对其进行了非常多的改进，在竞争不激烈时，Synchronized的性能要优于ReetrantLock ；在 高 竞 争 情 况 下 ，Synchronized的性能会下降几十倍，但是ReetrantLock的性能能维持常态。</p>
-
-<h2 id="问题四-reentrantlock是如何实现可重入性的">问题四 ： ReentrantLock是如何实现可重入性的？</h2>
-
+<h2 id="问题四--reentrantlock是如何实现可重入性的">问题四 ： ReentrantLock是如何实现可重入性的？</h2>
 <p>ReentrantLock内部自定义了同步器Sync （ Sync既实现了AQS ，又实现了AOS ， 而AOS提供了一种互斥锁持有的方式），其实就是加锁的时候通过CAS算法，将线程对象放到一个双向链表中，，每取锁的时候，看下当前维护的那个线程ID和当前请求的线程ID是否一样，一样就可重入了。</p>
-
-<h2 id="问题五-除了reetrantlock-你-还-接-触-过juc中的哪些并发工具">问题五：除了ReetrantLock ， 你 还 接 触 过JUC中的哪些并发工具？</h2>
-
+<h2 id="问题五除了reetrantlock--你-还-接-触-过juc中的哪些并发工具">问题五：除了ReetrantLock ， 你 还 接 触 过JUC中的哪些并发工具？</h2>
 <p>通 常 所 说 的 并 发 包 （ JUC ） 也 就 是java.util.concurrent及其子包，集中了Java并发的各种基础工具类，具体主要包括几个方面：</p>
-
 <ol>
 <li>提供了CountDownLatch 、 CyclicBarrier 、 Semaphore等，比Synchronized更加高级，可以实现更加丰富多线程操作的同步结构。</li>
 <li>提供了ConcurrentHashMap 、 有 序 的ConcunrrentSkipListMap ， 或者通过类似快照机制实现线程安全的动态数组CopyOnWriteArrayList等，各种线程安全的容器。</li>
 <li>提供了ArrayBlockingQueue 、 SynchorousQueue或针对特定场景的PriorityBlockingQueue等，各种并发队列实现。</li>
 <li>强大的Executor框架，可以创建各种不同类型的线程池，调度任务运行等。</li>
 </ol>
-
-<h2 id="问题六-请谈谈readwritelock和stampedlock">问题六：请谈谈ReadWriteLock和StampedLock 。</h2>
-
+<h2 id="问题六请谈谈readwritelock和stampedlock-">问题六：请谈谈ReadWriteLock和StampedLock 。</h2>
 <p>虽然ReentrantLock和Synchronized简单实用，但是行为上有一定局限性，要么不占，要么独占。实际应用场景中，有时候不需要大量竞争的写操作，而是以并发读取为主，为了进一步优化并发操作的粒度 ， Java提供了读写锁。</p>
-
 <p>读写锁基于的原理是多个读操作不需要互斥，如果读锁试图锁定时，写锁是被某个线程持有，读锁将无法获得，而只好等待对方操作结束，这样就可以自动保证不会读取到有争议的数据。</p>
-
 <p>ReadWriteLock代表了一对锁，Synchronized的粒度似乎细一些，但在实际应用中，其表现也并不尽如人意，主要还是因为相对比较大的开销。</p>
-
 <p>所 以 ， JDK在后期引入了StampedLock ， 在 提 供 类 似 读 写 锁 的 同 时 ，还支持优化读模式。优化读基于假设，大多数情况下读操作并不会和写操作冲突，其逻辑是先试着修改，然后通过validate方法确认是否进入了写模式，如果没有进入，就成功避免了开销；如果进入，则尝试获取读锁。</p>
-
-<h2 id="问题七-如何让java的线程彼此同步-你了解过哪些同步器-请分别介绍下">问题七：如何让Java的线程彼此同步？你了解过哪些同步器？请分别介绍下。</h2>
-
+<h2 id="问题七如何让java的线程彼此同步你了解过哪些同步器请分别介绍下">问题七：如何让Java的线程彼此同步？你了解过哪些同步器？请分别介绍下。</h2>
 <p>JUC中 的 同 步 器 三 个 主 要 的 成 员 ： CountDownLatch 、 CyclicBarrier和Semaphore ， 通 过 它 们 可 以 方 便 地 实 现 很 多 线 程 之 间 协 作 的 功 能 。</p>
-
 <p><strong>CountDownLatch叫倒计数</strong>，允许一个或多个线程等待某些操作完成。看几个场景：</p>
-
 <ol>
 <li>跑步比赛，裁判需要等到所有的运动员（“其他线程”）都跑到终点（达到目标），才能去算排名和颁奖。</li>
 <li>模拟并发，我需要启动100个线程去同时访问某一个地址，我希望它们能同时并发，而不是一个一个的去执行。</li>
 </ol>
-
-<p><strong>CyclicBarrier叫循环栅栏，</strong>它实现让一组线程等待至某个状态之后再全 部 同 时 执 行 ， 而 且 当 所 有 等 待 线 程 被 释 放 后 ， CyclicBarrier可以被重 复 使 用 。 CyclicBarrier的典型应用场景是用来等待并发线程结束。CyclicBarrier的主要方法是await() ， await()每被调用一次，计数便会减少1， 并 阻 塞 住 当 前 线 程 。 当 计 数 减 至0时，阻塞解除，所有在此CyclicBarrier 上 面 阻 塞 的 线 程 开 始 运 行 。</p>
-
-<p><strong>Semaphore ， Java版本的信号量实现</strong>，<strong>用于控制同时访问的线程个数，来达到限制通用资源访问的目的，</strong>其原理是通过acquire()获取一个许可，如果没有就等待，而release()释放一个许可。</p>
-
-<h2 id="问-题-八-cyclicbarrier和countdownlatch看起来很相似-请对比下呢">问 题 八 ： CyclicBarrier和CountDownLatch看起来很相似，请对比下呢？</h2>
-
+<p>**CyclicBarrier叫循环栅栏，**它实现让一组线程等待至某个状态之后再全 部 同 时 执 行 ， 而 且 当 所 有 等 待 线 程 被 释 放 后 ， CyclicBarrier可以被重 复 使 用 。 CyclicBarrier的典型应用场景是用来等待并发线程结束。CyclicBarrier的主要方法是await() ， await()每被调用一次，计数便会减少1， 并 阻 塞 住 当 前 线 程 。 当 计 数 减 至0时，阻塞解除，所有在此CyclicBarrier 上 面 阻 塞 的 线 程 开 始 运 行 。</p>
+<p><strong>Semaphore ， Java版本的信号量实现</strong>，**用于控制同时访问的线程个数，来达到限制通用资源访问的目的，**其原理是通过acquire()获取一个许可，如果没有就等待，而release()释放一个许可。</p>
+<h2 id="问-题-八--cyclicbarrier和countdownlatch看起来很相似请对比下呢">问 题 八 ： CyclicBarrier和CountDownLatch看起来很相似，请对比下呢？</h2>
 <p>它们的行为有一定相似度，区别主要在于：</p>
-
 <ol>
 <li>CountDownLatch是 不 可 以 重 置 的 ， 所 以 无 法 重 用 ， CyclicBarrier没有这种限制，可以重用。</li>
 <li>CountDownLatch的基本操作组合是countDown/await ， 调 用await的线程阻塞等待countDown足够的次数，不管你   是在一个线 程还是多个线程里countDown ， 只 要 次 数 足 够 即 可 。CyclicBarrier的基本操作组合就是await ， 当 所 有 的 伙 伴 都 调 用 了await ， 才 会 继 续进行任务，并自动进行重置。CountDownLatch目的是让一个线程等待其他N个线程达到某个条件后，自己再去做某个事（通过CyclicBarrier的第二个构造方法public CyclicBarrier(int parties, Runnable barrierAction) ， 在 新 线程里做事可以达到同样的效果）。而CyclicBarrier的目的是让N多线程互相等待直到所有的都达到某个状态，然后这N个线程再继续执行各自后续（通过CountDownLatch在某些场合也能完成类似的效果）。</li>
 </ol>
-
 <h1 id="java-线-程-池-相-关-问-题">Java 线 程 池 相 关 问 题</h1>
-
-<h2 id="问-题-一-java中的线程池是如何实现的">问 题 一 ： Java中的线程池是如何实现的？</h2>
-
+<h2 id="问-题-一--java中的线程池是如何实现的">问 题 一 ： Java中的线程池是如何实现的？</h2>
 <ol>
-<li>在Java中，所谓的线程池中的“线程”，其实是被抽象为了一个静态内部类Worker ， 它 基 于AQS实现，存放在线程池的HashSet<Worker> workers 成 员 变 量 中 ；</li>
-<li>而需要执行的任务则存放在成员变量workQueue（ BlockingQueue<Runnable> workQueue ） 中 。这样，整个线程池实现的基本思想就是：从workQueue中不断取出需要执行的任务，放在Workers中进行处理。</li>
+<li>在Java中，所谓的线程池中的“线程”，其实是被抽象为了一个静态内部类Worker ， 它 基 于AQS实现，存放在线程池的HashSet<!-- raw HTML omitted --> workers 成 员 变 量 中 ；</li>
+<li>而需要执行的任务则存放在成员变量workQueue（ BlockingQueue<!-- raw HTML omitted --> workQueue ） 中 。这样，整个线程池实现的基本思想就是：从workQueue中不断取出需要执行的任务，放在Workers中进行处理。</li>
 </ol>
-
-<h2 id="问题二-创建线程池的几个核心构造参数">问题二：创建线程池的几个核心构造参数？</h2>
-
+<h2 id="问题二创建线程池的几个核心构造参数">问题二：创建线程池的几个核心构造参数？</h2>
 <p>Java中的线程池的创建其实非常灵活，我们可以通过配置不同的参数，创建出行为不同的线程池，这几个参数包括：</p>
-
 <ol>
 <li>corePoolSize ： 线 程 池 的 核 心 线 程 数 。</li>
 <li>maximumPoolSize ： 线 程 池 允 许 的 最 大 线 程 数 。</li>
 <li>keepAliveTime ： 超 过 核 心 线 程 数 时 闲 置 线 程 的 存 活 时 间 。</li>
 <li>workQueue ： 任 务 执 行 前 保 存 任 务 的 队 列 ， 保 存 由execute方法提交的Runnable任务。</li>
 </ol>
-
-<h2 id="问题三-线程池中的线程是怎么创建的-是一开始就随着线程池的启动创建好的吗">问题三：线程池中的线程是怎么创建的？是一开始就随着线程池的启动创建好的吗？</h2>
-
+<h2 id="问题三线程池中的线程是怎么创建的是一开始就随着线程池的启动创建好的吗">问题三：线程池中的线程是怎么创建的？是一开始就随着线程池的启动创建好的吗？</h2>
 <p>显然不是的。线程池默认初始化后不启动Worker ， 等 待 有 请 求 时 才 启动。每当我们调用execute()方法添加一个任务时，线程池会做如下判断：</p>
-
 <ol>
-<li><p>如果正在运行的线程数量小于corePoolSize ， 那 么 马 上 创 建 线 程 运 行这个任务；</p></li>
-
-<li><p>如果正在运行的线程数量大于或等于corePoolSize ， 那 么 将 这 个 任 务放入队列；</p></li>
-
-<li><p>如果这时候队列满了，而且正在运行的线程数量小于maximumPoolSize ， 那 么 还 是 要 创 建 非 核 心 线 程 立 刻 运 行 这 个 任 务 ；</p></li>
-
-<li><p>如果队列满了，而且正在运行的线程数量大于或等于maximumPoolSize ， 那 么 线 程 池 会 抛 出 异 常 RejectExecutionException 。</p></li>
+<li>
+<p>如果正在运行的线程数量小于corePoolSize ， 那 么 马 上 创 建 线 程 运 行这个任务；</p>
+</li>
+<li>
+<p>如果正在运行的线程数量大于或等于corePoolSize ， 那 么 将 这 个 任 务放入队列；</p>
+</li>
+<li>
+<p>如果这时候队列满了，而且正在运行的线程数量小于maximumPoolSize ， 那 么 还 是 要 创 建 非 核 心 线 程 立 刻 运 行 这 个 任 务 ；</p>
+</li>
+<li>
+<p>如果队列满了，而且正在运行的线程数量大于或等于maximumPoolSize ， 那 么 线 程 池 会 抛 出 异 常 RejectExecutionException 。</p>
+</li>
 </ol>
-
 <p>当一个线程完成任务时，它会从队列中取下一个任务来执行。当一个线 程 无 事 可 做 ， 超 过 一 定 的 时 间 （ keepAliveTime ） 时 ， 线 程 池 会 判断。</p>
-
 <p>如果当前运行的线程数大于corePoolSize ， 那 么 这 个 线 程 就 被 停 掉 。所以线程池的所有任务完成后，它最终会收缩到corePoolSize的大小。</p>
-
-<h2 id="问题四-既然提到可以通过配置不同参数创建出不同的线程池-那么java中默认实现好的线程池又有哪些呢-请比较它们的异同">问题四：既然提到可以通过配置不同参数创建出不同的线程池，那么Java中默认实现好的线程池又有哪些呢？请比较它们的异同。</h2>
-
+<h2 id="问题四既然提到可以通过配置不同参数创建出不同的线程池那么java中默认实现好的线程池又有哪些呢请比较它们的异同">问题四：既然提到可以通过配置不同参数创建出不同的线程池，那么Java中默认实现好的线程池又有哪些呢？请比较它们的异同。</h2>
 <h3 id="singlethreadexecutor线程池">SingleThreadExecutor线程池</h3>
-
 <p>这个线程池只有一个核心线程在工作，也就是相当于单线程串行执行所有任务。如果这个唯一的线程因为异常结束，那么会有一个新的线程来替代它。此线程池保证所有任务的执行顺序按照任务的提交顺序执行。</p>
-
 <ul>
 <li>corePoolSize ： 1 ， 只 有 一 个 核 心 线 程 在 工 作</li>
 <li>maximumPoolSize ： 1</li>
 <li>keepAliveTime ： 0L</li>
-<li>workQueue ： new LinkedBlockingQueue<Runnable>() ， 其 缓 冲 队 列是无界的</li>
+<li>workQueue ： new LinkedBlockingQueue<!-- raw HTML omitted -->() ， 其 缓 冲 队 列是无界的</li>
 </ul>
-
 <h3 id="fixedthreadpool-线-程-池">FixedThreadPool 线 程 池</h3>
-
 <p>FixedThreadPool 是 固 定 大 小 的 线 程 池 ， 只 有 核 心 线 程 。 每 次 提 交 一 个任务就创建一个线程，直到线程达到线程池的最大大小。线程池的大小一旦达到最大值就会保持不变，如果某个线程因为执行异常而结束，那么线程池会补充一个新线程。</p>
-
 <p>FixedThreadPool 多 数 针 对 一 些 很 稳 定 很 固 定 的 正 规 并 发 线 程 ， 多 用 于服务器。</p>
-
 <ul>
 <li>corePoolSize ： nThreads</li>
 <li>maximumPoolSize ： nThreads</li>
 <li>keepAliveTime ： 0L</li>
-<li>workQueue ： new LinkedBlockingQueue<Runnable>() ， 其 缓 冲 队 列是无界的。</li>
+<li>workQueue ： new LinkedBlockingQueue<!-- raw HTML omitted -->() ， 其 缓 冲 队 列是无界的。</li>
 </ul>
-
 <h3 id="cachedthreadpool线程池">CachedThreadPool线程池</h3>
-
 <p>CachedThreadPool 是 无 界 线 程 池 ， 如 果 线 程 池 的 大 小 超 过 了 处 理 任 务所 需 要 的 线 程 ， 那 么 就 会 回 收 部 分 空 闲 （ 60秒不执行任务）线程，当任务数增加时，此线程池又可以智能的添加新线程来处理任务。线程池大小完全依赖于操作系统（或者说JVM ） 能 够 创 建 的 最 大 线 程大 小 。 SynchronousQueue 是 一 个 是 缓 冲 区 为1的阻塞队列。<strong>缓存型池子通常用于执行一些生存期很短的异步型任务，因此在一些面向连接的daemon型SERVER 中 用 得 不 多 。 但 对 于 生 存 期 短 的 异 步任务，它是Executor的首选。</strong></p>
-
 <ul>
 <li>corePoolSize ： 0</li>
 <li>maximumPoolSize ： Integer.MAX_VALUE</li>
 <li>keepAliveTime ： 60L</li>
-<li>workQueue ： new SynchronousQueue<Runnable>() ， 一 个 是 缓 冲 区为1的阻塞队列。</li>
+<li>workQueue ： new SynchronousQueue<!-- raw HTML omitted -->() ， 一 个 是 缓 冲 区为1的阻塞队列。</li>
 </ul>
-
 <h3 id="scheduledthreadpool-线-程-池">ScheduledThreadPool 线 程 池</h3>
-
 <p>ScheduledThreadPool ： 核 心 线 程 池 固 定 ， 大 小 无 限 的 线 程 池 。 此 线 程池支持定时以及周期性执行任务的需求。创建一个周期性执行任务的线程池。如果闲置，非核心线程池会在DEFAULT_KEEPALIVEMILLIS时间内回收。</p>
-
 <p></p>
-
 <ul>
 <li>corePoolSize ： corePoolSize</li>
 <li>maximumPoolSize ： Integer.MAX_VALUE</li>
 <li>keepAliveTime ： DEFAULT_KEEPALIVE_MILLIS</li>
 <li>workQueue ： new DelayedWorkQueue()</li>
 </ul>
-
-<h2 id="问题五-如何在java线程池中提交线程">问题五：如何在Java线程池中提交线程？</h2>
-
+<h2 id="问题五如何在java线程池中提交线程">问题五：如何在Java线程池中提交线程？</h2>
 <p>线程池最常用的提交任务的方法有两种：</p>
-
 <ol>
 <li>execute() ： ExecutorService.execute方法接收一个Runable实例，它用来执行一个任务：</li>
 <li>submit() ： ExecutorService.submit()方法返回的是Future对象。可以用isDone()来查询Future 是 否 已 经 完 成 ， 当 任 务 完 成 时 ，它具有一个结果，可以调用get()来获取结果。也可以不用isDone()进行检查就直接调用get() ， 在 这 种 情 况 下 ， get()将阻塞，直至结果</li>
 </ol>
-
 <h1 id="java-内-存-模-型-相-关-问-题">Java 内 存 模 型 相 关 问 题</h1>
-
-<h2 id="问题一-什么是java的-内-存-模-型-java中各个线程是怎么彼此看到对方的变量的">问题一：什么是Java的 内 存 模 型 ， Java中各个线程是怎么彼此看到对方的变量的？</h2>
-
+<h2 id="问题一什么是java的-内-存-模-型--java中各个线程是怎么彼此看到对方的变量的">问题一：什么是Java的 内 存 模 型 ， Java中各个线程是怎么彼此看到对方的变量的？</h2>
 <p>Java的内存模型定义了程序中各个变量的访问规则，即在虚拟机中将变量存储到内存和从内存中取出这样的底层细节。</p>
-
 <p>此处的变量包括实例字段、静态字段和构成数组对象的元素，但是不包括局部变量和方法参数，因为这些是线程私有的，不会被共享，所以不存在竞争问题。</p>
-
 <p><strong>Java中 各 个 线 程 是 怎 么 彼 此 看 到 对 方 的 变 量 的 呢 ？</strong> Java 中 定 义 了 主 内存与工作内存的概念：</p>
-
 <p>所有的变量都存储在主内存，每条线程还有自己的工作内存，保存了被该线程使用到的变量的主内存副本拷贝。线程对变量的所有操作（读取、赋值）都必须在工作内存中进行，不直接读写主内存的变量。不同的线程之间也无法直接访问对方工作内存的变量，线程间变量值的传递需要通过主内存。</p>
-
-<h2 id="问题二-请谈谈volatile有什么特点-为什么它能保证变量对所有线程的可见性">问题二：请谈谈volatile有什么特点，为什么它能保证变量对所有线程的可见性？</h2>
-
+<h2 id="问题二请谈谈volatile有什么特点为什么它能保证变量对所有线程的可见性">问题二：请谈谈volatile有什么特点，为什么它能保证变量对所有线程的可见性？</h2>
 <p><strong>关键字volatile是Java 虚 拟 机 提 供 的 最 轻 量 级 的 同 步 机 制</strong> 。 当 一 个变量被定义成volatile之后，具备两种特性：</p>
-
 <ol>
-<li><p>保证此变量对所有线程的可见性。当一条线程修改了这个变量的值，新值对于其他线程是可以立即得知的。而普通变量做不到这一点。</p></li>
-
-<li><p>禁止指令重排序优化。普通变量仅仅能保证在该方法执行过程中，得到正确结果，但是不保证程序代码的执行顺序。</p></li>
+<li>
+<p>保证此变量对所有线程的可见性。当一条线程修改了这个变量的值，新值对于其他线程是可以立即得知的。而普通变量做不到这一点。</p>
+</li>
+<li>
+<p>禁止指令重排序优化。普通变量仅仅能保证在该方法执行过程中，得到正确结果，但是不保证程序代码的执行顺序。</p>
+</li>
 </ol>
-
 <h3 id="java的内存模型定义了8种内存间操作">Java的内存模型定义了8种内存间操作：</h3>
-
 <h4 id="lock-和unlock">lock 和unlock</h4>
-
 <ol>
-<li><p>把一个变量标识为一条线程独占的状态。</p></li>
-
-<li><p>把一个处于锁定状态的变量释放出来，释放之后的变量才能被其他线程锁定。</p></li>
+<li>
+<p>把一个变量标识为一条线程独占的状态。</p>
+</li>
+<li>
+<p>把一个处于锁定状态的变量释放出来，释放之后的变量才能被其他线程锁定。</p>
+</li>
 </ol>
-
 <h4 id="read-和-write">read 和 write</h4>
-
 <ol>
-<li><p>把一个变量值从主内存传输到线程的工作内存，以便load 。</p></li>
-
-<li><p>把store操作从工作内存得到的变量的值，放入主内存的变量中。</p></li>
+<li>
+<p>把一个变量值从主内存传输到线程的工作内存，以便load 。</p>
+</li>
+<li>
+<p>把store操作从工作内存得到的变量的值，放入主内存的变量中。</p>
+</li>
 </ol>
-
 <h4 id="load和store">load和store</h4>
-
 <ol>
-<li><p>把read操作从主内存得到的变量值放入工作内存的变量副本中。</p></li>
-
-<li><p>把工作内存的变量值传送到主内存，以便write 。</p></li>
+<li>
+<p>把read操作从主内存得到的变量值放入工作内存的变量副本中。</p>
+</li>
+<li>
+<p>把工作内存的变量值传送到主内存，以便write 。</p>
+</li>
 </ol>
-
 <h4 id="use和assgin">use和assgin</h4>
-
 <ol>
-<li><p>把工作内存变量值传递给执行引擎。</p></li>
-
-<li><p>将执行引擎值传递给工作内存变量值。</p></li>
+<li>
+<p>把工作内存变量值传递给执行引擎。</p>
+</li>
+<li>
+<p>将执行引擎值传递给工作内存变量值。</p>
+</li>
 </ol>
-
 <h4 id="总结">总结</h4>
-
 <p><strong>volatile的实现基于这8种内存间操作，保证了一个线程对某个volatile变量的修改，一定会被另一个线程看见，即保证了可见性。</strong></p>
-
-<h2 id="问题三-既然volatile能够保证线程间的变量可见性-是不是就意味着基于volatile变量的运算就是并发安全的">问题三：既然volatile能够保证线程间的变量可见性，是不是就意味着基于volatile变量的运算就是并发安全的？</h2>
-
-<p><strong>好文：<a href="https://blog.csdn.net/chenaima1314/article/details/78723265">https://blog.csdn.net/chenaima1314/article/details/78723265</a></strong></p>
-
+<h2 id="问题三既然volatile能够保证线程间的变量可见性是不是就意味着基于volatile变量的运算就是并发安全的">问题三：既然volatile能够保证线程间的变量可见性，是不是就意味着基于volatile变量的运算就是并发安全的？</h2>
+<p><strong>好文：https://blog.csdn.net/chenaima1314/article/details/78723265</strong></p>
 <p>显然不是的。基于volatile变量的运算在并发下不一定是安全的。</p>
-
 <p>volatile变量在各个线程的工作内存，不存在一致性问题（各个线程的工作内存中volatile变量，每次使用前都要刷新到主内存）。</p>
-
 <p><strong>但是Java里面的运算并非原子操作，导致volatile变量的运算在并发下一样是不安全的。</strong></p>
-
-<h2 id="问题四-请对比下volatile对比synchronized的异同">问题四：请对比下volatile对比Synchronized的异同。</h2>
-
+<h2 id="问题四请对比下volatile对比synchronized的异同">问题四：请对比下volatile对比Synchronized的异同。</h2>
 <p>Synchronized既能保证可见性，又能保证原子性，而volatile只能保证可见性，无法保证原子性。</p>
-
 <p>ThreadLocal和Synchonized都用于解决多线程并发访问，防止任务在共享资源上产生冲突。但是ThreadLocal与Synchronized有本质的区别。</p>
-
 <p><strong>Synchronized用于实现同步机制，是利用锁的机制使变量或代码块在某一时该只能被一个线程访问，是一种“以时间换空间”的方式。</strong></p>
-
 <p><strong>而ThreadLocal为每一个线程都提供了变量的副本，使得每个线程在某一时间访问到的并不是同一个对象，根除了对变量的共享，是一种“以空间换时间”的方式。</strong></p>
-
-<h2 id="问题五-请谈谈threadlocal是怎么解决并发安全的">问题五：请谈谈ThreadLocal是怎么解决并发安全的？</h2>
-
+<h2 id="问题五请谈谈threadlocal是怎么解决并发安全的">问题五：请谈谈ThreadLocal是怎么解决并发安全的？</h2>
 <p>ThreadLocal这是Java提供的一种保存线程私有信息的机制，因为其在整个线程生命周期内有效，所以可以方便地在一个线程关联的不同业务模块之间传递信息，比如事务ID 、 Cookie等上下文相关信息。</p>
-
 <p>ThreadLocal为每一个线程维护变量的副本，把共享数据的可见范围限制在同一个线程之内，其实现原理是，在ThreadLocal类中有一个Map ， 用 于 存 储 每 一 个 线 程 的 变 量 的 副 本 。</p>
-
-<h2 id="问题六-很多人都说要慎用threadlocal-谈-谈-你-的-理-解-使-用threadlocal需要注意些什么">问题六：很多人都说要慎用ThreadLocal ， 谈 谈 你 的 理 解 ， 使 用ThreadLocal需要注意些什么？</h2>
-
+<h2 id="问题六很多人都说要慎用threadlocal--谈-谈-你-的-理-解--使-用threadlocal需要注意些什么">问题六：很多人都说要慎用ThreadLocal ， 谈 谈 你 的 理 解 ， 使 用ThreadLocal需要注意些什么？</h2>
 <p><strong>使用ThreadLocal要注意remove ！</strong></p>
-
 <p>ThreadLocal的实现是基于一个所谓的ThreadLocalMap ， 在ThreadLocalMap中，它的key是一个弱引用。通常弱引用都会和引用队列配合清理机制使用，但是ThreadLocal是个例外，它并没有这么做。</p>
-
 <p>这意味着，废弃项目的回收依赖于显式地触发，否则就要等待线程结束，进而回收相应ThreadLocalMap ！这 就 是 很 多</p>
-
 <p>OOM的来源，<strong>所以通常都会建议，应用一定要自己负责remove ， 并 且 不 要 和 线 程 池 配合，因为worker 线 程 往 往 是 不 会 退 出 的 。</strong></p>
+<h2 id="heading"></h2>
 
 
                 
@@ -714,64 +603,55 @@
                     </h4>
                     <ul class="catalog-body"></ul>
                     <nav id="TableOfContents">
-<ul>
-<li><a href="#锁的框架包">锁的框架包</a></li>
-<li><a href="#并发包相关知识点">并发包相关知识点</a></li>
-<li><a href="#synchronized-相-关-问-题">Synchronized 相 关 问 题</a>
-<ul>
-<li><a href="#问题-一-synchronized用过吗-其原理是什么">问题 一 ： Synchronized用过吗，其原理是什么？</a></li>
-<li><a href="#问题二-你刚才提到获取对象的锁-这个-锁-到底是什么-如何确定对象的锁">问题二：你刚才提到获取对象的锁，这个“锁”到底是什么？如何确定对象的锁？</a></li>
-<li><a href="#问题三-什么是可重入性-为什么说synchronized是可重入锁">问题三：什么是可重入性，为什么说Synchronized是可重入锁？</a></li>
-<li><a href="#问题-四-jvm-对java的原生锁做了哪些优化">问题 四 ： JVM 对Java的原生锁做了哪些优化？</a></li>
-<li><a href="#问题五-为什么说synchronized-是-非-公-平-锁">问题五：为什么说Synchronized 是 非 公 平 锁 ？</a></li>
-<li><a href="#问题六-为什么说synchronized是一个悲观锁-乐观锁的实现原理又是什么-什么是cas-它-有-什-么-特-性">问题六：为什么说Synchronized是一个悲观锁？乐观锁的实现原理又是什么？什么是CAS ， 它 有 什 么 特 性 ？</a></li>
-<li><a href="#问题七-乐观锁一定就是好的吗">问题七：乐观锁一定就是好的吗？</a></li>
-</ul></li>
-<li><a href="#可重入锁reentrantlock-及-其-他-显-式-锁-相-关-问-题">可重入锁ReentrantLock 及 其 他 显 式 锁 相 关 问 题</a>
-<ul>
-<li><a href="#问题一-跟synchronized相比-可重入锁reentrantlock其实现原理有什么不同">问题一：跟Synchronized相比，可重入锁ReentrantLock其实现原理有什么不同？</a></li>
-<li><a href="#问题二-那么请谈谈aqs-框-架-是-怎-么-回-事-儿">问题二：那么请谈谈AQS 框 架 是 怎 么 回 事 儿 ？</a></li>
-<li><a href="#问题三-请尽可能详尽地对比下synchronized和reentrantlock的异同">问题三：请尽可能详尽地对比下Synchronized和ReentrantLock的异同。</a></li>
-<li><a href="#问题四-reentrantlock是如何实现可重入性的">问题四 ： ReentrantLock是如何实现可重入性的？</a></li>
-<li><a href="#问题五-除了reetrantlock-你-还-接-触-过juc中的哪些并发工具">问题五：除了ReetrantLock ， 你 还 接 触 过JUC中的哪些并发工具？</a></li>
-<li><a href="#问题六-请谈谈readwritelock和stampedlock">问题六：请谈谈ReadWriteLock和StampedLock 。</a></li>
-<li><a href="#问题七-如何让java的线程彼此同步-你了解过哪些同步器-请分别介绍下">问题七：如何让Java的线程彼此同步？你了解过哪些同步器？请分别介绍下。</a></li>
-<li><a href="#问-题-八-cyclicbarrier和countdownlatch看起来很相似-请对比下呢">问 题 八 ： CyclicBarrier和CountDownLatch看起来很相似，请对比下呢？</a></li>
-</ul></li>
-<li><a href="#java-线-程-池-相-关-问-题">Java 线 程 池 相 关 问 题</a>
-<ul>
-<li><a href="#问-题-一-java中的线程池是如何实现的">问 题 一 ： Java中的线程池是如何实现的？</a></li>
-<li><a href="#问题二-创建线程池的几个核心构造参数">问题二：创建线程池的几个核心构造参数？</a></li>
-<li><a href="#问题三-线程池中的线程是怎么创建的-是一开始就随着线程池的启动创建好的吗">问题三：线程池中的线程是怎么创建的？是一开始就随着线程池的启动创建好的吗？</a></li>
-<li><a href="#问题四-既然提到可以通过配置不同参数创建出不同的线程池-那么java中默认实现好的线程池又有哪些呢-请比较它们的异同">问题四：既然提到可以通过配置不同参数创建出不同的线程池，那么Java中默认实现好的线程池又有哪些呢？请比较它们的异同。</a>
-<ul>
-<li><a href="#singlethreadexecutor线程池">SingleThreadExecutor线程池</a></li>
-<li><a href="#fixedthreadpool-线-程-池">FixedThreadPool 线 程 池</a></li>
-<li><a href="#cachedthreadpool线程池">CachedThreadPool线程池</a></li>
-<li><a href="#scheduledthreadpool-线-程-池">ScheduledThreadPool 线 程 池</a></li>
-</ul></li>
-<li><a href="#问题五-如何在java线程池中提交线程">问题五：如何在Java线程池中提交线程？</a></li>
-</ul></li>
-<li><a href="#java-内-存-模-型-相-关-问-题">Java 内 存 模 型 相 关 问 题</a>
-<ul>
-<li><a href="#问题一-什么是java的-内-存-模-型-java中各个线程是怎么彼此看到对方的变量的">问题一：什么是Java的 内 存 模 型 ， Java中各个线程是怎么彼此看到对方的变量的？</a></li>
-<li><a href="#问题二-请谈谈volatile有什么特点-为什么它能保证变量对所有线程的可见性">问题二：请谈谈volatile有什么特点，为什么它能保证变量对所有线程的可见性？</a>
-<ul>
-<li><a href="#java的内存模型定义了8种内存间操作">Java的内存模型定义了8种内存间操作：</a>
-<ul>
-<li><a href="#lock-和unlock">lock 和unlock</a></li>
-<li><a href="#read-和-write">read 和 write</a></li>
-<li><a href="#load和store">load和store</a></li>
-<li><a href="#use和assgin">use和assgin</a></li>
-<li><a href="#总结">总结</a></li>
-</ul></li>
-</ul></li>
-<li><a href="#问题三-既然volatile能够保证线程间的变量可见性-是不是就意味着基于volatile变量的运算就是并发安全的">问题三：既然volatile能够保证线程间的变量可见性，是不是就意味着基于volatile变量的运算就是并发安全的？</a></li>
-<li><a href="#问题四-请对比下volatile对比synchronized的异同">问题四：请对比下volatile对比Synchronized的异同。</a></li>
-<li><a href="#问题五-请谈谈threadlocal是怎么解决并发安全的">问题五：请谈谈ThreadLocal是怎么解决并发安全的？</a></li>
-<li><a href="#问题六-很多人都说要慎用threadlocal-谈-谈-你-的-理-解-使-用threadlocal需要注意些什么">问题六：很多人都说要慎用ThreadLocal ， 谈 谈 你 的 理 解 ， 使 用ThreadLocal需要注意些什么？</a></li>
-</ul></li>
-</ul>
+  <ul>
+    <li><a href="#问题-一--synchronized用过吗其原理是什么">问题 一 ： Synchronized用过吗，其原理是什么？</a></li>
+    <li><a href="#问题二你刚才提到获取对象的锁这个锁到底是什么如何确定对象的锁">问题二：你刚才提到获取对象的锁，这个“锁”到底是什么？如何确定对象的锁？</a></li>
+    <li><a href="#问题三什么是可重入性为什么说synchronized是可重入锁">问题三：什么是可重入性，为什么说Synchronized是可重入锁？</a></li>
+    <li><a href="#问题-四--jvm-对java的原生锁做了哪些优化">问题 四 ： JVM 对Java的原生锁做了哪些优化？</a></li>
+    <li><a href="#问题五为什么说synchronized-是-非-公-平-锁-">问题五：为什么说Synchronized 是 非 公 平 锁 ？</a></li>
+    <li><a href="#问题六为什么说synchronized是一个悲观锁乐观锁的实现原理又是什么什么是cas--它-有-什-么-特-性-">问题六：为什么说Synchronized是一个悲观锁？乐观锁的实现原理又是什么？什么是CAS ， 它 有 什 么 特 性 ？</a></li>
+    <li><a href="#问题七乐观锁一定就是好的吗">问题七：乐观锁一定就是好的吗？</a></li>
+  </ul>
+
+  <ul>
+    <li><a href="#问题一跟synchronized相比可重入锁reentrantlock其实现原理有什么不同">问题一：跟Synchronized相比，可重入锁ReentrantLock其实现原理有什么不同？</a></li>
+    <li><a href="#问题二那么请谈谈aqs-框-架-是-怎-么-回-事-儿-">问题二：那么请谈谈AQS 框 架 是 怎 么 回 事 儿 ？</a></li>
+    <li><a href="#问题三请尽可能详尽地对比下synchronized和reentrantlock的异同">问题三：请尽可能详尽地对比下Synchronized和ReentrantLock的异同。</a></li>
+    <li><a href="#问题四--reentrantlock是如何实现可重入性的">问题四 ： ReentrantLock是如何实现可重入性的？</a></li>
+    <li><a href="#问题五除了reetrantlock--你-还-接-触-过juc中的哪些并发工具">问题五：除了ReetrantLock ， 你 还 接 触 过JUC中的哪些并发工具？</a></li>
+    <li><a href="#问题六请谈谈readwritelock和stampedlock-">问题六：请谈谈ReadWriteLock和StampedLock 。</a></li>
+    <li><a href="#问题七如何让java的线程彼此同步你了解过哪些同步器请分别介绍下">问题七：如何让Java的线程彼此同步？你了解过哪些同步器？请分别介绍下。</a></li>
+    <li><a href="#问-题-八--cyclicbarrier和countdownlatch看起来很相似请对比下呢">问 题 八 ： CyclicBarrier和CountDownLatch看起来很相似，请对比下呢？</a></li>
+  </ul>
+
+  <ul>
+    <li><a href="#问-题-一--java中的线程池是如何实现的">问 题 一 ： Java中的线程池是如何实现的？</a></li>
+    <li><a href="#问题二创建线程池的几个核心构造参数">问题二：创建线程池的几个核心构造参数？</a></li>
+    <li><a href="#问题三线程池中的线程是怎么创建的是一开始就随着线程池的启动创建好的吗">问题三：线程池中的线程是怎么创建的？是一开始就随着线程池的启动创建好的吗？</a></li>
+    <li><a href="#问题四既然提到可以通过配置不同参数创建出不同的线程池那么java中默认实现好的线程池又有哪些呢请比较它们的异同">问题四：既然提到可以通过配置不同参数创建出不同的线程池，那么Java中默认实现好的线程池又有哪些呢？请比较它们的异同。</a>
+      <ul>
+        <li><a href="#singlethreadexecutor线程池">SingleThreadExecutor线程池</a></li>
+        <li><a href="#fixedthreadpool-线-程-池">FixedThreadPool 线 程 池</a></li>
+        <li><a href="#cachedthreadpool线程池">CachedThreadPool线程池</a></li>
+        <li><a href="#scheduledthreadpool-线-程-池">ScheduledThreadPool 线 程 池</a></li>
+      </ul>
+    </li>
+    <li><a href="#问题五如何在java线程池中提交线程">问题五：如何在Java线程池中提交线程？</a></li>
+  </ul>
+
+  <ul>
+    <li><a href="#问题一什么是java的-内-存-模-型--java中各个线程是怎么彼此看到对方的变量的">问题一：什么是Java的 内 存 模 型 ， Java中各个线程是怎么彼此看到对方的变量的？</a></li>
+    <li><a href="#问题二请谈谈volatile有什么特点为什么它能保证变量对所有线程的可见性">问题二：请谈谈volatile有什么特点，为什么它能保证变量对所有线程的可见性？</a>
+      <ul>
+        <li><a href="#java的内存模型定义了8种内存间操作">Java的内存模型定义了8种内存间操作：</a></li>
+      </ul>
+    </li>
+    <li><a href="#问题三既然volatile能够保证线程间的变量可见性是不是就意味着基于volatile变量的运算就是并发安全的">问题三：既然volatile能够保证线程间的变量可见性，是不是就意味着基于volatile变量的运算就是并发安全的？</a></li>
+    <li><a href="#问题四请对比下volatile对比synchronized的异同">问题四：请对比下volatile对比Synchronized的异同。</a></li>
+    <li><a href="#问题五请谈谈threadlocal是怎么解决并发安全的">问题五：请谈谈ThreadLocal是怎么解决并发安全的？</a></li>
+    <li><a href="#问题六很多人都说要慎用threadlocal--谈-谈-你-的-理-解--使-用threadlocal需要注意些什么">问题六：很多人都说要慎用ThreadLocal ， 谈 谈 你 的 理 解 ， 使 用ThreadLocal需要注意些什么？</a></li>
+    <li><a href="#heading"></a></li>
+  </ul>
 </nav>
                     <br>
                     <br>
@@ -796,9 +676,6 @@
                         
                         
                         
-                        <a href="/tags/" title="">
-                            
-                        </a>
                         
                         
                         
@@ -808,101 +685,6 @@
                         
                         
                         
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        <a href="/tags/qt" title="QT">
-                            QT
-                        </a>
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        <a href="/tags/zookeeper" title="Zookeeper">
-                            Zookeeper
-                        </a>
                         
                         
                         
@@ -942,8 +724,10 @@
                         
                         
                         
-                        <a href="/tags/elasticsearch" title="elasticSearch">
-                            elasticSearch
+                        
+                        
+                        <a href="/tags/elasticsearch" title="elasticsearch">
+                            elasticsearch
                         </a>
                         
                         
@@ -954,9 +738,27 @@
                         
                         
                         
-                        <a href="/tags/golang" title="golang">
-                            golang
-                        </a>
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
                         
                         
                         
@@ -994,9 +796,21 @@
                         
                         
                         
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
                         <a href="/tags/jvm" title="jvm">
                             jvm
                         </a>
+                        
+                        
+                        
+                        
                         
                         
                         
@@ -1020,9 +834,19 @@
                         
                         
                         
+                        
+                        
+                        
+                        
+                        
+                        
                         <a href="/tags/mongodb" title="mongodb">
                             mongodb
                         </a>
+                        
+                        
+                        
+                        
                         
                         
                         
@@ -1033,10 +857,6 @@
                         </a>
                         
                         
-                        
-                        <a href="/tags/mycat" title="mycat">
-                            mycat
-                        </a>
                         
                         
                         
@@ -1050,9 +870,17 @@
                         
                         
                         
-                        <a href="/tags/nginx" title="nginx">
-                            nginx
-                        </a>
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
                         
                         
                         
@@ -1076,8 +904,22 @@
                         
                         
                         
+                        
+                        
                         <a href="/tags/rocketmq" title="rocketmq">
                             rocketmq
+                        </a>
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        <a href="/tags/security%E6%A1%86%E6%9E%B6%E5%AD%A6%E4%B9%A0" title="security框架学习">
+                            security框架学习
                         </a>
                         
                         
@@ -1104,17 +946,11 @@
                         
                         
                         
-                        <a href="/tags/springcloud" title="springCloud">
-                            springCloud
-                        </a>
-                        
-                        
-                        
-                        
-                        
                         <a href="/tags/springboot" title="springboot">
                             springboot
                         </a>
+                        
+                        
                         
                         
                         
@@ -1128,6 +964,9 @@
                         
                         
                         
+                        <a href="/tags/springcloud" title="springcloud">
+                            springcloud
+                        </a>
                         
                         
                         
@@ -1153,6 +992,33 @@
                         
                         
                         
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        <a href="/tags/zookeeper" title="zookeeper">
+                            zookeeper
+                        </a>
                         
                         
                         
@@ -1212,6 +1078,8 @@
                         
                         
                         
+                        
+                        
                         <a href="/tags/%E5%88%86%E5%B8%83%E5%BC%8F%E7%B3%BB%E5%88%97" title="分布式系列">
                             分布式系列
                         </a>
@@ -1231,6 +1099,10 @@
                         
                         
                         
+                        
+                        <a href="/tags/%E5%8D%8F%E8%AE%AE%E6%A0%88" title="协议栈">
+                            协议栈
+                        </a>
                         
                         
                         
@@ -1430,6 +1302,12 @@
                         
                         
                         
+                        
+                        
+                        
+                        
+                        
+                        
                         <a href="/tags/%E7%BD%91%E7%BB%9C%E7%BC%96%E7%A8%8B" title="网络编程">
                             网络编程
                         </a>
@@ -1453,6 +1331,10 @@
                         
                         
                         
+                        
+                        <a href="/tags/%E8%AE%A4%E8%AF%81%E5%92%8C%E6%8E%88%E6%9D%83" title="认证和授权">
+                            认证和授权
+                        </a>
                         
                         
                         
@@ -1623,7 +1505,7 @@
                     
                 </ul>
 		<p class="copyright text-muted">
-                    Copyright &copy;  2020
+                    Copyright &copy;  2021
                     <br>
                     <a href="https://themes.gohugo.io/hugo-theme-cleanwhite">CleanWhite Hugo Theme</a> by <a href="https://zhaohuabing.com">Huabing</a> |
                     <iframe

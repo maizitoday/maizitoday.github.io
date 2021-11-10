@@ -97,15 +97,15 @@
                     </li>
                     
                     <li>
-                        <a href="/categories/english">English</a>
+                        <a href="/categories/english">english</a>
                     </li>
                     
                     <li>
-                        <a href="/categories/life">Life</a>
+                        <a href="/categories/life">life</a>
                     </li>
                     
                     <li>
-                        <a href="/categories/tech">Tech</a>
+                        <a href="/categories/tech">tech</a>
                     </li>
                     
 
@@ -233,183 +233,147 @@
                 
                 
                 
-                
-
-<p>[TOC]</p>
-
-<p><strong>转载地址：<a href="https://juejin.im/post/5d9e79ac51882509701337c2">https://juejin.im/post/5d9e79ac51882509701337c2</a>         作者：虚无境</strong></p>
-
+                <p>[TOC]</p>
+<p><strong>转载地址：https://juejin.im/post/5d9e79ac51882509701337c2         作者：虚无境</strong></p>
 <h1 id="elasticsearch-java-api">ElasticSearch JAVA API</h1>
-
 <p>目前市面上有几种常见的ElasticSearch Java API架包，JestClient、SpringBoot整合的SpringData、Spring整合的ElasticsearchTemplate、Elasticsearch Bboss等一些开源架包，上述这些第三方整合的架包中，基本已经支持日常的使用，除了支持的ES版本会低一些而已。</p>
-
 <p>本文介绍的是ElasticSearch官方的<code>Java High Level REST Client</code>的使用，<code>Java High Level REST Client</code>是ElasticSearch官方目前推荐使用的，适用于6.x以上的版本，要求JDK在1.8以上，可以很好的在大版本中进行兼容，并且该架包自身也包含<code>Java Low Level REST Client</code>中的方法，可以应对一些特需的情况进行特殊的处理， 它对于一些常用的方法封装Restful风格，可以直接对应操作名调用使用即可，支持同步和异步(Async)调用。</p>
+<h1 id="pomxml">pom.xml</h1>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-java" data-lang="java"> <span style="color:#f92672">&lt;</span>dependency<span style="color:#f92672">&gt;</span>
+      <span style="color:#f92672">&lt;</span>groupId<span style="color:#f92672">&gt;</span>org<span style="color:#f92672">.</span><span style="color:#a6e22e">elasticsearch</span><span style="color:#f92672">.</span><span style="color:#a6e22e">client</span><span style="color:#f92672">&lt;/</span>groupId<span style="color:#f92672">&gt;</span>
+      <span style="color:#f92672">&lt;</span>artifactId<span style="color:#f92672">&gt;</span>elasticsearch<span style="color:#f92672">-</span>rest<span style="color:#f92672">-</span>high<span style="color:#f92672">-</span>level<span style="color:#f92672">-</span>client<span style="color:#f92672">&lt;/</span>artifactId<span style="color:#f92672">&gt;</span>
+      <span style="color:#f92672">&lt;</span>version<span style="color:#f92672">&gt;</span>6<span style="color:#f92672">.</span><span style="color:#a6e22e">8</span><span style="color:#f92672">.</span><span style="color:#a6e22e">9</span><span style="color:#f92672">&lt;/</span>version<span style="color:#f92672">&gt;</span>
+ <span style="color:#f92672">&lt;/</span>dependency<span style="color:#f92672">&gt;</span>
+</code></pre></div><h1 id="初始化连接">初始化连接</h1>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-java" data-lang="java">
+RestHighLevelClient client <span style="color:#f92672">=</span> <span style="color:#66d9ef">new</span> RestHighLevelClient<span style="color:#f92672">(</span>RestClient<span style="color:#f92672">.</span><span style="color:#a6e22e">builder</span><span style="color:#f92672">(</span><span style="color:#66d9ef">new</span> HttpHost<span style="color:#f92672">(</span><span style="color:#e6db74">&#34;127.0.0.1&#34;</span><span style="color:#f92672">,</span> 9200<span style="color:#f92672">)));</span>
 
-<h1 id="pom-xml">pom.xml</h1>
-
-<pre><code class="language-java"> &lt;dependency&gt;
-      &lt;groupId&gt;org.elasticsearch.client&lt;/groupId&gt;
-      &lt;artifactId&gt;elasticsearch-rest-high-level-client&lt;/artifactId&gt;
-      &lt;version&gt;6.8.9&lt;/version&gt;
- &lt;/dependency&gt;
-</code></pre>
-
-<h1 id="初始化连接">初始化连接</h1>
-
-<pre><code class="language-java">
-RestHighLevelClient client = new RestHighLevelClient(RestClient.builder(new HttpHost(&quot;127.0.0.1&quot;, 9200)));
-
-client.close(); //关闭
-</code></pre>
-
-<h1 id="crud操作">CRUD操作</h1>
-
+client<span style="color:#f92672">.</span><span style="color:#a6e22e">close</span><span style="color:#f92672">();</span> <span style="color:#75715e">//关闭
+</span></code></pre></div><h1 id="crud操作">CRUD操作</h1>
 <h2 id="新增数据">新增数据</h2>
-
 <p>ElasticSearch可以直接新增数据，只要你指定了index(索引库名称)和type(类型)即可。在新增的时候你可以自己指定主键ID，也可以不指定，由 ElasticSearch自身生成。Elasticsearch <code>Java High Level REST Client</code>新增数据提供了三种方法，这里我们就来看一下这三种写法吧。</p>
-
 <h3 id="通过jsonstring进行创建">通过jsonString进行创建</h3>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-java" data-lang="java">  String index <span style="color:#f92672">=</span> <span style="color:#e6db74">&#34;test1&#34;</span><span style="color:#f92672">;</span>
+	String type <span style="color:#f92672">=</span> <span style="color:#e6db74">&#34;_doc&#34;</span><span style="color:#f92672">;</span>
+	<span style="color:#75715e">// 唯一编号
+</span><span style="color:#75715e"></span>	String id <span style="color:#f92672">=</span> <span style="color:#e6db74">&#34;1&#34;</span><span style="color:#f92672">;</span>
+	IndexRequest request <span style="color:#f92672">=</span> <span style="color:#66d9ef">new</span> IndexRequest<span style="color:#f92672">(</span>index<span style="color:#f92672">,</span> type<span style="color:#f92672">,</span> id<span style="color:#f92672">);</span>
 
-<pre><code class="language-java">  String index = &quot;test1&quot;;
-	String type = &quot;_doc&quot;;
-	// 唯一编号
-	String id = &quot;1&quot;;
-	IndexRequest request = new IndexRequest(index, type, id);
+	String jsonString <span style="color:#f92672">=</span> <span style="color:#e6db74">&#34;{&#34;</span> <span style="color:#f92672">+</span> <span style="color:#e6db74">&#34;\&#34;uid\&#34;:\&#34;1234\&#34;,&#34;</span><span style="color:#f92672">+</span> <span style="color:#e6db74">&#34;\&#34;phone\&#34;:\&#34;12345678909\&#34;,&#34;</span><span style="color:#f92672">+</span> <span style="color:#e6db74">&#34;\&#34;msgcode\&#34;:\&#34;1\&#34;,&#34;</span> <span style="color:#f92672">+</span> <span style="color:#e6db74">&#34;\&#34;sendtime\&#34;:\&#34;2019-03-14 01:57:04\&#34;,&#34;</span>
+			<span style="color:#f92672">+</span> <span style="color:#e6db74">&#34;\&#34;message\&#34;:\&#34;xuwujing study Elasticsearch\&#34;&#34;</span> <span style="color:#f92672">+</span> <span style="color:#e6db74">&#34;}&#34;</span><span style="color:#f92672">;</span>
+	request<span style="color:#f92672">.</span><span style="color:#a6e22e">source</span><span style="color:#f92672">(</span>jsonString<span style="color:#f92672">,</span> XContentType<span style="color:#f92672">.</span><span style="color:#a6e22e">JSON</span><span style="color:#f92672">);</span>
+	IndexResponse indexResponse <span style="color:#f92672">=</span> client<span style="color:#f92672">.</span><span style="color:#a6e22e">index</span><span style="color:#f92672">(</span>request<span style="color:#f92672">,</span> RequestOptions<span style="color:#f92672">.</span><span style="color:#a6e22e">DEFAULT</span><span style="color:#f92672">);</span>
 
-	String jsonString = &quot;{&quot; + &quot;\&quot;uid\&quot;:\&quot;1234\&quot;,&quot;+ &quot;\&quot;phone\&quot;:\&quot;12345678909\&quot;,&quot;+ &quot;\&quot;msgcode\&quot;:\&quot;1\&quot;,&quot; + &quot;\&quot;sendtime\&quot;:\&quot;2019-03-14 01:57:04\&quot;,&quot;
-			+ &quot;\&quot;message\&quot;:\&quot;xuwujing study Elasticsearch\&quot;&quot; + &quot;}&quot;;
-	request.source(jsonString, XContentType.JSON);
-	IndexResponse indexResponse = client.index(request, RequestOptions.DEFAULT);
-
-</code></pre>
-
-<h3 id="通过map创建-会自动转换成json的数据">通过map创建,会自动转换成json的数据</h3>
-
-<pre><code class="language-java">String index = &quot;test1&quot;;
-String type = &quot;_doc&quot;;
-// 唯一编号
-String id = &quot;2&quot;;
-IndexRequest request = new IndexRequest(index, type, id);
-Map&lt;String, Object&gt; jsonMap = new HashMap&lt;&gt;();
-jsonMap.put(&quot;uid&quot;, 1234);
-jsonMap.put(&quot;phone&quot;, 12345678909L);
-jsonMap.put(&quot;msgcode&quot;, 1);
-jsonMap.put(&quot;sendtime&quot;, &quot;2019-03-14 01:57:04&quot;);
-jsonMap.put(&quot;message&quot;, &quot;xuwujing study Elasticsearch&quot;);
-request.source(jsonMap);
-IndexResponse indexResponse = client.index(request, RequestOptions.DEFAULT);
-System.out.println(indexResponse.toString());
-</code></pre>
-
-<p><strong>推荐第二种，比较容易理解和使用。</strong></p>
-
+</code></pre></div><h3 id="通过map创建会自动转换成json的数据">通过map创建,会自动转换成json的数据</h3>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-java" data-lang="java">String index <span style="color:#f92672">=</span> <span style="color:#e6db74">&#34;test1&#34;</span><span style="color:#f92672">;</span>
+String type <span style="color:#f92672">=</span> <span style="color:#e6db74">&#34;_doc&#34;</span><span style="color:#f92672">;</span>
+<span style="color:#75715e">// 唯一编号
+</span><span style="color:#75715e"></span>String id <span style="color:#f92672">=</span> <span style="color:#e6db74">&#34;2&#34;</span><span style="color:#f92672">;</span>
+IndexRequest request <span style="color:#f92672">=</span> <span style="color:#66d9ef">new</span> IndexRequest<span style="color:#f92672">(</span>index<span style="color:#f92672">,</span> type<span style="color:#f92672">,</span> id<span style="color:#f92672">);</span>
+Map<span style="color:#f92672">&lt;</span>String<span style="color:#f92672">,</span> Object<span style="color:#f92672">&gt;</span> jsonMap <span style="color:#f92672">=</span> <span style="color:#66d9ef">new</span> HashMap<span style="color:#f92672">&lt;&gt;();</span>
+jsonMap<span style="color:#f92672">.</span><span style="color:#a6e22e">put</span><span style="color:#f92672">(</span><span style="color:#e6db74">&#34;uid&#34;</span><span style="color:#f92672">,</span> 1234<span style="color:#f92672">);</span>
+jsonMap<span style="color:#f92672">.</span><span style="color:#a6e22e">put</span><span style="color:#f92672">(</span><span style="color:#e6db74">&#34;phone&#34;</span><span style="color:#f92672">,</span> 12345678909L<span style="color:#f92672">);</span>
+jsonMap<span style="color:#f92672">.</span><span style="color:#a6e22e">put</span><span style="color:#f92672">(</span><span style="color:#e6db74">&#34;msgcode&#34;</span><span style="color:#f92672">,</span> 1<span style="color:#f92672">);</span>
+jsonMap<span style="color:#f92672">.</span><span style="color:#a6e22e">put</span><span style="color:#f92672">(</span><span style="color:#e6db74">&#34;sendtime&#34;</span><span style="color:#f92672">,</span> <span style="color:#e6db74">&#34;2019-03-14 01:57:04&#34;</span><span style="color:#f92672">);</span>
+jsonMap<span style="color:#f92672">.</span><span style="color:#a6e22e">put</span><span style="color:#f92672">(</span><span style="color:#e6db74">&#34;message&#34;</span><span style="color:#f92672">,</span> <span style="color:#e6db74">&#34;xuwujing study Elasticsearch&#34;</span><span style="color:#f92672">);</span>
+request<span style="color:#f92672">.</span><span style="color:#a6e22e">source</span><span style="color:#f92672">(</span>jsonMap<span style="color:#f92672">);</span>
+IndexResponse indexResponse <span style="color:#f92672">=</span> client<span style="color:#f92672">.</span><span style="color:#a6e22e">index</span><span style="color:#f92672">(</span>request<span style="color:#f92672">,</span> RequestOptions<span style="color:#f92672">.</span><span style="color:#a6e22e">DEFAULT</span><span style="color:#f92672">);</span>
+System<span style="color:#f92672">.</span><span style="color:#a6e22e">out</span><span style="color:#f92672">.</span><span style="color:#a6e22e">println</span><span style="color:#f92672">(</span>indexResponse<span style="color:#f92672">.</span><span style="color:#a6e22e">toString</span><span style="color:#f92672">());</span>
+</code></pre></div><p><strong>推荐第二种，比较容易理解和使用。</strong></p>
 <h2 id="创建索引库">创建索引库</h2>
-
 <p>在上述示例中，我们通过直接通过创建数据从而创建了索引库，但是没有创建索引库而通过ES自身生成的这种并不友好，因为它会使用默认的配置，字段结构都是text(text的数据会分词，在存储的时候也会额外的占用空间)，分片和索引副本采用默认值，默认是5和1，ES的分片数在创建之后就不能修改，除非reindex，所以这里我们还是指定数据模板进行创建。 使用JAVA API 创建索引库的方法和上述中新增数据的一样，有三种方式，不过这里就只介绍一种。</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-java" data-lang="java"><span style="color:#66d9ef">private</span> <span style="color:#66d9ef">static</span> <span style="color:#66d9ef">void</span> <span style="color:#a6e22e">createIndex</span><span style="color:#f92672">(</span>RestHighLevelClient client<span style="color:#f92672">)</span> <span style="color:#66d9ef">throws</span> IOException <span style="color:#f92672">{</span>
+        String type <span style="color:#f92672">=</span> <span style="color:#e6db74">&#34;_doc&#34;</span><span style="color:#f92672">;</span>
+        String index <span style="color:#f92672">=</span> <span style="color:#e6db74">&#34;maizi&#34;</span><span style="color:#f92672">;</span>
+        <span style="color:#75715e">// setting 的值
+</span><span style="color:#75715e"></span>        Map<span style="color:#f92672">&lt;</span>String<span style="color:#f92672">,</span> Object<span style="color:#f92672">&gt;</span> setmapping <span style="color:#f92672">=</span> <span style="color:#66d9ef">new</span> HashMap<span style="color:#f92672">&lt;&gt;();</span>
+        <span style="color:#75715e">// 分区数、副本数、缓存刷新时间
+</span><span style="color:#75715e"></span>        setmapping<span style="color:#f92672">.</span><span style="color:#a6e22e">put</span><span style="color:#f92672">(</span><span style="color:#e6db74">&#34;number_of_shards&#34;</span><span style="color:#f92672">,</span> 10<span style="color:#f92672">);</span>
+        setmapping<span style="color:#f92672">.</span><span style="color:#a6e22e">put</span><span style="color:#f92672">(</span><span style="color:#e6db74">&#34;number_of_replicas&#34;</span><span style="color:#f92672">,</span> 1<span style="color:#f92672">);</span>
+        setmapping<span style="color:#f92672">.</span><span style="color:#a6e22e">put</span><span style="color:#f92672">(</span><span style="color:#e6db74">&#34;refresh_interval&#34;</span><span style="color:#f92672">,</span> <span style="color:#e6db74">&#34;5s&#34;</span><span style="color:#f92672">);</span>
+        Map<span style="color:#f92672">&lt;</span>String<span style="color:#f92672">,</span> Object<span style="color:#f92672">&gt;</span> keyword <span style="color:#f92672">=</span> <span style="color:#66d9ef">new</span> HashMap<span style="color:#f92672">&lt;&gt;();</span>
+        <span style="color:#75715e">// 设置类型
+</span><span style="color:#75715e"></span>        keyword<span style="color:#f92672">.</span><span style="color:#a6e22e">put</span><span style="color:#f92672">(</span><span style="color:#e6db74">&#34;type&#34;</span><span style="color:#f92672">,</span> <span style="color:#e6db74">&#34;keyword&#34;</span><span style="color:#f92672">);</span>
+        Map<span style="color:#f92672">&lt;</span>String<span style="color:#f92672">,</span> Object<span style="color:#f92672">&gt;</span> lon <span style="color:#f92672">=</span> <span style="color:#66d9ef">new</span> HashMap<span style="color:#f92672">&lt;&gt;();</span>
+        <span style="color:#75715e">// 设置类型
+</span><span style="color:#75715e"></span>        lon<span style="color:#f92672">.</span><span style="color:#a6e22e">put</span><span style="color:#f92672">(</span><span style="color:#e6db74">&#34;type&#34;</span><span style="color:#f92672">,</span> <span style="color:#e6db74">&#34;long&#34;</span><span style="color:#f92672">);</span>
+        Map<span style="color:#f92672">&lt;</span>String<span style="color:#f92672">,</span> Object<span style="color:#f92672">&gt;</span> date <span style="color:#f92672">=</span> <span style="color:#66d9ef">new</span> HashMap<span style="color:#f92672">&lt;&gt;();</span>
+        <span style="color:#75715e">// 设置类型
+</span><span style="color:#75715e"></span>        date<span style="color:#f92672">.</span><span style="color:#a6e22e">put</span><span style="color:#f92672">(</span><span style="color:#e6db74">&#34;type&#34;</span><span style="color:#f92672">,</span> <span style="color:#e6db74">&#34;date&#34;</span><span style="color:#f92672">);</span>
+        date<span style="color:#f92672">.</span><span style="color:#a6e22e">put</span><span style="color:#f92672">(</span><span style="color:#e6db74">&#34;format&#34;</span><span style="color:#f92672">,</span> <span style="color:#e6db74">&#34;yyyy-MM-dd HH:mm:ss&#34;</span><span style="color:#f92672">);</span>
 
-<pre><code class="language-java">private static void createIndex(RestHighLevelClient client) throws IOException {
-        String type = &quot;_doc&quot;;
-        String index = &quot;maizi&quot;;
-        // setting 的值
-        Map&lt;String, Object&gt; setmapping = new HashMap&lt;&gt;();
-        // 分区数、副本数、缓存刷新时间
-        setmapping.put(&quot;number_of_shards&quot;, 10);
-        setmapping.put(&quot;number_of_replicas&quot;, 1);
-        setmapping.put(&quot;refresh_interval&quot;, &quot;5s&quot;);
-        Map&lt;String, Object&gt; keyword = new HashMap&lt;&gt;();
-        // 设置类型
-        keyword.put(&quot;type&quot;, &quot;keyword&quot;);
-        Map&lt;String, Object&gt; lon = new HashMap&lt;&gt;();
-        // 设置类型
-        lon.put(&quot;type&quot;, &quot;long&quot;);
-        Map&lt;String, Object&gt; date = new HashMap&lt;&gt;();
-        // 设置类型
-        date.put(&quot;type&quot;, &quot;date&quot;);
-        date.put(&quot;format&quot;, &quot;yyyy-MM-dd HH:mm:ss&quot;);
+        Map<span style="color:#f92672">&lt;</span>String<span style="color:#f92672">,</span> Object<span style="color:#f92672">&gt;</span> jsonMap2 <span style="color:#f92672">=</span> <span style="color:#66d9ef">new</span> HashMap<span style="color:#f92672">&lt;&gt;();</span>
+        Map<span style="color:#f92672">&lt;</span>String<span style="color:#f92672">,</span> Object<span style="color:#f92672">&gt;</span> properties <span style="color:#f92672">=</span> <span style="color:#66d9ef">new</span> HashMap<span style="color:#f92672">&lt;&gt;();</span>
+        <span style="color:#75715e">// 设置字段message信息
+</span><span style="color:#75715e"></span>        properties<span style="color:#f92672">.</span><span style="color:#a6e22e">put</span><span style="color:#f92672">(</span><span style="color:#e6db74">&#34;uid&#34;</span><span style="color:#f92672">,</span> lon<span style="color:#f92672">);</span>
+        properties<span style="color:#f92672">.</span><span style="color:#a6e22e">put</span><span style="color:#f92672">(</span><span style="color:#e6db74">&#34;phone&#34;</span><span style="color:#f92672">,</span> lon<span style="color:#f92672">);</span>
+        properties<span style="color:#f92672">.</span><span style="color:#a6e22e">put</span><span style="color:#f92672">(</span><span style="color:#e6db74">&#34;msgcode&#34;</span><span style="color:#f92672">,</span> lon<span style="color:#f92672">);</span>
+        properties<span style="color:#f92672">.</span><span style="color:#a6e22e">put</span><span style="color:#f92672">(</span><span style="color:#e6db74">&#34;message&#34;</span><span style="color:#f92672">,</span> keyword<span style="color:#f92672">);</span>
+        properties<span style="color:#f92672">.</span><span style="color:#a6e22e">put</span><span style="color:#f92672">(</span><span style="color:#e6db74">&#34;sendtime&#34;</span><span style="color:#f92672">,</span> date<span style="color:#f92672">);</span>
+        Map<span style="color:#f92672">&lt;</span>String<span style="color:#f92672">,</span> Object<span style="color:#f92672">&gt;</span> mapping <span style="color:#f92672">=</span> <span style="color:#66d9ef">new</span> HashMap<span style="color:#f92672">&lt;&gt;();</span>
+        mapping<span style="color:#f92672">.</span><span style="color:#a6e22e">put</span><span style="color:#f92672">(</span><span style="color:#e6db74">&#34;properties&#34;</span><span style="color:#f92672">,</span> properties<span style="color:#f92672">);</span>
+        jsonMap2<span style="color:#f92672">.</span><span style="color:#a6e22e">put</span><span style="color:#f92672">(</span>type<span style="color:#f92672">,</span> mapping<span style="color:#f92672">);</span>
 
-        Map&lt;String, Object&gt; jsonMap2 = new HashMap&lt;&gt;();
-        Map&lt;String, Object&gt; properties = new HashMap&lt;&gt;();
-        // 设置字段message信息
-        properties.put(&quot;uid&quot;, lon);
-        properties.put(&quot;phone&quot;, lon);
-        properties.put(&quot;msgcode&quot;, lon);
-        properties.put(&quot;message&quot;, keyword);
-        properties.put(&quot;sendtime&quot;, date);
-        Map&lt;String, Object&gt; mapping = new HashMap&lt;&gt;();
-        mapping.put(&quot;properties&quot;, properties);
-        jsonMap2.put(type, mapping);
+        GetIndexRequest getRequest <span style="color:#f92672">=</span> <span style="color:#66d9ef">new</span> GetIndexRequest<span style="color:#f92672">();</span>
+        getRequest<span style="color:#f92672">.</span><span style="color:#a6e22e">indices</span><span style="color:#f92672">(</span>index<span style="color:#f92672">);</span>
+        getRequest<span style="color:#f92672">.</span><span style="color:#a6e22e">local</span><span style="color:#f92672">(</span><span style="color:#66d9ef">false</span><span style="color:#f92672">);</span>
+        getRequest<span style="color:#f92672">.</span><span style="color:#a6e22e">humanReadable</span><span style="color:#f92672">(</span><span style="color:#66d9ef">true</span><span style="color:#f92672">);</span>
+        <span style="color:#66d9ef">boolean</span> exists2 <span style="color:#f92672">=</span> client<span style="color:#f92672">.</span><span style="color:#a6e22e">indices</span><span style="color:#f92672">().</span><span style="color:#a6e22e">exists</span><span style="color:#f92672">(</span>getRequest<span style="color:#f92672">,</span> RequestOptions<span style="color:#f92672">.</span><span style="color:#a6e22e">DEFAULT</span><span style="color:#f92672">);</span>
+        <span style="color:#75715e">// 如果存在就不创建了
+</span><span style="color:#75715e"></span>        <span style="color:#66d9ef">if</span> <span style="color:#f92672">(</span>exists2<span style="color:#f92672">)</span> <span style="color:#f92672">{</span>
+            System<span style="color:#f92672">.</span><span style="color:#a6e22e">out</span><span style="color:#f92672">.</span><span style="color:#a6e22e">println</span><span style="color:#f92672">(</span>index <span style="color:#f92672">+</span> <span style="color:#e6db74">&#34;索引库已经存在!&#34;</span><span style="color:#f92672">);</span>
+            <span style="color:#66d9ef">return</span><span style="color:#f92672">;</span>
+        <span style="color:#f92672">}</span>
+        <span style="color:#75715e">// 开始创建库
+</span><span style="color:#75715e"></span>        CreateIndexRequest request <span style="color:#f92672">=</span> <span style="color:#66d9ef">new</span> CreateIndexRequest<span style="color:#f92672">(</span>index<span style="color:#f92672">);</span>
+        <span style="color:#66d9ef">try</span> <span style="color:#f92672">{</span>
+            <span style="color:#75715e">// 加载数据类型
+</span><span style="color:#75715e"></span>            request<span style="color:#f92672">.</span><span style="color:#a6e22e">settings</span><span style="color:#f92672">(</span>setmapping<span style="color:#f92672">);</span>
+            <span style="color:#75715e">// 设置mapping参数
+</span><span style="color:#75715e"></span>            request<span style="color:#f92672">.</span><span style="color:#a6e22e">mapping</span><span style="color:#f92672">(</span>type<span style="color:#f92672">,</span> jsonMap2<span style="color:#f92672">);</span>
+            <span style="color:#75715e">// 设置别名
+</span><span style="color:#75715e"></span>            request<span style="color:#f92672">.</span><span style="color:#a6e22e">alias</span><span style="color:#f92672">(</span><span style="color:#66d9ef">new</span> Alias<span style="color:#f92672">(</span><span style="color:#e6db74">&#34;pancm_alias&#34;</span><span style="color:#f92672">));</span>
+            CreateIndexResponse createIndexResponse <span style="color:#f92672">=</span> client<span style="color:#f92672">.</span><span style="color:#a6e22e">indices</span><span style="color:#f92672">().</span><span style="color:#a6e22e">create</span><span style="color:#f92672">(</span>request<span style="color:#f92672">,</span> RequestOptions<span style="color:#f92672">.</span><span style="color:#a6e22e">DEFAULT</span><span style="color:#f92672">);</span>
+            <span style="color:#66d9ef">boolean</span> falg <span style="color:#f92672">=</span> createIndexResponse<span style="color:#f92672">.</span><span style="color:#a6e22e">isAcknowledged</span><span style="color:#f92672">();</span>
+            <span style="color:#66d9ef">if</span> <span style="color:#f92672">(</span>falg<span style="color:#f92672">)</span> <span style="color:#f92672">{</span>
+                System<span style="color:#f92672">.</span><span style="color:#a6e22e">out</span><span style="color:#f92672">.</span><span style="color:#a6e22e">println</span><span style="color:#f92672">(</span><span style="color:#e6db74">&#34;创建索引库:&#34;</span> <span style="color:#f92672">+</span> index <span style="color:#f92672">+</span> <span style="color:#e6db74">&#34;成功！&#34;</span><span style="color:#f92672">);</span>
+            <span style="color:#f92672">}</span>
+        <span style="color:#f92672">}</span> <span style="color:#66d9ef">catch</span> <span style="color:#f92672">(</span>IOException e<span style="color:#f92672">)</span> <span style="color:#f92672">{</span>
+            e<span style="color:#f92672">.</span><span style="color:#a6e22e">printStackTrace</span><span style="color:#f92672">();</span>
+        <span style="color:#f92672">}</span>
 
-        GetIndexRequest getRequest = new GetIndexRequest();
-        getRequest.indices(index);
-        getRequest.local(false);
-        getRequest.humanReadable(true);
-        boolean exists2 = client.indices().exists(getRequest, RequestOptions.DEFAULT);
-        // 如果存在就不创建了
-        if (exists2) {
-            System.out.println(index + &quot;索引库已经存在!&quot;);
-            return;
-        }
-        // 开始创建库
-        CreateIndexRequest request = new CreateIndexRequest(index);
-        try {
-            // 加载数据类型
-            request.settings(setmapping);
-            // 设置mapping参数
-            request.mapping(type, jsonMap2);
-            // 设置别名
-            request.alias(new Alias(&quot;pancm_alias&quot;));
-            CreateIndexResponse createIndexResponse = client.indices().create(request, RequestOptions.DEFAULT);
-            boolean falg = createIndexResponse.isAcknowledged();
-            if (falg) {
-                System.out.println(&quot;创建索引库:&quot; + index + &quot;成功！&quot;);
-            }
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-
-    }
-</code></pre>
-
-<p><strong>注：创建索引库的时候，一定要先判断索引库是否存在！！！</strong> 这里创建索引库的时候顺便也指定了别名（alias），这个别名是一个好东西，使用恰当可以提升查询性能，这里我们留着下次在讲。</p>
-
+    <span style="color:#f92672">}</span>
+</code></pre></div><p><strong>注：创建索引库的时候，一定要先判断索引库是否存在！！！</strong> 这里创建索引库的时候顺便也指定了别名（alias），这个别名是一个好东西，使用恰当可以提升查询性能，这里我们留着下次在讲。</p>
 <h2 id="修改数据">修改数据</h2>
-
 <p>ES提供修改API的时候，有两种方式，一种是直接修改，但是若数据不存在会抛出异常，另一种则是存在更新，不存着就插入。相比第一种，第二种会更加好用一些，不过在写入速度上是不如第一种的。</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-java" data-lang="java"><span style="color:#66d9ef">private</span> <span style="color:#66d9ef">static</span> <span style="color:#66d9ef">void</span> <span style="color:#a6e22e">update</span><span style="color:#f92672">(</span>RestHighLevelClient client<span style="color:#f92672">)</span> <span style="color:#66d9ef">throws</span> IOException <span style="color:#f92672">{</span>
+        String type <span style="color:#f92672">=</span> <span style="color:#e6db74">&#34;_doc&#34;</span><span style="color:#f92672">;</span>
+        String index <span style="color:#f92672">=</span> <span style="color:#e6db74">&#34;test1&#34;</span><span style="color:#f92672">;</span>
+        <span style="color:#75715e">// 唯一编号
+</span><span style="color:#75715e"></span>        String id <span style="color:#f92672">=</span> <span style="color:#e6db74">&#34;1&#34;</span><span style="color:#f92672">;</span>
+        UpdateRequest upateRequest <span style="color:#f92672">=</span> <span style="color:#66d9ef">new</span> UpdateRequest<span style="color:#f92672">();</span>
+        upateRequest<span style="color:#f92672">.</span><span style="color:#a6e22e">id</span><span style="color:#f92672">(</span>id<span style="color:#f92672">);</span>
+        upateRequest<span style="color:#f92672">.</span><span style="color:#a6e22e">index</span><span style="color:#f92672">(</span>index<span style="color:#f92672">);</span>
+        upateRequest<span style="color:#f92672">.</span><span style="color:#a6e22e">type</span><span style="color:#f92672">(</span>type<span style="color:#f92672">);</span>
 
-<pre><code class="language-java">private static void update(RestHighLevelClient client) throws IOException {
-        String type = &quot;_doc&quot;;
-        String index = &quot;test1&quot;;
-        // 唯一编号
-        String id = &quot;1&quot;;
-        UpdateRequest upateRequest = new UpdateRequest();
-        upateRequest.id(id);
-        upateRequest.index(index);
-        upateRequest.type(type);
+        <span style="color:#75715e">// 依旧可以使用Map这种集合作为更新条件
+</span><span style="color:#75715e"></span>        Map<span style="color:#f92672">&lt;</span>String<span style="color:#f92672">,</span> Object<span style="color:#f92672">&gt;</span> jsonMap <span style="color:#f92672">=</span> <span style="color:#66d9ef">new</span> HashMap<span style="color:#f92672">&lt;&gt;();</span>
+        jsonMap<span style="color:#f92672">.</span><span style="color:#a6e22e">put</span><span style="color:#f92672">(</span><span style="color:#e6db74">&#34;uid&#34;</span><span style="color:#f92672">,</span> 12345<span style="color:#f92672">);</span>
+        jsonMap<span style="color:#f92672">.</span><span style="color:#a6e22e">put</span><span style="color:#f92672">(</span><span style="color:#e6db74">&#34;phone&#34;</span><span style="color:#f92672">,</span> 123456789019L<span style="color:#f92672">);</span>
+        jsonMap<span style="color:#f92672">.</span><span style="color:#a6e22e">put</span><span style="color:#f92672">(</span><span style="color:#e6db74">&#34;msgcode&#34;</span><span style="color:#f92672">,</span> 2<span style="color:#f92672">);</span>
+        jsonMap<span style="color:#f92672">.</span><span style="color:#a6e22e">put</span><span style="color:#f92672">(</span><span style="color:#e6db74">&#34;sendtime&#34;</span><span style="color:#f92672">,</span> <span style="color:#e6db74">&#34;2019-03-14 01:57:04&#34;</span><span style="color:#f92672">);</span>
+        jsonMap<span style="color:#f92672">.</span><span style="color:#a6e22e">put</span><span style="color:#f92672">(</span><span style="color:#e6db74">&#34;message&#34;</span><span style="color:#f92672">,</span> <span style="color:#e6db74">&#34;xuwujing study Elasticsearch&#34;</span><span style="color:#f92672">);</span>
+        upateRequest<span style="color:#f92672">.</span><span style="color:#a6e22e">doc</span><span style="color:#f92672">(</span>jsonMap<span style="color:#f92672">);</span>
+        <span style="color:#75715e">// upsert 方法表示如果数据不存在，那么就新增一条
+</span><span style="color:#75715e"></span>        upateRequest<span style="color:#f92672">.</span><span style="color:#a6e22e">docAsUpsert</span><span style="color:#f92672">(</span><span style="color:#66d9ef">true</span><span style="color:#f92672">);</span>
+        client<span style="color:#f92672">.</span><span style="color:#a6e22e">update</span><span style="color:#f92672">(</span>upateRequest<span style="color:#f92672">,</span> RequestOptions<span style="color:#f92672">.</span><span style="color:#a6e22e">DEFAULT</span><span style="color:#f92672">);</span>
+        System<span style="color:#f92672">.</span><span style="color:#a6e22e">out</span><span style="color:#f92672">.</span><span style="color:#a6e22e">println</span><span style="color:#f92672">(</span><span style="color:#e6db74">&#34;更新成功！&#34;</span><span style="color:#f92672">);</span>
 
-        // 依旧可以使用Map这种集合作为更新条件
-        Map&lt;String, Object&gt; jsonMap = new HashMap&lt;&gt;();
-        jsonMap.put(&quot;uid&quot;, 12345);
-        jsonMap.put(&quot;phone&quot;, 123456789019L);
-        jsonMap.put(&quot;msgcode&quot;, 2);
-        jsonMap.put(&quot;sendtime&quot;, &quot;2019-03-14 01:57:04&quot;);
-        jsonMap.put(&quot;message&quot;, &quot;xuwujing study Elasticsearch&quot;);
-        upateRequest.doc(jsonMap);
-        // upsert 方法表示如果数据不存在，那么就新增一条
-        upateRequest.docAsUpsert(true);
-        client.update(upateRequest, RequestOptions.DEFAULT);
-        System.out.println(&quot;更新成功！&quot;);
-
-    }
-</code></pre>
-
-<p><strong>注:  upsert 方法表示如果数据不存在，那么就新增一条，默认是false。</strong></p>
-
+    <span style="color:#f92672">}</span>
+</code></pre></div><p><strong>注:  upsert 方法表示如果数据不存在，那么就新增一条，默认是false。</strong></p>
 <h2 id="查询数据">查询数据</h2>
-
 <p>几个常用的查询API这里就简单的介绍下用法，然后再直接给出所有的查询语句代码。</p>
-
 <h3 id="查询api">查询API</h3>
-
 <ul>
 <li>等值（term查询：QueryBuilders.termQuery(name,value);</li>
 <li>多值(terms)查询:QueryBuilders.termsQuery(name,value,value2,value3&hellip;);</li>
@@ -418,362 +382,316 @@ System.out.println(indexResponse.toString());
 <li>模糊(wildcard)查询:QueryBuilders.wildcardQuery(name,<em>+value+</em>);</li>
 <li>组合（bool）查询: BoolQueryBuilder boolQueryBuilder = new BoolQueryBuilder();</li>
 </ul>
-
 <h3 id="查询所有代码示例">查询所有代码示例</h3>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-java" data-lang="java"> <span style="color:#66d9ef">private</span> <span style="color:#66d9ef">static</span> <span style="color:#66d9ef">void</span> <span style="color:#a6e22e">allSearch</span><span style="color:#f92672">()</span> <span style="color:#66d9ef">throws</span> IOException <span style="color:#f92672">{</span>
+    SearchRequest searchRequestAll <span style="color:#f92672">=</span> <span style="color:#66d9ef">new</span> SearchRequest<span style="color:#f92672">();</span>
+    SearchSourceBuilder searchSourceBuilder <span style="color:#f92672">=</span> <span style="color:#66d9ef">new</span> SearchSourceBuilder<span style="color:#f92672">();</span>
+    searchSourceBuilder<span style="color:#f92672">.</span><span style="color:#a6e22e">query</span><span style="color:#f92672">(</span>QueryBuilders<span style="color:#f92672">.</span><span style="color:#a6e22e">matchAllQuery</span><span style="color:#f92672">());</span>
+    searchRequestAll<span style="color:#f92672">.</span><span style="color:#a6e22e">source</span><span style="color:#f92672">(</span>searchSourceBuilder<span style="color:#f92672">);</span>
+    <span style="color:#75715e">// 同步查询
+</span><span style="color:#75715e"></span>    SearchResponse searchResponseAll <span style="color:#f92672">=</span> client<span style="color:#f92672">.</span><span style="color:#a6e22e">search</span><span style="color:#f92672">(</span>searchRequestAll<span style="color:#f92672">,</span> RequestOptions<span style="color:#f92672">.</span><span style="color:#a6e22e">DEFAULT</span><span style="color:#f92672">);</span>
+    System<span style="color:#f92672">.</span><span style="color:#a6e22e">out</span><span style="color:#f92672">.</span><span style="color:#a6e22e">println</span><span style="color:#f92672">(</span><span style="color:#e6db74">&#34;所有查询总数:&#34;</span> <span style="color:#f92672">+</span> searchResponseAll<span style="color:#f92672">.</span><span style="color:#a6e22e">getHits</span><span style="color:#f92672">().</span><span style="color:#a6e22e">getTotalHits</span><span style="color:#f92672">());</span>
+<span style="color:#f92672">}</span>
 
-<pre><code class="language-java"> private static void allSearch() throws IOException {
-    SearchRequest searchRequestAll = new SearchRequest();
-    SearchSourceBuilder searchSourceBuilder = new SearchSourceBuilder();
-    searchSourceBuilder.query(QueryBuilders.matchAllQuery());
-    searchRequestAll.source(searchSourceBuilder);
-    // 同步查询
-    SearchResponse searchResponseAll = client.search(searchRequestAll, RequestOptions.DEFAULT);
-    System.out.println(&quot;所有查询总数:&quot; + searchResponseAll.getHits().getTotalHits());
-}
-
-</code></pre>
-
-<h3 id="一般查询代码示例">一般查询代码示例</h3>
-
+</code></pre></div><h3 id="一般查询代码示例">一般查询代码示例</h3>
 <p>其实就是等值查询，只不过在里面加入了分页、排序、超时、路由等等设置，并且在查询结果里面增加了一些处理。</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-java" data-lang="java">   <span style="color:#66d9ef">private</span> <span style="color:#66d9ef">static</span> <span style="color:#66d9ef">void</span> <span style="color:#a6e22e">genSearch</span><span style="color:#f92672">()</span> <span style="color:#66d9ef">throws</span> IOException <span style="color:#f92672">{</span>
+    String type <span style="color:#f92672">=</span> <span style="color:#e6db74">&#34;_doc&#34;</span><span style="color:#f92672">;</span>
+    String index <span style="color:#f92672">=</span> <span style="color:#e6db74">&#34;test1&#34;</span><span style="color:#f92672">;</span>
+    <span style="color:#75715e">// 查询指定的索引库
+</span><span style="color:#75715e"></span>    SearchRequest searchRequest <span style="color:#f92672">=</span> <span style="color:#66d9ef">new</span> SearchRequest<span style="color:#f92672">(</span>index<span style="color:#f92672">);</span>
+    searchRequest<span style="color:#f92672">.</span><span style="color:#a6e22e">types</span><span style="color:#f92672">(</span>type<span style="color:#f92672">);</span>
+    SearchSourceBuilder sourceBuilder <span style="color:#f92672">=</span> <span style="color:#66d9ef">new</span> SearchSourceBuilder<span style="color:#f92672">();</span>
+    <span style="color:#75715e">// 设置查询条件
+</span><span style="color:#75715e"></span>    sourceBuilder<span style="color:#f92672">.</span><span style="color:#a6e22e">query</span><span style="color:#f92672">(</span>QueryBuilders<span style="color:#f92672">.</span><span style="color:#a6e22e">termQuery</span><span style="color:#f92672">(</span><span style="color:#e6db74">&#34;uid&#34;</span><span style="color:#f92672">,</span> <span style="color:#e6db74">&#34;1234&#34;</span><span style="color:#f92672">));</span>
+    <span style="color:#75715e">// 设置起止和结束
+</span><span style="color:#75715e"></span>    sourceBuilder<span style="color:#f92672">.</span><span style="color:#a6e22e">from</span><span style="color:#f92672">(</span>0<span style="color:#f92672">);</span>
+    sourceBuilder<span style="color:#f92672">.</span><span style="color:#a6e22e">size</span><span style="color:#f92672">(</span>5<span style="color:#f92672">);</span>
+    sourceBuilder<span style="color:#f92672">.</span><span style="color:#a6e22e">timeout</span><span style="color:#f92672">(</span><span style="color:#66d9ef">new</span> TimeValue<span style="color:#f92672">(</span>60<span style="color:#f92672">,</span> TimeUnit<span style="color:#f92672">.</span><span style="color:#a6e22e">SECONDS</span><span style="color:#f92672">));</span>
+    <span style="color:#75715e">// 设置路由
+</span><span style="color:#75715e">//		searchRequest.routing(&#34;routing&#34;);
+</span><span style="color:#75715e"></span>    <span style="color:#75715e">// 设置索引库表达式
+</span><span style="color:#75715e"></span>    searchRequest<span style="color:#f92672">.</span><span style="color:#a6e22e">indicesOptions</span><span style="color:#f92672">(</span>IndicesOptions<span style="color:#f92672">.</span><span style="color:#a6e22e">lenientExpandOpen</span><span style="color:#f92672">());</span>
+    <span style="color:#75715e">// 查询选择本地分片，默认是集群分片
+</span><span style="color:#75715e"></span>    searchRequest<span style="color:#f92672">.</span><span style="color:#a6e22e">preference</span><span style="color:#f92672">(</span><span style="color:#e6db74">&#34;_local&#34;</span><span style="color:#f92672">);</span>
 
-<pre><code class="language-java">   private static void genSearch() throws IOException {
-    String type = &quot;_doc&quot;;
-    String index = &quot;test1&quot;;
-    // 查询指定的索引库
-    SearchRequest searchRequest = new SearchRequest(index);
-    searchRequest.types(type);
-    SearchSourceBuilder sourceBuilder = new SearchSourceBuilder();
-    // 设置查询条件
-    sourceBuilder.query(QueryBuilders.termQuery(&quot;uid&quot;, &quot;1234&quot;));
-    // 设置起止和结束
-    sourceBuilder.from(0);
-    sourceBuilder.size(5);
-    sourceBuilder.timeout(new TimeValue(60, TimeUnit.SECONDS));
-    // 设置路由
-//		searchRequest.routing(&quot;routing&quot;);
-    // 设置索引库表达式
-    searchRequest.indicesOptions(IndicesOptions.lenientExpandOpen());
-    // 查询选择本地分片，默认是集群分片
-    searchRequest.preference(&quot;_local&quot;);
+    <span style="color:#75715e">// 排序
+</span><span style="color:#75715e"></span>    <span style="color:#75715e">// 根据默认值进行降序排序
+</span><span style="color:#75715e">//	sourceBuilder.sort(new ScoreSortBuilder().order(SortOrder.DESC));
+</span><span style="color:#75715e"></span>    <span style="color:#75715e">// 根据字段进行升序排序
+</span><span style="color:#75715e">//	sourceBuilder.sort(new FieldSortBuilder(&#34;id&#34;).order(SortOrder.ASC));
+</span><span style="color:#75715e"></span>
+    <span style="color:#75715e">// 关闭suorce查询
+</span><span style="color:#75715e">//	sourceBuilder.fetchSource(false);
+</span><span style="color:#75715e"></span>
+    String<span style="color:#f92672">[]</span> includeFields <span style="color:#f92672">=</span> <span style="color:#66d9ef">new</span> String<span style="color:#f92672">[]{</span><span style="color:#e6db74">&#34;title&#34;</span><span style="color:#f92672">,</span> <span style="color:#e6db74">&#34;user&#34;</span><span style="color:#f92672">,</span> <span style="color:#e6db74">&#34;innerObject.*&#34;</span><span style="color:#f92672">};</span>
+    String<span style="color:#f92672">[]</span> excludeFields <span style="color:#f92672">=</span> <span style="color:#66d9ef">new</span> String<span style="color:#f92672">[]{</span><span style="color:#e6db74">&#34;_type&#34;</span><span style="color:#f92672">};</span>
+    <span style="color:#75715e">// 包含或排除字段
+</span><span style="color:#75715e">//	sourceBuilder.fetchSource(includeFields, excludeFields);
+</span><span style="color:#75715e"></span>
+    searchRequest<span style="color:#f92672">.</span><span style="color:#a6e22e">source</span><span style="color:#f92672">(</span>sourceBuilder<span style="color:#f92672">);</span>
+	System<span style="color:#f92672">.</span><span style="color:#a6e22e">out</span><span style="color:#f92672">.</span><span style="color:#a6e22e">println</span><span style="color:#f92672">(</span><span style="color:#e6db74">&#34;普通查询的DSL语句:&#34;</span><span style="color:#f92672">+</span>sourceBuilder<span style="color:#f92672">.</span><span style="color:#a6e22e">toString</span><span style="color:#f92672">());</span>
+    <span style="color:#75715e">// 同步查询
+</span><span style="color:#75715e"></span>    SearchResponse searchResponse <span style="color:#f92672">=</span> client<span style="color:#f92672">.</span><span style="color:#a6e22e">search</span><span style="color:#f92672">(</span>searchRequest<span style="color:#f92672">,</span> RequestOptions<span style="color:#f92672">.</span><span style="color:#a6e22e">DEFAULT</span><span style="color:#f92672">);</span>
 
-    // 排序
-    // 根据默认值进行降序排序
-//	sourceBuilder.sort(new ScoreSortBuilder().order(SortOrder.DESC));
-    // 根据字段进行升序排序
-//	sourceBuilder.sort(new FieldSortBuilder(&quot;id&quot;).order(SortOrder.ASC));
+    <span style="color:#75715e">// HTTP状态代码、执行时间或请求是否提前终止或超时
+</span><span style="color:#75715e"></span>    RestStatus status <span style="color:#f92672">=</span> searchResponse<span style="color:#f92672">.</span><span style="color:#a6e22e">status</span><span style="color:#f92672">();</span>
+    TimeValue took <span style="color:#f92672">=</span> searchResponse<span style="color:#f92672">.</span><span style="color:#a6e22e">getTook</span><span style="color:#f92672">();</span>
+    Boolean terminatedEarly <span style="color:#f92672">=</span> searchResponse<span style="color:#f92672">.</span><span style="color:#a6e22e">isTerminatedEarly</span><span style="color:#f92672">();</span>
+    <span style="color:#66d9ef">boolean</span> timedOut <span style="color:#f92672">=</span> searchResponse<span style="color:#f92672">.</span><span style="color:#a6e22e">isTimedOut</span><span style="color:#f92672">();</span>
 
-    // 关闭suorce查询
-//	sourceBuilder.fetchSource(false);
+    <span style="color:#75715e">// 供关于受搜索影响的切分总数的统计信息，以及成功和失败的切分
+</span><span style="color:#75715e"></span>    <span style="color:#66d9ef">int</span> totalShards <span style="color:#f92672">=</span> searchResponse<span style="color:#f92672">.</span><span style="color:#a6e22e">getTotalShards</span><span style="color:#f92672">();</span>
+    <span style="color:#66d9ef">int</span> successfulShards <span style="color:#f92672">=</span> searchResponse<span style="color:#f92672">.</span><span style="color:#a6e22e">getSuccessfulShards</span><span style="color:#f92672">();</span>
+    <span style="color:#66d9ef">int</span> failedShards <span style="color:#f92672">=</span> searchResponse<span style="color:#f92672">.</span><span style="color:#a6e22e">getFailedShards</span><span style="color:#f92672">();</span>
+    <span style="color:#75715e">// 失败的原因
+</span><span style="color:#75715e"></span>    <span style="color:#66d9ef">for</span> <span style="color:#f92672">(</span>ShardSearchFailure failure <span style="color:#f92672">:</span> searchResponse<span style="color:#f92672">.</span><span style="color:#a6e22e">getShardFailures</span><span style="color:#f92672">())</span> <span style="color:#f92672">{</span>
+        <span style="color:#75715e">// failures should be handled here
+</span><span style="color:#75715e"></span>    <span style="color:#f92672">}</span>
+    <span style="color:#75715e">// 结果
+</span><span style="color:#75715e"></span>    searchResponse<span style="color:#f92672">.</span><span style="color:#a6e22e">getHits</span><span style="color:#f92672">().</span><span style="color:#a6e22e">forEach</span><span style="color:#f92672">(</span>hit <span style="color:#f92672">-&gt;</span> <span style="color:#f92672">{</span>
+        Map<span style="color:#f92672">&lt;</span>String<span style="color:#f92672">,</span> Object<span style="color:#f92672">&gt;</span> map <span style="color:#f92672">=</span> hit<span style="color:#f92672">.</span><span style="color:#a6e22e">getSourceAsMap</span><span style="color:#f92672">();</span>
+        System<span style="color:#f92672">.</span><span style="color:#a6e22e">out</span><span style="color:#f92672">.</span><span style="color:#a6e22e">println</span><span style="color:#f92672">(</span><span style="color:#e6db74">&#34;普通查询的结果:&#34;</span> <span style="color:#f92672">+</span> map<span style="color:#f92672">);</span>
+    <span style="color:#f92672">});</span>
+    System<span style="color:#f92672">.</span><span style="color:#a6e22e">out</span><span style="color:#f92672">.</span><span style="color:#a6e22e">println</span><span style="color:#f92672">(</span><span style="color:#e6db74">&#34;\n=================\n&#34;</span><span style="color:#f92672">);</span>
+<span style="color:#f92672">}</span>
 
-    String[] includeFields = new String[]{&quot;title&quot;, &quot;user&quot;, &quot;innerObject.*&quot;};
-    String[] excludeFields = new String[]{&quot;_type&quot;};
-    // 包含或排除字段
-//	sourceBuilder.fetchSource(includeFields, excludeFields);
-
-    searchRequest.source(sourceBuilder);
-	System.out.println(&quot;普通查询的DSL语句:&quot;+sourceBuilder.toString());
-    // 同步查询
-    SearchResponse searchResponse = client.search(searchRequest, RequestOptions.DEFAULT);
-
-    // HTTP状态代码、执行时间或请求是否提前终止或超时
-    RestStatus status = searchResponse.status();
-    TimeValue took = searchResponse.getTook();
-    Boolean terminatedEarly = searchResponse.isTerminatedEarly();
-    boolean timedOut = searchResponse.isTimedOut();
-
-    // 供关于受搜索影响的切分总数的统计信息，以及成功和失败的切分
-    int totalShards = searchResponse.getTotalShards();
-    int successfulShards = searchResponse.getSuccessfulShards();
-    int failedShards = searchResponse.getFailedShards();
-    // 失败的原因
-    for (ShardSearchFailure failure : searchResponse.getShardFailures()) {
-        // failures should be handled here
-    }
-    // 结果
-    searchResponse.getHits().forEach(hit -&gt; {
-        Map&lt;String, Object&gt; map = hit.getSourceAsMap();
-        System.out.println(&quot;普通查询的结果:&quot; + map);
-    });
-    System.out.println(&quot;\n=================\n&quot;);
-}
-
-</code></pre>
-
-<h3 id="或查询">或查询</h3>
-
+</code></pre></div><h3 id="或查询">或查询</h3>
 <p>其实这个或查询也是bool查询中的一种，这里的查询语句相当于SQL语句中的</p>
-
-<pre><code class="language-sql">SELECT * FROM test1 where (uid = 1 or uid =2) and phone = 12345678919
-</code></pre>
-
-<p>代码示例:</p>
-
-<pre><code class="language-java">private static void orSearch() throws IOException {
-    SearchRequest searchRequest = new SearchRequest();
-    searchRequest.indices(&quot;test1&quot;);
-    searchRequest.types(&quot;_doc&quot;);
-    SearchSourceBuilder searchSourceBuilder = new SearchSourceBuilder();
-    BoolQueryBuilder boolQueryBuilder = new BoolQueryBuilder();
-    BoolQueryBuilder boolQueryBuilder2 = new BoolQueryBuilder();
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-sql" data-lang="sql"><span style="color:#66d9ef">SELECT</span> <span style="color:#f92672">*</span> <span style="color:#66d9ef">FROM</span> test1 <span style="color:#66d9ef">where</span> (uid <span style="color:#f92672">=</span> <span style="color:#ae81ff">1</span> <span style="color:#66d9ef">or</span> uid <span style="color:#f92672">=</span><span style="color:#ae81ff">2</span>) <span style="color:#66d9ef">and</span> phone <span style="color:#f92672">=</span> <span style="color:#ae81ff">12345678919</span>
+</code></pre></div><p>代码示例:</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-java" data-lang="java"><span style="color:#66d9ef">private</span> <span style="color:#66d9ef">static</span> <span style="color:#66d9ef">void</span> <span style="color:#a6e22e">orSearch</span><span style="color:#f92672">()</span> <span style="color:#66d9ef">throws</span> IOException <span style="color:#f92672">{</span>
+    SearchRequest searchRequest <span style="color:#f92672">=</span> <span style="color:#66d9ef">new</span> SearchRequest<span style="color:#f92672">();</span>
+    searchRequest<span style="color:#f92672">.</span><span style="color:#a6e22e">indices</span><span style="color:#f92672">(</span><span style="color:#e6db74">&#34;test1&#34;</span><span style="color:#f92672">);</span>
+    searchRequest<span style="color:#f92672">.</span><span style="color:#a6e22e">types</span><span style="color:#f92672">(</span><span style="color:#e6db74">&#34;_doc&#34;</span><span style="color:#f92672">);</span>
+    SearchSourceBuilder searchSourceBuilder <span style="color:#f92672">=</span> <span style="color:#66d9ef">new</span> SearchSourceBuilder<span style="color:#f92672">();</span>
+    BoolQueryBuilder boolQueryBuilder <span style="color:#f92672">=</span> <span style="color:#66d9ef">new</span> BoolQueryBuilder<span style="color:#f92672">();</span>
+    BoolQueryBuilder boolQueryBuilder2 <span style="color:#f92672">=</span> <span style="color:#66d9ef">new</span> BoolQueryBuilder<span style="color:#f92672">();</span>
  
-      /**
-     *  SELECT * FROM test1 where (uid = 1234 or uid =12345)  and phone = 12345678909
-     * */
-    boolQueryBuilder2.should(QueryBuilders.termQuery(&quot;uid&quot;, 1234));
-    boolQueryBuilder2.should(QueryBuilders.termQuery(&quot;uid&quot;, 12345));
-    boolQueryBuilder.must(boolQueryBuilder2);
-    boolQueryBuilder.must(QueryBuilders.termQuery(&quot;phone&quot;, &quot;12345678909&quot;));
-    searchSourceBuilder.query(boolQueryBuilder);
-    System.out.println(&quot;或查询语句:&quot; + searchSourceBuilder.toString());
-    searchRequest.source(searchSourceBuilder);
-    // 同步查询
-    SearchResponse searchResponse = client.search(searchRequest, RequestOptions.DEFAULT);
+      <span style="color:#75715e">/**
+</span><span style="color:#75715e">     *  SELECT * FROM test1 where (uid = 1234 or uid =12345)  and phone = 12345678909
+</span><span style="color:#75715e">     * */</span>
+    boolQueryBuilder2<span style="color:#f92672">.</span><span style="color:#a6e22e">should</span><span style="color:#f92672">(</span>QueryBuilders<span style="color:#f92672">.</span><span style="color:#a6e22e">termQuery</span><span style="color:#f92672">(</span><span style="color:#e6db74">&#34;uid&#34;</span><span style="color:#f92672">,</span> 1234<span style="color:#f92672">));</span>
+    boolQueryBuilder2<span style="color:#f92672">.</span><span style="color:#a6e22e">should</span><span style="color:#f92672">(</span>QueryBuilders<span style="color:#f92672">.</span><span style="color:#a6e22e">termQuery</span><span style="color:#f92672">(</span><span style="color:#e6db74">&#34;uid&#34;</span><span style="color:#f92672">,</span> 12345<span style="color:#f92672">));</span>
+    boolQueryBuilder<span style="color:#f92672">.</span><span style="color:#a6e22e">must</span><span style="color:#f92672">(</span>boolQueryBuilder2<span style="color:#f92672">);</span>
+    boolQueryBuilder<span style="color:#f92672">.</span><span style="color:#a6e22e">must</span><span style="color:#f92672">(</span>QueryBuilders<span style="color:#f92672">.</span><span style="color:#a6e22e">termQuery</span><span style="color:#f92672">(</span><span style="color:#e6db74">&#34;phone&#34;</span><span style="color:#f92672">,</span> <span style="color:#e6db74">&#34;12345678909&#34;</span><span style="color:#f92672">));</span>
+    searchSourceBuilder<span style="color:#f92672">.</span><span style="color:#a6e22e">query</span><span style="color:#f92672">(</span>boolQueryBuilder<span style="color:#f92672">);</span>
+    System<span style="color:#f92672">.</span><span style="color:#a6e22e">out</span><span style="color:#f92672">.</span><span style="color:#a6e22e">println</span><span style="color:#f92672">(</span><span style="color:#e6db74">&#34;或查询语句:&#34;</span> <span style="color:#f92672">+</span> searchSourceBuilder<span style="color:#f92672">.</span><span style="color:#a6e22e">toString</span><span style="color:#f92672">());</span>
+    searchRequest<span style="color:#f92672">.</span><span style="color:#a6e22e">source</span><span style="color:#f92672">(</span>searchSourceBuilder<span style="color:#f92672">);</span>
+    <span style="color:#75715e">// 同步查询
+</span><span style="color:#75715e"></span>    SearchResponse searchResponse <span style="color:#f92672">=</span> client<span style="color:#f92672">.</span><span style="color:#a6e22e">search</span><span style="color:#f92672">(</span>searchRequest<span style="color:#f92672">,</span> RequestOptions<span style="color:#f92672">.</span><span style="color:#a6e22e">DEFAULT</span><span style="color:#f92672">);</span>
 
-    searchResponse.getHits().forEach(documentFields -&gt; {
+    searchResponse<span style="color:#f92672">.</span><span style="color:#a6e22e">getHits</span><span style="color:#f92672">().</span><span style="color:#a6e22e">forEach</span><span style="color:#f92672">(</span>documentFields <span style="color:#f92672">-&gt;</span> <span style="color:#f92672">{</span>
 
-        System.out.println(&quot;查询结果:&quot; + documentFields.getSourceAsMap());
-    });
+        System<span style="color:#f92672">.</span><span style="color:#a6e22e">out</span><span style="color:#f92672">.</span><span style="color:#a6e22e">println</span><span style="color:#f92672">(</span><span style="color:#e6db74">&#34;查询结果:&#34;</span> <span style="color:#f92672">+</span> documentFields<span style="color:#f92672">.</span><span style="color:#a6e22e">getSourceAsMap</span><span style="color:#f92672">());</span>
+    <span style="color:#f92672">});</span>
 
-}
+<span style="color:#f92672">}</span>
 
-</code></pre>
-
-<h3 id="模糊查询">模糊查询</h3>
-
+</code></pre></div><h3 id="模糊查询">模糊查询</h3>
 <p>相当于SQL语句中的like查询。</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-java" data-lang="java"> <span style="color:#66d9ef">private</span> <span style="color:#66d9ef">static</span> <span style="color:#66d9ef">void</span> <span style="color:#a6e22e">likeSearch</span><span style="color:#f92672">()</span> <span style="color:#66d9ef">throws</span> IOException <span style="color:#f92672">{</span>
+        String type <span style="color:#f92672">=</span> <span style="color:#e6db74">&#34;_doc&#34;</span><span style="color:#f92672">;</span>
+        String index <span style="color:#f92672">=</span> <span style="color:#e6db74">&#34;test1&#34;</span><span style="color:#f92672">;</span>
+        SearchRequest searchRequest <span style="color:#f92672">=</span> <span style="color:#66d9ef">new</span> SearchRequest<span style="color:#f92672">();</span>
+        searchRequest<span style="color:#f92672">.</span><span style="color:#a6e22e">indices</span><span style="color:#f92672">(</span>index<span style="color:#f92672">);</span>
+        searchRequest<span style="color:#f92672">.</span><span style="color:#a6e22e">types</span><span style="color:#f92672">(</span>type<span style="color:#f92672">);</span>
+        SearchSourceBuilder searchSourceBuilder <span style="color:#f92672">=</span> <span style="color:#66d9ef">new</span> SearchSourceBuilder<span style="color:#f92672">();</span>
+        BoolQueryBuilder boolQueryBuilder <span style="color:#f92672">=</span> <span style="color:#66d9ef">new</span> BoolQueryBuilder<span style="color:#f92672">();</span>
 
-<pre><code class="language-java"> private static void likeSearch() throws IOException {
-        String type = &quot;_doc&quot;;
-        String index = &quot;test1&quot;;
-        SearchRequest searchRequest = new SearchRequest();
-        searchRequest.indices(index);
-        searchRequest.types(type);
-        SearchSourceBuilder searchSourceBuilder = new SearchSourceBuilder();
-        BoolQueryBuilder boolQueryBuilder = new BoolQueryBuilder();
-
-        /**
-         * SELECT * FROM p_test where message like '%xu%';
-         */
-        boolQueryBuilder.must(QueryBuilders.wildcardQuery(&quot;message&quot;, &quot;*xu*&quot;));
-        searchSourceBuilder.query(boolQueryBuilder);
-        System.out.println(&quot;模糊查询语句:&quot; + searchSourceBuilder.toString());
-        searchRequest.source(searchSourceBuilder);
-        // 同步查询
-        SearchResponse searchResponse = client.search(searchRequest, RequestOptions.DEFAULT);
-        searchResponse.getHits().forEach(documentFields -&gt; {
-            System.out.println(&quot;模糊查询结果:&quot; + documentFields.getSourceAsMap());
-        });
-        System.out.println(&quot;\n=================\n&quot;);
-    }
-</code></pre>
-
-<h3 id="多值查询">多值查询</h3>
-
+        <span style="color:#75715e">/**
+</span><span style="color:#75715e">         * SELECT * FROM p_test where message like &#39;%xu%&#39;;
+</span><span style="color:#75715e">         */</span>
+        boolQueryBuilder<span style="color:#f92672">.</span><span style="color:#a6e22e">must</span><span style="color:#f92672">(</span>QueryBuilders<span style="color:#f92672">.</span><span style="color:#a6e22e">wildcardQuery</span><span style="color:#f92672">(</span><span style="color:#e6db74">&#34;message&#34;</span><span style="color:#f92672">,</span> <span style="color:#e6db74">&#34;*xu*&#34;</span><span style="color:#f92672">));</span>
+        searchSourceBuilder<span style="color:#f92672">.</span><span style="color:#a6e22e">query</span><span style="color:#f92672">(</span>boolQueryBuilder<span style="color:#f92672">);</span>
+        System<span style="color:#f92672">.</span><span style="color:#a6e22e">out</span><span style="color:#f92672">.</span><span style="color:#a6e22e">println</span><span style="color:#f92672">(</span><span style="color:#e6db74">&#34;模糊查询语句:&#34;</span> <span style="color:#f92672">+</span> searchSourceBuilder<span style="color:#f92672">.</span><span style="color:#a6e22e">toString</span><span style="color:#f92672">());</span>
+        searchRequest<span style="color:#f92672">.</span><span style="color:#a6e22e">source</span><span style="color:#f92672">(</span>searchSourceBuilder<span style="color:#f92672">);</span>
+        <span style="color:#75715e">// 同步查询
+</span><span style="color:#75715e"></span>        SearchResponse searchResponse <span style="color:#f92672">=</span> client<span style="color:#f92672">.</span><span style="color:#a6e22e">search</span><span style="color:#f92672">(</span>searchRequest<span style="color:#f92672">,</span> RequestOptions<span style="color:#f92672">.</span><span style="color:#a6e22e">DEFAULT</span><span style="color:#f92672">);</span>
+        searchResponse<span style="color:#f92672">.</span><span style="color:#a6e22e">getHits</span><span style="color:#f92672">().</span><span style="color:#a6e22e">forEach</span><span style="color:#f92672">(</span>documentFields <span style="color:#f92672">-&gt;</span> <span style="color:#f92672">{</span>
+            System<span style="color:#f92672">.</span><span style="color:#a6e22e">out</span><span style="color:#f92672">.</span><span style="color:#a6e22e">println</span><span style="color:#f92672">(</span><span style="color:#e6db74">&#34;模糊查询结果:&#34;</span> <span style="color:#f92672">+</span> documentFields<span style="color:#f92672">.</span><span style="color:#a6e22e">getSourceAsMap</span><span style="color:#f92672">());</span>
+        <span style="color:#f92672">});</span>
+        System<span style="color:#f92672">.</span><span style="color:#a6e22e">out</span><span style="color:#f92672">.</span><span style="color:#a6e22e">println</span><span style="color:#f92672">(</span><span style="color:#e6db74">&#34;\n=================\n&#34;</span><span style="color:#f92672">);</span>
+    <span style="color:#f92672">}</span>
+</code></pre></div><h3 id="多值查询">多值查询</h3>
 <p>也就是相当于SQL语句中的in查询。</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-java" data-lang="java"> 	 <span style="color:#66d9ef">private</span> <span style="color:#66d9ef">static</span> <span style="color:#66d9ef">void</span> <span style="color:#a6e22e">inSearch</span><span style="color:#f92672">()</span> <span style="color:#66d9ef">throws</span> IOException <span style="color:#f92672">{</span>
+        String type <span style="color:#f92672">=</span> <span style="color:#e6db74">&#34;_doc&#34;</span><span style="color:#f92672">;</span>
+        String index <span style="color:#f92672">=</span> <span style="color:#e6db74">&#34;test1&#34;</span><span style="color:#f92672">;</span>
+        <span style="color:#75715e">// 查询指定的索引库
+</span><span style="color:#75715e"></span>        SearchRequest searchRequest <span style="color:#f92672">=</span> <span style="color:#66d9ef">new</span> SearchRequest<span style="color:#f92672">(</span>index<span style="color:#f92672">,</span>type<span style="color:#f92672">);</span>
+        SearchSourceBuilder sourceBuilder <span style="color:#f92672">=</span> <span style="color:#66d9ef">new</span> SearchSourceBuilder<span style="color:#f92672">();</span>
+        <span style="color:#75715e">/**
+</span><span style="color:#75715e">         *  SELECT * FROM p_test where uid in (1,2)
+</span><span style="color:#75715e">         * */</span>
+        <span style="color:#75715e">// 设置查询条件
+</span><span style="color:#75715e"></span>        sourceBuilder<span style="color:#f92672">.</span><span style="color:#a6e22e">query</span><span style="color:#f92672">(</span>QueryBuilders<span style="color:#f92672">.</span><span style="color:#a6e22e">termsQuery</span><span style="color:#f92672">(</span><span style="color:#e6db74">&#34;uid&#34;</span><span style="color:#f92672">,</span> 1<span style="color:#f92672">,</span> 2<span style="color:#f92672">));</span>
+        searchRequest<span style="color:#f92672">.</span><span style="color:#a6e22e">source</span><span style="color:#f92672">(</span>sourceBuilder<span style="color:#f92672">);</span>
+  		System<span style="color:#f92672">.</span><span style="color:#a6e22e">out</span><span style="color:#f92672">.</span><span style="color:#a6e22e">println</span><span style="color:#f92672">(</span><span style="color:#e6db74">&#34;in查询的DSL语句:&#34;</span><span style="color:#f92672">+</span>sourceBuilder<span style="color:#f92672">.</span><span style="color:#a6e22e">toString</span><span style="color:#f92672">());</span>
+        <span style="color:#75715e">// 同步查询
+</span><span style="color:#75715e"></span>        SearchResponse searchResponse <span style="color:#f92672">=</span> client<span style="color:#f92672">.</span><span style="color:#a6e22e">search</span><span style="color:#f92672">(</span>searchRequest<span style="color:#f92672">,</span> RequestOptions<span style="color:#f92672">.</span><span style="color:#a6e22e">DEFAULT</span><span style="color:#f92672">);</span>
+        <span style="color:#75715e">// 结果
+</span><span style="color:#75715e"></span>        searchResponse<span style="color:#f92672">.</span><span style="color:#a6e22e">getHits</span><span style="color:#f92672">().</span><span style="color:#a6e22e">forEach</span><span style="color:#f92672">(</span>hit <span style="color:#f92672">-&gt;</span> <span style="color:#f92672">{</span>
+            Map<span style="color:#f92672">&lt;</span>String<span style="color:#f92672">,</span> Object<span style="color:#f92672">&gt;</span> map <span style="color:#f92672">=</span> hit<span style="color:#f92672">.</span><span style="color:#a6e22e">getSourceAsMap</span><span style="color:#f92672">();</span>
+            String string <span style="color:#f92672">=</span> hit<span style="color:#f92672">.</span><span style="color:#a6e22e">getSourceAsString</span><span style="color:#f92672">();</span>
+            System<span style="color:#f92672">.</span><span style="color:#a6e22e">out</span><span style="color:#f92672">.</span><span style="color:#a6e22e">println</span><span style="color:#f92672">(</span><span style="color:#e6db74">&#34;in查询的Map结果:&#34;</span> <span style="color:#f92672">+</span> map<span style="color:#f92672">);</span>
+            System<span style="color:#f92672">.</span><span style="color:#a6e22e">out</span><span style="color:#f92672">.</span><span style="color:#a6e22e">println</span><span style="color:#f92672">(</span><span style="color:#e6db74">&#34;in查询的String结果:&#34;</span> <span style="color:#f92672">+</span> string<span style="color:#f92672">);</span>
+        <span style="color:#f92672">});</span>
 
-<pre><code class="language-java"> 	 private static void inSearch() throws IOException {
-        String type = &quot;_doc&quot;;
-        String index = &quot;test1&quot;;
-        // 查询指定的索引库
-        SearchRequest searchRequest = new SearchRequest(index,type);
-        SearchSourceBuilder sourceBuilder = new SearchSourceBuilder();
-        /**
-         *  SELECT * FROM p_test where uid in (1,2)
-         * */
-        // 设置查询条件
-        sourceBuilder.query(QueryBuilders.termsQuery(&quot;uid&quot;, 1, 2));
-        searchRequest.source(sourceBuilder);
-  		System.out.println(&quot;in查询的DSL语句:&quot;+sourceBuilder.toString());
-        // 同步查询
-        SearchResponse searchResponse = client.search(searchRequest, RequestOptions.DEFAULT);
-        // 结果
-        searchResponse.getHits().forEach(hit -&gt; {
-            Map&lt;String, Object&gt; map = hit.getSourceAsMap();
-            String string = hit.getSourceAsString();
-            System.out.println(&quot;in查询的Map结果:&quot; + map);
-            System.out.println(&quot;in查询的String结果:&quot; + string);
-        });
+        System<span style="color:#f92672">.</span><span style="color:#a6e22e">out</span><span style="color:#f92672">.</span><span style="color:#a6e22e">println</span><span style="color:#f92672">(</span><span style="color:#e6db74">&#34;\n=================\n&#34;</span><span style="color:#f92672">);</span>
+    <span style="color:#f92672">}</span>
 
-        System.out.println(&quot;\n=================\n&quot;);
-    }
-
-</code></pre>
-
-<h3 id="存在查询">存在查询</h3>
-
+</code></pre></div><h3 id="存在查询">存在查询</h3>
 <p>判断是否存在该字段，用法和SQL语句中的exist类似。</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-java" data-lang="java">  <span style="color:#66d9ef">private</span> <span style="color:#66d9ef">static</span> <span style="color:#66d9ef">void</span> <span style="color:#a6e22e">existSearch</span><span style="color:#f92672">()</span> <span style="color:#66d9ef">throws</span> IOException <span style="color:#f92672">{</span>
+    String type <span style="color:#f92672">=</span> <span style="color:#e6db74">&#34;_doc&#34;</span><span style="color:#f92672">;</span>
+    String index <span style="color:#f92672">=</span> <span style="color:#e6db74">&#34;test1&#34;</span><span style="color:#f92672">;</span>
+    <span style="color:#75715e">// 查询指定的索引库
+</span><span style="color:#75715e"></span>    SearchRequest searchRequest <span style="color:#f92672">=</span> <span style="color:#66d9ef">new</span> SearchRequest<span style="color:#f92672">(</span>index<span style="color:#f92672">);</span>
+    searchRequest<span style="color:#f92672">.</span><span style="color:#a6e22e">types</span><span style="color:#f92672">(</span>type<span style="color:#f92672">);</span>
+    SearchSourceBuilder sourceBuilder <span style="color:#f92672">=</span> <span style="color:#66d9ef">new</span> SearchSourceBuilder<span style="color:#f92672">();</span>
 
-<pre><code class="language-java">  private static void existSearch() throws IOException {
-    String type = &quot;_doc&quot;;
-    String index = &quot;test1&quot;;
-    // 查询指定的索引库
-    SearchRequest searchRequest = new SearchRequest(index);
-    searchRequest.types(type);
-    SearchSourceBuilder sourceBuilder = new SearchSourceBuilder();
+    <span style="color:#75715e">// 设置查询条件
+</span><span style="color:#75715e"></span>     sourceBuilder<span style="color:#f92672">.</span><span style="color:#a6e22e">query</span><span style="color:#f92672">(</span>QueryBuilders<span style="color:#f92672">.</span><span style="color:#a6e22e">existsQuery</span><span style="color:#f92672">(</span><span style="color:#e6db74">&#34;msgcode&#34;</span><span style="color:#f92672">));</span>
+    searchRequest<span style="color:#f92672">.</span><span style="color:#a6e22e">source</span><span style="color:#f92672">(</span>sourceBuilder<span style="color:#f92672">);</span>
+    System<span style="color:#f92672">.</span><span style="color:#a6e22e">out</span><span style="color:#f92672">.</span><span style="color:#a6e22e">println</span><span style="color:#f92672">(</span><span style="color:#e6db74">&#34;存在查询的DSL语句:&#34;</span><span style="color:#f92672">+</span>sourceBuilder<span style="color:#f92672">.</span><span style="color:#a6e22e">toString</span><span style="color:#f92672">());</span>
+    <span style="color:#75715e">// 同步查询
+</span><span style="color:#75715e"></span>    SearchResponse searchResponse <span style="color:#f92672">=</span> client<span style="color:#f92672">.</span><span style="color:#a6e22e">search</span><span style="color:#f92672">(</span>searchRequest<span style="color:#f92672">,</span> RequestOptions<span style="color:#f92672">.</span><span style="color:#a6e22e">DEFAULT</span><span style="color:#f92672">);</span>
+    <span style="color:#75715e">// 结果
+</span><span style="color:#75715e"></span>    searchResponse<span style="color:#f92672">.</span><span style="color:#a6e22e">getHits</span><span style="color:#f92672">().</span><span style="color:#a6e22e">forEach</span><span style="color:#f92672">(</span>hit <span style="color:#f92672">-&gt;</span> <span style="color:#f92672">{</span>
+        Map<span style="color:#f92672">&lt;</span>String<span style="color:#f92672">,</span> Object<span style="color:#f92672">&gt;</span> map <span style="color:#f92672">=</span> hit<span style="color:#f92672">.</span><span style="color:#a6e22e">getSourceAsMap</span><span style="color:#f92672">();</span>
+        String string <span style="color:#f92672">=</span> hit<span style="color:#f92672">.</span><span style="color:#a6e22e">getSourceAsString</span><span style="color:#f92672">();</span>
+        System<span style="color:#f92672">.</span><span style="color:#a6e22e">out</span><span style="color:#f92672">.</span><span style="color:#a6e22e">println</span><span style="color:#f92672">(</span><span style="color:#e6db74">&#34;存在查询的Map结果:&#34;</span> <span style="color:#f92672">+</span> map<span style="color:#f92672">);</span>
+        System<span style="color:#f92672">.</span><span style="color:#a6e22e">out</span><span style="color:#f92672">.</span><span style="color:#a6e22e">println</span><span style="color:#f92672">(</span><span style="color:#e6db74">&#34;存在查询的String结果:&#34;</span> <span style="color:#f92672">+</span> string<span style="color:#f92672">);</span>
+    <span style="color:#f92672">});</span>
+    System<span style="color:#f92672">.</span><span style="color:#a6e22e">out</span><span style="color:#f92672">.</span><span style="color:#a6e22e">println</span><span style="color:#f92672">(</span><span style="color:#e6db74">&#34;\n=================\n&#34;</span><span style="color:#f92672">);</span>
+<span style="color:#f92672">}</span>
 
-    // 设置查询条件
-     sourceBuilder.query(QueryBuilders.existsQuery(&quot;msgcode&quot;));
-    searchRequest.source(sourceBuilder);
-    System.out.println(&quot;存在查询的DSL语句:&quot;+sourceBuilder.toString());
-    // 同步查询
-    SearchResponse searchResponse = client.search(searchRequest, RequestOptions.DEFAULT);
-    // 结果
-    searchResponse.getHits().forEach(hit -&gt; {
-        Map&lt;String, Object&gt; map = hit.getSourceAsMap();
-        String string = hit.getSourceAsString();
-        System.out.println(&quot;存在查询的Map结果:&quot; + map);
-        System.out.println(&quot;存在查询的String结果:&quot; + string);
-    });
-    System.out.println(&quot;\n=================\n&quot;);
-}
-
-</code></pre>
-
-<h3 id="范围查询">范围查询</h3>
-
+</code></pre></div><h3 id="范围查询">范围查询</h3>
 <p>和SQL语句中&lt;&gt;使用方法一样,其中gt是大于，lt是小于，gte是大于等于，lte是小于等于。</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-java" data-lang="java"><span style="color:#66d9ef">private</span> <span style="color:#66d9ef">static</span> <span style="color:#66d9ef">void</span> <span style="color:#a6e22e">rangeSearch</span><span style="color:#f92672">()</span> <span style="color:#66d9ef">throws</span> IOException<span style="color:#f92672">{</span>
+    String type <span style="color:#f92672">=</span> <span style="color:#e6db74">&#34;_doc&#34;</span><span style="color:#f92672">;</span>
+    String index <span style="color:#f92672">=</span> <span style="color:#e6db74">&#34;test1&#34;</span><span style="color:#f92672">;</span>
+    SearchRequest searchRequest <span style="color:#f92672">=</span> <span style="color:#66d9ef">new</span> SearchRequest<span style="color:#f92672">(</span>index<span style="color:#f92672">);</span>
+    searchRequest<span style="color:#f92672">.</span><span style="color:#a6e22e">types</span><span style="color:#f92672">(</span>type<span style="color:#f92672">);</span>
+    SearchSourceBuilder sourceBuilder <span style="color:#f92672">=</span> <span style="color:#66d9ef">new</span> SearchSourceBuilder<span style="color:#f92672">();</span>
 
-<pre><code class="language-java">private static void rangeSearch() throws IOException{
-    String type = &quot;_doc&quot;;
-    String index = &quot;test1&quot;;
-    SearchRequest searchRequest = new SearchRequest(index);
-    searchRequest.types(type);
-    SearchSourceBuilder sourceBuilder = new SearchSourceBuilder();
+    <span style="color:#75715e">// 设置查询条件
+</span><span style="color:#75715e"></span>    sourceBuilder<span style="color:#f92672">.</span><span style="color:#a6e22e">query</span><span style="color:#f92672">(</span>QueryBuilders<span style="color:#f92672">.</span><span style="color:#a6e22e">rangeQuery</span><span style="color:#f92672">(</span><span style="color:#e6db74">&#34;sendtime&#34;</span><span style="color:#f92672">).</span><span style="color:#a6e22e">gte</span><span style="color:#f92672">(</span><span style="color:#e6db74">&#34;2019-01-01 00:00:00&#34;</span><span style="color:#f92672">).</span><span style="color:#a6e22e">lte</span><span style="color:#f92672">(</span><span style="color:#e6db74">&#34;2019-12-31 23:59:59&#34;</span><span style="color:#f92672">));</span>
+    searchRequest<span style="color:#f92672">.</span><span style="color:#a6e22e">source</span><span style="color:#f92672">(</span>sourceBuilder<span style="color:#f92672">);</span>
+     System<span style="color:#f92672">.</span><span style="color:#a6e22e">out</span><span style="color:#f92672">.</span><span style="color:#a6e22e">println</span><span style="color:#f92672">(</span><span style="color:#e6db74">&#34;范围查询的DSL语句:&#34;</span><span style="color:#f92672">+</span>sourceBuilder<span style="color:#f92672">.</span><span style="color:#a6e22e">toString</span><span style="color:#f92672">());</span>
+    <span style="color:#75715e">// 同步查询
+</span><span style="color:#75715e"></span>    SearchResponse searchResponse <span style="color:#f92672">=</span> client<span style="color:#f92672">.</span><span style="color:#a6e22e">search</span><span style="color:#f92672">(</span>searchRequest<span style="color:#f92672">,</span> RequestOptions<span style="color:#f92672">.</span><span style="color:#a6e22e">DEFAULT</span><span style="color:#f92672">);</span>
+    <span style="color:#75715e">// 结果
+</span><span style="color:#75715e"></span>    searchResponse<span style="color:#f92672">.</span><span style="color:#a6e22e">getHits</span><span style="color:#f92672">().</span><span style="color:#a6e22e">forEach</span><span style="color:#f92672">(</span>hit <span style="color:#f92672">-&gt;</span> <span style="color:#f92672">{</span>
+        String string <span style="color:#f92672">=</span> hit<span style="color:#f92672">.</span><span style="color:#a6e22e">getSourceAsString</span><span style="color:#f92672">();</span>
+        System<span style="color:#f92672">.</span><span style="color:#a6e22e">out</span><span style="color:#f92672">.</span><span style="color:#a6e22e">println</span><span style="color:#f92672">(</span><span style="color:#e6db74">&#34;范围查询的String结果:&#34;</span> <span style="color:#f92672">+</span> string<span style="color:#f92672">);</span>
+    <span style="color:#f92672">});</span>
+    System<span style="color:#f92672">.</span><span style="color:#a6e22e">out</span><span style="color:#f92672">.</span><span style="color:#a6e22e">println</span><span style="color:#f92672">(</span><span style="color:#e6db74">&#34;\n=================\n&#34;</span><span style="color:#f92672">);</span>
+<span style="color:#f92672">}</span>
 
-    // 设置查询条件
-    sourceBuilder.query(QueryBuilders.rangeQuery(&quot;sendtime&quot;).gte(&quot;2019-01-01 00:00:00&quot;).lte(&quot;2019-12-31 23:59:59&quot;));
-    searchRequest.source(sourceBuilder);
-     System.out.println(&quot;范围查询的DSL语句:&quot;+sourceBuilder.toString());
-    // 同步查询
-    SearchResponse searchResponse = client.search(searchRequest, RequestOptions.DEFAULT);
-    // 结果
-    searchResponse.getHits().forEach(hit -&gt; {
-        String string = hit.getSourceAsString();
-        System.out.println(&quot;范围查询的String结果:&quot; + string);
-    });
-    System.out.println(&quot;\n=================\n&quot;);
-}
-
-</code></pre>
-
-<h3 id="正则查询">正则查询</h3>
-
+</code></pre></div><h3 id="正则查询">正则查询</h3>
 <p>ES可以使用正则进行查询，查询方式也非常的简单，代码示例如下：</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-java" data-lang="java"> <span style="color:#66d9ef">private</span> <span style="color:#66d9ef">static</span> <span style="color:#66d9ef">void</span> <span style="color:#a6e22e">regexpSearch</span><span style="color:#f92672">()</span> <span style="color:#66d9ef">throws</span> IOException<span style="color:#f92672">{</span>
+    String type <span style="color:#f92672">=</span> <span style="color:#e6db74">&#34;_doc&#34;</span><span style="color:#f92672">;</span>
+    String index <span style="color:#f92672">=</span> <span style="color:#e6db74">&#34;test1&#34;</span><span style="color:#f92672">;</span>
+    <span style="color:#75715e">// 查询指定的索引库
+</span><span style="color:#75715e"></span>    SearchRequest searchRequest <span style="color:#f92672">=</span> <span style="color:#66d9ef">new</span> SearchRequest<span style="color:#f92672">(</span>index<span style="color:#f92672">);</span>
+    searchRequest<span style="color:#f92672">.</span><span style="color:#a6e22e">types</span><span style="color:#f92672">(</span>type<span style="color:#f92672">);</span>
+    SearchSourceBuilder sourceBuilder <span style="color:#f92672">=</span> <span style="color:#66d9ef">new</span> SearchSourceBuilder<span style="color:#f92672">();</span>
+    <span style="color:#75715e">// 设置查询条件
+</span><span style="color:#75715e"></span>    sourceBuilder<span style="color:#f92672">.</span><span style="color:#a6e22e">query</span><span style="color:#f92672">(</span>QueryBuilders<span style="color:#f92672">.</span><span style="color:#a6e22e">regexpQuery</span><span style="color:#f92672">(</span><span style="color:#e6db74">&#34;message&#34;</span><span style="color:#f92672">,</span><span style="color:#e6db74">&#34;xu[0-9]&#34;</span><span style="color:#f92672">));</span>
+    searchRequest<span style="color:#f92672">.</span><span style="color:#a6e22e">source</span><span style="color:#f92672">(</span>sourceBuilder<span style="color:#f92672">);</span>
+	 System<span style="color:#f92672">.</span><span style="color:#a6e22e">out</span><span style="color:#f92672">.</span><span style="color:#a6e22e">println</span><span style="color:#f92672">(</span><span style="color:#e6db74">&#34;正则查询的DSL语句:&#34;</span><span style="color:#f92672">+</span>sourceBuilder<span style="color:#f92672">.</span><span style="color:#a6e22e">toString</span><span style="color:#f92672">());</span>
+    <span style="color:#75715e">// 同步查询
+</span><span style="color:#75715e"></span>    SearchResponse searchResponse <span style="color:#f92672">=</span> client<span style="color:#f92672">.</span><span style="color:#a6e22e">search</span><span style="color:#f92672">(</span>searchRequest<span style="color:#f92672">,</span> RequestOptions<span style="color:#f92672">.</span><span style="color:#a6e22e">DEFAULT</span><span style="color:#f92672">);</span>
+    <span style="color:#75715e">// 结果
+</span><span style="color:#75715e"></span>    searchResponse<span style="color:#f92672">.</span><span style="color:#a6e22e">getHits</span><span style="color:#f92672">().</span><span style="color:#a6e22e">forEach</span><span style="color:#f92672">(</span>hit <span style="color:#f92672">-&gt;</span> <span style="color:#f92672">{</span>
+        Map<span style="color:#f92672">&lt;</span>String<span style="color:#f92672">,</span> Object<span style="color:#f92672">&gt;</span> map <span style="color:#f92672">=</span> hit<span style="color:#f92672">.</span><span style="color:#a6e22e">getSourceAsMap</span><span style="color:#f92672">();</span>
+        String string <span style="color:#f92672">=</span> hit<span style="color:#f92672">.</span><span style="color:#a6e22e">getSourceAsString</span><span style="color:#f92672">();</span>
+        System<span style="color:#f92672">.</span><span style="color:#a6e22e">out</span><span style="color:#f92672">.</span><span style="color:#a6e22e">println</span><span style="color:#f92672">(</span><span style="color:#e6db74">&#34;正则查询的Map结果:&#34;</span> <span style="color:#f92672">+</span> map<span style="color:#f92672">);</span>
+        System<span style="color:#f92672">.</span><span style="color:#a6e22e">out</span><span style="color:#f92672">.</span><span style="color:#a6e22e">println</span><span style="color:#f92672">(</span><span style="color:#e6db74">&#34;正则查询的String结果:&#34;</span> <span style="color:#f92672">+</span> string<span style="color:#f92672">);</span>
+    <span style="color:#f92672">});</span>
 
-<pre><code class="language-java"> private static void regexpSearch() throws IOException{
-    String type = &quot;_doc&quot;;
-    String index = &quot;test1&quot;;
-    // 查询指定的索引库
-    SearchRequest searchRequest = new SearchRequest(index);
-    searchRequest.types(type);
-    SearchSourceBuilder sourceBuilder = new SearchSourceBuilder();
-    // 设置查询条件
-    sourceBuilder.query(QueryBuilders.regexpQuery(&quot;message&quot;,&quot;xu[0-9]&quot;));
-    searchRequest.source(sourceBuilder);
-	 System.out.println(&quot;正则查询的DSL语句:&quot;+sourceBuilder.toString());
-    // 同步查询
-    SearchResponse searchResponse = client.search(searchRequest, RequestOptions.DEFAULT);
-    // 结果
-    searchResponse.getHits().forEach(hit -&gt; {
-        Map&lt;String, Object&gt; map = hit.getSourceAsMap();
-        String string = hit.getSourceAsString();
-        System.out.println(&quot;正则查询的Map结果:&quot; + map);
-        System.out.println(&quot;正则查询的String结果:&quot; + string);
-    });
+    System<span style="color:#f92672">.</span><span style="color:#a6e22e">out</span><span style="color:#f92672">.</span><span style="color:#a6e22e">println</span><span style="color:#f92672">(</span><span style="color:#e6db74">&#34;\n=================\n&#34;</span><span style="color:#f92672">);</span>
+<span style="color:#f92672">}</span>
 
-    System.out.println(&quot;\n=================\n&quot;);
-}
+</code></pre></div><h2 id="删除数据">删除数据</h2>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-java" data-lang="java"> <span style="color:#66d9ef">private</span> <span style="color:#66d9ef">static</span> <span style="color:#66d9ef">void</span> <span style="color:#a6e22e">delete</span><span style="color:#f92672">(</span>RestHighLevelClient client<span style="color:#f92672">)</span> <span style="color:#66d9ef">throws</span> IOException <span style="color:#f92672">{</span>
+        String type <span style="color:#f92672">=</span> <span style="color:#e6db74">&#34;_doc&#34;</span><span style="color:#f92672">;</span>
+        String index <span style="color:#f92672">=</span> <span style="color:#e6db74">&#34;test1&#34;</span><span style="color:#f92672">;</span>
+        <span style="color:#75715e">// 唯一编号
+</span><span style="color:#75715e"></span>        String id <span style="color:#f92672">=</span> <span style="color:#e6db74">&#34;1&#34;</span><span style="color:#f92672">;</span>
+        DeleteRequest deleteRequest <span style="color:#f92672">=</span> <span style="color:#66d9ef">new</span> DeleteRequest<span style="color:#f92672">();</span>
+        deleteRequest<span style="color:#f92672">.</span><span style="color:#a6e22e">id</span><span style="color:#f92672">(</span>id<span style="color:#f92672">);</span>
+        deleteRequest<span style="color:#f92672">.</span><span style="color:#a6e22e">index</span><span style="color:#f92672">(</span>index<span style="color:#f92672">);</span>
+        deleteRequest<span style="color:#f92672">.</span><span style="color:#a6e22e">type</span><span style="color:#f92672">(</span>type<span style="color:#f92672">);</span>
+        <span style="color:#75715e">// 设置超时时间
+</span><span style="color:#75715e"></span>        deleteRequest<span style="color:#f92672">.</span><span style="color:#a6e22e">timeout</span><span style="color:#f92672">(</span>TimeValue<span style="color:#f92672">.</span><span style="color:#a6e22e">timeValueMinutes</span><span style="color:#f92672">(</span>2<span style="color:#f92672">));</span>
+        <span style="color:#75715e">// 设置刷新策略&#34;wait_for&#34;
+</span><span style="color:#75715e"></span>        <span style="color:#75715e">// 保持此请求打开，直到刷新使此请求的内容可以搜索为止。此刷新策略与高索引和搜索吞吐量兼容，但它会导致请求等待响应，直到发生刷新
+</span><span style="color:#75715e"></span>        deleteRequest<span style="color:#f92672">.</span><span style="color:#a6e22e">setRefreshPolicy</span><span style="color:#f92672">(</span>WriteRequest<span style="color:#f92672">.</span><span style="color:#a6e22e">RefreshPolicy</span><span style="color:#f92672">.</span><span style="color:#a6e22e">WAIT_UNTIL</span><span style="color:#f92672">);</span>
+        <span style="color:#75715e">// 同步删除
+</span><span style="color:#75715e"></span>        DeleteResponse deleteResponse <span style="color:#f92672">=</span> client<span style="color:#f92672">.</span><span style="color:#a6e22e">delete</span><span style="color:#f92672">(</span>deleteRequest<span style="color:#f92672">,</span> RequestOptions<span style="color:#f92672">.</span><span style="color:#a6e22e">DEFAULT</span><span style="color:#f92672">);</span>
+    <span style="color:#f92672">}</span>
+</code></pre></div><p>ES根据条件进行删除：</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-java" data-lang="java"><span style="color:#66d9ef">private</span> <span style="color:#66d9ef">static</span> <span style="color:#66d9ef">void</span> <span style="color:#a6e22e">deleteByQuery</span><span style="color:#f92672">()</span> <span style="color:#66d9ef">throws</span> IOException <span style="color:#f92672">{</span>
+	String type <span style="color:#f92672">=</span> <span style="color:#e6db74">&#34;_doc&#34;</span><span style="color:#f92672">;</span>
+	String index <span style="color:#f92672">=</span> <span style="color:#e6db74">&#34;test1&#34;</span><span style="color:#f92672">;</span>
+	DeleteByQueryRequest request <span style="color:#f92672">=</span> <span style="color:#66d9ef">new</span> DeleteByQueryRequest<span style="color:#f92672">(</span>index<span style="color:#f92672">,</span>type<span style="color:#f92672">);</span>
+	<span style="color:#75715e">// 设置查询条件
+</span><span style="color:#75715e"></span>	request<span style="color:#f92672">.</span><span style="color:#a6e22e">setQuery</span><span style="color:#f92672">(</span>QueryBuilders<span style="color:#f92672">.</span><span style="color:#a6e22e">termsQuery</span><span style="color:#f92672">(</span><span style="color:#e6db74">&#34;uid&#34;</span><span style="color:#f92672">,</span>1234<span style="color:#f92672">));</span>
+	<span style="color:#75715e">// 同步执行
+</span><span style="color:#75715e"></span>	BulkByScrollResponse bulkResponse <span style="color:#f92672">=</span> client<span style="color:#f92672">.</span><span style="color:#a6e22e">deleteByQuery</span><span style="color:#f92672">(</span>request<span style="color:#f92672">,</span> RequestOptions<span style="color:#f92672">.</span><span style="color:#a6e22e">DEFAULT</span><span style="color:#f92672">);</span>
+<span style="color:#f92672">}</span>
 
-</code></pre>
-
-<h2 id="删除数据">删除数据</h2>
-
-<pre><code class="language-java"> private static void delete(RestHighLevelClient client) throws IOException {
-        String type = &quot;_doc&quot;;
-        String index = &quot;test1&quot;;
-        // 唯一编号
-        String id = &quot;1&quot;;
-        DeleteRequest deleteRequest = new DeleteRequest();
-        deleteRequest.id(id);
-        deleteRequest.index(index);
-        deleteRequest.type(type);
-        // 设置超时时间
-        deleteRequest.timeout(TimeValue.timeValueMinutes(2));
-        // 设置刷新策略&quot;wait_for&quot;
-        // 保持此请求打开，直到刷新使此请求的内容可以搜索为止。此刷新策略与高索引和搜索吞吐量兼容，但它会导致请求等待响应，直到发生刷新
-        deleteRequest.setRefreshPolicy(WriteRequest.RefreshPolicy.WAIT_UNTIL);
-        // 同步删除
-        DeleteResponse deleteResponse = client.delete(deleteRequest, RequestOptions.DEFAULT);
-    }
-</code></pre>
-
-<p>ES根据条件进行删除：</p>
-
-<pre><code class="language-java">private static void deleteByQuery() throws IOException {
-	String type = &quot;_doc&quot;;
-	String index = &quot;test1&quot;;
-	DeleteByQueryRequest request = new DeleteByQueryRequest(index,type);
-	// 设置查询条件
-	request.setQuery(QueryBuilders.termsQuery(&quot;uid&quot;,1234));
-	// 同步执行
-	BulkByScrollResponse bulkResponse = client.deleteByQuery(request, RequestOptions.DEFAULT);
-}
-
-</code></pre>
-
-<h1 id="命令行显示数据格式">命令行显示数据格式</h1>
-
-<pre><code>GET  test1/_search
-</code></pre>
-
-<p>数据格式</p>
-
-<pre><code class="language-json">{
-  &quot;took&quot; : 5,
-  &quot;timed_out&quot; : false,
-  &quot;_shards&quot; : {
-    &quot;total&quot; : 5,
-    &quot;successful&quot; : 5,
-    &quot;skipped&quot; : 0,
-    &quot;failed&quot; : 0
+</code></pre></div><h1 id="命令行显示数据格式">命令行显示数据格式</h1>
+<pre tabindex="0"><code>GET  test1/_search
+</code></pre><p>数据格式</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-json" data-lang="json">{
+  <span style="color:#f92672">&#34;took&#34;</span> : <span style="color:#ae81ff">5</span>,
+  <span style="color:#f92672">&#34;timed_out&#34;</span> : <span style="color:#66d9ef">false</span>,
+  <span style="color:#f92672">&#34;_shards&#34;</span> : {
+    <span style="color:#f92672">&#34;total&#34;</span> : <span style="color:#ae81ff">5</span>,
+    <span style="color:#f92672">&#34;successful&#34;</span> : <span style="color:#ae81ff">5</span>,
+    <span style="color:#f92672">&#34;skipped&#34;</span> : <span style="color:#ae81ff">0</span>,
+    <span style="color:#f92672">&#34;failed&#34;</span> : <span style="color:#ae81ff">0</span>
   },
-  &quot;hits&quot; : {
-    &quot;total&quot; : 2,
-    &quot;max_score&quot; : 1.0,
-    &quot;hits&quot; : [
+  <span style="color:#f92672">&#34;hits&#34;</span> : {
+    <span style="color:#f92672">&#34;total&#34;</span> : <span style="color:#ae81ff">2</span>,
+    <span style="color:#f92672">&#34;max_score&#34;</span> : <span style="color:#ae81ff">1.0</span>,
+    <span style="color:#f92672">&#34;hits&#34;</span> : [
       {
-        &quot;_index&quot; : &quot;test1&quot;,
-        &quot;_type&quot; : &quot;_doc&quot;,
-        &quot;_id&quot; : &quot;2&quot;,
-        &quot;_score&quot; : 1.0,
-        &quot;_source&quot; : {
-          &quot;msgcode&quot; : 1,
-          &quot;uid&quot; : 1234,
-          &quot;phone&quot; : 12345678909,
-          &quot;sendtime&quot; : &quot;2019-03-14 01:57:04&quot;,
-          &quot;message&quot; : &quot;xuwujing study Elasticsearch&quot;
+        <span style="color:#f92672">&#34;_index&#34;</span> : <span style="color:#e6db74">&#34;test1&#34;</span>,
+        <span style="color:#f92672">&#34;_type&#34;</span> : <span style="color:#e6db74">&#34;_doc&#34;</span>,
+        <span style="color:#f92672">&#34;_id&#34;</span> : <span style="color:#e6db74">&#34;2&#34;</span>,
+        <span style="color:#f92672">&#34;_score&#34;</span> : <span style="color:#ae81ff">1.0</span>,
+        <span style="color:#f92672">&#34;_source&#34;</span> : {
+          <span style="color:#f92672">&#34;msgcode&#34;</span> : <span style="color:#ae81ff">1</span>,
+          <span style="color:#f92672">&#34;uid&#34;</span> : <span style="color:#ae81ff">1234</span>,
+          <span style="color:#f92672">&#34;phone&#34;</span> : <span style="color:#ae81ff">12345678909</span>,
+          <span style="color:#f92672">&#34;sendtime&#34;</span> : <span style="color:#e6db74">&#34;2019-03-14 01:57:04&#34;</span>,
+          <span style="color:#f92672">&#34;message&#34;</span> : <span style="color:#e6db74">&#34;xuwujing study Elasticsearch&#34;</span>
         }
       },
       {
-        &quot;_index&quot; : &quot;test1&quot;,
-        &quot;_type&quot; : &quot;_doc&quot;,
-        &quot;_id&quot; : &quot;1&quot;,
-        &quot;_score&quot; : 1.0,
-        &quot;_source&quot; : {
-          &quot;msgcode&quot; : 2,
-          &quot;uid&quot; : 12345,
-          &quot;phone&quot; : 123456789019,
-          &quot;sendtime&quot; : &quot;2019-03-14 01:57:04&quot;,
-          &quot;message&quot; : &quot;xuwujing study Elasticsearch&quot;
+        <span style="color:#f92672">&#34;_index&#34;</span> : <span style="color:#e6db74">&#34;test1&#34;</span>,
+        <span style="color:#f92672">&#34;_type&#34;</span> : <span style="color:#e6db74">&#34;_doc&#34;</span>,
+        <span style="color:#f92672">&#34;_id&#34;</span> : <span style="color:#e6db74">&#34;1&#34;</span>,
+        <span style="color:#f92672">&#34;_score&#34;</span> : <span style="color:#ae81ff">1.0</span>,
+        <span style="color:#f92672">&#34;_source&#34;</span> : {
+          <span style="color:#f92672">&#34;msgcode&#34;</span> : <span style="color:#ae81ff">2</span>,
+          <span style="color:#f92672">&#34;uid&#34;</span> : <span style="color:#ae81ff">12345</span>,
+          <span style="color:#f92672">&#34;phone&#34;</span> : <span style="color:#ae81ff">123456789019</span>,
+          <span style="color:#f92672">&#34;sendtime&#34;</span> : <span style="color:#e6db74">&#34;2019-03-14 01:57:04&#34;</span>,
+          <span style="color:#f92672">&#34;message&#34;</span> : <span style="color:#e6db74">&#34;xuwujing study Elasticsearch&#34;</span>
         }
       }
     ]
   }
 }
 
-</code></pre>
-
+</code></pre></div>
 
                 
                 
@@ -880,35 +798,30 @@ System.out.println(indexResponse.toString());
                     </h4>
                     <ul class="catalog-body"></ul>
                     <nav id="TableOfContents">
-<ul>
-<li><a href="#elasticsearch-java-api">ElasticSearch JAVA API</a></li>
-<li><a href="#pom-xml">pom.xml</a></li>
-<li><a href="#初始化连接">初始化连接</a></li>
-<li><a href="#crud操作">CRUD操作</a>
-<ul>
-<li><a href="#新增数据">新增数据</a>
-<ul>
-<li><a href="#通过jsonstring进行创建">通过jsonString进行创建</a></li>
-<li><a href="#通过map创建-会自动转换成json的数据">通过map创建,会自动转换成json的数据</a></li>
-</ul></li>
-<li><a href="#创建索引库">创建索引库</a></li>
-<li><a href="#修改数据">修改数据</a></li>
-<li><a href="#查询数据">查询数据</a>
-<ul>
-<li><a href="#查询api">查询API</a></li>
-<li><a href="#查询所有代码示例">查询所有代码示例</a></li>
-<li><a href="#一般查询代码示例">一般查询代码示例</a></li>
-<li><a href="#或查询">或查询</a></li>
-<li><a href="#模糊查询">模糊查询</a></li>
-<li><a href="#多值查询">多值查询</a></li>
-<li><a href="#存在查询">存在查询</a></li>
-<li><a href="#范围查询">范围查询</a></li>
-<li><a href="#正则查询">正则查询</a></li>
-</ul></li>
-<li><a href="#删除数据">删除数据</a></li>
-</ul></li>
-<li><a href="#命令行显示数据格式">命令行显示数据格式</a></li>
-</ul>
+  <ul>
+    <li><a href="#新增数据">新增数据</a>
+      <ul>
+        <li><a href="#通过jsonstring进行创建">通过jsonString进行创建</a></li>
+        <li><a href="#通过map创建会自动转换成json的数据">通过map创建,会自动转换成json的数据</a></li>
+      </ul>
+    </li>
+    <li><a href="#创建索引库">创建索引库</a></li>
+    <li><a href="#修改数据">修改数据</a></li>
+    <li><a href="#查询数据">查询数据</a>
+      <ul>
+        <li><a href="#查询api">查询API</a></li>
+        <li><a href="#查询所有代码示例">查询所有代码示例</a></li>
+        <li><a href="#一般查询代码示例">一般查询代码示例</a></li>
+        <li><a href="#或查询">或查询</a></li>
+        <li><a href="#模糊查询">模糊查询</a></li>
+        <li><a href="#多值查询">多值查询</a></li>
+        <li><a href="#存在查询">存在查询</a></li>
+        <li><a href="#范围查询">范围查询</a></li>
+        <li><a href="#正则查询">正则查询</a></li>
+      </ul>
+    </li>
+    <li><a href="#删除数据">删除数据</a></li>
+  </ul>
 </nav>
                     <br>
                     <br>
@@ -933,9 +846,6 @@ System.out.println(indexResponse.toString());
                         
                         
                         
-                        <a href="/tags/" title="">
-                            
-                        </a>
                         
                         
                         
@@ -945,101 +855,6 @@ System.out.println(indexResponse.toString());
                         
                         
                         
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        <a href="/tags/qt" title="QT">
-                            QT
-                        </a>
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        <a href="/tags/zookeeper" title="Zookeeper">
-                            Zookeeper
-                        </a>
                         
                         
                         
@@ -1079,8 +894,10 @@ System.out.println(indexResponse.toString());
                         
                         
                         
-                        <a href="/tags/elasticsearch" title="elasticSearch">
-                            elasticSearch
+                        
+                        
+                        <a href="/tags/elasticsearch" title="elasticsearch">
+                            elasticsearch
                         </a>
                         
                         
@@ -1091,9 +908,27 @@ System.out.println(indexResponse.toString());
                         
                         
                         
-                        <a href="/tags/golang" title="golang">
-                            golang
-                        </a>
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
                         
                         
                         
@@ -1131,9 +966,21 @@ System.out.println(indexResponse.toString());
                         
                         
                         
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
                         <a href="/tags/jvm" title="jvm">
                             jvm
                         </a>
+                        
+                        
+                        
+                        
                         
                         
                         
@@ -1157,9 +1004,19 @@ System.out.println(indexResponse.toString());
                         
                         
                         
+                        
+                        
+                        
+                        
+                        
+                        
                         <a href="/tags/mongodb" title="mongodb">
                             mongodb
                         </a>
+                        
+                        
+                        
+                        
                         
                         
                         
@@ -1170,10 +1027,6 @@ System.out.println(indexResponse.toString());
                         </a>
                         
                         
-                        
-                        <a href="/tags/mycat" title="mycat">
-                            mycat
-                        </a>
                         
                         
                         
@@ -1187,9 +1040,17 @@ System.out.println(indexResponse.toString());
                         
                         
                         
-                        <a href="/tags/nginx" title="nginx">
-                            nginx
-                        </a>
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
                         
                         
                         
@@ -1213,8 +1074,22 @@ System.out.println(indexResponse.toString());
                         
                         
                         
+                        
+                        
                         <a href="/tags/rocketmq" title="rocketmq">
                             rocketmq
+                        </a>
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        <a href="/tags/security%E6%A1%86%E6%9E%B6%E5%AD%A6%E4%B9%A0" title="security框架学习">
+                            security框架学习
                         </a>
                         
                         
@@ -1241,17 +1116,11 @@ System.out.println(indexResponse.toString());
                         
                         
                         
-                        <a href="/tags/springcloud" title="springCloud">
-                            springCloud
-                        </a>
-                        
-                        
-                        
-                        
-                        
                         <a href="/tags/springboot" title="springboot">
                             springboot
                         </a>
+                        
+                        
                         
                         
                         
@@ -1265,6 +1134,9 @@ System.out.println(indexResponse.toString());
                         
                         
                         
+                        <a href="/tags/springcloud" title="springcloud">
+                            springcloud
+                        </a>
                         
                         
                         
@@ -1290,6 +1162,33 @@ System.out.println(indexResponse.toString());
                         
                         
                         
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        <a href="/tags/zookeeper" title="zookeeper">
+                            zookeeper
+                        </a>
                         
                         
                         
@@ -1349,6 +1248,8 @@ System.out.println(indexResponse.toString());
                         
                         
                         
+                        
+                        
                         <a href="/tags/%E5%88%86%E5%B8%83%E5%BC%8F%E7%B3%BB%E5%88%97" title="分布式系列">
                             分布式系列
                         </a>
@@ -1368,6 +1269,10 @@ System.out.println(indexResponse.toString());
                         
                         
                         
+                        
+                        <a href="/tags/%E5%8D%8F%E8%AE%AE%E6%A0%88" title="协议栈">
+                            协议栈
+                        </a>
                         
                         
                         
@@ -1567,6 +1472,12 @@ System.out.println(indexResponse.toString());
                         
                         
                         
+                        
+                        
+                        
+                        
+                        
+                        
                         <a href="/tags/%E7%BD%91%E7%BB%9C%E7%BC%96%E7%A8%8B" title="网络编程">
                             网络编程
                         </a>
@@ -1590,6 +1501,10 @@ System.out.println(indexResponse.toString());
                         
                         
                         
+                        
+                        <a href="/tags/%E8%AE%A4%E8%AF%81%E5%92%8C%E6%8E%88%E6%9D%83" title="认证和授权">
+                            认证和授权
+                        </a>
                         
                         
                         
@@ -1760,7 +1675,7 @@ System.out.println(indexResponse.toString());
                     
                 </ul>
 		<p class="copyright text-muted">
-                    Copyright &copy;  2020
+                    Copyright &copy;  2021
                     <br>
                     <a href="https://themes.gohugo.io/hugo-theme-cleanwhite">CleanWhite Hugo Theme</a> by <a href="https://zhaohuabing.com">Huabing</a> |
                     <iframe

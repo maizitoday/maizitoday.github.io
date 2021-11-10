@@ -97,15 +97,15 @@
                     </li>
                     
                     <li>
-                        <a href="/categories/english">English</a>
+                        <a href="/categories/english">english</a>
                     </li>
                     
                     <li>
-                        <a href="/categories/life">Life</a>
+                        <a href="/categories/life">life</a>
                     </li>
                     
                     <li>
-                        <a href="/categories/tech">Tech</a>
+                        <a href="/categories/tech">tech</a>
                     </li>
                     
 
@@ -233,158 +233,106 @@
                 
                 
                 
-                
-
-<p>[TOC]</p>
-
+                <p>[TOC]</p>
 <p><strong>说明： 本学习主要对尚硅谷周阳大神《SpringCloud视频》记录，一下文字来源这个视频PPT</strong></p>
-
-<p><strong>说明： 版本springboot2.14</strong>  <strong><spring-cloud.version>Greenwich.SR1</spring-cloud.version></strong></p>
-
+<p><strong>说明： 版本springboot2.14</strong>  <strong>&lt;spring-cloud.version&gt;Greenwich.SR1&lt;/spring-cloud.version&gt;</strong></p>
 <h1 id="eureka是什么">Eureka是什么</h1>
-
 <p>Eureka 采用了 C-S 的设计架构。Eureka Server 作为服务注册功能的服务器，它是服务注册中心。</p>
-
 <p>而系统中的其他微服务，使用 Eureka 的客户端连接到 Eureka Server并维持心跳连接。这样系统的维护人员就可以通过 Eureka Server 来监控系统中各个微服务是否正常运行。SpringCloud 的一些其他模块（比如Zuul）就可以通过 Eureka Server 来发现系统中的其他微服务，并执行相关的逻辑。</p>
-
-<p><img src="/img/18-1.png" alt="18-1" /></p>
-
+<p><img src="/img/18-1.png" alt="18-1"></p>
 <p>Service Provider服务提供方将自身服务注册到Eureka，从而使服务消费方能够找到。</p>
-
 <p>Service Consumer服务消费方从Eureka获取注册服务列表，从而能够消费服务。</p>
-
 <p><strong>Eureka包含两个组件：Eureka Server和Eureka Client</strong></p>
-
 <p>Eureka Server提供服务注册服务</p>
-
 <p>各个节点启动后，会在EurekaServer中进行注册，这样EurekaServer中的服务注册表中将会存储所有可用服务节点的信息，服务节点的信息可以在界面中直观的看到</p>
-
 <p>EurekaClient是一个Java客户端，用于简化Eureka Server的交互，客户端同时也具备一个内置的、使用轮询(round-robin)负载算法的负载均衡器。在应用启动后，将会向Eureka Server发送心跳(默认周期为30秒)。如果Eureka Server在多个心跳周期内没有接收到某个节点的心跳，EurekaServer将会从服务注册表中把这个服务节点移除（默认90秒）</p>
-
 <h1 id="搭建eureka-server集群">搭建Eureka Server集群</h1>
-
 <p>通过IDEA直接创建eureka server，需要注意其中他的相关包无法下载的时候，先maven clear，然后删除maven库里面的已经没下载好的包， 然后点击maven projects,  执行reimport，从新建立jar包依赖。</p>
-
 <p>启动类添加：@EnableEurekaServer  注解</p>
-
 <p>application.yml配置如下：</p>
-
-<pre><code class="language-yml">server:
-  port: 5001
-eureka:
-  instance:
-    hostname: eureka5001.com #eureka服务端的实例名称, 我这边做了host映射
-  client:  #声明自己是服务端
-    register-with-eureka: false  #false表示不向注册中心注册自己。
-    fetch-registry: false
-    service-url:
-     defaultZone: http://eureka5002.com:5002/eureka/,http://eureka5003.com:5003/eureka/
-#其他两个服务，把对应的地址和端口修改就OK了。    
-</code></pre>
-
-<p>集群效果如下：</p>
-
-<p><img src="/img/18-2.png" alt="18-2" /></p>
-
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-yml" data-lang="yml"><span style="color:#f92672">server</span>:
+  <span style="color:#f92672">port</span>: <span style="color:#ae81ff">5001</span>
+<span style="color:#f92672">eureka</span>:
+  <span style="color:#f92672">instance</span>:
+    <span style="color:#f92672">hostname</span>: <span style="color:#ae81ff">eureka5001.com</span> <span style="color:#75715e">#eureka服务端的实例名称, 我这边做了host映射</span>
+  <span style="color:#f92672">client</span>:  <span style="color:#75715e">#声明自己是服务端</span>
+    <span style="color:#f92672">register-with-eureka</span>: <span style="color:#66d9ef">false</span>  <span style="color:#75715e">#false表示不向注册中心注册自己。</span>
+    <span style="color:#f92672">fetch-registry</span>: <span style="color:#66d9ef">false</span>
+    <span style="color:#f92672">service-url</span>:
+     <span style="color:#f92672">defaultZone</span>: <span style="color:#ae81ff">http://eureka5002.com:5002/eureka/,http://eureka5003.com:5003/eureka/</span>
+<span style="color:#75715e">#其他两个服务，把对应的地址和端口修改就OK了。    </span>
+</code></pre></div><p>集群效果如下：</p>
+<p><img src="/img/18-2.png" alt="18-2"></p>
 <h1 id="搭建eureka-client客户端">搭建Eureka Client客户端</h1>
-
 <p>注册相关微服务到cureka server端，</p>
-
 <p>启动类添加：@EnableEurekaClient 注解</p>
-
 <p>pom.xml配置如下</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-xml" data-lang="xml"> <span style="color:#75715e">&lt;!--
+</span><span style="color:#75715e">     添加客户端eureka-client包:
+</span><span style="color:#75715e">     
+</span><span style="color:#75715e">     因为我的cloud版本是 &lt;spring-cloud.version&gt;Greenwich.SR1&lt;/spring-cloud.version&gt;，所以
+</span><span style="color:#75715e">     我的eureka-client版本是&lt;version&gt;2.1.1.RELEASE&lt;/version&gt;
+</span><span style="color:#75715e">  --&gt;</span>
+<span style="color:#f92672">&lt;dependencies&gt;</span>
+     <span style="color:#f92672">&lt;dependency&gt;</span>
+			  <span style="color:#f92672">&lt;groupId&gt;</span>org.springframework.cloud<span style="color:#f92672">&lt;/groupId&gt;</span>
+			  <span style="color:#f92672">&lt;artifactId&gt;</span>spring-cloud-starter-netflix-eureka-client<span style="color:#f92672">&lt;/artifactId&gt;</span>
+        <span style="color:#f92672">&lt;version&gt;</span>2.1.1.RELEASE<span style="color:#f92672">&lt;/version&gt;</span>
+    <span style="color:#f92672">&lt;/dependency&gt;</span>
+<span style="color:#f92672">&lt;/dependencies&gt;</span>
 
-<pre><code class="language-xml"> &lt;!--
-     添加客户端eureka-client包:
-     
-     因为我的cloud版本是 &lt;spring-cloud.version&gt;Greenwich.SR1&lt;/spring-cloud.version&gt;，所以
-     我的eureka-client版本是&lt;version&gt;2.1.1.RELEASE&lt;/version&gt;
-  --&gt;
-&lt;dependencies&gt;
-     &lt;dependency&gt;
-			  &lt;groupId&gt;org.springframework.cloud&lt;/groupId&gt;
-			  &lt;artifactId&gt;spring-cloud-starter-netflix-eureka-client&lt;/artifactId&gt;
-        &lt;version&gt;2.1.1.RELEASE&lt;/version&gt;
-    &lt;/dependency&gt;
-&lt;/dependencies&gt;
+</code></pre></div><p>application.yml如下：</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-yml" data-lang="yml"><span style="color:#f92672">server</span>:
+  <span style="color:#f92672">port</span>: <span style="color:#ae81ff">8001</span>
 
-</code></pre>
+<span style="color:#f92672">spring</span>:
+  <span style="color:#f92672">application</span>:
+    <span style="color:#f92672">name</span>: <span style="color:#ae81ff">provide-1</span> <span style="color:#75715e">#入驻eureka的服务名称</span>
 
-<p>application.yml如下：</p>
-
-<pre><code class="language-yml">server:
-  port: 8001
-
-spring:
-  application:
-    name: provide-1 #入驻eureka的服务名称
-
-eureka:
-  client:
-    service-url:
-      defaultZone: http://eureka5001.com:5001/eureka,
-                   http://eureka5002.com:5002/eureka,
-                   http://eureka5003.com:5003/eureka
-</code></pre>
-
-<p>效果如上图,显示除了Eureka里面注册的服务是provide-1，同时也对应出来ip地址。</p>
-
+<span style="color:#f92672">eureka</span>:
+  <span style="color:#f92672">client</span>:
+    <span style="color:#f92672">service-url</span>:
+      <span style="color:#f92672">defaultZone</span>: <span style="color:#ae81ff">http://eureka5001.com:5001/eureka,</span>
+                   <span style="color:#ae81ff">http://eureka5002.com:5002/eureka,</span>
+                   <span style="color:#ae81ff">http://eureka5003.com:5003/eureka</span>
+</code></pre></div><p>效果如上图,显示除了Eureka里面注册的服务是provide-1，同时也对应出来ip地址。</p>
 <h1 id="自我保护机制">自我保护机制</h1>
-
 <p>什么是自我保护模式？</p>
-
 <p>默认情况下，如果EurekaServer在一定时间内没有接收到某个微服务实例的心跳，EurekaServer将会注销该实例（默认90秒）。但是当网络分区故障发生时，微服务与EurekaServer之间无法正常通信，以上行为可能变得非常危险了——因为微服务本身其实是健康的，此时本不应该注销这个微服务。Eureka通过“自我保护模式”来解决这个问题——当EurekaServer节点在短时间内丢失过多客户端时（可能发生了网络分区故障），那么这个节点就会进入自我保护模式。一旦进入该模式，EurekaServer就会保护服务注册表中的信息，不再删除服务注册表中的数据（也就是不会注销任何微服务）。当网络故障恢复后，该Eureka Server节点会自动退出自我保护模式。</p>
-
 <p>在自我保护模式中，Eureka Server会保护服务注册表中的信息，不再注销任何服务实例。当它收到的心跳数重新恢复到阈值以上时，该Eureka Server节点就会自动退出自我保护模式。它的设计哲学就是宁可保留错误的服务注册信息，也不盲目注销任何可能健康的服务实例。一句话讲解：好死不如赖活着</p>
-
 <p>综上，自我保护模式是一种应对网络异常的安全保护措施。它的架构哲学是宁可同时保留所有微服务（健康的微服务和不健康的微服务都会保留），也不盲目注销任何健康的微服务。使用自我保护模式，可以让Eureka集群更加的健壮、稳定。</p>
-
 <p><strong>一句话：某时刻某一个微服务不可用了，eureka不会立刻清理，依旧会对该微服务的信息进行保存</strong></p>
-
 <p><strong>Eureka Server 在运行期间会去统计心跳失败比例在 15 分钟之内是否低于 85%，如果低于 85%，Eureka Server 即会进入自我保护机制。</strong></p>
-
-<pre><code class="language-properties">eureka.server.enable-self-preservation=true
-</code></pre>
-
-<h1 id="eureka和zookeeper比较">Eureka和Zookeeper比较</h1>
-
+<pre tabindex="0"><code class="language-properties" data-lang="properties">eureka.server.enable-self-preservation=true
+</code></pre><h1 id="eureka和zookeeper比较">Eureka和Zookeeper比较</h1>
 <p><strong>转载地址： <a href="https://www.cnblogs.com/Eternally-dream/p/9833464.html">https://www.cnblogs.com/Eternally-dream/p/9833464.html</a></strong></p>
-
 <p><strong>传统数据库：ACID</strong></p>
-
 <p>​     <strong>NOSQL:   CAP</strong></p>
-
-<p><img src="/img/18-4.png" alt="18-4" /></p>
-
-<p><img src="/img/18-3.png" alt="18-3" /></p>
-
-<p><img src="/img/18-5.png" alt="18-5" /></p>
-
-<p><img src="/img/18-7.png" alt="18-6" /></p>
-
+<p><img src="/img/18-4.png" alt="18-4"></p>
+<p><img src="/img/18-3.png" alt="18-3"></p>
+<p><img src="/img/18-5.png" alt="18-5"></p>
+<p><img src="/img/18-7.png" alt="18-6"></p>
 <h1 id="yaml说明">yaml说明</h1>
-
-<pre><code class="language-yaml">server:
-  port: 8000
-management:  
-  port: 9000   # spring-boot-starter-acturator(监控系统健康)  一个管理端口
-eureka:
-  server:
-    eviction-interval-timer-in-ms: 30000 #续期时间，即扫描失效服务的间隔时间。(默认是60秒)
-    enable-self-preservation: false  #关闭自我保护模式 (缺省为打开)
-  instance:
-    hostname: localhost   # eureka服务端的实力名称
-  client:
-    service-url:    
-      # 设置与Eureka Server交互的地址查询服务和注册服务都需要依赖这个地址(单机版)
-      defaultZone: http://${eureka.instance.hostname}:${server.port}/eureka/
-    register-with-eureka: false   # false表示自己不需要向注册中心注册自己
-    fetch-registry: false # false表示自己就是注册中心。我的职责就是维护服务实例，并不需要去检索服务
-security:
-  basic:
-    enabled: false  # 配置不需要登录验证
-</code></pre>
-
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-yaml" data-lang="yaml"><span style="color:#f92672">server</span>:
+  <span style="color:#f92672">port</span>: <span style="color:#ae81ff">8000</span>
+<span style="color:#f92672">management</span>:  
+  <span style="color:#f92672">port</span>: <span style="color:#ae81ff">9000</span>   <span style="color:#75715e"># spring-boot-starter-acturator(监控系统健康)  一个管理端口</span>
+<span style="color:#f92672">eureka</span>:
+  <span style="color:#f92672">server</span>:
+    <span style="color:#f92672">eviction-interval-timer-in-ms</span>: <span style="color:#ae81ff">30000</span> <span style="color:#75715e">#续期时间，即扫描失效服务的间隔时间。(默认是60秒)</span>
+    <span style="color:#f92672">enable-self-preservation</span>: <span style="color:#66d9ef">false</span>  <span style="color:#75715e">#关闭自我保护模式 (缺省为打开)</span>
+  <span style="color:#f92672">instance</span>:
+    <span style="color:#f92672">hostname</span>: <span style="color:#ae81ff">localhost  </span> <span style="color:#75715e"># eureka服务端的实力名称</span>
+  <span style="color:#f92672">client</span>:
+    <span style="color:#f92672">service-url</span>:    
+      <span style="color:#75715e"># 设置与Eureka Server交互的地址查询服务和注册服务都需要依赖这个地址(单机版)</span>
+      <span style="color:#f92672">defaultZone</span>: <span style="color:#ae81ff">http://${eureka.instance.hostname}:${server.port}/eureka/</span>
+    <span style="color:#f92672">register-with-eureka</span>: <span style="color:#66d9ef">false</span>   <span style="color:#75715e"># false表示自己不需要向注册中心注册自己</span>
+    <span style="color:#f92672">fetch-registry</span>: <span style="color:#66d9ef">false</span> <span style="color:#75715e"># false表示自己就是注册中心。我的职责就是维护服务实例，并不需要去检索服务</span>
+<span style="color:#f92672">security</span>:
+  <span style="color:#f92672">basic</span>:
+    <span style="color:#f92672">enabled</span>: <span style="color:#66d9ef">false</span>  <span style="color:#75715e"># 配置不需要登录验证</span>
+</code></pre></div>
 
                 
                 
@@ -490,16 +438,7 @@ security:
                         <a class="catalog-toggle" style="font-size: 24px;" href="index.html#">目录结构</a>
                     </h4>
                     <ul class="catalog-body"></ul>
-                    <nav id="TableOfContents">
-<ul>
-<li><a href="#eureka是什么">Eureka是什么</a></li>
-<li><a href="#搭建eureka-server集群">搭建Eureka Server集群</a></li>
-<li><a href="#搭建eureka-client客户端">搭建Eureka Client客户端</a></li>
-<li><a href="#自我保护机制">自我保护机制</a></li>
-<li><a href="#eureka和zookeeper比较">Eureka和Zookeeper比较</a></li>
-<li><a href="#yaml说明">yaml说明</a></li>
-</ul>
-</nav>
+                    <nav id="TableOfContents"></nav>
                     <br>
                     <br>
                     <br>
@@ -523,9 +462,6 @@ security:
                         
                         
                         
-                        <a href="/tags/" title="">
-                            
-                        </a>
                         
                         
                         
@@ -535,101 +471,6 @@ security:
                         
                         
                         
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        <a href="/tags/qt" title="QT">
-                            QT
-                        </a>
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        <a href="/tags/zookeeper" title="Zookeeper">
-                            Zookeeper
-                        </a>
                         
                         
                         
@@ -669,8 +510,10 @@ security:
                         
                         
                         
-                        <a href="/tags/elasticsearch" title="elasticSearch">
-                            elasticSearch
+                        
+                        
+                        <a href="/tags/elasticsearch" title="elasticsearch">
+                            elasticsearch
                         </a>
                         
                         
@@ -681,9 +524,27 @@ security:
                         
                         
                         
-                        <a href="/tags/golang" title="golang">
-                            golang
-                        </a>
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
                         
                         
                         
@@ -721,9 +582,21 @@ security:
                         
                         
                         
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
                         <a href="/tags/jvm" title="jvm">
                             jvm
                         </a>
+                        
+                        
+                        
+                        
                         
                         
                         
@@ -747,9 +620,19 @@ security:
                         
                         
                         
+                        
+                        
+                        
+                        
+                        
+                        
                         <a href="/tags/mongodb" title="mongodb">
                             mongodb
                         </a>
+                        
+                        
+                        
+                        
                         
                         
                         
@@ -760,10 +643,6 @@ security:
                         </a>
                         
                         
-                        
-                        <a href="/tags/mycat" title="mycat">
-                            mycat
-                        </a>
                         
                         
                         
@@ -777,9 +656,17 @@ security:
                         
                         
                         
-                        <a href="/tags/nginx" title="nginx">
-                            nginx
-                        </a>
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
                         
                         
                         
@@ -803,8 +690,22 @@ security:
                         
                         
                         
+                        
+                        
                         <a href="/tags/rocketmq" title="rocketmq">
                             rocketmq
+                        </a>
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        <a href="/tags/security%E6%A1%86%E6%9E%B6%E5%AD%A6%E4%B9%A0" title="security框架学习">
+                            security框架学习
                         </a>
                         
                         
@@ -831,17 +732,11 @@ security:
                         
                         
                         
-                        <a href="/tags/springcloud" title="springCloud">
-                            springCloud
-                        </a>
-                        
-                        
-                        
-                        
-                        
                         <a href="/tags/springboot" title="springboot">
                             springboot
                         </a>
+                        
+                        
                         
                         
                         
@@ -855,6 +750,9 @@ security:
                         
                         
                         
+                        <a href="/tags/springcloud" title="springcloud">
+                            springcloud
+                        </a>
                         
                         
                         
@@ -880,6 +778,33 @@ security:
                         
                         
                         
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        <a href="/tags/zookeeper" title="zookeeper">
+                            zookeeper
+                        </a>
                         
                         
                         
@@ -939,6 +864,8 @@ security:
                         
                         
                         
+                        
+                        
                         <a href="/tags/%E5%88%86%E5%B8%83%E5%BC%8F%E7%B3%BB%E5%88%97" title="分布式系列">
                             分布式系列
                         </a>
@@ -958,6 +885,10 @@ security:
                         
                         
                         
+                        
+                        <a href="/tags/%E5%8D%8F%E8%AE%AE%E6%A0%88" title="协议栈">
+                            协议栈
+                        </a>
                         
                         
                         
@@ -1157,6 +1088,12 @@ security:
                         
                         
                         
+                        
+                        
+                        
+                        
+                        
+                        
                         <a href="/tags/%E7%BD%91%E7%BB%9C%E7%BC%96%E7%A8%8B" title="网络编程">
                             网络编程
                         </a>
@@ -1180,6 +1117,10 @@ security:
                         
                         
                         
+                        
+                        <a href="/tags/%E8%AE%A4%E8%AF%81%E5%92%8C%E6%8E%88%E6%9D%83" title="认证和授权">
+                            认证和授权
+                        </a>
                         
                         
                         
@@ -1350,7 +1291,7 @@ security:
                     
                 </ul>
 		<p class="copyright text-muted">
-                    Copyright &copy;  2020
+                    Copyright &copy;  2021
                     <br>
                     <a href="https://themes.gohugo.io/hugo-theme-cleanwhite">CleanWhite Hugo Theme</a> by <a href="https://zhaohuabing.com">Huabing</a> |
                     <iframe

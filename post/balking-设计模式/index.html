@@ -97,15 +97,15 @@
                     </li>
                     
                     <li>
-                        <a href="/categories/english">English</a>
+                        <a href="/categories/english">english</a>
                     </li>
                     
                     <li>
-                        <a href="/categories/life">Life</a>
+                        <a href="/categories/life">life</a>
                     </li>
                     
                     <li>
-                        <a href="/categories/tech">Tech</a>
+                        <a href="/categories/tech">tech</a>
                     </li>
                     
 
@@ -241,227 +241,197 @@
                 
                 
                 
-                
-
-<p>[TOC]</p>
-
-<p><strong>转载地址：<a href="https://blog.csdn.net/huangxun08/article/details/47081515">https://blog.csdn.net/huangxun08/article/details/47081515</a></strong></p>
-
+                <p>[TOC]</p>
+<p><strong>转载地址：https://blog.csdn.net/huangxun08/article/details/47081515</strong></p>
 <h1 id="balking简介">balking简介</h1>
-
 <p>当现在不适合这个操作，或是没有必要进行这个操作时就直接放弃这个操作而回去，这个就是Balking模式。例如王某在餐厅吃饭，当王某需要点餐时喊服务员需要点餐。当服务员A和B都注意到了王某点餐的示意，这时服务员B看到服务员A已经去响应了王某的点餐请求，所以服务员B就不会再过去响应王某的点餐请求。</p>
-
 <h1 id="代码示例">代码示例</h1>
-
 <h2 id="customer">Customer</h2>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-java" data-lang="java"><span style="color:#66d9ef">public</span> <span style="color:#66d9ef">class</span> <span style="color:#a6e22e">Customer</span> <span style="color:#f92672">{</span>
+    <span style="color:#66d9ef">private</span> <span style="color:#66d9ef">volatile</span> <span style="color:#66d9ef">boolean</span> m_calledService <span style="color:#f92672">=</span> <span style="color:#66d9ef">false</span><span style="color:#f92672">;</span><span style="color:#75715e">// 取值为false表示没有服务请求，否则有服务请求。
+</span><span style="color:#75715e"></span>    <span style="color:#66d9ef">private</span> String m_Name<span style="color:#f92672">;</span>
 
-<pre><code class="language-java">public class Customer {
-    private volatile boolean m_calledService = false;// 取值为false表示没有服务请求，否则有服务请求。
-    private String m_Name;
+    <span style="color:#66d9ef">public</span> <span style="color:#a6e22e">Customer</span><span style="color:#f92672">(</span>String name<span style="color:#f92672">)</span> <span style="color:#f92672">{</span>
+        <span style="color:#66d9ef">this</span><span style="color:#f92672">.</span><span style="color:#a6e22e">m_Name</span> <span style="color:#f92672">=</span> name<span style="color:#f92672">;</span>
+    <span style="color:#f92672">}</span>
 
-    public Customer(String name) {
-        this.m_Name = name;
-    }
+    <span style="color:#75715e">/**
+</span><span style="color:#75715e">     * 获得服务的方法,如果警戒条件不成立，那么直接返回，不再执行操作
+</span><span style="color:#75715e">     */</span>
+    <span style="color:#66d9ef">public</span> <span style="color:#66d9ef">synchronized</span> <span style="color:#66d9ef">boolean</span> <span style="color:#a6e22e">GetService</span><span style="color:#f92672">(</span>String waiterName<span style="color:#f92672">,</span> String serviceName<span style="color:#f92672">)</span> <span style="color:#f92672">{</span>
+        <span style="color:#66d9ef">if</span> <span style="color:#f92672">(!</span>m_calledService<span style="color:#f92672">)</span> <span style="color:#f92672">{</span>
+            System<span style="color:#f92672">.</span><span style="color:#a6e22e">out</span><span style="color:#f92672">.</span><span style="color:#a6e22e">println</span><span style="color:#f92672">(</span><span style="color:#e6db74">&#34;no service  need-----------------&#34;</span><span style="color:#f92672">);</span>
+            <span style="color:#66d9ef">return</span> <span style="color:#66d9ef">false</span><span style="color:#f92672">;</span>
+        <span style="color:#f92672">}</span>
+        System<span style="color:#f92672">.</span><span style="color:#a6e22e">out</span><span style="color:#f92672">.</span><span style="color:#a6e22e">println</span><span style="color:#f92672">(</span>waiterName <span style="color:#f92672">+</span> <span style="color:#e6db74">&#34;提供服务-- &#34;</span> <span style="color:#f92672">+</span> serviceName<span style="color:#f92672">);</span>
+        m_calledService <span style="color:#f92672">=</span> <span style="color:#66d9ef">false</span><span style="color:#f92672">;</span>
+        <span style="color:#66d9ef">return</span> <span style="color:#66d9ef">true</span><span style="color:#f92672">;</span>
+    <span style="color:#f92672">}</span>
 
-    /**
-     * 获得服务的方法,如果警戒条件不成立，那么直接返回，不再执行操作
-     */
-    public synchronized boolean GetService(String waiterName, String serviceName) {
-        if (!m_calledService) {
-            System.out.println(&quot;no service  need-----------------&quot;);
-            return false;
-        }
-        System.out.println(waiterName + &quot;提供服务-- &quot; + serviceName);
-        m_calledService = false;
-        return true;
-    }
+    <span style="color:#75715e">/**
+</span><span style="color:#75715e">     * 顾客向服务员发出服务请求,当顾客已经是发出服务要求的状态，那么没有必要,执行更改状态的操作，
+</span><span style="color:#75715e">       直接返回false,  所以，这也是一个Balking Pattern的设计
+</span><span style="color:#75715e">     *      
+</span><span style="color:#75715e">     */</span>
+    <span style="color:#66d9ef">public</span> <span style="color:#66d9ef">synchronized</span> <span style="color:#66d9ef">boolean</span> <span style="color:#a6e22e">CallService</span><span style="color:#f92672">(</span>String serviceName<span style="color:#f92672">)</span> <span style="color:#f92672">{</span>
+        <span style="color:#66d9ef">if</span> <span style="color:#f92672">(</span>m_calledService<span style="color:#f92672">)</span> <span style="color:#f92672">{</span>
+            System<span style="color:#f92672">.</span><span style="color:#a6e22e">out</span><span style="color:#f92672">.</span><span style="color:#a6e22e">println</span><span style="color:#f92672">(</span><span style="color:#e6db74">&#34;not get service-------------------------&#34;</span><span style="color:#f92672">);</span>
+            <span style="color:#66d9ef">return</span> <span style="color:#66d9ef">false</span><span style="color:#f92672">;</span>
+        <span style="color:#f92672">}</span>
+        m_calledService <span style="color:#f92672">=</span> <span style="color:#66d9ef">true</span><span style="color:#f92672">;</span>
+        System<span style="color:#f92672">.</span><span style="color:#a6e22e">out</span><span style="color:#f92672">.</span><span style="color:#a6e22e">println</span><span style="color:#f92672">(</span>m_Name <span style="color:#f92672">+</span> <span style="color:#e6db74">&#34;需要服务 : &#34;</span> <span style="color:#f92672">+</span> serviceName<span style="color:#f92672">);</span>
+        <span style="color:#66d9ef">return</span> <span style="color:#66d9ef">true</span><span style="color:#f92672">;</span>
+    <span style="color:#f92672">}</span>
+<span style="color:#f92672">}</span>
+</code></pre></div><h2 id="waiter">Waiter</h2>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-java" data-lang="java"><span style="color:#66d9ef">public</span> <span style="color:#66d9ef">class</span> <span style="color:#a6e22e">Waiter</span> <span style="color:#66d9ef">extends</span> Thread <span style="color:#f92672">{</span>
+    <span style="color:#66d9ef">private</span> Customer m_Customer<span style="color:#f92672">;</span>
+    <span style="color:#66d9ef">private</span> <span style="color:#66d9ef">static</span> <span style="color:#66d9ef">int</span> i <span style="color:#f92672">=</span> 0<span style="color:#f92672">;</span> <span style="color:#75715e">// 满二十次计数线程
+</span><span style="color:#75715e"></span>
+    <span style="color:#66d9ef">public</span> <span style="color:#a6e22e">Waiter</span><span style="color:#f92672">(</span>String name<span style="color:#f92672">,</span> Customer customer<span style="color:#f92672">)</span> <span style="color:#f92672">{</span>
+        <span style="color:#66d9ef">super</span><span style="color:#f92672">(</span>name<span style="color:#f92672">);</span>
+        <span style="color:#66d9ef">this</span><span style="color:#f92672">.</span><span style="color:#a6e22e">m_Customer</span> <span style="color:#f92672">=</span> customer<span style="color:#f92672">;</span>
+    <span style="color:#f92672">}</span>
 
-    /**
-     * 顾客向服务员发出服务请求,当顾客已经是发出服务要求的状态，那么没有必要,执行更改状态的操作，
-       直接返回false,  所以，这也是一个Balking Pattern的设计
-     *      
-     */
-    public synchronized boolean CallService(String serviceName) {
-        if (m_calledService) {
-            System.out.println(&quot;not get service-------------------------&quot;);
-            return false;
-        }
-        m_calledService = true;
-        System.out.println(m_Name + &quot;需要服务 : &quot; + serviceName);
-        return true;
-    }
-}
-</code></pre>
+    <span style="color:#75715e">/**
+</span><span style="color:#75715e">     * 服务员随机等待一段时间后为顾客提供服务        
+</span><span style="color:#75715e">     */</span>
+     <span style="color:#a6e22e">@Override</span>
+    <span style="color:#66d9ef">public</span> <span style="color:#66d9ef">void</span> <span style="color:#a6e22e">run</span><span style="color:#f92672">()</span> <span style="color:#f92672">{</span>
+        Object obj <span style="color:#f92672">=</span> <span style="color:#66d9ef">new</span> Object<span style="color:#f92672">();</span>
+        <span style="color:#66d9ef">synchronized</span> <span style="color:#f92672">(</span>obj<span style="color:#f92672">)</span> <span style="color:#f92672">{</span>
+            <span style="color:#66d9ef">while</span> <span style="color:#f92672">(</span>i <span style="color:#f92672">&lt;</span> 10<span style="color:#f92672">)</span> <span style="color:#f92672">{</span>
+                <span style="color:#75715e">// 这里控制客服那边的发过来的请求和服务员这边的处理是一致。
+</span><span style="color:#75715e"></span>                <span style="color:#66d9ef">if</span> <span style="color:#f92672">(</span>m_Customer<span style="color:#f92672">.</span><span style="color:#a6e22e">GetService</span><span style="color:#f92672">(</span><span style="color:#66d9ef">super</span><span style="color:#f92672">.</span><span style="color:#a6e22e">getName</span><span style="color:#f92672">(),</span> <span style="color:#e6db74">&#34;No_&#34;</span> <span style="color:#f92672">+</span> i<span style="color:#f92672">))</span> <span style="color:#f92672">{</span>
+                    i<span style="color:#f92672">++;</span>
+                <span style="color:#f92672">}</span>
+                <span style="color:#75715e">// 随机等待一段时间
+</span><span style="color:#75715e"></span>                <span style="color:#66d9ef">try</span> <span style="color:#f92672">{</span>
+                    Random rand <span style="color:#f92672">=</span> <span style="color:#66d9ef">new</span> Random<span style="color:#f92672">();</span>
+                    Thread<span style="color:#f92672">.</span><span style="color:#a6e22e">sleep</span><span style="color:#f92672">(</span>rand<span style="color:#f92672">.</span><span style="color:#a6e22e">nextInt</span><span style="color:#f92672">(</span>1_000<span style="color:#f92672">));</span>
+                <span style="color:#f92672">}</span> <span style="color:#66d9ef">catch</span> <span style="color:#f92672">(</span>InterruptedException e<span style="color:#f92672">)</span> <span style="color:#f92672">{</span>
+                    e<span style="color:#f92672">.</span><span style="color:#a6e22e">printStackTrace</span><span style="color:#f92672">();</span>
+                <span style="color:#f92672">}</span>
+            <span style="color:#f92672">}</span>
+        <span style="color:#f92672">}</span>
+    <span style="color:#f92672">}</span>
+<span style="color:#f92672">}</span>
+</code></pre></div><h2 id="callservicethread">CallServiceThread</h2>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-java" data-lang="java"><span style="color:#66d9ef">public</span> <span style="color:#66d9ef">class</span> <span style="color:#a6e22e">CallServiceThread</span> <span style="color:#66d9ef">extends</span> Thread <span style="color:#f92672">{</span>
+    <span style="color:#66d9ef">private</span> Customer m_Customer<span style="color:#f92672">;</span>
+    <span style="color:#66d9ef">public</span> <span style="color:#a6e22e">CallServiceThread</span><span style="color:#f92672">(</span>Customer customer<span style="color:#f92672">)</span> <span style="color:#f92672">{</span>
+        <span style="color:#66d9ef">this</span><span style="color:#f92672">.</span><span style="color:#a6e22e">m_Customer</span> <span style="color:#f92672">=</span> customer<span style="color:#f92672">;</span>
+    <span style="color:#f92672">}</span>
+    <span style="color:#75715e">/**
+</span><span style="color:#75715e">     * 线程使得顾客发出一百次服务要求
+</span><span style="color:#75715e">     */</span>
+    <span style="color:#a6e22e">@Override</span>
+    <span style="color:#66d9ef">public</span> <span style="color:#66d9ef">void</span> <span style="color:#a6e22e">run</span><span style="color:#f92672">()</span> <span style="color:#f92672">{</span>
+        <span style="color:#66d9ef">int</span> i <span style="color:#f92672">=</span> 0<span style="color:#f92672">;</span>
+        Object obj <span style="color:#f92672">=</span> <span style="color:#66d9ef">new</span> Object<span style="color:#f92672">();</span>
+        <span style="color:#66d9ef">synchronized</span> <span style="color:#f92672">(</span>obj<span style="color:#f92672">)</span> <span style="color:#f92672">{</span>
+            <span style="color:#66d9ef">while</span> <span style="color:#f92672">(</span>i <span style="color:#f92672">&lt;</span> 10<span style="color:#f92672">)</span> <span style="color:#f92672">{</span>
+                <span style="color:#66d9ef">if</span> <span style="color:#f92672">(</span>m_Customer<span style="color:#f92672">.</span><span style="color:#a6e22e">CallService</span><span style="color:#f92672">(</span><span style="color:#e6db74">&#34;No_&#34;</span> <span style="color:#f92672">+</span> i<span style="color:#f92672">))</span> <span style="color:#f92672">{</span>
+                    i<span style="color:#f92672">++;</span>
+                <span style="color:#f92672">}</span>
+                <span style="color:#66d9ef">try</span> <span style="color:#f92672">{</span>
+                    Random rand <span style="color:#f92672">=</span> <span style="color:#66d9ef">new</span> Random<span style="color:#f92672">();</span>
+                    Thread<span style="color:#f92672">.</span><span style="color:#a6e22e">sleep</span><span style="color:#f92672">(</span>rand<span style="color:#f92672">.</span><span style="color:#a6e22e">nextInt</span><span style="color:#f92672">(</span>1_000<span style="color:#f92672">));</span>
+                <span style="color:#f92672">}</span> <span style="color:#66d9ef">catch</span> <span style="color:#f92672">(</span>InterruptedException e<span style="color:#f92672">)</span> <span style="color:#f92672">{</span>
+                    e<span style="color:#f92672">.</span><span style="color:#a6e22e">printStackTrace</span><span style="color:#f92672">();</span>
+                <span style="color:#f92672">}</span>
+            <span style="color:#f92672">}</span>
+        <span style="color:#f92672">}</span>
+    <span style="color:#f92672">}</span>
+<span style="color:#f92672">}</span>
+</code></pre></div><h2 id="callservicethread-1">CallServiceThread</h2>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-java" data-lang="java"><span style="color:#66d9ef">public</span> <span style="color:#66d9ef">class</span> <span style="color:#a6e22e">CallServiceThread</span> <span style="color:#66d9ef">extends</span> Thread <span style="color:#f92672">{</span>
+    <span style="color:#66d9ef">private</span> Customer m_Customer<span style="color:#f92672">;</span>
+    <span style="color:#66d9ef">public</span> <span style="color:#a6e22e">CallServiceThread</span><span style="color:#f92672">(</span>Customer customer<span style="color:#f92672">)</span> <span style="color:#f92672">{</span>
+        <span style="color:#66d9ef">this</span><span style="color:#f92672">.</span><span style="color:#a6e22e">m_Customer</span> <span style="color:#f92672">=</span> customer<span style="color:#f92672">;</span>
+    <span style="color:#f92672">}</span>
 
-<h2 id="waiter">Waiter</h2>
+    <span style="color:#75715e">/**
+</span><span style="color:#75715e">     * 线程使得顾客发出一百次服务要求
+</span><span style="color:#75715e">     */</span>
+    <span style="color:#a6e22e">@Override</span>
+    <span style="color:#66d9ef">public</span> <span style="color:#66d9ef">void</span> <span style="color:#a6e22e">run</span><span style="color:#f92672">()</span> <span style="color:#f92672">{</span>
+        <span style="color:#66d9ef">int</span> i <span style="color:#f92672">=</span> 0<span style="color:#f92672">;</span>
+        Object obj <span style="color:#f92672">=</span> <span style="color:#66d9ef">new</span> Object<span style="color:#f92672">();</span>
+        <span style="color:#66d9ef">synchronized</span> <span style="color:#f92672">(</span>obj<span style="color:#f92672">)</span> <span style="color:#f92672">{</span>
+            <span style="color:#66d9ef">while</span> <span style="color:#f92672">(</span>i <span style="color:#f92672">&lt;</span> 10<span style="color:#f92672">)</span> <span style="color:#f92672">{</span>
+                <span style="color:#66d9ef">if</span> <span style="color:#f92672">(</span>m_Customer<span style="color:#f92672">.</span><span style="color:#a6e22e">CallService</span><span style="color:#f92672">(</span><span style="color:#e6db74">&#34;No_&#34;</span> <span style="color:#f92672">+</span> i<span style="color:#f92672">))</span> <span style="color:#f92672">{</span>
+                    i<span style="color:#f92672">++;</span>
+                <span style="color:#f92672">}</span>
+                <span style="color:#66d9ef">try</span> <span style="color:#f92672">{</span>
+                    Random rand <span style="color:#f92672">=</span> <span style="color:#66d9ef">new</span> Random<span style="color:#f92672">();</span>
+                    Thread<span style="color:#f92672">.</span><span style="color:#a6e22e">sleep</span><span style="color:#f92672">(</span>rand<span style="color:#f92672">.</span><span style="color:#a6e22e">nextInt</span><span style="color:#f92672">(</span>1_000<span style="color:#f92672">));</span>
+                <span style="color:#f92672">}</span> <span style="color:#66d9ef">catch</span> <span style="color:#f92672">(</span>InterruptedException e<span style="color:#f92672">)</span> <span style="color:#f92672">{</span>
+                    e<span style="color:#f92672">.</span><span style="color:#a6e22e">printStackTrace</span><span style="color:#f92672">();</span>
+                <span style="color:#f92672">}</span>
+            <span style="color:#f92672">}</span>
+        <span style="color:#f92672">}</span>
+    <span style="color:#f92672">}</span>
+<span style="color:#f92672">}</span>
+</code></pre></div><h2 id="main">Main</h2>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-java" data-lang="java"><span style="color:#66d9ef">public</span> <span style="color:#66d9ef">class</span> <span style="color:#a6e22e">Main</span> <span style="color:#f92672">{</span>
+    <span style="color:#66d9ef">public</span> <span style="color:#66d9ef">static</span> <span style="color:#66d9ef">void</span> <span style="color:#a6e22e">main</span><span style="color:#f92672">(</span>String<span style="color:#f92672">[]</span> args<span style="color:#f92672">)</span> <span style="color:#f92672">{</span>
 
-<pre><code class="language-java">public class Waiter extends Thread {
-    private Customer m_Customer;
-    private static int i = 0; // 满二十次计数线程
+        Customer customer <span style="color:#f92672">=</span> <span style="color:#66d9ef">new</span> Customer<span style="color:#f92672">(</span><span style="color:#e6db74">&#34;顾客1&#34;</span><span style="color:#f92672">);</span>
+        CallServiceThread changer <span style="color:#f92672">=</span> <span style="color:#66d9ef">new</span> CallServiceThread<span style="color:#f92672">(</span>customer<span style="color:#f92672">);</span>
 
-    public Waiter(String name, Customer customer) {
-        super(name);
-        this.m_Customer = customer;
-    }
+        Waiter waiter1 <span style="color:#f92672">=</span> <span style="color:#66d9ef">new</span> Waiter<span style="color:#f92672">(</span><span style="color:#e6db74">&#34;waiter1&#34;</span><span style="color:#f92672">,</span> customer<span style="color:#f92672">);</span>
+        Waiter waiter2 <span style="color:#f92672">=</span> <span style="color:#66d9ef">new</span> Waiter<span style="color:#f92672">(</span><span style="color:#e6db74">&#34;waiter2&#34;</span><span style="color:#f92672">,</span> customer<span style="color:#f92672">);</span>
 
-    /**
-     * 服务员随机等待一段时间后为顾客提供服务        
-     */
-     @Override
-    public void run() {
-        Object obj = new Object();
-        synchronized (obj) {
-            while (i &lt; 10) {
-                // 这里控制客服那边的发过来的请求和服务员这边的处理是一致。
-                if (m_Customer.GetService(super.getName(), &quot;No_&quot; + i)) {
-                    i++;
-                }
-                // 随机等待一段时间
-                try {
-                    Random rand = new Random();
-                    Thread.sleep(rand.nextInt(1_000));
-                } catch (InterruptedException e) {
-                    e.printStackTrace();
-                }
-            }
-        }
-    }
-}
-</code></pre>
-
-<h2 id="callservicethread">CallServiceThread</h2>
-
-<pre><code class="language-java">public class CallServiceThread extends Thread {
-    private Customer m_Customer;
-    public CallServiceThread(Customer customer) {
-        this.m_Customer = customer;
-    }
-    /**
-     * 线程使得顾客发出一百次服务要求
-     */
-    @Override
-    public void run() {
-        int i = 0;
-        Object obj = new Object();
-        synchronized (obj) {
-            while (i &lt; 10) {
-                if (m_Customer.CallService(&quot;No_&quot; + i)) {
-                    i++;
-                }
-                try {
-                    Random rand = new Random();
-                    Thread.sleep(rand.nextInt(1_000));
-                } catch (InterruptedException e) {
-                    e.printStackTrace();
-                }
-            }
-        }
-    }
-}
-</code></pre>
-
-<h2 id="callservicethread-1">CallServiceThread</h2>
-
-<pre><code class="language-java">public class CallServiceThread extends Thread {
-    private Customer m_Customer;
-    public CallServiceThread(Customer customer) {
-        this.m_Customer = customer;
-    }
-
-    /**
-     * 线程使得顾客发出一百次服务要求
-     */
-    @Override
-    public void run() {
-        int i = 0;
-        Object obj = new Object();
-        synchronized (obj) {
-            while (i &lt; 10) {
-                if (m_Customer.CallService(&quot;No_&quot; + i)) {
-                    i++;
-                }
-                try {
-                    Random rand = new Random();
-                    Thread.sleep(rand.nextInt(1_000));
-                } catch (InterruptedException e) {
-                    e.printStackTrace();
-                }
-            }
-        }
-    }
-}
-</code></pre>
-
-<h2 id="main">Main</h2>
-
-<pre><code class="language-java">public class Main {
-    public static void main(String[] args) {
-
-        Customer customer = new Customer(&quot;顾客1&quot;);
-        CallServiceThread changer = new CallServiceThread(customer);
-
-        Waiter waiter1 = new Waiter(&quot;waiter1&quot;, customer);
-        Waiter waiter2 = new Waiter(&quot;waiter2&quot;, customer);
-
-        changer.start();
+        changer<span style="color:#f92672">.</span><span style="color:#a6e22e">start</span><span style="color:#f92672">();</span>
       
-        waiter1.start();
-        waiter2.start();
-    }
+        waiter1<span style="color:#f92672">.</span><span style="color:#a6e22e">start</span><span style="color:#f92672">();</span>
+        waiter2<span style="color:#f92672">.</span><span style="color:#a6e22e">start</span><span style="color:#f92672">();</span>
+    <span style="color:#f92672">}</span>
 
-}
-</code></pre>
-
-<h2 id="运行结果">运行结果</h2>
-
-<pre><code class="language-java">顾客1需要服务 : No_0
-waiter1提供服务-- No_0
-no service  need----------------------------------------------
-no service  need----------------------------------------------
-顾客1需要服务 : No_1
-waiter1提供服务-- No_1
-no service  need----------------------------------------------
-no service  need----------------------------------------------
-顾客1需要服务 : No_2
-not get service----------------------------------------------
-waiter2提供服务-- No_2
-no service  need----------------------------------------------
-no service  need----------------------------------------------
-no service  need----------------------------------------------
-顾客1需要服务 : No_3
-not get service----------------------------------------------
-waiter1提供服务-- No_3
-no service  need----------------------------------------------
-顾客1需要服务 : No_4
-not get service----------------------------------------------
-waiter2提供服务-- No_4
-顾客1需要服务 : No_5
-waiter1提供服务-- No_5
-no service  need----------------------------------------------
-顾客1需要服务 : No_6
-waiter2提供服务-- No_6
-顾客1需要服务 : No_7
-waiter1提供服务-- No_7
-no service  need----------------------------------------------
-no service  need----------------------------------------------
-顾客1需要服务 : No_8
-waiter1提供服务-- No_8
-no service  need----------------------------------------------
-no service  need----------------------------------------------
-no service  need----------------------------------------------
-顾客1需要服务 : No_9
-waiter2提供服务-- No_9
-</code></pre>
-
-<h1 id="总结">总结</h1>
-
+<span style="color:#f92672">}</span>
+</code></pre></div><h2 id="运行结果">运行结果</h2>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-java" data-lang="java">顾客1需要服务 <span style="color:#f92672">:</span> No_0
+waiter1提供服务<span style="color:#f92672">--</span> No_0
+no service  need<span style="color:#f92672">----------------------------------------------</span>
+no service  need<span style="color:#f92672">----------------------------------------------</span>
+顾客1需要服务 <span style="color:#f92672">:</span> No_1
+waiter1提供服务<span style="color:#f92672">--</span> No_1
+no service  need<span style="color:#f92672">----------------------------------------------</span>
+no service  need<span style="color:#f92672">----------------------------------------------</span>
+顾客1需要服务 <span style="color:#f92672">:</span> No_2
+not get service<span style="color:#f92672">----------------------------------------------</span>
+waiter2提供服务<span style="color:#f92672">--</span> No_2
+no service  need<span style="color:#f92672">----------------------------------------------</span>
+no service  need<span style="color:#f92672">----------------------------------------------</span>
+no service  need<span style="color:#f92672">----------------------------------------------</span>
+顾客1需要服务 <span style="color:#f92672">:</span> No_3
+not get service<span style="color:#f92672">----------------------------------------------</span>
+waiter1提供服务<span style="color:#f92672">--</span> No_3
+no service  need<span style="color:#f92672">----------------------------------------------</span>
+顾客1需要服务 <span style="color:#f92672">:</span> No_4
+not get service<span style="color:#f92672">----------------------------------------------</span>
+waiter2提供服务<span style="color:#f92672">--</span> No_4
+顾客1需要服务 <span style="color:#f92672">:</span> No_5
+waiter1提供服务<span style="color:#f92672">--</span> No_5
+no service  need<span style="color:#f92672">----------------------------------------------</span>
+顾客1需要服务 <span style="color:#f92672">:</span> No_6
+waiter2提供服务<span style="color:#f92672">--</span> No_6
+顾客1需要服务 <span style="color:#f92672">:</span> No_7
+waiter1提供服务<span style="color:#f92672">--</span> No_7
+no service  need<span style="color:#f92672">----------------------------------------------</span>
+no service  need<span style="color:#f92672">----------------------------------------------</span>
+顾客1需要服务 <span style="color:#f92672">:</span> No_8
+waiter1提供服务<span style="color:#f92672">--</span> No_8
+no service  need<span style="color:#f92672">----------------------------------------------</span>
+no service  need<span style="color:#f92672">----------------------------------------------</span>
+no service  need<span style="color:#f92672">----------------------------------------------</span>
+顾客1需要服务 <span style="color:#f92672">:</span> No_9
+waiter2提供服务<span style="color:#f92672">--</span> No_9
+</code></pre></div><h1 id="总结">总结</h1>
 <p>上面的示例可以看出来， 一个客服对应两个服务员， 两个服务员的两个线程，通过一个变量</p>
-
-<pre><code class="language-java"> private volatile boolean m_calledService = false;
-</code></pre>
-
-<p>来控制，已经服务过或者没有服务两个状态的控制来处理， 如果这个服务已经处理过了，那就改变状态了。另外一个状态查看这个状态后，就知道已经服务过了，所以就直接return了。</p>
-
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-java" data-lang="java"> <span style="color:#66d9ef">private</span> <span style="color:#66d9ef">volatile</span> <span style="color:#66d9ef">boolean</span> m_calledService <span style="color:#f92672">=</span> <span style="color:#66d9ef">false</span><span style="color:#f92672">;</span>
+</code></pre></div><p>来控制，已经服务过或者没有服务两个状态的控制来处理， 如果这个服务已经处理过了，那就改变状态了。另外一个状态查看这个状态后，就知道已经服务过了，所以就直接return了。</p>
 <p><strong>这个模式的主要就是变量的控制。</strong></p>
 
 
@@ -511,15 +481,15 @@ waiter2提供服务-- No_9
                 <ul class="pager">
                     
                     <li class="previous">
-                        <a href="/post/immutable-%E8%AE%BE%E8%AE%A1%E6%A8%A1%E5%BC%8F/" data-toggle="tooltip" data-placement="top"
-                            title="immutable-设计模式">&larr;
+                        <a href="/post/guarded-suspension-%E8%AE%BE%E8%AE%A1%E6%A8%A1%E5%BC%8F/" data-toggle="tooltip" data-placement="top"
+                            title="Guarded-Suspension-设计模式">&larr;
                             Previous Post</a>
                     </li>
                     
                     
                     <li class="next">
-                        <a href="/post/threadlocal-%E8%AE%BE%E8%AE%A1%E6%A8%A1%E5%BC%8F/" data-toggle="tooltip" data-placement="top"
-                            title="ThreadLocal-设计模式">Next
+                        <a href="/post/future-%E8%AE%BE%E8%AE%A1%E6%A8%A1%E5%BC%8F/" data-toggle="tooltip" data-placement="top"
+                            title="Future-设计模式">Next
                             Post &rarr;</a>
                     </li>
                     
@@ -570,19 +540,14 @@ waiter2提供服务-- No_9
                     </h4>
                     <ul class="catalog-body"></ul>
                     <nav id="TableOfContents">
-<ul>
-<li><a href="#balking简介">balking简介</a></li>
-<li><a href="#代码示例">代码示例</a>
-<ul>
-<li><a href="#customer">Customer</a></li>
-<li><a href="#waiter">Waiter</a></li>
-<li><a href="#callservicethread">CallServiceThread</a></li>
-<li><a href="#callservicethread-1">CallServiceThread</a></li>
-<li><a href="#main">Main</a></li>
-<li><a href="#运行结果">运行结果</a></li>
-</ul></li>
-<li><a href="#总结">总结</a></li>
-</ul>
+  <ul>
+    <li><a href="#customer">Customer</a></li>
+    <li><a href="#waiter">Waiter</a></li>
+    <li><a href="#callservicethread">CallServiceThread</a></li>
+    <li><a href="#callservicethread-1">CallServiceThread</a></li>
+    <li><a href="#main">Main</a></li>
+    <li><a href="#运行结果">运行结果</a></li>
+  </ul>
 </nav>
                     <br>
                     <br>
@@ -607,9 +572,6 @@ waiter2提供服务-- No_9
                         
                         
                         
-                        <a href="/tags/" title="">
-                            
-                        </a>
                         
                         
                         
@@ -619,101 +581,6 @@ waiter2提供服务-- No_9
                         
                         
                         
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        <a href="/tags/qt" title="QT">
-                            QT
-                        </a>
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        <a href="/tags/zookeeper" title="Zookeeper">
-                            Zookeeper
-                        </a>
                         
                         
                         
@@ -753,8 +620,10 @@ waiter2提供服务-- No_9
                         
                         
                         
-                        <a href="/tags/elasticsearch" title="elasticSearch">
-                            elasticSearch
+                        
+                        
+                        <a href="/tags/elasticsearch" title="elasticsearch">
+                            elasticsearch
                         </a>
                         
                         
@@ -765,9 +634,27 @@ waiter2提供服务-- No_9
                         
                         
                         
-                        <a href="/tags/golang" title="golang">
-                            golang
-                        </a>
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
                         
                         
                         
@@ -805,9 +692,21 @@ waiter2提供服务-- No_9
                         
                         
                         
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
                         <a href="/tags/jvm" title="jvm">
                             jvm
                         </a>
+                        
+                        
+                        
+                        
                         
                         
                         
@@ -831,9 +730,19 @@ waiter2提供服务-- No_9
                         
                         
                         
+                        
+                        
+                        
+                        
+                        
+                        
                         <a href="/tags/mongodb" title="mongodb">
                             mongodb
                         </a>
+                        
+                        
+                        
+                        
                         
                         
                         
@@ -844,10 +753,6 @@ waiter2提供服务-- No_9
                         </a>
                         
                         
-                        
-                        <a href="/tags/mycat" title="mycat">
-                            mycat
-                        </a>
                         
                         
                         
@@ -861,9 +766,17 @@ waiter2提供服务-- No_9
                         
                         
                         
-                        <a href="/tags/nginx" title="nginx">
-                            nginx
-                        </a>
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
                         
                         
                         
@@ -887,8 +800,22 @@ waiter2提供服务-- No_9
                         
                         
                         
+                        
+                        
                         <a href="/tags/rocketmq" title="rocketmq">
                             rocketmq
+                        </a>
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        <a href="/tags/security%E6%A1%86%E6%9E%B6%E5%AD%A6%E4%B9%A0" title="security框架学习">
+                            security框架学习
                         </a>
                         
                         
@@ -915,17 +842,11 @@ waiter2提供服务-- No_9
                         
                         
                         
-                        <a href="/tags/springcloud" title="springCloud">
-                            springCloud
-                        </a>
-                        
-                        
-                        
-                        
-                        
                         <a href="/tags/springboot" title="springboot">
                             springboot
                         </a>
+                        
+                        
                         
                         
                         
@@ -939,6 +860,9 @@ waiter2提供服务-- No_9
                         
                         
                         
+                        <a href="/tags/springcloud" title="springcloud">
+                            springcloud
+                        </a>
                         
                         
                         
@@ -964,6 +888,33 @@ waiter2提供服务-- No_9
                         
                         
                         
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        <a href="/tags/zookeeper" title="zookeeper">
+                            zookeeper
+                        </a>
                         
                         
                         
@@ -1023,6 +974,8 @@ waiter2提供服务-- No_9
                         
                         
                         
+                        
+                        
                         <a href="/tags/%E5%88%86%E5%B8%83%E5%BC%8F%E7%B3%BB%E5%88%97" title="分布式系列">
                             分布式系列
                         </a>
@@ -1042,6 +995,10 @@ waiter2提供服务-- No_9
                         
                         
                         
+                        
+                        <a href="/tags/%E5%8D%8F%E8%AE%AE%E6%A0%88" title="协议栈">
+                            协议栈
+                        </a>
                         
                         
                         
@@ -1241,6 +1198,12 @@ waiter2提供服务-- No_9
                         
                         
                         
+                        
+                        
+                        
+                        
+                        
+                        
                         <a href="/tags/%E7%BD%91%E7%BB%9C%E7%BC%96%E7%A8%8B" title="网络编程">
                             网络编程
                         </a>
@@ -1264,6 +1227,10 @@ waiter2提供服务-- No_9
                         
                         
                         
+                        
+                        <a href="/tags/%E8%AE%A4%E8%AF%81%E5%92%8C%E6%8E%88%E6%9D%83" title="认证和授权">
+                            认证和授权
+                        </a>
                         
                         
                         
@@ -1434,7 +1401,7 @@ waiter2提供服务-- No_9
                     
                 </ul>
 		<p class="copyright text-muted">
-                    Copyright &copy;  2020
+                    Copyright &copy;  2021
                     <br>
                     <a href="https://themes.gohugo.io/hugo-theme-cleanwhite">CleanWhite Hugo Theme</a> by <a href="https://zhaohuabing.com">Huabing</a> |
                     <iframe

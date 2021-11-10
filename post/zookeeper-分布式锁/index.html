@@ -97,15 +97,15 @@
                     </li>
                     
                     <li>
-                        <a href="/categories/english">English</a>
+                        <a href="/categories/english">english</a>
                     </li>
                     
                     <li>
-                        <a href="/categories/life">Life</a>
+                        <a href="/categories/life">life</a>
                     </li>
                     
                     <li>
-                        <a href="/categories/tech">Tech</a>
+                        <a href="/categories/tech">tech</a>
                     </li>
                     
 
@@ -237,273 +237,255 @@
                 
                 
                 
-                
-
-<p>[TOC]</p>
-
-<p><strong>说明： 代码实现基于<a href="https://www.bilibili.com/video/av39142828?from=search&amp;seid=11914183011254036747视频">https://www.bilibili.com/video/av39142828?from=search&amp;seid=11914183011254036747视频</a></strong></p>
-
+                <p>[TOC]</p>
+<p><strong>说明： 代码实现基于https://www.bilibili.com/video/av39142828?from=search&amp;seid=11914183011254036747视频</strong></p>
 <h1 id="分布式锁解决方案">分布式锁解决方案</h1>
-
-<p><img src="/img/5-13.png" alt="5-13" /></p>
-
+<p><img src="/img/5-13.png" alt="5-13"></p>
 <h1 id="实现代码">实现代码</h1>
-
 <p>重现Lock接口，这一块可以提出来作为一个公共工具类。</p>
+<h2 id="pomxml">pom.xml</h2>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-xml" data-lang="xml"> <span style="color:#f92672">&lt;dependency&gt;</span>
+      <span style="color:#f92672">&lt;groupId&gt;</span>org.apache.zookeeper<span style="color:#f92672">&lt;/groupId&gt;</span>
+      <span style="color:#f92672">&lt;artifactId&gt;</span>zookeeper<span style="color:#f92672">&lt;/artifactId&gt;</span>
+      <span style="color:#f92672">&lt;version&gt;</span>3.6.1<span style="color:#f92672">&lt;/version&gt;</span>
+    <span style="color:#f92672">&lt;/dependency&gt;</span>
+    <span style="color:#f92672">&lt;dependency&gt;</span>
+      <span style="color:#f92672">&lt;groupId&gt;</span>com.101tec<span style="color:#f92672">&lt;/groupId&gt;</span>
+      <span style="color:#f92672">&lt;artifactId&gt;</span>zkclient<span style="color:#f92672">&lt;/artifactId&gt;</span>
+      <span style="color:#f92672">&lt;version&gt;</span>0.11<span style="color:#f92672">&lt;/version&gt;</span>
+    <span style="color:#f92672">&lt;/dependency&gt;</span>
+</code></pre></div><h2 id="lock接口重写类">Lock接口重写类</h2>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-java" data-lang="java"><span style="color:#f92672">package</span> com.example.lockdemo<span style="color:#f92672">;</span>
+<span style="color:#75715e">/*
+</span><span style="color:#75715e"> * @Description: 处理Zookeeper分布式锁
+</span><span style="color:#75715e"> * @Author: 麦子
+</span><span style="color:#75715e"> * @Date: 2019-05-13 18:33:10
+</span><span style="color:#75715e"> * @LastEditTime: 2019-05-13 22:18:55
+</span><span style="color:#75715e"> * @LastEditors: 麦子
+</span><span style="color:#75715e"> */</span>
 
-<h2 id="pom-xml">pom.xml</h2>
+<span style="color:#f92672">import</span> java.util.Collections<span style="color:#f92672">;</span>
+<span style="color:#f92672">import</span> java.util.List<span style="color:#f92672">;</span>
+<span style="color:#f92672">import</span> java.util.concurrent.CountDownLatch<span style="color:#f92672">;</span>
+<span style="color:#f92672">import</span> java.util.concurrent.TimeUnit<span style="color:#f92672">;</span>
+<span style="color:#f92672">import</span> java.util.concurrent.locks.Condition<span style="color:#f92672">;</span>
+<span style="color:#f92672">import</span> java.util.concurrent.locks.Lock<span style="color:#f92672">;</span>
 
-<pre><code class="language-xml"> &lt;dependency&gt;
-      &lt;groupId&gt;org.apache.zookeeper&lt;/groupId&gt;
-      &lt;artifactId&gt;zookeeper&lt;/artifactId&gt;
-      &lt;version&gt;3.6.1&lt;/version&gt;
-    &lt;/dependency&gt;
-    &lt;dependency&gt;
-      &lt;groupId&gt;com.101tec&lt;/groupId&gt;
-      &lt;artifactId&gt;zkclient&lt;/artifactId&gt;
-      &lt;version&gt;0.11&lt;/version&gt;
-    &lt;/dependency&gt;
-</code></pre>
+<span style="color:#f92672">import</span> org.I0Itec.zkclient.IZkDataListener<span style="color:#f92672">;</span>
+<span style="color:#f92672">import</span> org.I0Itec.zkclient.ZkClient<span style="color:#f92672">;</span>
+<span style="color:#f92672">import</span> org.I0Itec.zkclient.serialize.SerializableSerializer<span style="color:#f92672">;</span>
 
-<h2 id="lock接口重写类">Lock接口重写类</h2>
+<span style="color:#75715e">/***
+</span><span style="color:#75715e"> *   思路： 需要锁的话，就需要一个依据来处理。 
+</span><span style="color:#75715e"> *    
+</span><span style="color:#75715e"> *   1.  每一个线程来处理业务，都在Zookeeper上面注册一个有序路径节点。 
+</span><span style="color:#75715e"> *   2.  查看特定目录下面的如我这里就是 ticketLock 这个节点下面的所有生成的子节点，查看这个最小的有序路径节点。
+</span><span style="color:#75715e"> *   3.  如果是获取到最小的有序节点，就获取到了锁，如果当前线程获取的不是最小的有序节点，那么就暂停当前线程。
+</span><span style="color:#75715e"> *   4.  当其中另外一条线程处理完成后，就会触发，删除节点的回调， 这个时候在把标记了暂停的那一条线程给释放走下去，在此去获取锁的方法。
+</span><span style="color:#75715e"> *   5.  从上面的四个步骤可以看出，其中Zookeeper这个节点就是用来控制线程的暂停和释放的关键。每一条线程就相当于一个有序节点，这样就可以看到线程变相的
+</span><span style="color:#75715e"> *       成为了一个有序的队列形式了。这样的话，执行起来就是按相应的步骤了，一步一步的执行。
+</span><span style="color:#75715e"> */</span>
+<span style="color:#66d9ef">public</span> <span style="color:#66d9ef">class</span> <span style="color:#a6e22e">ZkLockDemo</span> <span style="color:#66d9ef">implements</span> Lock <span style="color:#f92672">{</span>
 
-<pre><code class="language-java">package com.example.lockdemo;
-/*
- * @Description: 处理Zookeeper分布式锁
- * @Author: 麦子
- * @Date: 2019-05-13 18:33:10
- * @LastEditTime: 2019-05-13 22:18:55
- * @LastEditors: 麦子
- */
+    <span style="color:#66d9ef">private</span> String zkServers <span style="color:#f92672">=</span> <span style="color:#e6db74">&#34;127.0.0.1:2181,127.0.0.1:2182,127.0.0.1:2183&#34;</span><span style="color:#f92672">;</span>
+    <span style="color:#66d9ef">private</span> ZkClient zkClient <span style="color:#f92672">=</span> <span style="color:#66d9ef">new</span> ZkClient<span style="color:#f92672">(</span>zkServers<span style="color:#f92672">,</span> 2000<span style="color:#f92672">,</span> 1000<span style="color:#f92672">,</span> <span style="color:#66d9ef">new</span> SerializableSerializer<span style="color:#f92672">());</span>
+    <span style="color:#66d9ef">private</span> CountDownLatch cd<span style="color:#f92672">;</span>
 
-import java.util.Collections;
-import java.util.List;
-import java.util.concurrent.CountDownLatch;
-import java.util.concurrent.TimeUnit;
-import java.util.concurrent.locks.Condition;
-import java.util.concurrent.locks.Lock;
+    <span style="color:#66d9ef">private</span> String beforePath<span style="color:#f92672">;</span> <span style="color:#75715e">// 当前请求的节点前一个节点
+</span><span style="color:#75715e"></span>    <span style="color:#66d9ef">private</span> String currentPath<span style="color:#f92672">;</span> <span style="color:#75715e">// 当前请求的节点
+</span><span style="color:#75715e"></span>
+    <span style="color:#66d9ef">private</span> <span style="color:#66d9ef">static</span> String LOCK_PATH <span style="color:#f92672">=</span> <span style="color:#e6db74">&#34;ticketLock&#34;</span><span style="color:#f92672">;</span>
 
-import org.I0Itec.zkclient.IZkDataListener;
-import org.I0Itec.zkclient.ZkClient;
-import org.I0Itec.zkclient.serialize.SerializableSerializer;
+    <span style="color:#75715e">/***
+</span><span style="color:#75715e">     * 判断是否有 ticketLock 目录， 没有就创建
+</span><span style="color:#75715e">     */</span>
+    <span style="color:#66d9ef">public</span> <span style="color:#a6e22e">ZkLockDemo</span><span style="color:#f92672">()</span> <span style="color:#f92672">{</span>
+        <span style="color:#66d9ef">if</span> <span style="color:#f92672">(!</span><span style="color:#66d9ef">this</span><span style="color:#f92672">.</span><span style="color:#a6e22e">zkClient</span><span style="color:#f92672">.</span><span style="color:#a6e22e">exists</span><span style="color:#f92672">(</span><span style="color:#e6db74">&#34;/&#34;</span><span style="color:#f92672">+</span> LOCK_PATH<span style="color:#f92672">))</span> <span style="color:#f92672">{</span>
+            <span style="color:#66d9ef">this</span><span style="color:#f92672">.</span><span style="color:#a6e22e">zkClient</span><span style="color:#f92672">.</span><span style="color:#a6e22e">createPersistent</span><span style="color:#f92672">(</span>LOCK_PATH<span style="color:#f92672">);</span>
+        <span style="color:#f92672">}</span>
+    <span style="color:#f92672">}</span>
 
-/***
- *   思路： 需要锁的话，就需要一个依据来处理。 
- *    
- *   1.  每一个线程来处理业务，都在Zookeeper上面注册一个有序路径节点。 
- *   2.  查看特定目录下面的如我这里就是 ticketLock 这个节点下面的所有生成的子节点，查看这个最小的有序路径节点。
- *   3.  如果是获取到最小的有序节点，就获取到了锁，如果当前线程获取的不是最小的有序节点，那么就暂停当前线程。
- *   4.  当其中另外一条线程处理完成后，就会触发，删除节点的回调， 这个时候在把标记了暂停的那一条线程给释放走下去，在此去获取锁的方法。
- *   5.  从上面的四个步骤可以看出，其中Zookeeper这个节点就是用来控制线程的暂停和释放的关键。每一条线程就相当于一个有序节点，这样就可以看到线程变相的
- *       成为了一个有序的队列形式了。这样的话，执行起来就是按相应的步骤了，一步一步的执行。
- */
-public class ZkLockDemo implements Lock {
+    <span style="color:#a6e22e">@Override</span>
+    <span style="color:#66d9ef">public</span> <span style="color:#66d9ef">void</span> <span style="color:#a6e22e">lock</span><span style="color:#f92672">()</span> <span style="color:#f92672">{</span>
+        <span style="color:#66d9ef">if</span> <span style="color:#f92672">(</span>tryLock<span style="color:#f92672">())</span> <span style="color:#f92672">{</span>
+            <span style="color:#66d9ef">return</span><span style="color:#f92672">;</span>
+        <span style="color:#f92672">}</span>
+        waitForLock<span style="color:#f92672">();</span>
+        <span style="color:#75715e">// 递归获取锁
+</span><span style="color:#75715e"></span>        lock<span style="color:#f92672">();</span>
+    <span style="color:#f92672">}</span>
 
-    private String zkServers = &quot;127.0.0.1:2181,127.0.0.1:2182,127.0.0.1:2183&quot;;
-    private ZkClient zkClient = new ZkClient(zkServers, 2000, 1000, new SerializableSerializer());
-    private CountDownLatch cd;
+    <span style="color:#75715e">/**
+</span><span style="color:#75715e">     * 让当前线程休眠一段时间
+</span><span style="color:#75715e">     */</span>
+    <span style="color:#66d9ef">private</span> <span style="color:#66d9ef">void</span> <span style="color:#a6e22e">waitForLock</span><span style="color:#f92672">()</span> <span style="color:#f92672">{</span>
+        IZkDataListener listener <span style="color:#f92672">=</span> <span style="color:#66d9ef">new</span> IZkDataListener<span style="color:#f92672">()</span> <span style="color:#f92672">{</span>
 
-    private String beforePath; // 当前请求的节点前一个节点
-    private String currentPath; // 当前请求的节点
+            <span style="color:#a6e22e">@Override</span>
+            <span style="color:#66d9ef">public</span> <span style="color:#66d9ef">void</span> <span style="color:#a6e22e">handleDataDeleted</span><span style="color:#f92672">(</span>String dataPath<span style="color:#f92672">)</span> <span style="color:#66d9ef">throws</span> Exception <span style="color:#f92672">{</span>
+                <span style="color:#66d9ef">if</span> <span style="color:#f92672">(</span>cd <span style="color:#f92672">!=</span> <span style="color:#66d9ef">null</span><span style="color:#f92672">)</span> <span style="color:#f92672">{</span>
+                    cd<span style="color:#f92672">.</span><span style="color:#a6e22e">countDown</span><span style="color:#f92672">();</span>
+                <span style="color:#f92672">}</span>
 
-    private static String LOCK_PATH = &quot;ticketLock&quot;;
+            <span style="color:#f92672">}</span>
 
-    /***
-     * 判断是否有 ticketLock 目录， 没有就创建
-     */
-    public ZkLockDemo() {
-        if (!this.zkClient.exists(&quot;/&quot;+ LOCK_PATH)) {
-            this.zkClient.createPersistent(LOCK_PATH);
-        }
-    }
+            <span style="color:#a6e22e">@Override</span>
+            <span style="color:#66d9ef">public</span> <span style="color:#66d9ef">void</span> <span style="color:#a6e22e">handleDataChange</span><span style="color:#f92672">(</span>String dataPath<span style="color:#f92672">,</span> Object data<span style="color:#f92672">)</span> <span style="color:#66d9ef">throws</span> Exception <span style="color:#f92672">{</span>
 
-    @Override
-    public void lock() {
-        if (tryLock()) {
-            return;
-        }
-        waitForLock();
-        // 递归获取锁
-        lock();
-    }
+            <span style="color:#f92672">}</span>
+        <span style="color:#f92672">};</span>
 
-    /**
-     * 让当前线程休眠一段时间
-     */
-    private void waitForLock() {
-        IZkDataListener listener = new IZkDataListener() {
+        System<span style="color:#f92672">.</span><span style="color:#a6e22e">out</span><span style="color:#f92672">.</span><span style="color:#a6e22e">println</span><span style="color:#f92672">(</span><span style="color:#e6db74">&#34;+++++beforePath= &#34;</span><span style="color:#f92672">+</span>beforePath<span style="color:#f92672">);</span>
+        <span style="color:#66d9ef">this</span><span style="color:#f92672">.</span><span style="color:#a6e22e">zkClient</span><span style="color:#f92672">.</span><span style="color:#a6e22e">subscribeDataChanges</span><span style="color:#f92672">(</span>beforePath<span style="color:#f92672">,</span> listener<span style="color:#f92672">);</span>
+        <span style="color:#66d9ef">if</span> <span style="color:#f92672">(</span><span style="color:#66d9ef">this</span><span style="color:#f92672">.</span><span style="color:#a6e22e">zkClient</span><span style="color:#f92672">.</span><span style="color:#a6e22e">exists</span><span style="color:#f92672">(</span>beforePath<span style="color:#f92672">))</span> <span style="color:#f92672">{</span>
+            cd <span style="color:#f92672">=</span> <span style="color:#66d9ef">new</span> CountDownLatch<span style="color:#f92672">(</span>1<span style="color:#f92672">);</span>
+            <span style="color:#66d9ef">try</span> <span style="color:#f92672">{</span>
+                cd<span style="color:#f92672">.</span><span style="color:#a6e22e">await</span><span style="color:#f92672">();</span>
+            <span style="color:#f92672">}</span> <span style="color:#66d9ef">catch</span> <span style="color:#f92672">(</span>Exception e<span style="color:#f92672">)</span> <span style="color:#f92672">{</span>
+                e<span style="color:#f92672">.</span><span style="color:#a6e22e">printStackTrace</span><span style="color:#f92672">();</span>
+            <span style="color:#f92672">}</span>
+        <span style="color:#f92672">}</span>
 
-            @Override
-            public void handleDataDeleted(String dataPath) throws Exception {
-                if (cd != null) {
-                    cd.countDown();
-                }
+        <span style="color:#66d9ef">this</span><span style="color:#f92672">.</span><span style="color:#a6e22e">zkClient</span><span style="color:#f92672">.</span><span style="color:#a6e22e">unsubscribeDataChanges</span><span style="color:#f92672">(</span>beforePath<span style="color:#f92672">,</span> listener<span style="color:#f92672">);</span>
 
-            }
+    <span style="color:#f92672">}</span>
 
-            @Override
-            public void handleDataChange(String dataPath, Object data) throws Exception {
+    <span style="color:#75715e">/**
+</span><span style="color:#75715e">     * @description: 非阻塞加锁
+</span><span style="color:#75715e">     * @param {type}
+</span><span style="color:#75715e">     * @return:
+</span><span style="color:#75715e">     */</span>
+    <span style="color:#a6e22e">@Override</span>
+    <span style="color:#66d9ef">public</span> <span style="color:#66d9ef">boolean</span> <span style="color:#a6e22e">tryLock</span><span style="color:#f92672">()</span> <span style="color:#f92672">{</span>
+        <span style="color:#66d9ef">if</span> <span style="color:#f92672">(</span>currentPath <span style="color:#f92672">==</span> <span style="color:#66d9ef">null</span> <span style="color:#f92672">||</span> currentPath<span style="color:#f92672">.</span><span style="color:#a6e22e">length</span><span style="color:#f92672">()</span> <span style="color:#f92672">&lt;</span> 0<span style="color:#f92672">)</span> <span style="color:#f92672">{</span>
+            currentPath <span style="color:#f92672">=</span> <span style="color:#66d9ef">this</span><span style="color:#f92672">.</span><span style="color:#a6e22e">zkClient</span><span style="color:#f92672">.</span><span style="color:#a6e22e">createEphemeralSequential</span><span style="color:#f92672">(</span><span style="color:#e6db74">&#34;/&#34;</span> <span style="color:#f92672">+</span> LOCK_PATH <span style="color:#f92672">+</span> <span style="color:#e6db74">&#34;/window&#34;</span><span style="color:#f92672">,</span>
+                    Thread<span style="color:#f92672">.</span><span style="color:#a6e22e">currentThread</span><span style="color:#f92672">().</span><span style="color:#a6e22e">getName</span><span style="color:#f92672">());</span>
+            System<span style="color:#f92672">.</span><span style="color:#a6e22e">out</span><span style="color:#f92672">.</span><span style="color:#a6e22e">println</span><span style="color:#f92672">(</span><span style="color:#e6db74">&#34;------------&gt;&#34;</span> <span style="color:#f92672">+</span> currentPath<span style="color:#f92672">);</span>
+        <span style="color:#f92672">}</span>
+        <span style="color:#75715e">// 获取所有临时节点排序
+</span><span style="color:#75715e"></span>        List<span style="color:#f92672">&lt;</span>String<span style="color:#f92672">&gt;</span> nodesList <span style="color:#f92672">=</span> <span style="color:#66d9ef">this</span><span style="color:#f92672">.</span><span style="color:#a6e22e">zkClient</span><span style="color:#f92672">.</span><span style="color:#a6e22e">getChildren</span><span style="color:#f92672">(</span><span style="color:#e6db74">&#34;/&#34;</span><span style="color:#f92672">+</span>LOCK_PATH<span style="color:#f92672">);</span>
+        Collections<span style="color:#f92672">.</span><span style="color:#a6e22e">sort</span><span style="color:#f92672">(</span>nodesList<span style="color:#f92672">);</span>
+        <span style="color:#75715e">// 如果当前节点在所有节点中排名第一就获取锁成功
+</span><span style="color:#75715e"></span>        <span style="color:#66d9ef">if</span> <span style="color:#f92672">(</span>currentPath<span style="color:#f92672">.</span><span style="color:#a6e22e">equals</span><span style="color:#f92672">(</span><span style="color:#e6db74">&#34;/&#34;</span><span style="color:#f92672">+</span>LOCK_PATH <span style="color:#f92672">+</span> <span style="color:#e6db74">&#34;/&#34;</span> <span style="color:#f92672">+</span> nodesList<span style="color:#f92672">.</span><span style="color:#a6e22e">get</span><span style="color:#f92672">(</span>0<span style="color:#f92672">)))</span> <span style="color:#f92672">{</span>
+            <span style="color:#66d9ef">return</span> <span style="color:#66d9ef">true</span><span style="color:#f92672">;</span>
+        <span style="color:#f92672">}</span> <span style="color:#66d9ef">else</span> <span style="color:#f92672">{</span>
+            <span style="color:#75715e">// 如果当前节点在所有节点中排名不是排名第一，就获取前面的节点，并赋值给beforePath
+</span><span style="color:#75715e"></span>            <span style="color:#66d9ef">for</span> <span style="color:#f92672">(</span><span style="color:#66d9ef">int</span> i <span style="color:#f92672">=</span> 0<span style="color:#f92672">;</span> i <span style="color:#f92672">&lt;</span> nodesList<span style="color:#f92672">.</span><span style="color:#a6e22e">size</span><span style="color:#f92672">();</span> i<span style="color:#f92672">++)</span> <span style="color:#f92672">{</span>
+                <span style="color:#66d9ef">if</span> <span style="color:#f92672">(</span>currentPath<span style="color:#f92672">.</span><span style="color:#a6e22e">equals</span><span style="color:#f92672">(</span><span style="color:#e6db74">&#34;/&#34;</span> <span style="color:#f92672">+</span> LOCK_PATH <span style="color:#f92672">+</span><span style="color:#e6db74">&#34;/&#34;</span><span style="color:#f92672">+</span> nodesList<span style="color:#f92672">.</span><span style="color:#a6e22e">get</span><span style="color:#f92672">(</span>i<span style="color:#f92672">)))</span> <span style="color:#f92672">{</span>
+                    beforePath <span style="color:#f92672">=</span> <span style="color:#e6db74">&#34;/&#34;</span><span style="color:#f92672">+</span>LOCK_PATH <span style="color:#f92672">+</span> <span style="color:#e6db74">&#34;/&#34;</span> <span style="color:#f92672">+</span> nodesList<span style="color:#f92672">.</span><span style="color:#a6e22e">get</span><span style="color:#f92672">(</span>i <span style="color:#f92672">-</span> 1<span style="color:#f92672">);</span>
+                    <span style="color:#66d9ef">return</span> <span style="color:#66d9ef">false</span><span style="color:#f92672">;</span>
+                <span style="color:#f92672">}</span>
+            <span style="color:#f92672">}</span>
 
-            }
-        };
+        <span style="color:#f92672">}</span>
 
-        System.out.println(&quot;+++++beforePath= &quot;+beforePath);
-        this.zkClient.subscribeDataChanges(beforePath, listener);
-        if (this.zkClient.exists(beforePath)) {
-            cd = new CountDownLatch(1);
-            try {
-                cd.await();
-            } catch (Exception e) {
-                e.printStackTrace();
-            }
-        }
+        <span style="color:#66d9ef">return</span> <span style="color:#66d9ef">false</span><span style="color:#f92672">;</span>
+    <span style="color:#f92672">}</span>
 
-        this.zkClient.unsubscribeDataChanges(beforePath, listener);
+    <span style="color:#a6e22e">@Override</span>
+    <span style="color:#66d9ef">public</span> <span style="color:#66d9ef">void</span> <span style="color:#a6e22e">unlock</span><span style="color:#f92672">()</span> <span style="color:#f92672">{</span>
+        <span style="color:#75715e">// 删除当前临时节点
+</span><span style="color:#75715e"></span>        zkClient<span style="color:#f92672">.</span><span style="color:#a6e22e">delete</span><span style="color:#f92672">(</span>currentPath<span style="color:#f92672">);</span>
+    <span style="color:#f92672">}</span>
 
-    }
+    <span style="color:#a6e22e">@Override</span>
+    <span style="color:#66d9ef">public</span> <span style="color:#66d9ef">boolean</span> <span style="color:#a6e22e">tryLock</span><span style="color:#f92672">(</span><span style="color:#66d9ef">long</span> time<span style="color:#f92672">,</span> TimeUnit unit<span style="color:#f92672">)</span> <span style="color:#66d9ef">throws</span> InterruptedException <span style="color:#f92672">{</span>
+        <span style="color:#66d9ef">return</span> <span style="color:#66d9ef">false</span><span style="color:#f92672">;</span>
+    <span style="color:#f92672">}</span>
 
-    /**
-     * @description: 非阻塞加锁
-     * @param {type}
-     * @return:
-     */
-    @Override
-    public boolean tryLock() {
-        if (currentPath == null || currentPath.length() &lt; 0) {
-            currentPath = this.zkClient.createEphemeralSequential(&quot;/&quot; + LOCK_PATH + &quot;/window&quot;,
-                    Thread.currentThread().getName());
-            System.out.println(&quot;------------&gt;&quot; + currentPath);
-        }
-        // 获取所有临时节点排序
-        List&lt;String&gt; nodesList = this.zkClient.getChildren(&quot;/&quot;+LOCK_PATH);
-        Collections.sort(nodesList);
-        // 如果当前节点在所有节点中排名第一就获取锁成功
-        if (currentPath.equals(&quot;/&quot;+LOCK_PATH + &quot;/&quot; + nodesList.get(0))) {
-            return true;
-        } else {
-            // 如果当前节点在所有节点中排名不是排名第一，就获取前面的节点，并赋值给beforePath
-            for (int i = 0; i &lt; nodesList.size(); i++) {
-                if (currentPath.equals(&quot;/&quot; + LOCK_PATH +&quot;/&quot;+ nodesList.get(i))) {
-                    beforePath = &quot;/&quot;+LOCK_PATH + &quot;/&quot; + nodesList.get(i - 1);
-                    return false;
-                }
-            }
+    <span style="color:#a6e22e">@Override</span>
+    <span style="color:#66d9ef">public</span> Condition <span style="color:#a6e22e">newCondition</span><span style="color:#f92672">()</span> <span style="color:#f92672">{</span>
+        <span style="color:#66d9ef">return</span> <span style="color:#66d9ef">null</span><span style="color:#f92672">;</span>
+    <span style="color:#f92672">}</span>
 
-        }
+    <span style="color:#a6e22e">@Override</span>
+    <span style="color:#66d9ef">public</span> <span style="color:#66d9ef">void</span> <span style="color:#a6e22e">lockInterruptibly</span><span style="color:#f92672">()</span> <span style="color:#66d9ef">throws</span> InterruptedException <span style="color:#f92672">{</span>
 
-        return false;
-    }
+    <span style="color:#f92672">}</span>
 
-    @Override
-    public void unlock() {
-        // 删除当前临时节点
-        zkClient.delete(currentPath);
-    }
+<span style="color:#f92672">}</span>
+</code></pre></div><h2 id="应用场景类">应用场景类</h2>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-java" data-lang="java"><span style="color:#f92672">package</span> com.example.lockdemo<span style="color:#f92672">;</span>
+<span style="color:#75715e">/*
+</span><span style="color:#75715e"> * @Description: 请输入....
+</span><span style="color:#75715e"> * @Author: 麦子
+</span><span style="color:#75715e"> * @Date: 2019-05-13 18:08:07
+</span><span style="color:#75715e"> * @LastEditTime: 2019-05-13 20:44:25
+</span><span style="color:#75715e"> * @LastEditors: 麦子
+</span><span style="color:#75715e"> */</span>
 
-    @Override
-    public boolean tryLock(long time, TimeUnit unit) throws InterruptedException {
-        return false;
-    }
+<span style="color:#f92672">import</span> java.io.File<span style="color:#f92672">;</span>
+<span style="color:#f92672">import</span> java.io.FileOutputStream<span style="color:#f92672">;</span>
+<span style="color:#f92672">import</span> java.io.IOException<span style="color:#f92672">;</span>
+<span style="color:#f92672">import</span> java.io.PrintStream<span style="color:#f92672">;</span>
+<span style="color:#f92672">import</span> java.util.concurrent.locks.Lock<span style="color:#f92672">;</span>
+<span style="color:#f92672">import</span> java.util.concurrent.locks.ReentrantLock<span style="color:#f92672">;</span>
 
-    @Override
-    public Condition newCondition() {
-        return null;
-    }
+<span style="color:#66d9ef">public</span> <span style="color:#66d9ef">class</span> <span style="color:#a6e22e">TicketDemo</span> <span style="color:#66d9ef">implements</span> Runnable <span style="color:#f92672">{</span>
 
-    @Override
-    public void lockInterruptibly() throws InterruptedException {
+    <span style="color:#66d9ef">private</span> <span style="color:#66d9ef">int</span> count <span style="color:#f92672">=</span> 0<span style="color:#f92672">;</span>
+    <span style="color:#75715e">// private Lock lock = new ReentrantLock();
+</span><span style="color:#75715e"></span>
+    <span style="color:#a6e22e">@Override</span>
+    <span style="color:#66d9ef">public</span> <span style="color:#66d9ef">void</span> <span style="color:#a6e22e">run</span><span style="color:#f92672">()</span> <span style="color:#f92672">{</span>
 
-    }
+        <span style="color:#66d9ef">while</span> <span style="color:#f92672">(</span>count <span style="color:#f92672">&lt;</span> 100<span style="color:#f92672">)</span> <span style="color:#f92672">{</span>
+            ZkLockDemo lock <span style="color:#f92672">=</span> <span style="color:#66d9ef">new</span> ZkLockDemo<span style="color:#f92672">();</span>
+            lock<span style="color:#f92672">.</span><span style="color:#a6e22e">lock</span><span style="color:#f92672">();</span>
+            <span style="color:#66d9ef">try</span> <span style="color:#f92672">{</span>
+                <span style="color:#66d9ef">if</span> <span style="color:#f92672">(</span>count <span style="color:#f92672">&lt;</span> 100<span style="color:#f92672">)</span> <span style="color:#f92672">{</span>
+                    <span style="color:#f92672">++</span>count<span style="color:#f92672">;</span>
+                    System<span style="color:#f92672">.</span><span style="color:#a6e22e">out</span><span style="color:#f92672">.</span><span style="color:#a6e22e">println</span><span style="color:#f92672">(</span>Thread<span style="color:#f92672">.</span><span style="color:#a6e22e">currentThread</span><span style="color:#f92672">().</span><span style="color:#a6e22e">getName</span><span style="color:#f92672">()</span> <span style="color:#f92672">+</span> <span style="color:#e6db74">&#34;: 卖出了第 &#34;</span> <span style="color:#f92672">+</span> count <span style="color:#f92672">+</span> <span style="color:#e6db74">&#34; 张票&#34;</span><span style="color:#f92672">);</span>
+                <span style="color:#f92672">}</span>
+            <span style="color:#f92672">}</span> <span style="color:#66d9ef">catch</span> <span style="color:#f92672">(</span>Exception e<span style="color:#f92672">)</span> <span style="color:#f92672">{</span>
+                <span style="color:#75715e">// TODO: handle exception
+</span><span style="color:#75715e"></span>            <span style="color:#f92672">}</span> <span style="color:#66d9ef">finally</span> <span style="color:#f92672">{</span>
+                lock<span style="color:#f92672">.</span><span style="color:#a6e22e">unlock</span><span style="color:#f92672">();</span>
+            <span style="color:#f92672">}</span>
+            <span style="color:#66d9ef">try</span> <span style="color:#f92672">{</span>
+                Thread<span style="color:#f92672">.</span><span style="color:#a6e22e">sleep</span><span style="color:#f92672">(</span>200<span style="color:#f92672">);</span>
+            <span style="color:#f92672">}</span> <span style="color:#66d9ef">catch</span> <span style="color:#f92672">(</span>InterruptedException e<span style="color:#f92672">)</span> <span style="color:#f92672">{</span>
+                <span style="color:#75715e">// TODO Auto-generated catch block
+</span><span style="color:#75715e"></span>                e<span style="color:#f92672">.</span><span style="color:#a6e22e">printStackTrace</span><span style="color:#f92672">();</span>
+            <span style="color:#f92672">}</span>
 
-}
-</code></pre>
+        <span style="color:#f92672">}</span>
+    <span style="color:#f92672">}</span>
 
-<h2 id="应用场景类">应用场景类</h2>
-
-<pre><code class="language-java">package com.example.lockdemo;
-/*
- * @Description: 请输入....
- * @Author: 麦子
- * @Date: 2019-05-13 18:08:07
- * @LastEditTime: 2019-05-13 20:44:25
- * @LastEditors: 麦子
- */
-
-import java.io.File;
-import java.io.FileOutputStream;
-import java.io.IOException;
-import java.io.PrintStream;
-import java.util.concurrent.locks.Lock;
-import java.util.concurrent.locks.ReentrantLock;
-
-public class TicketDemo implements Runnable {
-
-    private int count = 0;
-    // private Lock lock = new ReentrantLock();
-
-    @Override
-    public void run() {
-
-        while (count &lt; 100) {
-            ZkLockDemo lock = new ZkLockDemo();
-            lock.lock();
-            try {
-                if (count &lt; 100) {
-                    ++count;
-                    System.out.println(Thread.currentThread().getName() + &quot;: 卖出了第 &quot; + count + &quot; 张票&quot;);
-                }
-            } catch (Exception e) {
-                // TODO: handle exception
-            } finally {
-                lock.unlock();
-            }
-            try {
-                Thread.sleep(200);
-            } catch (InterruptedException e) {
-                // TODO Auto-generated catch block
-                e.printStackTrace();
-            }
-
-        }
-    }
-
-    public static void main(String[] args) {
-        TicketDemo ticketDemo = new TicketDemo();
-        Thread threadA = new Thread(ticketDemo, &quot;窗口A&quot;);
-        Thread threadB = new Thread(ticketDemo, &quot;窗口B&quot;);
-        Thread threadC = new Thread(ticketDemo, &quot;窗口C&quot;);
+    <span style="color:#66d9ef">public</span> <span style="color:#66d9ef">static</span> <span style="color:#66d9ef">void</span> <span style="color:#a6e22e">main</span><span style="color:#f92672">(</span>String<span style="color:#f92672">[]</span> args<span style="color:#f92672">)</span> <span style="color:#f92672">{</span>
+        TicketDemo ticketDemo <span style="color:#f92672">=</span> <span style="color:#66d9ef">new</span> TicketDemo<span style="color:#f92672">();</span>
+        Thread threadA <span style="color:#f92672">=</span> <span style="color:#66d9ef">new</span> Thread<span style="color:#f92672">(</span>ticketDemo<span style="color:#f92672">,</span> <span style="color:#e6db74">&#34;窗口A&#34;</span><span style="color:#f92672">);</span>
+        Thread threadB <span style="color:#f92672">=</span> <span style="color:#66d9ef">new</span> Thread<span style="color:#f92672">(</span>ticketDemo<span style="color:#f92672">,</span> <span style="color:#e6db74">&#34;窗口B&#34;</span><span style="color:#f92672">);</span>
+        Thread threadC <span style="color:#f92672">=</span> <span style="color:#66d9ef">new</span> Thread<span style="color:#f92672">(</span>ticketDemo<span style="color:#f92672">,</span> <span style="color:#e6db74">&#34;窗口C&#34;</span><span style="color:#f92672">);</span>
   
 
-        threadA.start();
-        threadB.start();
-        threadC.start();
+        threadA<span style="color:#f92672">.</span><span style="color:#a6e22e">start</span><span style="color:#f92672">();</span>
+        threadB<span style="color:#f92672">.</span><span style="color:#a6e22e">start</span><span style="color:#f92672">();</span>
+        threadC<span style="color:#f92672">.</span><span style="color:#a6e22e">start</span><span style="color:#f92672">();</span>
         
-        ticketDemo.printOut();
+        ticketDemo<span style="color:#f92672">.</span><span style="color:#a6e22e">printOut</span><span style="color:#f92672">();</span>
 
 
-    }
+    <span style="color:#f92672">}</span>
 
-   /***
-      控制台日志输入到 文本中
-   */
-    private void printOut() {
-        File f = new File(&quot;out.log&quot;);
-        try {
-            f.createNewFile();
-            FileOutputStream fileOutputStream = new FileOutputStream(f);
-            PrintStream printStream = new PrintStream(fileOutputStream);
-            System.setOut(printStream);
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-    }
+   <span style="color:#75715e">/***
+</span><span style="color:#75715e">      控制台日志输入到 文本中
+</span><span style="color:#75715e">   */</span>
+    <span style="color:#66d9ef">private</span> <span style="color:#66d9ef">void</span> <span style="color:#a6e22e">printOut</span><span style="color:#f92672">()</span> <span style="color:#f92672">{</span>
+        File f <span style="color:#f92672">=</span> <span style="color:#66d9ef">new</span> File<span style="color:#f92672">(</span><span style="color:#e6db74">&#34;out.log&#34;</span><span style="color:#f92672">);</span>
+        <span style="color:#66d9ef">try</span> <span style="color:#f92672">{</span>
+            f<span style="color:#f92672">.</span><span style="color:#a6e22e">createNewFile</span><span style="color:#f92672">();</span>
+            FileOutputStream fileOutputStream <span style="color:#f92672">=</span> <span style="color:#66d9ef">new</span> FileOutputStream<span style="color:#f92672">(</span>f<span style="color:#f92672">);</span>
+            PrintStream printStream <span style="color:#f92672">=</span> <span style="color:#66d9ef">new</span> PrintStream<span style="color:#f92672">(</span>fileOutputStream<span style="color:#f92672">);</span>
+            System<span style="color:#f92672">.</span><span style="color:#a6e22e">setOut</span><span style="color:#f92672">(</span>printStream<span style="color:#f92672">);</span>
+        <span style="color:#f92672">}</span> <span style="color:#66d9ef">catch</span> <span style="color:#f92672">(</span>IOException e<span style="color:#f92672">)</span> <span style="color:#f92672">{</span>
+            e<span style="color:#f92672">.</span><span style="color:#a6e22e">printStackTrace</span><span style="color:#f92672">();</span>
+        <span style="color:#f92672">}</span>
+    <span style="color:#f92672">}</span>
 
-}
-</code></pre>
-
-<h2 id="运行结果如下">运行结果如下</h2>
-
-<pre><code class="language-java">窗口C: 卖出了第 85 张票
+<span style="color:#f92672">}</span>
+</code></pre></div><h2 id="运行结果如下">运行结果如下</h2>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-java" data-lang="java">窗口C: 卖出了第 85 张票
 窗口B: 卖出了第 86 张票
 窗口A: 卖出了第 87 张票
 窗口C: 卖出了第 88 张票
@@ -519,8 +501,7 @@ public class TicketDemo implements Runnable {
 窗口B: 卖出了第 98 张票
 窗口A: 卖出了第 99 张票
 窗口C: 卖出了第 100 张票
-</code></pre>
-
+</code></pre></div>
 
                 
                 
@@ -627,16 +608,12 @@ public class TicketDemo implements Runnable {
                     </h4>
                     <ul class="catalog-body"></ul>
                     <nav id="TableOfContents">
-<ul>
-<li><a href="#分布式锁解决方案">分布式锁解决方案</a></li>
-<li><a href="#实现代码">实现代码</a>
-<ul>
-<li><a href="#pom-xml">pom.xml</a></li>
-<li><a href="#lock接口重写类">Lock接口重写类</a></li>
-<li><a href="#应用场景类">应用场景类</a></li>
-<li><a href="#运行结果如下">运行结果如下</a></li>
-</ul></li>
-</ul>
+  <ul>
+    <li><a href="#pomxml">pom.xml</a></li>
+    <li><a href="#lock接口重写类">Lock接口重写类</a></li>
+    <li><a href="#应用场景类">应用场景类</a></li>
+    <li><a href="#运行结果如下">运行结果如下</a></li>
+  </ul>
 </nav>
                     <br>
                     <br>
@@ -661,9 +638,6 @@ public class TicketDemo implements Runnable {
                         
                         
                         
-                        <a href="/tags/" title="">
-                            
-                        </a>
                         
                         
                         
@@ -673,101 +647,6 @@ public class TicketDemo implements Runnable {
                         
                         
                         
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        <a href="/tags/qt" title="QT">
-                            QT
-                        </a>
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        <a href="/tags/zookeeper" title="Zookeeper">
-                            Zookeeper
-                        </a>
                         
                         
                         
@@ -807,8 +686,10 @@ public class TicketDemo implements Runnable {
                         
                         
                         
-                        <a href="/tags/elasticsearch" title="elasticSearch">
-                            elasticSearch
+                        
+                        
+                        <a href="/tags/elasticsearch" title="elasticsearch">
+                            elasticsearch
                         </a>
                         
                         
@@ -819,9 +700,27 @@ public class TicketDemo implements Runnable {
                         
                         
                         
-                        <a href="/tags/golang" title="golang">
-                            golang
-                        </a>
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
                         
                         
                         
@@ -859,9 +758,21 @@ public class TicketDemo implements Runnable {
                         
                         
                         
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
                         <a href="/tags/jvm" title="jvm">
                             jvm
                         </a>
+                        
+                        
+                        
+                        
                         
                         
                         
@@ -885,9 +796,19 @@ public class TicketDemo implements Runnable {
                         
                         
                         
+                        
+                        
+                        
+                        
+                        
+                        
                         <a href="/tags/mongodb" title="mongodb">
                             mongodb
                         </a>
+                        
+                        
+                        
+                        
                         
                         
                         
@@ -898,10 +819,6 @@ public class TicketDemo implements Runnable {
                         </a>
                         
                         
-                        
-                        <a href="/tags/mycat" title="mycat">
-                            mycat
-                        </a>
                         
                         
                         
@@ -915,9 +832,17 @@ public class TicketDemo implements Runnable {
                         
                         
                         
-                        <a href="/tags/nginx" title="nginx">
-                            nginx
-                        </a>
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
                         
                         
                         
@@ -941,8 +866,22 @@ public class TicketDemo implements Runnable {
                         
                         
                         
+                        
+                        
                         <a href="/tags/rocketmq" title="rocketmq">
                             rocketmq
+                        </a>
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        <a href="/tags/security%E6%A1%86%E6%9E%B6%E5%AD%A6%E4%B9%A0" title="security框架学习">
+                            security框架学习
                         </a>
                         
                         
@@ -969,17 +908,11 @@ public class TicketDemo implements Runnable {
                         
                         
                         
-                        <a href="/tags/springcloud" title="springCloud">
-                            springCloud
-                        </a>
-                        
-                        
-                        
-                        
-                        
                         <a href="/tags/springboot" title="springboot">
                             springboot
                         </a>
+                        
+                        
                         
                         
                         
@@ -993,6 +926,9 @@ public class TicketDemo implements Runnable {
                         
                         
                         
+                        <a href="/tags/springcloud" title="springcloud">
+                            springcloud
+                        </a>
                         
                         
                         
@@ -1018,6 +954,33 @@ public class TicketDemo implements Runnable {
                         
                         
                         
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        <a href="/tags/zookeeper" title="zookeeper">
+                            zookeeper
+                        </a>
                         
                         
                         
@@ -1077,6 +1040,8 @@ public class TicketDemo implements Runnable {
                         
                         
                         
+                        
+                        
                         <a href="/tags/%E5%88%86%E5%B8%83%E5%BC%8F%E7%B3%BB%E5%88%97" title="分布式系列">
                             分布式系列
                         </a>
@@ -1096,6 +1061,10 @@ public class TicketDemo implements Runnable {
                         
                         
                         
+                        
+                        <a href="/tags/%E5%8D%8F%E8%AE%AE%E6%A0%88" title="协议栈">
+                            协议栈
+                        </a>
                         
                         
                         
@@ -1295,6 +1264,12 @@ public class TicketDemo implements Runnable {
                         
                         
                         
+                        
+                        
+                        
+                        
+                        
+                        
                         <a href="/tags/%E7%BD%91%E7%BB%9C%E7%BC%96%E7%A8%8B" title="网络编程">
                             网络编程
                         </a>
@@ -1318,6 +1293,10 @@ public class TicketDemo implements Runnable {
                         
                         
                         
+                        
+                        <a href="/tags/%E8%AE%A4%E8%AF%81%E5%92%8C%E6%8E%88%E6%9D%83" title="认证和授权">
+                            认证和授权
+                        </a>
                         
                         
                         
@@ -1488,7 +1467,7 @@ public class TicketDemo implements Runnable {
                     
                 </ul>
 		<p class="copyright text-muted">
-                    Copyright &copy;  2020
+                    Copyright &copy;  2021
                     <br>
                     <a href="https://themes.gohugo.io/hugo-theme-cleanwhite">CleanWhite Hugo Theme</a> by <a href="https://zhaohuabing.com">Huabing</a> |
                     <iframe

@@ -97,15 +97,15 @@
                     </li>
                     
                     <li>
-                        <a href="/categories/english">English</a>
+                        <a href="/categories/english">english</a>
                     </li>
                     
                     <li>
-                        <a href="/categories/life">Life</a>
+                        <a href="/categories/life">life</a>
                     </li>
                     
                     <li>
-                        <a href="/categories/tech">Tech</a>
+                        <a href="/categories/tech">tech</a>
                     </li>
                     
 
@@ -237,168 +237,129 @@
                 
                 
                 
-                
-
-<p>[TOC]</p>
-
+                <p>[TOC]</p>
 <p><strong>记录来源：《设计模式之禅》作者：秦小波</strong></p>
-
 <h1 id="定义">定义</h1>
-
 <p>定义一个操作中的算法的框架，而将一些步骤延迟到子类中。使得子类可以不改 变一个算法的结构即可重定义该算法的某些特定步骤。</p>
-
 <p>模板方法模式确实非常简单，仅仅使用了Java的继承机制，但它是一个应用非常广泛的 模式。其中，AbstractClass叫做抽象模板，它的方法分为两类：</p>
-
 <p>● 基本方法</p>
-
 <p>基本方法也叫做基本操作，是由子类实现的方法，并且在模板方法被调用。</p>
-
 <p>● 模板方法</p>
-
 <p>可以有一个或几个，一般是一个具体方法，也就是一个框架，实现对基本方法的调度， 完成固定的逻辑。</p>
-
 <p><strong>注意：为了防止恶意的操作，一般模板方法都加上final关键字，不允许被覆写</strong>。</p>
-
 <h1 id="抽象模板类">抽象模板类</h1>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-java" data-lang="java"><span style="color:#f92672">package</span> com.muban<span style="color:#f92672">;</span>
+<span style="color:#75715e">/*
+</span><span style="color:#75715e"> * @Description: 请输入....
+</span><span style="color:#75715e"> * @Author: 麦子
+</span><span style="color:#75715e"> * @Date: 2020-04-11 11:26:55
+</span><span style="color:#75715e"> * @LastEditTime: 2020-04-11 11:28:04
+</span><span style="color:#75715e"> * @LastEditors: 麦子
+</span><span style="color:#75715e"> */</span>
 
-<pre><code class="language-java">package com.muban;
-/*
- * @Description: 请输入....
- * @Author: 麦子
- * @Date: 2020-04-11 11:26:55
- * @LastEditTime: 2020-04-11 11:28:04
- * @LastEditors: 麦子
- */
+<span style="color:#66d9ef">public</span> <span style="color:#66d9ef">abstract</span> <span style="color:#66d9ef">class</span> <span style="color:#a6e22e">AbstractClass</span> <span style="color:#f92672">{</span>
 
-public abstract class AbstractClass {
+    <span style="color:#75715e">// 基本方法
+</span><span style="color:#75715e"></span>    <span style="color:#66d9ef">protected</span> <span style="color:#66d9ef">abstract</span> <span style="color:#66d9ef">void</span> <span style="color:#a6e22e">doSomething</span><span style="color:#f92672">();</span>
 
-    // 基本方法
-    protected abstract void doSomething();
+    <span style="color:#75715e">// 基本方法
+</span><span style="color:#75715e"></span>    <span style="color:#66d9ef">protected</span> <span style="color:#66d9ef">abstract</span> <span style="color:#66d9ef">void</span> <span style="color:#a6e22e">doAnything</span><span style="color:#f92672">();</span>
 
-    // 基本方法
-    protected abstract void doAnything();
+    <span style="color:#75715e">// 模板方法
+</span><span style="color:#75715e"></span>    <span style="color:#66d9ef">public</span> <span style="color:#66d9ef">void</span> <span style="color:#a6e22e">templateMethod</span><span style="color:#f92672">()</span> <span style="color:#f92672">{</span>
+        <span style="color:#75715e">/* * 调用基本方法，完成相关的逻辑 */</span> 
+        <span style="color:#66d9ef">this</span><span style="color:#f92672">.</span><span style="color:#a6e22e">doAnything</span><span style="color:#f92672">();</span>
+        <span style="color:#66d9ef">this</span><span style="color:#f92672">.</span><span style="color:#a6e22e">doSomething</span><span style="color:#f92672">();</span>
+    <span style="color:#f92672">}</span>
 
-    // 模板方法
-    public void templateMethod() {
-        /* * 调用基本方法，完成相关的逻辑 */ 
-        this.doAnything();
-        this.doSomething();
-    }
-
-}
-</code></pre>
-
-<p><strong>注意：抽象模板中的基本方法尽量设计为protected类型，符合迪米特法则，不需要暴露 的属性或方法尽量不要设置为protected类型。实现类若非必要，尽量不要扩大父类中的访问 权限。</strong></p>
-
+<span style="color:#f92672">}</span>
+</code></pre></div><p><strong>注意：抽象模板中的基本方法尽量设计为protected类型，符合迪米特法则，不需要暴露 的属性或方法尽量不要设置为protected类型。实现类若非必要，尽量不要扩大父类中的访问 权限。</strong></p>
 <h1 id="优点">优点</h1>
-
 <p>● 封装不变部分，扩展可变部分</p>
-
 <p>把认为是不变部分的算法封装到父类实现，而可变部分的则可以通过继承来继续扩展。 在悍马模型例子中，是不是就非常容易扩展？例如增加一个H3型号的悍马模型，很容易 呀，增加一个子类，实现父类的基本方法就可以了。</p>
-
 <p>● 提取公共部分代码，便于维护</p>
-
 <p>我们例子中刚刚走过的弯路就是最好的证明，如果我们不抽取到父类中，任由这种散乱 的代码发生，想想后果是什么样子？维护人员为了修正一个缺陷，需要到处查找类似的代 码！</p>
-
 <p>● 行为由父类控制，子类实现</p>
-
 <p>基本方法是由子类实现的，因此子类可以通过扩展的方式增加相应的功能，符合开闭原 则。</p>
-
 <h1 id="缺点">缺点</h1>
-
 <p>按照我们的设计习惯，抽象类负责声明最抽象、最一般的事物属性和方法，实现类完成 具体的事物属性和方法。但是模板方法模式却颠倒了，抽象类定义了部分抽象方法，由子类 实现，子类执行的结果影响了父类的结果，也就是子类对父类产生了影响，这在复杂的项目 中，会带来代码阅读的难度，而且也会让新手产生不适感。</p>
-
 <h1 id="使用场景">使用场景</h1>
-
 <p>● 多个子类有公有的方法，并且逻辑基本相同时。</p>
-
 <p>● 重要、复杂的算法，可以把核心算法设计为模板方法，周边的相关细节功能则由各个 子类实现。</p>
-
 <p>● 重构时，模板方法模式是一个经常使用的模式，把相同的代码抽取到父类中，然后通 过钩子函数（见“模板方法模式的扩展”）约束其行为。</p>
-
 <p><strong>其实到这里可以更多的看到这个模式更多的就是一种抽象类的一种灵活封装和用法。</strong></p>
-
 <h1 id="代码演示">代码演示</h1>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-java" data-lang="java"><span style="color:#f92672">package</span> com.muban<span style="color:#f92672">;</span>
+<span style="color:#75715e">/*
+</span><span style="color:#75715e"> * @Description: 请输入....
+</span><span style="color:#75715e"> * @Author: 麦子
+</span><span style="color:#75715e"> * @Date: 2020-04-11 11:26:55
+</span><span style="color:#75715e"> * @LastEditTime: 2020-04-11 11:42:32
+</span><span style="color:#75715e"> * @LastEditors: 麦子
+</span><span style="color:#75715e"> */</span>
 
-<pre><code class="language-java">package com.muban;
-/*
- * @Description: 请输入....
- * @Author: 麦子
- * @Date: 2020-04-11 11:26:55
- * @LastEditTime: 2020-04-11 11:42:32
- * @LastEditors: 麦子
- */
+<span style="color:#66d9ef">public</span> <span style="color:#66d9ef">abstract</span> <span style="color:#66d9ef">class</span> <span style="color:#a6e22e">AbstractClass</span> <span style="color:#f92672">{</span>
 
-public abstract class AbstractClass {
+    <span style="color:#75715e">// 基本方法
+</span><span style="color:#75715e"></span>    <span style="color:#66d9ef">protected</span> <span style="color:#66d9ef">abstract</span> <span style="color:#66d9ef">void</span> <span style="color:#a6e22e">doSomething</span><span style="color:#f92672">();</span>
 
-    // 基本方法
-    protected abstract void doSomething();
+    <span style="color:#75715e">// 基本方法
+</span><span style="color:#75715e"></span>    <span style="color:#66d9ef">protected</span> <span style="color:#66d9ef">abstract</span> <span style="color:#66d9ef">void</span> <span style="color:#a6e22e">doAnything</span><span style="color:#f92672">();</span>
 
-    // 基本方法
-    protected abstract void doAnything();
+    <span style="color:#75715e">// 模板方法
+</span><span style="color:#75715e"></span>    <span style="color:#66d9ef">public</span> <span style="color:#66d9ef">final</span> <span style="color:#66d9ef">void</span> <span style="color:#a6e22e">templateMethod</span><span style="color:#f92672">()</span> <span style="color:#f92672">{</span>
+        <span style="color:#75715e">/* * 调用基本方法，完成相关的逻辑 */</span>
+        <span style="color:#66d9ef">if</span> <span style="color:#f92672">(</span><span style="color:#66d9ef">this</span><span style="color:#f92672">.</span><span style="color:#a6e22e">check</span><span style="color:#f92672">())</span> <span style="color:#f92672">{</span>
+            <span style="color:#66d9ef">this</span><span style="color:#f92672">.</span><span style="color:#a6e22e">doAnything</span><span style="color:#f92672">();</span>
+            <span style="color:#66d9ef">this</span><span style="color:#f92672">.</span><span style="color:#a6e22e">doSomething</span><span style="color:#f92672">();</span>
+        <span style="color:#f92672">}</span><span style="color:#66d9ef">else</span><span style="color:#f92672">{</span>
+            System<span style="color:#f92672">.</span><span style="color:#a6e22e">out</span><span style="color:#f92672">.</span><span style="color:#a6e22e">println</span><span style="color:#f92672">(</span><span style="color:#e6db74">&#34;子类 重写 check &#34;</span><span style="color:#f92672">);</span>
+        <span style="color:#f92672">}</span>
+    <span style="color:#f92672">}</span>
 
-    // 模板方法
-    public final void templateMethod() {
-        /* * 调用基本方法，完成相关的逻辑 */
-        if (this.check()) {
-            this.doAnything();
-            this.doSomething();
-        }else{
-            System.out.println(&quot;子类 重写 check &quot;);
-        }
-    }
+    <span style="color:#66d9ef">protected</span> <span style="color:#66d9ef">boolean</span> <span style="color:#a6e22e">check</span><span style="color:#f92672">()</span> <span style="color:#f92672">{</span>
+        <span style="color:#66d9ef">return</span> <span style="color:#66d9ef">true</span><span style="color:#f92672">;</span>
+    <span style="color:#f92672">}</span>
 
-    protected boolean check() {
-        return true;
-    }
+<span style="color:#f92672">}</span>
+</code></pre></div><div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-java" data-lang="java"><span style="color:#f92672">package</span> com.muban<span style="color:#f92672">;</span>
+<span style="color:#75715e">/*
+</span><span style="color:#75715e"> * @Description: 请输入....
+</span><span style="color:#75715e"> * @Author: 麦子
+</span><span style="color:#75715e"> * @Date: 2020-04-11 11:33:50
+</span><span style="color:#75715e"> * @LastEditTime: 2020-04-11 11:46:50
+</span><span style="color:#75715e"> * @LastEditors: 麦子
+</span><span style="color:#75715e"> */</span>
 
-}
-</code></pre>
+<span style="color:#66d9ef">public</span> <span style="color:#66d9ef">class</span> <span style="color:#a6e22e">Car</span> <span style="color:#66d9ef">extends</span> AbstractClass<span style="color:#f92672">{</span>
 
-<pre><code class="language-java">package com.muban;
-/*
- * @Description: 请输入....
- * @Author: 麦子
- * @Date: 2020-04-11 11:33:50
- * @LastEditTime: 2020-04-11 11:46:50
- * @LastEditors: 麦子
- */
-
-public class Car extends AbstractClass{
-
-    @Override
-    protected void doAnything() {
+    <span style="color:#a6e22e">@Override</span>
+    <span style="color:#66d9ef">protected</span> <span style="color:#66d9ef">void</span> <span style="color:#a6e22e">doAnything</span><span style="color:#f92672">()</span> <span style="color:#f92672">{</span>
         
-          System.out.println(&quot;do anything&quot;);
-    }
+          System<span style="color:#f92672">.</span><span style="color:#a6e22e">out</span><span style="color:#f92672">.</span><span style="color:#a6e22e">println</span><span style="color:#f92672">(</span><span style="color:#e6db74">&#34;do anything&#34;</span><span style="color:#f92672">);</span>
+    <span style="color:#f92672">}</span>
 
-    @Override
-    protected void doSomething() {
-         System.out.println(&quot;do something&quot;);
-    }
+    <span style="color:#a6e22e">@Override</span>
+    <span style="color:#66d9ef">protected</span> <span style="color:#66d9ef">void</span> <span style="color:#a6e22e">doSomething</span><span style="color:#f92672">()</span> <span style="color:#f92672">{</span>
+         System<span style="color:#f92672">.</span><span style="color:#a6e22e">out</span><span style="color:#f92672">.</span><span style="color:#a6e22e">println</span><span style="color:#f92672">(</span><span style="color:#e6db74">&#34;do something&#34;</span><span style="color:#f92672">);</span>
+    <span style="color:#f92672">}</span>
 
-    @Override
-    protected boolean check() {
-         return false;
-    }
+    <span style="color:#a6e22e">@Override</span>
+    <span style="color:#66d9ef">protected</span> <span style="color:#66d9ef">boolean</span> <span style="color:#a6e22e">check</span><span style="color:#f92672">()</span> <span style="color:#f92672">{</span>
+         <span style="color:#66d9ef">return</span> <span style="color:#66d9ef">false</span><span style="color:#f92672">;</span>
+    <span style="color:#f92672">}</span>
     
 
-    public static void main(final String[] args) {
-        final Car car = new Car();
-         car.templateMethod();
-    }
+    <span style="color:#66d9ef">public</span> <span style="color:#66d9ef">static</span> <span style="color:#66d9ef">void</span> <span style="color:#a6e22e">main</span><span style="color:#f92672">(</span><span style="color:#66d9ef">final</span> String<span style="color:#f92672">[]</span> args<span style="color:#f92672">)</span> <span style="color:#f92672">{</span>
+        <span style="color:#66d9ef">final</span> Car car <span style="color:#f92672">=</span> <span style="color:#66d9ef">new</span> Car<span style="color:#f92672">();</span>
+         car<span style="color:#f92672">.</span><span style="color:#a6e22e">templateMethod</span><span style="color:#f92672">();</span>
+    <span style="color:#f92672">}</span>
 
     
-}
-</code></pre>
-
-<p>运行结果</p>
-
-<pre><code class="language-java">子类 重写 check 
-</code></pre>
-
-<h1 id="注意">注意</h1>
-
+<span style="color:#f92672">}</span>
+</code></pre></div><p>运行结果</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-java" data-lang="java">子类 重写 check 
+</code></pre></div><h1 id="注意">注意</h1>
 <p>需要注意， 在多个抽象方法组合的地方， 我们需要用final关键字，防止后面的子类进行方法的覆盖，这个方法就是所有的方法组合和骨架。</p>
 
 
@@ -506,17 +467,7 @@ public class Car extends AbstractClass{
                         <a class="catalog-toggle" style="font-size: 24px;" href="index.html#">目录结构</a>
                     </h4>
                     <ul class="catalog-body"></ul>
-                    <nav id="TableOfContents">
-<ul>
-<li><a href="#定义">定义</a></li>
-<li><a href="#抽象模板类">抽象模板类</a></li>
-<li><a href="#优点">优点</a></li>
-<li><a href="#缺点">缺点</a></li>
-<li><a href="#使用场景">使用场景</a></li>
-<li><a href="#代码演示">代码演示</a></li>
-<li><a href="#注意">注意</a></li>
-</ul>
-</nav>
+                    <nav id="TableOfContents"></nav>
                     <br>
                     <br>
                     <br>
@@ -540,9 +491,6 @@ public class Car extends AbstractClass{
                         
                         
                         
-                        <a href="/tags/" title="">
-                            
-                        </a>
                         
                         
                         
@@ -552,101 +500,6 @@ public class Car extends AbstractClass{
                         
                         
                         
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        <a href="/tags/qt" title="QT">
-                            QT
-                        </a>
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        <a href="/tags/zookeeper" title="Zookeeper">
-                            Zookeeper
-                        </a>
                         
                         
                         
@@ -686,8 +539,10 @@ public class Car extends AbstractClass{
                         
                         
                         
-                        <a href="/tags/elasticsearch" title="elasticSearch">
-                            elasticSearch
+                        
+                        
+                        <a href="/tags/elasticsearch" title="elasticsearch">
+                            elasticsearch
                         </a>
                         
                         
@@ -698,9 +553,27 @@ public class Car extends AbstractClass{
                         
                         
                         
-                        <a href="/tags/golang" title="golang">
-                            golang
-                        </a>
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
                         
                         
                         
@@ -738,9 +611,21 @@ public class Car extends AbstractClass{
                         
                         
                         
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
                         <a href="/tags/jvm" title="jvm">
                             jvm
                         </a>
+                        
+                        
+                        
+                        
                         
                         
                         
@@ -764,9 +649,19 @@ public class Car extends AbstractClass{
                         
                         
                         
+                        
+                        
+                        
+                        
+                        
+                        
                         <a href="/tags/mongodb" title="mongodb">
                             mongodb
                         </a>
+                        
+                        
+                        
+                        
                         
                         
                         
@@ -777,10 +672,6 @@ public class Car extends AbstractClass{
                         </a>
                         
                         
-                        
-                        <a href="/tags/mycat" title="mycat">
-                            mycat
-                        </a>
                         
                         
                         
@@ -794,9 +685,17 @@ public class Car extends AbstractClass{
                         
                         
                         
-                        <a href="/tags/nginx" title="nginx">
-                            nginx
-                        </a>
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
                         
                         
                         
@@ -820,8 +719,22 @@ public class Car extends AbstractClass{
                         
                         
                         
+                        
+                        
                         <a href="/tags/rocketmq" title="rocketmq">
                             rocketmq
+                        </a>
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        <a href="/tags/security%E6%A1%86%E6%9E%B6%E5%AD%A6%E4%B9%A0" title="security框架学习">
+                            security框架学习
                         </a>
                         
                         
@@ -848,17 +761,11 @@ public class Car extends AbstractClass{
                         
                         
                         
-                        <a href="/tags/springcloud" title="springCloud">
-                            springCloud
-                        </a>
-                        
-                        
-                        
-                        
-                        
                         <a href="/tags/springboot" title="springboot">
                             springboot
                         </a>
+                        
+                        
                         
                         
                         
@@ -872,6 +779,9 @@ public class Car extends AbstractClass{
                         
                         
                         
+                        <a href="/tags/springcloud" title="springcloud">
+                            springcloud
+                        </a>
                         
                         
                         
@@ -897,6 +807,33 @@ public class Car extends AbstractClass{
                         
                         
                         
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        <a href="/tags/zookeeper" title="zookeeper">
+                            zookeeper
+                        </a>
                         
                         
                         
@@ -956,6 +893,8 @@ public class Car extends AbstractClass{
                         
                         
                         
+                        
+                        
                         <a href="/tags/%E5%88%86%E5%B8%83%E5%BC%8F%E7%B3%BB%E5%88%97" title="分布式系列">
                             分布式系列
                         </a>
@@ -975,6 +914,10 @@ public class Car extends AbstractClass{
                         
                         
                         
+                        
+                        <a href="/tags/%E5%8D%8F%E8%AE%AE%E6%A0%88" title="协议栈">
+                            协议栈
+                        </a>
                         
                         
                         
@@ -1174,6 +1117,12 @@ public class Car extends AbstractClass{
                         
                         
                         
+                        
+                        
+                        
+                        
+                        
+                        
                         <a href="/tags/%E7%BD%91%E7%BB%9C%E7%BC%96%E7%A8%8B" title="网络编程">
                             网络编程
                         </a>
@@ -1197,6 +1146,10 @@ public class Car extends AbstractClass{
                         
                         
                         
+                        
+                        <a href="/tags/%E8%AE%A4%E8%AF%81%E5%92%8C%E6%8E%88%E6%9D%83" title="认证和授权">
+                            认证和授权
+                        </a>
                         
                         
                         
@@ -1367,7 +1320,7 @@ public class Car extends AbstractClass{
                     
                 </ul>
 		<p class="copyright text-muted">
-                    Copyright &copy;  2020
+                    Copyright &copy;  2021
                     <br>
                     <a href="https://themes.gohugo.io/hugo-theme-cleanwhite">CleanWhite Hugo Theme</a> by <a href="https://zhaohuabing.com">Huabing</a> |
                     <iframe

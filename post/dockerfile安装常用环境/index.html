@@ -97,15 +97,15 @@
                     </li>
                     
                     <li>
-                        <a href="/categories/english">English</a>
+                        <a href="/categories/english">english</a>
                     </li>
                     
                     <li>
-                        <a href="/categories/life">Life</a>
+                        <a href="/categories/life">life</a>
                     </li>
                     
                     <li>
-                        <a href="/categories/tech">Tech</a>
+                        <a href="/categories/tech">tech</a>
                     </li>
                     
 
@@ -237,454 +237,376 @@
                 
                 
                 
-                
+                <p>[TOC]</p>
+<h1 id="修改容器镜像名称">修改容器，镜像名称</h1>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-yaml" data-lang="yaml"><span style="color:#75715e"># 修改容器名称</span>
+<span style="color:#ae81ff">docker rename 0cf82999886a redis-5.0.5 </span>
 
-<p>[TOC]</p>
+<span style="color:#75715e"># 修改镜像名称</span>
+<span style="color:#ae81ff">docker tag  XX镜像id   XX新的名字</span>
 
-<h1 id="修改容器-镜像名称">修改容器，镜像名称</h1>
-
-<pre><code class="language-yaml"># 修改容器名称
-docker rename 0cf82999886a redis-5.0.5 
-
-# 修改镜像名称
-docker tag  XX镜像id   XX新的名字
-
-</code></pre>
-
-<h1 id="centos7">Centos7</h1>
-
+</code></pre></div><h1 id="centos7">Centos7</h1>
 <p>安装Centos7，java，maven，SSH</p>
-
-<pre><code class="language-dockerfile"># install centos7
-FROM centos:7
-RUN yum -y install net-tools  
-
-#常用命令下载
-RUN yum -y install wget
-RUN yum install -y curl
-
-
-#配置ssh 
-RUN yum -y  install  openssh-server
-RUN sed -i 's/#PermitRootLogin yes/PermitRootLogin yes/g' /etc/ssh/sshd_config
-RUN sed -i 's/#PubkeyAuthentication yes/PubkeyAuthentication yes/g' /etc/ssh/sshd_config
-RUN cat /etc/ssh/sshd_config 
-
-
-#创建一个新用户
-RUN useradd  maizissh -d /home/maizissh
-RUN mkdir /home/maizissh/.ssh
-RUN chown -R maizissh. /home/maizissh/.ssh
-COPY id_rsa.pub /usr/local/macrsa/
-RUN cd /usr/local/macrsa/ &amp;&amp; ls -l 
-RUN cat /usr/local/macrsa/id_rsa.pub &gt;&gt; /home/maizissh/.ssh/authorized_keys
-RUN cat /home/maizissh/.ssh/authorized_keys
-RUN chmod 700 /home/maizissh/.ssh
-RUN chmod 600 /home/maizissh/.ssh/authorized_keys
-
-
-# install java
-COPY jdk-8u11-linux-x64.tar.gz /usr/local/java/
-COPY start.sh /usr/local/
-RUN cd /usr/local/java/ &amp;&amp; ls &amp;&amp; tar -xvf jdk-8u11-linux-x64.tar.gz &amp;&amp; ls
-RUN echo 'export JAVA_HOME=/usr/local/java/jdk1.8.0_11' &gt;&gt; /etc/profile
-RUN echo 'export CLASSPATH=$JAVA_HOME/lib/dt.jar:$JAVA_HOME/lib/tools.jar' &gt;&gt; /etc/profile
-RUN echo 'export PATH=$PATH:$JAVA_HOME/bin' &gt;&gt; /etc/profile
-
-RUN echo &quot;查看-----------------&quot;
-RUN cat /etc/profile
-RUN echo &quot;java success&quot;
-
-
-
-# install maven
-RUN cd /usr/local/ &amp;&amp; mkdir maven
-RUN wget http://apache-mirror.rbc.ru/pub/apache/maven/maven-3/3.3.9/binaries/apache-maven-3.3.9-bin.tar.gz
-RUN mv apache-maven-3.3.9-bin.tar.gz  /usr/local/maven/  &amp;&amp; ls 
-RUN cd /usr/local/maven/ &amp;&amp; tar -xzvf apache-maven-3.3.9-bin.tar.gz &amp;&amp; ls
-RUN echo 'export MAVEN_HOME=/usr/local/maven/apache-maven-3.3.9'&gt;&gt;/etc/profile
-RUN echo 'export PATH=$JAVA_HOME/bin:$MAVEN_HOME/bin:$PATH'&gt;&gt;/etc/profile
-
-RUN echo &quot;查看-----------------&quot;
-RUN cat /etc/profile
-RUN echo &quot;maven success&quot;
-
-
-
-# COPY java_maven.sh /usr/bin/java_maven.sh
-# RUN  chmod +x  /usr/bin/java_maven.sh
-
-#安装java和maven环境
-RUN chmod 777 /usr/local/start.sh
-ENTRYPOINT [ &quot;sh&quot;, &quot;-c&quot;, &quot;/usr/local/start.sh&quot; ]
-#CMD sh /usr/local/start.sh
-
-
-# 编译 
-# docker build -t mycentos7 .
-
-#启动
-#docker run -itd --name mycentos7 -p 6666:22 --privileged=true mycentos7 /usr/sbin/init
- 
-</code></pre>
-
-<p>进入容器后，设置root密码</p>
-
-<pre><code>passwd  回车
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-dockerfile" data-lang="dockerfile"><span style="color:#75715e"># install centos7</span><span style="color:#960050;background-color:#1e0010">
+</span><span style="color:#960050;background-color:#1e0010"></span><span style="color:#66d9ef">FROM</span><span style="color:#e6db74"> centos:7</span><span style="color:#960050;background-color:#1e0010">
+</span><span style="color:#960050;background-color:#1e0010"></span><span style="color:#66d9ef">RUN</span> yum -y install net-tools  <span style="color:#960050;background-color:#1e0010">
+</span><span style="color:#960050;background-color:#1e0010">
+</span><span style="color:#960050;background-color:#1e0010"></span><span style="color:#75715e">#常用命令下载</span><span style="color:#960050;background-color:#1e0010">
+</span><span style="color:#960050;background-color:#1e0010"></span><span style="color:#66d9ef">RUN</span> yum -y install wget<span style="color:#960050;background-color:#1e0010">
+</span><span style="color:#960050;background-color:#1e0010"></span><span style="color:#66d9ef">RUN</span> yum install -y curl<span style="color:#960050;background-color:#1e0010">
+</span><span style="color:#960050;background-color:#1e0010">
+</span><span style="color:#960050;background-color:#1e0010">
+</span><span style="color:#960050;background-color:#1e0010"></span><span style="color:#75715e">#配置ssh </span><span style="color:#960050;background-color:#1e0010">
+</span><span style="color:#960050;background-color:#1e0010"></span><span style="color:#66d9ef">RUN</span> yum -y  install  openssh-server<span style="color:#960050;background-color:#1e0010">
+</span><span style="color:#960050;background-color:#1e0010"></span><span style="color:#66d9ef">RUN</span> sed -i <span style="color:#e6db74">&#39;s/#PermitRootLogin yes/PermitRootLogin yes/g&#39;</span> /etc/ssh/sshd_config<span style="color:#960050;background-color:#1e0010">
+</span><span style="color:#960050;background-color:#1e0010"></span><span style="color:#66d9ef">RUN</span> sed -i <span style="color:#e6db74">&#39;s/#PubkeyAuthentication yes/PubkeyAuthentication yes/g&#39;</span> /etc/ssh/sshd_config<span style="color:#960050;background-color:#1e0010">
+</span><span style="color:#960050;background-color:#1e0010"></span><span style="color:#66d9ef">RUN</span> cat /etc/ssh/sshd_config <span style="color:#960050;background-color:#1e0010">
+</span><span style="color:#960050;background-color:#1e0010">
+</span><span style="color:#960050;background-color:#1e0010">
+</span><span style="color:#960050;background-color:#1e0010"></span><span style="color:#75715e">#创建一个新用户</span><span style="color:#960050;background-color:#1e0010">
+</span><span style="color:#960050;background-color:#1e0010"></span><span style="color:#66d9ef">RUN</span> useradd  maizissh -d /home/maizissh<span style="color:#960050;background-color:#1e0010">
+</span><span style="color:#960050;background-color:#1e0010"></span><span style="color:#66d9ef">RUN</span> mkdir /home/maizissh/.ssh<span style="color:#960050;background-color:#1e0010">
+</span><span style="color:#960050;background-color:#1e0010"></span><span style="color:#66d9ef">RUN</span> chown -R maizissh. /home/maizissh/.ssh<span style="color:#960050;background-color:#1e0010">
+</span><span style="color:#960050;background-color:#1e0010"></span><span style="color:#66d9ef">COPY</span> id_rsa.pub /usr/local/macrsa/<span style="color:#960050;background-color:#1e0010">
+</span><span style="color:#960050;background-color:#1e0010"></span><span style="color:#66d9ef">RUN</span> cd /usr/local/macrsa/ <span style="color:#f92672">&amp;&amp;</span> ls -l <span style="color:#960050;background-color:#1e0010">
+</span><span style="color:#960050;background-color:#1e0010"></span><span style="color:#66d9ef">RUN</span> cat /usr/local/macrsa/id_rsa.pub &gt;&gt; /home/maizissh/.ssh/authorized_keys<span style="color:#960050;background-color:#1e0010">
+</span><span style="color:#960050;background-color:#1e0010"></span><span style="color:#66d9ef">RUN</span> cat /home/maizissh/.ssh/authorized_keys<span style="color:#960050;background-color:#1e0010">
+</span><span style="color:#960050;background-color:#1e0010"></span><span style="color:#66d9ef">RUN</span> chmod <span style="color:#ae81ff">700</span> /home/maizissh/.ssh<span style="color:#960050;background-color:#1e0010">
+</span><span style="color:#960050;background-color:#1e0010"></span><span style="color:#66d9ef">RUN</span> chmod <span style="color:#ae81ff">600</span> /home/maizissh/.ssh/authorized_keys<span style="color:#960050;background-color:#1e0010">
+</span><span style="color:#960050;background-color:#1e0010">
+</span><span style="color:#960050;background-color:#1e0010">
+</span><span style="color:#960050;background-color:#1e0010"></span><span style="color:#75715e"># install java</span><span style="color:#960050;background-color:#1e0010">
+</span><span style="color:#960050;background-color:#1e0010"></span><span style="color:#66d9ef">COPY</span> jdk-8u11-linux-x64.tar.gz /usr/local/java/<span style="color:#960050;background-color:#1e0010">
+</span><span style="color:#960050;background-color:#1e0010"></span><span style="color:#66d9ef">COPY</span> start.sh /usr/local/<span style="color:#960050;background-color:#1e0010">
+</span><span style="color:#960050;background-color:#1e0010"></span><span style="color:#66d9ef">RUN</span> cd /usr/local/java/ <span style="color:#f92672">&amp;&amp;</span> ls <span style="color:#f92672">&amp;&amp;</span> tar -xvf jdk-8u11-linux-x64.tar.gz <span style="color:#f92672">&amp;&amp;</span> ls<span style="color:#960050;background-color:#1e0010">
+</span><span style="color:#960050;background-color:#1e0010"></span><span style="color:#66d9ef">RUN</span> echo <span style="color:#e6db74">&#39;export JAVA_HOME=/usr/local/java/jdk1.8.0_11&#39;</span> &gt;&gt; /etc/profile<span style="color:#960050;background-color:#1e0010">
+</span><span style="color:#960050;background-color:#1e0010"></span><span style="color:#66d9ef">RUN</span> echo <span style="color:#e6db74">&#39;export CLASSPATH=$JAVA_HOME/lib/dt.jar:$JAVA_HOME/lib/tools.jar&#39;</span> &gt;&gt; /etc/profile<span style="color:#960050;background-color:#1e0010">
+</span><span style="color:#960050;background-color:#1e0010"></span><span style="color:#66d9ef">RUN</span> echo <span style="color:#e6db74">&#39;export PATH=$PATH:$JAVA_HOME/bin&#39;</span> &gt;&gt; /etc/profile<span style="color:#960050;background-color:#1e0010">
+</span><span style="color:#960050;background-color:#1e0010">
+</span><span style="color:#960050;background-color:#1e0010"></span><span style="color:#66d9ef">RUN</span> echo <span style="color:#e6db74">&#34;查看-----------------&#34;</span><span style="color:#960050;background-color:#1e0010">
+</span><span style="color:#960050;background-color:#1e0010"></span><span style="color:#66d9ef">RUN</span> cat /etc/profile<span style="color:#960050;background-color:#1e0010">
+</span><span style="color:#960050;background-color:#1e0010"></span><span style="color:#66d9ef">RUN</span> echo <span style="color:#e6db74">&#34;java success&#34;</span><span style="color:#960050;background-color:#1e0010">
+</span><span style="color:#960050;background-color:#1e0010">
+</span><span style="color:#960050;background-color:#1e0010">
+</span><span style="color:#960050;background-color:#1e0010">
+</span><span style="color:#960050;background-color:#1e0010"></span><span style="color:#75715e"># install maven</span><span style="color:#960050;background-color:#1e0010">
+</span><span style="color:#960050;background-color:#1e0010"></span><span style="color:#66d9ef">RUN</span> cd /usr/local/ <span style="color:#f92672">&amp;&amp;</span> mkdir maven<span style="color:#960050;background-color:#1e0010">
+</span><span style="color:#960050;background-color:#1e0010"></span><span style="color:#66d9ef">RUN</span> wget http://apache-mirror.rbc.ru/pub/apache/maven/maven-3/3.3.9/binaries/apache-maven-3.3.9-bin.tar.gz<span style="color:#960050;background-color:#1e0010">
+</span><span style="color:#960050;background-color:#1e0010"></span><span style="color:#66d9ef">RUN</span> mv apache-maven-3.3.9-bin.tar.gz  /usr/local/maven/  <span style="color:#f92672">&amp;&amp;</span> ls <span style="color:#960050;background-color:#1e0010">
+</span><span style="color:#960050;background-color:#1e0010"></span><span style="color:#66d9ef">RUN</span> cd /usr/local/maven/ <span style="color:#f92672">&amp;&amp;</span> tar -xzvf apache-maven-3.3.9-bin.tar.gz <span style="color:#f92672">&amp;&amp;</span> ls<span style="color:#960050;background-color:#1e0010">
+</span><span style="color:#960050;background-color:#1e0010"></span><span style="color:#66d9ef">RUN</span> echo <span style="color:#e6db74">&#39;export MAVEN_HOME=/usr/local/maven/apache-maven-3.3.9&#39;</span>&gt;&gt;/etc/profile<span style="color:#960050;background-color:#1e0010">
+</span><span style="color:#960050;background-color:#1e0010"></span><span style="color:#66d9ef">RUN</span> echo <span style="color:#e6db74">&#39;export PATH=$JAVA_HOME/bin:$MAVEN_HOME/bin:$PATH&#39;</span>&gt;&gt;/etc/profile<span style="color:#960050;background-color:#1e0010">
+</span><span style="color:#960050;background-color:#1e0010">
+</span><span style="color:#960050;background-color:#1e0010"></span><span style="color:#66d9ef">RUN</span> echo <span style="color:#e6db74">&#34;查看-----------------&#34;</span><span style="color:#960050;background-color:#1e0010">
+</span><span style="color:#960050;background-color:#1e0010"></span><span style="color:#66d9ef">RUN</span> cat /etc/profile<span style="color:#960050;background-color:#1e0010">
+</span><span style="color:#960050;background-color:#1e0010"></span><span style="color:#66d9ef">RUN</span> echo <span style="color:#e6db74">&#34;maven success&#34;</span><span style="color:#960050;background-color:#1e0010">
+</span><span style="color:#960050;background-color:#1e0010">
+</span><span style="color:#960050;background-color:#1e0010">
+</span><span style="color:#960050;background-color:#1e0010">
+</span><span style="color:#960050;background-color:#1e0010"></span><span style="color:#75715e"># COPY java_maven.sh /usr/bin/java_maven.sh</span><span style="color:#960050;background-color:#1e0010">
+</span><span style="color:#960050;background-color:#1e0010"></span><span style="color:#75715e"># RUN  chmod +x  /usr/bin/java_maven.sh</span><span style="color:#960050;background-color:#1e0010">
+</span><span style="color:#960050;background-color:#1e0010">
+</span><span style="color:#960050;background-color:#1e0010"></span><span style="color:#75715e">#安装java和maven环境</span><span style="color:#960050;background-color:#1e0010">
+</span><span style="color:#960050;background-color:#1e0010"></span><span style="color:#66d9ef">RUN</span> chmod <span style="color:#ae81ff">777</span> /usr/local/start.sh<span style="color:#960050;background-color:#1e0010">
+</span><span style="color:#960050;background-color:#1e0010"></span><span style="color:#66d9ef">ENTRYPOINT</span> [ <span style="color:#e6db74">&#34;sh&#34;</span>, <span style="color:#e6db74">&#34;-c&#34;</span>, <span style="color:#e6db74">&#34;/usr/local/start.sh&#34;</span> ]<span style="color:#960050;background-color:#1e0010">
+</span><span style="color:#960050;background-color:#1e0010"></span><span style="color:#75715e">#CMD sh /usr/local/start.sh</span><span style="color:#960050;background-color:#1e0010">
+</span><span style="color:#960050;background-color:#1e0010">
+</span><span style="color:#960050;background-color:#1e0010">
+</span><span style="color:#960050;background-color:#1e0010"></span><span style="color:#75715e"># 编译 </span><span style="color:#960050;background-color:#1e0010">
+</span><span style="color:#960050;background-color:#1e0010"></span><span style="color:#75715e"># docker build -t mycentos7 .</span><span style="color:#960050;background-color:#1e0010">
+</span><span style="color:#960050;background-color:#1e0010">
+</span><span style="color:#960050;background-color:#1e0010"></span><span style="color:#75715e">#启动</span><span style="color:#960050;background-color:#1e0010">
+</span><span style="color:#960050;background-color:#1e0010"></span><span style="color:#75715e">#docker run -itd --name mycentos7 -p 6666:22 --privileged=true mycentos7 /usr/sbin/init</span><span style="color:#960050;background-color:#1e0010">
+</span><span style="color:#960050;background-color:#1e0010"></span> <span style="color:#960050;background-color:#1e0010">
+</span></code></pre></div><p>进入容器后，设置root密码</p>
+<pre tabindex="0"><code>passwd  回车
 然后设置root密码
-</code></pre>
-
-<p>修改添加用户的密码</p>
-
-<pre><code>passwd   设置root密码
+</code></pre><p>修改添加用户的密码</p>
+<pre tabindex="0"><code>passwd   设置root密码
 passwd   maizissh  修改用户密码， 这个命令只适合用户。 
-</code></pre>
-
-<p><strong>注意：这里需要通过 追加到 &gt;&gt; /etc/profile文件中，这样才会永久生效，不然只有这一次连接才有java和maven环境</strong></p>
-
-<h2 id="start-sh">start.sh</h2>
-
-<pre><code class="language-shell">
-#!/usr/bin/env bash
+</code></pre><p><strong>注意：这里需要通过 追加到 &raquo; /etc/profile文件中，这样才会永久生效，不然只有这一次连接才有java和maven环境</strong></p>
+<h2 id="startsh">start.sh</h2>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-shell" data-lang="shell">
+<span style="color:#75715e">#!/usr/bin/env bash</span>
  
-#!/bin/bash
+<span style="color:#75715e">#!/bin/bash</span>
 
-echo &quot;开始执行容器启动脚本&quot;
+echo <span style="color:#e6db74">&#34;开始执行容器启动脚本&#34;</span>
 source /etc/profile
 cat /etc/profile
 
-#防止容器启动后退出
+<span style="color:#75715e">#防止容器启动后退出</span>
 tail -f /dev/null
-</code></pre>
-
-<h2 id="问题">问题</h2>
-
+</code></pre></div><h2 id="问题">问题</h2>
 <ol>
-<li><p>CMD无法执行这个脚本， 还不知道什么原因， 所以运行后，手动执行这个脚本，让 /etc/profile文件生效就好。</p></li>
-
-<li><p>改用ENTRYPOINT命令执行， 可以执行脚本， 但是  source  /etc/profile依然无法运行，所以还是要手动进行执行这个命令，同时怀疑是权限导致，后期设置root权限启动查看是否可以，在进行测试。</p></li>
+<li>
+<p>CMD无法执行这个脚本， 还不知道什么原因， 所以运行后，手动执行这个脚本，让 /etc/profile文件生效就好。</p>
+</li>
+<li>
+<p>改用ENTRYPOINT命令执行， 可以执行脚本， 但是  source  /etc/profile依然无法运行，所以还是要手动进行执行这个命令，同时怀疑是权限导致，后期设置root权限启动查看是否可以，在进行测试。</p>
+</li>
 </ol>
-
 <h1 id="nginx">Nginx</h1>
-
-<pre><code class="language-dockerfile">FROM nginx
-EXPOSE  8081
-
-# 编译 
-# docker build -f /vscode/docker-software-dockerfile/nginx/Dockerfile .
-
-
-#拷贝容器内 Nginx 默认配置文件到本地当前目录下的 conf 目录
-#docker run -itd -p 8081:80 -d nginx
-#docker cp fd2fb5879cd5:/etc/nginx/nginx.conf /vscode/docker-software-dockerfile/nginx/conf
-#docker cp fd2fb5879cd5:/etc/nginx/conf.d/default.conf /vscode/docker-software-#dockerfile/nginx/conf.d
-
-
-# 启动
-#docker run -itd  --name nginx  -p 8081:80  -v /vscode/docker-software-dockerfile/nginx/conf/nginx.conf:/etc/nginx/nginx.conf  -v /vscode/docker-software-dockerfile/nginx/defaultconf/default.conf:/etc/nginx/conf.d/default.conf  -v /vscode/docker-software-dockerfile/nginx/logs:/var/log/nginx    nginx
-
-# 注意  
-# 发现里面的/usr/share/nginx/html/index.html 无法替换。 $PWD如果不行就用绝对路径 -v 
-
-
-</code></pre>
-
-<h1 id="mysql">Mysql</h1>
-
-<pre><code class="language-dockerfile"> FROM mysql
- EXPOSE 3306
- 
- # 编译 
- # docker build -t mysql-master .
-
- # 启动
- # docker run -p 3306:3306  --name mysql-master -e MYSQL_ROOT_PASSWORD=root -itd mysql-master
- 
-</code></pre>
-
-<h1 id="oracle">Oracle</h1>
-
-<pre><code class="language-dockerfile"> FROM absolutapps/oracle-12c-ee
- EXPOSE 1521 
-
-
- # 编译 
- # docker build -t oracle12 .
-
- 
- # 启动
- # docker run -itd --name oracle12  --privileged  -p 8081:8080 -p 1521:1521 absolutapps/oracle-12c-ee
-
- # 账号: SYSTEM   密码: oracle  SERVICE_NAME:ORCL 
-</code></pre>
-
-<h1 id="redis">Redis</h1>
-
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-dockerfile" data-lang="dockerfile"><span style="color:#66d9ef">FROM</span><span style="color:#e6db74"> nginx</span><span style="color:#960050;background-color:#1e0010">
+</span><span style="color:#960050;background-color:#1e0010"></span><span style="color:#66d9ef">EXPOSE</span><span style="color:#e6db74">  8081</span><span style="color:#960050;background-color:#1e0010">
+</span><span style="color:#960050;background-color:#1e0010">
+</span><span style="color:#960050;background-color:#1e0010"></span><span style="color:#75715e"># 编译 </span><span style="color:#960050;background-color:#1e0010">
+</span><span style="color:#960050;background-color:#1e0010"></span><span style="color:#75715e"># docker build -f /vscode/docker-software-dockerfile/nginx/Dockerfile .</span><span style="color:#960050;background-color:#1e0010">
+</span><span style="color:#960050;background-color:#1e0010">
+</span><span style="color:#960050;background-color:#1e0010">
+</span><span style="color:#960050;background-color:#1e0010"></span><span style="color:#75715e">#拷贝容器内 Nginx 默认配置文件到本地当前目录下的 conf 目录</span><span style="color:#960050;background-color:#1e0010">
+</span><span style="color:#960050;background-color:#1e0010"></span><span style="color:#75715e">#docker run -itd -p 8081:80 -d nginx</span><span style="color:#960050;background-color:#1e0010">
+</span><span style="color:#960050;background-color:#1e0010"></span><span style="color:#75715e">#docker cp fd2fb5879cd5:/etc/nginx/nginx.conf /vscode/docker-software-dockerfile/nginx/conf</span><span style="color:#960050;background-color:#1e0010">
+</span><span style="color:#960050;background-color:#1e0010"></span><span style="color:#75715e">#docker cp fd2fb5879cd5:/etc/nginx/conf.d/default.conf /vscode/docker-software-#dockerfile/nginx/conf.d</span><span style="color:#960050;background-color:#1e0010">
+</span><span style="color:#960050;background-color:#1e0010">
+</span><span style="color:#960050;background-color:#1e0010">
+</span><span style="color:#960050;background-color:#1e0010"></span><span style="color:#75715e"># 启动</span><span style="color:#960050;background-color:#1e0010">
+</span><span style="color:#960050;background-color:#1e0010"></span><span style="color:#75715e">#docker run -itd  --name nginx  -p 8081:80  -v /vscode/docker-software-dockerfile/nginx/conf/nginx.conf:/etc/nginx/nginx.conf  -v /vscode/docker-software-dockerfile/nginx/defaultconf/default.conf:/etc/nginx/conf.d/default.conf  -v /vscode/docker-software-dockerfile/nginx/logs:/var/log/nginx    nginx</span><span style="color:#960050;background-color:#1e0010">
+</span><span style="color:#960050;background-color:#1e0010">
+</span><span style="color:#960050;background-color:#1e0010"></span><span style="color:#75715e"># 注意  </span><span style="color:#960050;background-color:#1e0010">
+</span><span style="color:#960050;background-color:#1e0010"></span><span style="color:#75715e"># 发现里面的/usr/share/nginx/html/index.html 无法替换。 $PWD如果不行就用绝对路径 -v </span><span style="color:#960050;background-color:#1e0010">
+</span><span style="color:#960050;background-color:#1e0010">
+</span><span style="color:#960050;background-color:#1e0010">
+</span></code></pre></div><h1 id="mysql">Mysql</h1>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-dockerfile" data-lang="dockerfile"> FROM mysql<span style="color:#960050;background-color:#1e0010">
+</span><span style="color:#960050;background-color:#1e0010"></span> EXPOSE <span style="color:#ae81ff">3306</span><span style="color:#960050;background-color:#1e0010">
+</span><span style="color:#960050;background-color:#1e0010"></span> <span style="color:#960050;background-color:#1e0010">
+</span><span style="color:#960050;background-color:#1e0010"></span> <span style="color:#75715e"># 编译 </span><span style="color:#960050;background-color:#1e0010">
+</span><span style="color:#960050;background-color:#1e0010"></span> <span style="color:#75715e"># docker build -t mysql-master .</span><span style="color:#960050;background-color:#1e0010">
+</span><span style="color:#960050;background-color:#1e0010">
+</span><span style="color:#960050;background-color:#1e0010"></span> <span style="color:#75715e"># 启动</span><span style="color:#960050;background-color:#1e0010">
+</span><span style="color:#960050;background-color:#1e0010"></span> <span style="color:#75715e"># docker run -p 3306:3306  --name mysql-master -e MYSQL_ROOT_PASSWORD=root -itd mysql-master</span><span style="color:#960050;background-color:#1e0010">
+</span><span style="color:#960050;background-color:#1e0010"></span> <span style="color:#960050;background-color:#1e0010">
+</span></code></pre></div><h1 id="oracle">Oracle</h1>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-dockerfile" data-lang="dockerfile"> FROM absolutapps/oracle-12c-ee<span style="color:#960050;background-color:#1e0010">
+</span><span style="color:#960050;background-color:#1e0010"></span> EXPOSE <span style="color:#ae81ff">1521</span> <span style="color:#960050;background-color:#1e0010">
+</span><span style="color:#960050;background-color:#1e0010">
+</span><span style="color:#960050;background-color:#1e0010">
+</span><span style="color:#960050;background-color:#1e0010"></span> <span style="color:#75715e"># 编译 </span><span style="color:#960050;background-color:#1e0010">
+</span><span style="color:#960050;background-color:#1e0010"></span> <span style="color:#75715e"># docker build -t oracle12 .</span><span style="color:#960050;background-color:#1e0010">
+</span><span style="color:#960050;background-color:#1e0010">
+</span><span style="color:#960050;background-color:#1e0010"></span> <span style="color:#960050;background-color:#1e0010">
+</span><span style="color:#960050;background-color:#1e0010"></span> <span style="color:#75715e"># 启动</span><span style="color:#960050;background-color:#1e0010">
+</span><span style="color:#960050;background-color:#1e0010"></span> <span style="color:#75715e"># docker run -itd --name oracle12  --privileged  -p 8081:8080 -p 1521:1521 absolutapps/oracle-12c-ee</span><span style="color:#960050;background-color:#1e0010">
+</span><span style="color:#960050;background-color:#1e0010">
+</span><span style="color:#960050;background-color:#1e0010"></span> <span style="color:#75715e"># 账号: SYSTEM   密码: oracle  SERVICE_NAME:ORCL </span><span style="color:#960050;background-color:#1e0010">
+</span></code></pre></div><h1 id="redis">Redis</h1>
 <p><a href="https://hub.docker.com/_/redis">https://hub.docker.com/_/redis</a></p>
-
-<pre><code class="language-shell"># 安装客户端
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-shell" data-lang="shell"><span style="color:#75715e"># 安装客户端</span>
 brew cask install another-redis-desktop-manager
-</code></pre>
-
-<pre><code class="language-yml"> FROM redis
- EXPOSE  6379
+</code></pre></div><div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-yml" data-lang="yml"> <span style="color:#ae81ff">FROM redis</span>
+ <span style="color:#ae81ff">EXPOSE  6379</span>
  
 
- # 编译 
- # docker build -f /vscode/docker-software-dockerfile/redis/Dockerfile .
+ <span style="color:#75715e"># 编译 </span>
+ <span style="color:#75715e"># docker build -f /vscode/docker-software-dockerfile/redis/Dockerfile .</span>
 
  
- # 启动
- docker run -p 6379:6379 \
-          -v /vscode/docker-software-dockerfile/redis/6379/data:/data \
-          -v /vscode/docker-software-dockerfile/redis/6379/redis.conf:/etc/redis/redis.conf \
-            --privileged=true \
-            --name redis \
-            -itd redis  redis-server /etc/redis/redis.conf --appendonly yes
-</code></pre>
-
-<h2 id="redis-conf">redis.conf</h2>
-
-<pre><code class="language-shell">#获取原始的redis.conf
+ <span style="color:#75715e"># 启动</span>
+ <span style="color:#ae81ff">docker run -p 6379:6379 \</span>
+          -<span style="color:#ae81ff">v /vscode/docker-software-dockerfile/redis/6379/data:/data \</span>
+          -<span style="color:#ae81ff">v /vscode/docker-software-dockerfile/redis/6379/redis.conf:/etc/redis/redis.conf \</span>
+            --<span style="color:#ae81ff">privileged=true \</span>
+            --<span style="color:#ae81ff">name redis \</span>
+            -<span style="color:#ae81ff">itd redis  redis-server /etc/redis/redis.conf --appendonly yes</span>
+</code></pre></div><h2 id="redisconf">redis.conf</h2>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-shell" data-lang="shell"><span style="color:#75715e">#获取原始的redis.conf</span>
 wget http://download.redis.io/releases/redis-5.0.5.tar.gz
 
-#新版本可能需要修改为 
+<span style="color:#75715e">#新版本可能需要修改为 </span>
 bind 0.0.0.0
 
-#不想给redis配置密码，需要修改配置文件：
+<span style="color:#75715e">#不想给redis配置密码，需要修改配置文件：</span>
 protected-mode no
 
-</code></pre>
-
-<p>上面处理完成，本地客户端和docker容器可以进行连接了。</p>
-
+</code></pre></div><p>上面处理完成，本地客户端和docker容器可以进行连接了。</p>
 <h2 id="服务启动和停止">服务启动和停止</h2>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-yml" data-lang="yml"><span style="color:#ae81ff">apt-get update &amp;&amp; apt-get install procps </span>
 
-<pre><code class="language-yml">apt-get update &amp;&amp; apt-get install procps 
+<span style="color:#ae81ff">ps aux | grep redis</span>
 
-ps aux | grep redis
+<span style="color:#75715e">#关闭 </span>
+<span style="color:#ae81ff">cd  /usr/local/bin </span>
+<span style="color:#ae81ff">root@369a39fe77bf:/usr/local/bin# redis-cli -h 127.0.0.1 -p 6379 shutdown</span>
 
-#关闭 
-cd  /usr/local/bin 
-root@369a39fe77bf:/usr/local/bin# redis-cli -h 127.0.0.1 -p 6379 shutdown
-
-#启动
-cd  /usr/local/bin 
-root@369a39fe77bf:/usr/local/bin# redis-server /etc/redis/redis.conf
-</code></pre>
-
-<h1 id="mongodb">MongoDB</h1>
-
-<pre><code class="language-yml">FROM mongo
-EXPOSE 27017
+<span style="color:#75715e">#启动</span>
+<span style="color:#ae81ff">cd  /usr/local/bin </span>
+<span style="color:#ae81ff">root@369a39fe77bf:/usr/local/bin# redis-server /etc/redis/redis.conf</span>
+</code></pre></div><h1 id="mongodb">MongoDB</h1>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-yml" data-lang="yml"><span style="color:#ae81ff">FROM mongo</span>
+<span style="color:#ae81ff">EXPOSE 27017</span>
  
-#docker hub -- https://hub.docker.com/_/mongo 
+<span style="color:#75715e">#docker hub -- https://hub.docker.com/_/mongo </span>
 
-#编译 
-docker build -f /vscode/docker-software-dockerfile/mongodb/Dockerfile .
+<span style="color:#75715e">#编译 </span>
+<span style="color:#ae81ff">docker build -f /vscode/docker-software-dockerfile/mongodb/Dockerfile .</span>
 
-#启动
-docker run -p 27017:27017 -v $PWD/db:/data/db -v $PWD/configdb:/data/configdb -d mongo
+<span style="color:#75715e">#启动</span>
+<span style="color:#ae81ff">docker run -p 27017:27017 -v $PWD/db:/data/db -v $PWD/configdb:/data/configdb -d mongo</span>
 
-#命令地址
-#/usr/bin/mongo  #手动启动客户端地址
+<span style="color:#75715e">#命令地址</span>
+<span style="color:#75715e">#/usr/bin/mongo  #手动启动客户端地址</span>
 
  
-#/usr/bin/  ./mongofiles -d records put /macfile/110.pdf  #GridFS操作
+<span style="color:#75715e">#/usr/bin/  ./mongofiles -d records put /macfile/110.pdf  #GridFS操作</span>
 
 
-#安装自己配置文件启动
-docker run -p 27000:27000 \
-              -v $PWD/27000/db:/data/db \
-              -v $PWD/27000/configdb:/data/configdb \
-              -itd mongo4.2.0 \
-              --config /data/configdb/27000_mongod.conf
+<span style="color:#75715e">#安装自己配置文件启动</span>
+<span style="color:#ae81ff">docker run -p 27000:27000 \</span>
+              -<span style="color:#ae81ff">v $PWD/27000/db:/data/db \</span>
+              -<span style="color:#ae81ff">v $PWD/27000/configdb:/data/configdb \</span>
+              -<span style="color:#ae81ff">itd mongo4.2.0 \</span>
+              --<span style="color:#ae81ff">config /data/configdb/27000_mongod.conf</span>
 
-</code></pre>
-
-<p><strong>集群模式搭建请搜索查看《mongodb-集群和分片》文章，一般我们都是直接集群模式处理</strong></p>
-
+</code></pre></div><p><strong>集群模式搭建请搜索查看《mongodb-集群和分片》文章，一般我们都是直接集群模式处理</strong></p>
 <h1 id="elk">ELK</h1>
-
 <h2 id="elasticsearch">ElasticSearch</h2>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-yml" data-lang="yml"><span style="color:#ae81ff">FROM elasticsearch:6.8.3</span>
+<span style="color:#ae81ff">EXPOSE  9300</span>
+<span style="color:#ae81ff">EXPOSE  9200</span>
 
-<pre><code class="language-yml">FROM elasticsearch:6.8.3
-EXPOSE  9300
-EXPOSE  9200
+<span style="color:#75715e"># 编译 </span>
+<span style="color:#ae81ff">docker build -f /vscode/docker-software-dockerfile/ElasticSearch/Dockerfile .</span>
 
-# 编译 
-docker build -f /vscode/docker-software-dockerfile/ElasticSearch/Dockerfile .
+<span style="color:#75715e"># 创建网段 </span>
+<span style="color:#ae81ff">docker network create esk</span>
 
-# 创建网段 
-docker network create esk
+<span style="color:#75715e"># macOS with Docker for Mac  设置vm</span>
+<span style="color:#ae81ff">$ screen ~/Library/Containers/com.docker.docker/Data/vms/0/tty</span>
+<span style="color:#ae81ff">sysctl -w vm.max_map_count=262144</span>
 
-# macOS with Docker for Mac  设置vm
-$ screen ~/Library/Containers/com.docker.docker/Data/vms/0/tty
-sysctl -w vm.max_map_count=262144
+<span style="color:#75715e"># 启动</span>
+<span style="color:#ae81ff">docker run -itd --name elasticsearch --net esk -p 9200:9200 -p 9300:9300 -e &#34;discovery.type=single-node&#34; elasticsearch:6.8.3</span>
 
-# 启动
-docker run -itd --name elasticsearch --net esk -p 9200:9200 -p 9300:9300 -e &quot;discovery.type=single-node&quot; elasticsearch:6.8.3
+<span style="color:#75715e"># 注意</span>
+<span style="color:#f92672">这个 --name 名字不能修改， 因为kibana默认的配置文件 kibana.yml 就是这个 elasticsearch.hosts</span>: [ <span style="color:#e6db74">&#34;http://elasticsearch:9200&#34;</span> ]
 
-# 注意
-这个 --name 名字不能修改， 因为kibana默认的配置文件 kibana.yml 就是这个 elasticsearch.hosts: [ &quot;http://elasticsearch:9200&quot; ]
+<span style="color:#75715e"># docker</span>
+<span style="color:#ae81ff">9300端口是使用tcp客户端连接使用的端口；</span>
+<span style="color:#ae81ff">9200端口是通过http协议连接es使用的端口；</span>
 
-# docker
-9300端口是使用tcp客户端连接使用的端口；
-9200端口是通过http协议连接es使用的端口；
+<span style="color:#75715e">#单节点发现编辑  discovery.type </span>
+<span style="color:#ae81ff">我们认识到某些用户需要将传输绑定到外部接口以测试其对传输客户端的使用。对于这种情况，我们提供发现类型single-node（通过设置discovery.type为来 配置single-node）；在这种情况下，节点将选举自己为主节点，并且不会与任何其他节点一起加入群集。</span>
 
-#单节点发现编辑  discovery.type 
-我们认识到某些用户需要将传输绑定到外部接口以测试其对传输客户端的使用。对于这种情况，我们提供发现类型single-node（通过设置discovery.type为来 配置single-node）；在这种情况下，节点将选举自己为主节点，并且不会与任何其他节点一起加入群集。
+<span style="color:#75715e">#配置文件地址</span>
+<span style="color:#ae81ff">/usr/share/elasticsearch/config</span>
 
-#配置文件地址
-/usr/share/elasticsearch/config
-
-</code></pre>
-
-<h2 id="kibana">Kibana</h2>
-
-<pre><code class="language-yml">FROM kibana:6.8.3
-EXPOSE  5601
+</code></pre></div><h2 id="kibana">Kibana</h2>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-yml" data-lang="yml"><span style="color:#ae81ff">FROM kibana:6.8.3</span>
+<span style="color:#ae81ff">EXPOSE  5601</span>
  
 
-# 编译 
-docker build -f /vscode/docker-software-dockerfile/kibana/Dockerfile .
+<span style="color:#75715e"># 编译 </span>
+<span style="color:#ae81ff">docker build -f /vscode/docker-software-dockerfile/kibana/Dockerfile .</span>
 
 
-# 启动
-docker run -d --name kibana6 --net esk -p 5601:5601 kibana:6.8.3
+<span style="color:#75715e"># 启动</span>
+<span style="color:#ae81ff">docker run -d --name kibana6 --net esk -p 5601:5601 kibana:6.8.3</span>
 
-#配置文件地址
-/usr/share/elasticsearch/config
-</code></pre>
-
-<h2 id="logstash">Logstash</h2>
-
+<span style="color:#75715e">#配置文件地址</span>
+<span style="color:#ae81ff">/usr/share/elasticsearch/config</span>
+</code></pre></div><h2 id="logstash">Logstash</h2>
 <h3 id="dockerfile">dockerfile</h3>
-
-<pre><code class="language-dockerfile">FROM logstash:6.8.3
-
-# 编译 
-# docker build -f /vscode/docker-software-dockerfile/Logstash/Dockerfile .
-
-# 启动   
-# docker run --name logstash -itd -p 6666:6666 -v  $PWD/config/logstash.yml:/usr/share/logstash/config/logstash.yml -v $PWD/config/pipelines.yml:/usr/share/logstash/config/pipelines.yml -v $PWD/config/logstash-sample.conf:/usr/share/logstash/config/logstash-sample.conf logstash:6.8.3 
-
-</code></pre>
-
-<h3 id="logstash-yml">logstash.yml</h3>
-
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-dockerfile" data-lang="dockerfile"><span style="color:#66d9ef">FROM</span><span style="color:#e6db74"> logstash:6.8.3</span><span style="color:#960050;background-color:#1e0010">
+</span><span style="color:#960050;background-color:#1e0010">
+</span><span style="color:#960050;background-color:#1e0010"></span><span style="color:#75715e"># 编译 </span><span style="color:#960050;background-color:#1e0010">
+</span><span style="color:#960050;background-color:#1e0010"></span><span style="color:#75715e"># docker build -f /vscode/docker-software-dockerfile/Logstash/Dockerfile .</span><span style="color:#960050;background-color:#1e0010">
+</span><span style="color:#960050;background-color:#1e0010">
+</span><span style="color:#960050;background-color:#1e0010"></span><span style="color:#75715e"># 启动   </span><span style="color:#960050;background-color:#1e0010">
+</span><span style="color:#960050;background-color:#1e0010"></span><span style="color:#75715e"># docker run --name logstash -itd -p 6666:6666 -v  $PWD/config/logstash.yml:/usr/share/logstash/config/logstash.yml -v $PWD/config/pipelines.yml:/usr/share/logstash/config/pipelines.yml -v $PWD/config/logstash-sample.conf:/usr/share/logstash/config/logstash-sample.conf logstash:6.8.3 </span><span style="color:#960050;background-color:#1e0010">
+</span><span style="color:#960050;background-color:#1e0010">
+</span></code></pre></div><h3 id="logstashyml">logstash.yml</h3>
 <p>这个我直接给屏蔽了</p>
-
-<pre><code class="language-yml"># http.host: &quot;0.0.0.0&quot;
-# xpack.monitoring.elasticsearch.hosts: [ &quot;http://elasticsearch:9200&quot; ]
-</code></pre>
-
-<h3 id="pipelines-yml">pipelines.yml</h3>
-
-<pre><code class="language-yml">- pipeline.id: sample
-  path.config: &quot;/usr/share/logstash/config/logstash-sample.conf&quot;
-</code></pre>
-
-<h3 id="logstash-sample-conf">logstash-sample.conf</h3>
-
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-yml" data-lang="yml"><span style="color:#75715e"># http.host: &#34;0.0.0.0&#34;</span>
+<span style="color:#75715e"># xpack.monitoring.elasticsearch.hosts: [ &#34;http://elasticsearch:9200&#34; ]</span>
+</code></pre></div><h3 id="pipelinesyml">pipelines.yml</h3>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-yml" data-lang="yml">- <span style="color:#f92672">pipeline.id</span>: <span style="color:#ae81ff">sample</span>
+  <span style="color:#f92672">path.config</span>: <span style="color:#e6db74">&#34;/usr/share/logstash/config/logstash-sample.conf&#34;</span>
+</code></pre></div><h3 id="logstash-sampleconf">logstash-sample.conf</h3>
 <p>模拟用tcp插件来获取数据到ES中。</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-json" data-lang="json"><span style="color:#960050;background-color:#1e0010">#</span> <span style="color:#960050;background-color:#1e0010">input</span>{
+<span style="color:#960050;background-color:#1e0010">#</span>     <span style="color:#960050;background-color:#1e0010">file{</span>
+<span style="color:#960050;background-color:#1e0010">#</span>         <span style="color:#960050;background-color:#1e0010">path</span> <span style="color:#960050;background-color:#1e0010">=&gt;</span> <span style="color:#960050;background-color:#1e0010">[</span><span style="color:#f92672">&#34;/rmc.log&#34;</span><span style="color:#960050;background-color:#1e0010">]</span>
+<span style="color:#960050;background-color:#1e0010">#</span>         <span style="color:#960050;background-color:#1e0010">start_position</span> <span style="color:#960050;background-color:#1e0010">=&gt;</span> <span style="color:#960050;background-color:#1e0010">beginning</span>
+<span style="color:#960050;background-color:#1e0010">#</span>         <span style="color:#960050;background-color:#1e0010">sincedb_path</span> <span style="color:#960050;background-color:#1e0010">=&gt;</span> <span style="color:#e6db74">&#34;/dev/null&#34;</span>
+<span style="color:#960050;background-color:#1e0010">#</span>     }
+<span style="color:#960050;background-color:#1e0010">#</span> <span style="color:#960050;background-color:#1e0010">}</span>
 
-<pre><code class="language-json"># input{
-#     file{
-#         path =&gt; [&quot;/rmc.log&quot;]
-#         start_position =&gt; beginning
-#         sincedb_path =&gt; &quot;/dev/null&quot;
-#     }
-# }
-
-input{
-  tcp {
-        port =&gt; &quot;6666&quot;
-        mode =&gt; &quot;server&quot;
+<span style="color:#960050;background-color:#1e0010">input</span>{
+  <span style="color:#960050;background-color:#1e0010">tcp</span> <span style="color:#960050;background-color:#1e0010">{</span>
+        <span style="color:#960050;background-color:#1e0010">port</span> <span style="color:#960050;background-color:#1e0010">=&gt;</span> <span style="color:#f92672">&#34;6666&#34;</span>
+        <span style="color:#960050;background-color:#1e0010">mode</span> <span style="color:#960050;background-color:#1e0010">=&gt;</span> <span style="color:#e6db74">&#34;server&#34;</span>
     }
-}
+<span style="color:#960050;background-color:#1e0010">}</span>
 
-filter{
+<span style="color:#960050;background-color:#1e0010">filter</span>{
 
 
 }
   
-output {
-  elasticsearch {
-    hosts =&gt; [&quot;http://192.168.1.100:9200&quot;]
-    id =&gt; &quot;my_plugin_id&quot;
-    index =&gt; &quot;viewdata-%{+YYYY.MM.dd}&quot;
-    #user =&gt; &quot;elastic&quot;
-    #password =&gt; &quot;changeme&quot;
+<span style="color:#960050;background-color:#1e0010">output</span> {
+  <span style="color:#960050;background-color:#1e0010">elasticsearch</span> <span style="color:#960050;background-color:#1e0010">{</span>
+    <span style="color:#960050;background-color:#1e0010">hosts</span> <span style="color:#960050;background-color:#1e0010">=&gt;</span> <span style="color:#960050;background-color:#1e0010">[</span><span style="color:#f92672">&#34;http://192.168.1.100:9200&#34;</span><span style="color:#960050;background-color:#1e0010">]</span>
+    <span style="color:#960050;background-color:#1e0010">id</span> <span style="color:#960050;background-color:#1e0010">=&gt;</span> <span style="color:#e6db74">&#34;my_plugin_id&#34;</span>
+    <span style="color:#960050;background-color:#1e0010">index</span> <span style="color:#960050;background-color:#1e0010">=&gt;</span> <span style="color:#e6db74">&#34;viewdata-%{+YYYY.MM.dd}&#34;</span>
+    <span style="color:#960050;background-color:#1e0010">#user</span> <span style="color:#960050;background-color:#1e0010">=&gt;</span> <span style="color:#e6db74">&#34;elastic&#34;</span>
+    <span style="color:#960050;background-color:#1e0010">#password</span> <span style="color:#960050;background-color:#1e0010">=&gt;</span> <span style="color:#e6db74">&#34;changeme&#34;</span>
   }
-  stdout {
-        codec =&gt; rubydebug
+  <span style="color:#960050;background-color:#1e0010">stdout</span> {
+        <span style="color:#960050;background-color:#1e0010">codec</span> <span style="color:#960050;background-color:#1e0010">=&gt;</span> <span style="color:#960050;background-color:#1e0010">rubydebug</span>
     }
-}
-##nc 192.168.1.100 6666 &lt; /var/log/nginx/access.log
-用nc命令来模拟tcp数据
-</code></pre>
-
-<h2 id="docker-network-create-somenetwork">$ docker network create somenetwork</h2>
-
+<span style="color:#960050;background-color:#1e0010">}</span>
+<span style="color:#960050;background-color:#1e0010">##nc</span> <span style="color:#ae81ff">192.168</span><span style="color:#960050;background-color:#1e0010">.</span><span style="color:#ae81ff">1.100</span> <span style="color:#ae81ff">6666</span> <span style="color:#960050;background-color:#1e0010">&lt;</span> <span style="color:#960050;background-color:#1e0010">/var/log/nginx/access.log</span>
+<span style="color:#960050;background-color:#1e0010">用nc命令来模拟tcp数据</span>
+</code></pre></div><h2 id="-docker-network-create-somenetwork">$ docker network create somenetwork</h2>
 <p>默认网络docker0：网络中所有主机间只能用IP相互访问。通过&ndash;link选项创建的容器可以对链接的容器名(container-name)作为hostname进行直接访问。
 自定义网络(bridge)：网络中所有主机除ip访问外，还可以直接用容器名(container-name)作为hostname相互访问。</p>
-
 <h2 id="问题记录">问题记录</h2>
-
 <p>我的ES和logstash, 一个是Networks：esk  一个是Networks：bridge，但是依然可以OK， 不知道为什么。 我的电脑是mac系统。 后期在来解答。</p>
-
 <h1 id="rocketmq">Rocketmq</h1>
-
 <h2 id="单主机模式">单主机模式</h2>
-
-<h3 id="docker-compose-yml">docker-compose.yml</h3>
-
-<pre><code class="language-json">version: '2'
-services:
-  namesrv:
-    image: rocketmqinc/rocketmq 
-    container_name: rmqnamesrv
-    ports:
-      - 9876:9876 #namesrv只使用了一个9876端口。
-    volumes:
-      - $PWD/opt/rocketmq/logs:/home/rocketmq/logs
-      - $PWD/opt/rocketmq/store:/home/rocketmq/store
-    command: sh mqnamesrv
-  broker:
-    image: rocketmqinc/rocketmq
-    container_name: rmqbroker
-    ports:
-      - 10909:10909 #主要是fastRemotingServer服务使用
-      - 10911:10911 #这个主要是broker的服务端口号，作为对producer和consumer使用服务的端口号，默认为10911，可以通过配置文件中修改。
-      - 10912:10912 #slave连接使用
-    volumes:
-      - $PWD/opt/rocketmq/logs:/home/rocketmq/logs
-      - $PWD/opt/rocketmq/store:/home/rocketmq/store
-      - $PWD/opt/rocketmq/conf/broker.conf:/opt/rocketmq-4.4.0/conf/broker.conf
-    #command: sh mqbroker -n namesrv:9876
-    command: sh mqbroker -n namesrv:9876 -c ../conf/broker.conf
-    depends_on:
-      - namesrv
-    environment:
-      - JAVA_HOME=/usr/lib/jvm/jre
-  console:
-    image: styletang/rocketmq-console-ng
-    container_name: rocketmq-console-ng
-    ports:
-      - 8087:8080
-    depends_on:
-      - namesrv
-    environment:
-      - JAVA_OPTS= -Dlogging.level.root=info   -Drocketmq.namesrv.addr=rmqnamesrv:9876 
-      - Dcom.rocketmq.sendMessageWithVIPChannel=falseclear
-</code></pre>
-
-<h3 id="broker-conf">broker.conf</h3>
-
+<h3 id="docker-composeyml">docker-compose.yml</h3>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-json" data-lang="json"><span style="color:#960050;background-color:#1e0010">version:</span> <span style="color:#960050;background-color:#1e0010">&#39;</span><span style="color:#ae81ff">2</span><span style="color:#960050;background-color:#1e0010">&#39;</span>
+<span style="color:#960050;background-color:#1e0010">services:</span>
+  <span style="color:#960050;background-color:#1e0010">namesrv:</span>
+    <span style="color:#960050;background-color:#1e0010">image:</span> <span style="color:#960050;background-color:#1e0010">rocketmqinc/rocketmq</span> 
+    <span style="color:#960050;background-color:#1e0010">container_name:</span> <span style="color:#960050;background-color:#1e0010">rmqnamesrv</span>
+    <span style="color:#960050;background-color:#1e0010">ports:</span>
+      <span style="color:#960050;background-color:#1e0010">-</span> <span style="color:#ae81ff">9876</span><span style="color:#960050;background-color:#1e0010">:</span><span style="color:#ae81ff">9876</span> <span style="color:#960050;background-color:#1e0010">#namesrv只使用了一个</span><span style="color:#ae81ff">9876</span><span style="color:#960050;background-color:#1e0010">端口。</span>
+    <span style="color:#960050;background-color:#1e0010">volumes:</span>
+      <span style="color:#960050;background-color:#1e0010">-</span> <span style="color:#960050;background-color:#1e0010">$PWD/opt/rocketmq/logs:/home/rocketmq/logs</span>
+      <span style="color:#960050;background-color:#1e0010">-</span> <span style="color:#960050;background-color:#1e0010">$PWD/opt/rocketmq/store:/home/rocketmq/store</span>
+    <span style="color:#960050;background-color:#1e0010">command:</span> <span style="color:#960050;background-color:#1e0010">sh</span> <span style="color:#960050;background-color:#1e0010">mqnamesrv</span>
+  <span style="color:#960050;background-color:#1e0010">broker:</span>
+    <span style="color:#960050;background-color:#1e0010">image:</span> <span style="color:#960050;background-color:#1e0010">rocketmqinc/rocketmq</span>
+    <span style="color:#960050;background-color:#1e0010">container_name:</span> <span style="color:#960050;background-color:#1e0010">rmqbroker</span>
+    <span style="color:#960050;background-color:#1e0010">ports:</span>
+      <span style="color:#960050;background-color:#1e0010">-</span> <span style="color:#ae81ff">10909</span><span style="color:#960050;background-color:#1e0010">:</span><span style="color:#ae81ff">10909</span> <span style="color:#960050;background-color:#1e0010">#主要是fastRemotingServer服务使用</span>
+      <span style="color:#960050;background-color:#1e0010">-</span> <span style="color:#ae81ff">10911</span><span style="color:#960050;background-color:#1e0010">:</span><span style="color:#ae81ff">10911</span> <span style="color:#960050;background-color:#1e0010">#这个主要是broker的服务端口号，作为对producer和consumer使用服务的端口号，默认为</span><span style="color:#ae81ff">10911</span><span style="color:#960050;background-color:#1e0010">，可以通过配置文件中修改。</span>
+      <span style="color:#960050;background-color:#1e0010">-</span> <span style="color:#ae81ff">10912</span><span style="color:#960050;background-color:#1e0010">:</span><span style="color:#ae81ff">10912</span> <span style="color:#960050;background-color:#1e0010">#slave连接使用</span>
+    <span style="color:#960050;background-color:#1e0010">volumes:</span>
+      <span style="color:#960050;background-color:#1e0010">-</span> <span style="color:#960050;background-color:#1e0010">$PWD/opt/rocketmq/logs:/home/rocketmq/logs</span>
+      <span style="color:#960050;background-color:#1e0010">-</span> <span style="color:#960050;background-color:#1e0010">$PWD/opt/rocketmq/store:/home/rocketmq/store</span>
+      <span style="color:#960050;background-color:#1e0010">-</span> <span style="color:#960050;background-color:#1e0010">$PWD/opt/rocketmq/conf/broker.conf:/opt/rocketmq</span><span style="color:#ae81ff">-4.4</span><span style="color:#960050;background-color:#1e0010">.</span><span style="color:#ae81ff">0</span><span style="color:#960050;background-color:#1e0010">/conf/broker.conf</span>
+    <span style="color:#960050;background-color:#1e0010">#command:</span> <span style="color:#960050;background-color:#1e0010">sh</span> <span style="color:#960050;background-color:#1e0010">mqbroker</span> <span style="color:#960050;background-color:#1e0010">-n</span> <span style="color:#960050;background-color:#1e0010">namesrv:</span><span style="color:#ae81ff">9876</span>
+    <span style="color:#960050;background-color:#1e0010">command:</span> <span style="color:#960050;background-color:#1e0010">sh</span> <span style="color:#960050;background-color:#1e0010">mqbroker</span> <span style="color:#960050;background-color:#1e0010">-n</span> <span style="color:#960050;background-color:#1e0010">namesrv:</span><span style="color:#ae81ff">9876</span> <span style="color:#960050;background-color:#1e0010">-c</span> <span style="color:#960050;background-color:#1e0010">../conf/broker.conf</span>
+    <span style="color:#960050;background-color:#1e0010">depends_on:</span>
+      <span style="color:#960050;background-color:#1e0010">-</span> <span style="color:#960050;background-color:#1e0010">namesrv</span>
+    <span style="color:#960050;background-color:#1e0010">environment:</span>
+      <span style="color:#960050;background-color:#1e0010">-</span> <span style="color:#960050;background-color:#1e0010">JAVA_HOME=/usr/lib/jvm/jre</span>
+  <span style="color:#960050;background-color:#1e0010">console:</span>
+    <span style="color:#960050;background-color:#1e0010">image:</span> <span style="color:#960050;background-color:#1e0010">styletang/rocketmq-console-ng</span>
+    <span style="color:#960050;background-color:#1e0010">container_name:</span> <span style="color:#960050;background-color:#1e0010">rocketmq-console-ng</span>
+    <span style="color:#960050;background-color:#1e0010">ports:</span>
+      <span style="color:#960050;background-color:#1e0010">-</span> <span style="color:#ae81ff">8087</span><span style="color:#960050;background-color:#1e0010">:</span><span style="color:#ae81ff">8080</span>
+    <span style="color:#960050;background-color:#1e0010">depends_on:</span>
+      <span style="color:#960050;background-color:#1e0010">-</span> <span style="color:#960050;background-color:#1e0010">namesrv</span>
+    <span style="color:#960050;background-color:#1e0010">environment:</span>
+      <span style="color:#960050;background-color:#1e0010">-</span> <span style="color:#960050;background-color:#1e0010">JAVA_OPTS=</span> <span style="color:#960050;background-color:#1e0010">-Dlogging.level.root=info</span>   <span style="color:#960050;background-color:#1e0010">-Drocketmq.namesrv.addr=rmqnamesrv:</span><span style="color:#ae81ff">9876</span> 
+      <span style="color:#960050;background-color:#1e0010">-</span> <span style="color:#960050;background-color:#1e0010">Dcom.rocketmq.sendMessageWithVIPChannel=falseclear</span>
+</code></pre></div><h3 id="brokerconf">broker.conf</h3>
 <p>注意修改 brokerIP1这个地址，<strong>这个地址就是你的本机物理IP，也就是你当前宿主机的IP地址</strong></p>
-
-<pre><code class="language-properties"># 所属集群名字
+<pre tabindex="0"><code class="language-properties" data-lang="properties"># 所属集群名字
 brokerClusterName = DefaultCluster
 # broker 名字，注意此处不同的配置文件填写的不一样，如果在 broker-a.properties 使用: broker-a,
 # 在 broker-b.properties 使用: broker-b
@@ -706,35 +628,28 @@ brokerRole = ASYNC_MASTER
 flushDiskType = ASYNC_FLUSH
 #set `brokerIP1` if you want to set physical IP as broker IP.
 brokerIP1=这样ip是你映射到主机的IP地址， 但是一定要放开上面的端口
-</code></pre>
+</code></pre><h3 id="启动">启动</h3>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-yaml" data-lang="yaml"><span style="color:#ae81ff">docker-compose up -d</span>
 
-<h3 id="启动">启动</h3>
+<span style="color:#75715e">#在broker中，执行，</span>
+<span style="color:#ae81ff">sh mqadmin clusterList -n rmqnamesrv:9876 </span>
 
-<pre><code class="language-yaml">docker-compose up -d
-
-#在broker中，执行，
-sh mqadmin clusterList -n rmqnamesrv:9876 
-
-#出现如下数据，证明连接nameserver已经正常。
-OpenJDK 64-Bit Server VM warning: ignoring option MaxPermSize=128m; support was removed in 8.0
-#Cluster Name     #Broker Name            #BID  #Addr                  #Version                #InTPS(LOAD)       #OutTPS(LOAD) #PCWait(ms) #Hour #SPACE
-DefaultCluster    broker-a                0     172.20.0.4 :10911      V4_4_0                   0.00(0,0ms)         0.00(0,0ms)          0 436044.47 -1.0000
-</code></pre>
-
-<h1 id="zookeeper">Zookeeper</h1>
-
-<pre><code class="language-dockerfile">FROM zookeeper
-EXPOSE 2181
-
-
-#编译
-# docker build -t myzookeeper .
-
-#运行
-# docker run  -itd  -p 2181:2181 --name myzookeeper --privileged -v $(pwd)/conf/:/conf/   myzookeeper
-
-</code></pre>
-
+<span style="color:#75715e">#出现如下数据，证明连接nameserver已经正常。</span>
+<span style="color:#f92672">OpenJDK 64-Bit Server VM warning</span>: <span style="color:#ae81ff">ignoring option MaxPermSize=128m; support was removed in 8.0</span>
+<span style="color:#75715e">#Cluster Name     #Broker Name            #BID  #Addr                  #Version                #InTPS(LOAD)       #OutTPS(LOAD) #PCWait(ms) #Hour #SPACE</span>
+<span style="color:#ae81ff">DefaultCluster    broker-a                0     172.20.0.4 :10911      V4_4_0                   0.00(0,0ms)         0.00(0,0ms)          0 436044.47 -1.0000</span>
+</code></pre></div><h1 id="zookeeper">Zookeeper</h1>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-dockerfile" data-lang="dockerfile"><span style="color:#66d9ef">FROM</span><span style="color:#e6db74"> zookeeper</span><span style="color:#960050;background-color:#1e0010">
+</span><span style="color:#960050;background-color:#1e0010"></span><span style="color:#66d9ef">EXPOSE</span><span style="color:#e6db74"> 2181</span><span style="color:#960050;background-color:#1e0010">
+</span><span style="color:#960050;background-color:#1e0010">
+</span><span style="color:#960050;background-color:#1e0010">
+</span><span style="color:#960050;background-color:#1e0010"></span><span style="color:#75715e">#编译</span><span style="color:#960050;background-color:#1e0010">
+</span><span style="color:#960050;background-color:#1e0010"></span><span style="color:#75715e"># docker build -t myzookeeper .</span><span style="color:#960050;background-color:#1e0010">
+</span><span style="color:#960050;background-color:#1e0010">
+</span><span style="color:#960050;background-color:#1e0010"></span><span style="color:#75715e">#运行</span><span style="color:#960050;background-color:#1e0010">
+</span><span style="color:#960050;background-color:#1e0010"></span><span style="color:#75715e"># docker run  -itd  -p 2181:2181 --name myzookeeper --privileged -v $(pwd)/conf/:/conf/   myzookeeper</span><span style="color:#960050;background-color:#1e0010">
+</span><span style="color:#960050;background-color:#1e0010">
+</span></code></pre></div>
 
                 
                 
@@ -841,47 +756,40 @@ EXPOSE 2181
                     </h4>
                     <ul class="catalog-body"></ul>
                     <nav id="TableOfContents">
-<ul>
-<li><a href="#修改容器-镜像名称">修改容器，镜像名称</a></li>
-<li><a href="#centos7">Centos7</a>
-<ul>
-<li><a href="#start-sh">start.sh</a></li>
-<li><a href="#问题">问题</a></li>
-</ul></li>
-<li><a href="#nginx">Nginx</a></li>
-<li><a href="#mysql">Mysql</a></li>
-<li><a href="#oracle">Oracle</a></li>
-<li><a href="#redis">Redis</a>
-<ul>
-<li><a href="#redis-conf">redis.conf</a></li>
-<li><a href="#服务启动和停止">服务启动和停止</a></li>
-</ul></li>
-<li><a href="#mongodb">MongoDB</a></li>
-<li><a href="#elk">ELK</a>
-<ul>
-<li><a href="#elasticsearch">ElasticSearch</a></li>
-<li><a href="#kibana">Kibana</a></li>
-<li><a href="#logstash">Logstash</a>
-<ul>
-<li><a href="#dockerfile">dockerfile</a></li>
-<li><a href="#logstash-yml">logstash.yml</a></li>
-<li><a href="#pipelines-yml">pipelines.yml</a></li>
-<li><a href="#logstash-sample-conf">logstash-sample.conf</a></li>
-</ul></li>
-<li><a href="#docker-network-create-somenetwork">$ docker network create somenetwork</a></li>
-<li><a href="#问题记录">问题记录</a></li>
-</ul></li>
-<li><a href="#rocketmq">Rocketmq</a>
-<ul>
-<li><a href="#单主机模式">单主机模式</a>
-<ul>
-<li><a href="#docker-compose-yml">docker-compose.yml</a></li>
-<li><a href="#broker-conf">broker.conf</a></li>
-<li><a href="#启动">启动</a></li>
-</ul></li>
-</ul></li>
-<li><a href="#zookeeper">Zookeeper</a></li>
-</ul>
+  <ul>
+    <li><a href="#startsh">start.sh</a></li>
+    <li><a href="#问题">问题</a></li>
+  </ul>
+
+  <ul>
+    <li><a href="#redisconf">redis.conf</a></li>
+    <li><a href="#服务启动和停止">服务启动和停止</a></li>
+  </ul>
+
+  <ul>
+    <li><a href="#elasticsearch">ElasticSearch</a></li>
+    <li><a href="#kibana">Kibana</a></li>
+    <li><a href="#logstash">Logstash</a>
+      <ul>
+        <li><a href="#dockerfile">dockerfile</a></li>
+        <li><a href="#logstashyml">logstash.yml</a></li>
+        <li><a href="#pipelinesyml">pipelines.yml</a></li>
+        <li><a href="#logstash-sampleconf">logstash-sample.conf</a></li>
+      </ul>
+    </li>
+    <li><a href="#-docker-network-create-somenetwork">$ docker network create somenetwork</a></li>
+    <li><a href="#问题记录">问题记录</a></li>
+  </ul>
+
+  <ul>
+    <li><a href="#单主机模式">单主机模式</a>
+      <ul>
+        <li><a href="#docker-composeyml">docker-compose.yml</a></li>
+        <li><a href="#brokerconf">broker.conf</a></li>
+        <li><a href="#启动">启动</a></li>
+      </ul>
+    </li>
+  </ul>
 </nav>
                     <br>
                     <br>
@@ -906,9 +814,6 @@ EXPOSE 2181
                         
                         
                         
-                        <a href="/tags/" title="">
-                            
-                        </a>
                         
                         
                         
@@ -918,101 +823,6 @@ EXPOSE 2181
                         
                         
                         
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        <a href="/tags/qt" title="QT">
-                            QT
-                        </a>
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        <a href="/tags/zookeeper" title="Zookeeper">
-                            Zookeeper
-                        </a>
                         
                         
                         
@@ -1052,8 +862,10 @@ EXPOSE 2181
                         
                         
                         
-                        <a href="/tags/elasticsearch" title="elasticSearch">
-                            elasticSearch
+                        
+                        
+                        <a href="/tags/elasticsearch" title="elasticsearch">
+                            elasticsearch
                         </a>
                         
                         
@@ -1064,9 +876,27 @@ EXPOSE 2181
                         
                         
                         
-                        <a href="/tags/golang" title="golang">
-                            golang
-                        </a>
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
                         
                         
                         
@@ -1104,9 +934,21 @@ EXPOSE 2181
                         
                         
                         
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
                         <a href="/tags/jvm" title="jvm">
                             jvm
                         </a>
+                        
+                        
+                        
+                        
                         
                         
                         
@@ -1130,9 +972,19 @@ EXPOSE 2181
                         
                         
                         
+                        
+                        
+                        
+                        
+                        
+                        
                         <a href="/tags/mongodb" title="mongodb">
                             mongodb
                         </a>
+                        
+                        
+                        
+                        
                         
                         
                         
@@ -1143,10 +995,6 @@ EXPOSE 2181
                         </a>
                         
                         
-                        
-                        <a href="/tags/mycat" title="mycat">
-                            mycat
-                        </a>
                         
                         
                         
@@ -1160,9 +1008,17 @@ EXPOSE 2181
                         
                         
                         
-                        <a href="/tags/nginx" title="nginx">
-                            nginx
-                        </a>
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
                         
                         
                         
@@ -1186,8 +1042,22 @@ EXPOSE 2181
                         
                         
                         
+                        
+                        
                         <a href="/tags/rocketmq" title="rocketmq">
                             rocketmq
+                        </a>
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        <a href="/tags/security%E6%A1%86%E6%9E%B6%E5%AD%A6%E4%B9%A0" title="security框架学习">
+                            security框架学习
                         </a>
                         
                         
@@ -1214,17 +1084,11 @@ EXPOSE 2181
                         
                         
                         
-                        <a href="/tags/springcloud" title="springCloud">
-                            springCloud
-                        </a>
-                        
-                        
-                        
-                        
-                        
                         <a href="/tags/springboot" title="springboot">
                             springboot
                         </a>
+                        
+                        
                         
                         
                         
@@ -1238,6 +1102,9 @@ EXPOSE 2181
                         
                         
                         
+                        <a href="/tags/springcloud" title="springcloud">
+                            springcloud
+                        </a>
                         
                         
                         
@@ -1263,6 +1130,33 @@ EXPOSE 2181
                         
                         
                         
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        <a href="/tags/zookeeper" title="zookeeper">
+                            zookeeper
+                        </a>
                         
                         
                         
@@ -1322,6 +1216,8 @@ EXPOSE 2181
                         
                         
                         
+                        
+                        
                         <a href="/tags/%E5%88%86%E5%B8%83%E5%BC%8F%E7%B3%BB%E5%88%97" title="分布式系列">
                             分布式系列
                         </a>
@@ -1341,6 +1237,10 @@ EXPOSE 2181
                         
                         
                         
+                        
+                        <a href="/tags/%E5%8D%8F%E8%AE%AE%E6%A0%88" title="协议栈">
+                            协议栈
+                        </a>
                         
                         
                         
@@ -1540,6 +1440,12 @@ EXPOSE 2181
                         
                         
                         
+                        
+                        
+                        
+                        
+                        
+                        
                         <a href="/tags/%E7%BD%91%E7%BB%9C%E7%BC%96%E7%A8%8B" title="网络编程">
                             网络编程
                         </a>
@@ -1563,6 +1469,10 @@ EXPOSE 2181
                         
                         
                         
+                        
+                        <a href="/tags/%E8%AE%A4%E8%AF%81%E5%92%8C%E6%8E%88%E6%9D%83" title="认证和授权">
+                            认证和授权
+                        </a>
                         
                         
                         
@@ -1733,7 +1643,7 @@ EXPOSE 2181
                     
                 </ul>
 		<p class="copyright text-muted">
-                    Copyright &copy;  2020
+                    Copyright &copy;  2021
                     <br>
                     <a href="https://themes.gohugo.io/hugo-theme-cleanwhite">CleanWhite Hugo Theme</a> by <a href="https://zhaohuabing.com">Huabing</a> |
                     <iframe

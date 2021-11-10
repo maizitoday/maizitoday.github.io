@@ -97,15 +97,15 @@
                     </li>
                     
                     <li>
-                        <a href="/categories/english">English</a>
+                        <a href="/categories/english">english</a>
                     </li>
                     
                     <li>
-                        <a href="/categories/life">Life</a>
+                        <a href="/categories/life">life</a>
                     </li>
                     
                     <li>
-                        <a href="/categories/tech">Tech</a>
+                        <a href="/categories/tech">tech</a>
                     </li>
                     
 
@@ -237,201 +237,111 @@
                 
                 
                 
-                
-
-<p>[TOC]</p>
-
-<p><strong>转载地址：<a href="https://juejin.im/post/6844904062329028621">https://juejin.im/post/6844904062329028621</a>   作者：张德Talk</strong></p>
-
-<p><img src="/img/Xnip2020-09-19_20-17-22.png" alt="Xnip2020-09-19_20-17-22" /></p>
-
+                <p>[TOC]</p>
+<p><strong>转载地址：https://juejin.im/post/6844904062329028621   作者：张德Talk</strong></p>
+<p><img src="/img/Xnip2020-09-19_20-17-22.png" alt="Xnip2020-09-19_20-17-22"></p>
 <h1 id="两大类索引">两大类索引</h1>
-
-<pre><code>使用的存储引擎：MySQL5.7 InnoDB
-</code></pre>
-
-<h2 id="聚簇索引">聚簇索引</h2>
-
-<pre><code>* 如果表设置了主键，则主键就是聚簇索引
+<pre tabindex="0"><code>使用的存储引擎：MySQL5.7 InnoDB
+</code></pre><h2 id="聚簇索引">聚簇索引</h2>
+<pre tabindex="0"><code>* 如果表设置了主键，则主键就是聚簇索引
 * 如果表没有主键，则会默认第一个NOT NULL，且唯一（UNIQUE）的列作为聚簇索引
 * 以上都没有，则会默认创建一个隐藏的row_id作为聚簇索引
-</code></pre>
-
-<p>InnoDB的聚簇索引的叶子节点存储的是行记录（其实是页结构，一个页包含多行数据），InnoDB必须要有至少一个聚簇索引。</p>
-
+</code></pre><p>InnoDB的聚簇索引的叶子节点存储的是行记录（其实是页结构，一个页包含多行数据），InnoDB必须要有至少一个聚簇索引。</p>
 <p><strong>由此可见，使用聚簇索引查询会很快，因为可以直接定位到行记录。</strong></p>
-
 <h2 id="普通索引">普通索引</h2>
-
 <p>普通索引也叫二级索引，除聚簇索引外的索引，即非聚簇索引。</p>
-
 <p>InnoDB的普通索引叶子节点存储的是主键（聚簇索引）的值，而MyISAM的普通索引存储的是记录指针。</p>
-
 <h1 id="示例">示例</h1>
-
 <h2 id="建表">建表</h2>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-sql" data-lang="sql">mysql<span style="color:#f92672">&gt;</span> <span style="color:#66d9ef">create</span> <span style="color:#66d9ef">table</span> <span style="color:#66d9ef">user</span>(
+    <span style="color:#f92672">-&gt;</span> id int(<span style="color:#ae81ff">10</span>) auto_increment,
+    <span style="color:#f92672">-&gt;</span> name varchar(<span style="color:#ae81ff">30</span>),
+    <span style="color:#f92672">-&gt;</span> age tinyint(<span style="color:#ae81ff">4</span>),
+    <span style="color:#f92672">-&gt;</span> <span style="color:#66d9ef">primary</span> <span style="color:#66d9ef">key</span> (id),
+    <span style="color:#f92672">-&gt;</span> <span style="color:#66d9ef">index</span> idx_age (age)
+    <span style="color:#f92672">-&gt;</span> )engine<span style="color:#f92672">=</span>innodb charset<span style="color:#f92672">=</span>utf8mb4;
 
-<pre><code class="language-sql">mysql&gt; create table user(
-    -&gt; id int(10) auto_increment,
-    -&gt; name varchar(30),
-    -&gt; age tinyint(4),
-    -&gt; primary key (id),
-    -&gt; index idx_age (age)
-    -&gt; )engine=innodb charset=utf8mb4;
-
-</code></pre>
-
-<p>id 字段是聚簇索引，age 字段是普通索引（二级索引）</p>
-
+</code></pre></div><p>id 字段是聚簇索引，age 字段是普通索引（二级索引）</p>
 <h2 id="填充数据">填充数据</h2>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-sql" data-lang="sql"><span style="color:#66d9ef">insert</span> <span style="color:#66d9ef">into</span> <span style="color:#66d9ef">user</span>(name,age) <span style="color:#66d9ef">values</span>(<span style="color:#e6db74">&#39;张三&#39;</span>,<span style="color:#ae81ff">30</span>);
+<span style="color:#66d9ef">insert</span> <span style="color:#66d9ef">into</span> <span style="color:#66d9ef">user</span>(name,age) <span style="color:#66d9ef">values</span>(<span style="color:#e6db74">&#39;李四&#39;</span>,<span style="color:#ae81ff">20</span>);
+<span style="color:#66d9ef">insert</span> <span style="color:#66d9ef">into</span> <span style="color:#66d9ef">user</span>(name,age) <span style="color:#66d9ef">values</span>(<span style="color:#e6db74">&#39;王五&#39;</span>,<span style="color:#ae81ff">40</span>);
+<span style="color:#66d9ef">insert</span> <span style="color:#66d9ef">into</span> <span style="color:#66d9ef">user</span>(name,age) <span style="color:#66d9ef">values</span>(<span style="color:#e6db74">&#39;刘八&#39;</span>,<span style="color:#ae81ff">10</span>);
 
-<pre><code class="language-sql">insert into user(name,age) values('张三',30);
-insert into user(name,age) values('李四',20);
-insert into user(name,age) values('王五',40);
-insert into user(name,age) values('刘八',10);
-
-mysql&gt; select * from user;
-+----+--------+------+
-| id | name  | age |
-+----+--------+------+
-| 1 | 张三  |  30 |
-| 2 | 李四  |  20 |
-| 3 | 王五  |  40 |
-| 4 | 刘八  |  10 |
-+----+--------+------+
-
-</code></pre>
-
-<h2 id="索引存储结构">索引存储结构</h2>
-
-<h3 id="聚簇索引-clusteredindex">聚簇索引（ClusteredIndex）</h3>
-
+mysql<span style="color:#f92672">&gt;</span> <span style="color:#66d9ef">select</span> <span style="color:#f92672">*</span> <span style="color:#66d9ef">from</span> <span style="color:#66d9ef">user</span>;
+<span style="color:#f92672">+</span><span style="color:#75715e">----+--------+------+
+</span><span style="color:#75715e"></span><span style="color:#f92672">|</span> id <span style="color:#f92672">|</span> name  <span style="color:#f92672">|</span> age <span style="color:#f92672">|</span>
+<span style="color:#f92672">+</span><span style="color:#75715e">----+--------+------+
+</span><span style="color:#75715e"></span><span style="color:#f92672">|</span> <span style="color:#ae81ff">1</span> <span style="color:#f92672">|</span> <span style="color:#960050;background-color:#1e0010">张三</span>  <span style="color:#f92672">|</span>  <span style="color:#ae81ff">30</span> <span style="color:#f92672">|</span>
+<span style="color:#f92672">|</span> <span style="color:#ae81ff">2</span> <span style="color:#f92672">|</span> <span style="color:#960050;background-color:#1e0010">李四</span>  <span style="color:#f92672">|</span>  <span style="color:#ae81ff">20</span> <span style="color:#f92672">|</span>
+<span style="color:#f92672">|</span> <span style="color:#ae81ff">3</span> <span style="color:#f92672">|</span> <span style="color:#960050;background-color:#1e0010">王五</span>  <span style="color:#f92672">|</span>  <span style="color:#ae81ff">40</span> <span style="color:#f92672">|</span>
+<span style="color:#f92672">|</span> <span style="color:#ae81ff">4</span> <span style="color:#f92672">|</span> <span style="color:#960050;background-color:#1e0010">刘八</span>  <span style="color:#f92672">|</span>  <span style="color:#ae81ff">10</span> <span style="color:#f92672">|</span>
+<span style="color:#f92672">+</span><span style="color:#75715e">----+--------+------+
+</span><span style="color:#75715e"></span>
+</code></pre></div><h2 id="索引存储结构">索引存储结构</h2>
+<h3 id="聚簇索引clusteredindex">聚簇索引（ClusteredIndex）</h3>
 <p>id 是主键，所以是聚簇索引，其叶子节点存储的是对应行记录的数据。</p>
-
-<p><img src="/img/Xnip2020-09-19_20-20-52.png" alt="Xnip2020-09-19_20-20-52" /></p>
-
-<h3 id="普通索引-secondaryindex">普通索引（secondaryIndex）</h3>
-
+<p><img src="/img/Xnip2020-09-19_20-20-52.png" alt="Xnip2020-09-19_20-20-52"></p>
+<h3 id="普通索引secondaryindex">普通索引（secondaryIndex）</h3>
 <p>age 是普通索引（二级索引），非聚簇索引，其叶子节点存储的是聚簇索引的的值</p>
-
-<p><img src="/img/Xnip2020-09-19_20-22-37.png" alt="Xnip2020-09-19_20-22-37" /></p>
-
+<p><img src="/img/Xnip2020-09-19_20-22-37.png" alt="Xnip2020-09-19_20-22-37"></p>
 <h3 id="查询">查询</h3>
-
 <h4 id="聚簇索引查找过程">聚簇索引查找过程</h4>
-
 <p>如果查询条件为主键（聚簇索引），则只需扫描一次B+树即可通过聚簇索引定位到要查找的行记录数据。</p>
-
-<pre><code class="language-sql">如：select * from user where id = 1;
-</code></pre>
-
-<p><img src="/img/Xnip2020-09-19_20-24-52.png" alt="Xnip2020-09-19_20-24-52" /></p>
-
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-sql" data-lang="sql"><span style="color:#960050;background-color:#1e0010">如：</span><span style="color:#66d9ef">select</span> <span style="color:#f92672">*</span> <span style="color:#66d9ef">from</span> <span style="color:#66d9ef">user</span> <span style="color:#66d9ef">where</span> id <span style="color:#f92672">=</span> <span style="color:#ae81ff">1</span>;
+</code></pre></div><p><img src="/img/Xnip2020-09-19_20-24-52.png" alt="Xnip2020-09-19_20-24-52"></p>
 <h4 id="普通索引查找过程">普通索引查找过程</h4>
-
 <p>如果查询条件为普通索引（非聚簇索引），需要扫描两次B+树，第一次扫描通过普通索引定位到聚簇索引的值，然后第二次扫描通过聚簇索引的值定位到要查找的行记录数据。</p>
-
-<pre><code class="language-sql"> 如：select * from user where age = 30;
-</code></pre>
-
-<h5 id="普通索引查找过程第一步">普通索引查找过程第一步</h5>
-
-<pre><code>1. 先通过普通索引 age=30 定位到主键值 id=1
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-sql" data-lang="sql"> <span style="color:#960050;background-color:#1e0010">如：</span><span style="color:#66d9ef">select</span> <span style="color:#f92672">*</span> <span style="color:#66d9ef">from</span> <span style="color:#66d9ef">user</span> <span style="color:#66d9ef">where</span> age <span style="color:#f92672">=</span> <span style="color:#ae81ff">30</span>;
+</code></pre></div><h5 id="普通索引查找过程第一步">普通索引查找过程第一步</h5>
+<pre tabindex="0"><code>1. 先通过普通索引 age=30 定位到主键值 id=1
 2. 再通过聚集索引 id=1 定位到行记录数据
-</code></pre>
-
-<p><img src="/img/Xnip2020-09-19_20-27-32.png" alt="Xnip2020-09-19_20-27-32" /></p>
-
+</code></pre><p><img src="/img/Xnip2020-09-19_20-27-32.png" alt="Xnip2020-09-19_20-27-32"></p>
 <h5 id="普通索引查找过程第二步">普通索引查找过程第二步</h5>
-
-<p><img src="/img/Xnip2020-09-19_20-28-07.png" alt="Xnip2020-09-19_20-28-07" /></p>
-
+<p><img src="/img/Xnip2020-09-19_20-28-07.png" alt="Xnip2020-09-19_20-28-07"></p>
 <h3 id="回表查询">回表查询</h3>
-
 <p>先通过普通索引的值定位聚簇索引值，再通过聚簇索引的值定位行记录数据，需要扫描两次索引B+树，它的性能较扫一遍索引树更低。</p>
-
 <h2 id="索引覆盖">索引覆盖</h2>
-
 <p>只需要在一棵索引树上就能获取SQL所需的所有列数据，无需回表，速度更快。</p>
-
-<pre><code class="language-sql">例如：select id,age from user where age = 10;
-</code></pre>
-
-<h3 id="如何实现覆盖索引">如何实现覆盖索引</h3>
-
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-sql" data-lang="sql"><span style="color:#960050;background-color:#1e0010">例如：</span><span style="color:#66d9ef">select</span> id,age <span style="color:#66d9ef">from</span> <span style="color:#66d9ef">user</span> <span style="color:#66d9ef">where</span> age <span style="color:#f92672">=</span> <span style="color:#ae81ff">10</span>;
+</code></pre></div><h3 id="如何实现覆盖索引">如何实现覆盖索引</h3>
 <p>常见的方法是：将被查询的字段，建立到联合索引里去。</p>
-
-<pre><code class="language-sql">1、如实现：select id,age from user where age = 10;
-</code></pre>
-
-<p>explain分析：因为age是普通索引，使用到了age索引，通过一次扫描B+树即可查询到相应的结果，这样就实现了覆盖索引</p>
-
-<p><img src="/img/Xnip2020-09-19_20-32-03.png" alt="Xnip2020-09-19_20-32-03" /></p>
-
-<pre><code class="language-sql">2、实现：select id,age,name from user where age = 10;
-</code></pre>
-
-<p>explain分析：age是普通索引，但name列不在索引树上，所以通过age索引在查询到id和age的值后，需要进行回表再查询name的值。<strong>此时的Extra列的NULL表示进行了回表查询</strong>。</p>
-
-<p><img src="/img/Xnip2020-09-19_20-33-28.png" alt="Xnip2020-09-19_20-33-28" /></p>
-
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-sql" data-lang="sql"><span style="color:#ae81ff">1</span><span style="color:#960050;background-color:#1e0010">、如实现：</span><span style="color:#66d9ef">select</span> id,age <span style="color:#66d9ef">from</span> <span style="color:#66d9ef">user</span> <span style="color:#66d9ef">where</span> age <span style="color:#f92672">=</span> <span style="color:#ae81ff">10</span>;
+</code></pre></div><p>explain分析：因为age是普通索引，使用到了age索引，通过一次扫描B+树即可查询到相应的结果，这样就实现了覆盖索引</p>
+<p><img src="/img/Xnip2020-09-19_20-32-03.png" alt="Xnip2020-09-19_20-32-03"></p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-sql" data-lang="sql"><span style="color:#ae81ff">2</span><span style="color:#960050;background-color:#1e0010">、实现：</span><span style="color:#66d9ef">select</span> id,age,name <span style="color:#66d9ef">from</span> <span style="color:#66d9ef">user</span> <span style="color:#66d9ef">where</span> age <span style="color:#f92672">=</span> <span style="color:#ae81ff">10</span>;
+</code></pre></div><p>explain分析：age是普通索引，但name列不在索引树上，所以通过age索引在查询到id和age的值后，需要进行回表再查询name的值。<strong>此时的Extra列的NULL表示进行了回表查询</strong>。</p>
+<p><img src="/img/Xnip2020-09-19_20-33-28.png" alt="Xnip2020-09-19_20-33-28"></p>
 <p>为了实现索引覆盖，需要建组合索引idx_age_name(age,name)</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-sql" data-lang="sql"><span style="color:#66d9ef">drop</span> <span style="color:#66d9ef">index</span> idx_age <span style="color:#66d9ef">on</span> <span style="color:#66d9ef">user</span>;
+<span style="color:#66d9ef">create</span> <span style="color:#66d9ef">index</span> idx_age_name <span style="color:#66d9ef">on</span> <span style="color:#66d9ef">user</span>(<span style="color:#f92672">`</span>age<span style="color:#f92672">`</span>,<span style="color:#f92672">`</span>name<span style="color:#f92672">`</span>);
 
-<pre><code class="language-sql">drop index idx_age on user;
-create index idx_age_name on user(`age`,`name`);
-
-</code></pre>
-
-<p>explain分析：此时字段age和name是组合索引idx_age_name，查询的字段id、age、name的值刚刚都在索引树上，只需扫描一次组合索引B+树即可，这就是实现了索引覆盖，此时的Extra字段为Using index表示使用了索引覆盖。</p>
-
-<p><img src="/img/Xnip2020-09-19_20-34-29.png" alt="Xnip2020-09-19_20-34-29" /></p>
-
+</code></pre></div><p>explain分析：此时字段age和name是组合索引idx_age_name，查询的字段id、age、name的值刚刚都在索引树上，只需扫描一次组合索引B+树即可，这就是实现了索引覆盖，此时的Extra字段为Using index表示使用了索引覆盖。</p>
+<p><img src="/img/Xnip2020-09-19_20-34-29.png" alt="Xnip2020-09-19_20-34-29"></p>
 <h1 id="哪些场景适合使用索引覆盖来优化sql">哪些场景适合使用索引覆盖来优化SQL</h1>
-
 <h2 id="全表count查询优化">全表count查询优化</h2>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-sql" data-lang="sql">mysql<span style="color:#f92672">&gt;</span> <span style="color:#66d9ef">create</span> <span style="color:#66d9ef">table</span> <span style="color:#66d9ef">user</span>(
+    <span style="color:#f92672">-&gt;</span> id int(<span style="color:#ae81ff">10</span>) auto_increment,
+    <span style="color:#f92672">-&gt;</span> name varchar(<span style="color:#ae81ff">30</span>),
+    <span style="color:#f92672">-&gt;</span> age tinyint(<span style="color:#ae81ff">4</span>),
+    <span style="color:#f92672">-&gt;</span> <span style="color:#66d9ef">primary</span> <span style="color:#66d9ef">key</span> (id),
+    <span style="color:#f92672">-&gt;</span> )engine<span style="color:#f92672">=</span>innodb charset<span style="color:#f92672">=</span>utf8mb4;
 
-<pre><code class="language-sql">mysql&gt; create table user(
-    -&gt; id int(10) auto_increment,
-    -&gt; name varchar(30),
-    -&gt; age tinyint(4),
-    -&gt; primary key (id),
-    -&gt; )engine=innodb charset=utf8mb4;
-
-</code></pre>
-
-<pre><code class="language-sql">例如：select count(age) from user;
-</code></pre>
-
-<p><img src="/img/Xnip2020-09-19_20-36-32.png" alt="Xnip2020-09-19_20-36-32" /></p>
-
+</code></pre></div><div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-sql" data-lang="sql"><span style="color:#960050;background-color:#1e0010">例如：</span><span style="color:#66d9ef">select</span> <span style="color:#66d9ef">count</span>(age) <span style="color:#66d9ef">from</span> <span style="color:#66d9ef">user</span>;
+</code></pre></div><p><img src="/img/Xnip2020-09-19_20-36-32.png" alt="Xnip2020-09-19_20-36-32"></p>
 <p>使用索引覆盖优化：创建age字段索引</p>
-
-<pre><code class="language-sql">create index idx_age on user(age);
-</code></pre>
-
-<p><img src="/img/Xnip2020-09-19_20-37-11.png" alt="Xnip2020-09-19_20-37-11" /></p>
-
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-sql" data-lang="sql"><span style="color:#66d9ef">create</span> <span style="color:#66d9ef">index</span> idx_age <span style="color:#66d9ef">on</span> <span style="color:#66d9ef">user</span>(age);
+</code></pre></div><p><img src="/img/Xnip2020-09-19_20-37-11.png" alt="Xnip2020-09-19_20-37-11"></p>
 <h2 id="列查询回表优化">列查询回表优化</h2>
-
 <p>前文在描述索引覆盖使用的例子就是</p>
-
-<pre><code class="language-sql">例如：select id,age,name from user where age = 10;
-</code></pre>
-
-<p>使用索引覆盖：建组合索引idx_age_name(age,name)即可</p>
-
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-sql" data-lang="sql"><span style="color:#960050;background-color:#1e0010">例如：</span><span style="color:#66d9ef">select</span> id,age,name <span style="color:#66d9ef">from</span> <span style="color:#66d9ef">user</span> <span style="color:#66d9ef">where</span> age <span style="color:#f92672">=</span> <span style="color:#ae81ff">10</span>;
+</code></pre></div><p>使用索引覆盖：建组合索引idx_age_name(age,name)即可</p>
 <h2 id="分页查询">分页查询</h2>
-
-<pre><code class="language-sql">例如：select id,age,name from user order by age limit 100,2;
-</code></pre>
-
-<p>因为name字段不是索引，所以在分页查询需要进行回表查询，此时Extra为Using filesort文件排序，查询性能低下。</p>
-
-<p><img src="/img/Xnip2020-09-19_20-38-45.png" alt="Xnip2020-09-19_20-38-45" /></p>
-
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-sql" data-lang="sql"><span style="color:#960050;background-color:#1e0010">例如：</span><span style="color:#66d9ef">select</span> id,age,name <span style="color:#66d9ef">from</span> <span style="color:#66d9ef">user</span> <span style="color:#66d9ef">order</span> <span style="color:#66d9ef">by</span> age <span style="color:#66d9ef">limit</span> <span style="color:#ae81ff">100</span>,<span style="color:#ae81ff">2</span>;
+</code></pre></div><p>因为name字段不是索引，所以在分页查询需要进行回表查询，此时Extra为Using filesort文件排序，查询性能低下。</p>
+<p><img src="/img/Xnip2020-09-19_20-38-45.png" alt="Xnip2020-09-19_20-38-45"></p>
 <p>使用索引覆盖：建组合索引idx_age_name(age,name)</p>
-
-<p><img src="/img/Xnip2020-09-19_20-39-17.png" alt="Xnip2020-09-19_20-39-17" /></p>
+<p><img src="/img/Xnip2020-09-19_20-39-17.png" alt="Xnip2020-09-19_20-39-17"></p>
 
 
                 
@@ -539,43 +449,34 @@ create index idx_age_name on user(`age`,`name`);
                     </h4>
                     <ul class="catalog-body"></ul>
                     <nav id="TableOfContents">
-<ul>
-<li><a href="#两大类索引">两大类索引</a>
-<ul>
-<li><a href="#聚簇索引">聚簇索引</a></li>
-<li><a href="#普通索引">普通索引</a></li>
-</ul></li>
-<li><a href="#示例">示例</a>
-<ul>
-<li><a href="#建表">建表</a></li>
-<li><a href="#填充数据">填充数据</a></li>
-<li><a href="#索引存储结构">索引存储结构</a>
-<ul>
-<li><a href="#聚簇索引-clusteredindex">聚簇索引（ClusteredIndex）</a></li>
-<li><a href="#普通索引-secondaryindex">普通索引（secondaryIndex）</a></li>
-<li><a href="#查询">查询</a>
-<ul>
-<li><a href="#聚簇索引查找过程">聚簇索引查找过程</a></li>
-<li><a href="#普通索引查找过程">普通索引查找过程</a>
-<ul>
-<li><a href="#普通索引查找过程第一步">普通索引查找过程第一步</a></li>
-<li><a href="#普通索引查找过程第二步">普通索引查找过程第二步</a></li>
-</ul></li>
-</ul></li>
-<li><a href="#回表查询">回表查询</a></li>
-</ul></li>
-<li><a href="#索引覆盖">索引覆盖</a>
-<ul>
-<li><a href="#如何实现覆盖索引">如何实现覆盖索引</a></li>
-</ul></li>
-</ul></li>
-<li><a href="#哪些场景适合使用索引覆盖来优化sql">哪些场景适合使用索引覆盖来优化SQL</a>
-<ul>
-<li><a href="#全表count查询优化">全表count查询优化</a></li>
-<li><a href="#列查询回表优化">列查询回表优化</a></li>
-<li><a href="#分页查询">分页查询</a></li>
-</ul></li>
-</ul>
+  <ul>
+    <li><a href="#聚簇索引">聚簇索引</a></li>
+    <li><a href="#普通索引">普通索引</a></li>
+  </ul>
+
+  <ul>
+    <li><a href="#建表">建表</a></li>
+    <li><a href="#填充数据">填充数据</a></li>
+    <li><a href="#索引存储结构">索引存储结构</a>
+      <ul>
+        <li><a href="#聚簇索引clusteredindex">聚簇索引（ClusteredIndex）</a></li>
+        <li><a href="#普通索引secondaryindex">普通索引（secondaryIndex）</a></li>
+        <li><a href="#查询">查询</a></li>
+        <li><a href="#回表查询">回表查询</a></li>
+      </ul>
+    </li>
+    <li><a href="#索引覆盖">索引覆盖</a>
+      <ul>
+        <li><a href="#如何实现覆盖索引">如何实现覆盖索引</a></li>
+      </ul>
+    </li>
+  </ul>
+
+  <ul>
+    <li><a href="#全表count查询优化">全表count查询优化</a></li>
+    <li><a href="#列查询回表优化">列查询回表优化</a></li>
+    <li><a href="#分页查询">分页查询</a></li>
+  </ul>
 </nav>
                     <br>
                     <br>
@@ -600,9 +501,6 @@ create index idx_age_name on user(`age`,`name`);
                         
                         
                         
-                        <a href="/tags/" title="">
-                            
-                        </a>
                         
                         
                         
@@ -612,101 +510,6 @@ create index idx_age_name on user(`age`,`name`);
                         
                         
                         
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        <a href="/tags/qt" title="QT">
-                            QT
-                        </a>
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        <a href="/tags/zookeeper" title="Zookeeper">
-                            Zookeeper
-                        </a>
                         
                         
                         
@@ -746,8 +549,10 @@ create index idx_age_name on user(`age`,`name`);
                         
                         
                         
-                        <a href="/tags/elasticsearch" title="elasticSearch">
-                            elasticSearch
+                        
+                        
+                        <a href="/tags/elasticsearch" title="elasticsearch">
+                            elasticsearch
                         </a>
                         
                         
@@ -758,9 +563,27 @@ create index idx_age_name on user(`age`,`name`);
                         
                         
                         
-                        <a href="/tags/golang" title="golang">
-                            golang
-                        </a>
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
                         
                         
                         
@@ -798,9 +621,21 @@ create index idx_age_name on user(`age`,`name`);
                         
                         
                         
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
                         <a href="/tags/jvm" title="jvm">
                             jvm
                         </a>
+                        
+                        
+                        
+                        
                         
                         
                         
@@ -824,9 +659,19 @@ create index idx_age_name on user(`age`,`name`);
                         
                         
                         
+                        
+                        
+                        
+                        
+                        
+                        
                         <a href="/tags/mongodb" title="mongodb">
                             mongodb
                         </a>
+                        
+                        
+                        
+                        
                         
                         
                         
@@ -837,10 +682,6 @@ create index idx_age_name on user(`age`,`name`);
                         </a>
                         
                         
-                        
-                        <a href="/tags/mycat" title="mycat">
-                            mycat
-                        </a>
                         
                         
                         
@@ -854,9 +695,17 @@ create index idx_age_name on user(`age`,`name`);
                         
                         
                         
-                        <a href="/tags/nginx" title="nginx">
-                            nginx
-                        </a>
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
                         
                         
                         
@@ -880,8 +729,22 @@ create index idx_age_name on user(`age`,`name`);
                         
                         
                         
+                        
+                        
                         <a href="/tags/rocketmq" title="rocketmq">
                             rocketmq
+                        </a>
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        <a href="/tags/security%E6%A1%86%E6%9E%B6%E5%AD%A6%E4%B9%A0" title="security框架学习">
+                            security框架学习
                         </a>
                         
                         
@@ -908,17 +771,11 @@ create index idx_age_name on user(`age`,`name`);
                         
                         
                         
-                        <a href="/tags/springcloud" title="springCloud">
-                            springCloud
-                        </a>
-                        
-                        
-                        
-                        
-                        
                         <a href="/tags/springboot" title="springboot">
                             springboot
                         </a>
+                        
+                        
                         
                         
                         
@@ -932,6 +789,9 @@ create index idx_age_name on user(`age`,`name`);
                         
                         
                         
+                        <a href="/tags/springcloud" title="springcloud">
+                            springcloud
+                        </a>
                         
                         
                         
@@ -957,6 +817,33 @@ create index idx_age_name on user(`age`,`name`);
                         
                         
                         
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        <a href="/tags/zookeeper" title="zookeeper">
+                            zookeeper
+                        </a>
                         
                         
                         
@@ -1016,6 +903,8 @@ create index idx_age_name on user(`age`,`name`);
                         
                         
                         
+                        
+                        
                         <a href="/tags/%E5%88%86%E5%B8%83%E5%BC%8F%E7%B3%BB%E5%88%97" title="分布式系列">
                             分布式系列
                         </a>
@@ -1035,6 +924,10 @@ create index idx_age_name on user(`age`,`name`);
                         
                         
                         
+                        
+                        <a href="/tags/%E5%8D%8F%E8%AE%AE%E6%A0%88" title="协议栈">
+                            协议栈
+                        </a>
                         
                         
                         
@@ -1234,6 +1127,12 @@ create index idx_age_name on user(`age`,`name`);
                         
                         
                         
+                        
+                        
+                        
+                        
+                        
+                        
                         <a href="/tags/%E7%BD%91%E7%BB%9C%E7%BC%96%E7%A8%8B" title="网络编程">
                             网络编程
                         </a>
@@ -1257,6 +1156,10 @@ create index idx_age_name on user(`age`,`name`);
                         
                         
                         
+                        
+                        <a href="/tags/%E8%AE%A4%E8%AF%81%E5%92%8C%E6%8E%88%E6%9D%83" title="认证和授权">
+                            认证和授权
+                        </a>
                         
                         
                         
@@ -1427,7 +1330,7 @@ create index idx_age_name on user(`age`,`name`);
                     
                 </ul>
 		<p class="copyright text-muted">
-                    Copyright &copy;  2020
+                    Copyright &copy;  2021
                     <br>
                     <a href="https://themes.gohugo.io/hugo-theme-cleanwhite">CleanWhite Hugo Theme</a> by <a href="https://zhaohuabing.com">Huabing</a> |
                     <iframe

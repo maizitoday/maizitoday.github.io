@@ -97,15 +97,15 @@
                     </li>
                     
                     <li>
-                        <a href="/categories/english">English</a>
+                        <a href="/categories/english">english</a>
                     </li>
                     
                     <li>
-                        <a href="/categories/life">Life</a>
+                        <a href="/categories/life">life</a>
                     </li>
                     
                     <li>
-                        <a href="/categories/tech">Tech</a>
+                        <a href="/categories/tech">tech</a>
                     </li>
                     
 
@@ -237,178 +237,155 @@
                 
                 
                 
-                
-
-<p>[TOC]</p>
-
+                <p>[TOC]</p>
 <p><strong>说明文章资料来源：尚硅谷韩顺平Netty视频教程（2019发布） <a href="https://www.bilibili.com/video/av76227904?p=36">https://www.bilibili.com/video/av76227904?p=36</a></strong></p>
-
 <h1 id="常见方法">常见方法</h1>
-
 <p>FileChannel 主要用来对本地文件进行 IO 操作，常见的方法有</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-java" data-lang="java"><span style="color:#66d9ef">public</span> <span style="color:#66d9ef">int</span> <span style="color:#a6e22e">read</span><span style="color:#f92672">(</span>ByteBuffer dst<span style="color:#f92672">)</span> <span style="color:#960050;background-color:#1e0010">，</span>从通道读取数据并放到缓冲区中
+<span style="color:#66d9ef">public</span> <span style="color:#66d9ef">int</span> <span style="color:#a6e22e">write</span><span style="color:#f92672">(</span>ByteBuffer src<span style="color:#f92672">)</span> <span style="color:#960050;background-color:#1e0010">，</span>把缓冲区的数据写到通道中 
+<span style="color:#66d9ef">public</span> <span style="color:#66d9ef">long</span> <span style="color:#a6e22e">transferFrom</span><span style="color:#f92672">(</span>ReadableByteChannel src<span style="color:#f92672">,</span> <span style="color:#66d9ef">long</span> position<span style="color:#f92672">,</span> <span style="color:#66d9ef">long</span> count<span style="color:#f92672">)</span><span style="color:#960050;background-color:#1e0010">，</span>从目标通道中复制数据到当前通道
+<span style="color:#66d9ef">public</span> <span style="color:#66d9ef">long</span> <span style="color:#a6e22e">transferTo</span><span style="color:#f92672">(</span><span style="color:#66d9ef">long</span> position<span style="color:#f92672">,</span> <span style="color:#66d9ef">long</span> count<span style="color:#f92672">,</span> WritableByteChannel target<span style="color:#f92672">)</span><span style="color:#960050;background-color:#1e0010">，</span>把数据从当前通道复制给目标通道
+</code></pre></div><h1 id="应用实例-1-本地文件写数据">应用实例 1-本地文件写数据</h1>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-java" data-lang="java"><span style="color:#f92672">package</span> com.nio<span style="color:#f92672">;</span>
+<span style="color:#75715e">/*
+</span><span style="color:#75715e"> * @Description: 请输入....
+</span><span style="color:#75715e"> * @Author: 麦子
+</span><span style="color:#75715e"> * @Date: 2020-03-18 10:30:03
+</span><span style="color:#75715e"> * @LastEditTime: 2020-03-18 10:38:22
+</span><span style="color:#75715e"> * @LastEditors: 麦子
+</span><span style="color:#75715e"> */</span>
 
-<pre><code class="language-java">public int read(ByteBuffer dst) ，从通道读取数据并放到缓冲区中
-public int write(ByteBuffer src) ，把缓冲区的数据写到通道中 
-public long transferFrom(ReadableByteChannel src, long position, long count)，从目标通道中复制数据到当前通道
-public long transferTo(long position, long count, WritableByteChannel target)，把数据从当前通道复制给目标通道
-</code></pre>
+<span style="color:#f92672">import</span> java.io.FileNotFoundException<span style="color:#f92672">;</span>
+<span style="color:#f92672">import</span> java.io.FileOutputStream<span style="color:#f92672">;</span>
+<span style="color:#f92672">import</span> java.io.IOException<span style="color:#f92672">;</span>
+<span style="color:#f92672">import</span> java.nio.ByteBuffer<span style="color:#f92672">;</span>
+<span style="color:#f92672">import</span> java.nio.channels.FileChannel<span style="color:#f92672">;</span>
 
-<h1 id="应用实例-1-本地文件写数据">应用实例 1-本地文件写数据</h1>
+<span style="color:#66d9ef">public</span> <span style="color:#66d9ef">class</span> <span style="color:#a6e22e">FileChannelDemo</span> <span style="color:#f92672">{</span>
 
-<pre><code class="language-java">package com.nio;
-/*
- * @Description: 请输入....
- * @Author: 麦子
- * @Date: 2020-03-18 10:30:03
- * @LastEditTime: 2020-03-18 10:38:22
- * @LastEditors: 麦子
- */
+    <span style="color:#66d9ef">public</span> <span style="color:#66d9ef">static</span> <span style="color:#66d9ef">void</span> <span style="color:#a6e22e">main</span><span style="color:#f92672">(</span>String<span style="color:#f92672">[]</span> args<span style="color:#f92672">)</span> <span style="color:#66d9ef">throws</span> IOException <span style="color:#f92672">{</span>
+        String str <span style="color:#f92672">=</span> <span style="color:#e6db74">&#34;hello,尚硅谷&#34;</span><span style="color:#f92672">;</span> <span style="color:#75715e">// 创建一个输出流-&gt;
+</span><span style="color:#75715e"></span>        FileOutputStream fileOutputStream <span style="color:#f92672">=</span> <span style="color:#66d9ef">new</span> FileOutputStream<span style="color:#f92672">(</span><span style="color:#e6db74">&#34;/Users/maizi/Desktop/1.txt&#34;</span><span style="color:#f92672">);</span>
 
-import java.io.FileNotFoundException;
-import java.io.FileOutputStream;
-import java.io.IOException;
-import java.nio.ByteBuffer;
-import java.nio.channels.FileChannel;
+        <span style="color:#75715e">// 通过 fileOutputStream 获取 对应的 FileChannel //这个 fileChannel 真实 类型是
+</span><span style="color:#75715e"></span>        FileChannel fileChannel <span style="color:#f92672">=</span> fileOutputStream<span style="color:#f92672">.</span><span style="color:#a6e22e">getChannel</span><span style="color:#f92672">();</span>
 
-public class FileChannelDemo {
+        <span style="color:#75715e">// 创建一个缓冲区 ByteBuffer
+</span><span style="color:#75715e"></span>        ByteBuffer byteBuffer <span style="color:#f92672">=</span> ByteBuffer<span style="color:#f92672">.</span><span style="color:#a6e22e">allocate</span><span style="color:#f92672">(</span>1024<span style="color:#f92672">);</span>
 
-    public static void main(String[] args) throws IOException {
-        String str = &quot;hello,尚硅谷&quot;; // 创建一个输出流-&gt;
-        FileOutputStream fileOutputStream = new FileOutputStream(&quot;/Users/maizi/Desktop/1.txt&quot;);
+        <span style="color:#75715e">// 将 str 放入 byteBuffer
+</span><span style="color:#75715e"></span>        byteBuffer<span style="color:#f92672">.</span><span style="color:#a6e22e">put</span><span style="color:#f92672">(</span>str<span style="color:#f92672">.</span><span style="color:#a6e22e">getBytes</span><span style="color:#f92672">());</span>
 
-        // 通过 fileOutputStream 获取 对应的 FileChannel //这个 fileChannel 真实 类型是
-        FileChannel fileChannel = fileOutputStream.getChannel();
+        <span style="color:#75715e">// 对 byteBuffer 进行 flip
+</span><span style="color:#75715e"></span>        byteBuffer<span style="color:#f92672">.</span><span style="color:#a6e22e">flip</span><span style="color:#f92672">();</span>
 
-        // 创建一个缓冲区 ByteBuffer
-        ByteBuffer byteBuffer = ByteBuffer.allocate(1024);
+        <span style="color:#75715e">// 将 byteBuffer 数据写入到 fileChannel
+</span><span style="color:#75715e"></span>        fileChannel<span style="color:#f92672">.</span><span style="color:#a6e22e">write</span><span style="color:#f92672">(</span>byteBuffer<span style="color:#f92672">);</span>
+        fileOutputStream<span style="color:#f92672">.</span><span style="color:#a6e22e">close</span><span style="color:#f92672">();</span>
+    <span style="color:#f92672">}</span>
 
-        // 将 str 放入 byteBuffer
-        byteBuffer.put(str.getBytes());
+<span style="color:#f92672">}</span>
+</code></pre></div><h1 id="应用实例-2-本地文件读数据">应用实例 2-本地文件读数据</h1>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-java" data-lang="java"><span style="color:#75715e">// 创建文件的输入流
+</span><span style="color:#75715e"></span>File file <span style="color:#f92672">=</span> <span style="color:#66d9ef">new</span> File<span style="color:#f92672">(</span><span style="color:#e6db74">&#34;/Users/maizi/Desktop/1.txt&#34;</span><span style="color:#f92672">);</span>
+FileInputStream fileInputStream <span style="color:#f92672">=</span> <span style="color:#66d9ef">new</span> FileInputStream<span style="color:#f92672">(</span>file<span style="color:#f92672">);</span>
 
-        // 对 byteBuffer 进行 flip
-        byteBuffer.flip();
+<span style="color:#75715e">// 通过 fileInputStream 获取对应的 FileChannel -&gt; 实际类型
+</span><span style="color:#75715e"></span>FileChannel fileChannel <span style="color:#f92672">=</span> fileInputStream<span style="color:#f92672">.</span><span style="color:#a6e22e">getChannel</span><span style="color:#f92672">();</span>
 
-        // 将 byteBuffer 数据写入到 fileChannel
-        fileChannel.write(byteBuffer);
-        fileOutputStream.close();
-    }
+<span style="color:#75715e">// 创建缓冲区
+</span><span style="color:#75715e"></span>ByteBuffer byteBuffer <span style="color:#f92672">=</span> ByteBuffer<span style="color:#f92672">.</span><span style="color:#a6e22e">allocate</span><span style="color:#f92672">((</span><span style="color:#66d9ef">int</span><span style="color:#f92672">)</span> file<span style="color:#f92672">.</span><span style="color:#a6e22e">length</span><span style="color:#f92672">());</span>
 
-}
-</code></pre>
+<span style="color:#75715e">// 将 通道的数据读入到 Buffer
+</span><span style="color:#75715e"></span>fileChannel<span style="color:#f92672">.</span><span style="color:#a6e22e">read</span><span style="color:#f92672">(</span>byteBuffer<span style="color:#f92672">);</span>
 
-<h1 id="应用实例-2-本地文件读数据">应用实例 2-本地文件读数据</h1>
+<span style="color:#75715e">// 将 byteBuffer 的 字节数据 转成 String
+</span><span style="color:#75715e"></span>System<span style="color:#f92672">.</span><span style="color:#a6e22e">out</span><span style="color:#f92672">.</span><span style="color:#a6e22e">println</span><span style="color:#f92672">(</span><span style="color:#66d9ef">new</span> String<span style="color:#f92672">(</span>byteBuffer<span style="color:#f92672">.</span><span style="color:#a6e22e">array</span><span style="color:#f92672">()));</span>
+fileInputStream<span style="color:#f92672">.</span><span style="color:#a6e22e">close</span><span style="color:#f92672">();</span>
 
-<pre><code class="language-java">// 创建文件的输入流
-File file = new File(&quot;/Users/maizi/Desktop/1.txt&quot;);
-FileInputStream fileInputStream = new FileInputStream(file);
-
-// 通过 fileInputStream 获取对应的 FileChannel -&gt; 实际类型
-FileChannel fileChannel = fileInputStream.getChannel();
-
-// 创建缓冲区
-ByteBuffer byteBuffer = ByteBuffer.allocate((int) file.length());
-
-// 将 通道的数据读入到 Buffer
-fileChannel.read(byteBuffer);
-
-// 将 byteBuffer 的 字节数据 转成 String
-System.out.println(new String(byteBuffer.array()));
-fileInputStream.close();
-
-</code></pre>
-
-<h1 id="应用实例-3-使用一个-buffer-完成文件读取-写入">应用实例 3-使用一个 Buffer 完成文件读取、写入</h1>
-
+</code></pre></div><h1 id="应用实例-3-使用一个-buffer-完成文件读取写入">应用实例 3-使用一个 Buffer 完成文件读取、写入</h1>
 <p>使用 FileChannel(通道) 和 方法 read , write，完成文件的拷贝</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-java" data-lang="java"> <span style="color:#66d9ef">public</span> <span style="color:#66d9ef">static</span> <span style="color:#66d9ef">void</span> <span style="color:#a6e22e">main</span><span style="color:#f92672">(</span>String<span style="color:#f92672">[]</span> args<span style="color:#f92672">)</span> <span style="color:#66d9ef">throws</span> IOException <span style="color:#f92672">{</span>
 
-<pre><code class="language-java"> public static void main(String[] args) throws IOException {
+        FileInputStream fileInputStream <span style="color:#f92672">=</span> <span style="color:#66d9ef">new</span> FileInputStream<span style="color:#f92672">(</span><span style="color:#e6db74">&#34;/Users/maizi/Desktop/1.txt&#34;</span><span style="color:#f92672">);</span>
+        FileChannel fileChannel01 <span style="color:#f92672">=</span> fileInputStream<span style="color:#f92672">.</span><span style="color:#a6e22e">getChannel</span><span style="color:#f92672">();</span>
 
-        FileInputStream fileInputStream = new FileInputStream(&quot;/Users/maizi/Desktop/1.txt&quot;);
-        FileChannel fileChannel01 = fileInputStream.getChannel();
+        FileOutputStream fileOutputStream <span style="color:#f92672">=</span> <span style="color:#66d9ef">new</span> FileOutputStream<span style="color:#f92672">(</span><span style="color:#e6db74">&#34;/Users/maizi/Desktop/2.txt&#34;</span><span style="color:#f92672">);</span>
+        FileChannel fileChannel02 <span style="color:#f92672">=</span> fileOutputStream<span style="color:#f92672">.</span><span style="color:#a6e22e">getChannel</span><span style="color:#f92672">();</span>
 
-        FileOutputStream fileOutputStream = new FileOutputStream(&quot;/Users/maizi/Desktop/2.txt&quot;);
-        FileChannel fileChannel02 = fileOutputStream.getChannel();
+        ByteBuffer byteBuffer <span style="color:#f92672">=</span> ByteBuffer<span style="color:#f92672">.</span><span style="color:#a6e22e">allocate</span><span style="color:#f92672">(</span>512<span style="color:#f92672">);</span>
 
-        ByteBuffer byteBuffer = ByteBuffer.allocate(512);
+        <span style="color:#66d9ef">while</span> <span style="color:#f92672">(</span><span style="color:#66d9ef">true</span><span style="color:#f92672">)</span> <span style="color:#f92672">{</span> <span style="color:#75715e">// 循环读取
+</span><span style="color:#75715e"></span>            <span style="color:#75715e">//这里有一个重要的操作，一定不要忘了
+</span><span style="color:#75715e"></span>            <span style="color:#75715e">/* 
+</span><span style="color:#75715e">              public final Buffer clear() 
+</span><span style="color:#75715e">                { 
+</span><span style="color:#75715e">                     position = 0; 
+</span><span style="color:#75715e">                     limit = capacity; 
+</span><span style="color:#75715e">                     mark = -1; 
+</span><span style="color:#75715e">                     return this;
+</span><span style="color:#75715e">                }
+</span><span style="color:#75715e">            */</span>
+            byteBuffer<span style="color:#f92672">.</span><span style="color:#a6e22e">clear</span><span style="color:#f92672">();</span> <span style="color:#75715e">// 清空 buffer
+</span><span style="color:#75715e"></span>            <span style="color:#66d9ef">int</span> read <span style="color:#f92672">=</span> fileChannel01<span style="color:#f92672">.</span><span style="color:#a6e22e">read</span><span style="color:#f92672">(</span>byteBuffer<span style="color:#f92672">);</span>
+            System<span style="color:#f92672">.</span><span style="color:#a6e22e">out</span><span style="color:#f92672">.</span><span style="color:#a6e22e">println</span><span style="color:#f92672">(</span><span style="color:#e6db74">&#34;read =&#34;</span> <span style="color:#f92672">+</span> read<span style="color:#f92672">);</span>
+            <span style="color:#66d9ef">if</span> <span style="color:#f92672">(</span>read <span style="color:#f92672">==</span> <span style="color:#f92672">-</span>1<span style="color:#f92672">)</span> <span style="color:#f92672">{</span> <span style="color:#75715e">// 表示读完
+</span><span style="color:#75715e"></span>                <span style="color:#66d9ef">break</span><span style="color:#f92672">;</span>
+            <span style="color:#f92672">}</span> <span style="color:#75715e">// 将 buffer 中的数据写入到 fileChannel02 -- 2.txt
+</span><span style="color:#75715e"></span>            byteBuffer<span style="color:#f92672">.</span><span style="color:#a6e22e">flip</span><span style="color:#f92672">();</span>
+            fileChannel02<span style="color:#f92672">.</span><span style="color:#a6e22e">write</span><span style="color:#f92672">(</span>byteBuffer<span style="color:#f92672">);</span>
 
-        while (true) { // 循环读取
-            //这里有一个重要的操作，一定不要忘了
-            /* 
-              public final Buffer clear() 
-                { 
-                     position = 0; 
-                     limit = capacity; 
-                     mark = -1; 
-                     return this;
-                }
-            */
-            byteBuffer.clear(); // 清空 buffer
-            int read = fileChannel01.read(byteBuffer);
-            System.out.println(&quot;read =&quot; + read);
-            if (read == -1) { // 表示读完
-                break;
-            } // 将 buffer 中的数据写入到 fileChannel02 -- 2.txt
-            byteBuffer.flip();
-            fileChannel02.write(byteBuffer);
+        <span style="color:#f92672">}</span>
 
-        }
+        <span style="color:#75715e">// 关闭相关的流
+</span><span style="color:#75715e"></span>        fileInputStream<span style="color:#f92672">.</span><span style="color:#a6e22e">close</span><span style="color:#f92672">();</span>
+        fileOutputStream<span style="color:#f92672">.</span><span style="color:#a6e22e">close</span><span style="color:#f92672">();</span>
 
-        // 关闭相关的流
-        fileInputStream.close();
-        fileOutputStream.close();
+    <span style="color:#f92672">}</span>
+</code></pre></div><h1 id="应用实例-4-拷贝文件-transferfrom-方法">应用实例 4-拷贝文件 transferFrom 方法</h1>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-java" data-lang="java"><span style="color:#66d9ef">public</span> <span style="color:#66d9ef">class</span> <span style="color:#a6e22e">FileChannelDemo</span> <span style="color:#f92672">{</span>
+    <span style="color:#66d9ef">public</span> <span style="color:#66d9ef">static</span> <span style="color:#66d9ef">void</span> <span style="color:#a6e22e">main</span><span style="color:#f92672">(</span>String<span style="color:#f92672">[]</span> args<span style="color:#f92672">)</span> <span style="color:#66d9ef">throws</span> IOException <span style="color:#f92672">{</span>
+        FileInputStream fileInputStream <span style="color:#f92672">=</span> <span style="color:#66d9ef">new</span> FileInputStream<span style="color:#f92672">(</span><span style="color:#e6db74">&#34;/Users/maizi/Desktop/1.txt&#34;</span><span style="color:#f92672">);</span>
+        FileOutputStream fileOutputStream <span style="color:#f92672">=</span> <span style="color:#66d9ef">new</span> FileOutputStream<span style="color:#f92672">(</span><span style="color:#e6db74">&#34;/Users/maizi/Desktop/3.txt&#34;</span><span style="color:#f92672">);</span>
 
-    }
-</code></pre>
+        <span style="color:#75715e">// 获取各个流对应的 filechannel
+</span><span style="color:#75715e"></span>        FileChannel sourceCh <span style="color:#f92672">=</span> fileInputStream<span style="color:#f92672">.</span><span style="color:#a6e22e">getChannel</span><span style="color:#f92672">();</span>
+        FileChannel destCh <span style="color:#f92672">=</span> fileOutputStream<span style="color:#f92672">.</span><span style="color:#a6e22e">getChannel</span><span style="color:#f92672">();</span>
 
-<h1 id="应用实例-4-拷贝文件-transferfrom-方法">应用实例 4-拷贝文件 transferFrom 方法</h1>
+        <span style="color:#75715e">// 使用 transferForm 完成拷贝
+</span><span style="color:#75715e"></span>        destCh<span style="color:#f92672">.</span><span style="color:#a6e22e">transferFrom</span><span style="color:#f92672">(</span>sourceCh<span style="color:#f92672">,</span> 0<span style="color:#f92672">,</span> sourceCh<span style="color:#f92672">.</span><span style="color:#a6e22e">size</span><span style="color:#f92672">());</span> <span style="color:#75715e">// 关闭相关通道和流
+</span><span style="color:#75715e"></span>        sourceCh<span style="color:#f92672">.</span><span style="color:#a6e22e">close</span><span style="color:#f92672">();</span>
+        destCh<span style="color:#f92672">.</span><span style="color:#a6e22e">close</span><span style="color:#f92672">();</span>
+        fileInputStream<span style="color:#f92672">.</span><span style="color:#a6e22e">close</span><span style="color:#f92672">();</span>
+        fileOutputStream<span style="color:#f92672">.</span><span style="color:#a6e22e">close</span><span style="color:#f92672">();</span>
+    <span style="color:#f92672">}</span>
+<span style="color:#f92672">}</span> 
+</code></pre></div><h1 id="mappedbytebuffer">MappedByteBuffer</h1>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-java" data-lang="java">RandomAccessFile randomAccessFile <span style="color:#f92672">=</span> <span style="color:#66d9ef">new</span> RandomAccessFile<span style="color:#f92672">(</span><span style="color:#e6db74">&#34;/Users/maizi/Desktop/1.txt&#34;</span><span style="color:#f92672">,</span> <span style="color:#e6db74">&#34;rw&#34;</span><span style="color:#f92672">);</span> <span style="color:#75715e">// 获取对应的通道
+</span><span style="color:#75715e"></span>        FileChannel channel <span style="color:#f92672">=</span> randomAccessFile<span style="color:#f92672">.</span><span style="color:#a6e22e">getChannel</span><span style="color:#f92672">();</span>
 
-<pre><code class="language-java">public class FileChannelDemo {
-    public static void main(String[] args) throws IOException {
-        FileInputStream fileInputStream = new FileInputStream(&quot;/Users/maizi/Desktop/1.txt&quot;);
-        FileOutputStream fileOutputStream = new FileOutputStream(&quot;/Users/maizi/Desktop/3.txt&quot;);
+        <span style="color:#75715e">/**
+</span><span style="color:#75715e">         * * 参数 
+</span><span style="color:#75715e">         * 1: FileChannel.MapMode.READ_WRITE 使用的读写模式 * 参数 
+</span><span style="color:#75715e">         * 2： 0 ： 可以直接修改的起始位置 * 参数
+</span><span style="color:#75715e">         * 3:  5: 是映射到内存的大小(不是索引位置) ,
+</span><span style="color:#75715e">               即将 1.txt 的多少个字节映射到内存 * 可以直接修改的范围就是 0-5 * 实际类型DirectByteBuffer
+</span><span style="color:#75715e">         * 
+</span><span style="color:#75715e">         */</span>
+        MappedByteBuffer mappedByteBuffer <span style="color:#f92672">=</span> channel<span style="color:#f92672">.</span><span style="color:#a6e22e">map</span><span style="color:#f92672">(</span>FileChannel<span style="color:#f92672">.</span><span style="color:#a6e22e">MapMode</span><span style="color:#f92672">.</span><span style="color:#a6e22e">READ_WRITE</span><span style="color:#f92672">,</span> 0<span style="color:#f92672">,</span> 5<span style="color:#f92672">);</span>
 
-        // 获取各个流对应的 filechannel
-        FileChannel sourceCh = fileInputStream.getChannel();
-        FileChannel destCh = fileOutputStream.getChannel();
+        mappedByteBuffer<span style="color:#f92672">.</span><span style="color:#a6e22e">put</span><span style="color:#f92672">(</span>0<span style="color:#f92672">,</span> <span style="color:#f92672">(</span><span style="color:#66d9ef">byte</span><span style="color:#f92672">)</span> <span style="color:#e6db74">&#39;H&#39;</span><span style="color:#f92672">);</span>
+        mappedByteBuffer<span style="color:#f92672">.</span><span style="color:#a6e22e">put</span><span style="color:#f92672">(</span>3<span style="color:#f92672">,</span> <span style="color:#f92672">(</span><span style="color:#66d9ef">byte</span><span style="color:#f92672">)</span> <span style="color:#e6db74">&#39;9&#39;</span><span style="color:#f92672">);</span>
+        <span style="color:#75715e">//mappedByteBuffer.put(5, (byte) &#39;Y&#39;);// IndexOutOfBoundsException
+</span><span style="color:#75715e"></span>
+        randomAccessFile<span style="color:#f92672">.</span><span style="color:#a6e22e">close</span><span style="color:#f92672">();</span>
+        System<span style="color:#f92672">.</span><span style="color:#a6e22e">out</span><span style="color:#f92672">.</span><span style="color:#a6e22e">println</span><span style="color:#f92672">(</span><span style="color:#e6db74">&#34;修改成功~~&#34;</span><span style="color:#f92672">);</span>
 
-        // 使用 transferForm 完成拷贝
-        destCh.transferFrom(sourceCh, 0, sourceCh.size()); // 关闭相关通道和流
-        sourceCh.close();
-        destCh.close();
-        fileInputStream.close();
-        fileOutputStream.close();
-    }
-} 
-</code></pre>
+原文件内容<span style="color:#960050;background-color:#1e0010">：</span>hello<span style="color:#f92672">,</span>尚硅谷
 
-<h1 id="mappedbytebuffer">MappedByteBuffer</h1>
+程序运行后打印结果<span style="color:#960050;background-color:#1e0010">：</span> Hel9o<span style="color:#f92672">,</span>尚硅谷
 
-<pre><code class="language-java">RandomAccessFile randomAccessFile = new RandomAccessFile(&quot;/Users/maizi/Desktop/1.txt&quot;, &quot;rw&quot;); // 获取对应的通道
-        FileChannel channel = randomAccessFile.getChannel();
-
-        /**
-         * * 参数 
-         * 1: FileChannel.MapMode.READ_WRITE 使用的读写模式 * 参数 
-         * 2： 0 ： 可以直接修改的起始位置 * 参数
-         * 3:  5: 是映射到内存的大小(不是索引位置) ,
-               即将 1.txt 的多少个字节映射到内存 * 可以直接修改的范围就是 0-5 * 实际类型DirectByteBuffer
-         * 
-         */
-        MappedByteBuffer mappedByteBuffer = channel.map(FileChannel.MapMode.READ_WRITE, 0, 5);
-
-        mappedByteBuffer.put(0, (byte) 'H');
-        mappedByteBuffer.put(3, (byte) '9');
-        //mappedByteBuffer.put(5, (byte) 'Y');// IndexOutOfBoundsException
-
-        randomAccessFile.close();
-        System.out.println(&quot;修改成功~~&quot;);
-
-原文件内容：hello,尚硅谷
-
-程序运行后打印结果： Hel9o,尚硅谷
-
-</code></pre>
-
+</code></pre></div>
 
                 
                 
@@ -514,16 +491,7 @@ fileInputStream.close();
                         <a class="catalog-toggle" style="font-size: 24px;" href="index.html#">目录结构</a>
                     </h4>
                     <ul class="catalog-body"></ul>
-                    <nav id="TableOfContents">
-<ul>
-<li><a href="#常见方法">常见方法</a></li>
-<li><a href="#应用实例-1-本地文件写数据">应用实例 1-本地文件写数据</a></li>
-<li><a href="#应用实例-2-本地文件读数据">应用实例 2-本地文件读数据</a></li>
-<li><a href="#应用实例-3-使用一个-buffer-完成文件读取-写入">应用实例 3-使用一个 Buffer 完成文件读取、写入</a></li>
-<li><a href="#应用实例-4-拷贝文件-transferfrom-方法">应用实例 4-拷贝文件 transferFrom 方法</a></li>
-<li><a href="#mappedbytebuffer">MappedByteBuffer</a></li>
-</ul>
-</nav>
+                    <nav id="TableOfContents"></nav>
                     <br>
                     <br>
                     <br>
@@ -547,9 +515,6 @@ fileInputStream.close();
                         
                         
                         
-                        <a href="/tags/" title="">
-                            
-                        </a>
                         
                         
                         
@@ -559,101 +524,6 @@ fileInputStream.close();
                         
                         
                         
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        <a href="/tags/qt" title="QT">
-                            QT
-                        </a>
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        <a href="/tags/zookeeper" title="Zookeeper">
-                            Zookeeper
-                        </a>
                         
                         
                         
@@ -693,8 +563,10 @@ fileInputStream.close();
                         
                         
                         
-                        <a href="/tags/elasticsearch" title="elasticSearch">
-                            elasticSearch
+                        
+                        
+                        <a href="/tags/elasticsearch" title="elasticsearch">
+                            elasticsearch
                         </a>
                         
                         
@@ -705,9 +577,27 @@ fileInputStream.close();
                         
                         
                         
-                        <a href="/tags/golang" title="golang">
-                            golang
-                        </a>
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
                         
                         
                         
@@ -745,9 +635,21 @@ fileInputStream.close();
                         
                         
                         
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
                         <a href="/tags/jvm" title="jvm">
                             jvm
                         </a>
+                        
+                        
+                        
+                        
                         
                         
                         
@@ -771,9 +673,19 @@ fileInputStream.close();
                         
                         
                         
+                        
+                        
+                        
+                        
+                        
+                        
                         <a href="/tags/mongodb" title="mongodb">
                             mongodb
                         </a>
+                        
+                        
+                        
+                        
                         
                         
                         
@@ -784,10 +696,6 @@ fileInputStream.close();
                         </a>
                         
                         
-                        
-                        <a href="/tags/mycat" title="mycat">
-                            mycat
-                        </a>
                         
                         
                         
@@ -801,9 +709,17 @@ fileInputStream.close();
                         
                         
                         
-                        <a href="/tags/nginx" title="nginx">
-                            nginx
-                        </a>
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
                         
                         
                         
@@ -827,8 +743,22 @@ fileInputStream.close();
                         
                         
                         
+                        
+                        
                         <a href="/tags/rocketmq" title="rocketmq">
                             rocketmq
+                        </a>
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        <a href="/tags/security%E6%A1%86%E6%9E%B6%E5%AD%A6%E4%B9%A0" title="security框架学习">
+                            security框架学习
                         </a>
                         
                         
@@ -855,17 +785,11 @@ fileInputStream.close();
                         
                         
                         
-                        <a href="/tags/springcloud" title="springCloud">
-                            springCloud
-                        </a>
-                        
-                        
-                        
-                        
-                        
                         <a href="/tags/springboot" title="springboot">
                             springboot
                         </a>
+                        
+                        
                         
                         
                         
@@ -879,6 +803,9 @@ fileInputStream.close();
                         
                         
                         
+                        <a href="/tags/springcloud" title="springcloud">
+                            springcloud
+                        </a>
                         
                         
                         
@@ -904,6 +831,33 @@ fileInputStream.close();
                         
                         
                         
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        <a href="/tags/zookeeper" title="zookeeper">
+                            zookeeper
+                        </a>
                         
                         
                         
@@ -963,6 +917,8 @@ fileInputStream.close();
                         
                         
                         
+                        
+                        
                         <a href="/tags/%E5%88%86%E5%B8%83%E5%BC%8F%E7%B3%BB%E5%88%97" title="分布式系列">
                             分布式系列
                         </a>
@@ -982,6 +938,10 @@ fileInputStream.close();
                         
                         
                         
+                        
+                        <a href="/tags/%E5%8D%8F%E8%AE%AE%E6%A0%88" title="协议栈">
+                            协议栈
+                        </a>
                         
                         
                         
@@ -1181,6 +1141,12 @@ fileInputStream.close();
                         
                         
                         
+                        
+                        
+                        
+                        
+                        
+                        
                         <a href="/tags/%E7%BD%91%E7%BB%9C%E7%BC%96%E7%A8%8B" title="网络编程">
                             网络编程
                         </a>
@@ -1204,6 +1170,10 @@ fileInputStream.close();
                         
                         
                         
+                        
+                        <a href="/tags/%E8%AE%A4%E8%AF%81%E5%92%8C%E6%8E%88%E6%9D%83" title="认证和授权">
+                            认证和授权
+                        </a>
                         
                         
                         
@@ -1374,7 +1344,7 @@ fileInputStream.close();
                     
                 </ul>
 		<p class="copyright text-muted">
-                    Copyright &copy;  2020
+                    Copyright &copy;  2021
                     <br>
                     <a href="https://themes.gohugo.io/hugo-theme-cleanwhite">CleanWhite Hugo Theme</a> by <a href="https://zhaohuabing.com">Huabing</a> |
                     <iframe

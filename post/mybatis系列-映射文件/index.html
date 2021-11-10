@@ -97,15 +97,15 @@
                     </li>
                     
                     <li>
-                        <a href="/categories/english">English</a>
+                        <a href="/categories/english">english</a>
                     </li>
                     
                     <li>
-                        <a href="/categories/life">Life</a>
+                        <a href="/categories/life">life</a>
                     </li>
                     
                     <li>
-                        <a href="/categories/tech">Tech</a>
+                        <a href="/categories/tech">tech</a>
                     </li>
                     
 
@@ -249,241 +249,174 @@
                 
                 
                 
-                
-
-<p>[TOC]</p>
-
+                <p>[TOC]</p>
 <p><strong>说明：以下文字总结来源尚硅谷视频《MyBatis》<a href="https://www.bilibili.com/video/av34875242/?p=9">https://www.bilibili.com/video/av34875242/?p=9</a></strong></p>
-
 <p><strong>官网文档：<a href="http://www.mybatis.org/mybatis-3/zh/configuration.html#typeAliases">http://www.mybatis.org/mybatis-3/zh/configuration.html#typeAliases</a></strong></p>
-
-<h1 id="默认返回-integer-long-boolean类型">默认返回 Integer，Long，Boolean类型</h1>
-
+<h1 id="默认返回-integerlongboolean类型">默认返回 Integer，Long，Boolean类型</h1>
 <p>对于增加，删除，修改， mybatis框架默认返回上面三种类型， 只要在Mapper中，直接写好返回类型就OK了。</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-java" data-lang="java"><span style="color:#66d9ef">public</span> <span style="color:#66d9ef">interface</span> <span style="color:#a6e22e">MysqlStudentMapper</span> <span style="color:#f92672">{</span>
 
-<pre><code class="language-java">public interface MysqlStudentMapper {
+    <span style="color:#66d9ef">boolean</span> <span style="color:#a6e22e">insertStudent</span><span style="color:#f92672">(</span>Student student<span style="color:#f92672">);</span>
 
-    boolean insertStudent(Student student);
-
-    int deleteStudent(Student student);
+    <span style="color:#66d9ef">int</span> <span style="color:#a6e22e">deleteStudent</span><span style="color:#f92672">(</span>Student student<span style="color:#f92672">);</span>
     
-    int updateStudent(Student student);
-}
-</code></pre>
-
-<pre><code class="language-xml">&lt;insert id=&quot;insertStudent&quot;&gt;
+    <span style="color:#66d9ef">int</span> <span style="color:#a6e22e">updateStudent</span><span style="color:#f92672">(</span>Student student<span style="color:#f92672">);</span>
+<span style="color:#f92672">}</span>
+</code></pre></div><div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-xml" data-lang="xml"><span style="color:#f92672">&lt;insert</span> <span style="color:#a6e22e">id=</span><span style="color:#e6db74">&#34;insertStudent&#34;</span><span style="color:#f92672">&gt;</span>
           insert into student (id,name,sex,age,address_bus)  values
                                (#{id}, #{name}, #{sex}, #{age}, #{addressBus})
- &lt;/insert&gt;
+ <span style="color:#f92672">&lt;/insert&gt;</span>
 
-&lt;update id=&quot;updateStudent&quot;&gt;
+<span style="color:#f92672">&lt;update</span> <span style="color:#a6e22e">id=</span><span style="color:#e6db74">&#34;updateStudent&#34;</span><span style="color:#f92672">&gt;</span>
      update student set name = #{name} where id = #{id}        
-&lt;/update&gt;
+<span style="color:#f92672">&lt;/update&gt;</span>
 
-&lt;delete id=&quot;deleteStudent&quot;&gt;
+<span style="color:#f92672">&lt;delete</span> <span style="color:#a6e22e">id=</span><span style="color:#e6db74">&#34;deleteStudent&#34;</span><span style="color:#f92672">&gt;</span>
        delete from student where id = #{id};
-&lt;/delete&gt;
-</code></pre>
-
-<h2 id="小技巧">小技巧</h2>
-
+<span style="color:#f92672">&lt;/delete&gt;</span>
+</code></pre></div><h2 id="小技巧">小技巧</h2>
 <p>我们可以把参数出入给sql执行的数据格式都为Map就好了， 因为框架底层也是用map来封装所有的参数的。</p>
-
 <h1 id="insert操作返回主键">insert操作返回主键</h1>
-
 <h2 id="mysql">MySql</h2>
-
-<pre><code class="language-xml">&lt;!--
-   useGeneratedKeys: 使用自增主键获取主键策略
-   keyProperty:  指定对应的主键属性， 也就是Mybatis获取到主键的值后赋值给哪一个javaBean对象的属性
- --&gt;  
-&lt;insert id=&quot;insertStudent&quot; 
-        parameterType=&quot;com.example.mybatisconfig.mysql.bean.Student&quot;
-        useGeneratedKeys=&quot;true&quot;  
-        keyProperty=&quot;id&quot;&gt;
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-xml" data-lang="xml"><span style="color:#75715e">&lt;!--
+</span><span style="color:#75715e">   useGeneratedKeys: 使用自增主键获取主键策略
+</span><span style="color:#75715e">   keyProperty:  指定对应的主键属性， 也就是Mybatis获取到主键的值后赋值给哪一个javaBean对象的属性
+</span><span style="color:#75715e"> --&gt;</span>  
+<span style="color:#f92672">&lt;insert</span> <span style="color:#a6e22e">id=</span><span style="color:#e6db74">&#34;insertStudent&#34;</span> 
+        <span style="color:#a6e22e">parameterType=</span><span style="color:#e6db74">&#34;com.example.mybatisconfig.mysql.bean.Student&#34;</span>
+        <span style="color:#a6e22e">useGeneratedKeys=</span><span style="color:#e6db74">&#34;true&#34;</span>  
+        <span style="color:#a6e22e">keyProperty=</span><span style="color:#e6db74">&#34;id&#34;</span><span style="color:#f92672">&gt;</span>
        insert into student (name,sex,age,address_bus)  values 
                            (#{name}, #{sex}, #{age}, #{addressBus})
-    &lt;/insert&gt;
-</code></pre>
-
-<h2 id="oracle">Oracle</h2>
-
-<pre><code class="language-xml">&lt;!-- 
-keyProperty:  指定对应的主键属性， 查询出队列后，放入到这个javaBean里面的id中
-resultType:   查出返回的数据类型， 
-     order:   BEFORE  在执行insert语句之前执行这个查询序列的操作。
---&gt;
-&lt;insert id=&quot;insertStudent&quot;&gt;
-   &lt;selectKey keyProperty=&quot;id&quot; order=&quot;BEFORE&quot; resultType=&quot;INTEGER&quot;&gt;
+    <span style="color:#f92672">&lt;/insert&gt;</span>
+</code></pre></div><h2 id="oracle">Oracle</h2>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-xml" data-lang="xml"><span style="color:#75715e">&lt;!-- 
+</span><span style="color:#75715e">keyProperty:  指定对应的主键属性， 查询出队列后，放入到这个javaBean里面的id中
+</span><span style="color:#75715e">resultType:   查出返回的数据类型， 
+</span><span style="color:#75715e">     order:   BEFORE  在执行insert语句之前执行这个查询序列的操作。
+</span><span style="color:#75715e">--&gt;</span>
+<span style="color:#f92672">&lt;insert</span> <span style="color:#a6e22e">id=</span><span style="color:#e6db74">&#34;insertStudent&#34;</span><span style="color:#f92672">&gt;</span>
+   <span style="color:#f92672">&lt;selectKey</span> <span style="color:#a6e22e">keyProperty=</span><span style="color:#e6db74">&#34;id&#34;</span> <span style="color:#a6e22e">order=</span><span style="color:#e6db74">&#34;BEFORE&#34;</span> <span style="color:#a6e22e">resultType=</span><span style="color:#e6db74">&#34;INTEGER&#34;</span><span style="color:#f92672">&gt;</span>
               select SEQ_NEWSID.nextval from dual
-   &lt;/selectKey&gt;
+   <span style="color:#f92672">&lt;/selectKey&gt;</span>
    insert into student (id, name,sex,age,addressBus) 
                 values (#{id}, #{name}, #{sex}, #{age}, #{addressBus})
-&lt;/insert&gt;
-</code></pre>
-
-<pre><code class="language-xml">&lt;!-- 
-keyProperty:  指定对应的主键属性， 查询出队列后，放入到这个javaBean里面的id中
-resultType:   查出返回的数据类型， 
-     order:   AFTER  在执行之后，直接把序列号返回给当前对象的id
---&gt;
-&lt;insert id=&quot;insertStudent&quot;&gt;
-  &lt;selectKey keyProperty=&quot;id&quot; order=&quot;AFTER&quot; resultType=&quot;INTEGER&quot;&gt;
+<span style="color:#f92672">&lt;/insert&gt;</span>
+</code></pre></div><div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-xml" data-lang="xml"><span style="color:#75715e">&lt;!-- 
+</span><span style="color:#75715e">keyProperty:  指定对应的主键属性， 查询出队列后，放入到这个javaBean里面的id中
+</span><span style="color:#75715e">resultType:   查出返回的数据类型， 
+</span><span style="color:#75715e">     order:   AFTER  在执行之后，直接把序列号返回给当前对象的id
+</span><span style="color:#75715e">--&gt;</span>
+<span style="color:#f92672">&lt;insert</span> <span style="color:#a6e22e">id=</span><span style="color:#e6db74">&#34;insertStudent&#34;</span><span style="color:#f92672">&gt;</span>
+  <span style="color:#f92672">&lt;selectKey</span> <span style="color:#a6e22e">keyProperty=</span><span style="color:#e6db74">&#34;id&#34;</span> <span style="color:#a6e22e">order=</span><span style="color:#e6db74">&#34;AFTER&#34;</span> <span style="color:#a6e22e">resultType=</span><span style="color:#e6db74">&#34;INTEGER&#34;</span><span style="color:#f92672">&gt;</span>
     select SEQ_NEWSID.currval from dual
-  &lt;/selectKey&gt;
+  <span style="color:#f92672">&lt;/selectKey&gt;</span>
   insert into student (id, name,sex,age,addressBus)  
                     values (SEQ_NEWSID.nextval, #{name}, #{sex}, #{age}, #{addressBus})
-&lt;/insert&gt;
-</code></pre>
-
-<h2 id="注意">注意</h2>
-
+<span style="color:#f92672">&lt;/insert&gt;</span>
+</code></pre></div><h2 id="注意">注意</h2>
 <p><strong>如果在并发的时候， AFTER获取的总是最后一条的值， 是会有问题的， 一般我们用第一种方式。</strong></p>
-
 <h1 id="参数处理">参数处理</h1>
-
 <h2 id="方法参数作为sql语句参数占位符">方法参数作为sql语句参数占位符</h2>
-
 <p>框架默认会把所有的参数都放入到<strong>Map中</strong>进行填充到sql语句中。</p>
-
-<pre><code class="language-xml">&lt;!-- 允许使用方法签名中的名称作为语句参数名称。 
-     为了使用该特性，你的项目必须采用 Java 8 编译.   默认是true， 
-     所以在mapper中方法中的参数，在sql的xml中可以直接使用。
- --&gt;
-&lt;setting name=&quot;useActualParamName&quot; value=&quot;true&quot; /&gt;
-</code></pre>
-
-<h2 id="和-区别">#和$区别</h2>
-
-<pre><code class="language-xml">&lt;select id=&quot;findStudentInfoByID&quot; resultType=&quot;com.example.mybatisconfig.mysql.bean.Student&quot;&gt;
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-xml" data-lang="xml"><span style="color:#75715e">&lt;!-- 允许使用方法签名中的名称作为语句参数名称。 
+</span><span style="color:#75715e">     为了使用该特性，你的项目必须采用 Java 8 编译.   默认是true， 
+</span><span style="color:#75715e">     所以在mapper中方法中的参数，在sql的xml中可以直接使用。
+</span><span style="color:#75715e"> --&gt;</span>
+<span style="color:#f92672">&lt;setting</span> <span style="color:#a6e22e">name=</span><span style="color:#e6db74">&#34;useActualParamName&#34;</span> <span style="color:#a6e22e">value=</span><span style="color:#e6db74">&#34;true&#34;</span> <span style="color:#f92672">/&gt;</span>
+</code></pre></div><h2 id="和区别">#和$区别</h2>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-xml" data-lang="xml"><span style="color:#f92672">&lt;select</span> <span style="color:#a6e22e">id=</span><span style="color:#e6db74">&#34;findStudentInfoByID&#34;</span> <span style="color:#a6e22e">resultType=</span><span style="color:#e6db74">&#34;com.example.mybatisconfig.mysql.bean.Student&#34;</span><span style="color:#f92672">&gt;</span>
        select * from student where id = ${id} and name = #{name}
-&lt;/select&gt;
-</code></pre>
-
-<pre><code class="language-java">: ==&gt;  Preparing: select * from student where id = 1 and name = ? 
-: ==&gt;  Parameters: 小强(String)
-: &lt;==  Total: 1
-</code></pre>
-
-<p>可以看到$符号直接就把数据给填充进入了， 而#只是一个占位符号，占位符的预编译更加的安全。 大多数的时候我们都是使用#的， 但是我们在分表的时候， 我们需要查询表的时候，表名是无法预编译的，所以只能使用这个美元了。</p>
-
+<span style="color:#f92672">&lt;/select&gt;</span>
+</code></pre></div><div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-java" data-lang="java"><span style="color:#f92672">:</span> <span style="color:#f92672">==&gt;</span>  Preparing<span style="color:#f92672">:</span> select <span style="color:#f92672">*</span> from student where id <span style="color:#f92672">=</span> 1 and name <span style="color:#f92672">=</span> <span style="color:#f92672">?</span> 
+<span style="color:#f92672">:</span> <span style="color:#f92672">==&gt;</span>  Parameters<span style="color:#f92672">:</span> 小强<span style="color:#f92672">(</span>String<span style="color:#f92672">)</span>
+<span style="color:#f92672">:</span> <span style="color:#f92672">&lt;==</span>  Total<span style="color:#f92672">:</span> 1
+</code></pre></div><p>可以看到$符号直接就把数据给填充进入了， 而#只是一个占位符号，占位符的预编译更加的安全。 大多数的时候我们都是使用#的， 但是我们在分表的时候， 我们需要查询表的时候，表名是无法预编译的，所以只能使用这个美元了。</p>
 <h2 id="参数属性">参数属性</h2>
-
-<pre><code class="language-properties">#{height,javaType=double,jdbcType=NUMERIC,numericScale=2}
-</code></pre>
-
-<p>尽管所有这些选项很强大，但大多时候你只须简单地指定属性名，其他的事情 MyBatis 会自己去推断，顶多要为可能为空的列指定 <code>jdbcType</code>。</p>
-
+<pre tabindex="0"><code class="language-properties" data-lang="properties">#{height,javaType=double,jdbcType=NUMERIC,numericScale=2}
+</code></pre><p>尽管所有这些选项很强大，但大多时候你只须简单地指定属性名，其他的事情 MyBatis 会自己去推断，顶多要为可能为空的列指定 <code>jdbcType</code>。</p>
 <p>jdbcType特定环境下面设置， 在我们的数据为NULL的时候， 有些数据可能不能识别mybatis对null的默认处理，比如Oracle的报错， 因为Mybatis对所有null映射的事原生Jdbc的OTHER类型， Oracle不能正确处理，他是没有这个类型的。所以这个时候需要加上这个属性。</p>
-
-<pre><code class="language-properties">#{height,jdbcType=NULL}
-</code></pre>
-
-<h1 id="select标签">select标签</h1>
-
-<h2 id="1-返回一个对象和集合-都是返回集合中的元素类型">1.  返回一个对象和集合， 都是返回集合中的元素类型</h2>
-
-<pre><code class="language-xml">&lt;select id=&quot;findStudentInfoByID&quot; resultType=&quot;com.example.mybatisconfig.mysql.bean.Student&quot;&gt;
+<pre tabindex="0"><code class="language-properties" data-lang="properties">#{height,jdbcType=NULL}
+</code></pre><h1 id="select标签">select标签</h1>
+<h2 id="1--返回一个对象和集合-都是返回集合中的元素类型">1.  返回一个对象和集合， 都是返回集合中的元素类型</h2>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-xml" data-lang="xml"><span style="color:#f92672">&lt;select</span> <span style="color:#a6e22e">id=</span><span style="color:#e6db74">&#34;findStudentInfoByID&#34;</span> <span style="color:#a6e22e">resultType=</span><span style="color:#e6db74">&#34;com.example.mybatisconfig.mysql.bean.Student&#34;</span><span style="color:#f92672">&gt;</span>
          select * from student where id = ${id} and name = #{name}
-&lt;/select&gt;
-</code></pre>
-
-<h2 id="2-返回map对象">2.  返回Map对象</h2>
-
-<pre><code class="language-xml">&lt;select id=&quot;findStudentInfoByID&quot; resultType=&quot;map&quot;&gt;
+<span style="color:#f92672">&lt;/select&gt;</span>
+</code></pre></div><h2 id="2--返回map对象">2.  返回Map对象</h2>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-xml" data-lang="xml"><span style="color:#f92672">&lt;select</span> <span style="color:#a6e22e">id=</span><span style="color:#e6db74">&#34;findStudentInfoByID&#34;</span> <span style="color:#a6e22e">resultType=</span><span style="color:#e6db74">&#34;map&#34;</span><span style="color:#f92672">&gt;</span>
        select * from student where id = ${id} and name = #{name}
-&lt;/select&gt;
-</code></pre>
-
-<h2 id="3-返回map-integer-student">3.  返回Map<Integer,Student></h2>
-
-<pre><code class="language-xml">&lt;select id=&quot;findStudentInfoByID&quot; resultType=&quot;com.example.mybatisconfig.mysql.bean.Student&quot;&gt;
+<span style="color:#f92672">&lt;/select&gt;</span>
+</code></pre></div><h2 id="3--返回mapintegerstudent">3.  返回Map&lt;Integer,Student&gt;</h2>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-xml" data-lang="xml"><span style="color:#f92672">&lt;select</span> <span style="color:#a6e22e">id=</span><span style="color:#e6db74">&#34;findStudentInfoByID&#34;</span> <span style="color:#a6e22e">resultType=</span><span style="color:#e6db74">&#34;com.example.mybatisconfig.mysql.bean.Student&#34;</span><span style="color:#f92672">&gt;</span>
     select * from student where id = ${id} and name = #{name}
-&lt;/select&gt;
-</code></pre>
+<span style="color:#f92672">&lt;/select&gt;</span>
+</code></pre></div><div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-java" data-lang="java">  <span style="color:#a6e22e">@MapKey</span><span style="color:#f92672">(</span><span style="color:#e6db74">&#34;id&#34;</span><span style="color:#f92672">)</span> <span style="color:#75715e">// 告诉Mybatis以这个值为key，一般都是主键。
+</span><span style="color:#75715e"></span>  Map<span style="color:#f92672">&lt;</span>Integer<span style="color:#f92672">,</span> Student<span style="color:#f92672">&gt;</span> <span style="color:#a6e22e">findStudentInfoByID</span><span style="color:#f92672">(</span>Map<span style="color:#f92672">&lt;</span>String<span style="color:#f92672">,</span> Object<span style="color:#f92672">&gt;</span> map<span style="color:#f92672">);</span>
+</code></pre></div><h3 id="显示效果为一个key对应这个对象">显示效果为一个key对应这个对象。</h3>
+<h2 id="4--resultmap">4.  resultMap</h2>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-xml" data-lang="xml"><span style="color:#f92672">&lt;resultMap</span> <span style="color:#a6e22e">id=</span><span style="color:#e6db74">&#34;student&#34;</span> <span style="color:#a6e22e">type=</span><span style="color:#e6db74">&#34;com.example.mybatisconfig.mysql.bean.Student&#34;</span><span style="color:#f92672">&gt;</span>
+    <span style="color:#75715e">&lt;!-- id 定义主键底层有优化 --&gt;</span>
+    <span style="color:#f92672">&lt;id</span> <span style="color:#a6e22e">column=</span><span style="color:#e6db74">&#34;id&#34;</span> <span style="color:#a6e22e">property=</span><span style="color:#e6db74">&#34;id&#34;</span><span style="color:#f92672">/&gt;</span>
+    <span style="color:#f92672">&lt;result</span> <span style="color:#a6e22e">column=</span><span style="color:#e6db74">&#34;name&#34;</span> <span style="color:#a6e22e">property=</span><span style="color:#e6db74">&#34;name&#34;</span><span style="color:#f92672">/&gt;</span>
+    <span style="color:#f92672">&lt;result</span> <span style="color:#a6e22e">column=</span><span style="color:#e6db74">&#34;sex&#34;</span> <span style="color:#a6e22e">property=</span><span style="color:#e6db74">&#34;sex&#34;</span><span style="color:#f92672">/&gt;</span>
+    <span style="color:#f92672">&lt;result</span> <span style="color:#a6e22e">column=</span><span style="color:#e6db74">&#34;age&#34;</span> <span style="color:#a6e22e">property=</span><span style="color:#e6db74">&#34;age&#34;</span><span style="color:#f92672">/&gt;</span>
+    <span style="color:#f92672">&lt;result</span> <span style="color:#a6e22e">column=</span><span style="color:#e6db74">&#34;address_bus&#34;</span> <span style="color:#a6e22e">property=</span><span style="color:#e6db74">&#34;addressBus&#34;</span><span style="color:#f92672">/&gt;</span>
+<span style="color:#f92672">&lt;/resultMap&gt;</span>
 
-<pre><code class="language-java">  @MapKey(&quot;id&quot;) // 告诉Mybatis以这个值为key，一般都是主键。
-  Map&lt;Integer, Student&gt; findStudentInfoByID(Map&lt;String, Object&gt; map);
-</code></pre>
-
-<h3 id="显示效果为一个key对应这个对象">显示效果为一个key对应这个对象。</h3>
-
-<h2 id="4-resultmap">4.  resultMap</h2>
-
-<pre><code class="language-xml">&lt;resultMap id=&quot;student&quot; type=&quot;com.example.mybatisconfig.mysql.bean.Student&quot;&gt;
-    &lt;!-- id 定义主键底层有优化 --&gt;
-    &lt;id column=&quot;id&quot; property=&quot;id&quot;/&gt;
-    &lt;result column=&quot;name&quot; property=&quot;name&quot;/&gt;
-    &lt;result column=&quot;sex&quot; property=&quot;sex&quot;/&gt;
-    &lt;result column=&quot;age&quot; property=&quot;age&quot;/&gt;
-    &lt;result column=&quot;address_bus&quot; property=&quot;addressBus&quot;/&gt;
-&lt;/resultMap&gt;
-
-&lt;select id=&quot;findStudentInfoByID&quot; resultMap=&quot;student&quot;&gt;
+<span style="color:#f92672">&lt;select</span> <span style="color:#a6e22e">id=</span><span style="color:#e6db74">&#34;findStudentInfoByID&#34;</span> <span style="color:#a6e22e">resultMap=</span><span style="color:#e6db74">&#34;student&#34;</span><span style="color:#f92672">&gt;</span>
 		select * from student where id = ${id} and name = #{name}
-&lt;/select&gt;
-</code></pre>
-
-<h3 id="一对一模式数据">一对一模式数据</h3>
-
-<pre><code class="language-xml">&lt;resultMap id=&quot;student&quot; type=&quot;com.example.mybatisconfig.mysql.bean.Student&quot;&gt;
-      &lt;!-- id 定义主键底层有优化 --&gt;
-      &lt;id column=&quot;id&quot; property=&quot;id&quot;/&gt;
-      &lt;result column=&quot;name&quot; property=&quot;name&quot;/&gt;
-      &lt;result column=&quot;sex&quot; property=&quot;sex&quot;/&gt;
-      &lt;result column=&quot;age&quot; property=&quot;age&quot;/&gt;
-      &lt;result column=&quot;address_bus&quot; property=&quot;addressBus&quot;/&gt;
-      &lt;!-- 一个学生对应一个爱好--&gt;
-      &lt;association property=&quot;play&quot; javaType=&quot;com.example.mybatisconfig.mysql.bean.Play&quot;&gt;
-            &lt;id column=&quot;id&quot; property=&quot;id&quot;/&gt;
-            &lt;result column=&quot;name&quot; property=&quot;name&quot;/&gt;
-            &lt;result column=&quot;sid&quot; property=&quot;sid&quot;/&gt;
-      &lt;/association&gt;
-    &lt;/resultMap&gt;
+<span style="color:#f92672">&lt;/select&gt;</span>
+</code></pre></div><h3 id="一对一模式数据">一对一模式数据</h3>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-xml" data-lang="xml"><span style="color:#f92672">&lt;resultMap</span> <span style="color:#a6e22e">id=</span><span style="color:#e6db74">&#34;student&#34;</span> <span style="color:#a6e22e">type=</span><span style="color:#e6db74">&#34;com.example.mybatisconfig.mysql.bean.Student&#34;</span><span style="color:#f92672">&gt;</span>
+      <span style="color:#75715e">&lt;!-- id 定义主键底层有优化 --&gt;</span>
+      <span style="color:#f92672">&lt;id</span> <span style="color:#a6e22e">column=</span><span style="color:#e6db74">&#34;id&#34;</span> <span style="color:#a6e22e">property=</span><span style="color:#e6db74">&#34;id&#34;</span><span style="color:#f92672">/&gt;</span>
+      <span style="color:#f92672">&lt;result</span> <span style="color:#a6e22e">column=</span><span style="color:#e6db74">&#34;name&#34;</span> <span style="color:#a6e22e">property=</span><span style="color:#e6db74">&#34;name&#34;</span><span style="color:#f92672">/&gt;</span>
+      <span style="color:#f92672">&lt;result</span> <span style="color:#a6e22e">column=</span><span style="color:#e6db74">&#34;sex&#34;</span> <span style="color:#a6e22e">property=</span><span style="color:#e6db74">&#34;sex&#34;</span><span style="color:#f92672">/&gt;</span>
+      <span style="color:#f92672">&lt;result</span> <span style="color:#a6e22e">column=</span><span style="color:#e6db74">&#34;age&#34;</span> <span style="color:#a6e22e">property=</span><span style="color:#e6db74">&#34;age&#34;</span><span style="color:#f92672">/&gt;</span>
+      <span style="color:#f92672">&lt;result</span> <span style="color:#a6e22e">column=</span><span style="color:#e6db74">&#34;address_bus&#34;</span> <span style="color:#a6e22e">property=</span><span style="color:#e6db74">&#34;addressBus&#34;</span><span style="color:#f92672">/&gt;</span>
+      <span style="color:#75715e">&lt;!-- 一个学生对应一个爱好--&gt;</span>
+      <span style="color:#f92672">&lt;association</span> <span style="color:#a6e22e">property=</span><span style="color:#e6db74">&#34;play&#34;</span> <span style="color:#a6e22e">javaType=</span><span style="color:#e6db74">&#34;com.example.mybatisconfig.mysql.bean.Play&#34;</span><span style="color:#f92672">&gt;</span>
+            <span style="color:#f92672">&lt;id</span> <span style="color:#a6e22e">column=</span><span style="color:#e6db74">&#34;id&#34;</span> <span style="color:#a6e22e">property=</span><span style="color:#e6db74">&#34;id&#34;</span><span style="color:#f92672">/&gt;</span>
+            <span style="color:#f92672">&lt;result</span> <span style="color:#a6e22e">column=</span><span style="color:#e6db74">&#34;name&#34;</span> <span style="color:#a6e22e">property=</span><span style="color:#e6db74">&#34;name&#34;</span><span style="color:#f92672">/&gt;</span>
+            <span style="color:#f92672">&lt;result</span> <span style="color:#a6e22e">column=</span><span style="color:#e6db74">&#34;sid&#34;</span> <span style="color:#a6e22e">property=</span><span style="color:#e6db74">&#34;sid&#34;</span><span style="color:#f92672">/&gt;</span>
+      <span style="color:#f92672">&lt;/association&gt;</span>
+    <span style="color:#f92672">&lt;/resultMap&gt;</span>
    
-    &lt;select id=&quot;findStudentInfoByID&quot; resultMap=&quot;student&quot;&gt;
+    <span style="color:#f92672">&lt;select</span> <span style="color:#a6e22e">id=</span><span style="color:#e6db74">&#34;findStudentInfoByID&#34;</span> <span style="color:#a6e22e">resultMap=</span><span style="color:#e6db74">&#34;student&#34;</span><span style="color:#f92672">&gt;</span>
     select * from student  
              left join  play  on student.pid = play.id 
              where student.id = #{id}  and student.name = #{name} 
-    &lt;/select&gt;
-</code></pre>
-
-<h3 id="一对多模式数据">一对多模式数据</h3>
-
-<pre><code class="language-xml">&lt;resultMap id=&quot;play&quot; type=&quot;com.example.mybatisconfig.mysql.bean.Play&quot;&gt;
-    &lt;id column=&quot;id&quot; property=&quot;id&quot;/&gt;
-    &lt;result column=&quot;name&quot; property=&quot;name&quot;/&gt;
-    &lt;result column=&quot;sid&quot; property=&quot;sid&quot;/&gt;
-    &lt;collection property=&quot;studentList&quot; ofType=&quot;com.example.mybatisconfig.mysql.bean.Student&quot;&gt;
-            &lt;id column=&quot;id&quot; property=&quot;id&quot;/&gt;
-            &lt;result column=&quot;name&quot; property=&quot;name&quot;/&gt;
-            &lt;result column=&quot;sex&quot; property=&quot;sex&quot;/&gt;
-            &lt;result column=&quot;age&quot; property=&quot;age&quot;/&gt;
-            &lt;result column=&quot;address_bus&quot; property=&quot;addressBus&quot;/&gt;
-       &lt;/collection&gt;
-  &lt;/resultMap&gt;
-</code></pre>
-
-<pre><code class="language-java">Play(id=1, name=篮球, sid=1, 
-studentList=[Student(id=1, name=篮球, sex=男, age=8, addressBus=湖南-17路, play=null)])
-</code></pre>
-
-<h3 id="具体列子">具体列子</h3>
-
-<pre><code class="language-xml">&lt;resultMap id=&quot;locationDataMap&quot; type=&quot;com.example.mybatisconfig.mysql.bean.Play&quot;&gt;
-    &lt;id column=&quot;id&quot; property=&quot;id&quot; jdbcType=&quot;INTEGER&quot; /&gt;
-    &lt;result column=&quot;org_code&quot; property=&quot;orgCode&quot; jdbcType=&quot;VARCHAR&quot; /&gt;
-    &lt;result column=&quot;longitude&quot; property=&quot;longitude&quot; jdbcType=&quot;DECIMAL&quot; /&gt;
-    &lt;result column=&quot;latitude&quot; property=&quot;latitude&quot; jdbcType=&quot;DECIMAL&quot; /&gt;
-    &lt;result column=&quot;org_name&quot; property=&quot;orgName&quot; jdbcType=&quot;VARCHAR&quot; /&gt;
-    &lt;result column=&quot;org_address&quot; property=&quot;orgAddress&quot; jdbcType=&quot;VARCHAR&quot; /&gt;
-    &lt;collection property=&quot;attachmentList&quot; ofType=&quot;com.example.mybatisconfig.mysql.bean.Student&quot;            
-                column=&quot;id&quot; select=&quot;getAttachmentList&quot;&gt;
-    &lt;/collection&gt;
-&lt;/resultMap&gt;
+    <span style="color:#f92672">&lt;/select&gt;</span>
+</code></pre></div><h3 id="一对多模式数据">一对多模式数据</h3>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-xml" data-lang="xml"><span style="color:#f92672">&lt;resultMap</span> <span style="color:#a6e22e">id=</span><span style="color:#e6db74">&#34;play&#34;</span> <span style="color:#a6e22e">type=</span><span style="color:#e6db74">&#34;com.example.mybatisconfig.mysql.bean.Play&#34;</span><span style="color:#f92672">&gt;</span>
+    <span style="color:#f92672">&lt;id</span> <span style="color:#a6e22e">column=</span><span style="color:#e6db74">&#34;id&#34;</span> <span style="color:#a6e22e">property=</span><span style="color:#e6db74">&#34;id&#34;</span><span style="color:#f92672">/&gt;</span>
+    <span style="color:#f92672">&lt;result</span> <span style="color:#a6e22e">column=</span><span style="color:#e6db74">&#34;name&#34;</span> <span style="color:#a6e22e">property=</span><span style="color:#e6db74">&#34;name&#34;</span><span style="color:#f92672">/&gt;</span>
+    <span style="color:#f92672">&lt;result</span> <span style="color:#a6e22e">column=</span><span style="color:#e6db74">&#34;sid&#34;</span> <span style="color:#a6e22e">property=</span><span style="color:#e6db74">&#34;sid&#34;</span><span style="color:#f92672">/&gt;</span>
+    <span style="color:#f92672">&lt;collection</span> <span style="color:#a6e22e">property=</span><span style="color:#e6db74">&#34;studentList&#34;</span> <span style="color:#a6e22e">ofType=</span><span style="color:#e6db74">&#34;com.example.mybatisconfig.mysql.bean.Student&#34;</span><span style="color:#f92672">&gt;</span>
+            <span style="color:#f92672">&lt;id</span> <span style="color:#a6e22e">column=</span><span style="color:#e6db74">&#34;id&#34;</span> <span style="color:#a6e22e">property=</span><span style="color:#e6db74">&#34;id&#34;</span><span style="color:#f92672">/&gt;</span>
+            <span style="color:#f92672">&lt;result</span> <span style="color:#a6e22e">column=</span><span style="color:#e6db74">&#34;name&#34;</span> <span style="color:#a6e22e">property=</span><span style="color:#e6db74">&#34;name&#34;</span><span style="color:#f92672">/&gt;</span>
+            <span style="color:#f92672">&lt;result</span> <span style="color:#a6e22e">column=</span><span style="color:#e6db74">&#34;sex&#34;</span> <span style="color:#a6e22e">property=</span><span style="color:#e6db74">&#34;sex&#34;</span><span style="color:#f92672">/&gt;</span>
+            <span style="color:#f92672">&lt;result</span> <span style="color:#a6e22e">column=</span><span style="color:#e6db74">&#34;age&#34;</span> <span style="color:#a6e22e">property=</span><span style="color:#e6db74">&#34;age&#34;</span><span style="color:#f92672">/&gt;</span>
+            <span style="color:#f92672">&lt;result</span> <span style="color:#a6e22e">column=</span><span style="color:#e6db74">&#34;address_bus&#34;</span> <span style="color:#a6e22e">property=</span><span style="color:#e6db74">&#34;addressBus&#34;</span><span style="color:#f92672">/&gt;</span>
+       <span style="color:#f92672">&lt;/collection&gt;</span>
+  <span style="color:#f92672">&lt;/resultMap&gt;</span>
+</code></pre></div><div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-java" data-lang="java">Play<span style="color:#f92672">(</span>id<span style="color:#f92672">=</span>1<span style="color:#f92672">,</span> name<span style="color:#f92672">=</span>篮球<span style="color:#f92672">,</span> sid<span style="color:#f92672">=</span>1<span style="color:#f92672">,</span> 
+studentList<span style="color:#f92672">=[</span>Student<span style="color:#f92672">(</span>id<span style="color:#f92672">=</span>1<span style="color:#f92672">,</span> name<span style="color:#f92672">=</span>篮球<span style="color:#f92672">,</span> sex<span style="color:#f92672">=</span>男<span style="color:#f92672">,</span> age<span style="color:#f92672">=</span>8<span style="color:#f92672">,</span> addressBus<span style="color:#f92672">=</span>湖南<span style="color:#f92672">-</span>17路<span style="color:#f92672">,</span> play<span style="color:#f92672">=</span><span style="color:#66d9ef">null</span><span style="color:#f92672">)])</span>
+</code></pre></div><h3 id="具体列子">具体列子</h3>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-xml" data-lang="xml"><span style="color:#f92672">&lt;resultMap</span> <span style="color:#a6e22e">id=</span><span style="color:#e6db74">&#34;locationDataMap&#34;</span> <span style="color:#a6e22e">type=</span><span style="color:#e6db74">&#34;com.example.mybatisconfig.mysql.bean.Play&#34;</span><span style="color:#f92672">&gt;</span>
+    <span style="color:#f92672">&lt;id</span> <span style="color:#a6e22e">column=</span><span style="color:#e6db74">&#34;id&#34;</span> <span style="color:#a6e22e">property=</span><span style="color:#e6db74">&#34;id&#34;</span> <span style="color:#a6e22e">jdbcType=</span><span style="color:#e6db74">&#34;INTEGER&#34;</span> <span style="color:#f92672">/&gt;</span>
+    <span style="color:#f92672">&lt;result</span> <span style="color:#a6e22e">column=</span><span style="color:#e6db74">&#34;org_code&#34;</span> <span style="color:#a6e22e">property=</span><span style="color:#e6db74">&#34;orgCode&#34;</span> <span style="color:#a6e22e">jdbcType=</span><span style="color:#e6db74">&#34;VARCHAR&#34;</span> <span style="color:#f92672">/&gt;</span>
+    <span style="color:#f92672">&lt;result</span> <span style="color:#a6e22e">column=</span><span style="color:#e6db74">&#34;longitude&#34;</span> <span style="color:#a6e22e">property=</span><span style="color:#e6db74">&#34;longitude&#34;</span> <span style="color:#a6e22e">jdbcType=</span><span style="color:#e6db74">&#34;DECIMAL&#34;</span> <span style="color:#f92672">/&gt;</span>
+    <span style="color:#f92672">&lt;result</span> <span style="color:#a6e22e">column=</span><span style="color:#e6db74">&#34;latitude&#34;</span> <span style="color:#a6e22e">property=</span><span style="color:#e6db74">&#34;latitude&#34;</span> <span style="color:#a6e22e">jdbcType=</span><span style="color:#e6db74">&#34;DECIMAL&#34;</span> <span style="color:#f92672">/&gt;</span>
+    <span style="color:#f92672">&lt;result</span> <span style="color:#a6e22e">column=</span><span style="color:#e6db74">&#34;org_name&#34;</span> <span style="color:#a6e22e">property=</span><span style="color:#e6db74">&#34;orgName&#34;</span> <span style="color:#a6e22e">jdbcType=</span><span style="color:#e6db74">&#34;VARCHAR&#34;</span> <span style="color:#f92672">/&gt;</span>
+    <span style="color:#f92672">&lt;result</span> <span style="color:#a6e22e">column=</span><span style="color:#e6db74">&#34;org_address&#34;</span> <span style="color:#a6e22e">property=</span><span style="color:#e6db74">&#34;orgAddress&#34;</span> <span style="color:#a6e22e">jdbcType=</span><span style="color:#e6db74">&#34;VARCHAR&#34;</span> <span style="color:#f92672">/&gt;</span>
+    <span style="color:#f92672">&lt;collection</span> <span style="color:#a6e22e">property=</span><span style="color:#e6db74">&#34;attachmentList&#34;</span> <span style="color:#a6e22e">ofType=</span><span style="color:#e6db74">&#34;com.example.mybatisconfig.mysql.bean.Student&#34;</span>            
+                <span style="color:#a6e22e">column=</span><span style="color:#e6db74">&#34;id&#34;</span> <span style="color:#a6e22e">select=</span><span style="color:#e6db74">&#34;getAttachmentList&#34;</span><span style="color:#f92672">&gt;</span>
+    <span style="color:#f92672">&lt;/collection&gt;</span>
+<span style="color:#f92672">&lt;/resultMap&gt;</span>
 
 
- &lt;select id=&quot;getAttachmentList&quot; parameterType=&quot;java.lang.Integer&quot; resultType=&quot;com.example.mybatisconfig.mysql.bean.Student&quot;&gt;
+ <span style="color:#f92672">&lt;select</span> <span style="color:#a6e22e">id=</span><span style="color:#e6db74">&#34;getAttachmentList&#34;</span> <span style="color:#a6e22e">parameterType=</span><span style="color:#e6db74">&#34;java.lang.Integer&#34;</span> <span style="color:#a6e22e">resultType=</span><span style="color:#e6db74">&#34;com.example.mybatisconfig.mysql.bean.Student&#34;</span><span style="color:#f92672">&gt;</span>
           select 
                  id as id,
                  party_map_id as partyMapId, 
@@ -492,23 +425,17 @@ studentList=[Student(id=1, name=篮球, sex=男, age=8, addressBus=湖南-17路,
                  created_time as createdTime
                  from t_party_organization_location_attachment 
                  where status = 1 and party_map_id = #{partyMapId} order by sort asc
-  &lt;/select&gt;
+  <span style="color:#f92672">&lt;/select&gt;</span>
   
-  &lt;!--列表--&gt;
-  &lt;select id=&quot;findList&quot; parameterType=&quot;java.util.Map&quot; resultMap=&quot;locationDataMap&quot;&gt;
+  <span style="color:#75715e">&lt;!--列表--&gt;</span>
+  <span style="color:#f92672">&lt;select</span> <span style="color:#a6e22e">id=</span><span style="color:#e6db74">&#34;findList&#34;</span> <span style="color:#a6e22e">parameterType=</span><span style="color:#e6db74">&#34;java.util.Map&#34;</span> <span style="color:#a6e22e">resultMap=</span><span style="color:#e6db74">&#34;locationDataMap&#34;</span><span style="color:#f92672">&gt;</span>
          select * from t_party_organization_location where org_name is not null order by id desc
-  &lt;/select&gt;
+  <span style="color:#f92672">&lt;/select&gt;</span>
 
 需要注意：  resultMap  和  resultType， partyMapId 这个值和 父表id对应。 
-</code></pre>
-
-<h2 id="column说明">column说明</h2>
-
-<pre><code>column说明：数据库的列名或者列标签别名，column	数据库的列名或者列标签别名。与传递给resultSet.getString(columnName)的参数名称相同。注意： 在处理组合键时，您可以使用column=“{prop1=col1,prop2=col2}”这样的语法，设置多个列名传入到嵌套查询语句。这就会把prop1和prop2设置到目标嵌套选择语句的参数对象中。
-</code></pre>
-
-<h2 id="5-对于多表查询-可以进行分布查询">5.  对于多表查询，可以进行分布查询</h2>
-
+</code></pre></div><h2 id="column说明">column说明</h2>
+<pre tabindex="0"><code>column说明：数据库的列名或者列标签别名，column	数据库的列名或者列标签别名。与传递给resultSet.getString(columnName)的参数名称相同。注意： 在处理组合键时，您可以使用column=“{prop1=col1,prop2=col2}”这样的语法，设置多个列名传入到嵌套查询语句。这就会把prop1和prop2设置到目标嵌套选择语句的参数对象中。
+</code></pre><h2 id="5--对于多表查询可以进行分布查询">5.  对于多表查询，可以进行分布查询</h2>
 <p>相当于，多表查询，可以拆分为几次sql查询，还可以进行开启延迟加载模式，相当于用到的时候才去执行sql语句。 但是感觉这也增加了和数据库进行交互的次数。所以用的比较的少。</p>
 
 
@@ -617,41 +544,40 @@ studentList=[Student(id=1, name=篮球, sex=男, age=8, addressBus=湖南-17路,
                     </h4>
                     <ul class="catalog-body"></ul>
                     <nav id="TableOfContents">
-<ul>
-<li><a href="#默认返回-integer-long-boolean类型">默认返回 Integer，Long，Boolean类型</a>
-<ul>
-<li><a href="#小技巧">小技巧</a></li>
-</ul></li>
-<li><a href="#insert操作返回主键">insert操作返回主键</a>
-<ul>
-<li><a href="#mysql">MySql</a></li>
-<li><a href="#oracle">Oracle</a></li>
-<li><a href="#注意">注意</a></li>
-</ul></li>
-<li><a href="#参数处理">参数处理</a>
-<ul>
-<li><a href="#方法参数作为sql语句参数占位符">方法参数作为sql语句参数占位符</a></li>
-<li><a href="#和-区别">#和$区别</a></li>
-<li><a href="#参数属性">参数属性</a></li>
-</ul></li>
-<li><a href="#select标签">select标签</a>
-<ul>
-<li><a href="#1-返回一个对象和集合-都是返回集合中的元素类型">1.  返回一个对象和集合， 都是返回集合中的元素类型</a></li>
-<li><a href="#2-返回map对象">2.  返回Map对象</a></li>
-<li><a href="#3-返回map-integer-student">3.  返回Map<Integer,Student></a>
-<ul>
-<li><a href="#显示效果为一个key对应这个对象">显示效果为一个key对应这个对象。</a></li>
-</ul></li>
-<li><a href="#4-resultmap">4.  resultMap</a>
-<ul>
-<li><a href="#一对一模式数据">一对一模式数据</a></li>
-<li><a href="#一对多模式数据">一对多模式数据</a></li>
-<li><a href="#具体列子">具体列子</a></li>
-</ul></li>
-<li><a href="#column说明">column说明</a></li>
-<li><a href="#5-对于多表查询-可以进行分布查询">5.  对于多表查询，可以进行分布查询</a></li>
-</ul></li>
-</ul>
+  <ul>
+    <li><a href="#小技巧">小技巧</a></li>
+  </ul>
+
+  <ul>
+    <li><a href="#mysql">MySql</a></li>
+    <li><a href="#oracle">Oracle</a></li>
+    <li><a href="#注意">注意</a></li>
+  </ul>
+
+  <ul>
+    <li><a href="#方法参数作为sql语句参数占位符">方法参数作为sql语句参数占位符</a></li>
+    <li><a href="#和区别">#和$区别</a></li>
+    <li><a href="#参数属性">参数属性</a></li>
+  </ul>
+
+  <ul>
+    <li><a href="#1--返回一个对象和集合-都是返回集合中的元素类型">1.  返回一个对象和集合， 都是返回集合中的元素类型</a></li>
+    <li><a href="#2--返回map对象">2.  返回Map对象</a></li>
+    <li><a href="#3--返回mapintegerstudent">3.  返回Map&lt;Integer,Student&gt;</a>
+      <ul>
+        <li><a href="#显示效果为一个key对应这个对象">显示效果为一个key对应这个对象。</a></li>
+      </ul>
+    </li>
+    <li><a href="#4--resultmap">4.  resultMap</a>
+      <ul>
+        <li><a href="#一对一模式数据">一对一模式数据</a></li>
+        <li><a href="#一对多模式数据">一对多模式数据</a></li>
+        <li><a href="#具体列子">具体列子</a></li>
+      </ul>
+    </li>
+    <li><a href="#column说明">column说明</a></li>
+    <li><a href="#5--对于多表查询可以进行分布查询">5.  对于多表查询，可以进行分布查询</a></li>
+  </ul>
 </nav>
                     <br>
                     <br>
@@ -676,9 +602,6 @@ studentList=[Student(id=1, name=篮球, sex=男, age=8, addressBus=湖南-17路,
                         
                         
                         
-                        <a href="/tags/" title="">
-                            
-                        </a>
                         
                         
                         
@@ -688,101 +611,6 @@ studentList=[Student(id=1, name=篮球, sex=男, age=8, addressBus=湖南-17路,
                         
                         
                         
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        <a href="/tags/qt" title="QT">
-                            QT
-                        </a>
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        <a href="/tags/zookeeper" title="Zookeeper">
-                            Zookeeper
-                        </a>
                         
                         
                         
@@ -822,8 +650,10 @@ studentList=[Student(id=1, name=篮球, sex=男, age=8, addressBus=湖南-17路,
                         
                         
                         
-                        <a href="/tags/elasticsearch" title="elasticSearch">
-                            elasticSearch
+                        
+                        
+                        <a href="/tags/elasticsearch" title="elasticsearch">
+                            elasticsearch
                         </a>
                         
                         
@@ -834,9 +664,27 @@ studentList=[Student(id=1, name=篮球, sex=男, age=8, addressBus=湖南-17路,
                         
                         
                         
-                        <a href="/tags/golang" title="golang">
-                            golang
-                        </a>
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
                         
                         
                         
@@ -874,9 +722,21 @@ studentList=[Student(id=1, name=篮球, sex=男, age=8, addressBus=湖南-17路,
                         
                         
                         
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
                         <a href="/tags/jvm" title="jvm">
                             jvm
                         </a>
+                        
+                        
+                        
+                        
                         
                         
                         
@@ -900,9 +760,19 @@ studentList=[Student(id=1, name=篮球, sex=男, age=8, addressBus=湖南-17路,
                         
                         
                         
+                        
+                        
+                        
+                        
+                        
+                        
                         <a href="/tags/mongodb" title="mongodb">
                             mongodb
                         </a>
+                        
+                        
+                        
+                        
                         
                         
                         
@@ -913,10 +783,6 @@ studentList=[Student(id=1, name=篮球, sex=男, age=8, addressBus=湖南-17路,
                         </a>
                         
                         
-                        
-                        <a href="/tags/mycat" title="mycat">
-                            mycat
-                        </a>
                         
                         
                         
@@ -930,9 +796,17 @@ studentList=[Student(id=1, name=篮球, sex=男, age=8, addressBus=湖南-17路,
                         
                         
                         
-                        <a href="/tags/nginx" title="nginx">
-                            nginx
-                        </a>
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
                         
                         
                         
@@ -956,8 +830,22 @@ studentList=[Student(id=1, name=篮球, sex=男, age=8, addressBus=湖南-17路,
                         
                         
                         
+                        
+                        
                         <a href="/tags/rocketmq" title="rocketmq">
                             rocketmq
+                        </a>
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        <a href="/tags/security%E6%A1%86%E6%9E%B6%E5%AD%A6%E4%B9%A0" title="security框架学习">
+                            security框架学习
                         </a>
                         
                         
@@ -984,17 +872,11 @@ studentList=[Student(id=1, name=篮球, sex=男, age=8, addressBus=湖南-17路,
                         
                         
                         
-                        <a href="/tags/springcloud" title="springCloud">
-                            springCloud
-                        </a>
-                        
-                        
-                        
-                        
-                        
                         <a href="/tags/springboot" title="springboot">
                             springboot
                         </a>
+                        
+                        
                         
                         
                         
@@ -1008,6 +890,9 @@ studentList=[Student(id=1, name=篮球, sex=男, age=8, addressBus=湖南-17路,
                         
                         
                         
+                        <a href="/tags/springcloud" title="springcloud">
+                            springcloud
+                        </a>
                         
                         
                         
@@ -1033,6 +918,33 @@ studentList=[Student(id=1, name=篮球, sex=男, age=8, addressBus=湖南-17路,
                         
                         
                         
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        <a href="/tags/zookeeper" title="zookeeper">
+                            zookeeper
+                        </a>
                         
                         
                         
@@ -1092,6 +1004,8 @@ studentList=[Student(id=1, name=篮球, sex=男, age=8, addressBus=湖南-17路,
                         
                         
                         
+                        
+                        
                         <a href="/tags/%E5%88%86%E5%B8%83%E5%BC%8F%E7%B3%BB%E5%88%97" title="分布式系列">
                             分布式系列
                         </a>
@@ -1111,6 +1025,10 @@ studentList=[Student(id=1, name=篮球, sex=男, age=8, addressBus=湖南-17路,
                         
                         
                         
+                        
+                        <a href="/tags/%E5%8D%8F%E8%AE%AE%E6%A0%88" title="协议栈">
+                            协议栈
+                        </a>
                         
                         
                         
@@ -1310,6 +1228,12 @@ studentList=[Student(id=1, name=篮球, sex=男, age=8, addressBus=湖南-17路,
                         
                         
                         
+                        
+                        
+                        
+                        
+                        
+                        
                         <a href="/tags/%E7%BD%91%E7%BB%9C%E7%BC%96%E7%A8%8B" title="网络编程">
                             网络编程
                         </a>
@@ -1333,6 +1257,10 @@ studentList=[Student(id=1, name=篮球, sex=男, age=8, addressBus=湖南-17路,
                         
                         
                         
+                        
+                        <a href="/tags/%E8%AE%A4%E8%AF%81%E5%92%8C%E6%8E%88%E6%9D%83" title="认证和授权">
+                            认证和授权
+                        </a>
                         
                         
                         
@@ -1503,7 +1431,7 @@ studentList=[Student(id=1, name=篮球, sex=男, age=8, addressBus=湖南-17路,
                     
                 </ul>
 		<p class="copyright text-muted">
-                    Copyright &copy;  2020
+                    Copyright &copy;  2021
                     <br>
                     <a href="https://themes.gohugo.io/hugo-theme-cleanwhite">CleanWhite Hugo Theme</a> by <a href="https://zhaohuabing.com">Huabing</a> |
                     <iframe

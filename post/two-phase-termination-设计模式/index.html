@@ -97,15 +97,15 @@
                     </li>
                     
                     <li>
-                        <a href="/categories/english">English</a>
+                        <a href="/categories/english">english</a>
                     </li>
                     
                     <li>
-                        <a href="/categories/life">Life</a>
+                        <a href="/categories/life">life</a>
                     </li>
                     
                     <li>
-                        <a href="/categories/tech">Tech</a>
+                        <a href="/categories/tech">tech</a>
                     </li>
                     
 
@@ -241,265 +241,224 @@
                 
                 
                 
-                
-
-<p>[TOC]</p>
-
-<p><strong>转载地址：<a href="https://blog.csdn.net/crazyzxljing0621/article/details/56669649">https://blog.csdn.net/crazyzxljing0621/article/details/56669649</a></strong></p>
-
+                <p>[TOC]</p>
+<p><strong>转载地址：https://blog.csdn.net/crazyzxljing0621/article/details/56669649</strong></p>
 <h1 id="概述">概述</h1>
-
 <p>当我们想要结束一个线程或者关闭jvm的时候，通过此模式可以优雅安全的关闭线程，让线程可以完成它本应完成的当前任务并可以附加一些收尾工作后再进行关闭。 此模式下关闭线程会有一定延迟，主要在于被关闭线程需要执行完后，再进行关闭。</p>
-
 <h1 id="代码演示">代码演示</h1>
-
-<h2 id="igamesys-游戏系统抽象模板">IGameSys&ndash;游戏系统抽象模板</h2>
-
+<h2 id="igamesys--游戏系统抽象模板">IGameSys&ndash;游戏系统抽象模板</h2>
 <p>定义了系统执行周期，系统名，规范了event和overevent，IgameSys及其派生类无需关心Thread细节，只需完成event/overevent业务操作即可。</p>
-
-<pre><code class="language-java">/**
- * 游戏系统
- * @author Administrator
- *
- */
-public abstract class IGameSys {
-	private long time;
-	private String name;
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-java" data-lang="java"><span style="color:#75715e">/**
+</span><span style="color:#75715e"> * 游戏系统
+</span><span style="color:#75715e"> * @author Administrator
+</span><span style="color:#75715e"> *
+</span><span style="color:#75715e"> */</span>
+<span style="color:#66d9ef">public</span> <span style="color:#66d9ef">abstract</span> <span style="color:#66d9ef">class</span> <span style="color:#a6e22e">IGameSys</span> <span style="color:#f92672">{</span>
+	<span style="color:#66d9ef">private</span> <span style="color:#66d9ef">long</span> time<span style="color:#f92672">;</span>
+	<span style="color:#66d9ef">private</span> String name<span style="color:#f92672">;</span>
  
-	public IGameSys(long time, String name) {
-		this.time = time;
-		this.name = name;
-	}
+	<span style="color:#66d9ef">public</span> <span style="color:#a6e22e">IGameSys</span><span style="color:#f92672">(</span><span style="color:#66d9ef">long</span> time<span style="color:#f92672">,</span> String name<span style="color:#f92672">)</span> <span style="color:#f92672">{</span>
+		<span style="color:#66d9ef">this</span><span style="color:#f92672">.</span><span style="color:#a6e22e">time</span> <span style="color:#f92672">=</span> time<span style="color:#f92672">;</span>
+		<span style="color:#66d9ef">this</span><span style="color:#f92672">.</span><span style="color:#a6e22e">name</span> <span style="color:#f92672">=</span> name<span style="color:#f92672">;</span>
+	<span style="color:#f92672">}</span>
  
  
-	public String name() {
-		return this.name;
-	}
+	<span style="color:#66d9ef">public</span> String <span style="color:#a6e22e">name</span><span style="color:#f92672">()</span> <span style="color:#f92672">{</span>
+		<span style="color:#66d9ef">return</span> <span style="color:#66d9ef">this</span><span style="color:#f92672">.</span><span style="color:#a6e22e">name</span><span style="color:#f92672">;</span>
+	<span style="color:#f92672">}</span>
  
-	public long time() {
-		return this.time;
-	}
+	<span style="color:#66d9ef">public</span> <span style="color:#66d9ef">long</span> <span style="color:#a6e22e">time</span><span style="color:#f92672">()</span> <span style="color:#f92672">{</span>
+		<span style="color:#66d9ef">return</span> <span style="color:#66d9ef">this</span><span style="color:#f92672">.</span><span style="color:#a6e22e">time</span><span style="color:#f92672">;</span>
+	<span style="color:#f92672">}</span>
  
-	public abstract void event(Object... ob) throws ThreadOverException;
+	<span style="color:#66d9ef">public</span> <span style="color:#66d9ef">abstract</span> <span style="color:#66d9ef">void</span> <span style="color:#a6e22e">event</span><span style="color:#f92672">(</span>Object<span style="color:#f92672">...</span> ob<span style="color:#f92672">)</span> <span style="color:#66d9ef">throws</span> ThreadOverException<span style="color:#f92672">;</span>
  
-	public abstract void overEvent();
+	<span style="color:#66d9ef">public</span> <span style="color:#66d9ef">abstract</span> <span style="color:#66d9ef">void</span> <span style="color:#a6e22e">overEvent</span><span style="color:#f92672">();</span>
  
-}
-</code></pre>
-
-<h2 id="activitysys-活动系统实现">ActivitySys&ndash;活动系统实现</h2>
-
-<pre><code class="language-java"> /**
- * 活动系统实现
- * 
- * @author Allen
- * @date 2017年2月21日
- * 
- */
-public class ActivitySys extends IGameSys {
+<span style="color:#f92672">}</span>
+</code></pre></div><h2 id="activitysys--活动系统实现">ActivitySys&ndash;活动系统实现</h2>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-java" data-lang="java"> <span style="color:#75715e">/**
+</span><span style="color:#75715e"> * 活动系统实现
+</span><span style="color:#75715e"> * 
+</span><span style="color:#75715e"> * @author Allen
+</span><span style="color:#75715e"> * @date 2017年2月21日
+</span><span style="color:#75715e"> * 
+</span><span style="color:#75715e"> */</span>
+<span style="color:#66d9ef">public</span> <span style="color:#66d9ef">class</span> <span style="color:#a6e22e">ActivitySys</span> <span style="color:#66d9ef">extends</span> IGameSys <span style="color:#f92672">{</span>
  
-	public ActivitySys(long time, String name) {
-		super(time, name);
-	}
+	<span style="color:#66d9ef">public</span> <span style="color:#a6e22e">ActivitySys</span><span style="color:#f92672">(</span><span style="color:#66d9ef">long</span> time<span style="color:#f92672">,</span> String name<span style="color:#f92672">)</span> <span style="color:#f92672">{</span>
+		<span style="color:#66d9ef">super</span><span style="color:#f92672">(</span>time<span style="color:#f92672">,</span> name<span style="color:#f92672">);</span>
+	<span style="color:#f92672">}</span>
  
-	private boolean temp = false;
+	<span style="color:#66d9ef">private</span> <span style="color:#66d9ef">boolean</span> temp <span style="color:#f92672">=</span> <span style="color:#66d9ef">false</span><span style="color:#f92672">;</span>
  
-	@Override
-	public void event(Object... ob) throws ThreadOverException {
-		if (!temp){
-			System.out.println(&quot;&lt;Thread-&quot; + super.name() + &quot;&gt;[event]活动系统运行中 &gt;&lt;&quot;);
-			temp=true; 
-		}
-	}
+	<span style="color:#a6e22e">@Override</span>
+	<span style="color:#66d9ef">public</span> <span style="color:#66d9ef">void</span> <span style="color:#a6e22e">event</span><span style="color:#f92672">(</span>Object<span style="color:#f92672">...</span> ob<span style="color:#f92672">)</span> <span style="color:#66d9ef">throws</span> ThreadOverException <span style="color:#f92672">{</span>
+		<span style="color:#66d9ef">if</span> <span style="color:#f92672">(!</span>temp<span style="color:#f92672">){</span>
+			System<span style="color:#f92672">.</span><span style="color:#a6e22e">out</span><span style="color:#f92672">.</span><span style="color:#a6e22e">println</span><span style="color:#f92672">(</span><span style="color:#e6db74">&#34;&lt;Thread-&#34;</span> <span style="color:#f92672">+</span> <span style="color:#66d9ef">super</span><span style="color:#f92672">.</span><span style="color:#a6e22e">name</span><span style="color:#f92672">()</span> <span style="color:#f92672">+</span> <span style="color:#e6db74">&#34;&gt;[event]活动系统运行中 &gt;&lt;&#34;</span><span style="color:#f92672">);</span>
+			temp<span style="color:#f92672">=</span><span style="color:#66d9ef">true</span><span style="color:#f92672">;</span> 
+		<span style="color:#f92672">}</span>
+	<span style="color:#f92672">}</span>
  
-	@Override
-	public void overEvent() {
-		System.out.println(&quot;&lt;Thread&quot; + super.name() + &quot;&gt;[overEvent]&quot;);
-	}
+	<span style="color:#a6e22e">@Override</span>
+	<span style="color:#66d9ef">public</span> <span style="color:#66d9ef">void</span> <span style="color:#a6e22e">overEvent</span><span style="color:#f92672">()</span> <span style="color:#f92672">{</span>
+		System<span style="color:#f92672">.</span><span style="color:#a6e22e">out</span><span style="color:#f92672">.</span><span style="color:#a6e22e">println</span><span style="color:#f92672">(</span><span style="color:#e6db74">&#34;&lt;Thread&#34;</span> <span style="color:#f92672">+</span> <span style="color:#66d9ef">super</span><span style="color:#f92672">.</span><span style="color:#a6e22e">name</span><span style="color:#f92672">()</span> <span style="color:#f92672">+</span> <span style="color:#e6db74">&#34;&gt;[overEvent]&#34;</span><span style="color:#f92672">);</span>
+	<span style="color:#f92672">}</span>
  
-}
-</code></pre>
-
-<h2 id="msgsys-公告系统实现">MsgSys&ndash;公告系统实现</h2>
-
-<pre><code class="language-java"> /**
- * 公告系统实现
- * 
- * @author Allen
- * @date 2017年2月21日
- * 
- */
-public class MsgSys extends IGameSys {
+<span style="color:#f92672">}</span>
+</code></pre></div><h2 id="msgsys--公告系统实现">MsgSys&ndash;公告系统实现</h2>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-java" data-lang="java"> <span style="color:#75715e">/**
+</span><span style="color:#75715e"> * 公告系统实现
+</span><span style="color:#75715e"> * 
+</span><span style="color:#75715e"> * @author Allen
+</span><span style="color:#75715e"> * @date 2017年2月21日
+</span><span style="color:#75715e"> * 
+</span><span style="color:#75715e"> */</span>
+<span style="color:#66d9ef">public</span> <span style="color:#66d9ef">class</span> <span style="color:#a6e22e">MsgSys</span> <span style="color:#66d9ef">extends</span> IGameSys <span style="color:#f92672">{</span>
  
-	public MsgSys(long time, String name) {
-		super(time, name);
-	}
-	private boolean temp=false;
-	@Override
-	public void event(Object... ob) throws ThreadOverException {
-		if (!temp){
-		System.out.println(&quot;&lt;Thread-&quot; + super.name() + &quot;&gt;[event]系统公告运行中 &gt;&lt;&quot;);
-		temp=true;
-		}
-	}
+	<span style="color:#66d9ef">public</span> <span style="color:#a6e22e">MsgSys</span><span style="color:#f92672">(</span><span style="color:#66d9ef">long</span> time<span style="color:#f92672">,</span> String name<span style="color:#f92672">)</span> <span style="color:#f92672">{</span>
+		<span style="color:#66d9ef">super</span><span style="color:#f92672">(</span>time<span style="color:#f92672">,</span> name<span style="color:#f92672">);</span>
+	<span style="color:#f92672">}</span>
+	<span style="color:#66d9ef">private</span> <span style="color:#66d9ef">boolean</span> temp<span style="color:#f92672">=</span><span style="color:#66d9ef">false</span><span style="color:#f92672">;</span>
+	<span style="color:#a6e22e">@Override</span>
+	<span style="color:#66d9ef">public</span> <span style="color:#66d9ef">void</span> <span style="color:#a6e22e">event</span><span style="color:#f92672">(</span>Object<span style="color:#f92672">...</span> ob<span style="color:#f92672">)</span> <span style="color:#66d9ef">throws</span> ThreadOverException <span style="color:#f92672">{</span>
+		<span style="color:#66d9ef">if</span> <span style="color:#f92672">(!</span>temp<span style="color:#f92672">){</span>
+		System<span style="color:#f92672">.</span><span style="color:#a6e22e">out</span><span style="color:#f92672">.</span><span style="color:#a6e22e">println</span><span style="color:#f92672">(</span><span style="color:#e6db74">&#34;&lt;Thread-&#34;</span> <span style="color:#f92672">+</span> <span style="color:#66d9ef">super</span><span style="color:#f92672">.</span><span style="color:#a6e22e">name</span><span style="color:#f92672">()</span> <span style="color:#f92672">+</span> <span style="color:#e6db74">&#34;&gt;[event]系统公告运行中 &gt;&lt;&#34;</span><span style="color:#f92672">);</span>
+		temp<span style="color:#f92672">=</span><span style="color:#66d9ef">true</span><span style="color:#f92672">;</span>
+		<span style="color:#f92672">}</span>
+	<span style="color:#f92672">}</span>
  
-	@Override
-	public void overEvent() {
-		System.out.println(&quot;&lt;Thread&quot; + super.name() + &quot;&gt;[overEvent]&quot;);
-	}
+	<span style="color:#a6e22e">@Override</span>
+	<span style="color:#66d9ef">public</span> <span style="color:#66d9ef">void</span> <span style="color:#a6e22e">overEvent</span><span style="color:#f92672">()</span> <span style="color:#f92672">{</span>
+		System<span style="color:#f92672">.</span><span style="color:#a6e22e">out</span><span style="color:#f92672">.</span><span style="color:#a6e22e">println</span><span style="color:#f92672">(</span><span style="color:#e6db74">&#34;&lt;Thread&#34;</span> <span style="color:#f92672">+</span> <span style="color:#66d9ef">super</span><span style="color:#f92672">.</span><span style="color:#a6e22e">name</span><span style="color:#f92672">()</span> <span style="color:#f92672">+</span> <span style="color:#e6db74">&#34;&gt;[overEvent]&#34;</span><span style="color:#f92672">);</span>
+	<span style="color:#f92672">}</span>
  
-}
+<span style="color:#f92672">}</span>
 
 
-</code></pre>
-
-<h2 id="irepairmodel">IRepairModel</h2>
-
+</code></pre></div><h2 id="irepairmodel">IRepairModel</h2>
 <p><strong>日后扩展，内容规范，依赖规范。这个在常用设计时候，应该这样的去考虑设计。</strong></p>
-
-<pre><code class="language-java">public interface IRepairModel extends Runnable {
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-java" data-lang="java"><span style="color:#66d9ef">public</span> <span style="color:#66d9ef">interface</span> <span style="color:#a6e22e">IRepairModel</span> <span style="color:#66d9ef">extends</span> Runnable <span style="color:#f92672">{</span>
  
-}
-</code></pre>
-
-<h2 id="repairmodelimpl-两阶段终止模式实现">RepairModelImpl   两阶段终止模式实现</h2>
-
+<span style="color:#f92672">}</span>
+</code></pre></div><h2 id="repairmodelimpl---两阶段终止模式实现">RepairModelImpl   两阶段终止模式实现</h2>
 <p>对IgameSys进行了两阶段终止模式实现。</p>
-
-<pre><code class="language-java">
-public class RepairModelImpl implements IRepairModel {
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-java" data-lang="java">
+<span style="color:#66d9ef">public</span> <span style="color:#66d9ef">class</span> <span style="color:#a6e22e">RepairModelImpl</span> <span style="color:#66d9ef">implements</span> IRepairModel <span style="color:#f92672">{</span>
  
-	private IGameSys ir;
+	<span style="color:#66d9ef">private</span> IGameSys ir<span style="color:#f92672">;</span>
  
-	public RepairModelImpl(IGameSys ir) {
-		this.ir = ir;
-	}
+	<span style="color:#66d9ef">public</span> <span style="color:#a6e22e">RepairModelImpl</span><span style="color:#f92672">(</span>IGameSys ir<span style="color:#f92672">)</span> <span style="color:#f92672">{</span>
+		<span style="color:#66d9ef">this</span><span style="color:#f92672">.</span><span style="color:#a6e22e">ir</span> <span style="color:#f92672">=</span> ir<span style="color:#f92672">;</span>
+	<span style="color:#f92672">}</span>
  
-	@Override
-	public void run() {
-		System.out.println(ir.name() + &quot;已启动&quot;);
-		try {
-			while (true) {
-				Thread.sleep(ir.time());
-				if (SystemState.getInstance().isState()){
-            break;
-         }	
-				ir.event();
-			}
-		} catch (ThreadOverException e) {
-			e.printStackTrace();
-		} catch (InterruptedException e) {
-			e.printStackTrace();
-		} finally {
-			ir.overEvent();
-		}
-		return;
-	}
-}
-</code></pre>
-
-<h2 id="systemstate">SystemState</h2>
-
+	<span style="color:#a6e22e">@Override</span>
+	<span style="color:#66d9ef">public</span> <span style="color:#66d9ef">void</span> <span style="color:#a6e22e">run</span><span style="color:#f92672">()</span> <span style="color:#f92672">{</span>
+		System<span style="color:#f92672">.</span><span style="color:#a6e22e">out</span><span style="color:#f92672">.</span><span style="color:#a6e22e">println</span><span style="color:#f92672">(</span>ir<span style="color:#f92672">.</span><span style="color:#a6e22e">name</span><span style="color:#f92672">()</span> <span style="color:#f92672">+</span> <span style="color:#e6db74">&#34;已启动&#34;</span><span style="color:#f92672">);</span>
+		<span style="color:#66d9ef">try</span> <span style="color:#f92672">{</span>
+			<span style="color:#66d9ef">while</span> <span style="color:#f92672">(</span><span style="color:#66d9ef">true</span><span style="color:#f92672">)</span> <span style="color:#f92672">{</span>
+				Thread<span style="color:#f92672">.</span><span style="color:#a6e22e">sleep</span><span style="color:#f92672">(</span>ir<span style="color:#f92672">.</span><span style="color:#a6e22e">time</span><span style="color:#f92672">());</span>
+				<span style="color:#66d9ef">if</span> <span style="color:#f92672">(</span>SystemState<span style="color:#f92672">.</span><span style="color:#a6e22e">getInstance</span><span style="color:#f92672">().</span><span style="color:#a6e22e">isState</span><span style="color:#f92672">()){</span>
+            <span style="color:#66d9ef">break</span><span style="color:#f92672">;</span>
+         <span style="color:#f92672">}</span>	
+				ir<span style="color:#f92672">.</span><span style="color:#a6e22e">event</span><span style="color:#f92672">();</span>
+			<span style="color:#f92672">}</span>
+		<span style="color:#f92672">}</span> <span style="color:#66d9ef">catch</span> <span style="color:#f92672">(</span>ThreadOverException e<span style="color:#f92672">)</span> <span style="color:#f92672">{</span>
+			e<span style="color:#f92672">.</span><span style="color:#a6e22e">printStackTrace</span><span style="color:#f92672">();</span>
+		<span style="color:#f92672">}</span> <span style="color:#66d9ef">catch</span> <span style="color:#f92672">(</span>InterruptedException e<span style="color:#f92672">)</span> <span style="color:#f92672">{</span>
+			e<span style="color:#f92672">.</span><span style="color:#a6e22e">printStackTrace</span><span style="color:#f92672">();</span>
+		<span style="color:#f92672">}</span> <span style="color:#66d9ef">finally</span> <span style="color:#f92672">{</span>
+			ir<span style="color:#f92672">.</span><span style="color:#a6e22e">overEvent</span><span style="color:#f92672">();</span>
+		<span style="color:#f92672">}</span>
+		<span style="color:#66d9ef">return</span><span style="color:#f92672">;</span>
+	<span style="color:#f92672">}</span>
+<span style="color:#f92672">}</span>
+</code></pre></div><h2 id="systemstate">SystemState</h2>
 <p>单例且volatile，sendState开闭。</p>
-
-<pre><code class="language-java"> /**
- * 修复状态
- * 
- * @author Allen
- * @date 2017年2月21日
- *
- */
-public final class SystemState {
-	/**
-	 * 饿汉单例
-	 */
-	private static SystemState instance = new SystemState();
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-java" data-lang="java"> <span style="color:#75715e">/**
+</span><span style="color:#75715e"> * 修复状态
+</span><span style="color:#75715e"> * 
+</span><span style="color:#75715e"> * @author Allen
+</span><span style="color:#75715e"> * @date 2017年2月21日
+</span><span style="color:#75715e"> *
+</span><span style="color:#75715e"> */</span>
+<span style="color:#66d9ef">public</span> <span style="color:#66d9ef">final</span> <span style="color:#66d9ef">class</span> <span style="color:#a6e22e">SystemState</span> <span style="color:#f92672">{</span>
+	<span style="color:#75715e">/**
+</span><span style="color:#75715e">	 * 饿汉单例
+</span><span style="color:#75715e">	 */</span>
+	<span style="color:#66d9ef">private</span> <span style="color:#66d9ef">static</span> SystemState instance <span style="color:#f92672">=</span> <span style="color:#66d9ef">new</span> SystemState<span style="color:#f92672">();</span>
  
-	private SystemState() {
-	}
+	<span style="color:#66d9ef">private</span> <span style="color:#a6e22e">SystemState</span><span style="color:#f92672">()</span> <span style="color:#f92672">{</span>
+	<span style="color:#f92672">}</span>
  
-	public static SystemState getInstance() {
-		return instance;
-	}
+	<span style="color:#66d9ef">public</span> <span style="color:#66d9ef">static</span> SystemState <span style="color:#a6e22e">getInstance</span><span style="color:#f92672">()</span> <span style="color:#f92672">{</span>
+		<span style="color:#66d9ef">return</span> instance<span style="color:#f92672">;</span>
+	<span style="color:#f92672">}</span>
  
-	private volatile boolean state = false;
+	<span style="color:#66d9ef">private</span> <span style="color:#66d9ef">volatile</span> <span style="color:#66d9ef">boolean</span> state <span style="color:#f92672">=</span> <span style="color:#66d9ef">false</span><span style="color:#f92672">;</span>
  
-	public boolean isState() {
-		return state;
-	}
+	<span style="color:#66d9ef">public</span> <span style="color:#66d9ef">boolean</span> <span style="color:#a6e22e">isState</span><span style="color:#f92672">()</span> <span style="color:#f92672">{</span>
+		<span style="color:#66d9ef">return</span> state<span style="color:#f92672">;</span>
+	<span style="color:#f92672">}</span>
  
-	/**
-	 * 发送状态 
-	 * @author Allen
-	 * @date 2017年2月21日
-	 */
-	public void sendState() {
-		this.state = true;
- 	}
+	<span style="color:#75715e">/**
+</span><span style="color:#75715e">	 * 发送状态 
+</span><span style="color:#75715e">	 * @author Allen
+</span><span style="color:#75715e">	 * @date 2017年2月21日
+</span><span style="color:#75715e">	 */</span>
+	<span style="color:#66d9ef">public</span> <span style="color:#66d9ef">void</span> <span style="color:#a6e22e">sendState</span><span style="color:#f92672">()</span> <span style="color:#f92672">{</span>
+		<span style="color:#66d9ef">this</span><span style="color:#f92672">.</span><span style="color:#a6e22e">state</span> <span style="color:#f92672">=</span> <span style="color:#66d9ef">true</span><span style="color:#f92672">;</span>
+ 	<span style="color:#f92672">}</span>
 
-}
-</code></pre>
-
-<h2 id="threadoverexception">ThreadOverException</h2>
-
-<pre><code class="language-java"> public class ThreadOverException extends Exception {
+<span style="color:#f92672">}</span>
+</code></pre></div><h2 id="threadoverexception">ThreadOverException</h2>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-java" data-lang="java"> <span style="color:#66d9ef">public</span> <span style="color:#66d9ef">class</span> <span style="color:#a6e22e">ThreadOverException</span> <span style="color:#66d9ef">extends</span> Exception <span style="color:#f92672">{</span>
  
-	private static final long serialVersionUID = 1L;
+	<span style="color:#66d9ef">private</span> <span style="color:#66d9ef">static</span> <span style="color:#66d9ef">final</span> <span style="color:#66d9ef">long</span> serialVersionUID <span style="color:#f92672">=</span> 1L<span style="color:#f92672">;</span>
  
-}
+<span style="color:#f92672">}</span>
 
 
-</code></pre>
-
-<h2 id="main">Main</h2>
-
-<pre><code class="language-java">/**
- * 
- * @author Allen 
- * @date 2017年2月22日
- *
- */
-public class Main {
-	static IGameSys[] igame = { 
-		new MsgSys(500,&quot;公告系统&quot;), 
-		new ActivitySys(200,&quot;活动系统&quot;)
-		}; 
-	public static void main(String[] args) throws InterruptedException {
-		System.out.println(&quot;游戏服务器已启动&quot;);
-		startThreadGroup();
-		Thread.sleep(4000);
-		SystemState.getInstance().sendState();
+</code></pre></div><h2 id="main">Main</h2>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-java" data-lang="java"><span style="color:#75715e">/**
+</span><span style="color:#75715e"> * 
+</span><span style="color:#75715e"> * @author Allen 
+</span><span style="color:#75715e"> * @date 2017年2月22日
+</span><span style="color:#75715e"> *
+</span><span style="color:#75715e"> */</span>
+<span style="color:#66d9ef">public</span> <span style="color:#66d9ef">class</span> <span style="color:#a6e22e">Main</span> <span style="color:#f92672">{</span>
+	<span style="color:#66d9ef">static</span> IGameSys<span style="color:#f92672">[]</span> igame <span style="color:#f92672">=</span> <span style="color:#f92672">{</span> 
+		<span style="color:#66d9ef">new</span> MsgSys<span style="color:#f92672">(</span>500<span style="color:#f92672">,</span><span style="color:#e6db74">&#34;公告系统&#34;</span><span style="color:#f92672">),</span> 
+		<span style="color:#66d9ef">new</span> ActivitySys<span style="color:#f92672">(</span>200<span style="color:#f92672">,</span><span style="color:#e6db74">&#34;活动系统&#34;</span><span style="color:#f92672">)</span>
+		<span style="color:#f92672">};</span> 
+	<span style="color:#66d9ef">public</span> <span style="color:#66d9ef">static</span> <span style="color:#66d9ef">void</span> <span style="color:#a6e22e">main</span><span style="color:#f92672">(</span>String<span style="color:#f92672">[]</span> args<span style="color:#f92672">)</span> <span style="color:#66d9ef">throws</span> InterruptedException <span style="color:#f92672">{</span>
+		System<span style="color:#f92672">.</span><span style="color:#a6e22e">out</span><span style="color:#f92672">.</span><span style="color:#a6e22e">println</span><span style="color:#f92672">(</span><span style="color:#e6db74">&#34;游戏服务器已启动&#34;</span><span style="color:#f92672">);</span>
+		startThreadGroup<span style="color:#f92672">();</span>
+		Thread<span style="color:#f92672">.</span><span style="color:#a6e22e">sleep</span><span style="color:#f92672">(</span>4000<span style="color:#f92672">);</span>
+		SystemState<span style="color:#f92672">.</span><span style="color:#a6e22e">getInstance</span><span style="color:#f92672">().</span><span style="color:#a6e22e">sendState</span><span style="color:#f92672">();</span>
  
-	}
-	private static void startThreadGroup() throws InterruptedException { 
-		Iterator&lt;IGameSys&gt; it = Arrays.asList(igame).iterator();
-			while (it.hasNext()) {
-				Thread thread = new Thread(new RepairModelImpl(it.next()));
-				thread.start(); 
-			} 
-	}
-}
+	<span style="color:#f92672">}</span>
+	<span style="color:#66d9ef">private</span> <span style="color:#66d9ef">static</span> <span style="color:#66d9ef">void</span> <span style="color:#a6e22e">startThreadGroup</span><span style="color:#f92672">()</span> <span style="color:#66d9ef">throws</span> InterruptedException <span style="color:#f92672">{</span> 
+		Iterator<span style="color:#f92672">&lt;</span>IGameSys<span style="color:#f92672">&gt;</span> it <span style="color:#f92672">=</span> Arrays<span style="color:#f92672">.</span><span style="color:#a6e22e">asList</span><span style="color:#f92672">(</span>igame<span style="color:#f92672">).</span><span style="color:#a6e22e">iterator</span><span style="color:#f92672">();</span>
+			<span style="color:#66d9ef">while</span> <span style="color:#f92672">(</span>it<span style="color:#f92672">.</span><span style="color:#a6e22e">hasNext</span><span style="color:#f92672">())</span> <span style="color:#f92672">{</span>
+				Thread thread <span style="color:#f92672">=</span> <span style="color:#66d9ef">new</span> Thread<span style="color:#f92672">(</span><span style="color:#66d9ef">new</span> RepairModelImpl<span style="color:#f92672">(</span>it<span style="color:#f92672">.</span><span style="color:#a6e22e">next</span><span style="color:#f92672">()));</span>
+				thread<span style="color:#f92672">.</span><span style="color:#a6e22e">start</span><span style="color:#f92672">();</span> 
+			<span style="color:#f92672">}</span> 
+	<span style="color:#f92672">}</span>
+<span style="color:#f92672">}</span>
 
 
-</code></pre>
-
-<h2 id="运行结果">运行结果</h2>
-
-<pre><code class="language-java">游戏服务器已启动
+</code></pre></div><h2 id="运行结果">运行结果</h2>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-java" data-lang="java">游戏服务器已启动
 公告系统已启动
 活动系统已启动
-&lt;Thread-活动系统&gt;[event]活动系统运行中 &gt;&lt;
-&lt;Thread-公告系统&gt;[event]系统公告运行中 &gt;&lt;
-&lt;Thread公告系统&gt;[overEvent]
-&lt;Thread活动系统&gt;[overEvent]
-</code></pre>
-
-<h1 id="总结">总结</h1>
-
+<span style="color:#f92672">&lt;</span>Thread<span style="color:#f92672">-</span>活动系统<span style="color:#f92672">&gt;[</span>event<span style="color:#f92672">]</span>活动系统运行中 <span style="color:#f92672">&gt;&lt;</span>
+<span style="color:#f92672">&lt;</span>Thread<span style="color:#f92672">-</span>公告系统<span style="color:#f92672">&gt;[</span>event<span style="color:#f92672">]</span>系统公告运行中 <span style="color:#f92672">&gt;&lt;</span>
+<span style="color:#f92672">&lt;</span>Thread公告系统<span style="color:#f92672">&gt;[</span>overEvent<span style="color:#f92672">]</span>
+<span style="color:#f92672">&lt;</span>Thread活动系统<span style="color:#f92672">&gt;[</span>overEvent<span style="color:#f92672">]</span>
+</code></pre></div><h1 id="总结">总结</h1>
 <p>此模式的设计其实没什么精髓之处，其实就是线程中不断对一个参数进行验证，满足条件时线程跳出并执行结束后的收尾工作，最后安全关闭。</p>
-
 <h1 id="疑惑">疑惑</h1>
-
 <p>感觉就是一个线程结束后， 然后在finally里面或者其他的地方做一些结尾的工作处理而已。</p>
 
 
@@ -608,23 +567,17 @@ public class Main {
                     </h4>
                     <ul class="catalog-body"></ul>
                     <nav id="TableOfContents">
-<ul>
-<li><a href="#概述">概述</a></li>
-<li><a href="#代码演示">代码演示</a>
-<ul>
-<li><a href="#igamesys-游戏系统抽象模板">IGameSys&ndash;游戏系统抽象模板</a></li>
-<li><a href="#activitysys-活动系统实现">ActivitySys&ndash;活动系统实现</a></li>
-<li><a href="#msgsys-公告系统实现">MsgSys&ndash;公告系统实现</a></li>
-<li><a href="#irepairmodel">IRepairModel</a></li>
-<li><a href="#repairmodelimpl-两阶段终止模式实现">RepairModelImpl   两阶段终止模式实现</a></li>
-<li><a href="#systemstate">SystemState</a></li>
-<li><a href="#threadoverexception">ThreadOverException</a></li>
-<li><a href="#main">Main</a></li>
-<li><a href="#运行结果">运行结果</a></li>
-</ul></li>
-<li><a href="#总结">总结</a></li>
-<li><a href="#疑惑">疑惑</a></li>
-</ul>
+  <ul>
+    <li><a href="#igamesys--游戏系统抽象模板">IGameSys&ndash;游戏系统抽象模板</a></li>
+    <li><a href="#activitysys--活动系统实现">ActivitySys&ndash;活动系统实现</a></li>
+    <li><a href="#msgsys--公告系统实现">MsgSys&ndash;公告系统实现</a></li>
+    <li><a href="#irepairmodel">IRepairModel</a></li>
+    <li><a href="#repairmodelimpl---两阶段终止模式实现">RepairModelImpl   两阶段终止模式实现</a></li>
+    <li><a href="#systemstate">SystemState</a></li>
+    <li><a href="#threadoverexception">ThreadOverException</a></li>
+    <li><a href="#main">Main</a></li>
+    <li><a href="#运行结果">运行结果</a></li>
+  </ul>
 </nav>
                     <br>
                     <br>
@@ -649,9 +602,6 @@ public class Main {
                         
                         
                         
-                        <a href="/tags/" title="">
-                            
-                        </a>
                         
                         
                         
@@ -661,101 +611,6 @@ public class Main {
                         
                         
                         
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        <a href="/tags/qt" title="QT">
-                            QT
-                        </a>
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        <a href="/tags/zookeeper" title="Zookeeper">
-                            Zookeeper
-                        </a>
                         
                         
                         
@@ -795,8 +650,10 @@ public class Main {
                         
                         
                         
-                        <a href="/tags/elasticsearch" title="elasticSearch">
-                            elasticSearch
+                        
+                        
+                        <a href="/tags/elasticsearch" title="elasticsearch">
+                            elasticsearch
                         </a>
                         
                         
@@ -807,9 +664,27 @@ public class Main {
                         
                         
                         
-                        <a href="/tags/golang" title="golang">
-                            golang
-                        </a>
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
                         
                         
                         
@@ -847,9 +722,21 @@ public class Main {
                         
                         
                         
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
                         <a href="/tags/jvm" title="jvm">
                             jvm
                         </a>
+                        
+                        
+                        
+                        
                         
                         
                         
@@ -873,9 +760,19 @@ public class Main {
                         
                         
                         
+                        
+                        
+                        
+                        
+                        
+                        
                         <a href="/tags/mongodb" title="mongodb">
                             mongodb
                         </a>
+                        
+                        
+                        
+                        
                         
                         
                         
@@ -886,10 +783,6 @@ public class Main {
                         </a>
                         
                         
-                        
-                        <a href="/tags/mycat" title="mycat">
-                            mycat
-                        </a>
                         
                         
                         
@@ -903,9 +796,17 @@ public class Main {
                         
                         
                         
-                        <a href="/tags/nginx" title="nginx">
-                            nginx
-                        </a>
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
                         
                         
                         
@@ -929,8 +830,22 @@ public class Main {
                         
                         
                         
+                        
+                        
                         <a href="/tags/rocketmq" title="rocketmq">
                             rocketmq
+                        </a>
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        <a href="/tags/security%E6%A1%86%E6%9E%B6%E5%AD%A6%E4%B9%A0" title="security框架学习">
+                            security框架学习
                         </a>
                         
                         
@@ -957,17 +872,11 @@ public class Main {
                         
                         
                         
-                        <a href="/tags/springcloud" title="springCloud">
-                            springCloud
-                        </a>
-                        
-                        
-                        
-                        
-                        
                         <a href="/tags/springboot" title="springboot">
                             springboot
                         </a>
+                        
+                        
                         
                         
                         
@@ -981,6 +890,9 @@ public class Main {
                         
                         
                         
+                        <a href="/tags/springcloud" title="springcloud">
+                            springcloud
+                        </a>
                         
                         
                         
@@ -1006,6 +918,33 @@ public class Main {
                         
                         
                         
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        <a href="/tags/zookeeper" title="zookeeper">
+                            zookeeper
+                        </a>
                         
                         
                         
@@ -1065,6 +1004,8 @@ public class Main {
                         
                         
                         
+                        
+                        
                         <a href="/tags/%E5%88%86%E5%B8%83%E5%BC%8F%E7%B3%BB%E5%88%97" title="分布式系列">
                             分布式系列
                         </a>
@@ -1084,6 +1025,10 @@ public class Main {
                         
                         
                         
+                        
+                        <a href="/tags/%E5%8D%8F%E8%AE%AE%E6%A0%88" title="协议栈">
+                            协议栈
+                        </a>
                         
                         
                         
@@ -1283,6 +1228,12 @@ public class Main {
                         
                         
                         
+                        
+                        
+                        
+                        
+                        
+                        
                         <a href="/tags/%E7%BD%91%E7%BB%9C%E7%BC%96%E7%A8%8B" title="网络编程">
                             网络编程
                         </a>
@@ -1306,6 +1257,10 @@ public class Main {
                         
                         
                         
+                        
+                        <a href="/tags/%E8%AE%A4%E8%AF%81%E5%92%8C%E6%8E%88%E6%9D%83" title="认证和授权">
+                            认证和授权
+                        </a>
                         
                         
                         
@@ -1476,7 +1431,7 @@ public class Main {
                     
                 </ul>
 		<p class="copyright text-muted">
-                    Copyright &copy;  2020
+                    Copyright &copy;  2021
                     <br>
                     <a href="https://themes.gohugo.io/hugo-theme-cleanwhite">CleanWhite Hugo Theme</a> by <a href="https://zhaohuabing.com">Huabing</a> |
                     <iframe

@@ -97,15 +97,15 @@
                     </li>
                     
                     <li>
-                        <a href="/categories/english">English</a>
+                        <a href="/categories/english">english</a>
                     </li>
                     
                     <li>
-                        <a href="/categories/life">Life</a>
+                        <a href="/categories/life">life</a>
                     </li>
                     
                     <li>
-                        <a href="/categories/tech">Tech</a>
+                        <a href="/categories/tech">tech</a>
                     </li>
                     
 
@@ -237,120 +237,88 @@
                 
                 
                 
-                
-
-<p>[TOC]</p>
-
+                <p>[TOC]</p>
 <p><strong>说明：转载地址 <a href="https://www.cnblogs.com/wade-luffy/p/6542539.html">https://www.cnblogs.com/wade-luffy/p/6542539.html</a></strong></p>
-
 <h1 id="数据卷">数据卷</h1>
-
 <p>如果你现在的容器挂掉了， 那么比如你redis里面的RDB或者AOF的数据， 都会丢失， 如果你挂载到了宿主机，那么在重新启动，数据都在。<strong>同时多个容器共享一个配置，多个容器之间的数据还是同步。也就是，一些数据可以统一进行修改处理 。</strong></p>
-
 <h1 id="数据卷容器">数据卷容器</h1>
-
 <p>如果用户需要在多个容器之间共享一些持续更新的数据，最简单的方式是使用数据卷容器。数据卷容器也是一个容器，但是它的目的是专门用来提供数据卷供其他容器挂载。</p>
-
 <h1 id="数据卷应该场景">数据卷应该场景</h1>
-
 <p><strong>转载地址： <a href="https://blog.51cto.com/idweb/2322087?source=dra">https://blog.51cto.com/idweb/2322087?source=dra</a></strong></p>
-
 <ul>
 <li>在多个容器之间共享数据，多个容器可以同时以只读或者读写的方式挂载统一个数据卷，从而共享数据卷中的数据</li>
 <li>当宿主机不能保证一定存在某一个目录或一些固定的文件路径时，使用数据卷可以规避这种限制带来的问题</li>
 <li>当想把容器中的数据存储在宿主机之外的地方时，比如远程主机上和云存储上</li>
 <li>当你需要把容器数据在不同宿主机之间备份、恢复或迁移时，数据卷是很好的选择</li>
 </ul>
-
 <h2 id="数据覆盖问题">数据覆盖问题</h2>
-
 <ul>
 <li>如果挂载一个空的数据卷到容器中的一个非空目录中，那么这个目录下的文件会被复制到数据卷中</li>
 <li>如果挂载一个非空的数据卷到容器中的一个目录中，那么容器中的目录会显示数据卷中的数据。如果原来容器中的目录有数据，那么原始数据会被隐藏掉</li>
 </ul>
-
 <p>这两个规则都非常重要，灵活利用第一个规则可以帮助我们初始化数据卷中的内容。掌握第二个规则可以保证挂载数据卷后的数据总是你期望的结果。</p>
-
 <h1 id="实例操作">实例操作</h1>
-
-<pre><code class="language-dockerfile">#创建一个数据卷容器dbdata
-$ docker run -it -v /dbdata --name dbdata ubuntu
-#然后，可以在其他容器中使用--volumes-from来挂载dbdata容器中的数据卷.
-
-#例如创建db1和db2两个容器，并从dbdata容器挂载数据卷：
-
-$ docker run -it --volumes-from dbdata --name db1 ubuntu
-$ docker run -it --volumes-from dbdata --name db2 ubuntu
-
-#此时，容器db1和db2都挂载同一个数据卷到相同的/dbdata目录。三个容器任何一方在该目录下的写入，其他容器都可以看到。
-
-#可以多次使用--volumes-from参数来从多个容器挂载多个数据卷。还可以从其他已经挂载了容器卷的容器来挂载数据卷。
-#使用--volumes-from参数所挂载数据卷的容器自身并不需要保持在运行状态。
-
-#如果删除了挂载的容器（包括dbdata、db1和db2），数据卷并不会被自动删除。如果要删除一个数据卷，必须在删除最后一个还挂载着它的容器时显式使用docker rm -v命令来指定同时删除关联的容器。
-
-</code></pre>
-
-<h1 id="数据卷容器来迁移数据">数据卷容器来迁移数据</h1>
-
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-dockerfile" data-lang="dockerfile"><span style="color:#75715e">#创建一个数据卷容器dbdata</span><span style="color:#960050;background-color:#1e0010">
+</span><span style="color:#960050;background-color:#1e0010"></span>$ docker run -it -v /dbdata --name dbdata ubuntu<span style="color:#960050;background-color:#1e0010">
+</span><span style="color:#960050;background-color:#1e0010"></span><span style="color:#75715e">#然后，可以在其他容器中使用--volumes-from来挂载dbdata容器中的数据卷.</span><span style="color:#960050;background-color:#1e0010">
+</span><span style="color:#960050;background-color:#1e0010">
+</span><span style="color:#960050;background-color:#1e0010"></span><span style="color:#75715e">#例如创建db1和db2两个容器，并从dbdata容器挂载数据卷：</span><span style="color:#960050;background-color:#1e0010">
+</span><span style="color:#960050;background-color:#1e0010">
+</span><span style="color:#960050;background-color:#1e0010"></span>$ docker run -it --volumes-from dbdata --name db1 ubuntu<span style="color:#960050;background-color:#1e0010">
+</span><span style="color:#960050;background-color:#1e0010"></span>$ docker run -it --volumes-from dbdata --name db2 ubuntu<span style="color:#960050;background-color:#1e0010">
+</span><span style="color:#960050;background-color:#1e0010">
+</span><span style="color:#960050;background-color:#1e0010"></span><span style="color:#75715e">#此时，容器db1和db2都挂载同一个数据卷到相同的/dbdata目录。三个容器任何一方在该目录下的写入，其他容器都可以看到。</span><span style="color:#960050;background-color:#1e0010">
+</span><span style="color:#960050;background-color:#1e0010">
+</span><span style="color:#960050;background-color:#1e0010"></span><span style="color:#75715e">#可以多次使用--volumes-from参数来从多个容器挂载多个数据卷。还可以从其他已经挂载了容器卷的容器来挂载数据卷。</span><span style="color:#960050;background-color:#1e0010">
+</span><span style="color:#960050;background-color:#1e0010"></span><span style="color:#75715e">#使用--volumes-from参数所挂载数据卷的容器自身并不需要保持在运行状态。</span><span style="color:#960050;background-color:#1e0010">
+</span><span style="color:#960050;background-color:#1e0010">
+</span><span style="color:#960050;background-color:#1e0010"></span><span style="color:#75715e">#如果删除了挂载的容器（包括dbdata、db1和db2），数据卷并不会被自动删除。如果要删除一个数据卷，必须在删除最后一个还挂载着它的容器时显式使用docker rm -v命令来指定同时删除关联的容器。</span><span style="color:#960050;background-color:#1e0010">
+</span><span style="color:#960050;background-color:#1e0010">
+</span></code></pre></div><h1 id="数据卷容器来迁移数据">数据卷容器来迁移数据</h1>
 <p>可以利用数据卷容器对其中的数据卷进行备份、恢复，以实现数据的迁移。</p>
-
 <h2 id="备份">备份</h2>
-
-<pre><code class="language-dockerfile">docker run --volumes-from dbdata -v $(pwd):/backup --name worker ubuntu tar cvf /backup/backup.tar /dbdata
-
-首先利用ubuntu镜像创建了一个容器worker。使用--volumes-from dbdata参数来让worker容器挂载dbdata容器的数据卷(即dbdata数据卷),使用-v  $(pwd):/backup参数来挂载本地的当前目录到worker容器的/backup目录。worker容器启动后，使用了tar cvf  /backup/backup.tar /dbdata命令来将/dbdata下内容备份为容器内的/backup/backup.tar，即宿主主机当前目录下的backup.tar。
-</code></pre>
-
-<h2 id="恢复">恢复</h2>
-
-<pre><code class="language-dockerfile">如果要将数据恢复到一个容器，可以按照下面的步骤操作。
-
-首先创建一个带有数据卷的容器dbdata2：
-
-$ docker run -v /dbdata --name dbdata2 ubuntu /bin/bash
-
-然后创建另一个新的容器，挂载dbdata2的容器，并使用untar解压备份文件到所挂载的容器卷中：
-
-$ docker run --volumes-from dbdata2 -v $(pwd):/backup --name worker ubuntu bash
-
-cd /dbdata
-
-tar xvf /backup/backup.tar
-</code></pre>
-
-<h1 id="把数据存储到ssh服务器">把数据存储到SSH服务器</h1>
-
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-dockerfile" data-lang="dockerfile">docker run --volumes-from dbdata -v <span style="color:#66d9ef">$(</span>pwd<span style="color:#66d9ef">)</span>:/backup --name worker ubuntu tar cvf /backup/backup.tar /dbdata<span style="color:#960050;background-color:#1e0010">
+</span><span style="color:#960050;background-color:#1e0010">
+</span><span style="color:#960050;background-color:#1e0010"></span>首先利用ubuntu镜像创建了一个容器worker。使用--volumes-from dbdata参数来让worker容器挂载dbdata容器的数据卷<span style="color:#f92672">(</span>即dbdata数据卷<span style="color:#f92672">)</span>,使用-v  <span style="color:#66d9ef">$(</span>pwd<span style="color:#66d9ef">)</span>:/backup参数来挂载本地的当前目录到worker容器的/backup目录。worker容器启动后，使用了tar cvf  /backup/backup.tar /dbdata命令来将/dbdata下内容备份为容器内的/backup/backup.tar，即宿主主机当前目录下的backup.tar。<span style="color:#960050;background-color:#1e0010">
+</span></code></pre></div><h2 id="恢复">恢复</h2>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-dockerfile" data-lang="dockerfile">如果要将数据恢复到一个容器，可以按照下面的步骤操作。<span style="color:#960050;background-color:#1e0010">
+</span><span style="color:#960050;background-color:#1e0010">
+</span><span style="color:#960050;background-color:#1e0010"></span>首先创建一个带有数据卷的容器dbdata2：<span style="color:#960050;background-color:#1e0010">
+</span><span style="color:#960050;background-color:#1e0010">
+</span><span style="color:#960050;background-color:#1e0010"></span>$ docker run -v /dbdata --name dbdata2 ubuntu /bin/bash<span style="color:#960050;background-color:#1e0010">
+</span><span style="color:#960050;background-color:#1e0010">
+</span><span style="color:#960050;background-color:#1e0010"></span>然后创建另一个新的容器，挂载dbdata2的容器，并使用untar解压备份文件到所挂载的容器卷中：<span style="color:#960050;background-color:#1e0010">
+</span><span style="color:#960050;background-color:#1e0010">
+</span><span style="color:#960050;background-color:#1e0010"></span>$ docker run --volumes-from dbdata2 -v <span style="color:#66d9ef">$(</span>pwd<span style="color:#66d9ef">)</span>:/backup --name worker ubuntu bash<span style="color:#960050;background-color:#1e0010">
+</span><span style="color:#960050;background-color:#1e0010">
+</span><span style="color:#960050;background-color:#1e0010"></span>cd /dbdata<span style="color:#960050;background-color:#1e0010">
+</span><span style="color:#960050;background-color:#1e0010">
+</span><span style="color:#960050;background-color:#1e0010"></span>tar xvf /backup/backup.tar<span style="color:#960050;background-color:#1e0010">
+</span></code></pre></div><h1 id="把数据存储到ssh服务器">把数据存储到SSH服务器</h1>
 <p><strong>注意：目前这个不成功 ，后期在进行修改，有可能这个插件需要填写设置秘钥</strong></p>
-
-<pre><code class="language-bash">#下载插件
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-bash" data-lang="bash"><span style="color:#75715e">#下载插件</span>
 docker plugin install --grant-all-permissions vieux/sshfs
 
-#创建volume 
-docker volume create --driver vieux/sshfs \
-    -o sshcmd=maizissh@127.0.0.1:/home/maizissh/sshvolume \
-    -o password=maizi_today \
-    mysshvolume
-#启动容器 
-docker run -d --name sshfs \
-    --mount type=volume,volume-driver=vieux/sshfs,source=mysshvolume,target=/home/maizissh/sshvolume \
-    ubuntu /bin/bash
+<span style="color:#75715e">#创建volume </span>
+docker volume create --driver vieux/sshfs <span style="color:#ae81ff">\
+</span><span style="color:#ae81ff"></span>    -o sshcmd<span style="color:#f92672">=</span>maizissh@127.0.0.1:/home/maizissh/sshvolume <span style="color:#ae81ff">\
+</span><span style="color:#ae81ff"></span>    -o password<span style="color:#f92672">=</span>maizi_today <span style="color:#ae81ff">\
+</span><span style="color:#ae81ff"></span>    mysshvolume
+<span style="color:#75715e">#启动容器 </span>
+docker run -d --name sshfs <span style="color:#ae81ff">\
+</span><span style="color:#ae81ff"></span>    --mount type<span style="color:#f92672">=</span>volume,volume-driver<span style="color:#f92672">=</span>vieux/sshfs,source<span style="color:#f92672">=</span>mysshvolume,target<span style="color:#f92672">=</span>/home/maizissh/sshvolume <span style="color:#ae81ff">\
+</span><span style="color:#ae81ff"></span>    ubuntu /bin/bash
 
-#提示错误
-docker: Error response from daemon: error while mounting volume '': VolumeDriver.Mount: sshfs command execute failed: exit status 1 (read: Connection reset by peer
+<span style="color:#75715e">#提示错误</span>
+docker: Error response from daemon: error <span style="color:#66d9ef">while</span> mounting volume <span style="color:#e6db74">&#39;&#39;</span>: VolumeDriver.Mount: sshfs command execute failed: exit status <span style="color:#ae81ff">1</span> <span style="color:#f92672">(</span>read: Connection reset by peer
 
-#感觉要设置秘钥， 后期这个需要的时候在进行处理，
-</code></pre>
-
-<h1 id="docker-v">docker -v</h1>
-
+<span style="color:#75715e">#感觉要设置秘钥， 后期这个需要的时候在进行处理，</span>
+</code></pre></div><h1 id="docker--v">docker -v</h1>
 <p>如果是单一的redis恢复数据， 只要把前面容器里面的数据，copy出来， 然后-v 直接复制进去，然后重启就OK了。</p>
-
-<pre><code class="language-dockerfile">sudo docker run --rm-i -t -v /home/hyzhou/docker:/data:rw ubuntu:14.04 /bin/bash
-
-将本机的/home/hyzhou/docker，挂载到镜像中的/data目录
-</code></pre>
-
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-dockerfile" data-lang="dockerfile">sudo docker run --rm-i -t -v /home/hyzhou/docker:/data:rw ubuntu:14.04 /bin/bash<span style="color:#960050;background-color:#1e0010">
+</span><span style="color:#960050;background-color:#1e0010">
+</span><span style="color:#960050;background-color:#1e0010"></span>将本机的/home/hyzhou/docker，挂载到镜像中的/data目录<span style="color:#960050;background-color:#1e0010">
+</span></code></pre></div>
 
                 
                 
@@ -457,22 +425,14 @@ docker: Error response from daemon: error while mounting volume '': VolumeDriver
                     </h4>
                     <ul class="catalog-body"></ul>
                     <nav id="TableOfContents">
-<ul>
-<li><a href="#数据卷">数据卷</a></li>
-<li><a href="#数据卷容器">数据卷容器</a></li>
-<li><a href="#数据卷应该场景">数据卷应该场景</a>
-<ul>
-<li><a href="#数据覆盖问题">数据覆盖问题</a></li>
-</ul></li>
-<li><a href="#实例操作">实例操作</a></li>
-<li><a href="#数据卷容器来迁移数据">数据卷容器来迁移数据</a>
-<ul>
-<li><a href="#备份">备份</a></li>
-<li><a href="#恢复">恢复</a></li>
-</ul></li>
-<li><a href="#把数据存储到ssh服务器">把数据存储到SSH服务器</a></li>
-<li><a href="#docker-v">docker -v</a></li>
-</ul>
+  <ul>
+    <li><a href="#数据覆盖问题">数据覆盖问题</a></li>
+  </ul>
+
+  <ul>
+    <li><a href="#备份">备份</a></li>
+    <li><a href="#恢复">恢复</a></li>
+  </ul>
 </nav>
                     <br>
                     <br>
@@ -497,9 +457,6 @@ docker: Error response from daemon: error while mounting volume '': VolumeDriver
                         
                         
                         
-                        <a href="/tags/" title="">
-                            
-                        </a>
                         
                         
                         
@@ -509,101 +466,6 @@ docker: Error response from daemon: error while mounting volume '': VolumeDriver
                         
                         
                         
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        <a href="/tags/qt" title="QT">
-                            QT
-                        </a>
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        <a href="/tags/zookeeper" title="Zookeeper">
-                            Zookeeper
-                        </a>
                         
                         
                         
@@ -643,8 +505,10 @@ docker: Error response from daemon: error while mounting volume '': VolumeDriver
                         
                         
                         
-                        <a href="/tags/elasticsearch" title="elasticSearch">
-                            elasticSearch
+                        
+                        
+                        <a href="/tags/elasticsearch" title="elasticsearch">
+                            elasticsearch
                         </a>
                         
                         
@@ -655,9 +519,27 @@ docker: Error response from daemon: error while mounting volume '': VolumeDriver
                         
                         
                         
-                        <a href="/tags/golang" title="golang">
-                            golang
-                        </a>
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
                         
                         
                         
@@ -695,9 +577,21 @@ docker: Error response from daemon: error while mounting volume '': VolumeDriver
                         
                         
                         
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
                         <a href="/tags/jvm" title="jvm">
                             jvm
                         </a>
+                        
+                        
+                        
+                        
                         
                         
                         
@@ -721,9 +615,19 @@ docker: Error response from daemon: error while mounting volume '': VolumeDriver
                         
                         
                         
+                        
+                        
+                        
+                        
+                        
+                        
                         <a href="/tags/mongodb" title="mongodb">
                             mongodb
                         </a>
+                        
+                        
+                        
+                        
                         
                         
                         
@@ -734,10 +638,6 @@ docker: Error response from daemon: error while mounting volume '': VolumeDriver
                         </a>
                         
                         
-                        
-                        <a href="/tags/mycat" title="mycat">
-                            mycat
-                        </a>
                         
                         
                         
@@ -751,9 +651,17 @@ docker: Error response from daemon: error while mounting volume '': VolumeDriver
                         
                         
                         
-                        <a href="/tags/nginx" title="nginx">
-                            nginx
-                        </a>
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
                         
                         
                         
@@ -777,8 +685,22 @@ docker: Error response from daemon: error while mounting volume '': VolumeDriver
                         
                         
                         
+                        
+                        
                         <a href="/tags/rocketmq" title="rocketmq">
                             rocketmq
+                        </a>
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        <a href="/tags/security%E6%A1%86%E6%9E%B6%E5%AD%A6%E4%B9%A0" title="security框架学习">
+                            security框架学习
                         </a>
                         
                         
@@ -805,17 +727,11 @@ docker: Error response from daemon: error while mounting volume '': VolumeDriver
                         
                         
                         
-                        <a href="/tags/springcloud" title="springCloud">
-                            springCloud
-                        </a>
-                        
-                        
-                        
-                        
-                        
                         <a href="/tags/springboot" title="springboot">
                             springboot
                         </a>
+                        
+                        
                         
                         
                         
@@ -829,6 +745,9 @@ docker: Error response from daemon: error while mounting volume '': VolumeDriver
                         
                         
                         
+                        <a href="/tags/springcloud" title="springcloud">
+                            springcloud
+                        </a>
                         
                         
                         
@@ -854,6 +773,33 @@ docker: Error response from daemon: error while mounting volume '': VolumeDriver
                         
                         
                         
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        <a href="/tags/zookeeper" title="zookeeper">
+                            zookeeper
+                        </a>
                         
                         
                         
@@ -913,6 +859,8 @@ docker: Error response from daemon: error while mounting volume '': VolumeDriver
                         
                         
                         
+                        
+                        
                         <a href="/tags/%E5%88%86%E5%B8%83%E5%BC%8F%E7%B3%BB%E5%88%97" title="分布式系列">
                             分布式系列
                         </a>
@@ -932,6 +880,10 @@ docker: Error response from daemon: error while mounting volume '': VolumeDriver
                         
                         
                         
+                        
+                        <a href="/tags/%E5%8D%8F%E8%AE%AE%E6%A0%88" title="协议栈">
+                            协议栈
+                        </a>
                         
                         
                         
@@ -1131,6 +1083,12 @@ docker: Error response from daemon: error while mounting volume '': VolumeDriver
                         
                         
                         
+                        
+                        
+                        
+                        
+                        
+                        
                         <a href="/tags/%E7%BD%91%E7%BB%9C%E7%BC%96%E7%A8%8B" title="网络编程">
                             网络编程
                         </a>
@@ -1154,6 +1112,10 @@ docker: Error response from daemon: error while mounting volume '': VolumeDriver
                         
                         
                         
+                        
+                        <a href="/tags/%E8%AE%A4%E8%AF%81%E5%92%8C%E6%8E%88%E6%9D%83" title="认证和授权">
+                            认证和授权
+                        </a>
                         
                         
                         
@@ -1324,7 +1286,7 @@ docker: Error response from daemon: error while mounting volume '': VolumeDriver
                     
                 </ul>
 		<p class="copyright text-muted">
-                    Copyright &copy;  2020
+                    Copyright &copy;  2021
                     <br>
                     <a href="https://themes.gohugo.io/hugo-theme-cleanwhite">CleanWhite Hugo Theme</a> by <a href="https://zhaohuabing.com">Huabing</a> |
                     <iframe

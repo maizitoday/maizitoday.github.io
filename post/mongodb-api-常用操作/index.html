@@ -97,15 +97,15 @@
                     </li>
                     
                     <li>
-                        <a href="/categories/english">English</a>
+                        <a href="/categories/english">english</a>
                     </li>
                     
                     <li>
-                        <a href="/categories/life">Life</a>
+                        <a href="/categories/life">life</a>
                     </li>
                     
                     <li>
-                        <a href="/categories/tech">Tech</a>
+                        <a href="/categories/tech">tech</a>
                     </li>
                     
 
@@ -237,401 +237,338 @@
                 
                 
                 
-                
+                <p>[TOC]</p>
+<p><strong>转载地址：https://www.cnblogs.com/laoqing/p/11792578.html</strong></p>
+<h1 id="heading"></h1>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-xml" data-lang="xml">  <span style="color:#f92672">&lt;dependency&gt;</span>
+      <span style="color:#f92672">&lt;groupId&gt;</span>org.mongodb<span style="color:#f92672">&lt;/groupId&gt;</span>
+      <span style="color:#f92672">&lt;artifactId&gt;</span>mongo-java-driver<span style="color:#f92672">&lt;/artifactId&gt;</span>
+      <span style="color:#f92672">&lt;version&gt;</span>3.12.4<span style="color:#f92672">&lt;/version&gt;</span>
+   <span style="color:#f92672">&lt;/dependency&gt;</span>
+</code></pre></div><h1 id="连接和关闭">连接和关闭</h1>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-java" data-lang="java"> <span style="color:#66d9ef">private</span> <span style="color:#66d9ef">static</span> com<span style="color:#f92672">.</span><span style="color:#a6e22e">mongodb</span><span style="color:#f92672">.</span><span style="color:#a6e22e">client</span><span style="color:#f92672">.</span><span style="color:#a6e22e">MongoClient</span> mongoClient<span style="color:#f92672">;</span>
 
-<p>[TOC]</p>
+    <span style="color:#75715e">/**
+</span><span style="color:#75715e">     * 关于MongoDB Client的初始化和关闭
+</span><span style="color:#75715e">     * 
+</span><span style="color:#75715e">     * 
+</span><span style="color:#75715e">     */</span>
+    <span style="color:#66d9ef">public</span> <span style="color:#66d9ef">static</span> MongoClient <span style="color:#a6e22e">connection</span><span style="color:#f92672">()</span> <span style="color:#f92672">{</span>
+        <span style="color:#66d9ef">if</span> <span style="color:#f92672">(</span>mongoClient <span style="color:#f92672">==</span> <span style="color:#66d9ef">null</span><span style="color:#f92672">)</span> <span style="color:#f92672">{</span>
+            mongoClient <span style="color:#f92672">=</span> MongoClients<span style="color:#f92672">.</span><span style="color:#a6e22e">create</span><span style="color:#f92672">(</span><span style="color:#e6db74">&#34;mongodb://localhost:27017&#34;</span><span style="color:#f92672">);</span>
+            System<span style="color:#f92672">.</span><span style="color:#a6e22e">out</span><span style="color:#f92672">.</span><span style="color:#a6e22e">println</span><span style="color:#f92672">(</span>mongoClient<span style="color:#f92672">);</span>
+            System<span style="color:#f92672">.</span><span style="color:#a6e22e">out</span><span style="color:#f92672">.</span><span style="color:#a6e22e">println</span><span style="color:#f92672">(</span><span style="color:#e6db74">&#34;连接成功&#34;</span><span style="color:#f92672">);</span>
+        <span style="color:#f92672">}</span>
+        <span style="color:#66d9ef">return</span> mongoClient<span style="color:#f92672">;</span>
+    <span style="color:#f92672">}</span>
 
-<p><strong>转载地址：<a href="https://www.cnblogs.com/laoqing/p/11792578.html">https://www.cnblogs.com/laoqing/p/11792578.html</a></strong></p>
+    <span style="color:#75715e">/**
+</span><span style="color:#75715e">     * client连接到一个 Replica Set：
+</span><span style="color:#75715e">     */</span>
+    <span style="color:#66d9ef">public</span> <span style="color:#66d9ef">static</span> <span style="color:#66d9ef">void</span> <span style="color:#a6e22e">initByReplicaSet</span><span style="color:#f92672">()</span> <span style="color:#f92672">{</span>
+        mongoClient <span style="color:#f92672">=</span> MongoClients<span style="color:#f92672">.</span><span style="color:#a6e22e">create</span><span style="color:#f92672">(</span><span style="color:#e6db74">&#34;mongodb://host1:27017,host2:27017,host3:27017&#34;</span><span style="color:#f92672">);</span>
+        MongoClients<span style="color:#f92672">.</span><span style="color:#a6e22e">create</span><span style="color:#f92672">(</span><span style="color:#e6db74">&#34;mongodb://host1:27017,host2:27017,host3:27017/?replicaSet=myReplicaSet&#34;</span><span style="color:#f92672">);</span>
+        mongoClient <span style="color:#f92672">=</span> MongoClients<span style="color:#f92672">.</span><span style="color:#a6e22e">create</span><span style="color:#f92672">(</span>MongoClientSettings<span style="color:#f92672">.</span><span style="color:#a6e22e">builder</span><span style="color:#f92672">()</span>
+                <span style="color:#f92672">.</span><span style="color:#a6e22e">applyToClusterSettings</span><span style="color:#f92672">(</span>builder <span style="color:#f92672">-&gt;</span> builder<span style="color:#f92672">.</span><span style="color:#a6e22e">hosts</span><span style="color:#f92672">(</span>Arrays<span style="color:#f92672">.</span><span style="color:#a6e22e">asList</span><span style="color:#f92672">(</span><span style="color:#66d9ef">new</span> ServerAddress<span style="color:#f92672">(</span><span style="color:#e6db74">&#34;host1&#34;</span><span style="color:#f92672">,</span> 27017<span style="color:#f92672">),</span>
+                        <span style="color:#66d9ef">new</span> ServerAddress<span style="color:#f92672">(</span><span style="color:#e6db74">&#34;host2&#34;</span><span style="color:#f92672">,</span> 27017<span style="color:#f92672">),</span> <span style="color:#66d9ef">new</span> ServerAddress<span style="color:#f92672">(</span><span style="color:#e6db74">&#34;host3&#34;</span><span style="color:#f92672">,</span> 27017<span style="color:#f92672">))))</span>
+                <span style="color:#f92672">.</span><span style="color:#a6e22e">build</span><span style="color:#f92672">());</span>
+    <span style="color:#f92672">}</span>
 
-<pre><code class="language-xml">  &lt;dependency&gt;
-      &lt;groupId&gt;org.mongodb&lt;/groupId&gt;
-      &lt;artifactId&gt;mongo-java-driver&lt;/artifactId&gt;
-      &lt;version&gt;3.12.4&lt;/version&gt;
-   &lt;/dependency&gt;
-</code></pre>
+    <span style="color:#75715e">/**
+</span><span style="color:#75715e">     * 连接关闭
+</span><span style="color:#75715e">     */</span>
+    <span style="color:#66d9ef">public</span> <span style="color:#66d9ef">static</span> <span style="color:#66d9ef">void</span> <span style="color:#a6e22e">close</span><span style="color:#f92672">()</span> <span style="color:#f92672">{</span>
+        <span style="color:#66d9ef">if</span> <span style="color:#f92672">(</span>mongoClient <span style="color:#f92672">!=</span> <span style="color:#66d9ef">null</span><span style="color:#f92672">)</span> <span style="color:#f92672">{</span>
+            mongoClient<span style="color:#f92672">.</span><span style="color:#a6e22e">close</span><span style="color:#f92672">();</span>
+            mongoClient <span style="color:#f92672">=</span> <span style="color:#66d9ef">null</span><span style="color:#f92672">;</span>
+        <span style="color:#f92672">}</span>
+    <span style="color:#f92672">}</span>
 
-<h1 id="连接和关闭">连接和关闭</h1>
-
-<pre><code class="language-java"> private static com.mongodb.client.MongoClient mongoClient;
-
-    /**
-     * 关于MongoDB Client的初始化和关闭
-     * 
-     * 
-     */
-    public static MongoClient connection() {
-        if (mongoClient == null) {
-            mongoClient = MongoClients.create(&quot;mongodb://localhost:27017&quot;);
-            System.out.println(mongoClient);
-            System.out.println(&quot;连接成功&quot;);
-        }
-        return mongoClient;
-    }
-
-    /**
-     * client连接到一个 Replica Set：
-     */
-    public static void initByReplicaSet() {
-        mongoClient = MongoClients.create(&quot;mongodb://host1:27017,host2:27017,host3:27017&quot;);
-        MongoClients.create(&quot;mongodb://host1:27017,host2:27017,host3:27017/?replicaSet=myReplicaSet&quot;);
-        mongoClient = MongoClients.create(MongoClientSettings.builder()
-                .applyToClusterSettings(builder -&gt; builder.hosts(Arrays.asList(new ServerAddress(&quot;host1&quot;, 27017),
-                        new ServerAddress(&quot;host2&quot;, 27017), new ServerAddress(&quot;host3&quot;, 27017))))
-                .build());
-    }
-
-    /**
-     * 连接关闭
-     */
-    public static void close() {
-        if (mongoClient != null) {
-            mongoClient.close();
-            mongoClient = null;
-        }
-    }
-
-</code></pre>
-
-<h1 id="创建database">创建database</h1>
-
-<pre><code class="language-java"> /**
-     * 
-     * 获取database，如果没有会自动创建
-     * 
-     * @param databaseName
-     * @return
-     */
-    public static MongoDatabase getDatabase(String databaseName) {
-        MongoDatabase database = mongoClient.getDatabase(databaseName);
-        System.out.println(&quot;获取数据库成功   &quot; + database);
-        return database;
-    }
-</code></pre>
-
-<h1 id="创建collection">创建Collection</h1>
-
-<pre><code class="language-java"> /**
-     * 创建Collection
-     * 
-     * @param db
-     * @param collectionName
-     * @return
-     */
-    public static MongoCollection&lt;Document&gt; getCollection(MongoDatabase db, String collectionName) {
-        MongoCollection&lt;Document&gt; collection = db.getCollection(collectionName);
-        //db.createCollection(collectionName);
-        System.out.println(&quot;创建collection成功   &quot; + collection);
-        return collection;
-    }
-</code></pre>
-
-<h1 id="注意">注意</h1>
-
+</code></pre></div><h1 id="创建database">创建database</h1>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-java" data-lang="java"> <span style="color:#75715e">/**
+</span><span style="color:#75715e">     * 
+</span><span style="color:#75715e">     * 获取database，如果没有会自动创建
+</span><span style="color:#75715e">     * 
+</span><span style="color:#75715e">     * @param databaseName
+</span><span style="color:#75715e">     * @return
+</span><span style="color:#75715e">     */</span>
+    <span style="color:#66d9ef">public</span> <span style="color:#66d9ef">static</span> MongoDatabase <span style="color:#a6e22e">getDatabase</span><span style="color:#f92672">(</span>String databaseName<span style="color:#f92672">)</span> <span style="color:#f92672">{</span>
+        MongoDatabase database <span style="color:#f92672">=</span> mongoClient<span style="color:#f92672">.</span><span style="color:#a6e22e">getDatabase</span><span style="color:#f92672">(</span>databaseName<span style="color:#f92672">);</span>
+        System<span style="color:#f92672">.</span><span style="color:#a6e22e">out</span><span style="color:#f92672">.</span><span style="color:#a6e22e">println</span><span style="color:#f92672">(</span><span style="color:#e6db74">&#34;获取数据库成功   &#34;</span> <span style="color:#f92672">+</span> database<span style="color:#f92672">);</span>
+        <span style="color:#66d9ef">return</span> database<span style="color:#f92672">;</span>
+    <span style="color:#f92672">}</span>
+</code></pre></div><h1 id="创建collection">创建Collection</h1>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-java" data-lang="java"> <span style="color:#75715e">/**
+</span><span style="color:#75715e">     * 创建Collection
+</span><span style="color:#75715e">     * 
+</span><span style="color:#75715e">     * @param db
+</span><span style="color:#75715e">     * @param collectionName
+</span><span style="color:#75715e">     * @return
+</span><span style="color:#75715e">     */</span>
+    <span style="color:#66d9ef">public</span> <span style="color:#66d9ef">static</span> MongoCollection<span style="color:#f92672">&lt;</span>Document<span style="color:#f92672">&gt;</span> <span style="color:#a6e22e">getCollection</span><span style="color:#f92672">(</span>MongoDatabase db<span style="color:#f92672">,</span> String collectionName<span style="color:#f92672">)</span> <span style="color:#f92672">{</span>
+        MongoCollection<span style="color:#f92672">&lt;</span>Document<span style="color:#f92672">&gt;</span> collection <span style="color:#f92672">=</span> db<span style="color:#f92672">.</span><span style="color:#a6e22e">getCollection</span><span style="color:#f92672">(</span>collectionName<span style="color:#f92672">);</span>
+        <span style="color:#75715e">//db.createCollection(collectionName);
+</span><span style="color:#75715e"></span>        System<span style="color:#f92672">.</span><span style="color:#a6e22e">out</span><span style="color:#f92672">.</span><span style="color:#a6e22e">println</span><span style="color:#f92672">(</span><span style="color:#e6db74">&#34;创建collection成功   &#34;</span> <span style="color:#f92672">+</span> collection<span style="color:#f92672">);</span>
+        <span style="color:#66d9ef">return</span> collection<span style="color:#f92672">;</span>
+    <span style="color:#f92672">}</span>
+</code></pre></div><h1 id="注意">注意</h1>
 <p><strong>上面的操作，如果没有Document的数据的时候， 客户端是看不到这个数据库的。</strong></p>
-
 <h1 id="同步操作api">同步操作API</h1>
+<h2 id="pomxml">pom.xml</h2>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-xml" data-lang="xml"><span style="color:#f92672">&lt;dependency&gt;</span>
+      <span style="color:#f92672">&lt;groupId&gt;</span>org.mongodb<span style="color:#f92672">&lt;/groupId&gt;</span>
+      <span style="color:#f92672">&lt;artifactId&gt;</span>mongo-java-driver<span style="color:#f92672">&lt;/artifactId&gt;</span>
+      <span style="color:#f92672">&lt;version&gt;</span>3.12.4<span style="color:#f92672">&lt;/version&gt;</span>
+<span style="color:#f92672">&lt;/dependency&gt;</span>
+</code></pre></div><h2 id="新增">新增</h2>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-java" data-lang="java"><span style="color:#75715e">/**
+</span><span style="color:#75715e">     * 新增一条或者多条
+</span><span style="color:#75715e">     * 
+</span><span style="color:#75715e">     * @param collection
+</span><span style="color:#75715e">     */</span>
+    <span style="color:#66d9ef">public</span> <span style="color:#66d9ef">static</span> <span style="color:#66d9ef">void</span> <span style="color:#a6e22e">insertDocument</span><span style="color:#f92672">(</span>MongoCollection<span style="color:#f92672">&lt;</span>Document<span style="color:#f92672">&gt;</span> collection<span style="color:#f92672">)</span> <span style="color:#f92672">{</span>
+        Document document <span style="color:#f92672">=</span> <span style="color:#66d9ef">new</span> Document<span style="color:#f92672">();</span>
+        document<span style="color:#f92672">.</span><span style="color:#a6e22e">append</span><span style="color:#f92672">(</span><span style="color:#e6db74">&#34;java&#34;</span><span style="color:#f92672">,</span> <span style="color:#e6db74">&#34;长沙&#34;</span><span style="color:#f92672">);</span>
+        document<span style="color:#f92672">.</span><span style="color:#a6e22e">append</span><span style="color:#f92672">(</span><span style="color:#e6db74">&#34;age&#34;</span><span style="color:#f92672">,</span> <span style="color:#e6db74">&#34;8个月&#34;</span><span style="color:#f92672">);</span>
+        <span style="color:#75715e">// 新增一条
+</span><span style="color:#75715e"></span>        collection<span style="color:#f92672">.</span><span style="color:#a6e22e">insertOne</span><span style="color:#f92672">(</span>document<span style="color:#f92672">);</span>
 
-<h2 id="pom-xml">pom.xml</h2>
+        <span style="color:#75715e">// 新增多条
+</span><span style="color:#75715e"></span>        List<span style="color:#f92672">&lt;</span>Document<span style="color:#f92672">&gt;</span> documents <span style="color:#f92672">=</span> <span style="color:#66d9ef">new</span> ArrayList<span style="color:#f92672">&lt;</span>Document<span style="color:#f92672">&gt;();</span>
+        <span style="color:#66d9ef">for</span> <span style="color:#f92672">(</span><span style="color:#66d9ef">int</span> i <span style="color:#f92672">=</span> 0<span style="color:#f92672">;</span> i <span style="color:#f92672">&lt;</span> 5<span style="color:#f92672">;</span> i<span style="color:#f92672">++)</span> <span style="color:#f92672">{</span>
+            Document newDocument <span style="color:#f92672">=</span> <span style="color:#66d9ef">new</span> Document<span style="color:#f92672">();</span>
+            newDocument<span style="color:#f92672">.</span><span style="color:#a6e22e">append</span><span style="color:#f92672">(</span><span style="color:#e6db74">&#34;java&#34;</span><span style="color:#f92672">,</span> <span style="color:#e6db74">&#34;长沙-&#34;</span> <span style="color:#f92672">+</span> i<span style="color:#f92672">);</span>
+            newDocument<span style="color:#f92672">.</span><span style="color:#a6e22e">append</span><span style="color:#f92672">(</span><span style="color:#e6db74">&#34;age&#34;</span><span style="color:#f92672">,</span> <span style="color:#e6db74">&#34;时间-&#34;</span> <span style="color:#f92672">+</span> i<span style="color:#f92672">);</span>
+            documents<span style="color:#f92672">.</span><span style="color:#a6e22e">add</span><span style="color:#f92672">(</span>newDocument<span style="color:#f92672">);</span>
+        <span style="color:#f92672">}</span>
+        collection<span style="color:#f92672">.</span><span style="color:#a6e22e">insertMany</span><span style="color:#f92672">(</span>documents<span style="color:#f92672">);</span>
+    <span style="color:#f92672">}</span>
 
-<pre><code class="language-xml">&lt;dependency&gt;
-      &lt;groupId&gt;org.mongodb&lt;/groupId&gt;
-      &lt;artifactId&gt;mongo-java-driver&lt;/artifactId&gt;
-      &lt;version&gt;3.12.4&lt;/version&gt;
-&lt;/dependency&gt;
-</code></pre>
+    <span style="color:#75715e">/**
+</span><span style="color:#75715e">     * MongoDB 的bulkWrite操作 （批量写入），对于数据很多时，效率很高
+</span><span style="color:#75715e">     * 
+</span><span style="color:#75715e">     * @param dataBaseName
+</span><span style="color:#75715e">     * @param collectionName
+</span><span style="color:#75715e">     * @param listData
+</span><span style="color:#75715e">     * @return
+</span><span style="color:#75715e">     */</span>
+    <span style="color:#66d9ef">public</span> BulkWriteResult <span style="color:#a6e22e">bulkWrite</span><span style="color:#f92672">(</span>String dataBaseName<span style="color:#f92672">,</span> String collectionName<span style="color:#f92672">,</span>
+            List<span style="color:#f92672">&lt;?</span> <span style="color:#66d9ef">extends</span> WriteModel<span style="color:#f92672">&lt;?</span> <span style="color:#66d9ef">extends</span> Document<span style="color:#f92672">&gt;&gt;</span> listData<span style="color:#f92672">)</span> <span style="color:#f92672">{</span>
+        <span style="color:#66d9ef">return</span> getCollectionByName<span style="color:#f92672">(</span>dataBaseName<span style="color:#f92672">,</span> collectionName<span style="color:#f92672">).</span><span style="color:#a6e22e">bulkWrite</span><span style="color:#f92672">(</span>listData<span style="color:#f92672">);</span>
+    <span style="color:#f92672">}</span>
+</code></pre></div><h2 id="查询">查询</h2>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-java" data-lang="java"><span style="color:#75715e">/**
+</span><span style="color:#75715e">     * 查询数据库中有多少的collection
+</span><span style="color:#75715e">     * 
+</span><span style="color:#75715e">     * @param dataBaseName
+</span><span style="color:#75715e">     * @return
+</span><span style="color:#75715e">     */</span>
+    <span style="color:#66d9ef">public</span> <span style="color:#66d9ef">static</span> List<span style="color:#f92672">&lt;</span>String<span style="color:#f92672">&gt;</span> <span style="color:#a6e22e">listCollectionNames</span><span style="color:#f92672">(</span>String dataBaseName<span style="color:#f92672">)</span> <span style="color:#f92672">{</span>
+        List<span style="color:#f92672">&lt;</span>String<span style="color:#f92672">&gt;</span> stringList <span style="color:#f92672">=</span> <span style="color:#66d9ef">new</span> ArrayList<span style="color:#f92672">&lt;</span>String<span style="color:#f92672">&gt;();</span>
+        mongoClient<span style="color:#f92672">.</span><span style="color:#a6e22e">getDatabase</span><span style="color:#f92672">(</span>dataBaseName<span style="color:#f92672">).</span><span style="color:#a6e22e">listCollectionNames</span><span style="color:#f92672">().</span><span style="color:#a6e22e">forEach</span><span style="color:#f92672">((</span>Consumer<span style="color:#f92672">&lt;?</span> <span style="color:#66d9ef">super</span> String<span style="color:#f92672">&gt;)</span> t <span style="color:#f92672">-&gt;</span> <span style="color:#f92672">{</span>
+            stringList<span style="color:#f92672">.</span><span style="color:#a6e22e">add</span><span style="color:#f92672">(</span>t<span style="color:#f92672">);</span>
+        <span style="color:#f92672">});</span>
+        <span style="color:#66d9ef">return</span> stringList<span style="color:#f92672">;</span>
+    <span style="color:#f92672">}</span>
 
-<h2 id="新增">新增</h2>
+    <span style="color:#75715e">/**
+</span><span style="color:#75715e">     * 查询数据库中的 对应的 collection
+</span><span style="color:#75715e">     * 
+</span><span style="color:#75715e">     * @param dataBaseName
+</span><span style="color:#75715e">     * @param collectionName
+</span><span style="color:#75715e">     * @return
+</span><span style="color:#75715e">     */</span>
+    <span style="color:#66d9ef">public</span> <span style="color:#66d9ef">static</span> MongoCollection<span style="color:#f92672">&lt;</span>Document<span style="color:#f92672">&gt;</span> <span style="color:#a6e22e">getCollectionByName</span><span style="color:#f92672">(</span>String dataBaseName<span style="color:#f92672">,</span> String collectionName<span style="color:#f92672">)</span> <span style="color:#f92672">{</span>
+        <span style="color:#66d9ef">return</span> getDatabase<span style="color:#f92672">(</span>dataBaseName<span style="color:#f92672">).</span><span style="color:#a6e22e">getCollection</span><span style="color:#f92672">(</span>collectionName<span style="color:#f92672">);</span>
+    <span style="color:#f92672">}</span>
 
-<pre><code class="language-java">/**
-     * 新增一条或者多条
-     * 
-     * @param collection
-     */
-    public static void insertDocument(MongoCollection&lt;Document&gt; collection) {
-        Document document = new Document();
-        document.append(&quot;java&quot;, &quot;长沙&quot;);
-        document.append(&quot;age&quot;, &quot;8个月&quot;);
-        // 新增一条
-        collection.insertOne(document);
+    <span style="color:#75715e">/**
+</span><span style="color:#75715e">     * 精确查询，模糊查询，范围查询， 排序，返回条数
+</span><span style="color:#75715e">     * 
+</span><span style="color:#75715e">     * @param dataBaseName
+</span><span style="color:#75715e">     * @param collectionName
+</span><span style="color:#75715e">     * @param id
+</span><span style="color:#75715e">     * @return
+</span><span style="color:#75715e">     */</span>
+    <span style="color:#66d9ef">public</span> <span style="color:#66d9ef">static</span> FindIterable<span style="color:#f92672">&lt;</span>Document<span style="color:#f92672">&gt;</span> <span style="color:#a6e22e">findMongoDbDocById</span><span style="color:#f92672">(</span>String dataBaseName<span style="color:#f92672">,</span> String collectionName<span style="color:#f92672">,</span> String id<span style="color:#f92672">)</span> <span style="color:#f92672">{</span>
+        BasicDBObject searchDoc <span style="color:#f92672">=</span> <span style="color:#66d9ef">new</span> BasicDBObject<span style="color:#f92672">();</span>
+        <span style="color:#75715e">// 通过id（objectid）精确查询
+</span><span style="color:#75715e"></span>        <span style="color:#75715e">// searchDoc.put(&#34;_id&#34;, new ObjectId(id));
+</span><span style="color:#75715e"></span>
+        <span style="color:#75715e">// 模糊查询
+</span><span style="color:#75715e"></span>        searchDoc<span style="color:#f92672">.</span><span style="color:#a6e22e">put</span><span style="color:#f92672">(</span><span style="color:#e6db74">&#34;java&#34;</span><span style="color:#f92672">,</span> <span style="color:#66d9ef">new</span> BasicDBObject<span style="color:#f92672">(</span><span style="color:#e6db74">&#34;$regex&#34;</span><span style="color:#f92672">,</span> <span style="color:#e6db74">&#34;长沙&#34;</span><span style="color:#f92672">));</span>
 
-        // 新增多条
-        List&lt;Document&gt; documents = new ArrayList&lt;Document&gt;();
-        for (int i = 0; i &lt; 5; i++) {
-            Document newDocument = new Document();
-            newDocument.append(&quot;java&quot;, &quot;长沙-&quot; + i);
-            newDocument.append(&quot;age&quot;, &quot;时间-&quot; + i);
-            documents.add(newDocument);
-        }
-        collection.insertMany(documents);
-    }
+        <span style="color:#75715e">// searchDoc.put(&#34;java&#34;, new BasicDBObject(&#34;$gte&#34;, startId).append(&#34;$lte&#34;,
+</span><span style="color:#75715e"></span>        <span style="color:#75715e">// endId));
+</span><span style="color:#75715e"></span>
+        <span style="color:#75715e">//
+</span><span style="color:#75715e"></span>        <span style="color:#66d9ef">return</span> getCollectionByName<span style="color:#f92672">(</span>dataBaseName<span style="color:#f92672">,</span> collectionName<span style="color:#f92672">).</span><span style="color:#a6e22e">find</span><span style="color:#f92672">(</span>searchDoc<span style="color:#f92672">).</span><span style="color:#a6e22e">limit</span><span style="color:#f92672">(</span>10<span style="color:#f92672">)</span>
+                <span style="color:#f92672">.</span><span style="color:#a6e22e">sort</span><span style="color:#f92672">(</span><span style="color:#66d9ef">new</span> Document<span style="color:#f92672">().</span><span style="color:#a6e22e">append</span><span style="color:#f92672">(</span><span style="color:#e6db74">&#34;age&#34;</span><span style="color:#f92672">,</span> 1<span style="color:#f92672">));</span>
+    <span style="color:#f92672">}</span>
+</code></pre></div><h2 id="修改">修改</h2>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-java" data-lang="java"><span style="color:#75715e">/**
+</span><span style="color:#75715e">     * 
+</span><span style="color:#75715e">     * 更新一条， 批量更新
+</span><span style="color:#75715e">     * 
+</span><span style="color:#75715e">     */</span>
+    <span style="color:#66d9ef">public</span> <span style="color:#66d9ef">static</span> <span style="color:#66d9ef">void</span> <span style="color:#a6e22e">update</span><span style="color:#f92672">()</span> <span style="color:#f92672">{</span>
+        MongoDatabase database <span style="color:#f92672">=</span> App<span style="color:#f92672">.</span><span style="color:#a6e22e">getDatabase</span><span style="color:#f92672">(</span><span style="color:#e6db74">&#34;maiziDB&#34;</span><span style="color:#f92672">);</span>
+        MongoCollection<span style="color:#f92672">&lt;</span>Document<span style="color:#f92672">&gt;</span> workCollection <span style="color:#f92672">=</span> database<span style="color:#f92672">.</span><span style="color:#a6e22e">getCollection</span><span style="color:#f92672">(</span><span style="color:#e6db74">&#34;work&#34;</span><span style="color:#f92672">);</span>
+        Bson eqBson <span style="color:#f92672">=</span> Filters<span style="color:#f92672">.</span><span style="color:#a6e22e">eq</span><span style="color:#f92672">(</span><span style="color:#e6db74">&#34;java&#34;</span><span style="color:#f92672">,</span> <span style="color:#e6db74">&#34;长沙&#34;</span><span style="color:#f92672">);</span>
+        <span style="color:#75715e">// 要修改的内容
+</span><span style="color:#75715e"></span>        Document updateBson <span style="color:#f92672">=</span> <span style="color:#66d9ef">new</span> Document<span style="color:#f92672">(</span><span style="color:#e6db74">&#34;$set&#34;</span><span style="color:#f92672">,</span> <span style="color:#66d9ef">new</span> Document<span style="color:#f92672">(</span><span style="color:#e6db74">&#34;age&#34;</span><span style="color:#f92672">,</span> 25<span style="color:#f92672">).</span><span style="color:#a6e22e">append</span><span style="color:#f92672">(</span><span style="color:#e6db74">&#34;school&#34;</span><span style="color:#f92672">,</span> <span style="color:#e6db74">&#34;一度教育&#34;</span><span style="color:#f92672">));</span>
+        UpdateResult updateMany <span style="color:#f92672">=</span> workCollection<span style="color:#f92672">.</span><span style="color:#a6e22e">updateMany</span><span style="color:#f92672">(</span>eqBson<span style="color:#f92672">,</span> updateBson<span style="color:#f92672">);</span>
+        System<span style="color:#f92672">.</span><span style="color:#a6e22e">out</span><span style="color:#f92672">.</span><span style="color:#a6e22e">println</span><span style="color:#f92672">(</span>updateMany<span style="color:#f92672">.</span><span style="color:#a6e22e">toString</span><span style="color:#f92672">());</span>
 
-    /**
-     * MongoDB 的bulkWrite操作 （批量写入），对于数据很多时，效率很高
-     * 
-     * @param dataBaseName
-     * @param collectionName
-     * @param listData
-     * @return
-     */
-    public BulkWriteResult bulkWrite(String dataBaseName, String collectionName,
-            List&lt;? extends WriteModel&lt;? extends Document&gt;&gt; listData) {
-        return getCollectionByName(dataBaseName, collectionName).bulkWrite(listData);
-    }
-</code></pre>
+        <span style="color:#75715e">// workCollection.updateMany(filter, update)
+</span><span style="color:#75715e"></span>    <span style="color:#f92672">}</span>
+</code></pre></div><h2 id="删除">删除</h2>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-java" data-lang="java"><span style="color:#75715e">/**
+</span><span style="color:#75715e">     * 
+</span><span style="color:#75715e">     * 根据多个条件删除单个或者是多个
+</span><span style="color:#75715e">     * 
+</span><span style="color:#75715e">     */</span>
+    <span style="color:#66d9ef">public</span> <span style="color:#66d9ef">static</span> <span style="color:#66d9ef">void</span> <span style="color:#a6e22e">remove</span><span style="color:#f92672">()</span> <span style="color:#f92672">{</span>
+        MongoDatabase database <span style="color:#f92672">=</span> App<span style="color:#f92672">.</span><span style="color:#a6e22e">getDatabase</span><span style="color:#f92672">(</span><span style="color:#e6db74">&#34;maiziDB&#34;</span><span style="color:#f92672">);</span>
+        MongoCollection<span style="color:#f92672">&lt;</span>Document<span style="color:#f92672">&gt;</span> workCollection <span style="color:#f92672">=</span> database<span style="color:#f92672">.</span><span style="color:#a6e22e">getCollection</span><span style="color:#f92672">(</span><span style="color:#e6db74">&#34;work&#34;</span><span style="color:#f92672">);</span>
+        <span style="color:#75715e">// 单一条件删除
+</span><span style="color:#75715e"></span>        Bson delBson <span style="color:#f92672">=</span> Filters<span style="color:#f92672">.</span><span style="color:#a6e22e">eq</span><span style="color:#f92672">(</span><span style="color:#e6db74">&#34;age&#34;</span><span style="color:#f92672">,</span> <span style="color:#e6db74">&#34;时间-0&#34;</span><span style="color:#f92672">);</span>
+        DeleteResult deleteMany <span style="color:#f92672">=</span> workCollection<span style="color:#f92672">.</span><span style="color:#a6e22e">deleteMany</span><span style="color:#f92672">(</span>delBson<span style="color:#f92672">);</span>
+        System<span style="color:#f92672">.</span><span style="color:#a6e22e">out</span><span style="color:#f92672">.</span><span style="color:#a6e22e">println</span><span style="color:#f92672">(</span>deleteMany<span style="color:#f92672">.</span><span style="color:#a6e22e">toString</span><span style="color:#f92672">());</span>
 
-<h2 id="查询">查询</h2>
+        <span style="color:#75715e">// 多个条件合并，删除多个
+</span><span style="color:#75715e"></span>        Bson delBson1 <span style="color:#f92672">=</span> Filters<span style="color:#f92672">.</span><span style="color:#a6e22e">gte</span><span style="color:#f92672">(</span><span style="color:#e6db74">&#34;age&#34;</span><span style="color:#f92672">,</span> 20<span style="color:#f92672">);</span>
+        <span style="color:#75715e">// 构造删除条件（age&lt;=30）
+</span><span style="color:#75715e"></span>        Bson delBson2 <span style="color:#f92672">=</span> Filters<span style="color:#f92672">.</span><span style="color:#a6e22e">lte</span><span style="color:#f92672">(</span><span style="color:#e6db74">&#34;age&#34;</span><span style="color:#f92672">,</span> 30<span style="color:#f92672">);</span>
+        <span style="color:#75715e">// 合并删除条件
+</span><span style="color:#75715e"></span>        Bson delBsonCount <span style="color:#f92672">=</span> Filters<span style="color:#f92672">.</span><span style="color:#a6e22e">and</span><span style="color:#f92672">(</span>delBson1<span style="color:#f92672">,</span> delBson2<span style="color:#f92672">);</span>
+        deleteMany <span style="color:#f92672">=</span> workCollection<span style="color:#f92672">.</span><span style="color:#a6e22e">deleteMany</span><span style="color:#f92672">(</span>delBsonCount<span style="color:#f92672">);</span>
+        System<span style="color:#f92672">.</span><span style="color:#a6e22e">out</span><span style="color:#f92672">.</span><span style="color:#a6e22e">println</span><span style="color:#f92672">(</span>deleteMany<span style="color:#f92672">.</span><span style="color:#a6e22e">toString</span><span style="color:#f92672">());</span>
+    <span style="color:#f92672">}</span>
+</code></pre></div><h2 id="替换操作">替换操作</h2>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-java" data-lang="java"><span style="color:#75715e">/**
+</span><span style="color:#75715e">     * 存在就替换，不存在的话就插入
+</span><span style="color:#75715e">     * 
+</span><span style="color:#75715e">     * @param dataBaseName
+</span><span style="color:#75715e">     * @param collectionName
+</span><span style="color:#75715e">     * @param var1
+</span><span style="color:#75715e">     * @param var2
+</span><span style="color:#75715e">     * @param var3
+</span><span style="color:#75715e">     * @return
+</span><span style="color:#75715e">     */</span>
+    <span style="color:#66d9ef">public</span> UpdateResult <span style="color:#a6e22e">replaceDoc</span><span style="color:#f92672">(</span>String dataBaseName<span style="color:#f92672">,</span> String collectionName<span style="color:#f92672">,</span> Bson var1<span style="color:#f92672">,</span> Document var2<span style="color:#f92672">,</span>
+            ReplaceOptions var3<span style="color:#f92672">)</span> <span style="color:#f92672">{</span>
+        <span style="color:#66d9ef">return</span> getCollectionByName<span style="color:#f92672">(</span>dataBaseName<span style="color:#f92672">,</span> collectionName<span style="color:#f92672">).</span><span style="color:#a6e22e">replaceOne</span><span style="color:#f92672">(</span>var1<span style="color:#f92672">,</span> var2<span style="color:#f92672">,</span> var3<span style="color:#f92672">);</span>
+    <span style="color:#f92672">}</span>
 
-<pre><code class="language-java">/**
-     * 查询数据库中有多少的collection
-     * 
-     * @param dataBaseName
-     * @return
-     */
-    public static List&lt;String&gt; listCollectionNames(String dataBaseName) {
-        List&lt;String&gt; stringList = new ArrayList&lt;String&gt;();
-        mongoClient.getDatabase(dataBaseName).listCollectionNames().forEach((Consumer&lt;? super String&gt;) t -&gt; {
-            stringList.add(t);
-        });
-        return stringList;
-    }
-
-    /**
-     * 查询数据库中的 对应的 collection
-     * 
-     * @param dataBaseName
-     * @param collectionName
-     * @return
-     */
-    public static MongoCollection&lt;Document&gt; getCollectionByName(String dataBaseName, String collectionName) {
-        return getDatabase(dataBaseName).getCollection(collectionName);
-    }
-
-    /**
-     * 精确查询，模糊查询，范围查询， 排序，返回条数
-     * 
-     * @param dataBaseName
-     * @param collectionName
-     * @param id
-     * @return
-     */
-    public static FindIterable&lt;Document&gt; findMongoDbDocById(String dataBaseName, String collectionName, String id) {
-        BasicDBObject searchDoc = new BasicDBObject();
-        // 通过id（objectid）精确查询
-        // searchDoc.put(&quot;_id&quot;, new ObjectId(id));
-
-        // 模糊查询
-        searchDoc.put(&quot;java&quot;, new BasicDBObject(&quot;$regex&quot;, &quot;长沙&quot;));
-
-        // searchDoc.put(&quot;java&quot;, new BasicDBObject(&quot;$gte&quot;, startId).append(&quot;$lte&quot;,
-        // endId));
-
-        //
-        return getCollectionByName(dataBaseName, collectionName).find(searchDoc).limit(10)
-                .sort(new Document().append(&quot;age&quot;, 1));
-    }
-</code></pre>
-
-<h2 id="修改">修改</h2>
-
-<pre><code class="language-java">/**
-     * 
-     * 更新一条， 批量更新
-     * 
-     */
-    public static void update() {
-        MongoDatabase database = App.getDatabase(&quot;maiziDB&quot;);
-        MongoCollection&lt;Document&gt; workCollection = database.getCollection(&quot;work&quot;);
-        Bson eqBson = Filters.eq(&quot;java&quot;, &quot;长沙&quot;);
-        // 要修改的内容
-        Document updateBson = new Document(&quot;$set&quot;, new Document(&quot;age&quot;, 25).append(&quot;school&quot;, &quot;一度教育&quot;));
-        UpdateResult updateMany = workCollection.updateMany(eqBson, updateBson);
-        System.out.println(updateMany.toString());
-
-        // workCollection.updateMany(filter, update)
-    }
-</code></pre>
-
-<h2 id="删除">删除</h2>
-
-<pre><code class="language-java">/**
-     * 
-     * 根据多个条件删除单个或者是多个
-     * 
-     */
-    public static void remove() {
-        MongoDatabase database = App.getDatabase(&quot;maiziDB&quot;);
-        MongoCollection&lt;Document&gt; workCollection = database.getCollection(&quot;work&quot;);
-        // 单一条件删除
-        Bson delBson = Filters.eq(&quot;age&quot;, &quot;时间-0&quot;);
-        DeleteResult deleteMany = workCollection.deleteMany(delBson);
-        System.out.println(deleteMany.toString());
-
-        // 多个条件合并，删除多个
-        Bson delBson1 = Filters.gte(&quot;age&quot;, 20);
-        // 构造删除条件（age&lt;=30）
-        Bson delBson2 = Filters.lte(&quot;age&quot;, 30);
-        // 合并删除条件
-        Bson delBsonCount = Filters.and(delBson1, delBson2);
-        deleteMany = workCollection.deleteMany(delBsonCount);
-        System.out.println(deleteMany.toString());
-    }
-</code></pre>
-
-<h2 id="替换操作">替换操作</h2>
-
-<pre><code class="language-java">/**
-     * 存在就替换，不存在的话就插入
-     * 
-     * @param dataBaseName
-     * @param collectionName
-     * @param var1
-     * @param var2
-     * @param var3
-     * @return
-     */
-    public UpdateResult replaceDoc(String dataBaseName, String collectionName, Bson var1, Document var2,
-            ReplaceOptions var3) {
-        return getCollectionByName(dataBaseName, collectionName).replaceOne(var1, var2, var3);
-    }
-
-    /**
-     * 设置存在就替换，不存在的话就插入
-     * 
-     * @param dataBaseName
-     * @param collectionName
-     * @param var1
-     * @param var2
-     * @return
-     */
-    public UpdateResult replaceDoc(String dataBaseName, String collectionName, Bson var1, Document var2) {
-        Document documentQuery = new Document(&quot;_id&quot;, new ObjectId(&quot;id&quot;));
-        Document document = new Document(&quot;_id&quot;, new ObjectId(&quot;id&quot;));
-        ReplaceOptions replaceOptions = new ReplaceOptions();
-        replaceOptions.upsert(true);
-        return replaceDoc(dataBaseName, collectionName, documentQuery, document, replaceOptions);
-    }
-</code></pre>
-
-<h1 id="异步操作api">异步操作API</h1>
-
+    <span style="color:#75715e">/**
+</span><span style="color:#75715e">     * 设置存在就替换，不存在的话就插入
+</span><span style="color:#75715e">     * 
+</span><span style="color:#75715e">     * @param dataBaseName
+</span><span style="color:#75715e">     * @param collectionName
+</span><span style="color:#75715e">     * @param var1
+</span><span style="color:#75715e">     * @param var2
+</span><span style="color:#75715e">     * @return
+</span><span style="color:#75715e">     */</span>
+    <span style="color:#66d9ef">public</span> UpdateResult <span style="color:#a6e22e">replaceDoc</span><span style="color:#f92672">(</span>String dataBaseName<span style="color:#f92672">,</span> String collectionName<span style="color:#f92672">,</span> Bson var1<span style="color:#f92672">,</span> Document var2<span style="color:#f92672">)</span> <span style="color:#f92672">{</span>
+        Document documentQuery <span style="color:#f92672">=</span> <span style="color:#66d9ef">new</span> Document<span style="color:#f92672">(</span><span style="color:#e6db74">&#34;_id&#34;</span><span style="color:#f92672">,</span> <span style="color:#66d9ef">new</span> ObjectId<span style="color:#f92672">(</span><span style="color:#e6db74">&#34;id&#34;</span><span style="color:#f92672">));</span>
+        Document document <span style="color:#f92672">=</span> <span style="color:#66d9ef">new</span> Document<span style="color:#f92672">(</span><span style="color:#e6db74">&#34;_id&#34;</span><span style="color:#f92672">,</span> <span style="color:#66d9ef">new</span> ObjectId<span style="color:#f92672">(</span><span style="color:#e6db74">&#34;id&#34;</span><span style="color:#f92672">));</span>
+        ReplaceOptions replaceOptions <span style="color:#f92672">=</span> <span style="color:#66d9ef">new</span> ReplaceOptions<span style="color:#f92672">();</span>
+        replaceOptions<span style="color:#f92672">.</span><span style="color:#a6e22e">upsert</span><span style="color:#f92672">(</span><span style="color:#66d9ef">true</span><span style="color:#f92672">);</span>
+        <span style="color:#66d9ef">return</span> replaceDoc<span style="color:#f92672">(</span>dataBaseName<span style="color:#f92672">,</span> collectionName<span style="color:#f92672">,</span> documentQuery<span style="color:#f92672">,</span> document<span style="color:#f92672">,</span> replaceOptions<span style="color:#f92672">);</span>
+    <span style="color:#f92672">}</span>
+</code></pre></div><h1 id="异步操作api">异步操作API</h1>
 <p>mongodb异步驱动程序提供了异步api，可以利用netty或java 7的asynchronoussocketchannel实现快速、无阻塞的i/o，maven依赖</p>
-
-<h2 id="pom-xml-1">pom.xml</h2>
-
-<pre><code class="language-xml">  &lt;dependency&gt;
-      &lt;groupId&gt;org.mongodb&lt;/groupId&gt;
-      &lt;artifactId&gt;mongodb-driver-async&lt;/artifactId&gt;
-      &lt;version&gt;3.12.4&lt;/version&gt;
-    &lt;/dependency&gt;
-</code></pre>
-
-<p><strong>异步操作必然会涉及到回调，回调时采用ResultCallback<Document></strong></p>
-
+<h2 id="pomxml-1">pom.xml</h2>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-xml" data-lang="xml">  <span style="color:#f92672">&lt;dependency&gt;</span>
+      <span style="color:#f92672">&lt;groupId&gt;</span>org.mongodb<span style="color:#f92672">&lt;/groupId&gt;</span>
+      <span style="color:#f92672">&lt;artifactId&gt;</span>mongodb-driver-async<span style="color:#f92672">&lt;/artifactId&gt;</span>
+      <span style="color:#f92672">&lt;version&gt;</span>3.12.4<span style="color:#f92672">&lt;/version&gt;</span>
+    <span style="color:#f92672">&lt;/dependency&gt;</span>
+</code></pre></div><p><strong>异步操作必然会涉及到回调，回调时采用ResultCallback<!-- raw HTML omitted --></strong></p>
 <h2 id="异步insert操作">异步insert操作</h2>
-
-<pre><code class="language-java">collection.insertMany(documents, new SingleResultCallback&lt;Void&gt;() {
-    @Override
-    public void onResult(final Void result, final Throwable t) {
-        System.out.println(&quot;Documents inserted!&quot;);
-    }
-});
-</code></pre>
-
-<h2 id="异步统计操作">异步统计操作</h2>
-
-<pre><code class="language-java">collection.countDocuments(
-  new SingleResultCallback&lt;Long&gt;() {
-      @Override
-      public void onResult(final Long count, final Throwable t) {
-          System.out.println(count);
-      }
-  });
-</code></pre>
-
-<h2 id="异步更新操作">异步更新操作</h2>
-
-<pre><code class="language-java">collection.updateOne(eq(&quot;i&quot;, 10), set(&quot;i&quot;, 110),
-    new SingleResultCallback&lt;UpdateResult&gt;() {
-        @Override
-        public void onResult(final UpdateResult result, final Throwable t) {
-            System.out.println(result.getModifiedCount());
-        }
-    });
-</code></pre>
-
-<h2 id="异步删除操作">异步删除操作</h2>
-
-<pre><code class="language-java">collection.deleteMany(gte(&quot;i&quot;, 100), new SingleResultCallback&lt;DeleteResult&gt;() {
-    @Override
-    public void onResult(final DeleteResult result, final Throwable t) {
-        System.out.println(result.getDeletedCount());
-    }
-});
-</code></pre>
-
-<h1 id="mongodb-reactive-streams-操作api">MongoDB Reactive Streams 操作API</h1>
-
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-java" data-lang="java">collection<span style="color:#f92672">.</span><span style="color:#a6e22e">insertMany</span><span style="color:#f92672">(</span>documents<span style="color:#f92672">,</span> <span style="color:#66d9ef">new</span> SingleResultCallback<span style="color:#f92672">&lt;</span>Void<span style="color:#f92672">&gt;()</span> <span style="color:#f92672">{</span>
+    <span style="color:#a6e22e">@Override</span>
+    <span style="color:#66d9ef">public</span> <span style="color:#66d9ef">void</span> <span style="color:#a6e22e">onResult</span><span style="color:#f92672">(</span><span style="color:#66d9ef">final</span> Void result<span style="color:#f92672">,</span> <span style="color:#66d9ef">final</span> Throwable t<span style="color:#f92672">)</span> <span style="color:#f92672">{</span>
+        System<span style="color:#f92672">.</span><span style="color:#a6e22e">out</span><span style="color:#f92672">.</span><span style="color:#a6e22e">println</span><span style="color:#f92672">(</span><span style="color:#e6db74">&#34;Documents inserted!&#34;</span><span style="color:#f92672">);</span>
+    <span style="color:#f92672">}</span>
+<span style="color:#f92672">});</span>
+</code></pre></div><h2 id="异步统计操作">异步统计操作</h2>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-java" data-lang="java">collection<span style="color:#f92672">.</span><span style="color:#a6e22e">countDocuments</span><span style="color:#f92672">(</span>
+  <span style="color:#66d9ef">new</span> SingleResultCallback<span style="color:#f92672">&lt;</span>Long<span style="color:#f92672">&gt;()</span> <span style="color:#f92672">{</span>
+      <span style="color:#a6e22e">@Override</span>
+      <span style="color:#66d9ef">public</span> <span style="color:#66d9ef">void</span> <span style="color:#a6e22e">onResult</span><span style="color:#f92672">(</span><span style="color:#66d9ef">final</span> Long count<span style="color:#f92672">,</span> <span style="color:#66d9ef">final</span> Throwable t<span style="color:#f92672">)</span> <span style="color:#f92672">{</span>
+          System<span style="color:#f92672">.</span><span style="color:#a6e22e">out</span><span style="color:#f92672">.</span><span style="color:#a6e22e">println</span><span style="color:#f92672">(</span>count<span style="color:#f92672">);</span>
+      <span style="color:#f92672">}</span>
+  <span style="color:#f92672">});</span>
+</code></pre></div><h2 id="异步更新操作">异步更新操作</h2>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-java" data-lang="java">collection<span style="color:#f92672">.</span><span style="color:#a6e22e">updateOne</span><span style="color:#f92672">(</span>eq<span style="color:#f92672">(</span><span style="color:#e6db74">&#34;i&#34;</span><span style="color:#f92672">,</span> 10<span style="color:#f92672">),</span> set<span style="color:#f92672">(</span><span style="color:#e6db74">&#34;i&#34;</span><span style="color:#f92672">,</span> 110<span style="color:#f92672">),</span>
+    <span style="color:#66d9ef">new</span> SingleResultCallback<span style="color:#f92672">&lt;</span>UpdateResult<span style="color:#f92672">&gt;()</span> <span style="color:#f92672">{</span>
+        <span style="color:#a6e22e">@Override</span>
+        <span style="color:#66d9ef">public</span> <span style="color:#66d9ef">void</span> <span style="color:#a6e22e">onResult</span><span style="color:#f92672">(</span><span style="color:#66d9ef">final</span> UpdateResult result<span style="color:#f92672">,</span> <span style="color:#66d9ef">final</span> Throwable t<span style="color:#f92672">)</span> <span style="color:#f92672">{</span>
+            System<span style="color:#f92672">.</span><span style="color:#a6e22e">out</span><span style="color:#f92672">.</span><span style="color:#a6e22e">println</span><span style="color:#f92672">(</span>result<span style="color:#f92672">.</span><span style="color:#a6e22e">getModifiedCount</span><span style="color:#f92672">());</span>
+        <span style="color:#f92672">}</span>
+    <span style="color:#f92672">});</span>
+</code></pre></div><h2 id="异步删除操作">异步删除操作</h2>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-java" data-lang="java">collection<span style="color:#f92672">.</span><span style="color:#a6e22e">deleteMany</span><span style="color:#f92672">(</span>gte<span style="color:#f92672">(</span><span style="color:#e6db74">&#34;i&#34;</span><span style="color:#f92672">,</span> 100<span style="color:#f92672">),</span> <span style="color:#66d9ef">new</span> SingleResultCallback<span style="color:#f92672">&lt;</span>DeleteResult<span style="color:#f92672">&gt;()</span> <span style="color:#f92672">{</span>
+    <span style="color:#a6e22e">@Override</span>
+    <span style="color:#66d9ef">public</span> <span style="color:#66d9ef">void</span> <span style="color:#a6e22e">onResult</span><span style="color:#f92672">(</span><span style="color:#66d9ef">final</span> DeleteResult result<span style="color:#f92672">,</span> <span style="color:#66d9ef">final</span> Throwable t<span style="color:#f92672">)</span> <span style="color:#f92672">{</span>
+        System<span style="color:#f92672">.</span><span style="color:#a6e22e">out</span><span style="color:#f92672">.</span><span style="color:#a6e22e">println</span><span style="color:#f92672">(</span>result<span style="color:#f92672">.</span><span style="color:#a6e22e">getDeletedCount</span><span style="color:#f92672">());</span>
+    <span style="color:#f92672">}</span>
+<span style="color:#f92672">});</span>
+</code></pre></div><h1 id="mongodb-reactive-streams-操作api">MongoDB Reactive Streams 操作API</h1>
 <p>官方的MongoDB reactive streams Java驱动程序，为MongoDB提供异步流处理和无阻塞处理。</p>
-
 <p>完全实现reactive streams api，以提供与jvm生态系统中其他reactive streams的互操作，一般适合于大数据的处理，比如spark，flink，storm等。</p>
-
-<h2 id="pom-xml-2">pom.xml</h2>
-
-<pre><code class="language-xml">&lt;dependencies&gt;
-    &lt;dependency&gt;
-        &lt;groupId&gt;org.mongodb&lt;/groupId&gt;
-        &lt;artifactId&gt;mongodb-driver-reactivestreams&lt;/artifactId&gt;
-        &lt;version&gt;1.12.0&lt;/version&gt;
-    &lt;/dependency&gt;
-&lt;/dependencies&gt;
-</code></pre>
-
-<h2 id="会包含如下三部分">会包含如下三部分</h2>
-
+<h2 id="pomxml-2">pom.xml</h2>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-xml" data-lang="xml"><span style="color:#f92672">&lt;dependencies&gt;</span>
+    <span style="color:#f92672">&lt;dependency&gt;</span>
+        <span style="color:#f92672">&lt;groupId&gt;</span>org.mongodb<span style="color:#f92672">&lt;/groupId&gt;</span>
+        <span style="color:#f92672">&lt;artifactId&gt;</span>mongodb-driver-reactivestreams<span style="color:#f92672">&lt;/artifactId&gt;</span>
+        <span style="color:#f92672">&lt;version&gt;</span>1.12.0<span style="color:#f92672">&lt;/version&gt;</span>
+    <span style="color:#f92672">&lt;/dependency&gt;</span>
+<span style="color:#f92672">&lt;/dependencies&gt;</span>
+</code></pre></div><h2 id="会包含如下三部分">会包含如下三部分</h2>
 <ol>
 <li>Publisher：Publisher 是数据的发布者。Publisher 接口只有一个方法 subscribe，用于添加数据的订阅者，也就是 Subscriber。</li>
 <li>Subscriber： 是数据的订阅者。Subscriber 接口有4个方法，都是作为不同事件的处理器。在订阅者成功订阅到发布者之后，其 onSubscribe(Subscription s) 方法会被调用。</li>
 <li>Subscription：表示的是当前的订阅关系。</li>
 </ol>
-
 <h2 id="代码示例">代码示例</h2>
-
-<pre><code class="language-java">//建立连接
-MongoClient mongoClient = MongoClients.create(mongodbUrl);
-//获得数据库对象
-MongoDatabase database = client.getDatabase(databaseName);
-//获得集合
-MongoCollection collection = database.getCollection(collectionName);
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-java" data-lang="java"><span style="color:#75715e">//建立连接
+</span><span style="color:#75715e"></span>MongoClient mongoClient <span style="color:#f92672">=</span> MongoClients<span style="color:#f92672">.</span><span style="color:#a6e22e">create</span><span style="color:#f92672">(</span>mongodbUrl<span style="color:#f92672">);</span>
+<span style="color:#75715e">//获得数据库对象
+</span><span style="color:#75715e"></span>MongoDatabase database <span style="color:#f92672">=</span> client<span style="color:#f92672">.</span><span style="color:#a6e22e">getDatabase</span><span style="color:#f92672">(</span>databaseName<span style="color:#f92672">);</span>
+<span style="color:#75715e">//获得集合
+</span><span style="color:#75715e"></span>MongoCollection collection <span style="color:#f92672">=</span> database<span style="color:#f92672">.</span><span style="color:#a6e22e">getCollection</span><span style="color:#f92672">(</span>collectionName<span style="color:#f92672">);</span>
  
-//异步返回Publisher
-FindPublisher publisher = collection.find();
+<span style="color:#75715e">//异步返回Publisher
+</span><span style="color:#75715e"></span>FindPublisher publisher <span style="color:#f92672">=</span> collection<span style="color:#f92672">.</span><span style="color:#a6e22e">find</span><span style="color:#f92672">();</span>
  
-//订阅实现
-publisher.subscribe(new Subscriber() {
-    @Override
-    public void onSubscribe(Subscription str) {
-        System.out.println(&quot;start...&quot;);
-        //执行请求
-        str.request(Integer.MAX_VALUE);
-    }
-    @Override
-    public void onNext(Document document) {
-        //获得文档
-        System.out.println(&quot;Document:&quot; + document.toJson());
-    }
+<span style="color:#75715e">//订阅实现
+</span><span style="color:#75715e"></span>publisher<span style="color:#f92672">.</span><span style="color:#a6e22e">subscribe</span><span style="color:#f92672">(</span><span style="color:#66d9ef">new</span> Subscriber<span style="color:#f92672">()</span> <span style="color:#f92672">{</span>
+    <span style="color:#a6e22e">@Override</span>
+    <span style="color:#66d9ef">public</span> <span style="color:#66d9ef">void</span> <span style="color:#a6e22e">onSubscribe</span><span style="color:#f92672">(</span>Subscription str<span style="color:#f92672">)</span> <span style="color:#f92672">{</span>
+        System<span style="color:#f92672">.</span><span style="color:#a6e22e">out</span><span style="color:#f92672">.</span><span style="color:#a6e22e">println</span><span style="color:#f92672">(</span><span style="color:#e6db74">&#34;start...&#34;</span><span style="color:#f92672">);</span>
+        <span style="color:#75715e">//执行请求
+</span><span style="color:#75715e"></span>        str<span style="color:#f92672">.</span><span style="color:#a6e22e">request</span><span style="color:#f92672">(</span>Integer<span style="color:#f92672">.</span><span style="color:#a6e22e">MAX_VALUE</span><span style="color:#f92672">);</span>
+    <span style="color:#f92672">}</span>
+    <span style="color:#a6e22e">@Override</span>
+    <span style="color:#66d9ef">public</span> <span style="color:#66d9ef">void</span> <span style="color:#a6e22e">onNext</span><span style="color:#f92672">(</span>Document document<span style="color:#f92672">)</span> <span style="color:#f92672">{</span>
+        <span style="color:#75715e">//获得文档
+</span><span style="color:#75715e"></span>        System<span style="color:#f92672">.</span><span style="color:#a6e22e">out</span><span style="color:#f92672">.</span><span style="color:#a6e22e">println</span><span style="color:#f92672">(</span><span style="color:#e6db74">&#34;Document:&#34;</span> <span style="color:#f92672">+</span> document<span style="color:#f92672">.</span><span style="color:#a6e22e">toJson</span><span style="color:#f92672">());</span>
+    <span style="color:#f92672">}</span>
  
-    @Override
-    public void onError(Throwable t) {
-        System.out.println(&quot;error occurs.&quot;);
-    }
+    <span style="color:#a6e22e">@Override</span>
+    <span style="color:#66d9ef">public</span> <span style="color:#66d9ef">void</span> <span style="color:#a6e22e">onError</span><span style="color:#f92672">(</span>Throwable t<span style="color:#f92672">)</span> <span style="color:#f92672">{</span>
+        System<span style="color:#f92672">.</span><span style="color:#a6e22e">out</span><span style="color:#f92672">.</span><span style="color:#a6e22e">println</span><span style="color:#f92672">(</span><span style="color:#e6db74">&#34;error occurs.&#34;</span><span style="color:#f92672">);</span>
+    <span style="color:#f92672">}</span>
  
-    @Override
-    public void onComplete() {
-        System.out.println(&quot;finished.&quot;);
-    }
-});
-</code></pre>
-
+    <span style="color:#a6e22e">@Override</span>
+    <span style="color:#66d9ef">public</span> <span style="color:#66d9ef">void</span> <span style="color:#a6e22e">onComplete</span><span style="color:#f92672">()</span> <span style="color:#f92672">{</span>
+        System<span style="color:#f92672">.</span><span style="color:#a6e22e">out</span><span style="color:#f92672">.</span><span style="color:#a6e22e">println</span><span style="color:#f92672">(</span><span style="color:#e6db74">&#34;finished.&#34;</span><span style="color:#f92672">);</span>
+    <span style="color:#f92672">}</span>
+<span style="color:#f92672">});</span>
+</code></pre></div>
 
                 
                 
@@ -738,35 +675,28 @@ publisher.subscribe(new Subscriber() {
                     </h4>
                     <ul class="catalog-body"></ul>
                     <nav id="TableOfContents">
-<ul>
-<li><a href="#连接和关闭">连接和关闭</a></li>
-<li><a href="#创建database">创建database</a></li>
-<li><a href="#创建collection">创建Collection</a></li>
-<li><a href="#注意">注意</a></li>
-<li><a href="#同步操作api">同步操作API</a>
-<ul>
-<li><a href="#pom-xml">pom.xml</a></li>
-<li><a href="#新增">新增</a></li>
-<li><a href="#查询">查询</a></li>
-<li><a href="#修改">修改</a></li>
-<li><a href="#删除">删除</a></li>
-<li><a href="#替换操作">替换操作</a></li>
-</ul></li>
-<li><a href="#异步操作api">异步操作API</a>
-<ul>
-<li><a href="#pom-xml-1">pom.xml</a></li>
-<li><a href="#异步insert操作">异步insert操作</a></li>
-<li><a href="#异步统计操作">异步统计操作</a></li>
-<li><a href="#异步更新操作">异步更新操作</a></li>
-<li><a href="#异步删除操作">异步删除操作</a></li>
-</ul></li>
-<li><a href="#mongodb-reactive-streams-操作api">MongoDB Reactive Streams 操作API</a>
-<ul>
-<li><a href="#pom-xml-2">pom.xml</a></li>
-<li><a href="#会包含如下三部分">会包含如下三部分</a></li>
-<li><a href="#代码示例">代码示例</a></li>
-</ul></li>
-</ul>
+  <ul>
+    <li><a href="#pomxml">pom.xml</a></li>
+    <li><a href="#新增">新增</a></li>
+    <li><a href="#查询">查询</a></li>
+    <li><a href="#修改">修改</a></li>
+    <li><a href="#删除">删除</a></li>
+    <li><a href="#替换操作">替换操作</a></li>
+  </ul>
+
+  <ul>
+    <li><a href="#pomxml-1">pom.xml</a></li>
+    <li><a href="#异步insert操作">异步insert操作</a></li>
+    <li><a href="#异步统计操作">异步统计操作</a></li>
+    <li><a href="#异步更新操作">异步更新操作</a></li>
+    <li><a href="#异步删除操作">异步删除操作</a></li>
+  </ul>
+
+  <ul>
+    <li><a href="#pomxml-2">pom.xml</a></li>
+    <li><a href="#会包含如下三部分">会包含如下三部分</a></li>
+    <li><a href="#代码示例">代码示例</a></li>
+  </ul>
 </nav>
                     <br>
                     <br>
@@ -791,9 +721,6 @@ publisher.subscribe(new Subscriber() {
                         
                         
                         
-                        <a href="/tags/" title="">
-                            
-                        </a>
                         
                         
                         
@@ -803,101 +730,6 @@ publisher.subscribe(new Subscriber() {
                         
                         
                         
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        <a href="/tags/qt" title="QT">
-                            QT
-                        </a>
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        <a href="/tags/zookeeper" title="Zookeeper">
-                            Zookeeper
-                        </a>
                         
                         
                         
@@ -937,8 +769,10 @@ publisher.subscribe(new Subscriber() {
                         
                         
                         
-                        <a href="/tags/elasticsearch" title="elasticSearch">
-                            elasticSearch
+                        
+                        
+                        <a href="/tags/elasticsearch" title="elasticsearch">
+                            elasticsearch
                         </a>
                         
                         
@@ -949,9 +783,27 @@ publisher.subscribe(new Subscriber() {
                         
                         
                         
-                        <a href="/tags/golang" title="golang">
-                            golang
-                        </a>
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
                         
                         
                         
@@ -989,9 +841,21 @@ publisher.subscribe(new Subscriber() {
                         
                         
                         
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
                         <a href="/tags/jvm" title="jvm">
                             jvm
                         </a>
+                        
+                        
+                        
+                        
                         
                         
                         
@@ -1015,9 +879,19 @@ publisher.subscribe(new Subscriber() {
                         
                         
                         
+                        
+                        
+                        
+                        
+                        
+                        
                         <a href="/tags/mongodb" title="mongodb">
                             mongodb
                         </a>
+                        
+                        
+                        
+                        
                         
                         
                         
@@ -1028,10 +902,6 @@ publisher.subscribe(new Subscriber() {
                         </a>
                         
                         
-                        
-                        <a href="/tags/mycat" title="mycat">
-                            mycat
-                        </a>
                         
                         
                         
@@ -1045,9 +915,17 @@ publisher.subscribe(new Subscriber() {
                         
                         
                         
-                        <a href="/tags/nginx" title="nginx">
-                            nginx
-                        </a>
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
                         
                         
                         
@@ -1071,8 +949,22 @@ publisher.subscribe(new Subscriber() {
                         
                         
                         
+                        
+                        
                         <a href="/tags/rocketmq" title="rocketmq">
                             rocketmq
+                        </a>
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        <a href="/tags/security%E6%A1%86%E6%9E%B6%E5%AD%A6%E4%B9%A0" title="security框架学习">
+                            security框架学习
                         </a>
                         
                         
@@ -1099,17 +991,11 @@ publisher.subscribe(new Subscriber() {
                         
                         
                         
-                        <a href="/tags/springcloud" title="springCloud">
-                            springCloud
-                        </a>
-                        
-                        
-                        
-                        
-                        
                         <a href="/tags/springboot" title="springboot">
                             springboot
                         </a>
+                        
+                        
                         
                         
                         
@@ -1123,6 +1009,9 @@ publisher.subscribe(new Subscriber() {
                         
                         
                         
+                        <a href="/tags/springcloud" title="springcloud">
+                            springcloud
+                        </a>
                         
                         
                         
@@ -1148,6 +1037,33 @@ publisher.subscribe(new Subscriber() {
                         
                         
                         
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        <a href="/tags/zookeeper" title="zookeeper">
+                            zookeeper
+                        </a>
                         
                         
                         
@@ -1207,6 +1123,8 @@ publisher.subscribe(new Subscriber() {
                         
                         
                         
+                        
+                        
                         <a href="/tags/%E5%88%86%E5%B8%83%E5%BC%8F%E7%B3%BB%E5%88%97" title="分布式系列">
                             分布式系列
                         </a>
@@ -1226,6 +1144,10 @@ publisher.subscribe(new Subscriber() {
                         
                         
                         
+                        
+                        <a href="/tags/%E5%8D%8F%E8%AE%AE%E6%A0%88" title="协议栈">
+                            协议栈
+                        </a>
                         
                         
                         
@@ -1425,6 +1347,12 @@ publisher.subscribe(new Subscriber() {
                         
                         
                         
+                        
+                        
+                        
+                        
+                        
+                        
                         <a href="/tags/%E7%BD%91%E7%BB%9C%E7%BC%96%E7%A8%8B" title="网络编程">
                             网络编程
                         </a>
@@ -1448,6 +1376,10 @@ publisher.subscribe(new Subscriber() {
                         
                         
                         
+                        
+                        <a href="/tags/%E8%AE%A4%E8%AF%81%E5%92%8C%E6%8E%88%E6%9D%83" title="认证和授权">
+                            认证和授权
+                        </a>
                         
                         
                         
@@ -1618,7 +1550,7 @@ publisher.subscribe(new Subscriber() {
                     
                 </ul>
 		<p class="copyright text-muted">
-                    Copyright &copy;  2020
+                    Copyright &copy;  2021
                     <br>
                     <a href="https://themes.gohugo.io/hugo-theme-cleanwhite">CleanWhite Hugo Theme</a> by <a href="https://zhaohuabing.com">Huabing</a> |
                     <iframe

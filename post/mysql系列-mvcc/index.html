@@ -97,15 +97,15 @@
                     </li>
                     
                     <li>
-                        <a href="/categories/english">English</a>
+                        <a href="/categories/english">english</a>
                     </li>
                     
                     <li>
-                        <a href="/categories/life">Life</a>
+                        <a href="/categories/life">life</a>
                     </li>
                     
                     <li>
-                        <a href="/categories/tech">Tech</a>
+                        <a href="/categories/tech">tech</a>
                     </li>
                     
 
@@ -237,95 +237,68 @@
                 
                 
                 
-                
-
-<p>[TOC]</p>
-
-<p><strong>链接：<a href="https://www.jianshu.com/p/dd3724fc0f66">https://www.jianshu.com/p/dd3724fc0f66</a>  作者：Aaron_Swartz</strong></p>
-
-<p><strong>转载：<a href="https://www.cnblogs.com/YFYkuner/p/5178684.html">https://www.cnblogs.com/YFYkuner/p/5178684.html</a></strong></p>
-
+                <p>[TOC]</p>
+<p><strong>链接：https://www.jianshu.com/p/dd3724fc0f66  作者：Aaron_Swartz</strong></p>
+<p><strong>转载：https://www.cnblogs.com/YFYkuner/p/5178684.html</strong></p>
 <h1 id="概念">概念</h1>
-
 <p>MVCC，Multi-Version Concurrency Control，多版本并发控制。MVCC 是一种并发控制的方法，一般在数据库管理系统中，实现对数据库的并发访问；在编程语言中实现事务内存。</p>
-
 <p>如果有人从数据库中读数据的同时，有另外的人写入数据，有可能读数据的人会看到『半写』或者不一致的数据。有很多种方法来解决这个问题，叫做并发控制方法。最简单的方法，通过加锁，让所有的读者等待写者工作完成，但是这样效率会很差。MVCC 使用了一种不同的手段，每个连接到数据库的读者，<strong>在某个瞬间看到的是数据库的一个快照</strong>，写者写操作造成的变化在写操作完成之前（或者数据库事务提交之前）对于其他的读者来说是不可见的。</p>
-
 <p>当一个 MVCC 数据库需要更一个一条数据记录的时候，它不会直接用新数据覆盖旧数据，而是将旧数据标记为过时（obsolete）并在别处增加新版本的数据。这样就会有存储多个版本的数据，但是只有一个是最新的。这种方式允许读者读取在他读之前已经存在的数据，即使这些在读的过程中半路被别人修改、删除了，也对先前正在读的用户没有影响。这种多版本的方式避免了填充删除操作在内存和磁盘存储结构造成的空洞的开销，但是需要系统周期性整理（sweep through）以真实删除老的、过时的数据。对于面向文档的数据库（Document-oriented database，也即半结构化数据库）来说，这种方式允许系统将整个文档写到磁盘的一块连续区域上，当需要更新的时候，直接重写一个版本，而不是对文档的某些比特位、分片切除，或者维护一个链式的、非连续的数据库结构。</p>
-
 <p>MVCC 提供了时点（point in time）一致性视图。MVCC 并发控制下的读事务一般使用<strong>时间戳或者事务 ID去标记当前读的数据库的状态（版本）</strong>，读取这个版本的数据。读、写事务相互隔离，不需要加锁。读写并存的时候，写操作会根据目前数据库的状态，创建一个新版本，并发的读则依旧访问旧版本的数据。</p>
-
 <p><strong>一句话讲，MVCC就是用 同一份数据临时保留多版本的方式 的方式，实现并发控制。</strong></p>
-
 <p>这里留意到 MVCC 关键的两个点：</p>
-
 <ol>
 <li>在读写并发的过程中如何实现多版本；</li>
 <li>在读写并发之后，如何实现旧版本的删除（毕竟很多时候只需要一份最新版的数据就够了）；</li>
 </ol>
-
 <p><strong>MVCC是一种多版本并发控制机制</strong></p>
-
 <p>多版本控制: 指的是一种提高并发的技术。最早的数据库系统，只有读读之间可以并发，读写，写读，写写都要阻塞。引入多版本之后，<strong>只有写写之间相互阻塞，其他三种操作都可以并行</strong>，这样大幅度提高了InnoDB的并发度。在内部实现中，与Postgres在数据行上实现多版本不同，InnoDB是在undolog中实现的，通过undolog可以找回数据的历史版本。找回的数据历史版本可以提供给用户读(按照隔离级别的定义，有些读请求只能看到比较老的数据版本)，也可以在回滚的时候覆盖数据页上的数据。在InnoDB内部中，会记录一个全局的活跃读写事务数组，其主要用来判断事务的可见性。
- MVCC是一种多版本并发控制机制。</p>
-
+MVCC是一种多版本并发控制机制。</p>
 <h1 id="实现">实现</h1>
-
 <p>MVCC 使用时间戳（TS）、递增的事务 ID（T）实现事务一致性。</p>
-
 <p>MVCC 通过维护多版本数据，保证一个读事务永远不会被阻塞。对象 P 维护有多个版本，每个版本会有一个读时间戳（Read TimeStamp, RTS）和 写时间戳（Write TimeStamp, WTS），事务 Ti 读对象 P 的最新版本，该版本早于事务 Ti 的读时间戳 RTS(Ti)。</p>
-
 <p>事务 Ti 要对 P 执行写操作，如果有其他事务 Tk 同时对 P 操作，则 RTS(Ti）必须要早于 RTS(Tk)，即有 RTS(Ti) &lt; RTS(Tk)，这样对 Ti 对 P 的写操作才能完成。一般地，如果其他事务拥有 P 的一个更早的读时间戳的情况下，写操作是不能完成的。打个比方就是在存储前面有一道线，只有等你前面的人的完成了他们的事务，你的修改事务才可以提交完成。</p>
-
 <p>重复说一下：每个对象 P 有一个时间戳 TS，如果事务 Ti 想要对 P 执行写操作，（写要先读）事务的读时间戳是 RTS(Ti)，如果有其他事务拥有一个比较早的时间戳，有 TS(P) &lt; RTS(Ti)，这时事务 Ti 会退出并重新开始。否则，事务 Ti 创建一个 P 的新版本，并设置新版本 P 的时间戳，似的 TS = TS(Ti)。</p>
-
-<p><strong>MVCC 系统明显的缺点是会存储多个版本数据的冗余开销。</strong>但同时，读操作永不会被阻塞，这对那些以读操作为主的数据库来说非常重要。MVCC 实现了真的快照隔离（snapshot isolation），然后其他的并发控制方法要么是不完整的快照隔离方式，要么需要较高的性能损耗。</p>
-
+<p>**MVCC 系统明显的缺点是会存储多个版本数据的冗余开销。**但同时，读操作永不会被阻塞，这对那些以读操作为主的数据库来说非常重要。MVCC 实现了真的快照隔离（snapshot isolation），然后其他的并发控制方法要么是不完整的快照隔离方式，要么需要较高的性能损耗。</p>
 <p><strong>MVCC是通过保存数据在某个时间点的快照来实现的. 不同存储引擎的MVCC. 不同存储引擎的MVCC实现是不同的,典型的有乐观并发控制和悲观并发控制.</strong></p>
-
 <h1 id="mvcc是为了解决什么问题">MVCC是为了解决什么问题?</h1>
-
 <p>大家都应该知道,锁机制可以控制并发操作,但是其系统开销较大,而MVCC可以在大多数情况下代替行级锁,使用MVCC,能降低其系统开销.</p>
-
-<pre><code class="language-ruby">*   MVCC是被Mysql中 `事务型存储引擎InnoDB` 所支持的;
-*   **应对高并发事务, MVCC比`单纯的加锁`更高效**;
-*   MVCC只在 `READ COMMITTED` 和 `REPEATABLE READ` 两个隔离级别下工作;
-*   MVCC可以使用 `乐观(optimistic)锁` 和 `悲观(pessimistic)锁`来实现;
-*   各数据库中MVCC实现并不统一
-*   但是书中提到 &quot;InnoDB的MVCC是通过在每行记录后面保存**两个隐藏的列**来实现的&quot;(网上也有很多此类观点), 但其实并不准确, 可以参考[MySQL官方文档](https://dev.mysql.com/doc/refman/5.7/en/innodb-multi-versioning.html), 可以看到, InnoDB存储引擎在数据库每行数据的后面添加了**三个字段**, 不是两个!!
-</code></pre>
-
-<h1 id="mvcc-具体实现分析">MVCC 具体实现分析</h1>
-
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-ruby" data-lang="ruby"><span style="color:#f92672">*</span>   <span style="color:#66d9ef">MVCC是被Mysql中</span> <span style="color:#e6db74">`事务型存储引擎InnoDB`</span> <span style="color:#960050;background-color:#1e0010">所支持的</span>;
+<span style="color:#f92672">*</span>   <span style="color:#f92672">**</span><span style="color:#960050;background-color:#1e0010">应对高并发事务</span>, <span style="color:#66d9ef">MVCC比</span><span style="color:#e6db74">`单纯的加锁`</span><span style="color:#960050;background-color:#1e0010">更高效</span><span style="color:#f92672">**</span>;
+<span style="color:#f92672">*</span>   <span style="color:#66d9ef">MVCC只在</span> <span style="color:#e6db74">`READ COMMITTED`</span> <span style="color:#960050;background-color:#1e0010">和</span> <span style="color:#e6db74">`REPEATABLE READ`</span> <span style="color:#960050;background-color:#1e0010">两个隔离级别下工作</span>;
+<span style="color:#f92672">*</span>   <span style="color:#66d9ef">MVCC可以使用</span> <span style="color:#e6db74">`乐观(optimistic)锁`</span> <span style="color:#960050;background-color:#1e0010">和</span> <span style="color:#e6db74">`悲观(pessimistic)锁`</span><span style="color:#960050;background-color:#1e0010">来实现</span>;
+<span style="color:#f92672">*</span>   <span style="color:#960050;background-color:#1e0010">各数据库中</span><span style="color:#66d9ef">MVCC实现并不统一</span>
+<span style="color:#f92672">*</span>   <span style="color:#960050;background-color:#1e0010">但是书中提到</span> <span style="color:#e6db74">&#34;InnoDB的MVCC是通过在每行记录后面保存**两个隐藏的列**来实现的&#34;</span>(<span style="color:#960050;background-color:#1e0010">网上也有很多此类观点</span>), <span style="color:#960050;background-color:#1e0010">但其实并不准确</span>, <span style="color:#960050;background-color:#1e0010">可以参考</span><span style="color:#f92672">[</span><span style="color:#66d9ef">MySQL官方文档</span><span style="color:#f92672">]</span>(<span style="color:#e6db74">https</span>:<span style="color:#e6db74">//</span>dev<span style="color:#f92672">.</span>mysql<span style="color:#f92672">.</span>com<span style="color:#f92672">/</span>doc<span style="color:#f92672">/</span>refman<span style="color:#f92672">/</span><span style="color:#ae81ff">5</span><span style="color:#f92672">.</span><span style="color:#ae81ff">7</span><span style="color:#f92672">/</span>en<span style="color:#f92672">/</span>innodb<span style="color:#f92672">-</span>multi<span style="color:#f92672">-</span>versioning<span style="color:#f92672">.</span>html), <span style="color:#960050;background-color:#1e0010">可以看到</span>, <span style="color:#66d9ef">InnoDB存储引擎在数据库每行数据的后面添加了</span><span style="color:#f92672">**</span><span style="color:#960050;background-color:#1e0010">三个字段</span><span style="color:#f92672">**</span>, <span style="color:#960050;background-color:#1e0010">不是两个</span><span style="color:#f92672">!!</span>
+</code></pre></div><h1 id="mvcc-具体实现分析">MVCC 具体实现分析</h1>
 <p>下面,我们通过InnoDB的MVCC实现来分析MVCC使怎样进行并发控制的.</p>
-
 <p>InnoDB的MVCC,是通过在每行记录后面保存两个隐藏的列来实现的,这两个列，分别保存了这个行的创建时间，一个保存的是行的删除时间。这里存储的并不是实际的时间值,而是系统版本号(可以理解为事务的ID)，每开始一个新的事务，系统版本号就会自动递增，事务开始时刻的系统版本号会作为事务的ID.下面看一下在REPEATABLE READ隔离级别下,MVCC具体是如何操作的.</p>
-
 <h2 id="而innodb实现mvcc的方式是">而InnoDB实现MVCC的方式是:</h2>
-
 <ul>
-<li><p>事务以排他锁的形式修改原始数据</p></li>
-
-<li><p>把修改前的数据存放于undo log，通过回滚指针与主数据关联</p></li>
-
-<li><p>修改成功（commit）啥都不做，失败则恢复undo log中的数据（rollback）</p></li>
-
-<li><p>乐观锁和悲观锁</p></li>
-
-<li><pre><code class="language-java">1 悲观锁
-  1、排它锁，当事务在操作数据时把这部分数据进行锁定，直到操作完毕后再解锁，其他事务操作才可操作该部分数据。这将防止其他进程读取或修改表中的数据。
-  2、实现：大多数情况下依靠数据库的锁机制实现
-实现方式：
-一般使用 select ...for update 对所选择的数据进行加锁处理，例如select * from account where name=”Max” for update， 这条sql 语句锁定了account 表中所有符合检索条件（name=”Max”）的记录。本次事务提交之前（事务提交时会释放事务过程中的锁），外界无法修改这些记录。
-</code></pre></li>
+<li>
+<p>事务以排他锁的形式修改原始数据</p>
+</li>
+<li>
+<p>把修改前的数据存放于undo log，通过回滚指针与主数据关联</p>
+</li>
+<li>
+<p>修改成功（commit）啥都不做，失败则恢复undo log中的数据（rollback）</p>
+</li>
+<li>
+<p>乐观锁和悲观锁</p>
+</li>
+<li>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-java" data-lang="java">1 悲观锁
+    1<span style="color:#960050;background-color:#1e0010">、</span>排它锁<span style="color:#960050;background-color:#1e0010">，</span>当事务在操作数据时把这部分数据进行锁定<span style="color:#960050;background-color:#1e0010">，</span>直到操作完毕后再解锁<span style="color:#960050;background-color:#1e0010">，</span>其他事务操作才可操作该部分数据<span style="color:#960050;background-color:#1e0010">。</span>这将防止其他进程读取或修改表中的数据<span style="color:#960050;background-color:#1e0010">。</span>
+    2<span style="color:#960050;background-color:#1e0010">、</span>实现<span style="color:#960050;background-color:#1e0010">：</span>大多数情况下依靠数据库的锁机制实现
+  实现方式<span style="color:#960050;background-color:#1e0010">：</span>
+  一般使用 select <span style="color:#f92672">...</span><span style="color:#a6e22e">for</span> update 对所选择的数据进行加锁处理<span style="color:#960050;background-color:#1e0010">，</span>例如select <span style="color:#f92672">*</span> from account where name<span style="color:#f92672">=</span><span style="color:#960050;background-color:#1e0010">”</span>Max<span style="color:#960050;background-color:#1e0010">”</span> <span style="color:#66d9ef">for</span> update<span style="color:#960050;background-color:#1e0010">，</span> 这条sql 语句锁定了account 表中所有符合检索条件<span style="color:#960050;background-color:#1e0010">（</span>name<span style="color:#f92672">=</span><span style="color:#960050;background-color:#1e0010">”</span>Max<span style="color:#960050;background-color:#1e0010">”）</span>的记录<span style="color:#960050;background-color:#1e0010">。</span>本次事务提交之前<span style="color:#960050;background-color:#1e0010">（</span>事务提交时会释放事务过程中的锁<span style="color:#960050;background-color:#1e0010">），</span>外界无法修改这些记录<span style="color:#960050;background-color:#1e0010">。</span>
+</code></pre></div><div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-java" data-lang="java">2 乐观锁
+  实现方式<span style="color:#960050;background-color:#1e0010">：</span>
+    1<span style="color:#960050;background-color:#1e0010">、</span>如果有人在你之前更新了<span style="color:#960050;background-color:#1e0010">，</span>你的更新应当是被拒绝的<span style="color:#960050;background-color:#1e0010">，</span>可以让用户重新操作<span style="color:#960050;background-color:#1e0010">。</span>
+    2<span style="color:#960050;background-color:#1e0010">、</span>实现<span style="color:#960050;background-color:#1e0010">：</span>大多数基于数据版本<span style="color:#960050;background-color:#1e0010">（</span>Version<span style="color:#960050;background-color:#1e0010">）</span>记录机制实现
+  具体可通过给表加一个版本号或时间戳字段实现<span style="color:#960050;background-color:#1e0010">，</span>当读取数据时<span style="color:#960050;background-color:#1e0010">，</span>将version字段的值一同读出<span style="color:#960050;background-color:#1e0010">，</span>数据每更新一次<span style="color:#960050;background-color:#1e0010">，</span>对此version值加一<span style="color:#960050;background-color:#1e0010">。</span>当我们提交更新的时候<span style="color:#960050;background-color:#1e0010">，</span>判断当前版本信息与第一次取出来的版本值大小<span style="color:#960050;background-color:#1e0010">，</span>如果数据库表当前版本号与第一次取出来的version值相等<span style="color:#960050;background-color:#1e0010">，</span>则予以更新<span style="color:#960050;background-color:#1e0010">，</span>否则认为是过期数据<span style="color:#960050;background-color:#1e0010">，</span>拒绝更新<span style="color:#960050;background-color:#1e0010">，</span>让用户重新操作<span style="color:#960050;background-color:#1e0010">。</span>
+</code></pre></div></li>
 </ul>
-
-<pre><code class="language-java">  2 乐观锁
-    实现方式：
-      1、如果有人在你之前更新了，你的更新应当是被拒绝的，可以让用户重新操作。
-      2、实现：大多数基于数据版本（Version）记录机制实现
-    具体可通过给表加一个版本号或时间戳字段实现，当读取数据时，将version字段的值一同读出，数据每更新一次，对此version值加一。当我们提交更新的时候，判断当前版本信息与第一次取出来的版本值大小，如果数据库表当前版本号与第一次取出来的version值相等，则予以更新，否则认为是过期数据，拒绝更新，让用户重新操作。
-</code></pre>
 
 
                 
@@ -433,15 +406,9 @@
                     </h4>
                     <ul class="catalog-body"></ul>
                     <nav id="TableOfContents">
-<ul>
-<li><a href="#概念">概念</a></li>
-<li><a href="#实现">实现</a></li>
-<li><a href="#mvcc是为了解决什么问题">MVCC是为了解决什么问题?</a></li>
-<li><a href="#mvcc-具体实现分析">MVCC 具体实现分析</a>
-<ul>
-<li><a href="#而innodb实现mvcc的方式是">而InnoDB实现MVCC的方式是:</a></li>
-</ul></li>
-</ul>
+  <ul>
+    <li><a href="#而innodb实现mvcc的方式是">而InnoDB实现MVCC的方式是:</a></li>
+  </ul>
 </nav>
                     <br>
                     <br>
@@ -466,9 +433,6 @@
                         
                         
                         
-                        <a href="/tags/" title="">
-                            
-                        </a>
                         
                         
                         
@@ -478,101 +442,6 @@
                         
                         
                         
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        <a href="/tags/qt" title="QT">
-                            QT
-                        </a>
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        <a href="/tags/zookeeper" title="Zookeeper">
-                            Zookeeper
-                        </a>
                         
                         
                         
@@ -612,8 +481,10 @@
                         
                         
                         
-                        <a href="/tags/elasticsearch" title="elasticSearch">
-                            elasticSearch
+                        
+                        
+                        <a href="/tags/elasticsearch" title="elasticsearch">
+                            elasticsearch
                         </a>
                         
                         
@@ -624,9 +495,27 @@
                         
                         
                         
-                        <a href="/tags/golang" title="golang">
-                            golang
-                        </a>
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
                         
                         
                         
@@ -664,9 +553,21 @@
                         
                         
                         
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
                         <a href="/tags/jvm" title="jvm">
                             jvm
                         </a>
+                        
+                        
+                        
+                        
                         
                         
                         
@@ -690,9 +591,19 @@
                         
                         
                         
+                        
+                        
+                        
+                        
+                        
+                        
                         <a href="/tags/mongodb" title="mongodb">
                             mongodb
                         </a>
+                        
+                        
+                        
+                        
                         
                         
                         
@@ -703,10 +614,6 @@
                         </a>
                         
                         
-                        
-                        <a href="/tags/mycat" title="mycat">
-                            mycat
-                        </a>
                         
                         
                         
@@ -720,9 +627,17 @@
                         
                         
                         
-                        <a href="/tags/nginx" title="nginx">
-                            nginx
-                        </a>
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
                         
                         
                         
@@ -746,8 +661,22 @@
                         
                         
                         
+                        
+                        
                         <a href="/tags/rocketmq" title="rocketmq">
                             rocketmq
+                        </a>
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        <a href="/tags/security%E6%A1%86%E6%9E%B6%E5%AD%A6%E4%B9%A0" title="security框架学习">
+                            security框架学习
                         </a>
                         
                         
@@ -774,17 +703,11 @@
                         
                         
                         
-                        <a href="/tags/springcloud" title="springCloud">
-                            springCloud
-                        </a>
-                        
-                        
-                        
-                        
-                        
                         <a href="/tags/springboot" title="springboot">
                             springboot
                         </a>
+                        
+                        
                         
                         
                         
@@ -798,6 +721,9 @@
                         
                         
                         
+                        <a href="/tags/springcloud" title="springcloud">
+                            springcloud
+                        </a>
                         
                         
                         
@@ -823,6 +749,33 @@
                         
                         
                         
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        <a href="/tags/zookeeper" title="zookeeper">
+                            zookeeper
+                        </a>
                         
                         
                         
@@ -882,6 +835,8 @@
                         
                         
                         
+                        
+                        
                         <a href="/tags/%E5%88%86%E5%B8%83%E5%BC%8F%E7%B3%BB%E5%88%97" title="分布式系列">
                             分布式系列
                         </a>
@@ -901,6 +856,10 @@
                         
                         
                         
+                        
+                        <a href="/tags/%E5%8D%8F%E8%AE%AE%E6%A0%88" title="协议栈">
+                            协议栈
+                        </a>
                         
                         
                         
@@ -1100,6 +1059,12 @@
                         
                         
                         
+                        
+                        
+                        
+                        
+                        
+                        
                         <a href="/tags/%E7%BD%91%E7%BB%9C%E7%BC%96%E7%A8%8B" title="网络编程">
                             网络编程
                         </a>
@@ -1123,6 +1088,10 @@
                         
                         
                         
+                        
+                        <a href="/tags/%E8%AE%A4%E8%AF%81%E5%92%8C%E6%8E%88%E6%9D%83" title="认证和授权">
+                            认证和授权
+                        </a>
                         
                         
                         
@@ -1293,7 +1262,7 @@
                     
                 </ul>
 		<p class="copyright text-muted">
-                    Copyright &copy;  2020
+                    Copyright &copy;  2021
                     <br>
                     <a href="https://themes.gohugo.io/hugo-theme-cleanwhite">CleanWhite Hugo Theme</a> by <a href="https://zhaohuabing.com">Huabing</a> |
                     <iframe

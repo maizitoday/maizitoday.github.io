@@ -97,15 +97,15 @@
                     </li>
                     
                     <li>
-                        <a href="/categories/english">English</a>
+                        <a href="/categories/english">english</a>
                     </li>
                     
                     <li>
-                        <a href="/categories/life">Life</a>
+                        <a href="/categories/life">life</a>
                     </li>
                     
                     <li>
-                        <a href="/categories/tech">Tech</a>
+                        <a href="/categories/tech">tech</a>
                     </li>
                     
 
@@ -249,197 +249,172 @@
                 
                 
                 
-                
-
-<p>[TOC]</p>
-
+                <p>[TOC]</p>
 <p><strong>说明： 用docker+vscode，搭建本地开发环境</strong></p>
-
 <h1 id="dockerfile">dockerfile</h1>
-
 <p>集成ssh，java，maven环境</p>
-
-<pre><code class="language-dockerfile">
-# install centos7
-FROM centos:7
-RUN yum -y install net-tools  
-
-#常用命令下载
-RUN yum -y install wget
-RUN yum install -y curl
-
-
-#配置ssh 
-RUN yum -y  install  openssh-server
-RUN sed -i 's/#PermitRootLogin yes/PermitRootLogin yes/g' /etc/ssh/sshd_config
-RUN sed -i 's/#PubkeyAuthentication yes/PubkeyAuthentication yes/g' /etc/ssh/sshd_config
-RUN cat /etc/ssh/sshd_config 
-
-
-#创建一个新用户
-RUN useradd  maizissh -d /home/maizissh
-RUN mkdir /home/maizissh/.ssh
-RUN chown -R maizissh. /home/maizissh/.ssh
-COPY id_rsa.pub /usr/local/macrsa/
-RUN cd /usr/local/macrsa/ &amp;&amp; ls -l 
-RUN cat /usr/local/macrsa/id_rsa.pub &gt;&gt; /home/maizissh/.ssh/authorized_keys
-RUN cat /home/maizissh/.ssh/authorized_keys
-RUN chmod 700 /home/maizissh/.ssh
-RUN chmod 600 /home/maizissh/.ssh/authorized_keys
-
-
-# install java
-COPY jdk-8u11-linux-x64.tar.gz /usr/local/java/
-RUN cd /usr/local/java/ &amp;&amp; ls &amp;&amp; tar -xvf jdk-8u11-linux-x64.tar.gz &amp;&amp; ls
-ENV JAVA_HOME /usr/local/java/jdk1.8.0_11
-ENV CLASSPATH $JAVA_HOME/lib;$JAVA_HOME/jre/lib
-ENV PATH $PATH:$JAVA_HOME/bin
-RUN java -version
-RUN echo &quot;java success&quot;
-
-
-# install maven
-RUN cd /usr/local/ &amp;&amp; mkdir maven
-RUN wget http://apache-mirror.rbc.ru/pub/apache/maven/maven-3/3.3.9/binaries/apache-maven-3.3.9-bin.tar.gz
-RUN mv apache-maven-3.3.9-bin.tar.gz  /usr/local/maven/  &amp;&amp; ls 
-RUN cd /usr/local/maven/ &amp;&amp; tar -xzvf apache-maven-3.3.9-bin.tar.gz &amp;&amp; ls
-ENV MAVEN_HOME /usr/local/maven/apache-maven-3.3.9
-ENV PATH $JAVA_HOME/bin:$MAVEN_HOME/bin:$PATH
-RUN mvn -version
-RUN echo &quot;maven success&quot;
-
-
-# COPY java_maven.sh /usr/bin/java_maven.sh
-# RUN  chmod +x  /usr/bin/java_maven.sh
-
-#安装java和maven环境
-# CMD [ &quot;java_maven.sh&quot; ]
-# CMD [&quot;/usr/sbin/init&quot;]
-</code></pre>
-
-<p><strong>注意 ：ENV命令只是用当前的，不会去修改/etc/profile的文件，用 echo &lsquo;MAVEN_HOME=/usr/local/maven/apache-maven-3.3.9&rsquo;&gt;&gt;/etc/profile 添加到配置文件中，就永远的生效了。 不然退出去后，在进来，环境配置就失效了</strong></p>
-
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-dockerfile" data-lang="dockerfile"><span style="color:#960050;background-color:#1e0010">
+</span><span style="color:#960050;background-color:#1e0010"></span><span style="color:#75715e"># install centos7</span><span style="color:#960050;background-color:#1e0010">
+</span><span style="color:#960050;background-color:#1e0010"></span><span style="color:#66d9ef">FROM</span><span style="color:#e6db74"> centos:7</span><span style="color:#960050;background-color:#1e0010">
+</span><span style="color:#960050;background-color:#1e0010"></span><span style="color:#66d9ef">RUN</span> yum -y install net-tools  <span style="color:#960050;background-color:#1e0010">
+</span><span style="color:#960050;background-color:#1e0010">
+</span><span style="color:#960050;background-color:#1e0010"></span><span style="color:#75715e">#常用命令下载</span><span style="color:#960050;background-color:#1e0010">
+</span><span style="color:#960050;background-color:#1e0010"></span><span style="color:#66d9ef">RUN</span> yum -y install wget<span style="color:#960050;background-color:#1e0010">
+</span><span style="color:#960050;background-color:#1e0010"></span><span style="color:#66d9ef">RUN</span> yum install -y curl<span style="color:#960050;background-color:#1e0010">
+</span><span style="color:#960050;background-color:#1e0010">
+</span><span style="color:#960050;background-color:#1e0010">
+</span><span style="color:#960050;background-color:#1e0010"></span><span style="color:#75715e">#配置ssh </span><span style="color:#960050;background-color:#1e0010">
+</span><span style="color:#960050;background-color:#1e0010"></span><span style="color:#66d9ef">RUN</span> yum -y  install  openssh-server<span style="color:#960050;background-color:#1e0010">
+</span><span style="color:#960050;background-color:#1e0010"></span><span style="color:#66d9ef">RUN</span> sed -i <span style="color:#e6db74">&#39;s/#PermitRootLogin yes/PermitRootLogin yes/g&#39;</span> /etc/ssh/sshd_config<span style="color:#960050;background-color:#1e0010">
+</span><span style="color:#960050;background-color:#1e0010"></span><span style="color:#66d9ef">RUN</span> sed -i <span style="color:#e6db74">&#39;s/#PubkeyAuthentication yes/PubkeyAuthentication yes/g&#39;</span> /etc/ssh/sshd_config<span style="color:#960050;background-color:#1e0010">
+</span><span style="color:#960050;background-color:#1e0010"></span><span style="color:#66d9ef">RUN</span> cat /etc/ssh/sshd_config <span style="color:#960050;background-color:#1e0010">
+</span><span style="color:#960050;background-color:#1e0010">
+</span><span style="color:#960050;background-color:#1e0010">
+</span><span style="color:#960050;background-color:#1e0010"></span><span style="color:#75715e">#创建一个新用户</span><span style="color:#960050;background-color:#1e0010">
+</span><span style="color:#960050;background-color:#1e0010"></span><span style="color:#66d9ef">RUN</span> useradd  maizissh -d /home/maizissh<span style="color:#960050;background-color:#1e0010">
+</span><span style="color:#960050;background-color:#1e0010"></span><span style="color:#66d9ef">RUN</span> mkdir /home/maizissh/.ssh<span style="color:#960050;background-color:#1e0010">
+</span><span style="color:#960050;background-color:#1e0010"></span><span style="color:#66d9ef">RUN</span> chown -R maizissh. /home/maizissh/.ssh<span style="color:#960050;background-color:#1e0010">
+</span><span style="color:#960050;background-color:#1e0010"></span><span style="color:#66d9ef">COPY</span> id_rsa.pub /usr/local/macrsa/<span style="color:#960050;background-color:#1e0010">
+</span><span style="color:#960050;background-color:#1e0010"></span><span style="color:#66d9ef">RUN</span> cd /usr/local/macrsa/ <span style="color:#f92672">&amp;&amp;</span> ls -l <span style="color:#960050;background-color:#1e0010">
+</span><span style="color:#960050;background-color:#1e0010"></span><span style="color:#66d9ef">RUN</span> cat /usr/local/macrsa/id_rsa.pub &gt;&gt; /home/maizissh/.ssh/authorized_keys<span style="color:#960050;background-color:#1e0010">
+</span><span style="color:#960050;background-color:#1e0010"></span><span style="color:#66d9ef">RUN</span> cat /home/maizissh/.ssh/authorized_keys<span style="color:#960050;background-color:#1e0010">
+</span><span style="color:#960050;background-color:#1e0010"></span><span style="color:#66d9ef">RUN</span> chmod <span style="color:#ae81ff">700</span> /home/maizissh/.ssh<span style="color:#960050;background-color:#1e0010">
+</span><span style="color:#960050;background-color:#1e0010"></span><span style="color:#66d9ef">RUN</span> chmod <span style="color:#ae81ff">600</span> /home/maizissh/.ssh/authorized_keys<span style="color:#960050;background-color:#1e0010">
+</span><span style="color:#960050;background-color:#1e0010">
+</span><span style="color:#960050;background-color:#1e0010">
+</span><span style="color:#960050;background-color:#1e0010"></span><span style="color:#75715e"># install java</span><span style="color:#960050;background-color:#1e0010">
+</span><span style="color:#960050;background-color:#1e0010"></span><span style="color:#66d9ef">COPY</span> jdk-8u11-linux-x64.tar.gz /usr/local/java/<span style="color:#960050;background-color:#1e0010">
+</span><span style="color:#960050;background-color:#1e0010"></span><span style="color:#66d9ef">RUN</span> cd /usr/local/java/ <span style="color:#f92672">&amp;&amp;</span> ls <span style="color:#f92672">&amp;&amp;</span> tar -xvf jdk-8u11-linux-x64.tar.gz <span style="color:#f92672">&amp;&amp;</span> ls<span style="color:#960050;background-color:#1e0010">
+</span><span style="color:#960050;background-color:#1e0010"></span><span style="color:#66d9ef">ENV</span> JAVA_HOME /usr/local/java/jdk1.8.0_11<span style="color:#960050;background-color:#1e0010">
+</span><span style="color:#960050;background-color:#1e0010"></span><span style="color:#66d9ef">ENV</span> CLASSPATH $JAVA_HOME/lib;$JAVA_HOME/jre/lib<span style="color:#960050;background-color:#1e0010">
+</span><span style="color:#960050;background-color:#1e0010"></span><span style="color:#66d9ef">ENV</span> PATH $PATH:$JAVA_HOME/bin<span style="color:#960050;background-color:#1e0010">
+</span><span style="color:#960050;background-color:#1e0010"></span><span style="color:#66d9ef">RUN</span> java -version<span style="color:#960050;background-color:#1e0010">
+</span><span style="color:#960050;background-color:#1e0010"></span><span style="color:#66d9ef">RUN</span> echo <span style="color:#e6db74">&#34;java success&#34;</span><span style="color:#960050;background-color:#1e0010">
+</span><span style="color:#960050;background-color:#1e0010">
+</span><span style="color:#960050;background-color:#1e0010">
+</span><span style="color:#960050;background-color:#1e0010"></span><span style="color:#75715e"># install maven</span><span style="color:#960050;background-color:#1e0010">
+</span><span style="color:#960050;background-color:#1e0010"></span><span style="color:#66d9ef">RUN</span> cd /usr/local/ <span style="color:#f92672">&amp;&amp;</span> mkdir maven<span style="color:#960050;background-color:#1e0010">
+</span><span style="color:#960050;background-color:#1e0010"></span><span style="color:#66d9ef">RUN</span> wget http://apache-mirror.rbc.ru/pub/apache/maven/maven-3/3.3.9/binaries/apache-maven-3.3.9-bin.tar.gz<span style="color:#960050;background-color:#1e0010">
+</span><span style="color:#960050;background-color:#1e0010"></span><span style="color:#66d9ef">RUN</span> mv apache-maven-3.3.9-bin.tar.gz  /usr/local/maven/  <span style="color:#f92672">&amp;&amp;</span> ls <span style="color:#960050;background-color:#1e0010">
+</span><span style="color:#960050;background-color:#1e0010"></span><span style="color:#66d9ef">RUN</span> cd /usr/local/maven/ <span style="color:#f92672">&amp;&amp;</span> tar -xzvf apache-maven-3.3.9-bin.tar.gz <span style="color:#f92672">&amp;&amp;</span> ls<span style="color:#960050;background-color:#1e0010">
+</span><span style="color:#960050;background-color:#1e0010"></span><span style="color:#66d9ef">ENV</span> MAVEN_HOME /usr/local/maven/apache-maven-3.3.9<span style="color:#960050;background-color:#1e0010">
+</span><span style="color:#960050;background-color:#1e0010"></span><span style="color:#66d9ef">ENV</span> PATH $JAVA_HOME/bin:$MAVEN_HOME/bin:$PATH<span style="color:#960050;background-color:#1e0010">
+</span><span style="color:#960050;background-color:#1e0010"></span><span style="color:#66d9ef">RUN</span> mvn -version<span style="color:#960050;background-color:#1e0010">
+</span><span style="color:#960050;background-color:#1e0010"></span><span style="color:#66d9ef">RUN</span> echo <span style="color:#e6db74">&#34;maven success&#34;</span><span style="color:#960050;background-color:#1e0010">
+</span><span style="color:#960050;background-color:#1e0010">
+</span><span style="color:#960050;background-color:#1e0010">
+</span><span style="color:#960050;background-color:#1e0010"></span><span style="color:#75715e"># COPY java_maven.sh /usr/bin/java_maven.sh</span><span style="color:#960050;background-color:#1e0010">
+</span><span style="color:#960050;background-color:#1e0010"></span><span style="color:#75715e"># RUN  chmod +x  /usr/bin/java_maven.sh</span><span style="color:#960050;background-color:#1e0010">
+</span><span style="color:#960050;background-color:#1e0010">
+</span><span style="color:#960050;background-color:#1e0010"></span><span style="color:#75715e">#安装java和maven环境</span><span style="color:#960050;background-color:#1e0010">
+</span><span style="color:#960050;background-color:#1e0010"></span><span style="color:#75715e"># CMD [ &#34;java_maven.sh&#34; ]</span><span style="color:#960050;background-color:#1e0010">
+</span><span style="color:#960050;background-color:#1e0010"></span><span style="color:#75715e"># CMD [&#34;/usr/sbin/init&#34;]</span><span style="color:#960050;background-color:#1e0010">
+</span></code></pre></div><p><strong>注意 ：ENV命令只是用当前的，不会去修改/etc/profile的文件，用 echo &lsquo;MAVEN_HOME=/usr/local/maven/apache-maven-3.3.9&rsquo;&raquo;/etc/profile 添加到配置文件中，就永远的生效了。 不然退出去后，在进来，环境配置就失效了</strong></p>
 <h1 id="ssh配置">SSH配置</h1>
-
 <p>centos容器中，我就设置了这两个地方， 其他一些配置，在容器centos中，并没有，我是通过秘钥连接的。</p>
-
-<pre><code class="language-yaml">PermitRootLogin yes   #禁用root账户登录，如果是用root用户登录请开启
-PubkeyAuthentication yes 
-</code></pre>
-
-<h1 id="启动容器脚本">启动容器脚本</h1>
-
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-yaml" data-lang="yaml"><span style="color:#ae81ff">PermitRootLogin yes  </span> <span style="color:#75715e">#禁用root账户登录，如果是用root用户登录请开启</span>
+<span style="color:#ae81ff">PubkeyAuthentication yes </span>
+</code></pre></div><h1 id="启动容器脚本">启动容器脚本</h1>
 <p>秘钥登录ssh，/Users/maizi/.ssh  known_hosts 这个文件有时候需要删除已经链接的IP地址， 看具体错误查看这个文件</p>
-
-<pre><code class="language-shell">#!/usr/bin/env bash
-
-build() {
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-shell" data-lang="shell"><span style="color:#75715e">#!/usr/bin/env bash
+</span><span style="color:#75715e"></span>
+build<span style="color:#f92672">()</span> <span style="color:#f92672">{</span>
     cd /Users/maizi/.ssh
     rm -rf id_rsa
-    ssh-keygen -t rsa -P '' -f ~/.ssh/id_rsa
+    ssh-keygen -t rsa -P <span style="color:#e6db74">&#39;&#39;</span> -f ~/.ssh/id_rsa
     cp -fp ~/.ssh/id_rsa.pub ~/工具/dockerBuild
-    echo &quot;mac秘钥 success&quot;
+    echo <span style="color:#e6db74">&#34;mac秘钥 success&#34;</span>
 
-    #开始构建
+    <span style="color:#75715e">#开始构建</span>
     cd /Users/maizi/工具/dockerBuild
     docker build -t mycentos7 .
 
-}
+<span style="color:#f92672">}</span>
 
-start() {
-    #运行
-    docker run -itd --name mycentos7 -p 22:22 --privileged=true mycentos7 /usr/sbin/init
-}
+start<span style="color:#f92672">()</span> <span style="color:#f92672">{</span>
+    <span style="color:#75715e">#运行</span>
+    docker run -itd --name mycentos7 -p 22:22 --privileged<span style="color:#f92672">=</span>true mycentos7 /usr/sbin/init
+<span style="color:#f92672">}</span>
 
 
-stop() {
+stop<span style="color:#f92672">()</span> <span style="color:#f92672">{</span>
     docker stop mycentos7
     docker rm mycentos7
-}
+<span style="color:#f92672">}</span>
 
-remove() {
+remove<span style="color:#f92672">()</span> <span style="color:#f92672">{</span>
     docker stop mycentos7
     docker rm mycentos7
     docker rmi mycentos7
-}
+<span style="color:#f92672">}</span>
 
-check() {
+check<span style="color:#f92672">()</span> <span style="color:#f92672">{</span>
     docker exec -it mycentos7 bash
-}
+<span style="color:#f92672">}</span>
 
-#使用说明，用来提示输入参数
-usage() {
-    echo &quot;Usage: sh 执行脚本.sh [start|stop|restart]&quot;
-    exit 1
-}
+<span style="color:#75715e">#使用说明，用来提示输入参数</span>
+usage<span style="color:#f92672">()</span> <span style="color:#f92672">{</span>
+    echo <span style="color:#e6db74">&#34;Usage: sh 执行脚本.sh [start|stop|restart]&#34;</span>
+    exit <span style="color:#ae81ff">1</span>
+<span style="color:#f92672">}</span>
 
-case &quot;$1&quot; in
-&quot;build&quot;)
+<span style="color:#66d9ef">case</span> <span style="color:#e6db74">&#34;</span>$1<span style="color:#e6db74">&#34;</span> in
+<span style="color:#e6db74">&#34;build&#34;</span><span style="color:#f92672">)</span>
     build
     start
     ;;
-&quot;start&quot;)
+<span style="color:#e6db74">&#34;start&#34;</span><span style="color:#f92672">)</span>
     start
     ;;
-&quot;stop&quot;)
+<span style="color:#e6db74">&#34;stop&#34;</span><span style="color:#f92672">)</span>
     stop
     ;;
-&quot;check&quot;)
+<span style="color:#e6db74">&#34;check&#34;</span><span style="color:#f92672">)</span>
     check
     ;;
-&quot;restart&quot;)
-    echo &quot;restart......&quot;
+<span style="color:#e6db74">&#34;restart&#34;</span><span style="color:#f92672">)</span>
+    echo <span style="color:#e6db74">&#34;restart......&#34;</span>
     stop
     start
-    echo &quot;restart success&quot;
+    echo <span style="color:#e6db74">&#34;restart success&#34;</span>
     ;;
-*)
+*<span style="color:#f92672">)</span>
     check
     ;;
-esac
-</code></pre>
-
-<h1 id="问题">问题</h1>
-
+<span style="color:#66d9ef">esac</span>
+</code></pre></div><h1 id="问题">问题</h1>
 <p>直接构建的容器，进去后，已经安装好了java和maven环境，但是，直接连接SSH，用终端进入查看，环境并没有安装好， 现在也不知道，为什么容器进入有开发环境，终端连接没有，也许是因为重新连接了一个终端，环境没有用了，所以下面有一个脚本，安装环境。</p>
+<h1 id="javamaven脚本">java,maven脚本</h1>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-shell" data-lang="shell"><span style="color:#75715e">#!/usr/bin/env bash
+</span><span style="color:#75715e"></span>
+<span style="color:#75715e">#</span>
+echo <span style="color:#e6db74">&#34;install java maven 环境&#34;</span>
 
-<h1 id="java-maven脚本">java,maven脚本</h1>
-
-<pre><code class="language-shell">#!/usr/bin/env bash
-
-#
-echo &quot;install java maven 环境&quot;
-
-#安装java环境
-cd /usr/local/java/ &amp;&amp; ls &amp;&amp; tar -xvf jdk-8u11-linux-x64.tar.gz &amp;&amp; ls
-echo 'export JAVA_HOME=/usr/local/java/jdk1.8.0_11'&gt;&gt;/etc/profile
-echo 'export CLASSPATH=$JAVA_HOME/lib/dt.jar:$JAVA_HOME/lib/tools.jar'&gt;&gt;/etc/profile
-echo 'export PATH=$PATH:$JAVA_HOME/bin'&gt;&gt;/etc/profile
+<span style="color:#75715e">#安装java环境</span>
+cd /usr/local/java/ <span style="color:#f92672">&amp;&amp;</span> ls <span style="color:#f92672">&amp;&amp;</span> tar -xvf jdk-8u11-linux-x64.tar.gz <span style="color:#f92672">&amp;&amp;</span> ls
+echo <span style="color:#e6db74">&#39;export JAVA_HOME=/usr/local/java/jdk1.8.0_11&#39;</span>&gt;&gt;/etc/profile
+echo <span style="color:#e6db74">&#39;export CLASSPATH=$JAVA_HOME/lib/dt.jar:$JAVA_HOME/lib/tools.jar&#39;</span>&gt;&gt;/etc/profile
+echo <span style="color:#e6db74">&#39;export PATH=$PATH:$JAVA_HOME/bin&#39;</span>&gt;&gt;/etc/profile
 source /etc/profile
 java -version
-echo &quot;java success&quot;
+echo <span style="color:#e6db74">&#34;java success&#34;</span>
 
-#安装maven环境
-cd /usr/local/ &amp;&amp; mkdir maven
+<span style="color:#75715e">#安装maven环境</span>
+cd /usr/local/ <span style="color:#f92672">&amp;&amp;</span> mkdir maven
 wget http://apache-mirror.rbc.ru/pub/apache/maven/maven-3/3.3.9/binaries/apache-maven-3.3.9-bin.tar.gz
-mv apache-maven-3.3.9-bin.tar.gz /usr/local/maven/ &amp;&amp; ls
-cd /usr/local/maven/ &amp;&amp; tar -xzvf apache-maven-3.3.9-bin.tar.gz &amp;&amp; ls
-echo 'export MAVEN_HOME=/usr/local/maven/apache-maven-3.3.9'&gt;&gt;/etc/profile
-echo 'export PATH=$JAVA_HOME/bin:$MAVEN_HOME/bin:$PATH'&gt;&gt;/etc/profile
+mv apache-maven-3.3.9-bin.tar.gz /usr/local/maven/ <span style="color:#f92672">&amp;&amp;</span> ls
+cd /usr/local/maven/ <span style="color:#f92672">&amp;&amp;</span> tar -xzvf apache-maven-3.3.9-bin.tar.gz <span style="color:#f92672">&amp;&amp;</span> ls
+echo <span style="color:#e6db74">&#39;export MAVEN_HOME=/usr/local/maven/apache-maven-3.3.9&#39;</span>&gt;&gt;/etc/profile
+echo <span style="color:#e6db74">&#39;export PATH=$JAVA_HOME/bin:$MAVEN_HOME/bin:$PATH&#39;</span>&gt;&gt;/etc/profile
 source /etc/profile
 mvn -version
-echo &quot;maven success&quot;
+echo <span style="color:#e6db74">&#34;maven success&#34;</span>
 
 source /etc/profile
-</code></pre>
-
-<p><strong>注意： source /etc/profile  #针对用户   source /etc/bashrc   #针对系统，所以我修改 /etc/bashrc文件， 加入export这些操作，在重新连接终端，可以有java和maven环境。</strong></p>
-
+</code></pre></div><p><strong>注意： source /etc/profile  #针对用户   source /etc/bashrc   #针对系统，所以我修改 /etc/bashrc文件， 加入export这些操作，在重新连接终端，可以有java和maven环境。</strong></p>
 <h1 id="效果图">效果图</h1>
-
 <p>vscode安装SFTP插件，可以实现本地和远程服务端的文件传输。下面是直接进入容器内的centos系统。</p>
-
-<p><img src="/img/5-8.png" alt="5-8" /></p>
+<p><img src="/img/5-8.png" alt="5-8"></p>
 
 
                 
@@ -546,16 +521,7 @@ source /etc/profile
                         <a class="catalog-toggle" style="font-size: 24px;" href="index.html#">目录结构</a>
                     </h4>
                     <ul class="catalog-body"></ul>
-                    <nav id="TableOfContents">
-<ul>
-<li><a href="#dockerfile">dockerfile</a></li>
-<li><a href="#ssh配置">SSH配置</a></li>
-<li><a href="#启动容器脚本">启动容器脚本</a></li>
-<li><a href="#问题">问题</a></li>
-<li><a href="#java-maven脚本">java,maven脚本</a></li>
-<li><a href="#效果图">效果图</a></li>
-</ul>
-</nav>
+                    <nav id="TableOfContents"></nav>
                     <br>
                     <br>
                     <br>
@@ -579,9 +545,6 @@ source /etc/profile
                         
                         
                         
-                        <a href="/tags/" title="">
-                            
-                        </a>
                         
                         
                         
@@ -591,101 +554,6 @@ source /etc/profile
                         
                         
                         
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        <a href="/tags/qt" title="QT">
-                            QT
-                        </a>
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        <a href="/tags/zookeeper" title="Zookeeper">
-                            Zookeeper
-                        </a>
                         
                         
                         
@@ -725,8 +593,10 @@ source /etc/profile
                         
                         
                         
-                        <a href="/tags/elasticsearch" title="elasticSearch">
-                            elasticSearch
+                        
+                        
+                        <a href="/tags/elasticsearch" title="elasticsearch">
+                            elasticsearch
                         </a>
                         
                         
@@ -737,9 +607,27 @@ source /etc/profile
                         
                         
                         
-                        <a href="/tags/golang" title="golang">
-                            golang
-                        </a>
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
                         
                         
                         
@@ -777,9 +665,21 @@ source /etc/profile
                         
                         
                         
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
                         <a href="/tags/jvm" title="jvm">
                             jvm
                         </a>
+                        
+                        
+                        
+                        
                         
                         
                         
@@ -803,9 +703,19 @@ source /etc/profile
                         
                         
                         
+                        
+                        
+                        
+                        
+                        
+                        
                         <a href="/tags/mongodb" title="mongodb">
                             mongodb
                         </a>
+                        
+                        
+                        
+                        
                         
                         
                         
@@ -816,10 +726,6 @@ source /etc/profile
                         </a>
                         
                         
-                        
-                        <a href="/tags/mycat" title="mycat">
-                            mycat
-                        </a>
                         
                         
                         
@@ -833,9 +739,17 @@ source /etc/profile
                         
                         
                         
-                        <a href="/tags/nginx" title="nginx">
-                            nginx
-                        </a>
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
                         
                         
                         
@@ -859,8 +773,22 @@ source /etc/profile
                         
                         
                         
+                        
+                        
                         <a href="/tags/rocketmq" title="rocketmq">
                             rocketmq
+                        </a>
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        <a href="/tags/security%E6%A1%86%E6%9E%B6%E5%AD%A6%E4%B9%A0" title="security框架学习">
+                            security框架学习
                         </a>
                         
                         
@@ -887,17 +815,11 @@ source /etc/profile
                         
                         
                         
-                        <a href="/tags/springcloud" title="springCloud">
-                            springCloud
-                        </a>
-                        
-                        
-                        
-                        
-                        
                         <a href="/tags/springboot" title="springboot">
                             springboot
                         </a>
+                        
+                        
                         
                         
                         
@@ -911,6 +833,9 @@ source /etc/profile
                         
                         
                         
+                        <a href="/tags/springcloud" title="springcloud">
+                            springcloud
+                        </a>
                         
                         
                         
@@ -936,6 +861,33 @@ source /etc/profile
                         
                         
                         
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        <a href="/tags/zookeeper" title="zookeeper">
+                            zookeeper
+                        </a>
                         
                         
                         
@@ -995,6 +947,8 @@ source /etc/profile
                         
                         
                         
+                        
+                        
                         <a href="/tags/%E5%88%86%E5%B8%83%E5%BC%8F%E7%B3%BB%E5%88%97" title="分布式系列">
                             分布式系列
                         </a>
@@ -1014,6 +968,10 @@ source /etc/profile
                         
                         
                         
+                        
+                        <a href="/tags/%E5%8D%8F%E8%AE%AE%E6%A0%88" title="协议栈">
+                            协议栈
+                        </a>
                         
                         
                         
@@ -1213,6 +1171,12 @@ source /etc/profile
                         
                         
                         
+                        
+                        
+                        
+                        
+                        
+                        
                         <a href="/tags/%E7%BD%91%E7%BB%9C%E7%BC%96%E7%A8%8B" title="网络编程">
                             网络编程
                         </a>
@@ -1236,6 +1200,10 @@ source /etc/profile
                         
                         
                         
+                        
+                        <a href="/tags/%E8%AE%A4%E8%AF%81%E5%92%8C%E6%8E%88%E6%9D%83" title="认证和授权">
+                            认证和授权
+                        </a>
                         
                         
                         
@@ -1406,7 +1374,7 @@ source /etc/profile
                     
                 </ul>
 		<p class="copyright text-muted">
-                    Copyright &copy;  2020
+                    Copyright &copy;  2021
                     <br>
                     <a href="https://themes.gohugo.io/hugo-theme-cleanwhite">CleanWhite Hugo Theme</a> by <a href="https://zhaohuabing.com">Huabing</a> |
                     <iframe

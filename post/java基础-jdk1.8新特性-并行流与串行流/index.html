@@ -97,15 +97,15 @@
                     </li>
                     
                     <li>
-                        <a href="/categories/english">English</a>
+                        <a href="/categories/english">english</a>
                     </li>
                     
                     <li>
-                        <a href="/categories/life">Life</a>
+                        <a href="/categories/life">life</a>
                     </li>
                     
                     <li>
-                        <a href="/categories/tech">Tech</a>
+                        <a href="/categories/tech">tech</a>
                     </li>
                     
 
@@ -237,54 +237,38 @@
                 
                 
                 
-                
-
-<p>[TOC]</p>
-
-<p><strong>转载地址：<a href="https://blog.csdn.net/Keith003/article/details/80252553">https://blog.csdn.net/Keith003/article/details/80252553</a></strong></p>
-
-<p><strong>转载地址：<a href="https://blog.csdn.net/caishi13202/article/details/82667230">https://blog.csdn.net/caishi13202/article/details/82667230</a></strong></p>
-
+                <p>[TOC]</p>
+<p><strong>转载地址：https://blog.csdn.net/Keith003/article/details/80252553</strong></p>
+<p><strong>转载地址：https://blog.csdn.net/caishi13202/article/details/82667230</strong></p>
 <h1 id="并行流定义">并行流定义</h1>
-
 <p>并行流就是把一个内容分成多个数据块，并用不同的线程分别处理每个数据块的流。Java 8 中将并行进行了优化，我们可以很容易的对数据进行并行操作。<strong>Stream API 可以声明性地通过parallel() 与sequential() 在并行流与顺序流之间进行切换。</strong></p>
-
 <p>流可以是顺序的也可以是并行的。顺序流的操作是在单线程上执行的，而并行流的操作是在多线程上并发执行的。</p>
-
-<h1 id="fork-join-框架">Fork/Join 框架</h1>
-
+<h1 id="forkjoin-框架">Fork/Join 框架</h1>
 <p>Fork/Join 框架：就是在必要的情况下，将一个大任务，进行拆分(fork)成若干个小任务（拆到不可再拆时），再将一个个的小任务运算的结果进行join 汇总.</p>
-
-<p><img src="/img/20180509141820711.png" alt="20180509141820711" /></p>
-
-<h1 id="fork-join-框架与传统线程池的区别">Fork/Join 框架与传统线程池的区别</h1>
-
+<p><img src="/img/20180509141820711.png" alt="20180509141820711"></p>
+<h1 id="forkjoin-框架与传统线程池的区别">Fork/Join 框架与传统线程池的区别</h1>
 <p>采用“工作窃取”模式（work-stealing）：
-        当执行新的任务时它可以将其拆分分成更小的任务执行，并将小任务加到线程队列中，然后再从一个随机线程的队列中偷一个并把它放在自己的队列中。
-        相对于一般的线程池实现,fork/join框架的优势体现在对其中包含的任务的处理方式上.在一般的线程池中,如果一个线程正在执行的任务由于某些原因无法继续运行,那么该线程会处于等待状态.而在fork/join框架实现中,如果某个子问题由于等待另外一个子问题的完成而无法继续运行.那么处理该子问题的线程会主动寻找其他尚未运行的子问题来执行.这种方式减少了线程的等待时间,提高了性能.</p>
-
+当执行新的任务时它可以将其拆分分成更小的任务执行，并将小任务加到线程队列中，然后再从一个随机线程的队列中偷一个并把它放在自己的队列中。
+相对于一般的线程池实现,fork/join框架的优势体现在对其中包含的任务的处理方式上.在一般的线程池中,如果一个线程正在执行的任务由于某些原因无法继续运行,那么该线程会处于等待状态.而在fork/join框架实现中,如果某个子问题由于等待另外一个子问题的完成而无法继续运行.那么处理该子问题的线程会主动寻找其他尚未运行的子问题来执行.这种方式减少了线程的等待时间,提高了性能.</p>
 <p><strong>工作窃取模式</strong></p>
-
 <p>ForkJoin框架采用的是“工作窃取模式”，传统线程在处理任务时，假设有一个大任务被分解成了20个小任务，并由四个线程A,B,C,D处理，理论上来讲一个线程处理5个任务，每个线程的任务都放在一个队列中，当B,C,D的任务都处理完了，而A因为某些原因阻塞在了第二个小任务上，那么B,C,D都需要等待A处理完成，此时A处理完第二个任务后还有三个任务需要处理，可想而知，这样CPU的利用率很低。而ForkJoin采取的模式是，当B,C,D都处理完了，而A还阻塞在第二个任务时，B会从A的任务队列的末尾偷取一个任务过来自己处理，C和D也会从A的任务队列的末尾偷一个任务，这样就相当于B,C,D额外帮A分担了一些任务，提高了CPU的利用率。</p>
-
 <h1 id="实例证明是否多线程">实例证明是否多线程</h1>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-java" data-lang="java"><span style="color:#66d9ef">public</span> <span style="color:#66d9ef">static</span> <span style="color:#66d9ef">void</span> <span style="color:#a6e22e">main</span><span style="color:#f92672">(</span>String<span style="color:#f92672">[]</span> args<span style="color:#f92672">)</span> <span style="color:#f92672">{</span>   
+   List<span style="color:#f92672">&lt;</span>Integer<span style="color:#f92672">&gt;</span> data<span style="color:#f92672">=</span>Arrays<span style="color:#f92672">.</span><span style="color:#a6e22e">asList</span><span style="color:#f92672">(</span>1<span style="color:#f92672">,</span>2<span style="color:#f92672">,</span>3<span style="color:#f92672">,</span>4<span style="color:#f92672">,</span>5<span style="color:#f92672">,</span>6<span style="color:#f92672">,</span>7<span style="color:#f92672">);</span>
+   data<span style="color:#f92672">.</span><span style="color:#a6e22e">stream</span><span style="color:#f92672">().</span><span style="color:#a6e22e">forEach</span><span style="color:#f92672">(</span>System<span style="color:#f92672">.</span><span style="color:#a6e22e">out</span><span style="color:#f92672">::</span>println<span style="color:#f92672">);</span>
 
-<pre><code class="language-java">public static void main(String[] args) {   
-   List&lt;Integer&gt; data=Arrays.asList(1,2,3,4,5,6,7);
-   data.stream().forEach(System.out::println);
-
-   System.out.println(&quot;-----------------------------&quot;);
+   System<span style="color:#f92672">.</span><span style="color:#a6e22e">out</span><span style="color:#f92672">.</span><span style="color:#a6e22e">println</span><span style="color:#f92672">(</span><span style="color:#e6db74">&#34;-----------------------------&#34;</span><span style="color:#f92672">);</span>
   
-   data.parallelStream().forEach(System.out::println);
+   data<span style="color:#f92672">.</span><span style="color:#a6e22e">parallelStream</span><span style="color:#f92672">().</span><span style="color:#a6e22e">forEach</span><span style="color:#f92672">(</span>System<span style="color:#f92672">.</span><span style="color:#a6e22e">out</span><span style="color:#f92672">::</span>println<span style="color:#f92672">);</span>
   
-   System.out.println(&quot;*****************************&quot;);
-   /***
-         * 如果forEachOrdered()中间有其他如filter()的中介操作，会试着平行化处理，然后最终forEachOrdered()会以原数据顺序处理，
-         * 因此，使用forEachOrdered()这类的有序处理,可能会（或完全失去）失去平行化的一些优势，实际上中介操作亦有可能如此，例如sorted()方法。
-    */
-   data.parallelStream().forEachOrdered(System.out::println);
-}
-运行结果：
+   System<span style="color:#f92672">.</span><span style="color:#a6e22e">out</span><span style="color:#f92672">.</span><span style="color:#a6e22e">println</span><span style="color:#f92672">(</span><span style="color:#e6db74">&#34;*****************************&#34;</span><span style="color:#f92672">);</span>
+   <span style="color:#75715e">/***
+</span><span style="color:#75715e">         * 如果forEachOrdered()中间有其他如filter()的中介操作，会试着平行化处理，然后最终forEachOrdered()会以原数据顺序处理，
+</span><span style="color:#75715e">         * 因此，使用forEachOrdered()这类的有序处理,可能会（或完全失去）失去平行化的一些优势，实际上中介操作亦有可能如此，例如sorted()方法。
+</span><span style="color:#75715e">    */</span>
+   data<span style="color:#f92672">.</span><span style="color:#a6e22e">parallelStream</span><span style="color:#f92672">().</span><span style="color:#a6e22e">forEachOrdered</span><span style="color:#f92672">(</span>System<span style="color:#f92672">.</span><span style="color:#a6e22e">out</span><span style="color:#f92672">::</span>println<span style="color:#f92672">);</span>
+<span style="color:#f92672">}</span>
+运行结果<span style="color:#960050;background-color:#1e0010">：</span>
 1
 2
 3
@@ -292,7 +276,7 @@
 5
 6
 7
------------------------------
+<span style="color:#f92672">-----------------------------</span>
 5
 4
 2
@@ -300,7 +284,7 @@
 6
 3
 1
-*****************************
+<span style="color:#f92672">*****************************</span>
 1
 2
 3
@@ -308,22 +292,13 @@
 5
 6
 7
-</code></pre>
-
-<h1 id="stream和parallelstream方法中进行选择">stream和parallelStream方法中进行选择</h1>
-
-<p><strong>转载地址：<a href="https://www.jianshu.com/p/9a11f41c2b63">https://www.jianshu.com/p/9a11f41c2b63</a></strong></p>
-
+</code></pre></div><h1 id="stream和parallelstream方法中进行选择">stream和parallelStream方法中进行选择</h1>
+<p><strong>转载地址：https://www.jianshu.com/p/9a11f41c2b63</strong></p>
 <h2 id="是否需要并行">是否需要并行？</h2>
-
 <p>你需要弄清楚你要解决的问题是什么，数据量有多大，计算的特点是什么？并不是所有的问题都适合使用并发程序来求解，比如当数据量不大时，顺序执行往往比并行执行更快。毕竟，准备线程池和其它相关资源也是需要时间的。但是，当任务涉及到I/O操作并且任务之间不互相依赖时，那么并行化就是一个不错的选择。通常而言，将这类程序并行化之后，执行速度会提升好几个等级。</p>
-
-<h2 id="任务之间是否是独立的-是否会引起任何竞态条件">任务之间是否是独立的？是否会引起任何竞态条件？</h2>
-
+<h2 id="任务之间是否是独立的是否会引起任何竞态条件">任务之间是否是独立的？是否会引起任何竞态条件？</h2>
 <p>如果任务之间是独立的，并且代码中不涉及到对同一个对象的某个状态或者某个变量的更新操作，那么就表明代码是可以被并行化的。</p>
-
 <h2 id="结果是否取决于任务的调用顺序">结果是否取决于任务的调用顺序？</h2>
-
 <p>由于在并行环境中任务的执行顺序是不确定的，因此对于依赖于顺序的任务而言，并行化也许不能给出正确的结果。</p>
 
 
@@ -432,18 +407,11 @@
                     </h4>
                     <ul class="catalog-body"></ul>
                     <nav id="TableOfContents">
-<ul>
-<li><a href="#并行流定义">并行流定义</a></li>
-<li><a href="#fork-join-框架">Fork/Join 框架</a></li>
-<li><a href="#fork-join-框架与传统线程池的区别">Fork/Join 框架与传统线程池的区别</a></li>
-<li><a href="#实例证明是否多线程">实例证明是否多线程</a></li>
-<li><a href="#stream和parallelstream方法中进行选择">stream和parallelStream方法中进行选择</a>
-<ul>
-<li><a href="#是否需要并行">是否需要并行？</a></li>
-<li><a href="#任务之间是否是独立的-是否会引起任何竞态条件">任务之间是否是独立的？是否会引起任何竞态条件？</a></li>
-<li><a href="#结果是否取决于任务的调用顺序">结果是否取决于任务的调用顺序？</a></li>
-</ul></li>
-</ul>
+  <ul>
+    <li><a href="#是否需要并行">是否需要并行？</a></li>
+    <li><a href="#任务之间是否是独立的是否会引起任何竞态条件">任务之间是否是独立的？是否会引起任何竞态条件？</a></li>
+    <li><a href="#结果是否取决于任务的调用顺序">结果是否取决于任务的调用顺序？</a></li>
+  </ul>
 </nav>
                     <br>
                     <br>
@@ -468,9 +436,6 @@
                         
                         
                         
-                        <a href="/tags/" title="">
-                            
-                        </a>
                         
                         
                         
@@ -480,101 +445,6 @@
                         
                         
                         
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        <a href="/tags/qt" title="QT">
-                            QT
-                        </a>
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        <a href="/tags/zookeeper" title="Zookeeper">
-                            Zookeeper
-                        </a>
                         
                         
                         
@@ -614,8 +484,10 @@
                         
                         
                         
-                        <a href="/tags/elasticsearch" title="elasticSearch">
-                            elasticSearch
+                        
+                        
+                        <a href="/tags/elasticsearch" title="elasticsearch">
+                            elasticsearch
                         </a>
                         
                         
@@ -626,9 +498,27 @@
                         
                         
                         
-                        <a href="/tags/golang" title="golang">
-                            golang
-                        </a>
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
                         
                         
                         
@@ -666,9 +556,21 @@
                         
                         
                         
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
                         <a href="/tags/jvm" title="jvm">
                             jvm
                         </a>
+                        
+                        
+                        
+                        
                         
                         
                         
@@ -692,9 +594,19 @@
                         
                         
                         
+                        
+                        
+                        
+                        
+                        
+                        
                         <a href="/tags/mongodb" title="mongodb">
                             mongodb
                         </a>
+                        
+                        
+                        
+                        
                         
                         
                         
@@ -705,10 +617,6 @@
                         </a>
                         
                         
-                        
-                        <a href="/tags/mycat" title="mycat">
-                            mycat
-                        </a>
                         
                         
                         
@@ -722,9 +630,17 @@
                         
                         
                         
-                        <a href="/tags/nginx" title="nginx">
-                            nginx
-                        </a>
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
                         
                         
                         
@@ -748,8 +664,22 @@
                         
                         
                         
+                        
+                        
                         <a href="/tags/rocketmq" title="rocketmq">
                             rocketmq
+                        </a>
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        <a href="/tags/security%E6%A1%86%E6%9E%B6%E5%AD%A6%E4%B9%A0" title="security框架学习">
+                            security框架学习
                         </a>
                         
                         
@@ -776,17 +706,11 @@
                         
                         
                         
-                        <a href="/tags/springcloud" title="springCloud">
-                            springCloud
-                        </a>
-                        
-                        
-                        
-                        
-                        
                         <a href="/tags/springboot" title="springboot">
                             springboot
                         </a>
+                        
+                        
                         
                         
                         
@@ -800,6 +724,9 @@
                         
                         
                         
+                        <a href="/tags/springcloud" title="springcloud">
+                            springcloud
+                        </a>
                         
                         
                         
@@ -825,6 +752,33 @@
                         
                         
                         
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        <a href="/tags/zookeeper" title="zookeeper">
+                            zookeeper
+                        </a>
                         
                         
                         
@@ -884,6 +838,8 @@
                         
                         
                         
+                        
+                        
                         <a href="/tags/%E5%88%86%E5%B8%83%E5%BC%8F%E7%B3%BB%E5%88%97" title="分布式系列">
                             分布式系列
                         </a>
@@ -903,6 +859,10 @@
                         
                         
                         
+                        
+                        <a href="/tags/%E5%8D%8F%E8%AE%AE%E6%A0%88" title="协议栈">
+                            协议栈
+                        </a>
                         
                         
                         
@@ -1102,6 +1062,12 @@
                         
                         
                         
+                        
+                        
+                        
+                        
+                        
+                        
                         <a href="/tags/%E7%BD%91%E7%BB%9C%E7%BC%96%E7%A8%8B" title="网络编程">
                             网络编程
                         </a>
@@ -1125,6 +1091,10 @@
                         
                         
                         
+                        
+                        <a href="/tags/%E8%AE%A4%E8%AF%81%E5%92%8C%E6%8E%88%E6%9D%83" title="认证和授权">
+                            认证和授权
+                        </a>
                         
                         
                         
@@ -1295,7 +1265,7 @@
                     
                 </ul>
 		<p class="copyright text-muted">
-                    Copyright &copy;  2020
+                    Copyright &copy;  2021
                     <br>
                     <a href="https://themes.gohugo.io/hugo-theme-cleanwhite">CleanWhite Hugo Theme</a> by <a href="https://zhaohuabing.com">Huabing</a> |
                     <iframe

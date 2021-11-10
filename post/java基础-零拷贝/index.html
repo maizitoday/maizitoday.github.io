@@ -97,15 +97,15 @@
                     </li>
                     
                     <li>
-                        <a href="/categories/english">English</a>
+                        <a href="/categories/english">english</a>
                     </li>
                     
                     <li>
-                        <a href="/categories/life">Life</a>
+                        <a href="/categories/life">life</a>
                     </li>
                     
                     <li>
-                        <a href="/categories/tech">Tech</a>
+                        <a href="/categories/tech">tech</a>
                     </li>
                     
 
@@ -237,151 +237,101 @@
                 
                 
                 
-                
-
-<p>[TOC]</p>
-
-<p><strong>转载地址：<a href="https://zhuanlan.zhihu.com/p/78869158">https://zhuanlan.zhihu.com/p/78869158</a></strong></p>
-
-<p><strong>转载地址：<a href="https://www.cnblogs.com/fengli9998/p/10231329.html">https://www.cnblogs.com/fengli9998/p/10231329.html</a></strong></p>
-
+                <p>[TOC]</p>
+<p><strong>转载地址：https://zhuanlan.zhihu.com/p/78869158</strong></p>
+<p><strong>转载地址：https://www.cnblogs.com/fengli9998/p/10231329.html</strong></p>
 <h1 id="什么是零拷贝">什么是零拷贝</h1>
-
 <p>零拷贝(英语: Zero-copy) 技术是指计算机执行操作时，CPU不需要先将数据从某处内存复制到另一个特定区域。这种技术通常用于通过网络传输文件时节省CPU周期和内存带宽。</p>
-
 <p>➢零拷贝技术可以减少数据拷贝和共享总线操作的次数，消除传输数据在存储器之间不必要的中间拷贝次数，从而有效地提高数据传输效率</p>
-
 <p>➢零拷贝技术减少了用户进程地址空间和内核地址空间之间因为上:下文切换而带来的开销</p>
-
 <p><strong>可以看出没有说不需要拷贝，只是说减少冗余[不必要]的拷贝。</strong></p>
-
 <h1 id="零拷贝给我们带来的好处">零拷贝给我们带来的好处</h1>
-
 <ul>
 <li>减少甚至完全避免不必要的CPU拷贝，从而让CPU解脱出来去执行其他的任务</li>
 <li>减少内存带宽的占用</li>
 <li>通常零拷贝技术还能够减少用户空间和操作系统内核空间之间的上下文切换</li>
 </ul>
-
 <h1 id="零拷贝的实现">零拷贝的实现</h1>
-
 <p>零拷贝实际的实现并没有真正的标准，取决于操作系统如何实现这一点。零拷贝完全依赖于操作系统。操作系统支持，就有；不支持，就没有。不依赖Java本身。</p>
-
 <p>Kafka
 Netty
 rocketmq
 nginx
 apache</p>
-
 <p>上面这些组件都使用了。</p>
-
 <h1 id="io读写的方式">io读写的方式</h1>
-
 <h2 id="中断">中断</h2>
+<p><img src="/img/20160919145719523.png" alt="20160919145719523"></p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-java" data-lang="java">1<span style="color:#f92672">.</span> 用户进程发起数据读取请求
+2<span style="color:#f92672">.</span> 系统调度为该进程分配cpu
+3<span style="color:#f92672">.</span> <span style="color:#a6e22e">cpu向io控制器</span><span style="color:#f92672">(</span>ide<span style="color:#f92672">,</span>scsi<span style="color:#f92672">)</span>发送io请求
+4<span style="color:#f92672">.</span> 用户进程等待io完成<span style="color:#960050;background-color:#1e0010">，</span>让出cpu
+5<span style="color:#f92672">.</span> 系统调度cpu执行其他任务
+6<span style="color:#f92672">.</span> 数据写入至io控制器的缓冲寄存器
+7<span style="color:#f92672">.</span> 缓冲寄存器满了向cpu发出中断信号
+8<span style="color:#f92672">.</span> cpu读取数据至内存
 
-<p><img src="/img/20160919145719523.png" alt="20160919145719523" /></p>
-
-<pre><code class="language-java">1. 用户进程发起数据读取请求
-2. 系统调度为该进程分配cpu
-3. cpu向io控制器(ide,scsi)发送io请求
-4. 用户进程等待io完成，让出cpu
-5. 系统调度cpu执行其他任务
-6. 数据写入至io控制器的缓冲寄存器
-7. 缓冲寄存器满了向cpu发出中断信号
-8. cpu读取数据至内存
-
-缺点：中断次数取决于缓冲寄存器的大小
-</code></pre>
-
-<p>用户进程需要读取磁盘数据，需要CPU中断，发起IO请求，每次的IO中断，都带来CPU的上下文切换。</p>
-
+缺点<span style="color:#960050;background-color:#1e0010">：</span>中断次数取决于缓冲寄存器的大小
+</code></pre></div><p>用户进程需要读取磁盘数据，需要CPU中断，发起IO请求，每次的IO中断，都带来CPU的上下文切换。</p>
 <p><strong>因此出现了——DMA</strong></p>
-
 <h2 id="dma-直接内存存取">DMA-直接内存存取</h2>
-
 <p>DMA(Direct Memory Access，直接内存存取) 是所有现代电脑的重要特色，它允许不同速度的硬件装置来沟通，而不需要依赖于CPU 的大量中断负载。</p>
-
 <p>DMA控制器，接管了数据读写请求，减少CPU的负担。这样一来，CPU能高效工作了。
 现代硬盘基本都支持DMA。</p>
+<p><img src="/img/20160919145730460.png" alt="20160919145730460"></p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-java" data-lang="java">1<span style="color:#f92672">.</span> 用户进程发起数据读取请求
+2<span style="color:#f92672">.</span> 系统调度为该进程分配cpu
+3<span style="color:#f92672">.</span> cpu向DMA发送io请求
+4<span style="color:#f92672">.</span> 用户进程等待io完成<span style="color:#960050;background-color:#1e0010">，</span>让出cpu
+5<span style="color:#f92672">.</span> 系统调度cpu执行其他任务
+6<span style="color:#f92672">.</span> 数据写入至io控制器的缓冲寄存器
+7<span style="color:#f92672">.</span> DMA不断获取缓冲寄存器中的数据<span style="color:#960050;background-color:#1e0010">（</span>需要cpu时钟<span style="color:#960050;background-color:#1e0010">）</span>
+8<span style="color:#f92672">.</span> 传输至内存<span style="color:#960050;background-color:#1e0010">（</span>需要cpu时钟<span style="color:#960050;background-color:#1e0010">）</span>
+9<span style="color:#f92672">.</span> 所需的全部数据获取完毕后向cpu发出中断信号
 
-<p><img src="/img/20160919145730460.png" alt="20160919145730460" /></p>
-
-<pre><code class="language-java">1. 用户进程发起数据读取请求
-2. 系统调度为该进程分配cpu
-3. cpu向DMA发送io请求
-4. 用户进程等待io完成，让出cpu
-5. 系统调度cpu执行其他任务
-6. 数据写入至io控制器的缓冲寄存器
-7. DMA不断获取缓冲寄存器中的数据（需要cpu时钟）
-8. 传输至内存（需要cpu时钟）
-9. 所需的全部数据获取完毕后向cpu发出中断信号
-
-优点：减少cpu中断次数，不用cpu拷贝数据
-</code></pre>
-
-<h1 id="传统方式数据拷贝">传统方式数据拷贝</h1>
-
+优点<span style="color:#960050;background-color:#1e0010">：</span>减少cpu中断次数<span style="color:#960050;background-color:#1e0010">，</span>不用cpu拷贝数据
+</code></pre></div><h1 id="传统方式数据拷贝">传统方式数据拷贝</h1>
 <ol>
 <li>下面展示了 传统方式读取数据后并通过网络发送 所发生的数据拷贝：</li>
 </ol>
-
-<p><img src="/img/20160919145740562.png" alt="20160919145740562" /></p>
-
-<pre><code class="language-java">1. 一个read系统调用后，DMA执行了一次数据拷贝，从磁盘到内核空间
-2. read结束后，发生第二次数据拷贝，由cpu将数据从内核空间拷贝至用户空间
-3. send系统调用，cpu发生第三次数据拷贝，由cpu将数据从用户空间拷贝至内核空间(socket缓冲区)
-4. send系统调用结束后，DMA执行第四次数据拷贝，将数据从内核拷贝至协议引擎
-5. 另外，这四个过程中，每个过程都发生一次上下文切换
-</code></pre>
-
-<ol>
+<p><img src="/img/20160919145740562.png" alt="20160919145740562"></p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-java" data-lang="java">1<span style="color:#f92672">.</span> 一个read系统调用后<span style="color:#960050;background-color:#1e0010">，</span>DMA执行了一次数据拷贝<span style="color:#960050;background-color:#1e0010">，</span>从磁盘到内核空间
+2<span style="color:#f92672">.</span> read结束后<span style="color:#960050;background-color:#1e0010">，</span>发生第二次数据拷贝<span style="color:#960050;background-color:#1e0010">，</span>由cpu将数据从内核空间拷贝至用户空间
+3<span style="color:#f92672">.</span> send系统调用<span style="color:#960050;background-color:#1e0010">，</span>cpu发生第三次数据拷贝<span style="color:#960050;background-color:#1e0010">，</span>由cpu将数据从用户空间拷贝至内核空间<span style="color:#f92672">(</span>socket缓冲区<span style="color:#f92672">)</span>
+4<span style="color:#f92672">.</span> send系统调用结束后<span style="color:#960050;background-color:#1e0010">，</span>DMA执行第四次数据拷贝<span style="color:#960050;background-color:#1e0010">，</span>将数据从内核拷贝至协议引擎
+5<span style="color:#f92672">.</span> 另外<span style="color:#960050;background-color:#1e0010">，</span>这四个过程中<span style="color:#960050;background-color:#1e0010">，</span>每个过程都发生一次上下文切换
+</code></pre></div><ol start="2">
 <li>内存缓冲数据，主要是为了提高性能，内核可以预读部分数据，当所需数据小于内存缓冲区大小时，将极大的提高性能。</li>
 <li>零拷贝是为了消除这个过程中冗余的拷贝</li>
 </ol>
-
 <h1 id="零拷贝-sendfile-对应到java中">零拷贝-sendfile 对应到java中</h1>
-
-<pre><code class="language-java">//将数据从文件通道传输到了给定的可写字节通道
-为FileChannel.transferTo(long position, long count, WritableByteChannel target)
-</code></pre>
-
-<ol>
-<li>避免了第2，3步的数据拷贝，参考下图：</li>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-java" data-lang="java"><span style="color:#75715e">//将数据从文件通道传输到了给定的可写字节通道
+</span><span style="color:#75715e"></span>为FileChannel<span style="color:#f92672">.</span><span style="color:#a6e22e">transferTo</span><span style="color:#f92672">(</span><span style="color:#66d9ef">long</span> position<span style="color:#f92672">,</span> <span style="color:#66d9ef">long</span> count<span style="color:#f92672">,</span> WritableByteChannel target<span style="color:#f92672">)</span>
+</code></pre></div><ol>
+<li>
+<p>避免了第2，3步的数据拷贝，参考下图：</p>
+<p><img src="/img/20160919145750929.png" alt="20160919145750929"></p>
+</li>
 </ol>
-
-<p><img src="/img/20160919145750929.png" alt="20160919145750929" /></p>
-
-<pre><code class="language-java">1. DMA从拷贝至内核缓冲区
-2. cpu将数据从内核缓冲区拷贝至内核空间(socket缓冲区)
-3. DMA将数据从内核拷贝至协议引擎
-4. 这三个过程中共发生2次上下文切换，分别为发起读取文件和发送数据
-</code></pre>
-
-<ol>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-java" data-lang="java">1<span style="color:#f92672">.</span> DMA从拷贝至内核缓冲区
+2<span style="color:#f92672">.</span> <span style="color:#a6e22e">cpu将数据从内核缓冲区拷贝至内核空间</span><span style="color:#f92672">(</span>socket缓冲区<span style="color:#f92672">)</span>
+3<span style="color:#f92672">.</span> DMA将数据从内核拷贝至协议引擎
+4<span style="color:#f92672">.</span> 这三个过程中共发生2次上下文切换<span style="color:#960050;background-color:#1e0010">，</span>分别为发起读取文件和发送数据
+</code></pre></div><ol start="2">
 <li>以上过程发生了三次数据拷贝，其中有一次为cpu完成</li>
 <li>linux内核2.4以后，socket缓冲区做了调整，DMA带收集功能，如下图：</li>
 </ol>
-
-<p><img src="/img/20160919145802734.png" alt="20160919145802734" /></p>
-
-<pre><code class="language-java">1. DMA从拷贝至内核缓冲区
-2. 将数据的位置和长度的信息的描述符增加至内核空间(socket缓冲区)
-3. DMA将数据从内核拷贝至协议引擎
-</code></pre>
-
-<p><strong>所谓零拷贝，指的是应用内存与内核内存不存在拷贝。</strong></p>
-
+<p><img src="/img/20160919145802734.png" alt="20160919145802734"></p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-java" data-lang="java">1<span style="color:#f92672">.</span> DMA从拷贝至内核缓冲区
+2<span style="color:#f92672">.</span> <span style="color:#a6e22e">将数据的位置和长度的信息的描述符增加至内核空间</span><span style="color:#f92672">(</span>socket缓冲区<span style="color:#f92672">)</span>
+3<span style="color:#f92672">.</span> DMA将数据从内核拷贝至协议引擎
+</code></pre></div><p><strong>所谓零拷贝，指的是应用内存与内核内存不存在拷贝。</strong></p>
 <h1 id="零拷贝-mmap">零拷贝-mmap</h1>
-
-<p><img src="/img/998342-20190109085005656-1249109565.png" alt="998342-20190109085005656-1249109565" /></p>
-
+<p><img src="/img/998342-20190109085005656-1249109565.png" alt="998342-20190109085005656-1249109565"></p>
 <h1 id="零拷贝-sendfile">零拷贝-sendFile</h1>
-
-<p><img src="/img/998342-20190109085021607-1245221430.png" alt="998342-20190109085021607-1245221430" /></p>
-
+<p><img src="/img/998342-20190109085021607-1245221430.png" alt="998342-20190109085021607-1245221430"></p>
 <h1 id="mmap和sendfile的区别">mmap和sendFile的区别</h1>
-
-<p><img src="/img/Xnip2020-03-16_12-01-05.png" alt="Xnip2020-03-16_12-01-05" /></p>
+<p><img src="/img/Xnip2020-03-16_12-01-05.png" alt="Xnip2020-03-16_12-01-05"></p>
 
 
                 
@@ -489,21 +439,10 @@ apache</p>
                     </h4>
                     <ul class="catalog-body"></ul>
                     <nav id="TableOfContents">
-<ul>
-<li><a href="#什么是零拷贝">什么是零拷贝</a></li>
-<li><a href="#零拷贝给我们带来的好处">零拷贝给我们带来的好处</a></li>
-<li><a href="#零拷贝的实现">零拷贝的实现</a></li>
-<li><a href="#io读写的方式">io读写的方式</a>
-<ul>
-<li><a href="#中断">中断</a></li>
-<li><a href="#dma-直接内存存取">DMA-直接内存存取</a></li>
-</ul></li>
-<li><a href="#传统方式数据拷贝">传统方式数据拷贝</a></li>
-<li><a href="#零拷贝-sendfile-对应到java中">零拷贝-sendfile 对应到java中</a></li>
-<li><a href="#零拷贝-mmap">零拷贝-mmap</a></li>
-<li><a href="#零拷贝-sendfile">零拷贝-sendFile</a></li>
-<li><a href="#mmap和sendfile的区别">mmap和sendFile的区别</a></li>
-</ul>
+  <ul>
+    <li><a href="#中断">中断</a></li>
+    <li><a href="#dma-直接内存存取">DMA-直接内存存取</a></li>
+  </ul>
 </nav>
                     <br>
                     <br>
@@ -528,9 +467,6 @@ apache</p>
                         
                         
                         
-                        <a href="/tags/" title="">
-                            
-                        </a>
                         
                         
                         
@@ -540,101 +476,6 @@ apache</p>
                         
                         
                         
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        <a href="/tags/qt" title="QT">
-                            QT
-                        </a>
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        <a href="/tags/zookeeper" title="Zookeeper">
-                            Zookeeper
-                        </a>
                         
                         
                         
@@ -674,8 +515,10 @@ apache</p>
                         
                         
                         
-                        <a href="/tags/elasticsearch" title="elasticSearch">
-                            elasticSearch
+                        
+                        
+                        <a href="/tags/elasticsearch" title="elasticsearch">
+                            elasticsearch
                         </a>
                         
                         
@@ -686,9 +529,27 @@ apache</p>
                         
                         
                         
-                        <a href="/tags/golang" title="golang">
-                            golang
-                        </a>
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
                         
                         
                         
@@ -726,9 +587,21 @@ apache</p>
                         
                         
                         
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
                         <a href="/tags/jvm" title="jvm">
                             jvm
                         </a>
+                        
+                        
+                        
+                        
                         
                         
                         
@@ -752,9 +625,19 @@ apache</p>
                         
                         
                         
+                        
+                        
+                        
+                        
+                        
+                        
                         <a href="/tags/mongodb" title="mongodb">
                             mongodb
                         </a>
+                        
+                        
+                        
+                        
                         
                         
                         
@@ -765,10 +648,6 @@ apache</p>
                         </a>
                         
                         
-                        
-                        <a href="/tags/mycat" title="mycat">
-                            mycat
-                        </a>
                         
                         
                         
@@ -782,9 +661,17 @@ apache</p>
                         
                         
                         
-                        <a href="/tags/nginx" title="nginx">
-                            nginx
-                        </a>
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
                         
                         
                         
@@ -808,8 +695,22 @@ apache</p>
                         
                         
                         
+                        
+                        
                         <a href="/tags/rocketmq" title="rocketmq">
                             rocketmq
+                        </a>
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        <a href="/tags/security%E6%A1%86%E6%9E%B6%E5%AD%A6%E4%B9%A0" title="security框架学习">
+                            security框架学习
                         </a>
                         
                         
@@ -836,17 +737,11 @@ apache</p>
                         
                         
                         
-                        <a href="/tags/springcloud" title="springCloud">
-                            springCloud
-                        </a>
-                        
-                        
-                        
-                        
-                        
                         <a href="/tags/springboot" title="springboot">
                             springboot
                         </a>
+                        
+                        
                         
                         
                         
@@ -860,6 +755,9 @@ apache</p>
                         
                         
                         
+                        <a href="/tags/springcloud" title="springcloud">
+                            springcloud
+                        </a>
                         
                         
                         
@@ -885,6 +783,33 @@ apache</p>
                         
                         
                         
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        <a href="/tags/zookeeper" title="zookeeper">
+                            zookeeper
+                        </a>
                         
                         
                         
@@ -944,6 +869,8 @@ apache</p>
                         
                         
                         
+                        
+                        
                         <a href="/tags/%E5%88%86%E5%B8%83%E5%BC%8F%E7%B3%BB%E5%88%97" title="分布式系列">
                             分布式系列
                         </a>
@@ -963,6 +890,10 @@ apache</p>
                         
                         
                         
+                        
+                        <a href="/tags/%E5%8D%8F%E8%AE%AE%E6%A0%88" title="协议栈">
+                            协议栈
+                        </a>
                         
                         
                         
@@ -1162,6 +1093,12 @@ apache</p>
                         
                         
                         
+                        
+                        
+                        
+                        
+                        
+                        
                         <a href="/tags/%E7%BD%91%E7%BB%9C%E7%BC%96%E7%A8%8B" title="网络编程">
                             网络编程
                         </a>
@@ -1185,6 +1122,10 @@ apache</p>
                         
                         
                         
+                        
+                        <a href="/tags/%E8%AE%A4%E8%AF%81%E5%92%8C%E6%8E%88%E6%9D%83" title="认证和授权">
+                            认证和授权
+                        </a>
                         
                         
                         
@@ -1355,7 +1296,7 @@ apache</p>
                     
                 </ul>
 		<p class="copyright text-muted">
-                    Copyright &copy;  2020
+                    Copyright &copy;  2021
                     <br>
                     <a href="https://themes.gohugo.io/hugo-theme-cleanwhite">CleanWhite Hugo Theme</a> by <a href="https://zhaohuabing.com">Huabing</a> |
                     <iframe

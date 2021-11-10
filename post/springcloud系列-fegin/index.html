@@ -97,15 +97,15 @@
                     </li>
                     
                     <li>
-                        <a href="/categories/english">English</a>
+                        <a href="/categories/english">english</a>
                     </li>
                     
                     <li>
-                        <a href="/categories/life">Life</a>
+                        <a href="/categories/life">life</a>
                     </li>
                     
                     <li>
-                        <a href="/categories/tech">Tech</a>
+                        <a href="/categories/tech">tech</a>
                     </li>
                     
 
@@ -241,89 +241,62 @@
                 
                 
                 
-                
-
-<p>[TOC]</p>
-
+                <p>[TOC]</p>
 <p><strong>说明： 本学习主要对尚硅谷周阳大神《SpringCloud视频》记录，以下文字来源这个视频PPT</strong></p>
-
-<p><strong>说明： 版本springboot2.14</strong>   <strong><spring-cloud.version>Greenwich.SR1</spring-cloud.version></strong></p>
-
+<p><strong>说明： 版本springboot2.14</strong>   <strong>&lt;spring-cloud.version&gt;Greenwich.SR1&lt;/spring-cloud.version&gt;</strong></p>
 <h1 id="fegin是什么">Fegin是什么</h1>
-
-<p><img src="/img/20-1.png" alt="20-1" /></p>
-
+<p><img src="/img/20-1.png" alt="20-1"></p>
 <p>Feign是一种声明式、模板化的HTTP客户端。在Spring Cloud中使用Feign, 我们可以做到使用HTTP请求远程服务时能与 调用本地方法一样的编码体验，开发者完全感知不到这 是远程方法，更感知不到这是个HTTP请求.</p>
-
 <h1 id="fegin搭建">Fegin搭建</h1>
-
 <p>Fegin是客户端，他的主要流程是，通过找到Eureka中注册的服务，找到对应的provide提供的方法，直接暴露一个接口，然后Controller调用远程另一个微服务接口，就像是调用本地接口一样，同时他集成了ribbon的负载均衡。一般这样的接口，可以考虑写入到公共的Maven类中，以便其他的微服务调用。</p>
-
 <h2 id="consumer端">Consumer端</h2>
-
 <p>pomx修改</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-xml" data-lang="xml">   <span style="color:#f92672">&lt;dependency&gt;</span>
+			<span style="color:#f92672">&lt;groupId&gt;</span>org.springframework.cloud<span style="color:#f92672">&lt;/groupId&gt;</span>
+			<span style="color:#f92672">&lt;artifactId&gt;</span>spring-cloud-starter-netflix-ribbon<span style="color:#f92672">&lt;/artifactId&gt;</span>
+			<span style="color:#f92672">&lt;version&gt;</span>2.1.1.RELEASE<span style="color:#f92672">&lt;/version&gt;</span>
+		<span style="color:#f92672">&lt;/dependency&gt;</span>
 
-<pre><code class="language-xml">   &lt;dependency&gt;
-			&lt;groupId&gt;org.springframework.cloud&lt;/groupId&gt;
-			&lt;artifactId&gt;spring-cloud-starter-netflix-ribbon&lt;/artifactId&gt;
-			&lt;version&gt;2.1.1.RELEASE&lt;/version&gt;
-		&lt;/dependency&gt;
-
-		&lt;dependency&gt;
-			&lt;groupId&gt;org.springframework.cloud&lt;/groupId&gt;
-			&lt;artifactId&gt;spring-cloud-starter-openfeign&lt;/artifactId&gt;
-			&lt;version&gt;2.1.1.RELEASE&lt;/version&gt;
-		&lt;/dependency&gt;
-</code></pre>
-
-<h2 id="定义接口">定义接口</h2>
-
-<pre><code class="language-java">@Service
-@FeignClient(value = &quot;PROVIDE-DATA&quot;)
-public interface DataFeignService {
-    @RequestMapping(value = &quot;/provide&quot;)
-    MaiziUser getDataByFeign();
-}
-</code></pre>
-
-<h2 id="provide端接口查看">provide端接口查看</h2>
-
+		<span style="color:#f92672">&lt;dependency&gt;</span>
+			<span style="color:#f92672">&lt;groupId&gt;</span>org.springframework.cloud<span style="color:#f92672">&lt;/groupId&gt;</span>
+			<span style="color:#f92672">&lt;artifactId&gt;</span>spring-cloud-starter-openfeign<span style="color:#f92672">&lt;/artifactId&gt;</span>
+			<span style="color:#f92672">&lt;version&gt;</span>2.1.1.RELEASE<span style="color:#f92672">&lt;/version&gt;</span>
+		<span style="color:#f92672">&lt;/dependency&gt;</span>
+</code></pre></div><h2 id="定义接口">定义接口</h2>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-java" data-lang="java"><span style="color:#a6e22e">@Service</span>
+<span style="color:#a6e22e">@FeignClient</span><span style="color:#f92672">(</span>value <span style="color:#f92672">=</span> <span style="color:#e6db74">&#34;PROVIDE-DATA&#34;</span><span style="color:#f92672">)</span>
+<span style="color:#66d9ef">public</span> <span style="color:#66d9ef">interface</span> <span style="color:#a6e22e">DataFeignService</span> <span style="color:#f92672">{</span>
+    <span style="color:#a6e22e">@RequestMapping</span><span style="color:#f92672">(</span>value <span style="color:#f92672">=</span> <span style="color:#e6db74">&#34;/provide&#34;</span><span style="color:#f92672">)</span>
+    MaiziUser <span style="color:#a6e22e">getDataByFeign</span><span style="color:#f92672">();</span>
+<span style="color:#f92672">}</span>
+</code></pre></div><h2 id="provide端接口查看">provide端接口查看</h2>
 <p>这是对外接口，可以看到和上面的Fegin里面接口DataFeignService这个类里面的相关方法是对应的，也就找到对应的方法了。</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-java" data-lang="java"><span style="color:#a6e22e">@RestController</span>
+<span style="color:#66d9ef">public</span> <span style="color:#66d9ef">class</span> <span style="color:#a6e22e">ProvideController</span> <span style="color:#f92672">{</span>
 
-<pre><code class="language-java">@RestController
-public class ProvideController {
+    <span style="color:#a6e22e">@Autowired</span>
+    <span style="color:#66d9ef">private</span> ProvideService service<span style="color:#f92672">;</span>
 
-    @Autowired
-    private ProvideService service;
-
-    @RequestMapping(&quot;provide&quot;)
-    public MaiziUser provide()
-    {
-        return service.buildData();
-    }
-}
-</code></pre>
-
-<h2 id="查看当前eureka服务">查看当前eureka服务</h2>
-
-<p><img src="/img/20-2.png" alt="20-2" /></p>
-
+    <span style="color:#a6e22e">@RequestMapping</span><span style="color:#f92672">(</span><span style="color:#e6db74">&#34;provide&#34;</span><span style="color:#f92672">)</span>
+    <span style="color:#66d9ef">public</span> MaiziUser <span style="color:#a6e22e">provide</span><span style="color:#f92672">()</span>
+    <span style="color:#f92672">{</span>
+        <span style="color:#66d9ef">return</span> service<span style="color:#f92672">.</span><span style="color:#a6e22e">buildData</span><span style="color:#f92672">();</span>
+    <span style="color:#f92672">}</span>
+<span style="color:#f92672">}</span>
+</code></pre></div><h2 id="查看当前eureka服务">查看当前eureka服务</h2>
+<p><img src="/img/20-2.png" alt="20-2"></p>
 <p><strong>启动类，添加 @EnableFeignClients</strong></p>
+<h2 id="applicationyml文件">application.yml文件</h2>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-yml" data-lang="yml"><span style="color:#f92672">server</span>:
+  <span style="color:#f92672">port</span>: <span style="color:#ae81ff">9001</span>
 
-<h2 id="application-yml文件">application.yml文件</h2>
+<span style="color:#f92672">eureka</span>:
+  <span style="color:#f92672">client</span>:
+    <span style="color:#f92672">register-with-eureka</span>: <span style="color:#66d9ef">false</span> <span style="color:#75715e">#false表示不向注册中心注册自己,这也是和提供者的一个区别，这里只是做消费</span>
+    <span style="color:#f92672">service-url</span>:
+      <span style="color:#f92672">defaultZone</span>: <span style="color:#ae81ff">http://eureka5001.com:5001/eureka,http://eureka5002.com:5002/eureka,http://eureka5003.com:5003/eureka</span>
 
-<pre><code class="language-yml">server:
-  port: 9001
-
-eureka:
-  client:
-    register-with-eureka: false #false表示不向注册中心注册自己,这也是和提供者的一个区别，这里只是做消费
-    service-url:
-      defaultZone: http://eureka5001.com:5001/eureka,http://eureka5002.com:5002/eureka,http://eureka5003.com:5003/eureka
-
-</code></pre>
-
-<p>controller类直接调用DataFeignService这个服务就OK了。</p>
+</code></pre></div><p>controller类直接调用DataFeignService这个服务就OK了。</p>
 
 
                 
@@ -431,17 +404,13 @@ eureka:
                     </h4>
                     <ul class="catalog-body"></ul>
                     <nav id="TableOfContents">
-<ul>
-<li><a href="#fegin是什么">Fegin是什么</a></li>
-<li><a href="#fegin搭建">Fegin搭建</a>
-<ul>
-<li><a href="#consumer端">Consumer端</a></li>
-<li><a href="#定义接口">定义接口</a></li>
-<li><a href="#provide端接口查看">provide端接口查看</a></li>
-<li><a href="#查看当前eureka服务">查看当前eureka服务</a></li>
-<li><a href="#application-yml文件">application.yml文件</a></li>
-</ul></li>
-</ul>
+  <ul>
+    <li><a href="#consumer端">Consumer端</a></li>
+    <li><a href="#定义接口">定义接口</a></li>
+    <li><a href="#provide端接口查看">provide端接口查看</a></li>
+    <li><a href="#查看当前eureka服务">查看当前eureka服务</a></li>
+    <li><a href="#applicationyml文件">application.yml文件</a></li>
+  </ul>
 </nav>
                     <br>
                     <br>
@@ -466,9 +435,6 @@ eureka:
                         
                         
                         
-                        <a href="/tags/" title="">
-                            
-                        </a>
                         
                         
                         
@@ -478,101 +444,6 @@ eureka:
                         
                         
                         
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        <a href="/tags/qt" title="QT">
-                            QT
-                        </a>
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        <a href="/tags/zookeeper" title="Zookeeper">
-                            Zookeeper
-                        </a>
                         
                         
                         
@@ -612,8 +483,10 @@ eureka:
                         
                         
                         
-                        <a href="/tags/elasticsearch" title="elasticSearch">
-                            elasticSearch
+                        
+                        
+                        <a href="/tags/elasticsearch" title="elasticsearch">
+                            elasticsearch
                         </a>
                         
                         
@@ -624,9 +497,27 @@ eureka:
                         
                         
                         
-                        <a href="/tags/golang" title="golang">
-                            golang
-                        </a>
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
                         
                         
                         
@@ -664,9 +555,21 @@ eureka:
                         
                         
                         
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
                         <a href="/tags/jvm" title="jvm">
                             jvm
                         </a>
+                        
+                        
+                        
+                        
                         
                         
                         
@@ -690,9 +593,19 @@ eureka:
                         
                         
                         
+                        
+                        
+                        
+                        
+                        
+                        
                         <a href="/tags/mongodb" title="mongodb">
                             mongodb
                         </a>
+                        
+                        
+                        
+                        
                         
                         
                         
@@ -703,10 +616,6 @@ eureka:
                         </a>
                         
                         
-                        
-                        <a href="/tags/mycat" title="mycat">
-                            mycat
-                        </a>
                         
                         
                         
@@ -720,9 +629,17 @@ eureka:
                         
                         
                         
-                        <a href="/tags/nginx" title="nginx">
-                            nginx
-                        </a>
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
                         
                         
                         
@@ -746,8 +663,22 @@ eureka:
                         
                         
                         
+                        
+                        
                         <a href="/tags/rocketmq" title="rocketmq">
                             rocketmq
+                        </a>
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        <a href="/tags/security%E6%A1%86%E6%9E%B6%E5%AD%A6%E4%B9%A0" title="security框架学习">
+                            security框架学习
                         </a>
                         
                         
@@ -774,17 +705,11 @@ eureka:
                         
                         
                         
-                        <a href="/tags/springcloud" title="springCloud">
-                            springCloud
-                        </a>
-                        
-                        
-                        
-                        
-                        
                         <a href="/tags/springboot" title="springboot">
                             springboot
                         </a>
+                        
+                        
                         
                         
                         
@@ -798,6 +723,9 @@ eureka:
                         
                         
                         
+                        <a href="/tags/springcloud" title="springcloud">
+                            springcloud
+                        </a>
                         
                         
                         
@@ -823,6 +751,33 @@ eureka:
                         
                         
                         
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        <a href="/tags/zookeeper" title="zookeeper">
+                            zookeeper
+                        </a>
                         
                         
                         
@@ -882,6 +837,8 @@ eureka:
                         
                         
                         
+                        
+                        
                         <a href="/tags/%E5%88%86%E5%B8%83%E5%BC%8F%E7%B3%BB%E5%88%97" title="分布式系列">
                             分布式系列
                         </a>
@@ -901,6 +858,10 @@ eureka:
                         
                         
                         
+                        
+                        <a href="/tags/%E5%8D%8F%E8%AE%AE%E6%A0%88" title="协议栈">
+                            协议栈
+                        </a>
                         
                         
                         
@@ -1100,6 +1061,12 @@ eureka:
                         
                         
                         
+                        
+                        
+                        
+                        
+                        
+                        
                         <a href="/tags/%E7%BD%91%E7%BB%9C%E7%BC%96%E7%A8%8B" title="网络编程">
                             网络编程
                         </a>
@@ -1123,6 +1090,10 @@ eureka:
                         
                         
                         
+                        
+                        <a href="/tags/%E8%AE%A4%E8%AF%81%E5%92%8C%E6%8E%88%E6%9D%83" title="认证和授权">
+                            认证和授权
+                        </a>
                         
                         
                         
@@ -1293,7 +1264,7 @@ eureka:
                     
                 </ul>
 		<p class="copyright text-muted">
-                    Copyright &copy;  2020
+                    Copyright &copy;  2021
                     <br>
                     <a href="https://themes.gohugo.io/hugo-theme-cleanwhite">CleanWhite Hugo Theme</a> by <a href="https://zhaohuabing.com">Huabing</a> |
                     <iframe

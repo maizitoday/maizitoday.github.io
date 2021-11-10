@@ -97,15 +97,15 @@
                     </li>
                     
                     <li>
-                        <a href="/categories/english">English</a>
+                        <a href="/categories/english">english</a>
                     </li>
                     
                     <li>
-                        <a href="/categories/life">Life</a>
+                        <a href="/categories/life">life</a>
                     </li>
                     
                     <li>
-                        <a href="/categories/tech">Tech</a>
+                        <a href="/categories/tech">tech</a>
                     </li>
                     
 
@@ -237,313 +237,247 @@
                 
                 
                 
-                
-
-<p>[TOC]</p>
-
+                <p>[TOC]</p>
 <p><strong>说明： 下列文章主要对尚硅谷《SpringBoot视频教程》的总结，下列文字描述来源他们的课件。</strong></p>
-
 <p><strong>视频地址： <a href="https://www.bilibili.com/video/av38657363/?p=9">https://www.bilibili.com/video/av38657363/?p=9</a></strong></p>
-
-<p><strong>spingboot版本<version>2.1.5.RELEASE</version></strong></p>
-
+<p><strong>spingboot版本<!-- raw HTML omitted -->2.1.5.RELEASE<!-- raw HTML omitted --></strong></p>
 <h1 id="静态资源的映射规则">静态资源的映射规则</h1>
-
 <h2 id="webjars">webjars</h2>
-
 <p>所有 /webjars/** ，都去 classpath:/META-INF/resources/webjars/ 找资源，<strong>webjars：以jar包的方式引入静态资源</strong>；</p>
-
 <p><a href="http://www.webjars.org/">http://www.webjars.org/</a> 这里有很多前端的框架maven库。</p>
-
-<h3 id="jquery-js包导入">jquery.js包导入</h3>
-
-<pre><code class="language-xml">&lt;!--引入jquery-webjar--&gt;在访问的时候只需要写webjars下面资源的名称即可
-		&lt;dependency&gt;
-			&lt;groupId&gt;org.webjars&lt;/groupId&gt;
-			&lt;artifactId&gt;jquery&lt;/artifactId&gt;
-			&lt;version&gt;3.3.1&lt;/version&gt;
-		&lt;/dependency&gt;
-</code></pre>
-
-<p>localhost:8080/webjars/jquery/3.3.1/jquery.js</p>
-
-<p><img src="/img/Xnip2019-05-28_13-27-20.png" alt="Xnip2019-05-28_13-27-20" /></p>
-
+<h3 id="jqueryjs包导入">jquery.js包导入</h3>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-xml" data-lang="xml"><span style="color:#75715e">&lt;!--引入jquery-webjar--&gt;</span>在访问的时候只需要写webjars下面资源的名称即可
+		<span style="color:#f92672">&lt;dependency&gt;</span>
+			<span style="color:#f92672">&lt;groupId&gt;</span>org.webjars<span style="color:#f92672">&lt;/groupId&gt;</span>
+			<span style="color:#f92672">&lt;artifactId&gt;</span>jquery<span style="color:#f92672">&lt;/artifactId&gt;</span>
+			<span style="color:#f92672">&lt;version&gt;</span>3.3.1<span style="color:#f92672">&lt;/version&gt;</span>
+		<span style="color:#f92672">&lt;/dependency&gt;</span>
+</code></pre></div><p>localhost:8080/webjars/jquery/3.3.1/jquery.js</p>
+<p><img src="/img/Xnip2019-05-28_13-27-20.png" alt="Xnip2019-05-28_13-27-20"></p>
 <h2 id="默认静态资源的文件夹">默认静态资源的文件夹</h2>
-
-<pre><code class="language-properties">&quot;classpath:/META-INF/resources/&quot;, 
+<pre tabindex="0"><code class="language-properties" data-lang="properties">&quot;classpath:/META-INF/resources/&quot;, 
 &quot;classpath:/resources/&quot;,
 &quot;classpath:/static/&quot;, 
 &quot;classpath:/public/&quot; 
 &quot;/&quot;：当前项目的根路径
-</code></pre>
-
-<p><a href="http://localhost:8080/temp.jpg">http://localhost:8080/temp.jpg</a> 就直接到这些文件夹下面去找。</p>
-
+</code></pre><p>http://localhost:8080/temp.jpg 就直接到这些文件夹下面去找。</p>
 <h2 id="欢迎页面">欢迎页面</h2>
-
-<p>欢迎页； 静态资源文件夹下的所有<strong>index.html</strong>页面；被&rdquo;/**&ldquo;映射；</p>
-
+<p>欢迎页； 静态资源文件夹下的所有<strong>index.html</strong>页面；被&quot;/**&ldquo;映射；</p>
 <p>localhost:8080/   找index页面</p>
-
-<h2 id="favicon-ico图标">favicon.ico图标</h2>
-
+<h2 id="faviconico图标">favicon.ico图标</h2>
 <p>所有的 **/favicon.ico  都是在静态资源文件下找；</p>
-
 <h2 id="源码分析">源码分析</h2>
-
 <p>spring-boot-autoconfigure.jar中package org.springframework.boot.autoconfigure.web.servlet;这个WebMvcAutoConfiguration类处理。</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-java" data-lang="java"><span style="color:#a6e22e">@Override</span>
+		<span style="color:#66d9ef">public</span> <span style="color:#66d9ef">void</span> <span style="color:#a6e22e">addResourceHandlers</span><span style="color:#f92672">(</span>ResourceHandlerRegistry registry<span style="color:#f92672">)</span> <span style="color:#f92672">{</span>
+			<span style="color:#66d9ef">if</span> <span style="color:#f92672">(!</span><span style="color:#66d9ef">this</span><span style="color:#f92672">.</span><span style="color:#a6e22e">resourceProperties</span><span style="color:#f92672">.</span><span style="color:#a6e22e">isAddMappings</span><span style="color:#f92672">())</span> <span style="color:#f92672">{</span>
+				logger<span style="color:#f92672">.</span><span style="color:#a6e22e">debug</span><span style="color:#f92672">(</span><span style="color:#e6db74">&#34;Default resource handling disabled&#34;</span><span style="color:#f92672">);</span>
+				<span style="color:#66d9ef">return</span><span style="color:#f92672">;</span>
+			<span style="color:#f92672">}</span>
+			Integer cachePeriod <span style="color:#f92672">=</span> <span style="color:#66d9ef">this</span><span style="color:#f92672">.</span><span style="color:#a6e22e">resourceProperties</span><span style="color:#f92672">.</span><span style="color:#a6e22e">getCachePeriod</span><span style="color:#f92672">();</span>
+			<span style="color:#66d9ef">if</span> <span style="color:#f92672">(!</span>registry<span style="color:#f92672">.</span><span style="color:#a6e22e">hasMappingForPattern</span><span style="color:#f92672">(</span><span style="color:#e6db74">&#34;/webjars/**&#34;</span><span style="color:#f92672">))</span> <span style="color:#f92672">{</span>
+				customizeResourceHandlerRegistration<span style="color:#f92672">(</span>
+						registry<span style="color:#f92672">.</span><span style="color:#a6e22e">addResourceHandler</span><span style="color:#f92672">(</span><span style="color:#e6db74">&#34;/webjars/**&#34;</span><span style="color:#f92672">)</span>
+								<span style="color:#f92672">.</span><span style="color:#a6e22e">addResourceLocations</span><span style="color:#f92672">(</span>
+										<span style="color:#e6db74">&#34;classpath:/META-INF/resources/webjars/&#34;</span><span style="color:#f92672">)</span>
+						<span style="color:#f92672">.</span><span style="color:#a6e22e">setCachePeriod</span><span style="color:#f92672">(</span>cachePeriod<span style="color:#f92672">));</span>
+			<span style="color:#f92672">}</span>
+			String staticPathPattern <span style="color:#f92672">=</span> <span style="color:#66d9ef">this</span><span style="color:#f92672">.</span><span style="color:#a6e22e">mvcProperties</span><span style="color:#f92672">.</span><span style="color:#a6e22e">getStaticPathPattern</span><span style="color:#f92672">();</span>
+       <span style="color:#75715e">//静态资源文件夹映射
+</span><span style="color:#75715e"></span>			<span style="color:#66d9ef">if</span> <span style="color:#f92672">(!</span>registry<span style="color:#f92672">.</span><span style="color:#a6e22e">hasMappingForPattern</span><span style="color:#f92672">(</span>staticPathPattern<span style="color:#f92672">))</span> <span style="color:#f92672">{</span>
+				customizeResourceHandlerRegistration<span style="color:#f92672">(</span>
+						registry<span style="color:#f92672">.</span><span style="color:#a6e22e">addResourceHandler</span><span style="color:#f92672">(</span>staticPathPattern<span style="color:#f92672">)</span>
+								<span style="color:#f92672">.</span><span style="color:#a6e22e">addResourceLocations</span><span style="color:#f92672">(</span>
+                    <span style="color:#75715e">//默认的静态文件夹，如下代码块-2
+</span><span style="color:#75715e"></span>										<span style="color:#66d9ef">this</span><span style="color:#f92672">.</span><span style="color:#a6e22e">resourceProperties</span><span style="color:#f92672">.</span><span style="color:#a6e22e">getStaticLocations</span><span style="color:#f92672">())</span>
+						<span style="color:#f92672">.</span><span style="color:#a6e22e">setCachePeriod</span><span style="color:#f92672">(</span>cachePeriod<span style="color:#f92672">));</span>
+			<span style="color:#f92672">}</span>
+		<span style="color:#f92672">}</span>
 
-<pre><code class="language-java">@Override
-		public void addResourceHandlers(ResourceHandlerRegistry registry) {
-			if (!this.resourceProperties.isAddMappings()) {
-				logger.debug(&quot;Default resource handling disabled&quot;);
-				return;
-			}
-			Integer cachePeriod = this.resourceProperties.getCachePeriod();
-			if (!registry.hasMappingForPattern(&quot;/webjars/**&quot;)) {
-				customizeResourceHandlerRegistration(
-						registry.addResourceHandler(&quot;/webjars/**&quot;)
-								.addResourceLocations(
-										&quot;classpath:/META-INF/resources/webjars/&quot;)
-						.setCachePeriod(cachePeriod));
-			}
-			String staticPathPattern = this.mvcProperties.getStaticPathPattern();
-       //静态资源文件夹映射
-			if (!registry.hasMappingForPattern(staticPathPattern)) {
-				customizeResourceHandlerRegistration(
-						registry.addResourceHandler(staticPathPattern)
-								.addResourceLocations(
-                    //默认的静态文件夹，如下代码块-2
-										this.resourceProperties.getStaticLocations())
-						.setCachePeriod(cachePeriod));
-			}
-		}
+    <span style="color:#75715e">//配置欢迎页映射
+</span><span style="color:#75715e"></span>		<span style="color:#a6e22e">@Bean</span>
+		<span style="color:#66d9ef">public</span> WelcomePageHandlerMapping <span style="color:#a6e22e">welcomePageHandlerMapping</span><span style="color:#f92672">(</span>
+				ResourceProperties resourceProperties<span style="color:#f92672">)</span> <span style="color:#f92672">{</span>
+			<span style="color:#66d9ef">return</span> <span style="color:#66d9ef">new</span> WelcomePageHandlerMapping<span style="color:#f92672">(</span>resourceProperties<span style="color:#f92672">.</span><span style="color:#a6e22e">getWelcomePage</span><span style="color:#f92672">(),</span>
+					<span style="color:#66d9ef">this</span><span style="color:#f92672">.</span><span style="color:#a6e22e">mvcProperties</span><span style="color:#f92672">.</span><span style="color:#a6e22e">getStaticPathPattern</span><span style="color:#f92672">());</span>
+		<span style="color:#f92672">}</span>
 
-    //配置欢迎页映射
-		@Bean
-		public WelcomePageHandlerMapping welcomePageHandlerMapping(
-				ResourceProperties resourceProperties) {
-			return new WelcomePageHandlerMapping(resourceProperties.getWelcomePage(),
-					this.mvcProperties.getStaticPathPattern());
-		}
+    <span style="color:#75715e">//配置喜欢的图标
+</span><span style="color:#75715e"></span>		<span style="color:#a6e22e">@Configuration</span>
+		<span style="color:#a6e22e">@ConditionalOnProperty</span><span style="color:#f92672">(</span>value <span style="color:#f92672">=</span> <span style="color:#e6db74">&#34;spring.mvc.favicon.enabled&#34;</span><span style="color:#f92672">,</span> matchIfMissing <span style="color:#f92672">=</span> <span style="color:#66d9ef">true</span><span style="color:#f92672">)</span>
+		<span style="color:#66d9ef">public</span> <span style="color:#66d9ef">static</span> <span style="color:#66d9ef">class</span> <span style="color:#a6e22e">FaviconConfiguration</span> <span style="color:#f92672">{</span>
 
-    //配置喜欢的图标
-		@Configuration
-		@ConditionalOnProperty(value = &quot;spring.mvc.favicon.enabled&quot;, matchIfMissing = true)
-		public static class FaviconConfiguration {
+			<span style="color:#66d9ef">private</span> <span style="color:#66d9ef">final</span> ResourceProperties resourceProperties<span style="color:#f92672">;</span>
 
-			private final ResourceProperties resourceProperties;
+			<span style="color:#66d9ef">public</span> <span style="color:#a6e22e">FaviconConfiguration</span><span style="color:#f92672">(</span>ResourceProperties resourceProperties<span style="color:#f92672">)</span> <span style="color:#f92672">{</span>
+				<span style="color:#66d9ef">this</span><span style="color:#f92672">.</span><span style="color:#a6e22e">resourceProperties</span> <span style="color:#f92672">=</span> resourceProperties<span style="color:#f92672">;</span>
+			<span style="color:#f92672">}</span>
 
-			public FaviconConfiguration(ResourceProperties resourceProperties) {
-				this.resourceProperties = resourceProperties;
-			}
+			<span style="color:#a6e22e">@Bean</span>
+			<span style="color:#66d9ef">public</span> SimpleUrlHandlerMapping <span style="color:#a6e22e">faviconHandlerMapping</span><span style="color:#f92672">()</span> <span style="color:#f92672">{</span>
+				SimpleUrlHandlerMapping mapping <span style="color:#f92672">=</span> <span style="color:#66d9ef">new</span> SimpleUrlHandlerMapping<span style="color:#f92672">();</span>
+				mapping<span style="color:#f92672">.</span><span style="color:#a6e22e">setOrder</span><span style="color:#f92672">(</span>Ordered<span style="color:#f92672">.</span><span style="color:#a6e22e">HIGHEST_PRECEDENCE</span> <span style="color:#f92672">+</span> 1<span style="color:#f92672">);</span>
+        <span style="color:#75715e">//所有  **/favicon.ico 
+</span><span style="color:#75715e"></span>				mapping<span style="color:#f92672">.</span><span style="color:#a6e22e">setUrlMap</span><span style="color:#f92672">(</span>Collections<span style="color:#f92672">.</span><span style="color:#a6e22e">singletonMap</span><span style="color:#f92672">(</span><span style="color:#e6db74">&#34;**/favicon.ico&#34;</span><span style="color:#f92672">,</span>
+						faviconRequestHandler<span style="color:#f92672">()));</span>
+				<span style="color:#66d9ef">return</span> mapping<span style="color:#f92672">;</span>
+			<span style="color:#f92672">}</span>
+		<span style="color:#f92672">}</span>
+</code></pre></div><p>代码块-2</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-java" data-lang="java"><span style="color:#a6e22e">@ConfigurationProperties</span><span style="color:#f92672">(</span>prefix <span style="color:#f92672">=</span> <span style="color:#e6db74">&#34;spring.resources&#34;</span><span style="color:#f92672">,</span> ignoreUnknownFields <span style="color:#f92672">=</span> <span style="color:#66d9ef">false</span><span style="color:#f92672">)</span>
+<span style="color:#66d9ef">public</span> <span style="color:#66d9ef">class</span> <span style="color:#a6e22e">ResourceProperties</span> <span style="color:#f92672">{</span>
 
-			@Bean
-			public SimpleUrlHandlerMapping faviconHandlerMapping() {
-				SimpleUrlHandlerMapping mapping = new SimpleUrlHandlerMapping();
-				mapping.setOrder(Ordered.HIGHEST_PRECEDENCE + 1);
-        //所有  **/favicon.ico 
-				mapping.setUrlMap(Collections.singletonMap(&quot;**/favicon.ico&quot;,
-						faviconRequestHandler()));
-				return mapping;
-			}
-		}
-</code></pre>
-
-<p>代码块-2</p>
-
-<pre><code class="language-java">@ConfigurationProperties(prefix = &quot;spring.resources&quot;, ignoreUnknownFields = false)
-public class ResourceProperties {
-
-	private static final String[] CLASSPATH_RESOURCE_LOCATIONS = {
-			&quot;classpath:/META-INF/resources/&quot;, &quot;classpath:/resources/&quot;,
-			&quot;classpath:/static/&quot;, &quot;classpath:/public/&quot; };
-</code></pre>
-
-<h2 id="修改路径">修改路径</h2>
-
-<pre><code class="language-properties">#如果修改了，原来的默认设置都不行了， 一般不修改。
+	<span style="color:#66d9ef">private</span> <span style="color:#66d9ef">static</span> <span style="color:#66d9ef">final</span> String<span style="color:#f92672">[]</span> CLASSPATH_RESOURCE_LOCATIONS <span style="color:#f92672">=</span> <span style="color:#f92672">{</span>
+			<span style="color:#e6db74">&#34;classpath:/META-INF/resources/&#34;</span><span style="color:#f92672">,</span> <span style="color:#e6db74">&#34;classpath:/resources/&#34;</span><span style="color:#f92672">,</span>
+			<span style="color:#e6db74">&#34;classpath:/static/&#34;</span><span style="color:#f92672">,</span> <span style="color:#e6db74">&#34;classpath:/public/&#34;</span> <span style="color:#f92672">};</span>
+</code></pre></div><h2 id="修改路径">修改路径</h2>
+<pre tabindex="0"><code class="language-properties" data-lang="properties">#如果修改了，原来的默认设置都不行了， 一般不修改。
 spring.resources.static-locations*=classpath:/hello/
-</code></pre>
-
-<h1 id="thymeleaf模板引擎">thymeleaf模板引擎</h1>
-
+</code></pre><h1 id="thymeleaf模板引擎">thymeleaf模板引擎</h1>
 <h2 id="默认配置">默认配置</h2>
-
 <p>spring-boot-autoconfigure.jar中package org.springframework.boot.autoconfigure.thymeleaf;</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-java" data-lang="java"><span style="color:#a6e22e">@ConfigurationProperties</span><span style="color:#f92672">(</span>prefix <span style="color:#f92672">=</span> <span style="color:#e6db74">&#34;spring.thymeleaf&#34;</span><span style="color:#f92672">)</span>
+<span style="color:#66d9ef">public</span> <span style="color:#66d9ef">class</span> <span style="color:#a6e22e">ThymeleafProperties</span> <span style="color:#f92672">{</span>
 
-<pre><code class="language-java">@ConfigurationProperties(prefix = &quot;spring.thymeleaf&quot;)
-public class ThymeleafProperties {
+	<span style="color:#66d9ef">private</span> <span style="color:#66d9ef">static</span> <span style="color:#66d9ef">final</span> Charset DEFAULT_ENCODING <span style="color:#f92672">=</span> StandardCharsets<span style="color:#f92672">.</span><span style="color:#a6e22e">UTF_8</span><span style="color:#f92672">;</span>
 
-	private static final Charset DEFAULT_ENCODING = StandardCharsets.UTF_8;
+	<span style="color:#66d9ef">public</span> <span style="color:#66d9ef">static</span> <span style="color:#66d9ef">final</span> String DEFAULT_PREFIX <span style="color:#f92672">=</span> <span style="color:#e6db74">&#34;classpath:/templates/&#34;</span><span style="color:#f92672">;</span>
 
-	public static final String DEFAULT_PREFIX = &quot;classpath:/templates/&quot;;
-
-	public static final String DEFAULT_SUFFIX = &quot;.html&quot;;
-</code></pre>
-
-<p>只要我们把HTML页面放在classpath:/templates/，thymeleaf就能自动渲染；</p>
-
+	<span style="color:#66d9ef">public</span> <span style="color:#66d9ef">static</span> <span style="color:#66d9ef">final</span> String DEFAULT_SUFFIX <span style="color:#f92672">=</span> <span style="color:#e6db74">&#34;.html&#34;</span><span style="color:#f92672">;</span>
+</code></pre></div><p>只要我们把HTML页面放在classpath:/templates/，thymeleaf就能自动渲染；</p>
 <h2 id="简单使用">简单使用</h2>
-
-<pre><code class="language-java">@Controller
-public class DemoController {
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-java" data-lang="java"><span style="color:#a6e22e">@Controller</span>
+<span style="color:#66d9ef">public</span> <span style="color:#66d9ef">class</span> <span style="color:#a6e22e">DemoController</span> <span style="color:#f92672">{</span>
     
-    @Autowired
-    private HttpServletRequest request;
+    <span style="color:#a6e22e">@Autowired</span>
+    <span style="color:#66d9ef">private</span> HttpServletRequest request<span style="color:#f92672">;</span>
 
-    @RequestMapping(&quot;/success&quot;)
-    public String success() {
-        request.setAttribute(&quot;hello&quot;, &quot;你好&quot;);
-        request.setAttribute(&quot;hello2&quot;, &quot;&lt;h1&gt;你好&lt;/h1&gt;&quot;);
-        request.setAttribute(&quot;userData&quot;, Arrays.asList(&quot;李四&quot;,&quot;王五&quot;,&quot;张三&quot;));
-        return &quot;success&quot;;
-    }
+    <span style="color:#a6e22e">@RequestMapping</span><span style="color:#f92672">(</span><span style="color:#e6db74">&#34;/success&#34;</span><span style="color:#f92672">)</span>
+    <span style="color:#66d9ef">public</span> String <span style="color:#a6e22e">success</span><span style="color:#f92672">()</span> <span style="color:#f92672">{</span>
+        request<span style="color:#f92672">.</span><span style="color:#a6e22e">setAttribute</span><span style="color:#f92672">(</span><span style="color:#e6db74">&#34;hello&#34;</span><span style="color:#f92672">,</span> <span style="color:#e6db74">&#34;你好&#34;</span><span style="color:#f92672">);</span>
+        request<span style="color:#f92672">.</span><span style="color:#a6e22e">setAttribute</span><span style="color:#f92672">(</span><span style="color:#e6db74">&#34;hello2&#34;</span><span style="color:#f92672">,</span> <span style="color:#e6db74">&#34;&lt;h1&gt;你好&lt;/h1&gt;&#34;</span><span style="color:#f92672">);</span>
+        request<span style="color:#f92672">.</span><span style="color:#a6e22e">setAttribute</span><span style="color:#f92672">(</span><span style="color:#e6db74">&#34;userData&#34;</span><span style="color:#f92672">,</span> Arrays<span style="color:#f92672">.</span><span style="color:#a6e22e">asList</span><span style="color:#f92672">(</span><span style="color:#e6db74">&#34;李四&#34;</span><span style="color:#f92672">,</span><span style="color:#e6db74">&#34;王五&#34;</span><span style="color:#f92672">,</span><span style="color:#e6db74">&#34;张三&#34;</span><span style="color:#f92672">));</span>
+        <span style="color:#66d9ef">return</span> <span style="color:#e6db74">&#34;success&#34;</span><span style="color:#f92672">;</span>
+    <span style="color:#f92672">}</span>
 
-}
-</code></pre>
+<span style="color:#f92672">}</span>
+</code></pre></div><div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-html" data-lang="html"><span style="color:#75715e">&lt;!DOCTYPE html&gt;</span>
+&lt;<span style="color:#f92672">html</span> <span style="color:#a6e22e">lang</span><span style="color:#f92672">=</span><span style="color:#e6db74">&#34;en&#34;</span> <span style="color:#a6e22e">xmlns:th</span><span style="color:#f92672">=</span><span style="color:#e6db74">&#34;http://www.thymeleaf.org&#34;</span>&gt;
 
-<pre><code class="language-html">&lt;!DOCTYPE html&gt;
-&lt;html lang=&quot;en&quot; xmlns:th=&quot;http://www.thymeleaf.org&quot;&gt;
+&lt;<span style="color:#f92672">head</span>&gt;
+    &lt;<span style="color:#f92672">meta</span> <span style="color:#a6e22e">charset</span><span style="color:#f92672">=</span><span style="color:#e6db74">&#34;UTF-8&#34;</span>&gt;
+    &lt;<span style="color:#f92672">title</span>&gt;Title&lt;/<span style="color:#f92672">title</span>&gt;
+&lt;/<span style="color:#f92672">head</span>&gt;
 
-&lt;head&gt;
-    &lt;meta charset=&quot;UTF-8&quot;&gt;
-    &lt;title&gt;Title&lt;/title&gt;
-&lt;/head&gt;
+&lt;<span style="color:#f92672">body</span>&gt;
+    &lt;<span style="color:#f92672">h1</span>&gt;成功！&lt;/<span style="color:#f92672">h1</span>&gt;
+    <span style="color:#75715e">&lt;!--th:text 将div里面的文本内容设置为   转义--&gt;</span>
+    &lt;<span style="color:#f92672">div</span> <span style="color:#a6e22e">th:text</span><span style="color:#f92672">=</span><span style="color:#e6db74">&#34;${hello2}&#34;</span>&gt;这是显示欢迎信息&lt;/<span style="color:#f92672">div</span>&gt;
 
-&lt;body&gt;
-    &lt;h1&gt;成功！&lt;/h1&gt;
-    &lt;!--th:text 将div里面的文本内容设置为   转义--&gt;
-    &lt;div th:text=&quot;${hello2}&quot;&gt;这是显示欢迎信息&lt;/div&gt;
+    <span style="color:#75715e">&lt;!--th:utext 不转义--&gt;</span>
+    &lt;<span style="color:#f92672">div</span> <span style="color:#a6e22e">th:utext</span><span style="color:#f92672">=</span><span style="color:#e6db74">&#34;${hello2}&#34;</span>&gt;&lt;/<span style="color:#f92672">div</span>&gt;
 
-    &lt;!--th:utext 不转义--&gt;
-    &lt;div th:utext=&quot;${hello2}&quot;&gt;&lt;/div&gt;
+    &lt;<span style="color:#f92672">hr</span> /&gt;
 
-    &lt;hr /&gt;
+    <span style="color:#75715e">&lt;!--th:each 循环一个一个输出--&gt;</span>
+    &lt;<span style="color:#f92672">h1</span> <span style="color:#a6e22e">th:text</span><span style="color:#f92672">=</span><span style="color:#e6db74">&#34;${user}&#34;</span> <span style="color:#a6e22e">th:each</span><span style="color:#f92672">=</span><span style="color:#e6db74">&#34;user:${userData}&#34;</span>&gt;&lt;/<span style="color:#f92672">h1</span>&gt;
 
-    &lt;!--th:each 循环一个一个输出--&gt;
-    &lt;h1 th:text=&quot;${user}&quot; th:each=&quot;user:${userData}&quot;&gt;&lt;/h1&gt;
+    &lt;<span style="color:#f92672">hr</span> /&gt;
 
-    &lt;hr /&gt;
+    <span style="color:#75715e">&lt;!--th:each 循环一次输出--&gt;</span>
+    &lt;<span style="color:#f92672">h1</span>&gt;
+        &lt;<span style="color:#f92672">span</span> <span style="color:#a6e22e">th:each</span><span style="color:#f92672">=</span><span style="color:#e6db74">&#34;user:${userData}&#34;</span>&gt;[[${user}]],&lt;/<span style="color:#f92672">span</span>&gt;
+    &lt;/<span style="color:#f92672">h1</span>&gt;
 
-    &lt;!--th:each 循环一次输出--&gt;
-    &lt;h1&gt;
-        &lt;span th:each=&quot;user:${userData}&quot;&gt;[[${user}]],&lt;/span&gt;
-    &lt;/h1&gt;
+&lt;/<span style="color:#f92672">body</span>&gt;
 
-&lt;/body&gt;
-
-&lt;/html&gt;
-</code></pre>
-
-<p><strong>xmlns:th=&ldquo;<a href="http://www.thymeleaf.org&quot;">http://www.thymeleaf.org&quot;</a> 这个用于写的时候，标签有提示。</strong></p>
-
+&lt;/<span style="color:#f92672">html</span>&gt;
+</code></pre></div><p><strong>xmlns:th=&ldquo;<a href="http://www.thymeleaf.org">http://www.thymeleaf.org</a>&rdquo; 这个用于写的时候，标签有提示。</strong></p>
 <p><strong>注意： 用这个模板感觉好处是，如果前端做了一个页面出来了， 我们可以不加入thymeleaf的标签的话，那么他就是显示原网页，加入后，直接替换里面的文字改为动态化。这个用于前端和后端的分离是很好的。</strong></p>
-
 <h1 id="扩展springmvc">扩展SpringMVC</h1>
-
 <p>编写一个配置类（@Configuration），是WebMvcConfigurerAdapter类型；不能标注@EnableWebMvc</p>
-
 <p>既保留了所有的自动配置，也能用我们扩展的配置；</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-java" data-lang="java"><span style="color:#75715e">//使用WebMvcConfigurerAdapter可以来扩展SpringMVC的功能
+</span><span style="color:#75715e"></span><span style="color:#a6e22e">@Configuration</span>
+<span style="color:#66d9ef">public</span> <span style="color:#66d9ef">class</span> <span style="color:#a6e22e">MyMvcConfig</span> <span style="color:#66d9ef">extends</span> WebMvcConfigurerAdapter <span style="color:#f92672">{</span>
 
-<pre><code class="language-java">//使用WebMvcConfigurerAdapter可以来扩展SpringMVC的功能
-@Configuration
-public class MyMvcConfig extends WebMvcConfigurerAdapter {
-
-    @Override
-    public void addViewControllers(ViewControllerRegistry registry) {
-       // super.addViewControllers(registry);
-        //浏览器发送 /atguigu 请求来到 success
-        registry.addViewController(&quot;/atguigu&quot;).setViewName(&quot;success&quot;);
-    }
+    <span style="color:#a6e22e">@Override</span>
+    <span style="color:#66d9ef">public</span> <span style="color:#66d9ef">void</span> <span style="color:#a6e22e">addViewControllers</span><span style="color:#f92672">(</span>ViewControllerRegistry registry<span style="color:#f92672">)</span> <span style="color:#f92672">{</span>
+       <span style="color:#75715e">// super.addViewControllers(registry);
+</span><span style="color:#75715e"></span>        <span style="color:#75715e">//浏览器发送 /atguigu 请求来到 success
+</span><span style="color:#75715e"></span>        registry<span style="color:#f92672">.</span><span style="color:#a6e22e">addViewController</span><span style="color:#f92672">(</span><span style="color:#e6db74">&#34;/atguigu&#34;</span><span style="color:#f92672">).</span><span style="color:#a6e22e">setViewName</span><span style="color:#f92672">(</span><span style="color:#e6db74">&#34;success&#34;</span><span style="color:#f92672">);</span>
+    <span style="color:#f92672">}</span>
     
-   //所有的WebMvcConfigurerAdapter组件都会一起起作用
-    @Bean //将组件注册在容器
-    public WebMvcConfigurerAdapter webMvcConfigurerAdapter(){
-        WebMvcConfigurerAdapter adapter = new WebMvcConfigurerAdapter() {
-            @Override
-            public void addViewControllers(ViewControllerRegistry registry) {
-                registry.addViewController(&quot;/&quot;).setViewName(&quot;login&quot;);
-                registry.addViewController(&quot;/index.html&quot;).setViewName(&quot;login&quot;);
-            }
+   <span style="color:#75715e">//所有的WebMvcConfigurerAdapter组件都会一起起作用
+</span><span style="color:#75715e"></span>    <span style="color:#a6e22e">@Bean</span> <span style="color:#75715e">//将组件注册在容器
+</span><span style="color:#75715e"></span>    <span style="color:#66d9ef">public</span> WebMvcConfigurerAdapter <span style="color:#a6e22e">webMvcConfigurerAdapter</span><span style="color:#f92672">(){</span>
+        WebMvcConfigurerAdapter adapter <span style="color:#f92672">=</span> <span style="color:#66d9ef">new</span> WebMvcConfigurerAdapter<span style="color:#f92672">()</span> <span style="color:#f92672">{</span>
+            <span style="color:#a6e22e">@Override</span>
+            <span style="color:#66d9ef">public</span> <span style="color:#66d9ef">void</span> <span style="color:#a6e22e">addViewControllers</span><span style="color:#f92672">(</span>ViewControllerRegistry registry<span style="color:#f92672">)</span> <span style="color:#f92672">{</span>
+                registry<span style="color:#f92672">.</span><span style="color:#a6e22e">addViewController</span><span style="color:#f92672">(</span><span style="color:#e6db74">&#34;/&#34;</span><span style="color:#f92672">).</span><span style="color:#a6e22e">setViewName</span><span style="color:#f92672">(</span><span style="color:#e6db74">&#34;login&#34;</span><span style="color:#f92672">);</span>
+                registry<span style="color:#f92672">.</span><span style="color:#a6e22e">addViewController</span><span style="color:#f92672">(</span><span style="color:#e6db74">&#34;/index.html&#34;</span><span style="color:#f92672">).</span><span style="color:#a6e22e">setViewName</span><span style="color:#f92672">(</span><span style="color:#e6db74">&#34;login&#34;</span><span style="color:#f92672">);</span>
+            <span style="color:#f92672">}</span>
           
-           //注册拦截器
-            @Override
-            public void addInterceptors(InterceptorRegistry registry) {
-                //super.addInterceptors(registry);
-                //静态资源；  *.css , *.js
-                //SpringBoot已经做好了静态资源映射
-                registry.addInterceptor(new LoginHandlerInterceptor()).addPathPatterns(&quot;/**&quot;)
-                        .excludePathPatterns(&quot;/index.html&quot;,&quot;/&quot;,&quot;/user/login&quot;);
-            }
-        };
-        return adapter;
-    }
-}
-</code></pre>
-
-<p><strong>WebMvcConfigurerAdapter  这个接口里面有很多可以重写的抽象方法</strong>。上面的就可以定义以这个/atguigu请求的都到转到success的页面中。</p>
-
+           <span style="color:#75715e">//注册拦截器
+</span><span style="color:#75715e"></span>            <span style="color:#a6e22e">@Override</span>
+            <span style="color:#66d9ef">public</span> <span style="color:#66d9ef">void</span> <span style="color:#a6e22e">addInterceptors</span><span style="color:#f92672">(</span>InterceptorRegistry registry<span style="color:#f92672">)</span> <span style="color:#f92672">{</span>
+                <span style="color:#75715e">//super.addInterceptors(registry);
+</span><span style="color:#75715e"></span>                <span style="color:#75715e">//静态资源；  *.css , *.js
+</span><span style="color:#75715e"></span>                <span style="color:#75715e">//SpringBoot已经做好了静态资源映射
+</span><span style="color:#75715e"></span>                registry<span style="color:#f92672">.</span><span style="color:#a6e22e">addInterceptor</span><span style="color:#f92672">(</span><span style="color:#66d9ef">new</span> LoginHandlerInterceptor<span style="color:#f92672">()).</span><span style="color:#a6e22e">addPathPatterns</span><span style="color:#f92672">(</span><span style="color:#e6db74">&#34;/**&#34;</span><span style="color:#f92672">)</span>
+                        <span style="color:#f92672">.</span><span style="color:#a6e22e">excludePathPatterns</span><span style="color:#f92672">(</span><span style="color:#e6db74">&#34;/index.html&#34;</span><span style="color:#f92672">,</span><span style="color:#e6db74">&#34;/&#34;</span><span style="color:#f92672">,</span><span style="color:#e6db74">&#34;/user/login&#34;</span><span style="color:#f92672">);</span>
+            <span style="color:#f92672">}</span>
+        <span style="color:#f92672">};</span>
+        <span style="color:#66d9ef">return</span> adapter<span style="color:#f92672">;</span>
+    <span style="color:#f92672">}</span>
+<span style="color:#f92672">}</span>
+</code></pre></div><p><strong>WebMvcConfigurerAdapter  这个接口里面有很多可以重写的抽象方法</strong>。上面的就可以定义以这个/atguigu请求的都到转到success的页面中。</p>
 <h1 id="多请求映射">多请求映射</h1>
-
-<pre><code class="language-java"> @RequestMapping({&quot;/success&quot;,&quot;/&quot;})
-    public String success() {
-        request.setAttribute(&quot;hello&quot;, &quot;你好&quot;);
-        request.setAttribute(&quot;hello2&quot;, &quot;&lt;h1&gt;你好&lt;/h1&gt;&quot;);
-        request.setAttribute(&quot;userData&quot;, Arrays.asList(&quot;李四&quot;,&quot;王五&quot;,&quot;张三&quot;));
-        return &quot;success&quot;;
-    }
-</code></pre>
-
-<h1 id="引入资源">引入资源</h1>
-
-<p><img src="/img/Xnip2019-05-28_17-03-23.png" alt="Xnip2019-05-28_17-03-23" /></p>
-
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-java" data-lang="java"> <span style="color:#a6e22e">@RequestMapping</span><span style="color:#f92672">({</span><span style="color:#e6db74">&#34;/success&#34;</span><span style="color:#f92672">,</span><span style="color:#e6db74">&#34;/&#34;</span><span style="color:#f92672">})</span>
+    <span style="color:#66d9ef">public</span> String <span style="color:#a6e22e">success</span><span style="color:#f92672">()</span> <span style="color:#f92672">{</span>
+        request<span style="color:#f92672">.</span><span style="color:#a6e22e">setAttribute</span><span style="color:#f92672">(</span><span style="color:#e6db74">&#34;hello&#34;</span><span style="color:#f92672">,</span> <span style="color:#e6db74">&#34;你好&#34;</span><span style="color:#f92672">);</span>
+        request<span style="color:#f92672">.</span><span style="color:#a6e22e">setAttribute</span><span style="color:#f92672">(</span><span style="color:#e6db74">&#34;hello2&#34;</span><span style="color:#f92672">,</span> <span style="color:#e6db74">&#34;&lt;h1&gt;你好&lt;/h1&gt;&#34;</span><span style="color:#f92672">);</span>
+        request<span style="color:#f92672">.</span><span style="color:#a6e22e">setAttribute</span><span style="color:#f92672">(</span><span style="color:#e6db74">&#34;userData&#34;</span><span style="color:#f92672">,</span> Arrays<span style="color:#f92672">.</span><span style="color:#a6e22e">asList</span><span style="color:#f92672">(</span><span style="color:#e6db74">&#34;李四&#34;</span><span style="color:#f92672">,</span><span style="color:#e6db74">&#34;王五&#34;</span><span style="color:#f92672">,</span><span style="color:#e6db74">&#34;张三&#34;</span><span style="color:#f92672">));</span>
+        <span style="color:#66d9ef">return</span> <span style="color:#e6db74">&#34;success&#34;</span><span style="color:#f92672">;</span>
+    <span style="color:#f92672">}</span>
+</code></pre></div><h1 id="引入资源">引入资源</h1>
+<p><img src="/img/Xnip2019-05-28_17-03-23.png" alt="Xnip2019-05-28_17-03-23"></p>
 <h1 id="国际化">国际化</h1>
-
-<p><img src="/img/Xnip2019-05-28_17-59-04.png" alt="Xnip2019-05-28_17-59-04" /></p>
-
+<p><img src="/img/Xnip2019-05-28_17-59-04.png" alt="Xnip2019-05-28_17-59-04"></p>
 <h1 id="自定义拦截器">自定义拦截器</h1>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-java" data-lang="java">
+ <span style="color:#f92672">*</span> 登陆检查<span style="color:#960050;background-color:#1e0010">，</span>
+ <span style="color:#f92672">*/</span>
+<span style="color:#66d9ef">public</span> <span style="color:#66d9ef">class</span> <span style="color:#a6e22e">LoginHandlerInterceptor</span> <span style="color:#66d9ef">implements</span> HandlerInterceptor <span style="color:#f92672">{</span>
+    <span style="color:#75715e">//目标方法执行之前
+</span><span style="color:#75715e"></span>    <span style="color:#a6e22e">@Override</span>
+    <span style="color:#66d9ef">public</span> <span style="color:#66d9ef">boolean</span> <span style="color:#a6e22e">preHandle</span><span style="color:#f92672">(</span>HttpServletRequest request<span style="color:#f92672">,</span> HttpServletResponse response<span style="color:#f92672">,</span> Object handler<span style="color:#f92672">)</span> <span style="color:#66d9ef">throws</span> Exception <span style="color:#f92672">{</span>
+        Object user <span style="color:#f92672">=</span> request<span style="color:#f92672">.</span><span style="color:#a6e22e">getSession</span><span style="color:#f92672">().</span><span style="color:#a6e22e">getAttribute</span><span style="color:#f92672">(</span><span style="color:#e6db74">&#34;loginUser&#34;</span><span style="color:#f92672">);</span>
+        <span style="color:#66d9ef">if</span><span style="color:#f92672">(</span>user <span style="color:#f92672">==</span> <span style="color:#66d9ef">null</span><span style="color:#f92672">){</span>
+            <span style="color:#75715e">//未登陆，返回登陆页面
+</span><span style="color:#75715e"></span>            request<span style="color:#f92672">.</span><span style="color:#a6e22e">setAttribute</span><span style="color:#f92672">(</span><span style="color:#e6db74">&#34;msg&#34;</span><span style="color:#f92672">,</span><span style="color:#e6db74">&#34;没有权限请先登陆&#34;</span><span style="color:#f92672">);</span>
+            request<span style="color:#f92672">.</span><span style="color:#a6e22e">getRequestDispatcher</span><span style="color:#f92672">(</span><span style="color:#e6db74">&#34;/index.html&#34;</span><span style="color:#f92672">).</span><span style="color:#a6e22e">forward</span><span style="color:#f92672">(</span>request<span style="color:#f92672">,</span>response<span style="color:#f92672">);</span>
+            <span style="color:#66d9ef">return</span> <span style="color:#66d9ef">false</span><span style="color:#f92672">;</span>
+        <span style="color:#f92672">}</span><span style="color:#66d9ef">else</span><span style="color:#f92672">{</span>
+            <span style="color:#75715e">//已登陆，放行请求
+</span><span style="color:#75715e"></span>            <span style="color:#66d9ef">return</span> <span style="color:#66d9ef">true</span><span style="color:#f92672">;</span>
+        <span style="color:#f92672">}</span>
 
-<pre><code class="language-java">
- * 登陆检查，
- */
-public class LoginHandlerInterceptor implements HandlerInterceptor {
-    //目标方法执行之前
-    @Override
-    public boolean preHandle(HttpServletRequest request, HttpServletResponse response, Object handler) throws Exception {
-        Object user = request.getSession().getAttribute(&quot;loginUser&quot;);
-        if(user == null){
-            //未登陆，返回登陆页面
-            request.setAttribute(&quot;msg&quot;,&quot;没有权限请先登陆&quot;);
-            request.getRequestDispatcher(&quot;/index.html&quot;).forward(request,response);
-            return false;
-        }else{
-            //已登陆，放行请求
-            return true;
-        }
+    <span style="color:#f92672">}</span>
 
-    }
+    <span style="color:#a6e22e">@Override</span>
+    <span style="color:#66d9ef">public</span> <span style="color:#66d9ef">void</span> <span style="color:#a6e22e">postHandle</span><span style="color:#f92672">(</span>HttpServletRequest request<span style="color:#f92672">,</span> HttpServletResponse response<span style="color:#f92672">,</span> Object handler<span style="color:#f92672">,</span> ModelAndView modelAndView<span style="color:#f92672">)</span> <span style="color:#66d9ef">throws</span> Exception <span style="color:#f92672">{</span>
 
-    @Override
-    public void postHandle(HttpServletRequest request, HttpServletResponse response, Object handler, ModelAndView modelAndView) throws Exception {
+    <span style="color:#f92672">}</span>
 
-    }
+    <span style="color:#a6e22e">@Override</span>
+    <span style="color:#66d9ef">public</span> <span style="color:#66d9ef">void</span> <span style="color:#a6e22e">afterCompletion</span><span style="color:#f92672">(</span>HttpServletRequest request<span style="color:#f92672">,</span> HttpServletResponse response<span style="color:#f92672">,</span> Object handler<span style="color:#f92672">,</span> Exception ex<span style="color:#f92672">)</span> <span style="color:#66d9ef">throws</span> Exception <span style="color:#f92672">{</span>
 
-    @Override
-    public void afterCompletion(HttpServletRequest request, HttpServletResponse response, Object handler, Exception ex) throws Exception {
-
-    }
-}
-</code></pre>
-
-<h1 id="restful风格">RestFul风格</h1>
-
+    <span style="color:#f92672">}</span>
+<span style="color:#f92672">}</span>
+</code></pre></div><h1 id="restful风格">RestFul风格</h1>
 <p>使用Rest前，首先说一说Rest请求方式的好处，首先就是面向资源URI，即http请求的路径，Rest规定中要求URI各层只能用名词不用动词，这样相比传统的get请求有利于传输数据的稳定性，数据的操作流程不会被人轻易看破，也便于团队开发，各种URI一目了然；再通过固定的请求方式，对URI中的资源进行各种操作，常用的有：</p>
-
 <p>URI：  /资源名称/资源标识       HTTP请求方式区分对资源CRUD操作</p>
-
 <table>
 <thead>
 <tr>
@@ -552,26 +486,22 @@ public class LoginHandlerInterceptor implements HandlerInterceptor {
 <th>RestfulCRUD</th>
 </tr>
 </thead>
-
 <tbody>
 <tr>
 <td>查询</td>
 <td>getEmp</td>
 <td>emp—GET                   @<em>GetMapping</em>(value=&ldquo;path&rdquo;)</td>
 </tr>
-
 <tr>
 <td>添加</td>
 <td>addEmp?xxx</td>
 <td>emp—POST                 @<em>PostMapping</em>(value=&ldquo;path&rdquo;)</td>
 </tr>
-
 <tr>
 <td>修改</td>
 <td>updateEmp?id=xxx&amp;xxx=xx</td>
-<td>emp/{id}—PUT              @<em>PutMapping</em>(value=&ldquo;path/{id}&rdquo;)</td>
+<td>emp/{id}—PUT              @<em>PutMapping</em>(value=&ldquo;path/{id}&quot;)</td>
 </tr>
-
 <tr>
 <td>删除</td>
 <td>deleteEmp?id=1</td>
@@ -579,122 +509,93 @@ public class LoginHandlerInterceptor implements HandlerInterceptor {
 </tr>
 </tbody>
 </table>
-
 <p><strong>前端需要PUT,DELETE提交的时候， 设置nginx的配置文件就好了。</strong></p>
-
 <h1 id="定制错误的页面">定制错误的页面</h1>
-
 <h2 id="有模板引擎的情况下">有模板引擎的情况下</h2>
-
 <p>【将错误页面命名为  错误状态码.html 放在模板引擎文件夹里面的 error文件夹下】，发生此状态码的错误就会来到  对应的页面；我们可以使用<strong>4xx和5xx</strong>作为错误页面的文件名来匹配这种类型的所有错误，精确优先（优先寻找精确的状态码.html）；</p>
-
-<pre><code class="language-properties">#页面能获取的信息；
+<pre tabindex="0"><code class="language-properties" data-lang="properties">#页面能获取的信息；
 timestamp：时间戳
 status：状态码
 error：错误提示
 exception：异常对象
 message：异常消息
 errors：JSR303数据校验的错误都在这里
-</code></pre>
-
-<p><img src="/img/Xnip2019-05-28_19-45-29.png" alt="Xnip2019-05-28_19-45-29" /></p>
-
+</code></pre><p><img src="/img/Xnip2019-05-28_19-45-29.png" alt="Xnip2019-05-28_19-45-29"></p>
 <h2 id="没有模板引擎">没有模板引擎</h2>
-
 <p>模板引擎(也就是templates文件夹)找不到这个错误页面，静态资源文件夹下找；</p>
-
 <h1 id="异常统一处理">异常统一处理</h1>
-
-<p><img src="/img/Xnip2019-05-28_22-43-29.png" alt="Xnip2019-05-28_22-43-29" /></p>
-
+<p><img src="/img/Xnip2019-05-28_22-43-29.png" alt="Xnip2019-05-28_22-43-29"></p>
 <p>效果如下：</p>
-
-<pre><code class="language-json">{
-   &quot;code&quot;:&quot;user.notexist&quot;,
-   &quot;message&quot;:&quot;用户不存在&quot;
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-json" data-lang="json">{
+   <span style="color:#f92672">&#34;code&#34;</span>:<span style="color:#e6db74">&#34;user.notexist&#34;</span>,
+   <span style="color:#f92672">&#34;message&#34;</span>:<span style="color:#e6db74">&#34;用户不存在&#34;</span>
 }
-</code></pre>
-
-<h2 id="处理自定义异常代码">处理自定义异常代码</h2>
-
-<pre><code class="language-java">@ControllerAdvice
-public class MyExceptionHandler {
+</code></pre></div><h2 id="处理自定义异常代码">处理自定义异常代码</h2>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-java" data-lang="java"><span style="color:#a6e22e">@ControllerAdvice</span>
+<span style="color:#66d9ef">public</span> <span style="color:#66d9ef">class</span> <span style="color:#a6e22e">MyExceptionHandler</span> <span style="color:#f92672">{</span>
     
-    /***
-     * 
-     * @param e
-     * @return   浏览器和客户端都是json数据
-     */
-    @ResponseBody
-    @ExceptionHandler(UserNotExistException.class)
-    public Map&lt;String, Object&gt; handleException(Exception e) {
-        Map&lt;String, Object&gt; map = new HashMap&lt;&gt;();
-        map.put(&quot;code&quot;, &quot;user.notexist&quot;);
-        map.put(&quot;message&quot;, e.getMessage());
-        return map;
-    }
-}
-</code></pre>
+    <span style="color:#75715e">/***
+</span><span style="color:#75715e">     * 
+</span><span style="color:#75715e">     * @param e
+</span><span style="color:#75715e">     * @return   浏览器和客户端都是json数据
+</span><span style="color:#75715e">     */</span>
+    <span style="color:#a6e22e">@ResponseBody</span>
+    <span style="color:#a6e22e">@ExceptionHandler</span><span style="color:#f92672">(</span>UserNotExistException<span style="color:#f92672">.</span><span style="color:#a6e22e">class</span><span style="color:#f92672">)</span>
+    <span style="color:#66d9ef">public</span> Map<span style="color:#f92672">&lt;</span>String<span style="color:#f92672">,</span> Object<span style="color:#f92672">&gt;</span> <span style="color:#a6e22e">handleException</span><span style="color:#f92672">(</span>Exception e<span style="color:#f92672">)</span> <span style="color:#f92672">{</span>
+        Map<span style="color:#f92672">&lt;</span>String<span style="color:#f92672">,</span> Object<span style="color:#f92672">&gt;</span> map <span style="color:#f92672">=</span> <span style="color:#66d9ef">new</span> HashMap<span style="color:#f92672">&lt;&gt;();</span>
+        map<span style="color:#f92672">.</span><span style="color:#a6e22e">put</span><span style="color:#f92672">(</span><span style="color:#e6db74">&#34;code&#34;</span><span style="color:#f92672">,</span> <span style="color:#e6db74">&#34;user.notexist&#34;</span><span style="color:#f92672">);</span>
+        map<span style="color:#f92672">.</span><span style="color:#a6e22e">put</span><span style="color:#f92672">(</span><span style="color:#e6db74">&#34;message&#34;</span><span style="color:#f92672">,</span> e<span style="color:#f92672">.</span><span style="color:#a6e22e">getMessage</span><span style="color:#f92672">());</span>
+        <span style="color:#66d9ef">return</span> map<span style="color:#f92672">;</span>
+    <span style="color:#f92672">}</span>
+<span style="color:#f92672">}</span>
+</code></pre></div><h2 id="自动适应web和客户端异常代码">自动适应web和客户端异常代码</h2>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-java" data-lang="java"> <span style="color:#75715e">/**
+</span><span style="color:#75715e">     * 
+</span><span style="color:#75715e">     * @param e
+</span><span style="color:#75715e">     * @param request
+</span><span style="color:#75715e">     * @return  自动适应 web端和客户端端处理,也就是web端显示的错误信息和客户端返回的错误信息不一样
+</span><span style="color:#75715e">     */</span>
+    <span style="color:#a6e22e">@ExceptionHandler</span><span style="color:#f92672">(</span>UserNotExistException<span style="color:#f92672">.</span><span style="color:#a6e22e">class</span><span style="color:#f92672">)</span>
+    <span style="color:#66d9ef">public</span> String <span style="color:#a6e22e">handleException</span><span style="color:#f92672">(</span>Exception e<span style="color:#f92672">,</span> HttpServletRequest request<span style="color:#f92672">){</span>
+        Map<span style="color:#f92672">&lt;</span>String<span style="color:#f92672">,</span>Object<span style="color:#f92672">&gt;</span> map <span style="color:#f92672">=</span> <span style="color:#66d9ef">new</span> HashMap<span style="color:#f92672">&lt;&gt;();</span>
+        <span style="color:#75715e">//传入我们自己的错误状态码  4xx 5xx，否则就不会进入定制错误页面的解析流程
+</span><span style="color:#75715e"></span>        <span style="color:#75715e">/**
+</span><span style="color:#75715e">         * Integer statusCode = (Integer) request
+</span><span style="color:#75715e">         .getAttribute(&#34;javax.servlet.error.status_code&#34;);
+</span><span style="color:#75715e">         */</span>
+        request<span style="color:#f92672">.</span><span style="color:#a6e22e">setAttribute</span><span style="color:#f92672">(</span><span style="color:#e6db74">&#34;javax.servlet.error.status_code&#34;</span><span style="color:#f92672">,</span>500<span style="color:#f92672">);</span>
+        map<span style="color:#f92672">.</span><span style="color:#a6e22e">put</span><span style="color:#f92672">(</span><span style="color:#e6db74">&#34;code&#34;</span><span style="color:#f92672">,</span><span style="color:#e6db74">&#34;user.notexist&#34;</span><span style="color:#f92672">);</span>
+        map<span style="color:#f92672">.</span><span style="color:#a6e22e">put</span><span style="color:#f92672">(</span><span style="color:#e6db74">&#34;message&#34;</span><span style="color:#f92672">,</span>e<span style="color:#f92672">.</span><span style="color:#a6e22e">getMessage</span><span style="color:#f92672">());</span>
+        request<span style="color:#f92672">.</span><span style="color:#a6e22e">setAttribute</span><span style="color:#f92672">(</span><span style="color:#e6db74">&#34;resultData&#34;</span><span style="color:#f92672">,</span> map<span style="color:#f92672">);</span>
+        <span style="color:#75715e">//转发到/error
+</span><span style="color:#75715e"></span>        <span style="color:#66d9ef">return</span> <span style="color:#e6db74">&#34;forward:/error&#34;</span><span style="color:#f92672">;</span>
+    <span style="color:#f92672">}</span>
+</code></pre></div><p>出现错误以后，会来到/error请求，会被BasicErrorController处理，响应出去可以获取的数据是由getErrorAttributes得到的。</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-java" data-lang="java"><span style="color:#f92672">import</span> org.springframework.boot.web.servlet.error.DefaultErrorAttributes<span style="color:#f92672">;</span>
+<span style="color:#f92672">import</span> org.springframework.stereotype.Component<span style="color:#f92672">;</span>
+<span style="color:#f92672">import</span> org.springframework.web.context.request.RequestAttributes<span style="color:#f92672">;</span>
+<span style="color:#f92672">import</span> org.springframework.web.context.request.WebRequest<span style="color:#f92672">;</span>
 
-<h2 id="自动适应web和客户端异常代码">自动适应web和客户端异常代码</h2>
+<span style="color:#75715e">//给容器中加入我们自己定义的ErrorAttributes
+</span><span style="color:#75715e"></span><span style="color:#a6e22e">@Component</span>
+<span style="color:#66d9ef">public</span> <span style="color:#66d9ef">class</span> <span style="color:#a6e22e">MyErrorAttributes</span> <span style="color:#66d9ef">extends</span> DefaultErrorAttributes <span style="color:#f92672">{</span>
 
-<pre><code class="language-java"> /**
-     * 
-     * @param e
-     * @param request
-     * @return  自动适应 web端和客户端端处理,也就是web端显示的错误信息和客户端返回的错误信息不一样
-     */
-    @ExceptionHandler(UserNotExistException.class)
-    public String handleException(Exception e, HttpServletRequest request){
-        Map&lt;String,Object&gt; map = new HashMap&lt;&gt;();
-        //传入我们自己的错误状态码  4xx 5xx，否则就不会进入定制错误页面的解析流程
-        /**
-         * Integer statusCode = (Integer) request
-         .getAttribute(&quot;javax.servlet.error.status_code&quot;);
-         */
-        request.setAttribute(&quot;javax.servlet.error.status_code&quot;,500);
-        map.put(&quot;code&quot;,&quot;user.notexist&quot;);
-        map.put(&quot;message&quot;,e.getMessage());
-        request.setAttribute(&quot;resultData&quot;, map);
-        //转发到/error
-        return &quot;forward:/error&quot;;
-    }
-</code></pre>
-
-<p>出现错误以后，会来到/error请求，会被BasicErrorController处理，响应出去可以获取的数据是由getErrorAttributes得到的。</p>
-
-<pre><code class="language-java">import org.springframework.boot.web.servlet.error.DefaultErrorAttributes;
-import org.springframework.stereotype.Component;
-import org.springframework.web.context.request.RequestAttributes;
-import org.springframework.web.context.request.WebRequest;
-
-//给容器中加入我们自己定义的ErrorAttributes
-@Component
-public class MyErrorAttributes extends DefaultErrorAttributes {
-
-    @Override
-    public Map&lt;String, Object&gt; getErrorAttributes(WebRequest requestAttributes, boolean includeStackTrace) {
-        Map&lt;String, Object&gt; map = super.getErrorAttributes(requestAttributes, includeStackTrace);
-        map.put(&quot;company&quot;,&quot;atguigu&quot;);
-        Map&lt;String,Object&gt; data = (Map&lt;String, Object&gt;) requestAttributes.getAttribute(&quot;resultData&quot;,
-                RequestAttributes.SCOPE_REQUEST);
-        map.put(&quot;result&quot;, data);
-        return map;
-    }
-}
-</code></pre>
-
-<p>显示效果如下：</p>
-
-<p><img src="/img/Xnip2019-05-28_23-12-43.png" alt="Xnip2019-05-28_23-12-43" /></p>
-
+    <span style="color:#a6e22e">@Override</span>
+    <span style="color:#66d9ef">public</span> Map<span style="color:#f92672">&lt;</span>String<span style="color:#f92672">,</span> Object<span style="color:#f92672">&gt;</span> <span style="color:#a6e22e">getErrorAttributes</span><span style="color:#f92672">(</span>WebRequest requestAttributes<span style="color:#f92672">,</span> <span style="color:#66d9ef">boolean</span> includeStackTrace<span style="color:#f92672">)</span> <span style="color:#f92672">{</span>
+        Map<span style="color:#f92672">&lt;</span>String<span style="color:#f92672">,</span> Object<span style="color:#f92672">&gt;</span> map <span style="color:#f92672">=</span> <span style="color:#66d9ef">super</span><span style="color:#f92672">.</span><span style="color:#a6e22e">getErrorAttributes</span><span style="color:#f92672">(</span>requestAttributes<span style="color:#f92672">,</span> includeStackTrace<span style="color:#f92672">);</span>
+        map<span style="color:#f92672">.</span><span style="color:#a6e22e">put</span><span style="color:#f92672">(</span><span style="color:#e6db74">&#34;company&#34;</span><span style="color:#f92672">,</span><span style="color:#e6db74">&#34;atguigu&#34;</span><span style="color:#f92672">);</span>
+        Map<span style="color:#f92672">&lt;</span>String<span style="color:#f92672">,</span>Object<span style="color:#f92672">&gt;</span> data <span style="color:#f92672">=</span> <span style="color:#f92672">(</span>Map<span style="color:#f92672">&lt;</span>String<span style="color:#f92672">,</span> Object<span style="color:#f92672">&gt;)</span> requestAttributes<span style="color:#f92672">.</span><span style="color:#a6e22e">getAttribute</span><span style="color:#f92672">(</span><span style="color:#e6db74">&#34;resultData&#34;</span><span style="color:#f92672">,</span>
+                RequestAttributes<span style="color:#f92672">.</span><span style="color:#a6e22e">SCOPE_REQUEST</span><span style="color:#f92672">);</span>
+        map<span style="color:#f92672">.</span><span style="color:#a6e22e">put</span><span style="color:#f92672">(</span><span style="color:#e6db74">&#34;result&#34;</span><span style="color:#f92672">,</span> data<span style="color:#f92672">);</span>
+        <span style="color:#66d9ef">return</span> map<span style="color:#f92672">;</span>
+    <span style="color:#f92672">}</span>
+<span style="color:#f92672">}</span>
+</code></pre></div><p>显示效果如下：</p>
+<p><img src="/img/Xnip2019-05-28_23-12-43.png" alt="Xnip2019-05-28_23-12-43"></p>
 <p><strong>注意：在我们开发中， 500错误可以自定义一个页面给用户看，客户端的调用接口时候就给他看错误json日志。</strong></p>
-
 <h1 id="配置嵌入式servlet容器">配置嵌入式Servlet容器</h1>
-
 <p>tomcat就是一个servlet容器。springboot也就是默认用这个。</p>
-
-<pre><code class="language-properties">server.port=8081
+<pre tabindex="0"><code class="language-properties" data-lang="properties">server.port=8081
 server.context-path=/crud
 server.tomcat.uri-encoding=UTF-8
 
@@ -702,201 +603,159 @@ server.tomcat.uri-encoding=UTF-8
 server.xxx
 #Tomcat的设置
 server.tomcat.xxx
-</code></pre>
-
-<h2 id="注册servlet三大组件">注册Servlet三大组件</h2>
-
+</code></pre><h2 id="注册servlet三大组件">注册Servlet三大组件</h2>
 <h2 id="servlet">Servlet</h2>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-java" data-lang="java"><span style="color:#66d9ef">public</span> <span style="color:#66d9ef">class</span> <span style="color:#a6e22e">MyServlet</span> <span style="color:#66d9ef">extends</span> HttpServlet<span style="color:#f92672">{</span>
 
-<pre><code class="language-java">public class MyServlet extends HttpServlet{
-
-    private static final long serialVersionUID = 1L;
+    <span style="color:#66d9ef">private</span> <span style="color:#66d9ef">static</span> <span style="color:#66d9ef">final</span> <span style="color:#66d9ef">long</span> serialVersionUID <span style="color:#f92672">=</span> 1L<span style="color:#f92672">;</span>
     
-    @Override
-    protected void doGet(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
-        doPost(req, resp);
-    }
+    <span style="color:#a6e22e">@Override</span>
+    <span style="color:#66d9ef">protected</span> <span style="color:#66d9ef">void</span> <span style="color:#a6e22e">doGet</span><span style="color:#f92672">(</span>HttpServletRequest req<span style="color:#f92672">,</span> HttpServletResponse resp<span style="color:#f92672">)</span> <span style="color:#66d9ef">throws</span> ServletException<span style="color:#f92672">,</span> IOException <span style="color:#f92672">{</span>
+        doPost<span style="color:#f92672">(</span>req<span style="color:#f92672">,</span> resp<span style="color:#f92672">);</span>
+    <span style="color:#f92672">}</span>
 
-    @Override
-    protected void doPost(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
-        resp.getWriter().write(&quot;hello,my servlet&quot;);
-    }
+    <span style="color:#a6e22e">@Override</span>
+    <span style="color:#66d9ef">protected</span> <span style="color:#66d9ef">void</span> <span style="color:#a6e22e">doPost</span><span style="color:#f92672">(</span>HttpServletRequest req<span style="color:#f92672">,</span> HttpServletResponse resp<span style="color:#f92672">)</span> <span style="color:#66d9ef">throws</span> ServletException<span style="color:#f92672">,</span> IOException <span style="color:#f92672">{</span>
+        resp<span style="color:#f92672">.</span><span style="color:#a6e22e">getWriter</span><span style="color:#f92672">().</span><span style="color:#a6e22e">write</span><span style="color:#f92672">(</span><span style="color:#e6db74">&#34;hello,my servlet&#34;</span><span style="color:#f92672">);</span>
+    <span style="color:#f92672">}</span>
 
-}
-</code></pre>
+<span style="color:#f92672">}</span>
+</code></pre></div><h2 id="filter">Filter</h2>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-java" data-lang="java"><span style="color:#66d9ef">public</span> <span style="color:#66d9ef">class</span> <span style="color:#a6e22e">MyFifter</span> <span style="color:#66d9ef">implements</span> Filter <span style="color:#f92672">{</span>
 
-<h2 id="filter">Filter</h2>
+    <span style="color:#a6e22e">@Override</span>
+    <span style="color:#66d9ef">public</span> <span style="color:#66d9ef">void</span> <span style="color:#a6e22e">init</span><span style="color:#f92672">(</span>FilterConfig filterConfig<span style="color:#f92672">)</span> <span style="color:#66d9ef">throws</span> ServletException <span style="color:#f92672">{</span>
+        Filter<span style="color:#f92672">.</span><span style="color:#a6e22e">super</span><span style="color:#f92672">.</span><span style="color:#a6e22e">init</span><span style="color:#f92672">(</span>filterConfig<span style="color:#f92672">);</span>
+    <span style="color:#f92672">}</span>
 
-<pre><code class="language-java">public class MyFifter implements Filter {
-
-    @Override
-    public void init(FilterConfig filterConfig) throws ServletException {
-        Filter.super.init(filterConfig);
-    }
-
-    @Override
-    public void doFilter(ServletRequest request, ServletResponse response, FilterChain chain)
-            throws IOException, ServletException {
-            System.out.println(&quot;filter execute...&quot;);
-            chain.doFilter(request, response);
+    <span style="color:#a6e22e">@Override</span>
+    <span style="color:#66d9ef">public</span> <span style="color:#66d9ef">void</span> <span style="color:#a6e22e">doFilter</span><span style="color:#f92672">(</span>ServletRequest request<span style="color:#f92672">,</span> ServletResponse response<span style="color:#f92672">,</span> FilterChain chain<span style="color:#f92672">)</span>
+            <span style="color:#66d9ef">throws</span> IOException<span style="color:#f92672">,</span> ServletException <span style="color:#f92672">{</span>
+            System<span style="color:#f92672">.</span><span style="color:#a6e22e">out</span><span style="color:#f92672">.</span><span style="color:#a6e22e">println</span><span style="color:#f92672">(</span><span style="color:#e6db74">&#34;filter execute...&#34;</span><span style="color:#f92672">);</span>
+            chain<span style="color:#f92672">.</span><span style="color:#a6e22e">doFilter</span><span style="color:#f92672">(</span>request<span style="color:#f92672">,</span> response<span style="color:#f92672">);</span>
                 
-    }
+    <span style="color:#f92672">}</span>
 
-    @Override
-    public void destroy() {
-        Filter.super.destroy();
-    }
+    <span style="color:#a6e22e">@Override</span>
+    <span style="color:#66d9ef">public</span> <span style="color:#66d9ef">void</span> <span style="color:#a6e22e">destroy</span><span style="color:#f92672">()</span> <span style="color:#f92672">{</span>
+        Filter<span style="color:#f92672">.</span><span style="color:#a6e22e">super</span><span style="color:#f92672">.</span><span style="color:#a6e22e">destroy</span><span style="color:#f92672">();</span>
+    <span style="color:#f92672">}</span>
     
-}
-</code></pre>
-
-<h2 id="listener">Listener</h2>
-
-<pre><code class="language-java">public class MyListener implements ServletContextListener{
+<span style="color:#f92672">}</span>
+</code></pre></div><h2 id="listener">Listener</h2>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-java" data-lang="java"><span style="color:#66d9ef">public</span> <span style="color:#66d9ef">class</span> <span style="color:#a6e22e">MyListener</span> <span style="color:#66d9ef">implements</span> ServletContextListener<span style="color:#f92672">{</span>
     
-     @Override
-     public void contextInitialized(ServletContextEvent sce) {
-         System.out.println(&quot;tomcat 已经启动&quot;);
-     }
+     <span style="color:#a6e22e">@Override</span>
+     <span style="color:#66d9ef">public</span> <span style="color:#66d9ef">void</span> <span style="color:#a6e22e">contextInitialized</span><span style="color:#f92672">(</span>ServletContextEvent sce<span style="color:#f92672">)</span> <span style="color:#f92672">{</span>
+         System<span style="color:#f92672">.</span><span style="color:#a6e22e">out</span><span style="color:#f92672">.</span><span style="color:#a6e22e">println</span><span style="color:#f92672">(</span><span style="color:#e6db74">&#34;tomcat 已经启动&#34;</span><span style="color:#f92672">);</span>
+     <span style="color:#f92672">}</span>
 
-     @Override
-     public void contextDestroyed(ServletContextEvent sce) {
-         System.out.println(&quot;tomcat 已经停止&quot;);
-     }
+     <span style="color:#a6e22e">@Override</span>
+     <span style="color:#66d9ef">public</span> <span style="color:#66d9ef">void</span> <span style="color:#a6e22e">contextDestroyed</span><span style="color:#f92672">(</span>ServletContextEvent sce<span style="color:#f92672">)</span> <span style="color:#f92672">{</span>
+         System<span style="color:#f92672">.</span><span style="color:#a6e22e">out</span><span style="color:#f92672">.</span><span style="color:#a6e22e">println</span><span style="color:#f92672">(</span><span style="color:#e6db74">&#34;tomcat 已经停止&#34;</span><span style="color:#f92672">);</span>
+     <span style="color:#f92672">}</span>
 
-}
-</code></pre>
+<span style="color:#f92672">}</span>
+</code></pre></div><h2 id="注入到容器中">注入到容器中</h2>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-java" data-lang="java"><span style="color:#a6e22e">@Configuration</span>
+<span style="color:#66d9ef">public</span> <span style="color:#66d9ef">class</span> <span style="color:#a6e22e">MyServiceConfig</span> <span style="color:#f92672">{</span>
 
-<h2 id="注入到容器中">注入到容器中</h2>
+    <span style="color:#a6e22e">@Bean</span>
+    <span style="color:#66d9ef">public</span> ServletRegistrationBean <span style="color:#a6e22e">myServlet</span><span style="color:#f92672">()</span> <span style="color:#f92672">{</span>
+        ServletRegistrationBean registrationBean <span style="color:#f92672">=</span> <span style="color:#66d9ef">new</span> ServletRegistrationBean<span style="color:#f92672">(</span><span style="color:#66d9ef">new</span> MyServlet<span style="color:#f92672">(),</span> <span style="color:#e6db74">&#34;/myServlet&#34;</span><span style="color:#f92672">);</span>
+        <span style="color:#66d9ef">return</span> registrationBean<span style="color:#f92672">;</span>
+    <span style="color:#f92672">}</span>
 
-<pre><code class="language-java">@Configuration
-public class MyServiceConfig {
+    <span style="color:#a6e22e">@Bean</span>
+    <span style="color:#66d9ef">public</span> FilterRegistrationBean <span style="color:#a6e22e">myFilter</span><span style="color:#f92672">()</span> <span style="color:#f92672">{</span>
+        FilterRegistrationBean registrationBean <span style="color:#f92672">=</span> <span style="color:#66d9ef">new</span> FilterRegistrationBean<span style="color:#f92672">();</span>
+        registrationBean<span style="color:#f92672">.</span><span style="color:#a6e22e">setFilter</span><span style="color:#f92672">(</span><span style="color:#66d9ef">new</span> MyFifter<span style="color:#f92672">());</span>
+        registrationBean<span style="color:#f92672">.</span><span style="color:#a6e22e">setUrlPatterns</span><span style="color:#f92672">(</span>Arrays<span style="color:#f92672">.</span><span style="color:#a6e22e">asList</span><span style="color:#f92672">(</span><span style="color:#e6db74">&#34;/hello&#34;</span><span style="color:#f92672">,</span> <span style="color:#e6db74">&#34;/myServlet&#34;</span><span style="color:#f92672">));</span>
+        <span style="color:#66d9ef">return</span> registrationBean<span style="color:#f92672">;</span>
+    <span style="color:#f92672">}</span>
 
-    @Bean
-    public ServletRegistrationBean myServlet() {
-        ServletRegistrationBean registrationBean = new ServletRegistrationBean(new MyServlet(), &quot;/myServlet&quot;);
-        return registrationBean;
-    }
-
-    @Bean
-    public FilterRegistrationBean myFilter() {
-        FilterRegistrationBean registrationBean = new FilterRegistrationBean();
-        registrationBean.setFilter(new MyFifter());
-        registrationBean.setUrlPatterns(Arrays.asList(&quot;/hello&quot;, &quot;/myServlet&quot;));
-        return registrationBean;
-    }
-
-    @Bean
-    public ServletListenerRegistrationBean myListener() {
-        ServletListenerRegistrationBean&lt;MyListener&gt; registrationBean = new ServletListenerRegistrationBean&lt;&gt;(
-                new MyListener());
-        return registrationBean;
-    }
-}
-</code></pre>
-
-<p><strong>注意：需要一些详细的属性设置，在这里也可以进行设置处理。</strong></p>
-
+    <span style="color:#a6e22e">@Bean</span>
+    <span style="color:#66d9ef">public</span> ServletListenerRegistrationBean <span style="color:#a6e22e">myListener</span><span style="color:#f92672">()</span> <span style="color:#f92672">{</span>
+        ServletListenerRegistrationBean<span style="color:#f92672">&lt;</span>MyListener<span style="color:#f92672">&gt;</span> registrationBean <span style="color:#f92672">=</span> <span style="color:#66d9ef">new</span> ServletListenerRegistrationBean<span style="color:#f92672">&lt;&gt;(</span>
+                <span style="color:#66d9ef">new</span> MyListener<span style="color:#f92672">());</span>
+        <span style="color:#66d9ef">return</span> registrationBean<span style="color:#f92672">;</span>
+    <span style="color:#f92672">}</span>
+<span style="color:#f92672">}</span>
+</code></pre></div><p><strong>注意：需要一些详细的属性设置，在这里也可以进行设置处理。</strong></p>
 <h1 id="替换为其他嵌入式servlet容器">替换为其他嵌入式Servlet容器</h1>
-
-<h2 id="tomcat-默认使用">Tomcat（默认使用）</h2>
-
-<pre><code class="language-xml">&lt;dependency&gt;
-   &lt;groupId&gt;org.springframework.boot&lt;/groupId&gt;
-   &lt;artifactId&gt;spring-boot-starter-web&lt;/artifactId&gt;
+<h2 id="tomcat默认使用">Tomcat（默认使用）</h2>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-xml" data-lang="xml"><span style="color:#f92672">&lt;dependency&gt;</span>
+   <span style="color:#f92672">&lt;groupId&gt;</span>org.springframework.boot<span style="color:#f92672">&lt;/groupId&gt;</span>
+   <span style="color:#f92672">&lt;artifactId&gt;</span>spring-boot-starter-web<span style="color:#f92672">&lt;/artifactId&gt;</span>
    引入web模块默认就是使用嵌入式的Tomcat作为Servlet容器；
-&lt;/dependency&gt;
-</code></pre>
+<span style="color:#f92672">&lt;/dependency&gt;</span>
+</code></pre></div><h2 id="jetty">Jetty</h2>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-xml" data-lang="xml"><span style="color:#75715e">&lt;!-- 引入web模块 --&gt;</span>
+<span style="color:#f92672">&lt;dependency&gt;</span>
+   <span style="color:#f92672">&lt;groupId&gt;</span>org.springframework.boot<span style="color:#f92672">&lt;/groupId&gt;</span>
+   <span style="color:#f92672">&lt;artifactId&gt;</span>spring-boot-starter-web<span style="color:#f92672">&lt;/artifactId&gt;</span>
+   <span style="color:#f92672">&lt;exclusions&gt;</span>
+      <span style="color:#f92672">&lt;exclusion&gt;</span>
+         <span style="color:#f92672">&lt;artifactId&gt;</span>spring-boot-starter-tomcat<span style="color:#f92672">&lt;/artifactId&gt;</span>
+         <span style="color:#f92672">&lt;groupId&gt;</span>org.springframework.boot<span style="color:#f92672">&lt;/groupId&gt;</span>
+      <span style="color:#f92672">&lt;/exclusion&gt;</span>
+   <span style="color:#f92672">&lt;/exclusions&gt;</span>
+<span style="color:#f92672">&lt;/dependency&gt;</span>
 
-<h2 id="jetty">Jetty</h2>
-
-<pre><code class="language-xml">&lt;!-- 引入web模块 --&gt;
-&lt;dependency&gt;
-   &lt;groupId&gt;org.springframework.boot&lt;/groupId&gt;
-   &lt;artifactId&gt;spring-boot-starter-web&lt;/artifactId&gt;
-   &lt;exclusions&gt;
-      &lt;exclusion&gt;
-         &lt;artifactId&gt;spring-boot-starter-tomcat&lt;/artifactId&gt;
-         &lt;groupId&gt;org.springframework.boot&lt;/groupId&gt;
-      &lt;/exclusion&gt;
-   &lt;/exclusions&gt;
-&lt;/dependency&gt;
-
-&lt;!--引入其他的Servlet容器--&gt;
-&lt;dependency&gt;
-   &lt;artifactId&gt;spring-boot-starter-jetty&lt;/artifactId&gt;
-   &lt;groupId&gt;org.springframework.boot&lt;/groupId&gt;
-&lt;/dependency&gt;
-</code></pre>
-
-<h1 id="使用外置的servlet容器">使用外置的Servlet容器</h1>
-
+<span style="color:#75715e">&lt;!--引入其他的Servlet容器--&gt;</span>
+<span style="color:#f92672">&lt;dependency&gt;</span>
+   <span style="color:#f92672">&lt;artifactId&gt;</span>spring-boot-starter-jetty<span style="color:#f92672">&lt;/artifactId&gt;</span>
+   <span style="color:#f92672">&lt;groupId&gt;</span>org.springframework.boot<span style="color:#f92672">&lt;/groupId&gt;</span>
+<span style="color:#f92672">&lt;/dependency&gt;</span>
+</code></pre></div><h1 id="使用外置的servlet容器">使用外置的Servlet容器</h1>
 <p>嵌入式Servlet容器：应用打成可执行的jar</p>
-
 <p><strong>优点：简单、便携；</strong></p>
-
 <p><strong>缺点：默认不支持JSP、优化定制比较复杂。</strong></p>
-
 <h2 id="外置的servlet容器">外置的Servlet容器</h2>
-
 <p>外面安装Tomcat&mdash;应用war包的方式打包；</p>
-
 <p>1）、必须创建一个war项目；（利用idea创建好目录结构）</p>
-
 <p>2）、将嵌入式的Tomcat指定为provided；</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-xml" data-lang="xml"><span style="color:#f92672">&lt;dependency&gt;</span>
+   <span style="color:#f92672">&lt;groupId&gt;</span>org.springframework.boot<span style="color:#f92672">&lt;/groupId&gt;</span>
+   <span style="color:#f92672">&lt;artifactId&gt;</span>spring-boot-starter-tomcat<span style="color:#f92672">&lt;/artifactId&gt;</span>
+   <span style="color:#f92672">&lt;scope&gt;</span>provided<span style="color:#f92672">&lt;/scope&gt;</span>
+<span style="color:#f92672">&lt;/dependency&gt;</span>
+</code></pre></div><p>3）、必须编写一个<strong>SpringBootServletInitializer</strong>的子类，并调用configure方法</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-java" data-lang="java"><span style="color:#66d9ef">public</span> <span style="color:#66d9ef">class</span> <span style="color:#a6e22e">ServletInitializer</span> <span style="color:#66d9ef">extends</span> SpringBootServletInitializer <span style="color:#f92672">{</span>
 
-<pre><code class="language-xml">&lt;dependency&gt;
-   &lt;groupId&gt;org.springframework.boot&lt;/groupId&gt;
-   &lt;artifactId&gt;spring-boot-starter-tomcat&lt;/artifactId&gt;
-   &lt;scope&gt;provided&lt;/scope&gt;
-&lt;/dependency&gt;
-</code></pre>
+   <span style="color:#a6e22e">@Override</span>
+   <span style="color:#66d9ef">protected</span> SpringApplicationBuilder <span style="color:#a6e22e">configure</span><span style="color:#f92672">(</span>SpringApplicationBuilder application<span style="color:#f92672">)</span> <span style="color:#f92672">{</span>
+       <span style="color:#75715e">//传入SpringBoot应用的主程序
+</span><span style="color:#75715e"></span>      <span style="color:#66d9ef">return</span> application<span style="color:#f92672">.</span><span style="color:#a6e22e">sources</span><span style="color:#f92672">(</span>SpringBoot04WebJspApplication<span style="color:#f92672">.</span><span style="color:#a6e22e">class</span><span style="color:#f92672">);</span>
+   <span style="color:#f92672">}</span>
 
-<p>3）、必须编写一个<strong>SpringBootServletInitializer</strong>的子类，并调用configure方法</p>
-
-<pre><code class="language-java">public class ServletInitializer extends SpringBootServletInitializer {
-
-   @Override
-   protected SpringApplicationBuilder configure(SpringApplicationBuilder application) {
-       //传入SpringBoot应用的主程序
-      return application.sources(SpringBoot04WebJspApplication.class);
-   }
-
-}
-</code></pre>
-
-<p>4）、启动服务器就可以使用；</p>
-
+<span style="color:#f92672">}</span>
+</code></pre></div><p>4）、启动服务器就可以使用；</p>
 <h2 id="原理">原理</h2>
-
 <p>jar包：执行SpringBoot主类的main方法，启动ioc容器，创建嵌入式的Servlet容器；</p>
-
 <p>war包：启动服务器，<strong>服务器启动SpringBoot应用</strong>【SpringBootServletInitializer】，启动ioc容器；</p>
-
 <h1 id="自定义spring-boot的父pom">自定义Spring Boot的父POM</h1>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-xml" data-lang="xml">	<span style="color:#f92672">&lt;parent&gt;</span>
+		<span style="color:#f92672">&lt;artifactId&gt;</span>mycloud<span style="color:#f92672">&lt;/artifactId&gt;</span>
+		<span style="color:#f92672">&lt;groupId&gt;</span>maizi.cloud<span style="color:#f92672">&lt;/groupId&gt;</span>
+		<span style="color:#f92672">&lt;version&gt;</span>1.0-SNAPSHOT<span style="color:#f92672">&lt;/version&gt;</span>
+	<span style="color:#f92672">&lt;/parent&gt;</span>
+	<span style="color:#f92672">&lt;modelVersion&gt;</span>4.0.0<span style="color:#f92672">&lt;/modelVersion&gt;</span>
+	<span style="color:#f92672">&lt;artifactId&gt;</span>consumer-9001<span style="color:#f92672">&lt;/artifactId&gt;</span>
 
-<pre><code class="language-xml">	&lt;parent&gt;
-		&lt;artifactId&gt;mycloud&lt;/artifactId&gt;
-		&lt;groupId&gt;maizi.cloud&lt;/groupId&gt;
-		&lt;version&gt;1.0-SNAPSHOT&lt;/version&gt;
-	&lt;/parent&gt;
-	&lt;modelVersion&gt;4.0.0&lt;/modelVersion&gt;
-	&lt;artifactId&gt;consumer-9001&lt;/artifactId&gt;
-
-	&lt;dependencyManagement&gt;
-		&lt;dependencies&gt;
-			&lt;dependency&gt;
-				&lt;!-- Import dependency management from Spring Boot --&gt;
-				&lt;groupId&gt;org.springframework.boot&lt;/groupId&gt;
-				&lt;artifactId&gt;spring-boot-dependencies&lt;/artifactId&gt;
-				&lt;version&gt;2.1.4.RELEASE&lt;/version&gt;
-				&lt;type&gt;pom&lt;/type&gt;
-				&lt;scope&gt;import&lt;/scope&gt;
-			&lt;/dependency&gt;
-		&lt;/dependencies&gt;
-	&lt;/dependencyManagement&gt;
-</code></pre>
-
+	<span style="color:#f92672">&lt;dependencyManagement&gt;</span>
+		<span style="color:#f92672">&lt;dependencies&gt;</span>
+			<span style="color:#f92672">&lt;dependency&gt;</span>
+				<span style="color:#75715e">&lt;!-- Import dependency management from Spring Boot --&gt;</span>
+				<span style="color:#f92672">&lt;groupId&gt;</span>org.springframework.boot<span style="color:#f92672">&lt;/groupId&gt;</span>
+				<span style="color:#f92672">&lt;artifactId&gt;</span>spring-boot-dependencies<span style="color:#f92672">&lt;/artifactId&gt;</span>
+				<span style="color:#f92672">&lt;version&gt;</span>2.1.4.RELEASE<span style="color:#f92672">&lt;/version&gt;</span>
+				<span style="color:#f92672">&lt;type&gt;</span>pom<span style="color:#f92672">&lt;/type&gt;</span>
+				<span style="color:#f92672">&lt;scope&gt;</span>import<span style="color:#f92672">&lt;/scope&gt;</span>
+			<span style="color:#f92672">&lt;/dependency&gt;</span>
+		<span style="color:#f92672">&lt;/dependencies&gt;</span>
+	<span style="color:#f92672">&lt;/dependencyManagement&gt;</span>
+</code></pre></div>
 
                 
                 
@@ -1003,60 +862,51 @@ public class MyServiceConfig {
                     </h4>
                     <ul class="catalog-body"></ul>
                     <nav id="TableOfContents">
-<ul>
-<li><a href="#静态资源的映射规则">静态资源的映射规则</a>
-<ul>
-<li><a href="#webjars">webjars</a>
-<ul>
-<li><a href="#jquery-js包导入">jquery.js包导入</a></li>
-</ul></li>
-<li><a href="#默认静态资源的文件夹">默认静态资源的文件夹</a></li>
-<li><a href="#欢迎页面">欢迎页面</a></li>
-<li><a href="#favicon-ico图标">favicon.ico图标</a></li>
-<li><a href="#源码分析">源码分析</a></li>
-<li><a href="#修改路径">修改路径</a></li>
-</ul></li>
-<li><a href="#thymeleaf模板引擎">thymeleaf模板引擎</a>
-<ul>
-<li><a href="#默认配置">默认配置</a></li>
-<li><a href="#简单使用">简单使用</a></li>
-</ul></li>
-<li><a href="#扩展springmvc">扩展SpringMVC</a></li>
-<li><a href="#多请求映射">多请求映射</a></li>
-<li><a href="#引入资源">引入资源</a></li>
-<li><a href="#国际化">国际化</a></li>
-<li><a href="#自定义拦截器">自定义拦截器</a></li>
-<li><a href="#restful风格">RestFul风格</a></li>
-<li><a href="#定制错误的页面">定制错误的页面</a>
-<ul>
-<li><a href="#有模板引擎的情况下">有模板引擎的情况下</a></li>
-<li><a href="#没有模板引擎">没有模板引擎</a></li>
-</ul></li>
-<li><a href="#异常统一处理">异常统一处理</a>
-<ul>
-<li><a href="#处理自定义异常代码">处理自定义异常代码</a></li>
-<li><a href="#自动适应web和客户端异常代码">自动适应web和客户端异常代码</a></li>
-</ul></li>
-<li><a href="#配置嵌入式servlet容器">配置嵌入式Servlet容器</a>
-<ul>
-<li><a href="#注册servlet三大组件">注册Servlet三大组件</a></li>
-<li><a href="#servlet">Servlet</a></li>
-<li><a href="#filter">Filter</a></li>
-<li><a href="#listener">Listener</a></li>
-<li><a href="#注入到容器中">注入到容器中</a></li>
-</ul></li>
-<li><a href="#替换为其他嵌入式servlet容器">替换为其他嵌入式Servlet容器</a>
-<ul>
-<li><a href="#tomcat-默认使用">Tomcat（默认使用）</a></li>
-<li><a href="#jetty">Jetty</a></li>
-</ul></li>
-<li><a href="#使用外置的servlet容器">使用外置的Servlet容器</a>
-<ul>
-<li><a href="#外置的servlet容器">外置的Servlet容器</a></li>
-<li><a href="#原理">原理</a></li>
-</ul></li>
-<li><a href="#自定义spring-boot的父pom">自定义Spring Boot的父POM</a></li>
-</ul>
+  <ul>
+    <li><a href="#webjars">webjars</a>
+      <ul>
+        <li><a href="#jqueryjs包导入">jquery.js包导入</a></li>
+      </ul>
+    </li>
+    <li><a href="#默认静态资源的文件夹">默认静态资源的文件夹</a></li>
+    <li><a href="#欢迎页面">欢迎页面</a></li>
+    <li><a href="#faviconico图标">favicon.ico图标</a></li>
+    <li><a href="#源码分析">源码分析</a></li>
+    <li><a href="#修改路径">修改路径</a></li>
+  </ul>
+
+  <ul>
+    <li><a href="#默认配置">默认配置</a></li>
+    <li><a href="#简单使用">简单使用</a></li>
+  </ul>
+
+  <ul>
+    <li><a href="#有模板引擎的情况下">有模板引擎的情况下</a></li>
+    <li><a href="#没有模板引擎">没有模板引擎</a></li>
+  </ul>
+
+  <ul>
+    <li><a href="#处理自定义异常代码">处理自定义异常代码</a></li>
+    <li><a href="#自动适应web和客户端异常代码">自动适应web和客户端异常代码</a></li>
+  </ul>
+
+  <ul>
+    <li><a href="#注册servlet三大组件">注册Servlet三大组件</a></li>
+    <li><a href="#servlet">Servlet</a></li>
+    <li><a href="#filter">Filter</a></li>
+    <li><a href="#listener">Listener</a></li>
+    <li><a href="#注入到容器中">注入到容器中</a></li>
+  </ul>
+
+  <ul>
+    <li><a href="#tomcat默认使用">Tomcat（默认使用）</a></li>
+    <li><a href="#jetty">Jetty</a></li>
+  </ul>
+
+  <ul>
+    <li><a href="#外置的servlet容器">外置的Servlet容器</a></li>
+    <li><a href="#原理">原理</a></li>
+  </ul>
 </nav>
                     <br>
                     <br>
@@ -1081,9 +931,6 @@ public class MyServiceConfig {
                         
                         
                         
-                        <a href="/tags/" title="">
-                            
-                        </a>
                         
                         
                         
@@ -1093,101 +940,6 @@ public class MyServiceConfig {
                         
                         
                         
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        <a href="/tags/qt" title="QT">
-                            QT
-                        </a>
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        <a href="/tags/zookeeper" title="Zookeeper">
-                            Zookeeper
-                        </a>
                         
                         
                         
@@ -1227,8 +979,10 @@ public class MyServiceConfig {
                         
                         
                         
-                        <a href="/tags/elasticsearch" title="elasticSearch">
-                            elasticSearch
+                        
+                        
+                        <a href="/tags/elasticsearch" title="elasticsearch">
+                            elasticsearch
                         </a>
                         
                         
@@ -1239,9 +993,27 @@ public class MyServiceConfig {
                         
                         
                         
-                        <a href="/tags/golang" title="golang">
-                            golang
-                        </a>
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
                         
                         
                         
@@ -1279,9 +1051,21 @@ public class MyServiceConfig {
                         
                         
                         
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
                         <a href="/tags/jvm" title="jvm">
                             jvm
                         </a>
+                        
+                        
+                        
+                        
                         
                         
                         
@@ -1305,9 +1089,19 @@ public class MyServiceConfig {
                         
                         
                         
+                        
+                        
+                        
+                        
+                        
+                        
                         <a href="/tags/mongodb" title="mongodb">
                             mongodb
                         </a>
+                        
+                        
+                        
+                        
                         
                         
                         
@@ -1318,10 +1112,6 @@ public class MyServiceConfig {
                         </a>
                         
                         
-                        
-                        <a href="/tags/mycat" title="mycat">
-                            mycat
-                        </a>
                         
                         
                         
@@ -1335,9 +1125,17 @@ public class MyServiceConfig {
                         
                         
                         
-                        <a href="/tags/nginx" title="nginx">
-                            nginx
-                        </a>
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
                         
                         
                         
@@ -1361,8 +1159,22 @@ public class MyServiceConfig {
                         
                         
                         
+                        
+                        
                         <a href="/tags/rocketmq" title="rocketmq">
                             rocketmq
+                        </a>
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        <a href="/tags/security%E6%A1%86%E6%9E%B6%E5%AD%A6%E4%B9%A0" title="security框架学习">
+                            security框架学习
                         </a>
                         
                         
@@ -1389,17 +1201,11 @@ public class MyServiceConfig {
                         
                         
                         
-                        <a href="/tags/springcloud" title="springCloud">
-                            springCloud
-                        </a>
-                        
-                        
-                        
-                        
-                        
                         <a href="/tags/springboot" title="springboot">
                             springboot
                         </a>
+                        
+                        
                         
                         
                         
@@ -1413,6 +1219,9 @@ public class MyServiceConfig {
                         
                         
                         
+                        <a href="/tags/springcloud" title="springcloud">
+                            springcloud
+                        </a>
                         
                         
                         
@@ -1438,6 +1247,33 @@ public class MyServiceConfig {
                         
                         
                         
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        <a href="/tags/zookeeper" title="zookeeper">
+                            zookeeper
+                        </a>
                         
                         
                         
@@ -1497,6 +1333,8 @@ public class MyServiceConfig {
                         
                         
                         
+                        
+                        
                         <a href="/tags/%E5%88%86%E5%B8%83%E5%BC%8F%E7%B3%BB%E5%88%97" title="分布式系列">
                             分布式系列
                         </a>
@@ -1516,6 +1354,10 @@ public class MyServiceConfig {
                         
                         
                         
+                        
+                        <a href="/tags/%E5%8D%8F%E8%AE%AE%E6%A0%88" title="协议栈">
+                            协议栈
+                        </a>
                         
                         
                         
@@ -1715,6 +1557,12 @@ public class MyServiceConfig {
                         
                         
                         
+                        
+                        
+                        
+                        
+                        
+                        
                         <a href="/tags/%E7%BD%91%E7%BB%9C%E7%BC%96%E7%A8%8B" title="网络编程">
                             网络编程
                         </a>
@@ -1738,6 +1586,10 @@ public class MyServiceConfig {
                         
                         
                         
+                        
+                        <a href="/tags/%E8%AE%A4%E8%AF%81%E5%92%8C%E6%8E%88%E6%9D%83" title="认证和授权">
+                            认证和授权
+                        </a>
                         
                         
                         
@@ -1908,7 +1760,7 @@ public class MyServiceConfig {
                     
                 </ul>
 		<p class="copyright text-muted">
-                    Copyright &copy;  2020
+                    Copyright &copy;  2021
                     <br>
                     <a href="https://themes.gohugo.io/hugo-theme-cleanwhite">CleanWhite Hugo Theme</a> by <a href="https://zhaohuabing.com">Huabing</a> |
                     <iframe

@@ -97,15 +97,15 @@
                     </li>
                     
                     <li>
-                        <a href="/categories/english">English</a>
+                        <a href="/categories/english">english</a>
                     </li>
                     
                     <li>
-                        <a href="/categories/life">Life</a>
+                        <a href="/categories/life">life</a>
                     </li>
                     
                     <li>
-                        <a href="/categories/tech">Tech</a>
+                        <a href="/categories/tech">tech</a>
                     </li>
                     
 
@@ -233,40 +233,22 @@
                 
                 
                 
-                
-
-<p>[TOC]</p>
-
-<p>转载地址：<a href="https://juejin.im/post/5e12e2c55188253a937f435e">https://juejin.im/post/5e12e2c55188253a937f435e</a></p>
-
+                <p>[TOC]</p>
+<p>转载地址：https://juejin.im/post/5e12e2c55188253a937f435e</p>
 <h1 id="概述">概述</h1>
-
 <p>TCP是面向连接的传输层层协议，可以为应用层提供可靠的数据传输服务。所谓的面向连接并不是真正意思上的连接，只不过是在发送数据之前，首先得相互握手，也就是说接收方知道你要发数据给它了。而UDP是面向无连接的传输层协议，并不提供可靠的数据传输。有一个很恰当的比喻：UDP传输就类似于写信，接收方事先并不知道你要写信给他；而TCP传输就像是打电话，必须等对方按了接听键你才能更他通话。</p>
-
 <p>TCP（Transmission Control Protocol），又叫传输控制协议。 TCP协议是面向连接的，可靠的，基于字节流的传输协议。在基于 TCP 进行通信时，通信双方需要先建立一个 TCP 连接，建立连接需要经过三次握手，断开连接的时候需要经过四次挥手。</p>
-
 <h1 id="tcp协议">TCP协议</h1>
-
 <h2 id="tcp头部">TCP头部</h2>
-
-<p><img src="/img/Xnip2020-01-13_11-25-00.png" alt="Xnip2020-01-13_11-25-00" /></p>
-
+<p><img src="/img/Xnip2020-01-13_11-25-00.png" alt="Xnip2020-01-13_11-25-00"></p>
 <p>对于 TCP 头部来说，以下几个字段是很重要的:</p>
-
-<h3 id="序列号-sequence-number">序列号（Sequence number）</h3>
-
+<h3 id="序列号sequence-number">序列号（Sequence number）</h3>
 <p>这个序号保证了 TCP 传输的报文都是有序的，对端可以通过序号顺序的拼接报文</p>
-
-<h3 id="确认号-acknowledgement-number">确认号（Acknowledgement Number）</h3>
-
+<h3 id="确认号acknowledgement-number">确认号（Acknowledgement Number）</h3>
 <p>这个序号表示数据接收端期望接收的下一个字节的编号是多少，同时也表示上一个序号的数据已经收到</p>
-
-<h3 id="窗口大小-window-size">窗口大小（Window Size）</h3>
-
+<h3 id="窗口大小window-size">窗口大小（Window Size）</h3>
 <p>表示还能接收多少字节的数据，用于流量控制</p>
-
 <h3 id="标识符">标识符</h3>
-
 <ul>
 <li>ACK=1 ：该字段为一表示确认号字段有效。此外，TCP 还规定在连接建立后传送的所有报文段都必须把 ACK 置为一。</li>
 <li>SYN=1：当SYN=1，ACK=0时，表示当前报文段是一个连接请求报文。当SYN=1，ACK=1时，表示当前报文段是一个同意建立连接的应答报文。</li>
@@ -275,118 +257,74 @@
 <li>PSH=1 ：该字段为一表示接收端应该立即将数据 push 给应用层，而不是等到缓冲区满后再提交。</li>
 <li>RST=1：该字段为一表示当前 TCP 连接出现严重问题，可能需要重新建立 TCP 连接，也可以用于拒绝非法的报文段和拒绝连接请求。</li>
 </ul>
-
 <h2 id="三次握手">三次握手</h2>
-
-<p><img src="/img/Xnip2020-01-13_11-49-16.png" alt="Xnip2020-01-13_11-49-16" /></p>
-
+<p><img src="/img/Xnip2020-01-13_11-49-16.png" alt="Xnip2020-01-13_11-49-16"></p>
 <p>简单的说：</p>
-
 <h3 id="第一次握手">第一次握手</h3>
-
 <ul>
 <li>SYN = 1， seq(client) = x</li>
 <li>客户端向服务端发送连接请求报文段。该报文段中包含自身的数据通讯初始序号。请求发送后，客户端便进入 SYN-SENT 状态。</li>
 </ul>
-
 <h3 id="第二次握手">第二次握手</h3>
-
 <ul>
 <li>SYN = 1，ACK = 1，确认序号 = x+1, seq(server) = y</li>
 <li>服务端收到连接请求报文段后，如果同意连接，则会发送一个应答，该应答中也会包含自身的数据通讯初始序号，发送完成后便进入 SYN-RECEIVED 状态</li>
 </ul>
-
 <h3 id="第三次握手">第三次握手</h3>
-
 <ul>
 <li>ACK = 1，确认序号 = y+1, seq(client) = x + 1</li>
 <li>客户端收到连接同意的应答后，还要向服务端发送一个确认报文。客户端发完这个报文段后便进入ESTABLISHED 状态，服务端收到这个应答后也进入 ESTABLISHED 状态，此时连接建立成功。</li>
 </ul>
-
 <h3 id="为什么不用两次握手">为什么不用两次握手？</h3>
-
 <p>主要是为了防止已经失效的连接请求报文突然又传送到了服务器，从而产生资源浪费。</p>
-
 <p>采用两次握手，那么若Client向Server发起的包A1如果在传输链路上遇到的故障，导致传输到Server的时间相当滞后，在这个时间段由于Client没有收到Server的对于包A1的确认，那么就会重传一个包A2，假设服务器正常收到了A2的包，然后返回确认B2包。由于没有第三次握手，这个时候Client和Server已经建立连接了。再假设A1包随后在链路中传到了Server，这个时候Server又会返回B1包确认，但是由于Client已经清除了A1包，所以Client会丢弃掉这个确认包，但是Server会保持这个相当于“僵尸”的连接，造成Server的网络资源浪费。</p>
-
 <p>如果你用过对讲机你就会明白：</p>
-
 <ul>
 <li>C -&gt;S: 你能听到吗？</li>
 <li>S-&gt;C: 听到。你能听到我吗？</li>
 <li>C-&gt;S:听到。</li>
 </ul>
-
 <p>如果采用的是三次握手，就算是那一次失效的报文传送过来了，服务端接受到了那条失效报文并且回复了确认报文，但是客户端不会再次发出确认。由于服务器收不到确认，就知道客户端并没有请求连接，就不会建立新的连接造成资源浪费。</p>
-
 <h2 id="四次挥手">四次挥手</h2>
-
-<p><img src="/img/Xnip2020-01-13_11-57-03.png" alt="Xnip2020-01-13_11-57-03" /></p>
-
+<p><img src="/img/Xnip2020-01-13_11-57-03.png" alt="Xnip2020-01-13_11-57-03"></p>
 <p>TCP 是全双工的，在断开连接时两端都需要发送 FIN 和 ACK。</p>
-
 <h3 id="第一次挥手">第一次挥手</h3>
-
 <ul>
 <li>若客户端 A 认为数据发送完成，则它需要向服务端 B 发送连接释放请求。</li>
 </ul>
-
 <h3 id="第二次挥手">第二次挥手</h3>
-
 <ul>
 <li>B 收到连接释放请求后，会告诉应用层要释放 TCP 链接。然后会发送 ACK 包，并进入 <strong>CLOSE_WAIT</strong> 状态，表示 A 到 B 的连接已经释放，不接收 A 发的数据了。但是因为 <strong>TCP 连接时双向的</strong>，所以 B 仍旧可以发送数据给 A。</li>
 </ul>
-
 <h3 id="第三次挥手">第三次挥手</h3>
-
 <ul>
 <li>B 如果此时还有没发完的数据会继续发送，完毕后会向 A 发送连接释放请求，然后 B 便进入<strong>LAST-ACK</strong>状态。</li>
 <li>PS：通过延迟确认的技术（通常有时间限制，否则对方会误认为需要重传），可以将第二次和第三次挥手合并，延迟 ACK 包的发送。</li>
 </ul>
-
 <h3 id="第四次挥手">第四次挥手</h3>
-
 <ul>
 <li>A 收到B返回的释放请求后，向 B 发送确认应答，此时 A 进入 <strong>TIME-WAIT</strong> 状态。该状态会持续 2MSL（最大段生存期，指报文段在网络中生存的时间，超时会被抛弃） 时间，若该时间段内没有 B 的重发请求的话，就进入 <strong>CLOSED</strong> 状态。当 B 收到确认应答后，也便进入 CLOSED 状态。</li>
 </ul>
-
 <p><strong>A：我开始断开了。  B：我收到， 你可以断开了。断开了输出流，输入流还没关闭。  B：发送完所有数据后， 我服务器开始断开了，持续发送FIN命令。 A：发送ACK命令后， 就真的断开了。</strong></p>
-
 <h2 id="挥手和握手相关问题">挥手和握手相关问题</h2>
-
 <p><strong>1.  为什么 A 要进入 TIME-WAIT 状态，等待 2MSL 时间后才进入 CLOSED 状态？</strong></p>
-
 <p>为了保证 B 能收到 A 的确认应答。若 A 发完确认应答后直接进入 CLOSED 状态，如果确认应答因为网络问题一直没有到达，那么会造成 B 不能正常关闭。</p>
-
 <p>如果A发送完ACK应答之后直接进入CLOSED状态的话，如果因为网络延迟问题这个应答丢失或在2MSL内还没有到达B的话，那么B等待超时之后就会重新发送一个FIN包，但是此时A已经关闭了，永远得不到A的响应，从而导致B永远不能正常关闭</p>
-
 <p><strong>2.  为什么需要TIME_WAIT状态</strong></p>
-
 <p>第一：为实现TCP这种全双工连接的可靠释放</p>
-
 <p>这样可让TCP再次发送最后的ACK以防这个ACK丢失(另一端超时并重发最后的FIN)这种2MSL等待的另一个结果是这个TCP连接在2MSL等待期间，定义这个连接的插口(客户的IP地址和端口号，服务器的IP地址和端口号)不能再被使用。这个连接只能在2MSL结束后才能再被使用。</p>
-
 <p>第二：为使旧的数据包在网络因过期而消失</p>
-
 <p>每个具体TCP实现必须选择一个报文段最大生存时间MSL。它是任何报文段被丢弃前在网络内的最长时间。</p>
-
 <p><strong>3. 为什么建立连接是三次握手，关闭连接确是四次挥手呢？</strong></p>
-
 <ol>
 <li>建立连接的时候， 服务器在LISTEN状态下，收到建立连接请求的SYN报文后，把ACK和SYN放在一个报文里发送给客户端。</li>
 <li>而关闭连接时，服务器收到对方的FIN报文时，仅仅表示对方不再发送数据了但是还能接收数据，而自己也未必全部数据都发送给对方了。</li>
 </ol>
-
 <h2 id="拥塞处理">拥塞处理</h2>
-
 <p>拥塞处理包括了四个算法，分别为：慢开始，拥塞避免，快速重传，快速恢复。</p>
-
 <h2 id="为什么tcp这么复杂">为什么TCP这么复杂?</h2>
-
 <p>因为既要保证可靠性, 同时又要尽可能提高性能。</p>
-
 <h3 id="保证可靠性的机制">保证可靠性的机制</h3>
-
 <ul>
 <li>校验和</li>
 <li>序列号(按序到达)</li>
@@ -396,26 +334,20 @@
 <li>流量控制</li>
 <li>拥塞控制</li>
 </ul>
-
 <h3 id="提高性能的机制">提高性能的机制</h3>
-
 <ul>
 <li>滑动窗口</li>
 <li>快速重传</li>
 <li>延迟应答</li>
 <li>捎带应答</li>
 </ul>
-
 <h3 id="定时器">定时器</h3>
-
 <ul>
 <li>超时重传定时器</li>
 <li>保活定时器</li>
 <li>TIME_WAIT定时器</li>
 </ul>
-
 <h1 id="基于-tcp-的应用层协议">基于 TCP 的应用层协议</h1>
-
 <ul>
 <li>HTTP</li>
 <li>HTTPS</li>
@@ -424,81 +356,45 @@
 <li>FTP</li>
 <li>SMTP</li>
 </ul>
-
 <h1 id="tcp-包大小">TCP 包大小</h1>
-
 <p>我们在用Socket编程时，UDP协议要求包小于64K。TCP没有限定，TCP包头中就没有“包长度”字段，而完全依靠IP层去处理分帧。这就是为什么TCP常常被称作一种“流协议”的原因，开发者在使用TCP服务的时候，不必去关心数据包的大小，只需讲SOCKET看作一条数据流的入口，往里面放数据就是了，TCP协议本身会进行拥塞/流量控制。</p>
-
 <h1 id="tcp的核心api">TCP的核心API</h1>
-
 <p>转载地址： <a href="https://blog.csdn.net/Robot__Man/article/details/80657727">https://blog.csdn.net/Robot__Man/article/details/80657727</a></p>
-
 <h2 id="获取本地地址和端口号">获取本地地址和端口号</h2>
-
 <p>java.net.Socket为套接字类，其提供了很多方法，其中我们可以通过Socket获取本地的地址以及端口号。</p>
-
-<pre><code class="language-java">- int getLocalPort()，该方法用于获取本地使用的端口号。
-- InetAddress getLocalAddress()，该方法用于获取套接字绑定的本地地址。
-</code></pre>
-
-<p>使用InetAddress获取本地的地址方法：</p>
-
-<pre><code class="language-java">- String getCanonicalHostName()，获取此IP地址的完全限定域名。
-- String getHostAddress()，返回IP地址字符串（以文本表现形式）。
-</code></pre>
-
-<h2 id="获取远端地址和端口号">获取远端地址和端口号</h2>
-
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-java" data-lang="java"><span style="color:#f92672">-</span> <span style="color:#66d9ef">int</span> <span style="color:#a6e22e">getLocalPort</span><span style="color:#f92672">()</span><span style="color:#960050;background-color:#1e0010">，</span>该方法用于获取本地使用的端口号<span style="color:#960050;background-color:#1e0010">。</span>
+<span style="color:#f92672">-</span> InetAddress <span style="color:#a6e22e">getLocalAddress</span><span style="color:#f92672">()</span><span style="color:#960050;background-color:#1e0010">，</span>该方法用于获取套接字绑定的本地地址<span style="color:#960050;background-color:#1e0010">。</span>
+</code></pre></div><p>使用InetAddress获取本地的地址方法：</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-java" data-lang="java"><span style="color:#f92672">-</span> String <span style="color:#a6e22e">getCanonicalHostName</span><span style="color:#f92672">()</span><span style="color:#960050;background-color:#1e0010">，</span>获取此IP地址的完全限定域名<span style="color:#960050;background-color:#1e0010">。</span>
+<span style="color:#f92672">-</span> String <span style="color:#a6e22e">getHostAddress</span><span style="color:#f92672">()</span><span style="color:#960050;background-color:#1e0010">，</span>返回IP地址字符串<span style="color:#960050;background-color:#1e0010">（</span>以文本表现形式<span style="color:#960050;background-color:#1e0010">）。</span>
+</code></pre></div><h2 id="获取远端地址和端口号">获取远端地址和端口号</h2>
 <p>通过Socket获取远端的地址以及端口号。</p>
-
-<pre><code class="language-java">- int getPort()，该方法用于获取远端使用的端口号。
-- InetAddress getInetAddress()，该方法用于获取套接字绑定的远端地址。
-</code></pre>
-
-<h2 id="获取网络输入流和网络输出流">获取网络输入流和网络输出流</h2>
-
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-java" data-lang="java"><span style="color:#f92672">-</span> <span style="color:#66d9ef">int</span> <span style="color:#a6e22e">getPort</span><span style="color:#f92672">()</span><span style="color:#960050;background-color:#1e0010">，</span>该方法用于获取远端使用的端口号<span style="color:#960050;background-color:#1e0010">。</span>
+<span style="color:#f92672">-</span> InetAddress <span style="color:#a6e22e">getInetAddress</span><span style="color:#f92672">()</span><span style="color:#960050;background-color:#1e0010">，</span>该方法用于获取套接字绑定的远端地址<span style="color:#960050;background-color:#1e0010">。</span>
+</code></pre></div><h2 id="获取网络输入流和网络输出流">获取网络输入流和网络输出流</h2>
 <p>通过Socket获取输入流与输出流，这两个方法是使用Socket通讯的关键方法。</p>
-
-<pre><code class="language-java">- InputStream getInputStream()，该方法用于返回此套接字的输入流。
-- OutputStream getOutputStream()，该方法用于返回此套接字的输出流。
-</code></pre>
-
-<h2 id="close方法">close方法</h2>
-
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-java" data-lang="java"><span style="color:#f92672">-</span> InputStream <span style="color:#a6e22e">getInputStream</span><span style="color:#f92672">()</span><span style="color:#960050;background-color:#1e0010">，</span>该方法用于返回此套接字的输入流<span style="color:#960050;background-color:#1e0010">。</span>
+<span style="color:#f92672">-</span> OutputStream <span style="color:#a6e22e">getOutputStream</span><span style="color:#f92672">()</span><span style="color:#960050;background-color:#1e0010">，</span>该方法用于返回此套接字的输出流<span style="color:#960050;background-color:#1e0010">。</span>
+</code></pre></div><h2 id="close方法">close方法</h2>
 <p>当使用Socket进行通讯完毕后，要关闭Socket以释放系统资源。</p>
-
-<pre><code class="language-java">- close()，关闭此套接字。当关闭了该套接字后也会同时关闭由此获取的输入流与输出流。
-</code></pre>
-
-<h1 id="socket通信模型">Socket通信模型</h1>
-
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-java" data-lang="java"><span style="color:#f92672">-</span> close<span style="color:#f92672">()</span><span style="color:#960050;background-color:#1e0010">，</span>关闭此套接字<span style="color:#960050;background-color:#1e0010">。</span>当关闭了该套接字后也会同时关闭由此获取的输入流与输出流<span style="color:#960050;background-color:#1e0010">。</span>
+</code></pre></div><h1 id="socket通信模型">Socket通信模型</h1>
 <h2 id="server端serversocket监听">Server端ServerSocket监听</h2>
-
 <p>java.net.ServerSocket是运行于服务端应用程序中。通常创建ServerSocket需要指定服务端端口号，之后监听Socket的连接：</p>
-
-<pre><code class="language-java">　//创建ServerSocket并申请服务端口8088
-　ServerSocket server = new ServerSocket(8088);
- //方法会产生阻塞，直到某个Socket连接，并返回请求连接的Socket
- Socket socket = server.accept();
-</code></pre>
-
-<h2 id="client端socket连接">Client端Socket连接</h2>
-
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-java" data-lang="java">　<span style="color:#75715e">//创建ServerSocket并申请服务端口8088
+</span><span style="color:#75715e"></span>　ServerSocket server <span style="color:#f92672">=</span> <span style="color:#66d9ef">new</span> ServerSocket<span style="color:#f92672">(</span>8088<span style="color:#f92672">);</span>
+ <span style="color:#75715e">//方法会产生阻塞，直到某个Socket连接，并返回请求连接的Socket
+</span><span style="color:#75715e"></span> Socket socket <span style="color:#f92672">=</span> server<span style="color:#f92672">.</span><span style="color:#a6e22e">accept</span><span style="color:#f92672">();</span>
+</code></pre></div><h2 id="client端socket连接">Client端Socket连接</h2>
 <p>当服务端创建ServerSocket并通过accept()方法侦听后，我们就可以通过在客户端应用程序中创建Socket来向服务端发起连接。
 需要注意的是，创建Socket的同时就发起连接，若连接异常会抛出异常。</p>
-
-<pre><code class="language-java">//参数1：服务端的IP地址，参数2：服务端的服务端口
-Socket socket = new Socket(&quot;localhost&quot;,8088);
-</code></pre>
-
-<h2 id="nagle-算法">Nagle 算法</h2>
-
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-java" data-lang="java"><span style="color:#75715e">//参数1：服务端的IP地址，参数2：服务端的服务端口
+</span><span style="color:#75715e"></span>Socket socket <span style="color:#f92672">=</span> <span style="color:#66d9ef">new</span> Socket<span style="color:#f92672">(</span><span style="color:#e6db74">&#34;localhost&#34;</span><span style="color:#f92672">,</span>8088<span style="color:#f92672">);</span>
+</code></pre></div><h2 id="nagle-算法">Nagle 算法</h2>
 <p>TCP/IP协议中，无论发送多少数据，总是要在数据前面加上协议头，同时，对方接收到数据，也需要发送ACK表示确认。为了尽可能的利用网络带宽，TCP总是希望尽可能的发送足够大的数据。Nagle算法就是为了尽可能发送大块数据，避免网络中充斥着许多小数据块。</p>
-
-<pre><code class="language-java">// 但是对于实时交互性高的程序，建议其改为 true，即关闭 Nagle 算法，客户端每发送一次数据，无论数据包大小都会将这些数据发送出去
-clientSocket.setTcpNoDelay(true);
-</code></pre>
-
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-java" data-lang="java"><span style="color:#75715e">// 但是对于实时交互性高的程序，建议其改为 true，即关闭 Nagle 算法，客户端每发送一次数据，无论数据包大小都会将这些数据发送出去
+</span><span style="color:#75715e"></span>clientSocket<span style="color:#f92672">.</span><span style="color:#a6e22e">setTcpNoDelay</span><span style="color:#f92672">(</span><span style="color:#66d9ef">true</span><span style="color:#f92672">);</span>
+</code></pre></div>
 
                 
                 
@@ -605,56 +501,54 @@ clientSocket.setTcpNoDelay(true);
                     </h4>
                     <ul class="catalog-body"></ul>
                     <nav id="TableOfContents">
-<ul>
-<li><a href="#概述">概述</a></li>
-<li><a href="#tcp协议">TCP协议</a>
-<ul>
-<li><a href="#tcp头部">TCP头部</a>
-<ul>
-<li><a href="#序列号-sequence-number">序列号（Sequence number）</a></li>
-<li><a href="#确认号-acknowledgement-number">确认号（Acknowledgement Number）</a></li>
-<li><a href="#窗口大小-window-size">窗口大小（Window Size）</a></li>
-<li><a href="#标识符">标识符</a></li>
-</ul></li>
-<li><a href="#三次握手">三次握手</a>
-<ul>
-<li><a href="#第一次握手">第一次握手</a></li>
-<li><a href="#第二次握手">第二次握手</a></li>
-<li><a href="#第三次握手">第三次握手</a></li>
-<li><a href="#为什么不用两次握手">为什么不用两次握手？</a></li>
-</ul></li>
-<li><a href="#四次挥手">四次挥手</a>
-<ul>
-<li><a href="#第一次挥手">第一次挥手</a></li>
-<li><a href="#第二次挥手">第二次挥手</a></li>
-<li><a href="#第三次挥手">第三次挥手</a></li>
-<li><a href="#第四次挥手">第四次挥手</a></li>
-</ul></li>
-<li><a href="#挥手和握手相关问题">挥手和握手相关问题</a></li>
-<li><a href="#拥塞处理">拥塞处理</a></li>
-<li><a href="#为什么tcp这么复杂">为什么TCP这么复杂?</a>
-<ul>
-<li><a href="#保证可靠性的机制">保证可靠性的机制</a></li>
-<li><a href="#提高性能的机制">提高性能的机制</a></li>
-<li><a href="#定时器">定时器</a></li>
-</ul></li>
-</ul></li>
-<li><a href="#基于-tcp-的应用层协议">基于 TCP 的应用层协议</a></li>
-<li><a href="#tcp-包大小">TCP 包大小</a></li>
-<li><a href="#tcp的核心api">TCP的核心API</a>
-<ul>
-<li><a href="#获取本地地址和端口号">获取本地地址和端口号</a></li>
-<li><a href="#获取远端地址和端口号">获取远端地址和端口号</a></li>
-<li><a href="#获取网络输入流和网络输出流">获取网络输入流和网络输出流</a></li>
-<li><a href="#close方法">close方法</a></li>
-</ul></li>
-<li><a href="#socket通信模型">Socket通信模型</a>
-<ul>
-<li><a href="#server端serversocket监听">Server端ServerSocket监听</a></li>
-<li><a href="#client端socket连接">Client端Socket连接</a></li>
-<li><a href="#nagle-算法">Nagle 算法</a></li>
-</ul></li>
-</ul>
+  <ul>
+    <li><a href="#tcp头部">TCP头部</a>
+      <ul>
+        <li><a href="#序列号sequence-number">序列号（Sequence number）</a></li>
+        <li><a href="#确认号acknowledgement-number">确认号（Acknowledgement Number）</a></li>
+        <li><a href="#窗口大小window-size">窗口大小（Window Size）</a></li>
+        <li><a href="#标识符">标识符</a></li>
+      </ul>
+    </li>
+    <li><a href="#三次握手">三次握手</a>
+      <ul>
+        <li><a href="#第一次握手">第一次握手</a></li>
+        <li><a href="#第二次握手">第二次握手</a></li>
+        <li><a href="#第三次握手">第三次握手</a></li>
+        <li><a href="#为什么不用两次握手">为什么不用两次握手？</a></li>
+      </ul>
+    </li>
+    <li><a href="#四次挥手">四次挥手</a>
+      <ul>
+        <li><a href="#第一次挥手">第一次挥手</a></li>
+        <li><a href="#第二次挥手">第二次挥手</a></li>
+        <li><a href="#第三次挥手">第三次挥手</a></li>
+        <li><a href="#第四次挥手">第四次挥手</a></li>
+      </ul>
+    </li>
+    <li><a href="#挥手和握手相关问题">挥手和握手相关问题</a></li>
+    <li><a href="#拥塞处理">拥塞处理</a></li>
+    <li><a href="#为什么tcp这么复杂">为什么TCP这么复杂?</a>
+      <ul>
+        <li><a href="#保证可靠性的机制">保证可靠性的机制</a></li>
+        <li><a href="#提高性能的机制">提高性能的机制</a></li>
+        <li><a href="#定时器">定时器</a></li>
+      </ul>
+    </li>
+  </ul>
+
+  <ul>
+    <li><a href="#获取本地地址和端口号">获取本地地址和端口号</a></li>
+    <li><a href="#获取远端地址和端口号">获取远端地址和端口号</a></li>
+    <li><a href="#获取网络输入流和网络输出流">获取网络输入流和网络输出流</a></li>
+    <li><a href="#close方法">close方法</a></li>
+  </ul>
+
+  <ul>
+    <li><a href="#server端serversocket监听">Server端ServerSocket监听</a></li>
+    <li><a href="#client端socket连接">Client端Socket连接</a></li>
+    <li><a href="#nagle-算法">Nagle 算法</a></li>
+  </ul>
 </nav>
                     <br>
                     <br>
@@ -679,9 +573,6 @@ clientSocket.setTcpNoDelay(true);
                         
                         
                         
-                        <a href="/tags/" title="">
-                            
-                        </a>
                         
                         
                         
@@ -691,101 +582,6 @@ clientSocket.setTcpNoDelay(true);
                         
                         
                         
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        <a href="/tags/qt" title="QT">
-                            QT
-                        </a>
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        <a href="/tags/zookeeper" title="Zookeeper">
-                            Zookeeper
-                        </a>
                         
                         
                         
@@ -825,8 +621,10 @@ clientSocket.setTcpNoDelay(true);
                         
                         
                         
-                        <a href="/tags/elasticsearch" title="elasticSearch">
-                            elasticSearch
+                        
+                        
+                        <a href="/tags/elasticsearch" title="elasticsearch">
+                            elasticsearch
                         </a>
                         
                         
@@ -837,9 +635,27 @@ clientSocket.setTcpNoDelay(true);
                         
                         
                         
-                        <a href="/tags/golang" title="golang">
-                            golang
-                        </a>
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
                         
                         
                         
@@ -877,9 +693,21 @@ clientSocket.setTcpNoDelay(true);
                         
                         
                         
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
                         <a href="/tags/jvm" title="jvm">
                             jvm
                         </a>
+                        
+                        
+                        
+                        
                         
                         
                         
@@ -903,9 +731,19 @@ clientSocket.setTcpNoDelay(true);
                         
                         
                         
+                        
+                        
+                        
+                        
+                        
+                        
                         <a href="/tags/mongodb" title="mongodb">
                             mongodb
                         </a>
+                        
+                        
+                        
+                        
                         
                         
                         
@@ -916,10 +754,6 @@ clientSocket.setTcpNoDelay(true);
                         </a>
                         
                         
-                        
-                        <a href="/tags/mycat" title="mycat">
-                            mycat
-                        </a>
                         
                         
                         
@@ -933,9 +767,17 @@ clientSocket.setTcpNoDelay(true);
                         
                         
                         
-                        <a href="/tags/nginx" title="nginx">
-                            nginx
-                        </a>
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
                         
                         
                         
@@ -959,8 +801,22 @@ clientSocket.setTcpNoDelay(true);
                         
                         
                         
+                        
+                        
                         <a href="/tags/rocketmq" title="rocketmq">
                             rocketmq
+                        </a>
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        <a href="/tags/security%E6%A1%86%E6%9E%B6%E5%AD%A6%E4%B9%A0" title="security框架学习">
+                            security框架学习
                         </a>
                         
                         
@@ -987,17 +843,11 @@ clientSocket.setTcpNoDelay(true);
                         
                         
                         
-                        <a href="/tags/springcloud" title="springCloud">
-                            springCloud
-                        </a>
-                        
-                        
-                        
-                        
-                        
                         <a href="/tags/springboot" title="springboot">
                             springboot
                         </a>
+                        
+                        
                         
                         
                         
@@ -1011,6 +861,9 @@ clientSocket.setTcpNoDelay(true);
                         
                         
                         
+                        <a href="/tags/springcloud" title="springcloud">
+                            springcloud
+                        </a>
                         
                         
                         
@@ -1036,6 +889,33 @@ clientSocket.setTcpNoDelay(true);
                         
                         
                         
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        <a href="/tags/zookeeper" title="zookeeper">
+                            zookeeper
+                        </a>
                         
                         
                         
@@ -1095,6 +975,8 @@ clientSocket.setTcpNoDelay(true);
                         
                         
                         
+                        
+                        
                         <a href="/tags/%E5%88%86%E5%B8%83%E5%BC%8F%E7%B3%BB%E5%88%97" title="分布式系列">
                             分布式系列
                         </a>
@@ -1114,6 +996,10 @@ clientSocket.setTcpNoDelay(true);
                         
                         
                         
+                        
+                        <a href="/tags/%E5%8D%8F%E8%AE%AE%E6%A0%88" title="协议栈">
+                            协议栈
+                        </a>
                         
                         
                         
@@ -1313,6 +1199,12 @@ clientSocket.setTcpNoDelay(true);
                         
                         
                         
+                        
+                        
+                        
+                        
+                        
+                        
                         <a href="/tags/%E7%BD%91%E7%BB%9C%E7%BC%96%E7%A8%8B" title="网络编程">
                             网络编程
                         </a>
@@ -1336,6 +1228,10 @@ clientSocket.setTcpNoDelay(true);
                         
                         
                         
+                        
+                        <a href="/tags/%E8%AE%A4%E8%AF%81%E5%92%8C%E6%8E%88%E6%9D%83" title="认证和授权">
+                            认证和授权
+                        </a>
                         
                         
                         
@@ -1506,7 +1402,7 @@ clientSocket.setTcpNoDelay(true);
                     
                 </ul>
 		<p class="copyright text-muted">
-                    Copyright &copy;  2020
+                    Copyright &copy;  2021
                     <br>
                     <a href="https://themes.gohugo.io/hugo-theme-cleanwhite">CleanWhite Hugo Theme</a> by <a href="https://zhaohuabing.com">Huabing</a> |
                     <iframe

@@ -97,15 +97,15 @@
                     </li>
                     
                     <li>
-                        <a href="/categories/english">English</a>
+                        <a href="/categories/english">english</a>
                     </li>
                     
                     <li>
-                        <a href="/categories/life">Life</a>
+                        <a href="/categories/life">life</a>
                     </li>
                     
                     <li>
-                        <a href="/categories/tech">Tech</a>
+                        <a href="/categories/tech">tech</a>
                     </li>
                     
 
@@ -233,208 +233,192 @@
                 
                 
                 
-                
-
-<p>[TOC]</p>
-
-<p>转载地址：<a href="https://www.bilibili.com/video/av75603750?p=3">https://www.bilibili.com/video/av75603750?p=3</a>  《Socket网络编程进阶与实战》系列视频</p>
-
+                <p>[TOC]</p>
+<p>转载地址：https://www.bilibili.com/video/av75603750?p=3  《Socket网络编程进阶与实战》系列视频</p>
 <h1 id="服务端">服务端</h1>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-java" data-lang="java"><span style="color:#f92672">package</span> networkdemo<span style="color:#f92672">;</span>
+<span style="color:#75715e">/*
+</span><span style="color:#75715e"> * @Description: 请输入....
+</span><span style="color:#75715e"> * @Author: 麦子
+</span><span style="color:#75715e"> * @Date: 2020-01-06 20:28:09
+</span><span style="color:#75715e"> * @LastEditTime : 2020-01-06 22:01:11
+</span><span style="color:#75715e"> * @LastEditors  : 麦子
+</span><span style="color:#75715e"> */</span>
 
-<pre><code class="language-java">package networkdemo;
-/*
- * @Description: 请输入....
- * @Author: 麦子
- * @Date: 2020-01-06 20:28:09
- * @LastEditTime : 2020-01-06 22:01:11
- * @LastEditors  : 麦子
- */
+<span style="color:#f92672">import</span> java.io.BufferedReader<span style="color:#f92672">;</span>
+<span style="color:#f92672">import</span> java.io.IOException<span style="color:#f92672">;</span>
+<span style="color:#f92672">import</span> java.io.InputStreamReader<span style="color:#f92672">;</span>
+<span style="color:#f92672">import</span> java.io.PrintStream<span style="color:#f92672">;</span>
+<span style="color:#f92672">import</span> java.net.ServerSocket<span style="color:#f92672">;</span>
+<span style="color:#f92672">import</span> java.net.Socket<span style="color:#f92672">;</span>
 
-import java.io.BufferedReader;
-import java.io.IOException;
-import java.io.InputStreamReader;
-import java.io.PrintStream;
-import java.net.ServerSocket;
-import java.net.Socket;
+<span style="color:#66d9ef">public</span> <span style="color:#66d9ef">class</span> <span style="color:#a6e22e">TCPService</span> <span style="color:#f92672">{</span>
+    <span style="color:#66d9ef">public</span> <span style="color:#66d9ef">static</span> <span style="color:#66d9ef">void</span> <span style="color:#a6e22e">main</span><span style="color:#f92672">(</span>String<span style="color:#f92672">[]</span> args<span style="color:#f92672">)</span> <span style="color:#66d9ef">throws</span> IOException <span style="color:#f92672">{</span>
+        ServerSocket server <span style="color:#f92672">=</span> <span style="color:#66d9ef">new</span> ServerSocket<span style="color:#f92672">(</span>2000<span style="color:#f92672">);</span>
 
-public class TCPService {
-    public static void main(String[] args) throws IOException {
-        ServerSocket server = new ServerSocket(2000);
+        System<span style="color:#f92672">.</span><span style="color:#a6e22e">out</span><span style="color:#f92672">.</span><span style="color:#a6e22e">println</span><span style="color:#f92672">(</span><span style="color:#e6db74">&#34;服务器准备就绪&#34;</span><span style="color:#f92672">);</span>
+        System<span style="color:#f92672">.</span><span style="color:#a6e22e">out</span><span style="color:#f92672">.</span><span style="color:#a6e22e">println</span><span style="color:#f92672">(</span><span style="color:#e6db74">&#34;服务器信息: &#34;</span> <span style="color:#f92672">+</span> server<span style="color:#f92672">.</span><span style="color:#a6e22e">getInetAddress</span><span style="color:#f92672">()</span> <span style="color:#f92672">+</span> <span style="color:#e6db74">&#34; P: &#34;</span> <span style="color:#f92672">+</span> server<span style="color:#f92672">.</span><span style="color:#a6e22e">getLocalPort</span><span style="color:#f92672">());</span>
 
-        System.out.println(&quot;服务器准备就绪&quot;);
-        System.out.println(&quot;服务器信息: &quot; + server.getInetAddress() + &quot; P: &quot; + server.getLocalPort());
+        <span style="color:#75715e">// 等待客户端连接
+</span><span style="color:#75715e"></span>        <span style="color:#66d9ef">for</span> <span style="color:#f92672">(;;)</span> <span style="color:#f92672">{</span>
+            Socket client <span style="color:#f92672">=</span> server<span style="color:#f92672">.</span><span style="color:#a6e22e">accept</span><span style="color:#f92672">();</span>
+            ClientHandler clientHandler <span style="color:#f92672">=</span> <span style="color:#66d9ef">new</span> ClientHandler<span style="color:#f92672">(</span>client<span style="color:#f92672">);</span>
+            clientHandler<span style="color:#f92672">.</span><span style="color:#a6e22e">start</span><span style="color:#f92672">();</span>
+        <span style="color:#f92672">}</span>
+    <span style="color:#f92672">}</span>
 
-        // 等待客户端连接
-        for (;;) {
-            Socket client = server.accept();
-            ClientHandler clientHandler = new ClientHandler(client);
-            clientHandler.start();
-        }
-    }
+    <span style="color:#75715e">/**
+</span><span style="color:#75715e">     * 客户端消息处理
+</span><span style="color:#75715e">     */</span>
+    <span style="color:#66d9ef">private</span> <span style="color:#66d9ef">static</span> <span style="color:#66d9ef">class</span> <span style="color:#a6e22e">ClientHandler</span> <span style="color:#66d9ef">extends</span> Thread <span style="color:#f92672">{</span>
+        <span style="color:#66d9ef">private</span> Socket socket<span style="color:#f92672">;</span>
+        <span style="color:#66d9ef">private</span> <span style="color:#66d9ef">boolean</span> flag <span style="color:#f92672">=</span> <span style="color:#66d9ef">true</span><span style="color:#f92672">;</span>
 
-    /**
-     * 客户端消息处理
-     */
-    private static class ClientHandler extends Thread {
-        private Socket socket;
-        private boolean flag = true;
+        ClientHandler<span style="color:#f92672">(</span>Socket socket<span style="color:#f92672">)</span> <span style="color:#f92672">{</span>
+            <span style="color:#66d9ef">this</span><span style="color:#f92672">.</span><span style="color:#a6e22e">socket</span> <span style="color:#f92672">=</span> socket<span style="color:#f92672">;</span>
+        <span style="color:#f92672">}</span>
 
-        ClientHandler(Socket socket) {
-            this.socket = socket;
-        }
+        <span style="color:#a6e22e">@Override</span>
+        <span style="color:#66d9ef">public</span> <span style="color:#66d9ef">void</span> <span style="color:#a6e22e">run</span><span style="color:#f92672">()</span> <span style="color:#f92672">{</span>
+            System<span style="color:#f92672">.</span><span style="color:#a6e22e">out</span><span style="color:#f92672">.</span><span style="color:#a6e22e">println</span><span style="color:#f92672">(</span><span style="color:#e6db74">&#34;新客户端连接: &#34;</span> <span style="color:#f92672">+</span> socket<span style="color:#f92672">.</span><span style="color:#a6e22e">getInetAddress</span><span style="color:#f92672">()</span> <span style="color:#f92672">+</span> <span style="color:#e6db74">&#34; P:&#34;</span> <span style="color:#f92672">+</span> socket<span style="color:#f92672">.</span><span style="color:#a6e22e">getPort</span><span style="color:#f92672">());</span>
+            <span style="color:#66d9ef">try</span> <span style="color:#f92672">{</span>
 
-        @Override
-        public void run() {
-            System.out.println(&quot;新客户端连接: &quot; + socket.getInetAddress() + &quot; P:&quot; + socket.getPort());
-            try {
+                PrintStream socketOutPut <span style="color:#f92672">=</span> <span style="color:#66d9ef">new</span> PrintStream<span style="color:#f92672">(</span>socket<span style="color:#f92672">.</span><span style="color:#a6e22e">getOutputStream</span><span style="color:#f92672">());</span>
 
-                PrintStream socketOutPut = new PrintStream(socket.getOutputStream());
+                <span style="color:#75715e">// 得到输入流，用于接收数据
+</span><span style="color:#75715e"></span>                BufferedReader socketInput <span style="color:#f92672">=</span> <span style="color:#66d9ef">new</span> BufferedReader<span style="color:#f92672">(</span><span style="color:#66d9ef">new</span> InputStreamReader<span style="color:#f92672">(</span>socket<span style="color:#f92672">.</span><span style="color:#a6e22e">getInputStream</span><span style="color:#f92672">()));</span>
+                <span style="color:#66d9ef">do</span> <span style="color:#f92672">{</span>
 
-                // 得到输入流，用于接收数据
-                BufferedReader socketInput = new BufferedReader(new InputStreamReader(socket.getInputStream()));
-                do {
+                    <span style="color:#75715e">// 客户端拿到一条数据
+</span><span style="color:#75715e"></span>                    String str <span style="color:#f92672">=</span> socketInput<span style="color:#f92672">.</span><span style="color:#a6e22e">readLine</span><span style="color:#f92672">();</span>
+                    <span style="color:#66d9ef">if</span> <span style="color:#f92672">(</span><span style="color:#e6db74">&#34;bye&#34;</span><span style="color:#f92672">.</span><span style="color:#a6e22e">equalsIgnoreCase</span><span style="color:#f92672">(</span>str<span style="color:#f92672">))</span> <span style="color:#f92672">{</span>
+                        flag <span style="color:#f92672">=</span> <span style="color:#66d9ef">false</span><span style="color:#f92672">;</span>
+                        <span style="color:#75715e">// 回送
+</span><span style="color:#75715e"></span>                        socketOutPut<span style="color:#f92672">.</span><span style="color:#a6e22e">println</span><span style="color:#f92672">(</span><span style="color:#e6db74">&#34;bye&#34;</span><span style="color:#f92672">);</span>
+                    <span style="color:#f92672">}</span> <span style="color:#66d9ef">else</span> <span style="color:#f92672">{</span>
+                        <span style="color:#75715e">// 打印到屏幕，并回送数据长度
+</span><span style="color:#75715e"></span>                        System<span style="color:#f92672">.</span><span style="color:#a6e22e">out</span><span style="color:#f92672">.</span><span style="color:#a6e22e">println</span><span style="color:#f92672">(</span>str<span style="color:#f92672">);</span>
+                        socketOutPut<span style="color:#f92672">.</span><span style="color:#a6e22e">println</span><span style="color:#f92672">(</span><span style="color:#e6db74">&#34;服务器回送: &#34;</span> <span style="color:#f92672">+</span> str<span style="color:#f92672">.</span><span style="color:#a6e22e">length</span><span style="color:#f92672">());</span>
+                    <span style="color:#f92672">}</span>
 
-                    // 客户端拿到一条数据
-                    String str = socketInput.readLine();
-                    if (&quot;bye&quot;.equalsIgnoreCase(str)) {
-                        flag = false;
-                        // 回送
-                        socketOutPut.println(&quot;bye&quot;);
-                    } else {
-                        // 打印到屏幕，并回送数据长度
-                        System.out.println(str);
-                        socketOutPut.println(&quot;服务器回送: &quot; + str.length());
-                    }
+                <span style="color:#f92672">}</span> <span style="color:#66d9ef">while</span> <span style="color:#f92672">(</span>flag<span style="color:#f92672">);</span>
 
-                } while (flag);
+                socketInput<span style="color:#f92672">.</span><span style="color:#a6e22e">close</span><span style="color:#f92672">();</span>
+                socketOutPut<span style="color:#f92672">.</span><span style="color:#a6e22e">close</span><span style="color:#f92672">();</span>
 
-                socketInput.close();
-                socketOutPut.close();
+            <span style="color:#f92672">}</span> <span style="color:#66d9ef">catch</span> <span style="color:#f92672">(</span>Exception e<span style="color:#f92672">)</span> <span style="color:#f92672">{</span>
+                System<span style="color:#f92672">.</span><span style="color:#a6e22e">out</span><span style="color:#f92672">.</span><span style="color:#a6e22e">println</span><span style="color:#f92672">(</span><span style="color:#e6db74">&#34;连接异常断开&#34;</span><span style="color:#f92672">);</span>
+            <span style="color:#f92672">}</span> <span style="color:#66d9ef">finally</span> <span style="color:#f92672">{</span>
+                <span style="color:#66d9ef">try</span> <span style="color:#f92672">{</span>
+                    socket<span style="color:#f92672">.</span><span style="color:#a6e22e">close</span><span style="color:#f92672">();</span>
+                <span style="color:#f92672">}</span> <span style="color:#66d9ef">catch</span> <span style="color:#f92672">(</span>IOException e<span style="color:#f92672">)</span> <span style="color:#f92672">{</span>
+                    e<span style="color:#f92672">.</span><span style="color:#a6e22e">printStackTrace</span><span style="color:#f92672">();</span>
+                <span style="color:#f92672">}</span>
+            <span style="color:#f92672">}</span>
 
-            } catch (Exception e) {
-                System.out.println(&quot;连接异常断开&quot;);
-            } finally {
-                try {
-                    socket.close();
-                } catch (IOException e) {
-                    e.printStackTrace();
-                }
-            }
+            System<span style="color:#f92672">.</span><span style="color:#a6e22e">out</span><span style="color:#f92672">.</span><span style="color:#a6e22e">println</span><span style="color:#f92672">(</span><span style="color:#e6db74">&#34;客户端已退出: &#34;</span> <span style="color:#f92672">+</span> socket<span style="color:#f92672">.</span><span style="color:#a6e22e">getInetAddress</span><span style="color:#f92672">()</span> <span style="color:#f92672">+</span> <span style="color:#e6db74">&#34; P:&#34;</span> <span style="color:#f92672">+</span> socket<span style="color:#f92672">.</span><span style="color:#a6e22e">getPort</span><span style="color:#f92672">());</span>
 
-            System.out.println(&quot;客户端已退出: &quot; + socket.getInetAddress() + &quot; P:&quot; + socket.getPort());
+        <span style="color:#f92672">}</span>
+    <span style="color:#f92672">}</span>
+<span style="color:#f92672">}</span>
+</code></pre></div><h1 id="客服端">客服端</h1>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-java" data-lang="java"><span style="color:#f92672">package</span> networkdemo<span style="color:#f92672">;</span>
+<span style="color:#75715e">/*
+</span><span style="color:#75715e"> * @Description: 请输入....
+</span><span style="color:#75715e"> * @Author: 麦子
+</span><span style="color:#75715e"> * @Date: 2020-01-06 20:29:40
+</span><span style="color:#75715e"> * @LastEditTime : 2020-01-06 22:02:45
+</span><span style="color:#75715e"> * @LastEditors  : 麦子
+</span><span style="color:#75715e"> */</span>
 
-        }
-    }
-}
-</code></pre>
+<span style="color:#f92672">import</span> java.io.BufferedReader<span style="color:#f92672">;</span>
+<span style="color:#f92672">import</span> java.io.IOException<span style="color:#f92672">;</span>
+<span style="color:#f92672">import</span> java.io.InputStream<span style="color:#f92672">;</span>
+<span style="color:#f92672">import</span> java.io.InputStreamReader<span style="color:#f92672">;</span>
+<span style="color:#f92672">import</span> java.io.OutputStream<span style="color:#f92672">;</span>
+<span style="color:#f92672">import</span> java.io.PrintStream<span style="color:#f92672">;</span>
+<span style="color:#f92672">import</span> java.net.Inet4Address<span style="color:#f92672">;</span>
+<span style="color:#f92672">import</span> java.net.InetSocketAddress<span style="color:#f92672">;</span>
+<span style="color:#f92672">import</span> java.net.Socket<span style="color:#f92672">;</span>
+<span style="color:#f92672">import</span> java.net.SocketException<span style="color:#f92672">;</span>
+<span style="color:#f92672">import</span> java.net.UnknownHostException<span style="color:#f92672">;</span>
+<span style="color:#f92672">import</span> java.util.concurrent.TimeUnit<span style="color:#f92672">;</span>
 
-<h1 id="客服端">客服端</h1>
+<span style="color:#66d9ef">public</span> <span style="color:#66d9ef">class</span> <span style="color:#a6e22e">TCPClient</span> <span style="color:#f92672">{</span>
 
-<pre><code class="language-java">package networkdemo;
-/*
- * @Description: 请输入....
- * @Author: 麦子
- * @Date: 2020-01-06 20:29:40
- * @LastEditTime : 2020-01-06 22:02:45
- * @LastEditors  : 麦子
- */
+    <span style="color:#66d9ef">public</span> <span style="color:#66d9ef">static</span> <span style="color:#66d9ef">void</span> <span style="color:#a6e22e">main</span><span style="color:#f92672">(</span>String<span style="color:#f92672">[]</span> args<span style="color:#f92672">)</span> <span style="color:#66d9ef">throws</span> UnknownHostException<span style="color:#f92672">,</span> IOException <span style="color:#f92672">{</span>
+        Socket socket <span style="color:#f92672">=</span> <span style="color:#66d9ef">new</span> Socket<span style="color:#f92672">();</span>
+        <span style="color:#75715e">// 超时时间
+</span><span style="color:#75715e"></span>        socket<span style="color:#f92672">.</span><span style="color:#a6e22e">setSoTimeout</span><span style="color:#f92672">(</span>3_000<span style="color:#f92672">);</span>
+        <span style="color:#75715e">// 连接本地， 端口2000，超时时间是3000
+</span><span style="color:#75715e"></span>        socket<span style="color:#f92672">.</span><span style="color:#a6e22e">connect</span><span style="color:#f92672">(</span><span style="color:#66d9ef">new</span> InetSocketAddress<span style="color:#f92672">(</span>Inet4Address<span style="color:#f92672">.</span><span style="color:#a6e22e">getLocalHost</span><span style="color:#f92672">(),</span> 2_000<span style="color:#f92672">),</span> 3_000<span style="color:#f92672">);</span>
 
-import java.io.BufferedReader;
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.InputStreamReader;
-import java.io.OutputStream;
-import java.io.PrintStream;
-import java.net.Inet4Address;
-import java.net.InetSocketAddress;
-import java.net.Socket;
-import java.net.SocketException;
-import java.net.UnknownHostException;
-import java.util.concurrent.TimeUnit;
+        System<span style="color:#f92672">.</span><span style="color:#a6e22e">out</span><span style="color:#f92672">.</span><span style="color:#a6e22e">println</span><span style="color:#f92672">(</span><span style="color:#e6db74">&#34;已发起服务器连接，并进入后续流程&#34;</span><span style="color:#f92672">);</span>
+        System<span style="color:#f92672">.</span><span style="color:#a6e22e">out</span><span style="color:#f92672">.</span><span style="color:#a6e22e">println</span><span style="color:#f92672">(</span><span style="color:#e6db74">&#34;客户端信息: &#34;</span> <span style="color:#f92672">+</span> socket<span style="color:#f92672">.</span><span style="color:#a6e22e">getLocalAddress</span><span style="color:#f92672">()</span> <span style="color:#f92672">+</span> <span style="color:#e6db74">&#34;  P:&#34;</span> <span style="color:#f92672">+</span> socket<span style="color:#f92672">.</span><span style="color:#a6e22e">getLocalPort</span><span style="color:#f92672">());</span>
+        System<span style="color:#f92672">.</span><span style="color:#a6e22e">out</span><span style="color:#f92672">.</span><span style="color:#a6e22e">println</span><span style="color:#f92672">(</span><span style="color:#e6db74">&#34;服务器信息: &#34;</span> <span style="color:#f92672">+</span> socket<span style="color:#f92672">.</span><span style="color:#a6e22e">getInetAddress</span><span style="color:#f92672">()</span> <span style="color:#f92672">+</span> <span style="color:#e6db74">&#34; P:&#34;</span> <span style="color:#f92672">+</span> socket<span style="color:#f92672">.</span><span style="color:#a6e22e">getPort</span><span style="color:#f92672">());</span>
 
-public class TCPClient {
+        <span style="color:#66d9ef">try</span> <span style="color:#f92672">{</span>
+            <span style="color:#75715e">// 发送接收数据
+</span><span style="color:#75715e"></span>            todo<span style="color:#f92672">(</span>socket<span style="color:#f92672">);</span>
+        <span style="color:#f92672">}</span> <span style="color:#66d9ef">catch</span> <span style="color:#f92672">(</span>Exception e<span style="color:#f92672">)</span> <span style="color:#f92672">{</span>
+            System<span style="color:#f92672">.</span><span style="color:#a6e22e">out</span><span style="color:#f92672">.</span><span style="color:#a6e22e">println</span><span style="color:#f92672">(</span><span style="color:#e6db74">&#34;异常关闭&#34;</span><span style="color:#f92672">);</span>
+        <span style="color:#f92672">}</span>
 
-    public static void main(String[] args) throws UnknownHostException, IOException {
-        Socket socket = new Socket();
-        // 超时时间
-        socket.setSoTimeout(3_000);
-        // 连接本地， 端口2000，超时时间是3000
-        socket.connect(new InetSocketAddress(Inet4Address.getLocalHost(), 2_000), 3_000);
+        socket<span style="color:#f92672">.</span><span style="color:#a6e22e">close</span><span style="color:#f92672">();</span>
+        System<span style="color:#f92672">.</span><span style="color:#a6e22e">out</span><span style="color:#f92672">.</span><span style="color:#a6e22e">println</span><span style="color:#f92672">(</span><span style="color:#e6db74">&#34;客户端已退出&#34;</span><span style="color:#f92672">);</span>
 
-        System.out.println(&quot;已发起服务器连接，并进入后续流程&quot;);
-        System.out.println(&quot;客户端信息: &quot; + socket.getLocalAddress() + &quot;  P:&quot; + socket.getLocalPort());
-        System.out.println(&quot;服务器信息: &quot; + socket.getInetAddress() + &quot; P:&quot; + socket.getPort());
+    <span style="color:#f92672">}</span>
 
-        try {
-            // 发送接收数据
-            todo(socket);
-        } catch (Exception e) {
-            System.out.println(&quot;异常关闭&quot;);
-        }
+    <span style="color:#75715e">//
+</span><span style="color:#75715e"></span>    <span style="color:#66d9ef">private</span> <span style="color:#66d9ef">static</span> <span style="color:#66d9ef">void</span> <span style="color:#a6e22e">todo</span><span style="color:#f92672">(</span>Socket client<span style="color:#f92672">)</span> <span style="color:#66d9ef">throws</span> IOException<span style="color:#f92672">,</span> InterruptedException <span style="color:#f92672">{</span>
+        <span style="color:#75715e">// 构建键盘输入流
+</span><span style="color:#75715e"></span>        InputStream in <span style="color:#f92672">=</span> System<span style="color:#f92672">.</span><span style="color:#a6e22e">in</span><span style="color:#f92672">;</span>
+        BufferedReader input <span style="color:#f92672">=</span> <span style="color:#66d9ef">new</span> BufferedReader<span style="color:#f92672">(</span><span style="color:#66d9ef">new</span> InputStreamReader<span style="color:#f92672">(</span>in<span style="color:#f92672">));</span>
 
-        socket.close();
-        System.out.println(&quot;客户端已退出&quot;);
+        <span style="color:#75715e">// 得到Socket输出流，并转换为打印流
+</span><span style="color:#75715e"></span>        OutputStream outputStream <span style="color:#f92672">=</span> client<span style="color:#f92672">.</span><span style="color:#a6e22e">getOutputStream</span><span style="color:#f92672">();</span>
+        PrintStream socketPrintStream <span style="color:#f92672">=</span> <span style="color:#66d9ef">new</span> PrintStream<span style="color:#f92672">(</span>outputStream<span style="color:#f92672">);</span>
 
-    }
+        <span style="color:#75715e">// 从服务器获取数据
+</span><span style="color:#75715e"></span>        InputStream inputStream <span style="color:#f92672">=</span> client<span style="color:#f92672">.</span><span style="color:#a6e22e">getInputStream</span><span style="color:#f92672">();</span>
+        BufferedReader socketBufferedReader <span style="color:#f92672">=</span> <span style="color:#66d9ef">new</span> BufferedReader<span style="color:#f92672">(</span><span style="color:#66d9ef">new</span> InputStreamReader<span style="color:#f92672">(</span>inputStream<span style="color:#f92672">));</span>
+        <span style="color:#66d9ef">boolean</span> flag <span style="color:#f92672">=</span> <span style="color:#66d9ef">true</span><span style="color:#f92672">;</span>
+        <span style="color:#66d9ef">do</span> <span style="color:#f92672">{</span>
+            <span style="color:#75715e">// 键盘读取一行
+</span><span style="color:#75715e"></span>            String str <span style="color:#f92672">=</span> input<span style="color:#f92672">.</span><span style="color:#a6e22e">readLine</span><span style="color:#f92672">();</span>
+            <span style="color:#75715e">// 发送到服务器
+</span><span style="color:#75715e"></span>            socketPrintStream<span style="color:#f92672">.</span><span style="color:#a6e22e">println</span><span style="color:#f92672">(</span>str<span style="color:#f92672">);</span>
 
-    //
-    private static void todo(Socket client) throws IOException, InterruptedException {
-        // 构建键盘输入流
-        InputStream in = System.in;
-        BufferedReader input = new BufferedReader(new InputStreamReader(in));
+            System<span style="color:#f92672">.</span><span style="color:#a6e22e">out</span><span style="color:#f92672">.</span><span style="color:#a6e22e">println</span><span style="color:#f92672">(</span><span style="color:#e6db74">&#34;我在等待-----------------&#34;</span><span style="color:#f92672">);</span>
+            TimeUnit<span style="color:#f92672">.</span><span style="color:#a6e22e">SECONDS</span><span style="color:#f92672">.</span><span style="color:#a6e22e">sleep</span><span style="color:#f92672">(</span>2<span style="color:#f92672">);</span>
 
-        // 得到Socket输出流，并转换为打印流
-        OutputStream outputStream = client.getOutputStream();
-        PrintStream socketPrintStream = new PrintStream(outputStream);
+            <span style="color:#75715e">// 从服务器读取一行
+</span><span style="color:#75715e"></span>            String echo <span style="color:#f92672">=</span> socketBufferedReader<span style="color:#f92672">.</span><span style="color:#a6e22e">readLine</span><span style="color:#f92672">();</span>
+            <span style="color:#66d9ef">if</span> <span style="color:#f92672">(</span><span style="color:#e6db74">&#34;bye&#34;</span><span style="color:#f92672">.</span><span style="color:#a6e22e">equalsIgnoreCase</span><span style="color:#f92672">(</span>echo<span style="color:#f92672">))</span> <span style="color:#f92672">{</span>
+                flag <span style="color:#f92672">=</span> <span style="color:#66d9ef">false</span><span style="color:#f92672">;</span>
+            <span style="color:#f92672">}</span> <span style="color:#66d9ef">else</span> <span style="color:#f92672">{</span>
+                System<span style="color:#f92672">.</span><span style="color:#a6e22e">out</span><span style="color:#f92672">.</span><span style="color:#a6e22e">println</span><span style="color:#f92672">(</span>echo<span style="color:#f92672">);</span>
+            <span style="color:#f92672">}</span>
+        <span style="color:#f92672">}</span> <span style="color:#66d9ef">while</span> <span style="color:#f92672">(</span>flag<span style="color:#f92672">);</span>
 
-        // 从服务器获取数据
-        InputStream inputStream = client.getInputStream();
-        BufferedReader socketBufferedReader = new BufferedReader(new InputStreamReader(inputStream));
-        boolean flag = true;
-        do {
-            // 键盘读取一行
-            String str = input.readLine();
-            // 发送到服务器
-            socketPrintStream.println(str);
+        <span style="color:#75715e">// 资源释放
+</span><span style="color:#75715e"></span>        socketPrintStream<span style="color:#f92672">.</span><span style="color:#a6e22e">close</span><span style="color:#f92672">();</span>
+        socketBufferedReader<span style="color:#f92672">.</span><span style="color:#a6e22e">close</span><span style="color:#f92672">();</span>
+    <span style="color:#f92672">}</span>
 
-            System.out.println(&quot;我在等待-----------------&quot;);
-            TimeUnit.SECONDS.sleep(2);
-
-            // 从服务器读取一行
-            String echo = socketBufferedReader.readLine();
-            if (&quot;bye&quot;.equalsIgnoreCase(echo)) {
-                flag = false;
-            } else {
-                System.out.println(echo);
-            }
-        } while (flag);
-
-        // 资源释放
-        socketPrintStream.close();
-        socketBufferedReader.close();
-    }
-
-}
-</code></pre>
-
-<h1 id="运行结果">运行结果</h1>
-
-<pre><code class="language-java">服务器准备就绪
-服务器信息: 0.0.0.0/0.0.0.0 P: 2000
-新客户端连接: /127.0.0.1 P:63223
+<span style="color:#f92672">}</span>
+</code></pre></div><h1 id="运行结果">运行结果</h1>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-java" data-lang="java">服务器准备就绪
+服务器信息: 0<span style="color:#f92672">.</span><span style="color:#a6e22e">0</span><span style="color:#f92672">.</span><span style="color:#a6e22e">0</span><span style="color:#f92672">.</span><span style="color:#a6e22e">0</span><span style="color:#f92672">/</span>0<span style="color:#f92672">.</span><span style="color:#a6e22e">0</span><span style="color:#f92672">.</span><span style="color:#a6e22e">0</span><span style="color:#f92672">.</span><span style="color:#a6e22e">0</span> P<span style="color:#f92672">:</span> 2000
+新客户端连接: <span style="color:#f92672">/</span>127<span style="color:#f92672">.</span><span style="color:#a6e22e">0</span><span style="color:#f92672">.</span><span style="color:#a6e22e">0</span><span style="color:#f92672">.</span><span style="color:#a6e22e">1</span> P<span style="color:#f92672">:</span>63223
 我是麦子
-</code></pre>
-
-<pre><code>已发起服务器连接，并进入后续流程
+</code></pre></div><pre tabindex="0"><code>已发起服务器连接，并进入后续流程
 客户端信息: /127.0.0.1  P:63223
 服务器信息: localhost/127.0.0.1 P:2000
 我是麦子
 我在等待-----------------
 服务器回送: 4
-</code></pre>
-
-<h1 id="注意">注意</h1>
-
+</code></pre><h1 id="注意">注意</h1>
 <p>TCP上面的这种聊天是一种，发送信息， 然后等待服务器给的回复的模式。他是必须等待那边的返回。优化的在后面博客进行处理。</p>
 
 
@@ -542,14 +526,7 @@ public class TCPClient {
                         <a class="catalog-toggle" style="font-size: 24px;" href="index.html#">目录结构</a>
                     </h4>
                     <ul class="catalog-body"></ul>
-                    <nav id="TableOfContents">
-<ul>
-<li><a href="#服务端">服务端</a></li>
-<li><a href="#客服端">客服端</a></li>
-<li><a href="#运行结果">运行结果</a></li>
-<li><a href="#注意">注意</a></li>
-</ul>
-</nav>
+                    <nav id="TableOfContents"></nav>
                     <br>
                     <br>
                     <br>
@@ -573,9 +550,6 @@ public class TCPClient {
                         
                         
                         
-                        <a href="/tags/" title="">
-                            
-                        </a>
                         
                         
                         
@@ -585,101 +559,6 @@ public class TCPClient {
                         
                         
                         
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        <a href="/tags/qt" title="QT">
-                            QT
-                        </a>
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        <a href="/tags/zookeeper" title="Zookeeper">
-                            Zookeeper
-                        </a>
                         
                         
                         
@@ -719,8 +598,10 @@ public class TCPClient {
                         
                         
                         
-                        <a href="/tags/elasticsearch" title="elasticSearch">
-                            elasticSearch
+                        
+                        
+                        <a href="/tags/elasticsearch" title="elasticsearch">
+                            elasticsearch
                         </a>
                         
                         
@@ -731,9 +612,27 @@ public class TCPClient {
                         
                         
                         
-                        <a href="/tags/golang" title="golang">
-                            golang
-                        </a>
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
                         
                         
                         
@@ -771,9 +670,21 @@ public class TCPClient {
                         
                         
                         
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
                         <a href="/tags/jvm" title="jvm">
                             jvm
                         </a>
+                        
+                        
+                        
+                        
                         
                         
                         
@@ -797,9 +708,19 @@ public class TCPClient {
                         
                         
                         
+                        
+                        
+                        
+                        
+                        
+                        
                         <a href="/tags/mongodb" title="mongodb">
                             mongodb
                         </a>
+                        
+                        
+                        
+                        
                         
                         
                         
@@ -810,10 +731,6 @@ public class TCPClient {
                         </a>
                         
                         
-                        
-                        <a href="/tags/mycat" title="mycat">
-                            mycat
-                        </a>
                         
                         
                         
@@ -827,9 +744,17 @@ public class TCPClient {
                         
                         
                         
-                        <a href="/tags/nginx" title="nginx">
-                            nginx
-                        </a>
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
                         
                         
                         
@@ -853,8 +778,22 @@ public class TCPClient {
                         
                         
                         
+                        
+                        
                         <a href="/tags/rocketmq" title="rocketmq">
                             rocketmq
+                        </a>
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        <a href="/tags/security%E6%A1%86%E6%9E%B6%E5%AD%A6%E4%B9%A0" title="security框架学习">
+                            security框架学习
                         </a>
                         
                         
@@ -881,17 +820,11 @@ public class TCPClient {
                         
                         
                         
-                        <a href="/tags/springcloud" title="springCloud">
-                            springCloud
-                        </a>
-                        
-                        
-                        
-                        
-                        
                         <a href="/tags/springboot" title="springboot">
                             springboot
                         </a>
+                        
+                        
                         
                         
                         
@@ -905,6 +838,9 @@ public class TCPClient {
                         
                         
                         
+                        <a href="/tags/springcloud" title="springcloud">
+                            springcloud
+                        </a>
                         
                         
                         
@@ -930,6 +866,33 @@ public class TCPClient {
                         
                         
                         
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        <a href="/tags/zookeeper" title="zookeeper">
+                            zookeeper
+                        </a>
                         
                         
                         
@@ -989,6 +952,8 @@ public class TCPClient {
                         
                         
                         
+                        
+                        
                         <a href="/tags/%E5%88%86%E5%B8%83%E5%BC%8F%E7%B3%BB%E5%88%97" title="分布式系列">
                             分布式系列
                         </a>
@@ -1008,6 +973,10 @@ public class TCPClient {
                         
                         
                         
+                        
+                        <a href="/tags/%E5%8D%8F%E8%AE%AE%E6%A0%88" title="协议栈">
+                            协议栈
+                        </a>
                         
                         
                         
@@ -1207,6 +1176,12 @@ public class TCPClient {
                         
                         
                         
+                        
+                        
+                        
+                        
+                        
+                        
                         <a href="/tags/%E7%BD%91%E7%BB%9C%E7%BC%96%E7%A8%8B" title="网络编程">
                             网络编程
                         </a>
@@ -1230,6 +1205,10 @@ public class TCPClient {
                         
                         
                         
+                        
+                        <a href="/tags/%E8%AE%A4%E8%AF%81%E5%92%8C%E6%8E%88%E6%9D%83" title="认证和授权">
+                            认证和授权
+                        </a>
                         
                         
                         
@@ -1400,7 +1379,7 @@ public class TCPClient {
                     
                 </ul>
 		<p class="copyright text-muted">
-                    Copyright &copy;  2020
+                    Copyright &copy;  2021
                     <br>
                     <a href="https://themes.gohugo.io/hugo-theme-cleanwhite">CleanWhite Hugo Theme</a> by <a href="https://zhaohuabing.com">Huabing</a> |
                     <iframe

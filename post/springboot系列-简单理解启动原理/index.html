@@ -97,15 +97,15 @@
                     </li>
                     
                     <li>
-                        <a href="/categories/english">English</a>
+                        <a href="/categories/english">english</a>
                     </li>
                     
                     <li>
-                        <a href="/categories/life">Life</a>
+                        <a href="/categories/life">life</a>
                     </li>
                     
                     <li>
-                        <a href="/categories/tech">Tech</a>
+                        <a href="/categories/tech">tech</a>
                     </li>
                     
 
@@ -241,119 +241,80 @@
                 
                 
                 
-                
-
-<p>[TOC]</p>
-
+                <p>[TOC]</p>
 <p><strong>说明： 下列文章主要对尚硅谷《SpringBoot视频教程》的总结，下列文字描述来源他们的课件。</strong></p>
-
 <p><strong>视频地址： <a href="https://www.bilibili.com/video/av38657363/?p=9">https://www.bilibili.com/video/av38657363/?p=9</a></strong></p>
-
-<p><strong>spingboot版本<version>2.1.5.RELEASE</version></strong></p>
-
+<p><strong>spingboot版本<!-- raw HTML omitted -->2.1.5.RELEASE<!-- raw HTML omitted --></strong></p>
 <h1 id="处理包导入问题">处理包导入问题</h1>
-
-<h2 id="pom-xml">pom.xml</h2>
-
-<pre><code class="language-xml">&lt;parent&gt;
-  &lt;groupId&gt;org.springframework.boot&lt;/groupId&gt;
-  &lt;artifactId&gt;spring-boot-starter-parent&lt;/artifactId&gt;
-  &lt;version&gt;2.1.5.RELEASE&lt;/version&gt;
-  &lt;relativePath/&gt; 
-&lt;/parent&gt;
-</code></pre>
-
-<p>用vscode中，显示所有依赖，所有需要的包和对应的版本都已经处理好的了。如下：</p>
-
-<p><img src="/img/5-24-02.png" alt="5-24-02" /></p>
-
-<p><img src="/img/5-24-01.png" alt="5-24-01" /></p>
-
+<h2 id="pomxml">pom.xml</h2>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-xml" data-lang="xml"><span style="color:#f92672">&lt;parent&gt;</span>
+  <span style="color:#f92672">&lt;groupId&gt;</span>org.springframework.boot<span style="color:#f92672">&lt;/groupId&gt;</span>
+  <span style="color:#f92672">&lt;artifactId&gt;</span>spring-boot-starter-parent<span style="color:#f92672">&lt;/artifactId&gt;</span>
+  <span style="color:#f92672">&lt;version&gt;</span>2.1.5.RELEASE<span style="color:#f92672">&lt;/version&gt;</span>
+  <span style="color:#f92672">&lt;relativePath/&gt;</span> 
+<span style="color:#f92672">&lt;/parent&gt;</span>
+</code></pre></div><p>用vscode中，显示所有依赖，所有需要的包和对应的版本都已经处理好的了。如下：</p>
+<p><img src="/img/5-24-02.png" alt="5-24-02"></p>
+<p><img src="/img/5-24-01.png" alt="5-24-01"></p>
 <h2 id="spring-boot-starter">spring-boot-starter</h2>
-
 <p>spring-boot-starter：spring-boot场景启动器；帮我们导入了web模块正常运行所依赖的组件；</p>
-
 <p>Spring Boot将所有的功能场景都抽取出来，做成一个个的starters（启动器），只需要在项目里面引入这些starter相关场景的所有依赖都会导入进来。要用什么功能就导入什么场景的启动器</p>
-
-<p><img src="/img/5-24-03.png" alt="5-24-03" /></p>
-
+<p><img src="/img/5-24-03.png" alt="5-24-03"></p>
 <h1 id="扫描所有包导入所有类">扫描所有包导入所有类</h1>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-java" data-lang="java"><span style="color:#a6e22e">@Target</span><span style="color:#f92672">(</span>ElementType<span style="color:#f92672">.</span><span style="color:#a6e22e">TYPE</span><span style="color:#f92672">)</span>
+<span style="color:#a6e22e">@Retention</span><span style="color:#f92672">(</span>RetentionPolicy<span style="color:#f92672">.</span><span style="color:#a6e22e">RUNTIME</span><span style="color:#f92672">)</span>
+<span style="color:#a6e22e">@Documented</span>
+<span style="color:#a6e22e">@Inherited</span>
+<span style="color:#a6e22e">@SpringBootConfiguration</span>
+<span style="color:#a6e22e">@EnableAutoConfiguration</span>
+<span style="color:#a6e22e">@ComponentScan</span><span style="color:#f92672">(</span>excludeFilters <span style="color:#f92672">=</span> <span style="color:#f92672">{</span>
+		<span style="color:#a6e22e">@Filter</span><span style="color:#f92672">(</span>type <span style="color:#f92672">=</span> FilterType<span style="color:#f92672">.</span><span style="color:#a6e22e">CUSTOM</span><span style="color:#f92672">,</span> classes <span style="color:#f92672">=</span> TypeExcludeFilter<span style="color:#f92672">.</span><span style="color:#a6e22e">class</span><span style="color:#f92672">),</span>
+		<span style="color:#a6e22e">@Filter</span><span style="color:#f92672">(</span>type <span style="color:#f92672">=</span> FilterType<span style="color:#f92672">.</span><span style="color:#a6e22e">CUSTOM</span><span style="color:#f92672">,</span>
+				classes <span style="color:#f92672">=</span> AutoConfigurationExcludeFilter<span style="color:#f92672">.</span><span style="color:#a6e22e">class</span><span style="color:#f92672">)</span> <span style="color:#f92672">})</span>
+<span style="color:#66d9ef">public</span> <span style="color:#a6e22e">@interface</span> SpringBootApplication <span style="color:#f92672">{</span>
+</code></pre></div><p>点击@EnableAutoConfiguration</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-java" data-lang="java"><span style="color:#a6e22e">@Target</span><span style="color:#f92672">(</span>ElementType<span style="color:#f92672">.</span><span style="color:#a6e22e">TYPE</span><span style="color:#f92672">)</span>
+<span style="color:#a6e22e">@Retention</span><span style="color:#f92672">(</span>RetentionPolicy<span style="color:#f92672">.</span><span style="color:#a6e22e">RUNTIME</span><span style="color:#f92672">)</span>
+<span style="color:#a6e22e">@Documented</span>
+<span style="color:#a6e22e">@Inherited</span>
+<span style="color:#a6e22e">@AutoConfigurationPackage</span>
+<span style="color:#a6e22e">@Import</span><span style="color:#f92672">(</span>AutoConfigurationImportSelector<span style="color:#f92672">.</span><span style="color:#a6e22e">class</span><span style="color:#f92672">)</span>
+<span style="color:#66d9ef">public</span> <span style="color:#a6e22e">@interface</span> EnableAutoConfiguration <span style="color:#f92672">{</span>
 
-<pre><code class="language-java">@Target(ElementType.TYPE)
-@Retention(RetentionPolicy.RUNTIME)
-@Documented
-@Inherited
-@SpringBootConfiguration
-@EnableAutoConfiguration
-@ComponentScan(excludeFilters = {
-		@Filter(type = FilterType.CUSTOM, classes = TypeExcludeFilter.class),
-		@Filter(type = FilterType.CUSTOM,
-				classes = AutoConfigurationExcludeFilter.class) })
-public @interface SpringBootApplication {
-</code></pre>
+	String ENABLED_OVERRIDE_PROPERTY <span style="color:#f92672">=</span> <span style="color:#e6db74">&#34;spring.boot.enableautoconfiguration&#34;</span><span style="color:#f92672">;</span>
+</code></pre></div><p>点击@AutoConfigurationPackage</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-java" data-lang="java"><span style="color:#a6e22e">@Target</span><span style="color:#f92672">(</span>ElementType<span style="color:#f92672">.</span><span style="color:#a6e22e">TYPE</span><span style="color:#f92672">)</span>
+<span style="color:#a6e22e">@Retention</span><span style="color:#f92672">(</span>RetentionPolicy<span style="color:#f92672">.</span><span style="color:#a6e22e">RUNTIME</span><span style="color:#f92672">)</span>
+<span style="color:#a6e22e">@Documented</span>
+<span style="color:#a6e22e">@Inherited</span>
+<span style="color:#a6e22e">@Import</span><span style="color:#f92672">(</span>AutoConfigurationPackages<span style="color:#f92672">.</span><span style="color:#a6e22e">Registrar</span><span style="color:#f92672">.</span><span style="color:#a6e22e">class</span><span style="color:#f92672">)</span>
+<span style="color:#66d9ef">public</span> <span style="color:#a6e22e">@interface</span> AutoConfigurationPackage <span style="color:#f92672">{</span>
 
-<p>点击@EnableAutoConfiguration</p>
-
-<pre><code class="language-java">@Target(ElementType.TYPE)
-@Retention(RetentionPolicy.RUNTIME)
-@Documented
-@Inherited
-@AutoConfigurationPackage
-@Import(AutoConfigurationImportSelector.class)
-public @interface EnableAutoConfiguration {
-
-	String ENABLED_OVERRIDE_PROPERTY = &quot;spring.boot.enableautoconfiguration&quot;;
-</code></pre>
-
-<p>点击@AutoConfigurationPackage</p>
-
-<pre><code class="language-java">@Target(ElementType.TYPE)
-@Retention(RetentionPolicy.RUNTIME)
-@Documented
-@Inherited
-@Import(AutoConfigurationPackages.Registrar.class)
-public @interface AutoConfigurationPackage {
-
-}
-</code></pre>
-
-<p>查看<strong>Registrar</strong>类，debug如下：</p>
-
-<p><img src="/img/5-24-04.png" alt="5-24-04" /></p>
-
+<span style="color:#f92672">}</span>
+</code></pre></div><p>查看<strong>Registrar</strong>类，debug如下：</p>
+<p><img src="/img/5-24-04.png" alt="5-24-04"></p>
 <p>查看项目目录结构，注意其中的<strong>主配置类（@SpringBootApplication标注的类）目录</strong></p>
-
-<p><img src="/img/Xnip2019-05-24_17-33-47.png" alt="Xnip2019-05-24_17-33-47" /></p>
-
-<p>由上面可以看到，他加载了所有<strong>&ldquo;com.maizi.helloworld.helloword&rdquo;</strong>目录下的所有类。</p>
-
+<p><img src="/img/Xnip2019-05-24_17-33-47.png" alt="Xnip2019-05-24_17-33-47"></p>
+<p>由上面可以看到，他加载了所有**&ldquo;com.maizi.helloworld.helloword&rdquo;**目录下的所有类。</p>
 <p>这样，将主配置类（@SpringBootApplication标注的类）的所在包及下面所有子包里面的所有组件扫描到Spring容器；</p>
-
 <h1 id="加载默认配置文件">加载默认配置文件</h1>
-
 <p>分别点击：</p>
-
 <ol>
-<li><p>@<em>EnableAutoConfiguration</em></p></li>
-
-<li><p>@<em>Import</em>(AutoConfigurationImportSelector.class)</p></li>
+<li>
+<p>@<em>EnableAutoConfiguration</em></p>
+</li>
+<li>
+<p>@<em>Import</em>(AutoConfigurationImportSelector.class)</p>
+</li>
 </ol>
-
 <p>进去AutoConfigurationImportSelector类， debug查看结果如下：</p>
-
-<p><img src="/img/Xnip2019-05-24_17-43-30.png" alt="Xnip2019-05-24_17-43-30" /></p>
-
+<p><img src="/img/Xnip2019-05-24_17-43-30.png" alt="Xnip2019-05-24_17-43-30"></p>
 <p>会给容器中导入非常多的自动配置类（xxxAutoConfiguration）；就是给容器中导入这个场景需要的所有组件，并配置好这些组件；这些配置类就提供了我们在写yml文件的时候，默认的一些属性值， 如下：</p>
-
-<p><img src="/img/Xnip2019-05-24_16-56-51.png" alt="Xnip2019-05-24_16-56-51" /></p>
-
+<p><img src="/img/Xnip2019-05-24_16-56-51.png" alt="Xnip2019-05-24_16-56-51"></p>
 <p><strong>对应的就是   <em>server.port</em>=8081</strong></p>
-
 <p><strong>J2EE的整体整合解决方案和自动配置都在spring-boot-autoconfigure-1.5.9.RELEASE.jar；</strong></p>
-
 <h1 id="springboot知识导图笔记">springboot知识导图笔记</h1>
-
-<p><a href="/img/springboot知识导图笔记.xmind">springboot知识导图笔记.xmind</a></p>
+<p><a href="/img/springboot%E7%9F%A5%E8%AF%86%E5%AF%BC%E5%9B%BE%E7%AC%94%E8%AE%B0.xmind">springboot知识导图笔记.xmind</a></p>
 
 
                 
@@ -461,16 +422,10 @@ public @interface AutoConfigurationPackage {
                     </h4>
                     <ul class="catalog-body"></ul>
                     <nav id="TableOfContents">
-<ul>
-<li><a href="#处理包导入问题">处理包导入问题</a>
-<ul>
-<li><a href="#pom-xml">pom.xml</a></li>
-<li><a href="#spring-boot-starter">spring-boot-starter</a></li>
-</ul></li>
-<li><a href="#扫描所有包导入所有类">扫描所有包导入所有类</a></li>
-<li><a href="#加载默认配置文件">加载默认配置文件</a></li>
-<li><a href="#springboot知识导图笔记">springboot知识导图笔记</a></li>
-</ul>
+  <ul>
+    <li><a href="#pomxml">pom.xml</a></li>
+    <li><a href="#spring-boot-starter">spring-boot-starter</a></li>
+  </ul>
 </nav>
                     <br>
                     <br>
@@ -495,9 +450,6 @@ public @interface AutoConfigurationPackage {
                         
                         
                         
-                        <a href="/tags/" title="">
-                            
-                        </a>
                         
                         
                         
@@ -507,101 +459,6 @@ public @interface AutoConfigurationPackage {
                         
                         
                         
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        <a href="/tags/qt" title="QT">
-                            QT
-                        </a>
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        <a href="/tags/zookeeper" title="Zookeeper">
-                            Zookeeper
-                        </a>
                         
                         
                         
@@ -641,8 +498,10 @@ public @interface AutoConfigurationPackage {
                         
                         
                         
-                        <a href="/tags/elasticsearch" title="elasticSearch">
-                            elasticSearch
+                        
+                        
+                        <a href="/tags/elasticsearch" title="elasticsearch">
+                            elasticsearch
                         </a>
                         
                         
@@ -653,9 +512,27 @@ public @interface AutoConfigurationPackage {
                         
                         
                         
-                        <a href="/tags/golang" title="golang">
-                            golang
-                        </a>
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
                         
                         
                         
@@ -693,9 +570,21 @@ public @interface AutoConfigurationPackage {
                         
                         
                         
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
                         <a href="/tags/jvm" title="jvm">
                             jvm
                         </a>
+                        
+                        
+                        
+                        
                         
                         
                         
@@ -719,9 +608,19 @@ public @interface AutoConfigurationPackage {
                         
                         
                         
+                        
+                        
+                        
+                        
+                        
+                        
                         <a href="/tags/mongodb" title="mongodb">
                             mongodb
                         </a>
+                        
+                        
+                        
+                        
                         
                         
                         
@@ -732,10 +631,6 @@ public @interface AutoConfigurationPackage {
                         </a>
                         
                         
-                        
-                        <a href="/tags/mycat" title="mycat">
-                            mycat
-                        </a>
                         
                         
                         
@@ -749,9 +644,17 @@ public @interface AutoConfigurationPackage {
                         
                         
                         
-                        <a href="/tags/nginx" title="nginx">
-                            nginx
-                        </a>
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
                         
                         
                         
@@ -775,8 +678,22 @@ public @interface AutoConfigurationPackage {
                         
                         
                         
+                        
+                        
                         <a href="/tags/rocketmq" title="rocketmq">
                             rocketmq
+                        </a>
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        <a href="/tags/security%E6%A1%86%E6%9E%B6%E5%AD%A6%E4%B9%A0" title="security框架学习">
+                            security框架学习
                         </a>
                         
                         
@@ -803,17 +720,11 @@ public @interface AutoConfigurationPackage {
                         
                         
                         
-                        <a href="/tags/springcloud" title="springCloud">
-                            springCloud
-                        </a>
-                        
-                        
-                        
-                        
-                        
                         <a href="/tags/springboot" title="springboot">
                             springboot
                         </a>
+                        
+                        
                         
                         
                         
@@ -827,6 +738,9 @@ public @interface AutoConfigurationPackage {
                         
                         
                         
+                        <a href="/tags/springcloud" title="springcloud">
+                            springcloud
+                        </a>
                         
                         
                         
@@ -852,6 +766,33 @@ public @interface AutoConfigurationPackage {
                         
                         
                         
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        <a href="/tags/zookeeper" title="zookeeper">
+                            zookeeper
+                        </a>
                         
                         
                         
@@ -911,6 +852,8 @@ public @interface AutoConfigurationPackage {
                         
                         
                         
+                        
+                        
                         <a href="/tags/%E5%88%86%E5%B8%83%E5%BC%8F%E7%B3%BB%E5%88%97" title="分布式系列">
                             分布式系列
                         </a>
@@ -930,6 +873,10 @@ public @interface AutoConfigurationPackage {
                         
                         
                         
+                        
+                        <a href="/tags/%E5%8D%8F%E8%AE%AE%E6%A0%88" title="协议栈">
+                            协议栈
+                        </a>
                         
                         
                         
@@ -1129,6 +1076,12 @@ public @interface AutoConfigurationPackage {
                         
                         
                         
+                        
+                        
+                        
+                        
+                        
+                        
                         <a href="/tags/%E7%BD%91%E7%BB%9C%E7%BC%96%E7%A8%8B" title="网络编程">
                             网络编程
                         </a>
@@ -1152,6 +1105,10 @@ public @interface AutoConfigurationPackage {
                         
                         
                         
+                        
+                        <a href="/tags/%E8%AE%A4%E8%AF%81%E5%92%8C%E6%8E%88%E6%9D%83" title="认证和授权">
+                            认证和授权
+                        </a>
                         
                         
                         
@@ -1322,7 +1279,7 @@ public @interface AutoConfigurationPackage {
                     
                 </ul>
 		<p class="copyright text-muted">
-                    Copyright &copy;  2020
+                    Copyright &copy;  2021
                     <br>
                     <a href="https://themes.gohugo.io/hugo-theme-cleanwhite">CleanWhite Hugo Theme</a> by <a href="https://zhaohuabing.com">Huabing</a> |
                     <iframe

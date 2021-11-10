@@ -97,15 +97,15 @@
                     </li>
                     
                     <li>
-                        <a href="/categories/english">English</a>
+                        <a href="/categories/english">english</a>
                     </li>
                     
                     <li>
-                        <a href="/categories/life">Life</a>
+                        <a href="/categories/life">life</a>
                     </li>
                     
                     <li>
-                        <a href="/categories/tech">Tech</a>
+                        <a href="/categories/tech">tech</a>
                     </li>
                     
 
@@ -241,174 +241,142 @@
                 
                 
                 
-                
-
-<p>[TOC]</p>
-
+                <p>[TOC]</p>
 <h3 id="数据切分">数据切分</h3>
-
 <p>数据的切分（Sharding）根据其切分规则的类型，可以分为两种切分模式。一种是按照不同的表（或者 Schema）来切分到不同的数据库（主机）之上，这种切可以称之为数据的垂直（纵向）切分；另外一种则是根据 表中的数据的逻辑关系，将同一个表中的数据按照某种条件拆分到多台数据库（主机）上面，这种切分称之为数 据的水平（横向）切分。</p>
-
 <h3 id="逻辑表和物理表">逻辑表和物理表</h3>
-
 <p>逻辑表：逻辑表可以理解为数据库中的视图，是一张虚拟表。可以映射到一张物理表，也可以由多张物理表组成，这些物理表可以来自于不同的数据源。</p>
-
 <p>物理表：物理表是具体某个数据源中的一张表。</p>
-
 <h3 id="为什么要用mycat">为什么要用MyCat</h3>
-
 <p>转自： <a href="https://blog.csdn.net/nxw_tsp/article/details/56277430">https://blog.csdn.net/nxw_tsp/article/details/56277430</a></p>
-
 <p>***一、什么是MyCat：
 MyCat是一个开源的分布式数据库系统，是一个实现了MySQL协议的服务器，前端用户可以把它看作是一个数据库代理，用MySQL客户端工具和命令行访问，而其后端可以用MySQL原生协议与多个MySQL服务器通信，也可以用JDBC协议与大多数主流数据库服务器通信，其核心功能是分表分库，即将一个大表水平分割为N个小表，存储在后端MySQL服务器里或者其他数据库里。</p>
-
 <p>MyCat发展到目前的版本，已经不是一个单纯的MySQL代理了，它的后端可以支持MySQL、SQL Server、Oracle、DB2、PostgreSQL等主流数据库，也支持MongoDB这种新型NoSQL方式的存储，未来还会支持更多类型的存储。而在最终用户看来，无论是那种存储方式，在MyCat里，都是一个传统的数据库表，支持标准的SQL语句进行数据的操作，这样一来，对前端业务系统来说，可以大幅降低开发难度，提升开发速度</p>
-
 <p>所以可以这样理解：数据库是对底层存储文件的抽象，而Mycat是对数据库的抽象。他是所有背后数据库的一个管理者。 也是代码和数据库的一个接口。</p>
-
-<h3 id="mysql主从复制-docker">mysql主从复制(docker)</h3>
-
+<h3 id="mysql主从复制docker">mysql主从复制(docker)</h3>
 <ol>
 <li>mysql配置文件修改</li>
 </ol>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-yaml" data-lang="yaml">
+<span style="color:#75715e">#拉取mysql镜像，进入容器，修改/etc/mysql/my.cnf</span>
 
-<pre><code class="language-yaml">
-#拉取mysql镜像，进入容器，修改/etc/mysql/my.cnf
+<span style="color:#75715e">#在master中这个文件加入</span>
+[<span style="color:#ae81ff">mysqld]</span>
+<span style="color:#ae81ff">log-bin=mysql-bin</span> <span style="color:#75715e">#开启二进制日志</span>
+<span style="color:#ae81ff">server-id=1</span> <span style="color:#75715e"># 唯一服务器ID，非0整数，不能和其他服务器的server-id重复</span>
 
-#在master中这个文件加入
-[mysqld]
-log-bin=mysql-bin #开启二进制日志
-server-id=1 # 唯一服务器ID，非0整数，不能和其他服务器的server-id重复
+<span style="color:#75715e">#在slave中这个文件加入</span>
+[<span style="color:#ae81ff">mysqld]</span>
+<span style="color:#ae81ff">log-bin=mysql-bin</span>
+<span style="color:#ae81ff">server-id=2</span>
 
-#在slave中这个文件加入
-[mysqld]
-log-bin=mysql-bin
-server-id=2
+<span style="color:#75715e">#这里面还有很多配置， 有需要在查询配置。</span>
 
-#这里面还有很多配置， 有需要在查询配置。
-
-配置好后， 重新启动容器
-</code></pre>
-
-<ol>
+<span style="color:#ae81ff">配置好后， 重新启动容器</span>
+</code></pre></div><ol start="2">
 <li>客户端配置主从关系</li>
 </ol>
-
-<pre><code class="language-yaml">#master
-    #用数据库客户端工具连接master数据，执行一下数据，
-    #主要作用： 创建同步账号，允许访问的IP地址为%，%表示通配符
-    GRANT REPLICATION SLAVE ON *.* to 'root'@'%' identified by '123456';  
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-yaml" data-lang="yaml"><span style="color:#75715e">#master</span>
+    <span style="color:#75715e">#用数据库客户端工具连接master数据，执行一下数据，</span>
+    <span style="color:#75715e">#主要作用： 创建同步账号，允许访问的IP地址为%，%表示通配符</span>
+    <span style="color:#ae81ff">GRANT REPLICATION SLAVE ON *.* to &#39;root&#39;@&#39;%&#39; identified by &#39;123456&#39;;  </span>
     
-    #查看状态，记住File、Position的值，在Slaver中将用到
-    show master status;
+    <span style="color:#75715e">#查看状态，记住File、Position的值，在Slaver中将用到</span>
+    <span style="color:#ae81ff">show master status;</span>
     
-#slave    
-   #用数据库客户端工具连接slave数据，执行一下数据，
-   #主要作用： 设置主库链接
-   #主机ip， 不能是127.0.0.1, 如果是的话slave_i_state会是null
-   #MASTER_LOG_FILE 和 MASTER_LOG_POS 这个值，在master上面语句中有
-   #port是容器端口
-   CHANGE MASTER TO MASTER_HOST ='192.168.70.102', MASTER_USER ='root', MASTER_PASSWORD ='123456', MASTER_LOG_FILE ='mysql-bin.000001', MASTER_LOG_POS =429, MASTER_PORT =3306;
+<span style="color:#75715e">#slave    </span>
+   <span style="color:#75715e">#用数据库客户端工具连接slave数据，执行一下数据，</span>
+   <span style="color:#75715e">#主要作用： 设置主库链接</span>
+   <span style="color:#75715e">#主机ip， 不能是127.0.0.1, 如果是的话slave_i_state会是null</span>
+   <span style="color:#75715e">#MASTER_LOG_FILE 和 MASTER_LOG_POS 这个值，在master上面语句中有</span>
+   <span style="color:#75715e">#port是容器端口</span>
+   <span style="color:#ae81ff">CHANGE MASTER TO MASTER_HOST =&#39;192.168.70.102&#39;, MASTER_USER =&#39;root&#39;, MASTER_PASSWORD =&#39;123456&#39;, MASTER_LOG_FILE =&#39;mysql-bin.000001&#39;, MASTER_LOG_POS =429, MASTER_PORT =3306;</span>
     
-    #启动从库同步
-    start slave;
+    <span style="color:#75715e">#启动从库同步</span>
+    <span style="color:#ae81ff">start slave;</span>
     
-    #查看状态
-    show slave status;
+    <span style="color:#75715e">#查看状态</span>
+    <span style="color:#ae81ff">show slave status;</span>
     
- #成功的标志，
-    根据上面的查看状态语句，出现了 
-    slave_io_state:Waiting for master to send event
-    slave_sql_running:Yes
-    slave_io_running:Yes
-    表示已经成功了，现在主从复制已经完成
-</code></pre>
-
-<h3 id="mycat实现读写分离">mycat实现读写分离</h3>
-
+ <span style="color:#75715e">#成功的标志，</span>
+    <span style="color:#ae81ff">根据上面的查看状态语句，出现了 </span>
+    <span style="color:#ae81ff">slave_io_state:Waiting for master to send event</span>
+    <span style="color:#ae81ff">slave_sql_running:Yes</span>
+    <span style="color:#ae81ff">slave_io_running:Yes</span>
+    <span style="color:#ae81ff">表示已经成功了，现在主从复制已经完成</span>
+</code></pre></div><h3 id="mycat实现读写分离">mycat实现读写分离</h3>
 <p>主要是两个文件的修改， 一个是server.xml和schema.xml文件。</p>
-
-<h4 id="schema-xml">schema.xml</h4>
-
-<pre><code class="language-xml">&lt;mycat:schema xmlns:mycat=&quot;http://io.mycat/&quot;&gt;
+<h4 id="schemaxml">schema.xml</h4>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-xml" data-lang="xml"><span style="color:#f92672">&lt;mycat:schema</span> <span style="color:#a6e22e">xmlns:mycat=</span><span style="color:#e6db74">&#34;http://io.mycat/&#34;</span><span style="color:#f92672">&gt;</span>
    1. 这里定义了一个逻辑库，这个workdb是数据库集群对外的一个入口， 这个逻辑库对应的数据分片就是dn1
-   &lt;schema name=&quot;workdb&quot; checkSQLschema=&quot;false&quot; sqlMaxLimit=&quot;100&quot; dataNode=&quot;dn1&quot;&gt;&lt;/schema&gt;
+   <span style="color:#f92672">&lt;schema</span> <span style="color:#a6e22e">name=</span><span style="color:#e6db74">&#34;workdb&#34;</span> <span style="color:#a6e22e">checkSQLschema=</span><span style="color:#e6db74">&#34;false&#34;</span> <span style="color:#a6e22e">sqlMaxLimit=</span><span style="color:#e6db74">&#34;100&#34;</span> <span style="color:#a6e22e">dataNode=</span><span style="color:#e6db74">&#34;dn1&#34;</span><span style="color:#f92672">&gt;&lt;/schema&gt;</span>
    2. 这个数据节点dn1,表示了一个数据库代理，同时他代表的真实的数据库名称是work，如果你在客户端创建新的schemar的时候，可以创建，但是这个schema不可以使用，这里只能对work进行处理。
-  &lt;dataNode name=&quot;dn1&quot; dataHost=&quot;vm3306&quot; database=&quot;work&quot; &gt;&lt;/dataNode&gt;
-        &lt;dataHost name=&quot;vm3306&quot; maxCon=&quot;1000&quot; minCon=&quot;10&quot; balance=&quot;3&quot; writeType=&quot;0&quot; dbType=&quot;mysql&quot; dbDriver=&quot;native&quot;&gt;
+  <span style="color:#f92672">&lt;dataNode</span> <span style="color:#a6e22e">name=</span><span style="color:#e6db74">&#34;dn1&#34;</span> <span style="color:#a6e22e">dataHost=</span><span style="color:#e6db74">&#34;vm3306&#34;</span> <span style="color:#a6e22e">database=</span><span style="color:#e6db74">&#34;work&#34;</span> <span style="color:#f92672">&gt;&lt;/dataNode&gt;</span>
+        <span style="color:#f92672">&lt;dataHost</span> <span style="color:#a6e22e">name=</span><span style="color:#e6db74">&#34;vm3306&#34;</span> <span style="color:#a6e22e">maxCon=</span><span style="color:#e6db74">&#34;1000&#34;</span> <span style="color:#a6e22e">minCon=</span><span style="color:#e6db74">&#34;10&#34;</span> <span style="color:#a6e22e">balance=</span><span style="color:#e6db74">&#34;3&#34;</span> <span style="color:#a6e22e">writeType=</span><span style="color:#e6db74">&#34;0&#34;</span> <span style="color:#a6e22e">dbType=</span><span style="color:#e6db74">&#34;mysql&#34;</span> <span style="color:#a6e22e">dbDriver=</span><span style="color:#e6db74">&#34;native&#34;</span><span style="color:#f92672">&gt;</span>
           3.这个是用于监控服务是正常的
-			    &lt;heartbeat&gt;select user()&lt;/heartbeat&gt;
-			    &lt;writeHost host=&quot;hostM1&quot; url=&quot;192.168.70.102:3306&quot; user=&quot;root&quot; password=&quot;123456&quot;&gt;
-			        &lt;readHost host=&quot;hostS1&quot; url=&quot;192.168.70.102:3307&quot; user=&quot;root&quot; password=&quot;123456&quot;/&gt;
-			    &lt;/writeHost&gt;
-      &lt;/dataHost&gt;
-&lt;/mycat:schema&gt;
+			    <span style="color:#f92672">&lt;heartbeat&gt;</span>select user()<span style="color:#f92672">&lt;/heartbeat&gt;</span>
+			    <span style="color:#f92672">&lt;writeHost</span> <span style="color:#a6e22e">host=</span><span style="color:#e6db74">&#34;hostM1&#34;</span> <span style="color:#a6e22e">url=</span><span style="color:#e6db74">&#34;192.168.70.102:3306&#34;</span> <span style="color:#a6e22e">user=</span><span style="color:#e6db74">&#34;root&#34;</span> <span style="color:#a6e22e">password=</span><span style="color:#e6db74">&#34;123456&#34;</span><span style="color:#f92672">&gt;</span>
+			        <span style="color:#f92672">&lt;readHost</span> <span style="color:#a6e22e">host=</span><span style="color:#e6db74">&#34;hostS1&#34;</span> <span style="color:#a6e22e">url=</span><span style="color:#e6db74">&#34;192.168.70.102:3307&#34;</span> <span style="color:#a6e22e">user=</span><span style="color:#e6db74">&#34;root&#34;</span> <span style="color:#a6e22e">password=</span><span style="color:#e6db74">&#34;123456&#34;</span><span style="color:#f92672">/&gt;</span>
+			    <span style="color:#f92672">&lt;/writeHost&gt;</span>
+      <span style="color:#f92672">&lt;/dataHost&gt;</span>
+<span style="color:#f92672">&lt;/mycat:schema&gt;</span>
 
 负载均衡类型：
 
-（1）balance=&quot;0&quot;, 不开启读写分离机制，所有读操作都发送到当前可用的writeHost 上。
+（1）balance=&#34;0&#34;, 不开启读写分离机制，所有读操作都发送到当前可用的writeHost 上。
 
-（2）balance=&quot;1&quot;，全部的 readHost 与 stand by writeHost 参与 select 语句的负载均衡，简单的说，当双主双从模式(M1-&gt;S1，M2-&gt;S2，并且 M1 与 M2 互为主备)，正常情况下，M2,S1,S2 都参与 select 语句的负载均衡。
+（2）balance=&#34;1&#34;，全部的 readHost 与 stand by writeHost 参与 select 语句的负载均衡，简单的说，当双主双从模式(M1-&gt;S1，M2-&gt;S2，并且 M1 与 M2 互为主备)，正常情况下，M2,S1,S2 都参与 select 语句的负载均衡。
 
-（3）balance=&quot;2&quot;，所有读操作都随机的在 writeHost、 readhost 上分发。
+（3）balance=&#34;2&#34;，所有读操作都随机的在 writeHost、 readhost 上分发。
 
-（4）balance=&quot;3&quot;，所有读请求随机的分发到 wiriterHost 对应的 readhost 执行，writerHost 不负担读压力，注意 balance=3 只在 1.4 及其以后版本有，1.3 没有。
+（4）balance=&#34;3&#34;，所有读请求随机的分发到 wiriterHost 对应的 readhost 执行，writerHost 不负担读压力，注意 balance=3 只在 1.4 及其以后版本有，1.3 没有。
 
 
-writeType=&quot;0&quot;, 所有写操作发送到配置的第一个 writeHost，第一个挂了切到还生存的第二个writeHost，重新启动后已切换后的为准，切换记录在配置文件中:dnindex.properties
+writeType=&#34;0&#34;, 所有写操作发送到配置的第一个 writeHost，第一个挂了切到还生存的第二个writeHost，重新启动后已切换后的为准，切换记录在配置文件中:dnindex.properties
 
-</code></pre>
+</code></pre></div><h4 id="serverxml">server.xml</h4>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-xml" data-lang="xml">配置可以处理的用户，同时这个schemas这个地方就是schema中的逻辑库
 
-<h4 id="server-xml">server.xml</h4>
-
-<pre><code class="language-xml">配置可以处理的用户，同时这个schemas这个地方就是schema中的逻辑库
-
-&lt;user name=&quot;root&quot;&gt;
-		&lt;property name=&quot;password&quot;&gt;123456&lt;/property&gt;
-		&lt;property name=&quot;schemas&quot;&gt;workdb&lt;/property&gt;
+<span style="color:#f92672">&lt;user</span> <span style="color:#a6e22e">name=</span><span style="color:#e6db74">&#34;root&#34;</span><span style="color:#f92672">&gt;</span>
+		<span style="color:#f92672">&lt;property</span> <span style="color:#a6e22e">name=</span><span style="color:#e6db74">&#34;password&#34;</span><span style="color:#f92672">&gt;</span>123456<span style="color:#f92672">&lt;/property&gt;</span>
+		<span style="color:#f92672">&lt;property</span> <span style="color:#a6e22e">name=</span><span style="color:#e6db74">&#34;schemas&#34;</span><span style="color:#f92672">&gt;</span>workdb<span style="color:#f92672">&lt;/property&gt;</span>
 		
-		&lt;!-- 表级 DML 权限设置 --&gt;
-		&lt;!-- 		
-		&lt;privileges check=&quot;false&quot;&gt;
-			&lt;schema name=&quot;TESTDB&quot; dml=&quot;0110&quot; &gt;
-				&lt;table name=&quot;tb01&quot; dml=&quot;0000&quot;&gt;&lt;/table&gt;
-				&lt;table name=&quot;tb02&quot; dml=&quot;1111&quot;&gt;&lt;/table&gt;
-			&lt;/schema&gt;
-		&lt;/privileges&gt;		
-		 --&gt;
-	&lt;/user&gt;
+		<span style="color:#75715e">&lt;!-- 表级 DML 权限设置 --&gt;</span>
+		<span style="color:#75715e">&lt;!-- 		
+</span><span style="color:#75715e">		&lt;privileges check=&#34;false&#34;&gt;
+</span><span style="color:#75715e">			&lt;schema name=&#34;TESTDB&#34; dml=&#34;0110&#34; &gt;
+</span><span style="color:#75715e">				&lt;table name=&#34;tb01&#34; dml=&#34;0000&#34;&gt;&lt;/table&gt;
+</span><span style="color:#75715e">				&lt;table name=&#34;tb02&#34; dml=&#34;1111&#34;&gt;&lt;/table&gt;
+</span><span style="color:#75715e">			&lt;/schema&gt;
+</span><span style="color:#75715e">		&lt;/privileges&gt;		
+</span><span style="color:#75715e">		 --&gt;</span>
+	<span style="color:#f92672">&lt;/user&gt;</span>
 
-	&lt;user name=&quot;root_work&quot;&gt;
-		&lt;property name=&quot;password&quot;&gt;123456&lt;/property&gt;
-		&lt;property name=&quot;schemas&quot;&gt;workdb&lt;/property&gt;
-		&lt;property name=&quot;readOnly&quot;&gt;true&lt;/property&gt;
-	&lt;/user&gt;
-</code></pre>
-
-<p>如此就可以实现了mysql的读写分离，如图：</p>
-
-<p><img src="/img/mycat.png" alt="" /></p>
-
+	<span style="color:#f92672">&lt;user</span> <span style="color:#a6e22e">name=</span><span style="color:#e6db74">&#34;root_work&#34;</span><span style="color:#f92672">&gt;</span>
+		<span style="color:#f92672">&lt;property</span> <span style="color:#a6e22e">name=</span><span style="color:#e6db74">&#34;password&#34;</span><span style="color:#f92672">&gt;</span>123456<span style="color:#f92672">&lt;/property&gt;</span>
+		<span style="color:#f92672">&lt;property</span> <span style="color:#a6e22e">name=</span><span style="color:#e6db74">&#34;schemas&#34;</span><span style="color:#f92672">&gt;</span>workdb<span style="color:#f92672">&lt;/property&gt;</span>
+		<span style="color:#f92672">&lt;property</span> <span style="color:#a6e22e">name=</span><span style="color:#e6db74">&#34;readOnly&#34;</span><span style="color:#f92672">&gt;</span>true<span style="color:#f92672">&lt;/property&gt;</span>
+	<span style="color:#f92672">&lt;/user&gt;</span>
+</code></pre></div><p>如此就可以实现了mysql的读写分离，如图：</p>
+<p><img src="/img/mycat.png" alt=""></p>
 <h4 id="测试是否读写分离">测试是否读写分离</h4>
-
 <p>​        用客户端连接mycat服务器， 这个地方需要注意，我们连接的数据库的名称是work，同时，他的端口应该是8066/tcp这个端口， 我这边用的是docker映射出来的端口。</p>
-
 <ol>
-<li><p>连接成功mycat的， 然后直接在里面创建表， 写入数据，如果看到master和slave都有数据，证明写是ok的。</p></li>
-
-<li><p>然后在slave客户端手动添加一条数据， 然后在mycat的客户端直接查询这个表，查看出来的数据是否比master的数据要多一条，如果是多一条了，那么证明在查询的时候，是走的slave端。</p></li>
-
-<li><p>需要主要，手动插入slave后，在添加数据，发现master和slave数据无法同步了， 这个时候，请查看在slave中执行 show slave status;  查看</p></li>
-</ol>
-
+<li>
+<p>连接成功mycat的， 然后直接在里面创建表， 写入数据，如果看到master和slave都有数据，证明写是ok的。</p>
+</li>
+<li>
+<p>然后在slave客户端手动添加一条数据， 然后在mycat的客户端直接查询这个表，查看出来的数据是否比master的数据要多一条，如果是多一条了，那么证明在查询的时候，是走的slave端。</p>
+</li>
+<li>
+<p>需要主要，手动插入slave后，在添加数据，发现master和slave数据无法同步了， 这个时候，请查看在slave中执行 show slave status;  查看</p>
 <p>slave_io_state:Waiting for master to send event
-   slave_sql_running:Yes
-   slave_io_running:Yes</p>
-
+slave_sql_running:Yes
+slave_io_running:Yes</p>
 <p>这些状态是否正常，如果不正常， 就百度处理，把他们修改正常。 因为slave是不可以写入数据的。</p>
-
+</li>
+</ol>
 <h3 id="自动切换主从">自动切换主从</h3>
-
 <p>当主机挂掉后，需要自动从机为主机，这个时候，我们只要让这两台机子互为主从，上面的操作在执行一次，这个时候，我们用mycat来配置，就可以实现当主机挂掉了，从机就是主机了。</p>
 
 
@@ -517,25 +485,18 @@ writeType=&quot;0&quot;, 所有写操作发送到配置的第一个 writeHost，
                     </h4>
                     <ul class="catalog-body"></ul>
                     <nav id="TableOfContents">
-<ul>
-<li>
-<ul>
-<li>
-<ul>
-<li><a href="#数据切分">数据切分</a></li>
-<li><a href="#逻辑表和物理表">逻辑表和物理表</a></li>
-<li><a href="#为什么要用mycat">为什么要用MyCat</a></li>
-<li><a href="#mysql主从复制-docker">mysql主从复制(docker)</a></li>
-<li><a href="#mycat实现读写分离">mycat实现读写分离</a>
-<ul>
-<li><a href="#schema-xml">schema.xml</a></li>
-<li><a href="#server-xml">server.xml</a></li>
-<li><a href="#测试是否读写分离">测试是否读写分离</a></li>
-</ul></li>
-<li><a href="#自动切换主从">自动切换主从</a></li>
-</ul></li>
-</ul></li>
-</ul>
+  <ul>
+    <li>
+      <ul>
+        <li><a href="#数据切分">数据切分</a></li>
+        <li><a href="#逻辑表和物理表">逻辑表和物理表</a></li>
+        <li><a href="#为什么要用mycat">为什么要用MyCat</a></li>
+        <li><a href="#mysql主从复制docker">mysql主从复制(docker)</a></li>
+        <li><a href="#mycat实现读写分离">mycat实现读写分离</a></li>
+        <li><a href="#自动切换主从">自动切换主从</a></li>
+      </ul>
+    </li>
+  </ul>
 </nav>
                     <br>
                     <br>
@@ -560,9 +521,6 @@ writeType=&quot;0&quot;, 所有写操作发送到配置的第一个 writeHost，
                         
                         
                         
-                        <a href="/tags/" title="">
-                            
-                        </a>
                         
                         
                         
@@ -572,101 +530,6 @@ writeType=&quot;0&quot;, 所有写操作发送到配置的第一个 writeHost，
                         
                         
                         
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        <a href="/tags/qt" title="QT">
-                            QT
-                        </a>
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        <a href="/tags/zookeeper" title="Zookeeper">
-                            Zookeeper
-                        </a>
                         
                         
                         
@@ -706,8 +569,10 @@ writeType=&quot;0&quot;, 所有写操作发送到配置的第一个 writeHost，
                         
                         
                         
-                        <a href="/tags/elasticsearch" title="elasticSearch">
-                            elasticSearch
+                        
+                        
+                        <a href="/tags/elasticsearch" title="elasticsearch">
+                            elasticsearch
                         </a>
                         
                         
@@ -718,9 +583,27 @@ writeType=&quot;0&quot;, 所有写操作发送到配置的第一个 writeHost，
                         
                         
                         
-                        <a href="/tags/golang" title="golang">
-                            golang
-                        </a>
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
                         
                         
                         
@@ -758,9 +641,21 @@ writeType=&quot;0&quot;, 所有写操作发送到配置的第一个 writeHost，
                         
                         
                         
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
                         <a href="/tags/jvm" title="jvm">
                             jvm
                         </a>
+                        
+                        
+                        
+                        
                         
                         
                         
@@ -784,9 +679,19 @@ writeType=&quot;0&quot;, 所有写操作发送到配置的第一个 writeHost，
                         
                         
                         
+                        
+                        
+                        
+                        
+                        
+                        
                         <a href="/tags/mongodb" title="mongodb">
                             mongodb
                         </a>
+                        
+                        
+                        
+                        
                         
                         
                         
@@ -797,10 +702,6 @@ writeType=&quot;0&quot;, 所有写操作发送到配置的第一个 writeHost，
                         </a>
                         
                         
-                        
-                        <a href="/tags/mycat" title="mycat">
-                            mycat
-                        </a>
                         
                         
                         
@@ -814,9 +715,17 @@ writeType=&quot;0&quot;, 所有写操作发送到配置的第一个 writeHost，
                         
                         
                         
-                        <a href="/tags/nginx" title="nginx">
-                            nginx
-                        </a>
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
                         
                         
                         
@@ -840,8 +749,22 @@ writeType=&quot;0&quot;, 所有写操作发送到配置的第一个 writeHost，
                         
                         
                         
+                        
+                        
                         <a href="/tags/rocketmq" title="rocketmq">
                             rocketmq
+                        </a>
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        <a href="/tags/security%E6%A1%86%E6%9E%B6%E5%AD%A6%E4%B9%A0" title="security框架学习">
+                            security框架学习
                         </a>
                         
                         
@@ -868,17 +791,11 @@ writeType=&quot;0&quot;, 所有写操作发送到配置的第一个 writeHost，
                         
                         
                         
-                        <a href="/tags/springcloud" title="springCloud">
-                            springCloud
-                        </a>
-                        
-                        
-                        
-                        
-                        
                         <a href="/tags/springboot" title="springboot">
                             springboot
                         </a>
+                        
+                        
                         
                         
                         
@@ -892,6 +809,9 @@ writeType=&quot;0&quot;, 所有写操作发送到配置的第一个 writeHost，
                         
                         
                         
+                        <a href="/tags/springcloud" title="springcloud">
+                            springcloud
+                        </a>
                         
                         
                         
@@ -917,6 +837,33 @@ writeType=&quot;0&quot;, 所有写操作发送到配置的第一个 writeHost，
                         
                         
                         
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        <a href="/tags/zookeeper" title="zookeeper">
+                            zookeeper
+                        </a>
                         
                         
                         
@@ -976,6 +923,8 @@ writeType=&quot;0&quot;, 所有写操作发送到配置的第一个 writeHost，
                         
                         
                         
+                        
+                        
                         <a href="/tags/%E5%88%86%E5%B8%83%E5%BC%8F%E7%B3%BB%E5%88%97" title="分布式系列">
                             分布式系列
                         </a>
@@ -995,6 +944,10 @@ writeType=&quot;0&quot;, 所有写操作发送到配置的第一个 writeHost，
                         
                         
                         
+                        
+                        <a href="/tags/%E5%8D%8F%E8%AE%AE%E6%A0%88" title="协议栈">
+                            协议栈
+                        </a>
                         
                         
                         
@@ -1194,6 +1147,12 @@ writeType=&quot;0&quot;, 所有写操作发送到配置的第一个 writeHost，
                         
                         
                         
+                        
+                        
+                        
+                        
+                        
+                        
                         <a href="/tags/%E7%BD%91%E7%BB%9C%E7%BC%96%E7%A8%8B" title="网络编程">
                             网络编程
                         </a>
@@ -1217,6 +1176,10 @@ writeType=&quot;0&quot;, 所有写操作发送到配置的第一个 writeHost，
                         
                         
                         
+                        
+                        <a href="/tags/%E8%AE%A4%E8%AF%81%E5%92%8C%E6%8E%88%E6%9D%83" title="认证和授权">
+                            认证和授权
+                        </a>
                         
                         
                         
@@ -1387,7 +1350,7 @@ writeType=&quot;0&quot;, 所有写操作发送到配置的第一个 writeHost，
                     
                 </ul>
 		<p class="copyright text-muted">
-                    Copyright &copy;  2020
+                    Copyright &copy;  2021
                     <br>
                     <a href="https://themes.gohugo.io/hugo-theme-cleanwhite">CleanWhite Hugo Theme</a> by <a href="https://zhaohuabing.com">Huabing</a> |
                     <iframe
